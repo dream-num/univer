@@ -25,22 +25,19 @@
         "./*": "./src/*",
         "./facade": "./src/facade/index.ts"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
-                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
-                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
@@ -68,7 +65,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "^0.1.84",
+        "@univerjs/icons": "^0.2.2",
         "@univerjs/protocol": "0.1.39-alpha.38",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
@@ -79,18 +76,16 @@
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "vite": "^5.4.10",
+        "vitest": "^2.1.4"
     },
     "univerSpace": {
         ".": {
             "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*"

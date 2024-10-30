@@ -14,118 +14,117 @@
  * limitations under the License.
  */
 
-const fs = require('node:fs');
 const path = require('node:path');
 const process = require('node:process');
-const esbuild = require('esbuild');
+const fs = require('fs-extra');
 
 exports.buildPkg = function buildPkg() {
     return {
         name: 'build-pkg',
-        enforce: 'pre',
-        generateBundle() {
-            const srcDir = path.resolve(process.cwd(), 'src/locale');
-            const outputDir = path.resolve(process.cwd(), 'lib/locale');
+        apply: 'build',
+        enforce: 'post',
+        buildEnd() {
             const pkgPath = path.resolve(process.cwd(), 'package.json');
 
             if (!fs.existsSync(pkgPath)) {
                 return;
             }
 
-            const pkg = require(pkgPath);
+            const pkg = fs.readJSONSync(pkgPath);
 
+            // author
             pkg.author = 'DreamNum <developer@univer.ai>';
-            // pkg.license = 'Apache-2.0';
+
+            // license
+            if (pkg.name.startsWith('@univer/')) {
+                pkg.license = 'Apache-2.0';
+            }
+
+            // funding
             pkg.funding = {
                 type: 'opencollective',
                 url: 'https://opencollective.com/univer',
             };
+
+            // homepage
             pkg.homepage = 'https://univer.ai';
+
+            // repository
             pkg.repository = {
                 type: 'git',
                 url: 'https://github.com/dream-num/univer',
             };
+
+            // bugs
             pkg.bugs = {
                 url: 'https://github.com/dream-num/univer/issues',
             };
+
+            // keywords
             pkg.keywords = pkg.keywords || [
                 'univer',
             ];
 
+            // exports
             pkg.exports = Object.assign({
                 '.': './src/index.ts',
                 './*': './src/*',
             }, pkg.exports);
-            pkg.main = './lib/cjs/index.js';
-            pkg.module = './lib/es/index.js';
-            pkg.types = './lib/types/index.d.ts';
+
+            const facadeEntry = path.resolve(process.cwd(), 'src/facade/index.ts');
+            if (fs.existsSync(facadeEntry)) {
+                pkg.publishConfig.exports['./facade'] = {
+                    import: './lib/es/facade.js',
+                    types: './lib/types/facade/index.d.ts',
+                };
+            }
+
+            // main
+            pkg.main = './src/index.ts';
+
+            // publishConfig
             pkg.publishConfig = {
                 access: 'public',
-                main: './lib/cjs/index.js',
+                main: './lib/es/index.js',
                 module: './lib/es/index.js',
                 exports: {
                     '.': {
                         import: './lib/es/index.js',
-                        require: './lib/cjs/index.js',
                         types: './lib/types/index.d.ts',
                     },
                     './*': {
                         import: './lib/es/*',
-                        require: './lib/cjs/*',
                         types: './lib/types/index.d.ts',
                     },
                     './lib/*': './lib/*',
                 },
             };
 
+            // locale
+            const localeDir = path.resolve(process.cwd(), 'src/locale');
+            if (fs.existsSync(localeDir)) {
+                pkg.exports['./locale/*'] = './src/locale/*.ts';
+                pkg.publishConfig.exports['./locale/*'] = {
+                    import: './lib/locale/*.js',
+                    types: './lib/types/locale/*.d.ts',
+                };
+            }
+
+            // directories
             pkg.directories = {
                 lib: 'lib',
             };
+            // files
             pkg.files = [
                 'lib',
             ];
 
-            if (fs.existsSync(srcDir)) {
-                fs.readdirSync(srcDir)
-                    .filter((file) => file.includes('-') && fs.statSync(path.resolve(srcDir, file)).isFile())
-                    .forEach((file) => {
-                        const fullPath = path.join(srcDir, file);
-
-                        const syncResult = esbuild.buildSync({
-                            entryPoints: [fullPath],
-                            bundle: true,
-                            platform: 'node',
-                            format: 'cjs',
-                            write: false,
-                        });
-
-                        // eslint-disable-next-line no-new-func
-                        const module = new Function('module', `${syncResult.outputFiles[0].text};return module;`)({});
-                        const result = module.exports.default;
-                        const data = JSON.stringify(result, null, 2);
-
-                        if (!fs.existsSync(outputDir)) {
-                            fs.mkdirSync(outputDir, { recursive: true });
-                        }
-
-                        const outputPath = path.resolve(outputDir, file.replace('.ts', '.json'));
-
-                        fs.writeFileSync(outputPath, data);
-
-                        // eslint-disable-next-line no-console
-                        console.log(`[vite:build-pkg] ${outputPath} generated`);
-
-                        // exports
-                        pkg.exports['./locale/*'] = './src/locale/*.ts';
-                        pkg.publishConfig.exports['./locale/*'] = './lib/locale/*.json';
-                    });
-            }
-
             pkg.univerSpace = pkg.publishConfig.exports;
 
-            fs.writeFileSync(
+            fs.writeJSONSync(
                 `${process.cwd()}/package.json`,
-                `${JSON.stringify(pkg, null, 4)}\n`
+                pkg,
+                { spaces: 4, EOL: '\n' }
             );
         },
     };

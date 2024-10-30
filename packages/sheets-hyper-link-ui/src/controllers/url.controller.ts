@@ -15,10 +15,12 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
+import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 export class SheetHyperLinkUrlController extends Disposable {
     constructor(
+        @Inject(SheetsHyperLinkParserService) private readonly _parserService: SheetsHyperLinkParserService,
         @Inject(SheetsHyperLinkResolverService) private _resolverService: SheetsHyperLinkResolverService
     ) {
         super();
@@ -28,8 +30,8 @@ export class SheetHyperLinkUrlController extends Disposable {
     private _handleInitUrl() {
         const hash = location.hash;
         if (hash) {
-            const linkInfo = this._resolverService.parseHyperLink(hash);
-            linkInfo.handler();
+            const linkInfo = this._parserService.parseHyperLink(hash);
+            this._resolverService.navigate(linkInfo);
         }
     }
 }

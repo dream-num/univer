@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { getDT } from './common/utils';
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/thread-comment-panel';

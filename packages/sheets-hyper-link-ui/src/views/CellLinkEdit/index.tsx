@@ -22,15 +22,12 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../../common/util';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -53,6 +50,7 @@ export const CellLinkEdit = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);
+    const parserService = useDependency(SheetsHyperLinkParserService);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
@@ -145,7 +143,7 @@ export const CellLinkEdit = () => {
                 return;
             }
             setDisplay(link.display);
-            const linkInfo = resolverService.parseHyperLink(link.payload);
+            const linkInfo = parserService.parseHyperLink(link.payload);
             setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
             switch (linkInfo.type) {
                 case SheetHyperLinkType.URL: {

@@ -16,8 +16,7 @@
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, CustomRangeType, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { replaceSelectionFactory } from '@univerjs/docs-ui';
+import { DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;

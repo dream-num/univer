@@ -23,11 +23,13 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
     color: true,
     sourcemap: args.watch,
-    minify: true,
+    minify: false,
     target: 'chrome70',
     entryPoints: [
         './src/cases/basic.ts',
+        './src/sdk/worker.ts',
     ],
+    platform: 'node',
     outdir: './dist',
     define,
 });

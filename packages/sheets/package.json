@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -23,7 +23,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -67,7 +68,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.36",
+        "@univerjs/protocol": "0.1.39-alpha.38",
         "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {

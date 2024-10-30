@@ -823,7 +823,7 @@ export function getFontCreateConfig(
         },
         marginRight = 0,
         marginLeft = 0,
-        localeService,
+        // localeService,
         renderConfig = {},
     } = sectionBreakConfig;
     const { paragraphStyle = {}, bullet } = paragraph;
@@ -859,7 +859,7 @@ export function getFontCreateConfig(
         ...bulletTextStyle,
     };
 
-    const fontStyle = getFontStyleString(textStyle, localeService);
+    const fontStyle = getFontStyleString(textStyle);
 
     const mixTextStyle: ITextStyle = {
         ...documentTextStyle,

@@ -14,23 +14,31 @@
  * limitations under the License.
  */
 
-import { RxDisposable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
+import { RxDisposable } from '@univerjs/core';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of } from 'rxjs';
 import { filter, take, takeUntil } from 'rxjs/operators';
 
+// TODO: change this parameter type to `Serializable`.
+
 /** This protocol is for transferring data from the two peer univer instance running in different locations. */
 export interface IMessageProtocol {
+    // eslint-disable-next-line ts/no-explicit-any
     send(message: any): void;
+    // eslint-disable-next-line ts/no-explicit-any
     onMessage: Observable<any>;
 }
+
+// TODO: change this parameter type to `Serializable`.
 
 /**
  * Channel is a combination of methods and event sources. These methods and
  * event sources are usually provided by the same service or controller.
  */
 export interface IChannel {
+    // eslint-disable-next-line ts/no-explicit-any
     call<T>(method: string, args?: any): Promise<T>;
+    // eslint-disable-next-line ts/no-explicit-any
     subscribe<T>(event: string, args?: any): Observable<T>;
 }
 

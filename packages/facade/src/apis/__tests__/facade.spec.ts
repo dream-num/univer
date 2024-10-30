@@ -14,16 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
-
-import { IDescriptionService } from '@univerjs/sheets-formula';
-import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
-import { AddCommentCommand, AddCommentMutation, DeleteCommentCommand, DeleteCommentMutation, DeleteCommentTreeCommand, ResolveCommentMutation, UpdateCommentCommand, UpdateCommentMutation, UpdateCommentRefMutation } from '@univerjs/thread-comment';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, Injector, Nullable } from '@univerjs/core';
 import type {
     ColumnHeaderLayout,
     RenderComponentType,
@@ -32,9 +23,20 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
+import type { FUniver } from '../everything';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+
+import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
+import { IDescriptionService } from '@univerjs/sheets-formula';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { AddCommentCommand, AddCommentMutation, DeleteCommentCommand, DeleteCommentMutation, DeleteCommentTreeCommand, ResolveCommentMutation, UpdateCommentCommand, UpdateCommentMutation, UpdateCommentRefMutation } from '@univerjs/thread-comment';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
-import type { FUniver } from '../facade';
+
+import '../everything';
 
 describe('Test FUniver', () => {
     let get: Injector['get'];
@@ -47,12 +49,6 @@ describe('Test FUniver', () => {
         endColumn: number
     ) => Nullable<ICellData>;
 
-    let getStyleByPosition: (
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    ) => Nullable<IStyleData>;
     let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
 
     beforeEach(() => {
@@ -89,19 +85,6 @@ describe('Test FUniver', () => {
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();
-
-        getStyleByPosition = (
-            startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number
-        ): Nullable<IStyleData> => {
-            const value = getValueByPosition(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
-            if (value && styles) {
-                return styles.getStyleByCell(value);
-            }
-        };
 
         getSheetRenderComponent = (unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> => {
             const render = get(IRenderManagerService).getRenderById(unitId);

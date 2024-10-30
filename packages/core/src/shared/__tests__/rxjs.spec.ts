@@ -15,8 +15,8 @@
  */
 
 import { of } from 'rxjs';
-import { describe, expect, it } from 'vitest';
-import { takeAfter } from '../rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterTime, takeAfter } from '../rxjs';
 
 describe('test custom rxjs utils', () => {
     it('should terminate when a condition is met with "takeAfter"', () => {
@@ -24,6 +24,39 @@ describe('test custom rxjs utils', () => {
         const nums$ = of(1, 2, 3, 4, 5);
         nums$.pipe(takeAfter((val) => val === 3)).subscribe((v) => acculated.push(v));
         expect(acculated).toEqual([1, 2, 3]);
+    });
+
+    describe('test "createTimerObservable$"', () => {
+        beforeEach(() => vi.useFakeTimers());
+
+        afterEach(() => vi.useRealTimers());
+
+        it('should emit after a period of time', async () => {
+            let fired = false;
+
+            const ob1 = afterTime(2000);
+            ob1.subscribe(() => fired = true);
+            vi.advanceTimersByTime(1000);
+            expect(fired).toBeFalsy();
+            vi.advanceTimersByTime(2000);
+            expect(fired).toBeTruthy();
+
+            fired = false;
+            ob1.subscribe(() => fired = true);
+            expect(fired).toBeTruthy();
+
+            fired = false;
+            const ob2 = afterTime(2000);
+            ob2.subscribe(() => fired = true);
+            vi.advanceTimersByTime(3000);
+            expect(fired).toBeTruthy();
+
+            fired = false;
+            const ob3 = afterTime(2000);
+            vi.advanceTimersByTime(3000);
+            ob3.subscribe(() => fired = true);
+            expect(fired).toBeTruthy();
+        });
     });
 });
 

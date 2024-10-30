@@ -64,8 +64,8 @@ async function generateLocale() {
         '@univerjs/sheets-find-replace',
         '@univerjs/sheets-formula-ui',
         '@univerjs/sheets-hyper-link-ui',
-        '@univerjs/sheets-numfmt',
-        '@univerjs/sheets-thread-comment',
+        '@univerjs/sheets-numfmt-ui',
+        '@univerjs/sheets-thread-comment-ui',
         '@univerjs/sheets-ui',
         '@univerjs/sheets-zen-editor',
         '@univerjs/slides-ui',
@@ -73,6 +73,7 @@ async function generateLocale() {
         '@univerjs/ui',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const languages = [{
@@ -135,7 +136,7 @@ function buildCSS() {
         '@univerjs/docs-drawing-ui',
         '@univerjs/sheets-ui',
         '@univerjs/sheets-formula-ui',
-        '@univerjs/sheets-numfmt',
+        '@univerjs/sheets-numfmt-ui',
         '@univerjs/sheets-zen-editor',
         '@univerjs/sheets-data-validation-ui',
         '@univerjs/sheets-drawing-ui',
@@ -149,6 +150,7 @@ function buildCSS() {
         '@univerjs/find-replace',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const output = libs.map((lib) => {
@@ -209,7 +211,7 @@ function buildJS() {
         '@univerjs/sheets-ui',
         '@univerjs/sheets-formula',
         '@univerjs/sheets-formula-ui',
-        '@univerjs/sheets-numfmt',
+        '@univerjs/sheets-numfmt-ui',
         '@univerjs/sheets-zen-editor',
         '@univerjs/sheets-conditional-formatting',
         '@univerjs/sheets-conditional-formatting-ui',
@@ -224,7 +226,7 @@ function buildJS() {
         '@univerjs/sheets-sort-ui',
         '@univerjs/thread-comment',
         '@univerjs/thread-comment-ui',
-        '@univerjs/sheets-thread-comment-base',
+        '@univerjs/sheets-thread-comment',
         '@univerjs/sheets-thread-comment',
         '@univerjs/docs-thread-comment-ui',
         '@univerjs/drawing',
@@ -243,6 +245,7 @@ function buildJS() {
         '@univerjs/facade',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const output = libs.map((lib) => {

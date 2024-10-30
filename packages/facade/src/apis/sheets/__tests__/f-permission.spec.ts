@@ -15,11 +15,10 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { ICommandService, IPermissionService } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SetRangeProtectionMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FPermission', () => {

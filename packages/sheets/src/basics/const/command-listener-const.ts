@@ -21,12 +21,13 @@ import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/mov
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mutation';
+import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
+import { SetRowDataMutation } from '../../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutations';
-import { SetWorksheetRowColumnStyleMutation } from '../../commands/mutations/set-worksheet-row-column-style.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -63,6 +64,7 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     RemoveWorksheetMergeMutation.id,
     AddWorksheetMergeMutation.id,
     ReorderRangeMutation.id,
-    SetWorksheetRowColumnStyleMutation.id,
     SetWorksheetDefaultStyleMutation.id,
+    SetRowDataMutation.id,
+    SetColDataMutation.id,
 ];

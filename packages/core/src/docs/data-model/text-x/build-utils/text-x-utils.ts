@@ -77,9 +77,10 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         });
     }
 
+    const end = endIndex + 1 + (insert?.dataStream.length ?? 0);
     textX.selections = [{
-        startOffset: startIndex,
-        endOffset: endIndex + 1 + (insert?.dataStream.length ?? 0),
+        startOffset: end,
+        endOffset: end,
         collapsed: true,
     }];
 

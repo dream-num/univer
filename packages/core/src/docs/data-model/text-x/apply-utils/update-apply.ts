@@ -436,6 +436,7 @@ function updateTables(
 }
 
 // retain
+// eslint-disable-next-line max-lines-per-function
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -457,18 +458,13 @@ function updateCustomRanges(
 
     const removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        const removeIndex: number[] = [];
         for (let index = 0; index < customRanges.length; index++) {
             const customRange = customRanges[index];
             const { startIndex, endIndex } = customRange;
             if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                delete rangeMap[customRange.rangeId];
                 removeCustomRanges.push(customRange);
-                removeIndex.push(index);
             }
-        }
-
-        for (let index = removeIndex.length - 1; index >= 0; index--) {
-            customRanges.splice(removeIndex[index], 1);
         }
 
         updateBody.customRanges?.forEach((customRange) => {
@@ -480,11 +476,21 @@ function updateCustomRanges(
             });
         });
     } else {
+        const relativeCustomRanges = new Set<string>();
+        for (let index = 0; index < customRanges.length; index++) {
+            const customRange = customRanges[index];
+            const { startIndex, endIndex } = customRange;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                relativeCustomRanges.add(customRange.rangeId);
+            }
+        }
+
         for (const updateCustomRange of updateDataCustomRanges) {
             const { rangeId } = updateCustomRange;
             updateCustomRange.startIndex = updateCustomRange.startIndex + currentIndex;
             updateCustomRange.endIndex = updateCustomRange.endIndex + currentIndex;
             const oldCustomRange = rangeMap[rangeId];
+            relativeCustomRanges.delete(rangeId);
             if (oldCustomRange) {
                 if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
                     removeCustomRanges.push(oldCustomRange);
@@ -496,6 +502,11 @@ function updateCustomRanges(
             }
         }
 
+        relativeCustomRanges.forEach((rangeId) => {
+            removeCustomRanges.push(rangeMap[rangeId]);
+            delete rangeMap[rangeId];
+        });
+
         for (const removeCustomRange of removeCustomRanges) {
             const { rangeId } = removeCustomRange;
             const index = customRanges.findIndex((r) => r.rangeId === rangeId);
@@ -505,6 +516,7 @@ function updateCustomRanges(
         }
     }
 
+    body.customRanges.sort((a, b) => a.startIndex - b.startIndex);
     return removeCustomRanges;
 }
 
@@ -544,7 +556,7 @@ function updateCustomDecorations(
             customDecorations.splice(removeIndex[index], 1);
         }
 
-        updateBody.customDecorations?.forEach((customDecoration) => {
+        updateDataCustomDecorations?.forEach((customDecoration) => {
             const { startIndex, endIndex } = customDecoration;
             customDecorations.push({
                 ...customDecoration,
@@ -563,7 +575,11 @@ function updateCustomDecorations(
                 }
                 Object.assign(oldCustomDecoration, updateCustomDecoration);
             } else {
-                customDecorations.push(updateCustomDecoration);
+                customDecorations.push({
+                    ...updateCustomDecoration,
+                    startIndex: updateCustomDecoration.startIndex + currentIndex,
+                    endIndex: updateCustomDecoration.endIndex + currentIndex,
+                });
             }
         }
 

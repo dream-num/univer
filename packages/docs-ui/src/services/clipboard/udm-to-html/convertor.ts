@@ -15,8 +15,8 @@
  */
 
 import type { IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
@@ -126,7 +126,7 @@ export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endInd
         const { startIndex, endIndex, rangeType, rangeId } = range;
         const preHtml = getBodyInlineSlice(body, cursorIndex, startIndex);
         html += preHtml;
-        const sliceHtml = getBodyInlineSlice(body, startIndex + 1, endIndex);
+        const sliceHtml = getBodyInlineSlice(body, startIndex, endIndex + 1);
         switch (rangeType) {
             case CustomRangeType.HYPERLINK: {
                 html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml}</a>`;

@@ -304,20 +304,17 @@ export class FormulaDependencyGenerator extends Disposable {
         return FDtree;
     }
 
-    private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: FormulaDependencyTree[]) {
+    private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: IFormulaDependencyTree[]) {
         /**
          * Register formulas in doc, slide, and other types of applications.
          */
-
         for (const unitId of otherFormulaDataKeys) {
             const subComponentData = otherFormulaData[unitId];
-
             if (subComponentData == null) {
                 continue;
             }
 
             const subComponentKeys = Object.keys(subComponentData);
-
             for (const subUnitId of subComponentKeys) {
                 const subFormulaData = subComponentData[subUnitId];
 
@@ -326,19 +323,28 @@ export class FormulaDependencyGenerator extends Disposable {
                 }
 
                 const subFormulaDataKeys = Object.keys(subFormulaData);
-
                 for (const subFormulaDataId of subFormulaDataKeys) {
                     const hasOtherFormula = this._dependencyManagerService.hasOtherFormulaDataMainData(subFormulaDataId);
                     const formulaDataItem = subFormulaData[subFormulaDataId];
                     const { f: formulaString, ranges } = formulaDataItem;
 
                     if (hasOtherFormula) {
-                        continue;
+                        const treeSet = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
+                        if (treeSet) {
+                            for (const treeId of treeSet) {
+                                const tree = this._dependencyManagerService.getTreeById(treeId);
+                                if (tree) {
+                                    tree.isCache = true;
+                                }
+                            }
+                            continue;
+                        }
                     }
 
                     const node = this._generateAstNode(unitId, formulaString);
-
                     const { firstRow, firstColumn } = this._getFirstCellOfRange(ranges);
+
+                    const firstFDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
                     for (let i = 0; i < ranges.length; i++) {
                         const range = ranges[i];
@@ -348,26 +354,28 @@ export class FormulaDependencyGenerator extends Disposable {
                             for (let c = startColumn; c <= endColumn; c++) {
                                 const x = c - firstColumn;
                                 const y = r - firstRow;
+                                if (x === 0 && y === 0) {
+                                    firstFDtree.node = node;
+                                    firstFDtree.formula = formulaString;
+                                    firstFDtree.unitId = unitId;
+                                    firstFDtree.subUnitId = subUnitId;
+                                    firstFDtree.formulaId = subFormulaDataId;
+                                    firstFDtree.type = FormulaDependencyTreeType.OTHER_FORMULA;
+                                    treeList.push(firstFDtree);
+                                    this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, firstFDtree);
+                                    continue;
+                                }
 
-                                const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
-
-                                FDtree.node = node;
-                                FDtree.formula = formulaString;
-                                FDtree.unitId = unitId;
-                                FDtree.subUnitId = subUnitId;
-                                FDtree.formulaId = subFormulaDataId;
-
-                                FDtree.refOffsetX = x;
-                                FDtree.refOffsetY = y;
-                                FDtree.type = FormulaDependencyTreeType.OTHER_FORMULA;
-
-                                this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, FDtree);
-
-                                treeList.push(FDtree);
+                                const virtual = new FormulaDependencyTreeVirtual();
+                                virtual.treeId = generateRandomDependencyTreeId(this._dependencyManagerService);
+                                virtual.refTree = firstFDtree;
+                                virtual.refOffsetX = x;
+                                virtual.refOffsetY = y;
+                                this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, virtual);
+                                treeList.push(virtual);
                             }
                         }
                     }
-
                     this._dependencyManagerService.addOtherFormulaDependencyMainData(subFormulaDataId);
                 }
             }

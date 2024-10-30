@@ -72,6 +72,7 @@ const nextNodeAddToken = [
     matchToken.CLOSE_BRACKET,
 ];
 
+const getContent = (node: INode) => typeof node === 'string' ? node : node.token;
 /**
  * 根据输入内容,以及当前光标位置判断下一个 mouseDown 事件是不是需要新增选区
  *
@@ -135,8 +136,18 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                     setIsAddSelection(true);
                     return;
                 }
-                // 因为doc中‘=’不会进入sequenceNodes
+                // ‘=’不会进入 sequenceNodes ,所以需要 -1
                 const startOffset = range.startOffset - 1;
+
+                if (startOffset === 0) {
+                    const nextIndex = findIndexFromSequenceNodes(sequenceNodes, 1, false);
+                    const nextNode = sequenceNodes[nextIndex] || '';
+                    const nextContent = getContent(nextNode);
+                    if (baseToken.includes(nextContent as any)) {
+                        setIsAddSelection(true);
+                        return;
+                    }
+                }
                 const index = findIndexFromSequenceNodes(sequenceNodes, startOffset, false);
                 const currentNode = sequenceNodes[index];
                 if (!currentNode) {
@@ -144,8 +155,8 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                     return;
                 }
                 const nextNode = sequenceNodes[index + 1];
-                const nextContent = (typeof nextNode === 'string' ? nextNode : nextNode?.token ?? '') as any;
-                const content = typeof currentNode === 'string' ? currentNode : currentNode.token as any;
+                const nextContent = getContent(nextNode) as any;
+                const content = getContent(currentNode) as any;
                 if (currentNodeAddToken.includes(content) && (!nextNode || nextNodeAddToken.includes(nextContent))) {
                     setIsAddSelection(true);
                 } else {

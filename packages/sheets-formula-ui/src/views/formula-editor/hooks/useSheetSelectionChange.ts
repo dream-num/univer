@@ -75,23 +75,37 @@ export const useSheetSelectionChange = (
                 const offset = docRange.startOffset - 1;
                 const sequenceNodes = [...sequenceNodesRef.current];
                 if (getIsNeedAddSelection()) {
-                    const index = findIndexFromSequenceNodes(sequenceNodes, offset, false);
-                    if (index === -1 && sequenceNodes.length) {
-                        return;
+                    if (offset !== 0) {
+                        const index = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+                        if (index === -1 && sequenceNodes.length) {
+                            return;
+                        }
+                        const range = selections[selections.length - 1];
+                        const lastNodes = sequenceNodes.splice(index + 1);
+                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
+                        const unitRangeName = {
+                            range: range.rangeWithCoord,
+                            unitId: range.rangeWithCoord.unitId ?? unitId,
+                            sheetName: getSheetNameById(rangeSheetId),
+                        };
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                        const newSequenceNodes = [...sequenceNodes, ...lastNodes];
+                        const result = sequenceNodeToText(newSequenceNodes);
+                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes));
+                    } else {
+                        const range = selections[selections.length - 1];
+                        const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
+                        const unitRangeName = {
+                            range: range.rangeWithCoord,
+                            unitId: range.rangeWithCoord.unitId ?? unitId,
+                            sheetName: getSheetNameById(rangeSheetId),
+                        };
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
+                        const result = sequenceNodeToText(sequenceNodes);
+                        handleRangeChange(result, refRanges[0].length);
                     }
-                    const range = selections[selections.length - 1];
-                    const lastNodes = sequenceNodes.splice(index + 1);
-                    const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
-                    const unitRangeName = {
-                        range: range.rangeWithCoord,
-                        unitId: range.rangeWithCoord.unitId ?? unitId,
-                        sheetName: getSheetNameById(rangeSheetId),
-                    };
-                    const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
-                    sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
-                    const newSequenceNodes = [...sequenceNodes, ...lastNodes];
-                    const result = sequenceNodeToText(newSequenceNodes);
-                    handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes));
                 } else {
                     // 更新全部的 ref Selection
                     let currentRefIndex = 0;

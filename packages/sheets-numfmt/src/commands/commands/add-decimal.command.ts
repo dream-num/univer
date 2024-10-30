@@ -15,11 +15,10 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CellValueType, CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
 import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
-import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const AddDecimalCommand: ICommand = {

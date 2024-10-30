@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import { SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 
 export const SmartToggleFilterShortcut: IShortcutItem = {
     id: SmartToggleSheetsFilterCommand.id,

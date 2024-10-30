@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { deleteCustomRangeFactory, replaceSelectionFactory } from '@univerjs/docs-ui';
 import type { ICommand, IDocumentBody } from '@univerjs/core';
 import type { IDocMention } from '../../types/interfaces/i-mention';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
+import { deleteCustomRangeFactory, DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 
 export interface IAddDocMentionCommandParams {
     mention: IDocMention;

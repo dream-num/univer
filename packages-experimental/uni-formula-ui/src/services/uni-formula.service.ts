@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+import type {
+    DocumentDataModel,
+    ICellData,
+    ICommand,
+    IDisposable,
+    IDocumentBody,
+    Nullable,
+    SlideDataModel } from '@univerjs/core';
+import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import {
     BuildTextUtils,
     CommandType,
@@ -29,22 +38,13 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { replaceSelectionFactory } from '@univerjs/docs-ui';
+import { replaceSelectionFactory } from '@univerjs/docs';
 import { RichText } from '@univerjs/engine-render';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { CanvasView } from '@univerjs/slides-ui';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
-import type {
-    DocumentDataModel,
-    ICellData,
-    ICommand,
-    IDisposable,
-    IDocumentBody,
-    Nullable,
-    SlideDataModel } from '@univerjs/core';
-import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';

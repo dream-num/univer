@@ -20,6 +20,7 @@ import {
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    CancelFrozenCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand, CopySheetCommand,
@@ -79,7 +80,7 @@ import {
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {

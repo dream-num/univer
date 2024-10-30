@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -61,6 +62,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/protocol": "0.1.39-alpha.38",
         "@univerjs/sheets": "workspace:*"

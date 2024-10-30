@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { ICommandService } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { InsertCommand } from '@univerjs/docs-ui';
-
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Injector } from '@univerjs/core';
 import { createTestBed } from './create-test-bed';
-import type { FUniver } from '../../facade';
 
 describe('Test FDocument', () => {
     let get: Injector['get'];

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { IMessageProtocol } from '@univerjs/rpc';
-import type { Serializable } from 'node:child_process';
-import { fork } from 'node:child_process';
 import path from 'node:path';
 import { Univer } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
@@ -30,16 +27,16 @@ import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-condit
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import { Observable, shareReplay } from 'rxjs';
 
 export function createUniverOnNode(): Univer {
     const univer = new Univer();
 
     registerBasicPlugins(univer);
-    reigsterSharedPlugins(univer);
+    registerSharedPlugins(univer);
     registerRPCPlugin(univer);
 
     registerDocPlugins(univer);
@@ -52,7 +49,7 @@ function registerBasicPlugins(univer: Univer): void {
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 }
 
-function reigsterSharedPlugins(univer: Univer): void {
+function registerSharedPlugins(univer: Univer): void {
     univer.registerPlugin(UniverThreadCommentPlugin);
     univer.registerPlugin(UniverDrawingPlugin);
 }
@@ -64,6 +61,7 @@ function registerDocPlugins(univer: Univer): void {
 
 function registerSheetPlugins(univer: Univer): void {
     univer.registerPlugin(UniverSheetsPlugin);
+    univer.registerPlugin(UniverSheetsFormulaPlugin);
     univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
     univer.registerPlugin(UniverDataValidationPlugin);
     univer.registerPlugin(UniverSheetsDataValidationPlugin);
@@ -74,20 +72,6 @@ function registerSheetPlugins(univer: Univer): void {
 }
 
 function registerRPCPlugin(univer: Univer): void {
-    const childFork = fork(path.join(__dirname, './worker.js'));
-    const messageProtocol: IMessageProtocol = {
-        send(message: unknown): void {
-            childFork.send(message as Serializable);
-        },
-        onMessage: new Observable<any>((subscriber) => {
-            const handler = (message: unknown) => {
-                subscriber.next(message);
-            };
-
-            childFork.on('message', handler);
-            return () => childFork.off('message', handler);
-        }).pipe(shareReplay(1)),
-    };
-
-    univer.registerPlugin(UniverRPCNodeMainPlugin, { messageProtocol });
+    const childPath = path.join(__dirname, '../sdk/worker.js');
+    univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc: childPath });
 }

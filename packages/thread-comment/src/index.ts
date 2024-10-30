@@ -19,6 +19,7 @@ export { ThreadCommentResourceController } from './controllers/tc-resource.contr
 export { TC_PLUGIN_NAME } from './types/const';
 export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
 export { UniverThreadCommentPlugin } from './plugin';
+export { getDT } from './common/utils';
 
 export {
     type IThreadCommentDataSource,

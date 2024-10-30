@@ -77,7 +77,7 @@
         "@univerjs/icons": "^0.1.84",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"

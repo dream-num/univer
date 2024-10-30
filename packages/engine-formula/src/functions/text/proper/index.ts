@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Proper extends BaseFunction {
     override minParams = 1;

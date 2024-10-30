@@ -15,15 +15,15 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity } from '@univerjs/core';
-import type { FilterColumn, FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
+import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
-import { RefRangeService } from '@univerjs/sheets';
-
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
+import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity } from '@univerjs/core';
+import { RefRangeService } from '@univerjs/sheets';
+import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+
+import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { FilterConditionItems } from '../models/conditions';
-import { type ISetSheetsFilterCriteriaCommandParams, SetSheetsFilterCriteriaCommand } from '../commands/commands/sheets-filter.command';
 import { statisticFilterByValueItems } from '../models/utils';
 import { getFilterByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
 

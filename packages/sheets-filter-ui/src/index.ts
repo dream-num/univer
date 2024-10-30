@@ -21,16 +21,6 @@ export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 // #region - all commands
 
 export {
-    ClearSheetsFilterCriteriaCommand,
-    type ISetSheetFilterRangeCommandParams,
-    type ISetSheetsFilterCriteriaCommandParams,
-    ReCalcSheetsFilterCommand,
-    RemoveSheetFilterCommand,
-    SetSheetFilterRangeCommand,
-    SetSheetsFilterCriteriaCommand,
-    SmartToggleSheetsFilterCommand,
-} from './commands/commands/sheets-filter.command';
-export {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,
     type IOpenFilterPanelOperationParams,

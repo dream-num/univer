@@ -37,7 +37,7 @@ function transformTextRuns(
     targetCoverType: UpdateDocsAttributeType,
     transformType: TextXTransformType
 ) {
-    if (originTextRuns.length === 0) {
+    if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
         return targetTextRuns;
     }
 

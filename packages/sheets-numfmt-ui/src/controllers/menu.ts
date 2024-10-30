@@ -27,10 +27,11 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
-import { AddDecimalCommand, countryCurrencyMap, isPatternEqualWithoutDecimal, MenuCurrencyService, OpenNumfmtPanelOperator, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
+import { AddDecimalCommand, countryCurrencyMap, isPatternEqualWithoutDecimal, MenuCurrencyService, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { merge, Observable } from 'rxjs';
+import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../views/components/more-numfmt-type/MoreNumfmtType';
 
 export const MENU_OPTIONS: Array<{ label: string; pattern: string | null } | '|'> = [

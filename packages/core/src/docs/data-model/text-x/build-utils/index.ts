@@ -17,8 +17,8 @@
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
-import { getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
-import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
+import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
+import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
     static customRange = {
@@ -33,8 +33,7 @@ export class BuildTextUtils {
         replace: replaceSelectionTextX,
         makeSelection,
         normalizeSelection,
-        getDeleteActions: getRetainAndDeleteFromReplace,
-        getDeleteExcludeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
+        getDeleteActions: deleteSelectionTextX,
     };
 
     static range = {

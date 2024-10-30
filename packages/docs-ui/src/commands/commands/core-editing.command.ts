@@ -98,23 +98,22 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                     len: startOffset,
                 });
             }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body,
+                len: body.dataStream.length,
+            });
         } else {
-            const { dos } = BuildTextUtils.selection.getDeleteActions(range, segmentId, 0);
-
+            const dos = BuildTextUtils.selection.getDeleteActions(range, originBody, 0, body);
             textX.push(...dos);
-
-            doMutation.params.textRanges = [{
-                startOffset: startOffset + cursorMove,
-                endOffset: startOffset + cursorMove,
-                collapsed,
-            }];
         }
 
-        textX.push({
-            t: TextXActionType.INSERT,
-            body,
-            len: body.dataStream.length,
-        });
+        doMutation.params.textRanges = [{
+            startOffset: startOffset + cursorMove,
+            endOffset: startOffset + cursorMove,
+            collapsed,
+        }];
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);

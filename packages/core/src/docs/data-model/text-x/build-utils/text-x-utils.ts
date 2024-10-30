@@ -18,7 +18,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
-import type { IDeleteAction, IRetainAction, TextXAction } from '../action-types';
+import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
@@ -158,15 +158,16 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
-// eslint-disable-next-line max-lines-per-function
-export function getRetainAndDeleteAndExcludeLineBreak(
+
+export function deleteSelectionTextX(
     selection: ITextRange,
     body: IDocumentBody,
     memoryCursor: number = 0,
-    moveParagraph: boolean = true
-): Array<IRetainAction | IDeleteAction> {
+    insertBody: Nullable<IDocumentBody> = null,
+    keepBullet: boolean = true
+): Array<TextXAction> {
     const { startOffset, endOffset } = selection;
-    const dos: Array<IRetainAction | IDeleteAction> = [];
+    const dos: Array<TextXAction> = [];
     const { paragraphs = [] } = body;
 
     const textStart = startOffset - memoryCursor;
@@ -176,8 +177,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
     );
 
-    const retainPoints = new Set<number>();
-
     if (textStart > 0) {
         dos.push({
             t: TextXActionType.RETAIN,
@@ -185,23 +184,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         });
     }
 
-    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
-
     let cursor = textStart;
-    sortedRetains.forEach((pos) => {
-        const len = pos - cursor;
-        if (len > 0) {
-            dos.push({
-                t: TextXActionType.DELETE,
-                len,
-            });
-        }
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-        });
-        cursor = pos + 1;
-    });
 
     if (cursor < textEnd) {
         dos.push({
@@ -211,7 +194,15 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         cursor = textEnd;
     }
 
-    if (paragraphInRange && moveParagraph) {
+    if (insertBody) {
+        dos.push({
+            t: TextXActionType.INSERT,
+            body: insertBody,
+            len: insertBody.dataStream.length,
+        });
+    }
+
+    if (paragraphInRange && keepBullet) {
         const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
         if (nextParagraph) {
             if (nextParagraph.startIndex > cursor) {

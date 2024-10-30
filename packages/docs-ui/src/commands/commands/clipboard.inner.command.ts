@@ -141,7 +141,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        for (const selection of selections) {
+        for (let i = 0; i < selections.length; i++) {
+            const selection = selections[i];
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
@@ -190,16 +191,15 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     t: TextXActionType.RETAIN,
                     len,
                 });
+                textX.push({
+                    t: TextXActionType.INSERT,
+                    body: cloneBody,
+                    len: body.dataStream.length,
+                });
             } else {
-                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor);
+                const dos = BuildTextUtils.selection.getDeleteActions(selection, body, memoryCursor.cursor, cloneBody, i === selections.length - 1);
                 textX.push(...dos);
             }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: cloneBody,
-                len: body.dataStream.length,
-            });
 
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
@@ -256,7 +256,7 @@ function getCutActionsFromTextRanges(
                 len,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, memoryCursor.cursor));
+            textX.push(...BuildTextUtils.selection.getDeleteActions(selection, originBody, memoryCursor.cursor, null, i === selections.length - 1));
         }
 
         memoryCursor.reset();

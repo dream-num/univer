@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 interface IAddCustomDecorationParam {
     unitId: string;
@@ -51,7 +51,6 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: start - cursor,
-                segmentId,
             });
         }
 
@@ -67,7 +66,6 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
                 }],
             },
             len: end - start,
-            segmentId,
         });
 
         cursor = end;
@@ -169,14 +167,12 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: decoration.startIndex - cursor,
-                segmentId,
             });
         }
         cursor = (decoration.startIndex);
         textX.push({
             t: TextXActionType.RETAIN,
             len: decoration.endIndex - decoration.startIndex + 1,
-            segmentId,
             body: bodySlice,
             oldBody,
             coverType: UpdateDocsAttributeType.REPLACE,

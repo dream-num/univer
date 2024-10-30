@@ -189,7 +189,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len,
-                    segmentId,
                 });
             } else {
                 const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor, originBody);
@@ -200,8 +199,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 t: TextXActionType.INSERT,
                 body: cloneBody,
                 len: body.dataStream.length,
-                line: 0,
-                segmentId,
             });
 
             memoryCursor.reset();
@@ -256,7 +253,6 @@ function getCutActionsFromTextRanges(
             textX.push({
                 t: TextXActionType.RETAIN,
                 len,
-                segmentId,
             });
         } else {
             textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
@@ -341,15 +337,12 @@ function getCutActionsFromRectRanges(
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: offset - memoryCursor.cursor,
-                    segmentId,
                 });
             }
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len,
-                line: 0,
-                segmentId,
             });
 
             const action = jsonX.removeOp(['tableSource', tableId]);
@@ -369,15 +362,12 @@ function getCutActionsFromRectRanges(
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: offset - memoryCursor.cursor,
-                    segmentId,
                 });
             }
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len,
-                line: 0,
-                segmentId,
             });
 
             // Step 3: delete table rows;
@@ -402,15 +392,12 @@ function getCutActionsFromRectRanges(
                     textX.push({
                         t: TextXActionType.RETAIN,
                         len: retain - memoryCursor.cursor,
-                        segmentId,
                     });
                 }
 
                 textX.push({
                     t: TextXActionType.DELETE,
                     len: delLen,
-                    line: 0,
-                    segmentId,
                 });
 
                 memoryCursor.moveCursorTo(retain + delLen);

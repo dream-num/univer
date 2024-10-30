@@ -108,7 +108,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
-                segmentId,
             });
         }
 
@@ -116,8 +115,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             textX.push({
                 t: TextXActionType.DELETE,
                 len: oldTextLen,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -134,8 +131,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                     : [],
             },
             len: newText.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

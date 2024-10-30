@@ -15,6 +15,12 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo } from '@univerjs/core';
+import type {
+    FormatType,
+    IRemoveNumfmtMutationParams,
+    ISetCellsNumfmt,
+    ISetNumfmtMutationParams,
+} from '@univerjs/sheets';
 import {
     CommandType,
     ICommandService,
@@ -22,12 +28,6 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-import type {
-    FormatType,
-    IRemoveNumfmtMutationParams,
-    ISetCellsNumfmt,
-    ISetNumfmtMutationParams,
-} from '@univerjs/sheets';
 import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,

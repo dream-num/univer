@@ -20,7 +20,8 @@ export { DocInterceptorService } from './services/doc-interceptor/doc-intercepto
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-
+export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './utils/custom-range-factory';
+export { replaceSelectionFactory } from './utils/replace-selection-factory';
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
 

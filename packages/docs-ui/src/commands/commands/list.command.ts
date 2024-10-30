@@ -429,7 +429,6 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         textX.push({
             t: TextXActionType.DELETE,
             len: paragraphEnd - paragraphStart,
-            line: 1,
         });
 
         textX.push({

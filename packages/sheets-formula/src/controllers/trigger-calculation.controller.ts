@@ -50,6 +50,8 @@ export interface ICalculationProgress {
     done: number;
     /** The total number of formulas need to calculate. */
     count: number;
+    /** The label of the calculation progress. */
+    label?: string;
 }
 
 const NilProgress: ICalculationProgress = { done: 0, count: 0 };
@@ -90,23 +92,30 @@ export class TriggerCalculationController extends Disposable {
 
     readonly progress$ = this._progress$.asObservable();
 
-    private _emitProgress(): void {
-        this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount });
+    private _emitProgress(label?: string): void {
+        this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount, label });
     }
 
     private _startProgress(): void {
+        this._doneCalculationTaskCount = 0;
+        this._totalCalculationTaskCount = 1;
+
+        this._emitProgress('Analyzing dependencies');
+    }
+
+    private _calculateProgress(): void {
         if (this._executionInProgressParams) {
             const { totalFormulasToCalculate, completedFormulasCount, totalArrayFormulasToCalculate, completedArrayFormulasCount } = this._executionInProgressParams;
             this._doneCalculationTaskCount = completedFormulasCount + completedArrayFormulasCount;
             this._totalCalculationTaskCount = totalFormulasToCalculate + totalArrayFormulasToCalculate;
 
-            this._emitProgress();
+            this._emitProgress('Start calculating');
         }
     }
 
     private _completeProgress(): void {
         this._doneCalculationTaskCount = this._totalCalculationTaskCount;
-        this._emitProgress();
+        this._emitProgress('Complete calculation');
     }
 
     clearProgress(): void {
@@ -340,12 +349,13 @@ export class TriggerCalculationController extends Disposable {
                         // If the total calculation time exceeds 1s, a progress bar is displayed.
                         startDependencyTimer = setTimeout(() => {
                             startDependencyTimer = null;
+                            this._startProgress();
                         }, 1000);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING || stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            this._startProgress();
+                            this._calculateProgress();
                         }
                     }
                 } else {

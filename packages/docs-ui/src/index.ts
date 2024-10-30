@@ -19,10 +19,8 @@ export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
-export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
-export { replaceSelectionFactory } from './basics/replace';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
@@ -77,8 +75,8 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
-export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/delete.command';
-export { getCursorWhenDelete } from './commands/commands/delete.command';
+export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
+export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 
 export { IMEInputCommand } from './commands/commands/ime-input.command';
 export {

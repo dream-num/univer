@@ -25,6 +25,7 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import React, { useEffect } from 'react';
@@ -63,6 +64,7 @@ function factory(id: string) {
 
         // sheet feature plugins
         univer.registerPlugin(UniverSheetsNumfmtPlugin);
+        univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         // create univer sheet instance

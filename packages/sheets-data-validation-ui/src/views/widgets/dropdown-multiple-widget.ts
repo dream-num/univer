@@ -194,6 +194,32 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         return layout.cellAutoHeight;
     }
 
+    calcCellAutoWidth(info: ICellRenderContext): number | undefined {
+        const { primaryWithCoord, style, data } = info;
+        const fontRenderExtension = data.fontRenderExtension;
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
+        const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        const cellBounding = {
+            startX: _cellBounding.startX + leftOffset,
+            endX: _cellBounding.endX - rightOffset,
+            startY: _cellBounding.startY + topOffset,
+            endY: _cellBounding.endY - downOffset,
+        };
+        const validation = data.dataValidation;
+        if (!validation) {
+            return undefined;
+        }
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
+        const cellValue = getCellValueOrigin(data) ?? '';
+        const { validator: _validator } = validation;
+        const validator = _validator as ListMultipleValidator;
+        const items = validator.parseCellValue(cellValue);
+        const fontStyle = getFontStyleString(style ?? undefined);
+        const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
+        return layout.calcAutoWidth;
+    }
+
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {
         const { primaryWithCoord } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;

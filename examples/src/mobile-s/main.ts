@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FUniver } from '@univerjs/facade';
+import type { FUniver } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';

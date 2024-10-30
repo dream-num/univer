@@ -15,12 +15,13 @@
  */
 
 import { ThemeService, useDependency } from '@univerjs/core';
+import { Tooltip } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IProgressBarProps {
-    progress: { done: number; count: number };
+    progress: { done: number; count: number; label?: string };
     barColor?: string;
     onTerminate?: () => void;
     onClearProgress?: () => void; // Notify the parent component of the reset progress
@@ -28,7 +29,7 @@ export interface IProgressBarProps {
 
 export function ProgressBar(props: IProgressBarProps) {
     const { barColor, progress, onTerminate, onClearProgress } = props;
-    const { count, done } = progress;
+    const { count, done, label = '' } = progress;
 
     const themeService = useDependency(ThemeService);
     const color = barColor ?? themeService.getCurrentTheme().primaryColor; ;
@@ -94,6 +95,11 @@ export function ProgressBar(props: IProgressBarProps) {
 
     return (
         <div className={styles.progressBarContainer} style={{ display: visible ? 'flex' : 'none' }}>
+
+            <Tooltip showIfEllipsis title={label}>
+                <span className={styles.progressBarLabel}>{label}</span>
+            </Tooltip>
+
             <div className={styles.progressBar}>
                 <div
                     ref={progressBarInnerRef}

@@ -33,9 +33,8 @@ import {
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import {
-    IEditorBridgeService,
     ISheetSelectionRenderService,
     SELECTION_SHAPE_DEPTH,
     SelectionShape,
@@ -48,7 +47,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -93,8 +92,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     private _initInterceptorEditorStart(): void {
         this.disposeWithMe(
             toDisposable(
-                this._editorBridgeService.interceptor.intercept(
-                    this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT,
+                this._sheetInterceptorService.writeCellInterceptor.intercept(BEFORE_CELL_EDIT,
                     {
                         handler: (value, context, next) => {
                             const { row, col, unitId, subUnitId, worksheet } = context;

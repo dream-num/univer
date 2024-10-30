@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream } from '@univerjs/core';
-import { replaceSelectionFactory } from '@univerjs/docs-ui';
-import { SLIDE_EDITOR_ID } from '@univerjs/slides-ui';
 import type { ICommand, IDocumentBody } from '@univerjs/core';
+import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream } from '@univerjs/core';
+import { replaceSelectionFactory } from '@univerjs/docs';
+import { SLIDE_EDITOR_ID } from '@univerjs/slides-ui';
 import { SlideUIFormulaCacheService } from '../../services/slide-ui-formula-cache.service';
 
 export interface IAddSlideUniFormulaCommandParams {

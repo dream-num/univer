@@ -68,7 +68,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
-                segmentId,
             });
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
             const paragraphStyle: IParagraphStyle = {
@@ -88,7 +87,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
                         },
                     ],
                 },
-                segmentId,
                 coverType: UpdateDocsAttributeType.REPLACE,
             });
 

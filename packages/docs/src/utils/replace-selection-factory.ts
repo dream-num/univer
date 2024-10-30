@@ -59,8 +59,8 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         return false;
     }
     const textRanges = params.textRanges ?? [{
-        startOffset: selection.startOffset + insertBody.dataStream.length + 1,
-        endOffset: selection.startOffset + insertBody.dataStream.length + 1,
+        startOffset: selection.startOffset + insertBody.dataStream.length,
+        endOffset: selection.startOffset + insertBody.dataStream.length,
         collapsed: true,
         segmentId,
     }];
@@ -70,6 +70,7 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         body: insertBody,
         doc: docDataModel,
     });
+
     if (!textX) {
         return false;
     }

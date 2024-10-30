@@ -270,7 +270,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
 
-    const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset - 1);
+    const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
     const diffs = textDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
     const actions = diffs.map(([type, text]) => {

@@ -294,6 +294,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._initContextListener();
         // this.updateDataMerge();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+
+        if (!window.sk) {
+            window.sk = {};
+        }
+        window.sk[this.worksheet.getName()] = this;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -449,6 +454,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns boolean
      */
     updateVisibleRange(bounds?: IViewportInfo): boolean {
+        // console.log('updateVisibleRange');
         if (!this._worksheetData) {
             return false;
         }
@@ -851,6 +857,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
      */
     private _updateLayout(): void {
+        console.log('updateLayout', this.dirty);
         if (!this.dirty) {
             return;
         }
@@ -866,11 +873,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeader,
             showGridlines,
         } = this._worksheetData;
+
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
             rowCount,
             rowData,
             defaultRowHeight
         );
+        console.log('updateLayout', rowHeightAccumulation);
+
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
             columnCount,
             columnData,
@@ -1836,10 +1846,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._overflowCache.reset();
     }
 
-    private _makeDocumentSkeletonDirty(row: number, col: number): void {
-        if (this._stylesCache.fontMatrix == null) return;
-        this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
-    }
+    // private _makeDocumentSkeletonDirty(row: number, col: number): void {
+    //     if (this._stylesCache.fontMatrix == null) return;
+    //     this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
+    // }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
         mergeRange?: IRange;

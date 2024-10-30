@@ -277,10 +277,12 @@ export class FilterModel extends Disposable {
         const noCacheFilteredOutRows = this._getAllFilterColumns().filter((filterColumn) => !filterColumn.hasCache());
         for (const filterColumn of noCacheFilteredOutRows) {
             const filteredRows = filterColumn.reCalc();
+            console.log('filteredRows', filteredRows);
             if (filteredRows) {
                 this._alreadyFilteredOutRows = mergeSets(this._alreadyFilteredOutRows, filteredRows);
             }
         }
+        console.log('alreadyFilteredOutRows', this._alreadyFilteredOutRows)
     }
 }
 

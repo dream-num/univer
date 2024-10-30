@@ -367,29 +367,27 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const { id: commandId } = command;
 
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
+                const params = command.params;
+                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                // const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();
+
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
                 const workbookId = this._context.unitId;
                 const worksheetId = worksheet.getSheetId();
-                const params = command.params;
-                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
 
                 if (unitId !== workbookId || subUnitId !== worksheetId) {
                     return;
                 }
 
-                if (commandId !== SetWorksheetActiveOperation.id) {
-                    this._sheetSkeletonManagerService.makeDirty({
-                        sheetId: worksheetId,
-                        commandId,
-                    }, true);
-                }
+                // if (commandId !== SetWorksheetActiveOperation.id) {
+                this._sheetSkeletonManagerService.makeDirty({
+                    sheetId: worksheetId,
+                    commandId,
+                }, true);
+                // }
 
-                // Change the skeleton to render when the sheet is changed.
-                // Should also check the init sheet.
-                // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
-                // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,

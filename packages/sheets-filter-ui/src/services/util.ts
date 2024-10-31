@@ -31,6 +31,13 @@ export function findObjectByKey(data: IFilterByValueWithTreeItem[], targetKey: s
     return null;
 }
 
+export function areAllLeafNodesChecked(node: IFilterByValueWithTreeItem): boolean {
+    if (node.leaf) {
+        return node.checked;
+    }
+    return node.children ? node.children.every((child) => areAllLeafNodesChecked(child)) : true;
+}
+
 export function updateLeafNodesCheckedStatus(node: IFilterByValueWithTreeItem, status?: boolean) {
     if (node.leaf) {
         if (status !== undefined) {
@@ -68,8 +75,10 @@ export function searchTree(items: IFilterByValueWithTreeItem[], searchKeywords: 
             result.push({ ...item });
         } else if (item.children) {
             const filteredChildren = searchTree(item.children, searchKeywords);
+
             if (filteredChildren.length > 0) {
-                result.push({ ...item, children: filteredChildren });
+                const aggregatedCount = filteredChildren.reduce((sum, child) => sum + child.count, 0);
+                result.push({ ...item, count: aggregatedCount, children: filteredChildren });
             }
         }
     });

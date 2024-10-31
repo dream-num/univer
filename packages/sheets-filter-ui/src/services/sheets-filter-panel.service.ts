@@ -26,7 +26,7 @@ import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareRep
 import { FilterConditionItems } from '../models/conditions';
 import { statisticFilterByValueItems } from '../models/utils';
 import { getFilterTreeByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
-import { findObjectByKey, searchTree, updateLeafNodesCheckedStatus } from './util';
+import { areAllLeafNodesChecked, findObjectByKey, searchTree, updateLeafNodesCheckedStatus } from './util';
 
 export enum FilterBy {
     VALUES,
@@ -542,7 +542,8 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         if (!changedItem) {
             return;
         }
-        updateLeafNodesCheckedStatus(changedItem);
+        const allLeafChecked = areAllLeafNodesChecked(changedItem);
+        updateLeafNodesCheckedStatus(changedItem, !allLeafChecked);
         this._manuallyUpdateFilterItems(items);
     }
 

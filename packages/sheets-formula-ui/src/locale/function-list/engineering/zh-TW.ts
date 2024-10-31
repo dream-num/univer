@@ -467,6 +467,19 @@ export default {
             inumber: { name: '複數', detail: '要求得餘切值的複數。' },
         },
     },
+    IMCOTH: {
+        description: '傳回複數的雙曲餘切值',
+        abstract: '傳回複數的雙曲餘切值',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9366256?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得雙曲餘切值的複數。' },
+        },
+    },
     IMCSC: {
         description: '傳回複數的餘割值',
         abstract: '傳回複數的餘割值',
@@ -531,6 +544,20 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '複數', detail: '要求得自然對數的複數。' },
+        },
+    },
+    IMLOG: {
+        description: '傳回複數的以特定底數的對數',
+        abstract: '傳回複數的以特定底數的對數',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得以特定底數的對數的複數。' },
+            base: { name: '底數', detail: '計算對數時所用的底數。' },
         },
     },
     IMLOG10: {
@@ -704,6 +731,19 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '複數', detail: '要求得正切值的複數。' },
+        },
+    },
+    IMTANH: {
+        description: '傳回複數的雙曲正切值',
+        abstract: '傳回複數的雙曲正切值',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9366655?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得雙曲正切值的複數。' },
         },
     },
     OCT2BIN: {

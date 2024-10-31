@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { Complex } from '../../../basics/complex';
 import { ErrorType } from '../../../basics/error-type';
-import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { checkVariantsErrorIsArrayOrBoolean, checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Imlog10 extends BaseFunction {
+export class Imlog extends BaseFunction {
     override minParams = 1;
 
-    override maxParams = 1;
+    override maxParams = 2;
 
-    override calculate(inumber: BaseValueObject): BaseValueObject {
+    override calculate(inumber: BaseValueObject, base?: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsArrayOrBoolean(inumber);
 
         if (isError) {
@@ -37,7 +38,29 @@ export class Imlog10 extends BaseFunction {
 
         const [inumberObject] = variants as BaseValueObject[];
 
+        let _base = base ?? NumberValueObject.create(10);
+
+        if (_base.isArray()) {
+            const rowCount = (_base as ArrayValueObject).getRowCount();
+            const columnCount = (_base as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _base = (_base as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        const { isError: _isError, errorObject: _errorObject, variants: _variants } = checkVariantsErrorIsStringToNumber(_base);
+
+        if (_isError) {
+            return _errorObject as ErrorValueObject;
+        }
+
+        const [baseObject] = _variants as BaseValueObject[];
+
         const inumberValue = `${inumberObject.getValue()}`;
+        const baseValue = +baseObject.getValue();
 
         const complex = new Complex(inumberValue);
 
@@ -49,7 +72,15 @@ export class Imlog10 extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = complex.Log(10);
+        if (baseValue <= 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        const result = complex.Log(baseValue);
+
+        if (complex.isError()) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
 
         if (typeof result === 'number' || isRealNum(result)) {
             return NumberValueObject.create(+result);

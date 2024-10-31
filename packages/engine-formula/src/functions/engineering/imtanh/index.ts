@@ -23,7 +23,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Imlog10 extends BaseFunction {
+export class Imtanh extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -45,11 +45,11 @@ export class Imlog10 extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        if (complex.getRealNum() === 0 && complex.getINum() === 0) {
+        const result = complex.Tanh();
+
+        if (complex.isError()) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
-
-        const result = complex.Log(10);
 
         if (typeof result === 'number' || isRealNum(result)) {
             return NumberValueObject.create(+result);

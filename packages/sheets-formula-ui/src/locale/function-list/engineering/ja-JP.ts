@@ -467,6 +467,19 @@ export default {
             inumber: { name: '複素数', detail: '余接を求める複素数を指定します。' },
         },
     },
+    IMCOTH: {
+        description: '複素数の双曲線余接を返します。',
+        abstract: '複素数の双曲線余接を返します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9366256?hl=ja&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複素数', detail: '双曲線余接を求める複素数を指定します。' },
+        },
+    },
     IMCSC: {
         description: '複素数の余割を返します。',
         abstract: '複素数の余割を返します。',
@@ -531,6 +544,20 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '複素数', detail: '自然対数を求める複素数を指定します。' },
+        },
+    },
+    IMLOG: {
+        description: '指定された値を底とする複素数の対数を返します。',
+        abstract: '指定された値を底とする複素数の対数を返します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9366486?hl=ja&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複素数', detail: '特定の底に対する対数を計算する必要がある複素数。' },
+            base: { name: '底', detail: '対数を求めるときに使用する底です。' },
         },
     },
     IMLOG10: {
@@ -704,6 +731,19 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '複素数', detail: '正接を求める接線を指定します。' },
+        },
+    },
+    IMTANH: {
+        description: '複素数の双曲線正接を返します。',
+        abstract: '複素数の双曲線正接を返します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9366655?hl=ja&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複素数', detail: '双曲線正接を求める接線を指定します。' },
         },
     },
     OCT2BIN: {

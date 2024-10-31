@@ -467,6 +467,19 @@ export default {
             inumber: { name: 'inumber', detail: 'A complex number for which you want the cotangent.' },
         },
     },
+    IMCOTH: {
+        description: 'Returns the hyperbolic cotangent of a complex number',
+        abstract: 'Returns the hyperbolic cotangent of a complex number',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9366256?hl=en&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic cotangent.' },
+        },
+    },
     IMCSC: {
         description: 'Returns the cosecant of a complex number',
         abstract: 'Returns the cosecant of a complex number',
@@ -531,6 +544,20 @@ export default {
         ],
         functionParameter: {
             inumber: { name: 'inumber', detail: 'A complex number for which you want the natural logarithm.' },
+        },
+    },
+    IMLOG: {
+        description: 'Returns the logarithm of a complex number for a specified base',
+        abstract: 'Returns the logarithm of a complex number for a specified base',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hans&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'inumber', detail: 'A complex number whose logarithm to a specific base needs to be calculated.' },
+            base: { name: 'base', detail: 'The base to use when calculating the logarithm.' },
         },
     },
     IMLOG10: {
@@ -704,6 +731,19 @@ export default {
         ],
         functionParameter: {
             inumber: { name: 'inumber', detail: 'A complex number for which you want the tangent.' },
+        },
+    },
+    IMTANH: {
+        description: 'Returns the hyperbolic tangent of a complex number',
+        abstract: 'Returns the hyperbolic tangent of a complex number',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9366655?hl=en&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'inumber', detail: 'A complex number for which you want the hyperbolic tangent.' },
         },
     },
     OCT2BIN: {

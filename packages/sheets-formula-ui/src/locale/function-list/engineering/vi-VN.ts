@@ -468,6 +468,19 @@ export default {
             inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy cotangent.' },
         },
     },
+    IMCOTH: {
+        description: 'Trả về hyperbolic cotangent của số phức',
+        abstract: 'Trả về hyperbolic cotangent của số phức',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/9366256?hl=vi&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy hyperbolic cotangent.' },
+        },
+    },
     IMCSC: {
         description: 'Trả về cosecant của số phức',
         abstract: 'Trả về cosecant của số phức',
@@ -532,6 +545,20 @@ export default {
         ],
         functionParameter: {
             inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn tìm lô-ga-rit tự nhiên của nó.' },
+        },
+    },
+    IMLOG: {
+        description: 'Trả về logarithm của một số phức với cơ số xác định.',
+        abstract: 'Trả về logarithm của một số phức với cơ số xác định.',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/9366486?hl=vi&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'số phức', detail: 'Một số phức có logarit theo một cơ số cụ thể cần được tính.' },
+            base: { name: 'cơ số', detail: 'Cơ số cần sử dụng khi tính lôgarit.' },
         },
     },
     IMLOG10: {
@@ -705,7 +732,20 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy tang.' },
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy tan.' },
+        },
+    },
+    IMTANH: {
+        description: 'Trả về tanh của số phức',
+        abstract: 'Trả về tanh của số phức',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/9366655?hl=vi&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: 'số phức', detail: 'Số phức mà bạn muốn lấy tanh.' },
         },
     },
     OCT2BIN: {

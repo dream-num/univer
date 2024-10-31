@@ -54,6 +54,7 @@ import { Imcsch } from './imcsch';
 import { Imdiv } from './imdiv';
 import { Imexp } from './imexp';
 import { Imln } from './imln';
+import { Imlog } from './imlog';
 import { Imlog2 } from './imlog2';
 import { Imlog10 } from './imlog10';
 import { Impower } from './impower';
@@ -67,6 +68,7 @@ import { Imsqrt } from './imsqrt';
 import { Imsub } from './imsub';
 import { Imsum } from './imsum';
 import { Imtan } from './imtan';
+import { Imtanh } from './imtanh';
 import { Oct2bin } from './oct2bin';
 import { Oct2dec } from './oct2dec';
 import { Oct2hex } from './oct2hex';
@@ -111,6 +113,7 @@ export const functionEngineering = [
     [Imdiv, FUNCTION_NAMES_ENGINEERING.IMDIV],
     [Imexp, FUNCTION_NAMES_ENGINEERING.IMEXP],
     [Imln, FUNCTION_NAMES_ENGINEERING.IMLN],
+    [Imlog, FUNCTION_NAMES_ENGINEERING.IMLOG],
     [Imlog10, FUNCTION_NAMES_ENGINEERING.IMLOG10],
     [Imlog2, FUNCTION_NAMES_ENGINEERING.IMLOG2],
     [Impower, FUNCTION_NAMES_ENGINEERING.IMPOWER],
@@ -124,6 +127,7 @@ export const functionEngineering = [
     [Imsub, FUNCTION_NAMES_ENGINEERING.IMSUB],
     [Imsum, FUNCTION_NAMES_ENGINEERING.IMSUM],
     [Imtan, FUNCTION_NAMES_ENGINEERING.IMTAN],
+    [Imtanh, FUNCTION_NAMES_ENGINEERING.IMTANH],
     [Oct2bin, FUNCTION_NAMES_ENGINEERING.OCT2BIN],
     [Oct2dec, FUNCTION_NAMES_ENGINEERING.OCT2DEC],
     [Oct2hex, FUNCTION_NAMES_ENGINEERING.OCT2HEX],

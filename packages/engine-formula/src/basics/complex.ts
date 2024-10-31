@@ -311,10 +311,15 @@ export class Complex {
     }
 
     Coth(): number | string {
+        if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
+            this._isError = true;
+            return '';
+        }
+
         if (this._iNum) {
             const den = Decimal.cosh(this._realNum * 2).sub(Decimal.cos(this._iNum * 2));
-            const realNum = Decimal.sin(this._iNum * 2).div(den).toNumber();
-            const iNum = Decimal.sinh(this._realNum * 2).div(den).negated().toNumber();
+            const realNum = Decimal.sinh(this._realNum * 2).div(den).toNumber();
+            const iNum = Decimal.sin(this._iNum * 2).div(den).negated().toNumber();
 
             return Complex.getComplex(realNum, iNum, this._suffix);
         } else {
@@ -391,7 +396,7 @@ export class Complex {
         return Complex.getComplex(realNum, iNum, this._suffix);
     }
 
-    Log10(): number | string {
+    Log(base: number): number | string {
         const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
         const Decimal_realNum1 = Decimal.ln(abs);
         let Decimal_iNum1 = Decimal.acos(new Decimal(this._realNum).div(abs));
@@ -400,29 +405,16 @@ export class Complex {
             Decimal_iNum1 = Decimal_iNum1.negated();
         }
 
-        const Decimal_realNum2 = Decimal.ln(10);
+        const Decimal_realNum2 = Decimal.ln(base);
         const Decimal_iNum2 = new Decimal(0);
 
         const den = Decimal_realNum2.mul(Decimal_realNum2).add(Decimal_iNum2.mul(Decimal_iNum2));
-        const realNum = Decimal_realNum1.mul(Decimal_realNum2).add(Decimal_iNum1.mul(Decimal_iNum2)).div(den).toNumber();
-        const iNum = Decimal_iNum1.mul(Decimal_realNum2).sub(Decimal_realNum1.mul(Decimal_iNum2)).div(den).toNumber();
 
-        return Complex.getComplex(realNum, iNum, this._suffix);
-    }
-
-    Log2(): number | string {
-        const abs = Decimal.sqrt(Decimal.pow(this._realNum, 2).add(Decimal.pow(this._iNum, 2)));
-        const Decimal_realNum1 = Decimal.ln(abs);
-        let Decimal_iNum1 = Decimal.acos(new Decimal(this._realNum).div(abs));
-
-        if (this._iNum < 0) {
-            Decimal_iNum1 = Decimal_iNum1.negated();
+        if (den.eq(0)) {
+            this._isError = true;
+            return '';
         }
 
-        const Decimal_realNum2 = Decimal.ln(2);
-        const Decimal_iNum2 = new Decimal(0);
-
-        const den = Decimal_realNum2.mul(Decimal_realNum2).add(Decimal_iNum2.mul(Decimal_iNum2));
         const realNum = Decimal_realNum1.mul(Decimal_realNum2).add(Decimal_iNum1.mul(Decimal_iNum2)).div(den).toNumber();
         const iNum = Decimal_iNum1.mul(Decimal_realNum2).sub(Decimal_realNum1.mul(Decimal_iNum2)).div(den).toNumber();
 
@@ -590,6 +582,25 @@ export class Complex {
             return Complex.getComplex(realNum, iNum, this._suffix);
         } else {
             const realNum = Decimal.tan(this._realNum).toNumber();
+
+            return Complex.getComplex(realNum, this._iNum, this._suffix);
+        }
+    }
+
+    Tanh(): number | string {
+        if (!Number.isFinite(Math.sinh(this._realNum)) || !Number.isFinite(Math.cosh(this._realNum))) {
+            this._isError = true;
+            return '';
+        }
+
+        if (this._iNum) {
+            const den = Decimal.cosh(this._realNum * 2).add(Decimal.cos(this._iNum * 2));
+            const realNum = Decimal.sinh(this._realNum * 2).div(den).toNumber();
+            const iNum = Decimal.sin(this._iNum * 2).div(den).toNumber();
+
+            return Complex.getComplex(realNum, iNum, this._suffix);
+        } else {
+            const realNum = Decimal.tanh(this._realNum).toNumber();
 
             return Complex.getComplex(realNum, this._iNum, this._suffix);
         }

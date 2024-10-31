@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Workbook } from '@univerjs/core';
+import type { IRange, ITextRun, Nullable, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
@@ -23,7 +23,7 @@ import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-fo
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachPrimaryWithCoord, attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -51,6 +51,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
     const [ranges, rangesSet] = useState<ISelectionWithStyle[]>([]);
 
     useEffect(() => {
+        // const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -78,10 +79,10 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-
+            const primaryRange = worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
             selectionWithStyle.push({
                 range,
-                primary: null,
+                primary: primaryRange || null,
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }

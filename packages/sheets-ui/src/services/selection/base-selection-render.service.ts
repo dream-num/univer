@@ -852,6 +852,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
+     * TODO @lumixraku this function is useless.  remove it
      * Update the selection control by range.
      * @param control
      * @param newSelectionRange

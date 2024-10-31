@@ -1532,6 +1532,7 @@ export class PromptController extends Disposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();

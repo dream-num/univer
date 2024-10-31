@@ -62,6 +62,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
+
+        window.fsrs = this;
     }
 
     getLocation(): [string, string] {

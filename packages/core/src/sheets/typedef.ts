@@ -594,8 +594,30 @@ export interface ISingleCell {
 
 export interface IRangeWithCoord extends IPosition, IRange { }
 
+/**
+ * startRow,
+ * endRow,
+ * startColumn,
+ * endColumn,
+ * actualRow: number;
+ * actualColumn: number;
+ * isMerged: boolean;
+ * isMergedMainCell: boolean;
+ * rangeType?: RANGE_TYPE;
+ */
 export interface ISelectionCell extends IRange, ISingleCell { }
 
+/**
+ * startX: number;
+ * startY: number;
+ * endX: number;
+ * endY: number;
+ * actualRow: number;
+ * actualColumn: number;
+ * isMerged: boolean;
+ * isMergedMainCell: boolean;
+ * mergeInfo
+ */
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }

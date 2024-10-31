@@ -485,7 +485,7 @@ function updateCustomRanges(
         });
     }
 
-    body.customRanges = mergeContinuousRanges(newCustomRanges.sort((a, b) => a.startIndex - b.startIndex));
+    body.customRanges = mergeContinuousRanges(newCustomRanges);
     return removeCustomRanges;
 }
 

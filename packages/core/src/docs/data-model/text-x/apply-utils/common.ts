@@ -352,6 +352,7 @@ const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
 
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
 
     const mergedRanges: ICustomRange[] = [];
     let currentRange = { ...ranges[0] };
@@ -447,7 +448,7 @@ export function insertCustomRanges(
         customRanges.sort(sortRulesFactory('startIndex'));
     }
 
-    body.customRanges = mergeContinuousRanges(customRanges.sort((a, b) => a.startIndex - b.startIndex));
+    body.customRanges = mergeContinuousRanges(customRanges);
 }
 
 interface IIndexRange {
@@ -837,7 +838,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             newCustomRanges.push(customRange);
         }
 
-        body.customRanges = mergeContinuousRanges(newCustomRanges.sort((a, b) => a.startIndex - b.startIndex));
+        body.customRanges = mergeContinuousRanges(newCustomRanges);
     }
     return removeCustomRanges;
 }

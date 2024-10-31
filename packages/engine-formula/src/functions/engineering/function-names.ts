@@ -48,6 +48,7 @@ export enum FUNCTION_NAMES_ENGINEERING {
     IMCOS = 'IMCOS',
     IMCOSH = 'IMCOSH',
     IMCOT = 'IMCOT',
+    IMCOTH = 'IMCOTH',
     IMCSC = 'IMCSC',
     IMCSCH = 'IMCSCH',
     IMDIV = 'IMDIV',

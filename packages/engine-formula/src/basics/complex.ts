@@ -310,6 +310,20 @@ export class Complex {
         }
     }
 
+    Coth(): number | string {
+        if (this._iNum) {
+            const den = Decimal.cosh(this._realNum * 2).sub(Decimal.cos(this._iNum * 2));
+            const realNum = Decimal.sin(this._iNum * 2).div(den).toNumber();
+            const iNum = Decimal.sinh(this._realNum * 2).div(den).negated().toNumber();
+
+            return Complex.getComplex(realNum, iNum, this._suffix);
+        } else {
+            const realNum = new Decimal(1).div(Decimal.tanh(this._realNum)).toNumber();
+
+            return Complex.getComplex(realNum, this._iNum, this._suffix);
+        }
+    }
+
     Csc(): number | string {
         if (this._iNum) {
             const den = Decimal.cosh(this._iNum * 2).sub(Decimal.cos(this._realNum * 2));

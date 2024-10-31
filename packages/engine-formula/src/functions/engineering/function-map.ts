@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_ENGINEERING } from './function-names';
 import { Besseli } from './besseli';
 import { Besselj } from './besselj';
 import { Besselk } from './besselk';
@@ -37,6 +36,7 @@ import { Erf } from './erf';
 import { ErfPrecise } from './erf-precise';
 import { Erfc } from './erfc';
 import { ErfcPrecise } from './erfc-precise';
+import { FUNCTION_NAMES_ENGINEERING } from './function-names';
 import { Gestep } from './gestep';
 import { Hex2bin } from './hex2bin';
 import { Hex2dec } from './hex2dec';
@@ -48,13 +48,14 @@ import { Imconjugate } from './imconjugate';
 import { Imcos } from './imcos';
 import { Imcosh } from './imcosh';
 import { Imcot } from './imcot';
+import { Imcoth } from './imcoth';
 import { Imcsc } from './imcsc';
 import { Imcsch } from './imcsch';
 import { Imdiv } from './imdiv';
 import { Imexp } from './imexp';
 import { Imln } from './imln';
-import { Imlog10 } from './imlog10';
 import { Imlog2 } from './imlog2';
+import { Imlog10 } from './imlog10';
 import { Impower } from './impower';
 import { Improduct } from './improduct';
 import { Imreal } from './imreal';
@@ -104,6 +105,7 @@ export const functionEngineering = [
     [Imcos, FUNCTION_NAMES_ENGINEERING.IMCOS],
     [Imcosh, FUNCTION_NAMES_ENGINEERING.IMCOSH],
     [Imcot, FUNCTION_NAMES_ENGINEERING.IMCOT],
+    [Imcoth, FUNCTION_NAMES_ENGINEERING.IMCOTH],
     [Imcsc, FUNCTION_NAMES_ENGINEERING.IMCSC],
     [Imcsch, FUNCTION_NAMES_ENGINEERING.IMCSCH],
     [Imdiv, FUNCTION_NAMES_ENGINEERING.IMDIV],

@@ -501,7 +501,7 @@ function updateCustomRanges(
                     delete rangeMap[rangeId];
                     continue;
                 }
-                Object.assign(oldCustomRange, updateCustomRange);
+                Object.assign(oldCustomRange, { properties: updateCustomRange.properties });
             } else {
                 rangeMap[rangeId] = updateCustomRange;
             }

@@ -27,7 +27,6 @@ import type {
 } from '../../../../types/interfaces';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 import { getBodySlice } from '../utils';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
@@ -347,48 +346,82 @@ export function sliceByParagraph(body: IDocumentBody) {
     return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
 }
 
+export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
+    if (ranges.length <= 1) return ranges;
+
+    const mergedRanges: ICustomRange[] = [];
+    let currentRange = { ...ranges[0] };
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+
+        if (
+            currentRange.rangeId === nextRange.rangeId &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+            // Merge properties if they exist
+            if (nextRange.properties) {
+                currentRange.properties = {
+                    ...currentRange.properties,
+                    ...nextRange.properties,
+                };
+            }
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+
+            // If ranges have same ID but aren't continuous, generate new unique ID
+            if (currentRange.rangeId === mergedRanges[mergedRanges.length - 1].rangeId) {
+                currentRange.rangeId = `${currentRange.rangeId}_`;
+            }
+        }
+    }
+
+    // Push the last range
+    mergedRanges.push(currentRange);
+    return mergedRanges;
+}
+
 export function insertCustomRanges(
     body: IDocumentBody,
     insertBody: IDocumentBody,
     textLength: number,
     currentIndex: number
 ) {
-    if (insertBody.dataStream.indexOf(DataStreamTreeTokenType.PARAGRAPH) > -1 && insertBody.dataStream.length > 1) {
-        let cursor = 0;
-        sliceByParagraph(insertBody).forEach((slice) => {
-            insertCustomRanges(body, slice, slice.dataStream.length, currentIndex + cursor);
-            cursor += slice.dataStream.length;
-        });
-        return;
-    }
-
     if (!body.customRanges) {
         body.customRanges = [];
     }
 
     const { customRanges } = body;
     const customRangeMap: Record<string, ICustomRange> = {};
+    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+
+    if (matchedCustomRange) {
+        customRanges.splice(matchedCustomRangeIndex, 1);
+        customRanges.push({
+            ...matchedCustomRange,
+            startIndex: matchedCustomRange.startIndex,
+            endIndex: currentIndex - 1,
+        });
+        customRanges.push({
+            ...matchedCustomRange,
+            startIndex: currentIndex,
+            endIndex: matchedCustomRange.endIndex,
+        });
+    }
+
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
         customRangeMap[customRange.rangeId] = customRange;
-        const { startIndex, endIndex } = customRange;
+        const { startIndex } = customRange;
+        // move custom range when insert text before it
         if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
-        } else if (endIndex > currentIndex - 1) {
-            customRange.endIndex += textLength;
-        }
-    }
-
-    if (insertBody.dataStream === DataStreamTreeTokenType.PARAGRAPH) {
-        const customRange = customRanges.find((c) => c.startIndex < currentIndex && c.endIndex > currentIndex);
-        if (customRange) {
-            const copy = Tools.deepClone(customRange);
-            customRange.endIndex = currentIndex;
-
-            copy.startIndex = currentIndex + 1;
-            customRanges.push(copy);
-            copy.rangeId = `${customRange.rangeId}-`;
         }
     }
 
@@ -401,18 +434,10 @@ export function insertCustomRanges(
             customRange.endIndex += currentIndex;
             // merge into old custom range
             if (oldCustomRange) {
-                if (oldCustomRange.endIndex === customRange.startIndex - 1) {
-                    oldCustomRange.endIndex = customRange.endIndex;
-                }
-
-                if (oldCustomRange.startIndex === customRange.endIndex + 1) {
-                    oldCustomRange.startIndex = customRange.startIndex;
-                }
                 oldCustomRange.properties = {
                     ...oldCustomRange.properties,
                     ...customRange.properties,
                 };
-                continue;
             }
             // new custom range
             insertRanges.push(customRange);
@@ -422,7 +447,7 @@ export function insertCustomRanges(
         customRanges.sort(sortRulesFactory('startIndex'));
     }
 
-    customRanges.sort((a, b) => a.startIndex - b.startIndex);
+    body.customRanges = mergeContinuousRanges(customRanges.sort((a, b) => a.startIndex - b.startIndex));
 }
 
 interface IIndexRange {
@@ -813,7 +838,6 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         }
         body.customRanges = newCustomRanges;
     }
-
     return removeCustomRanges;
 }
 

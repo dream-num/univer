@@ -19,10 +19,11 @@ import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { useEffect, useState } from 'react';
 
+export type INode = (string | ISequenceNode);
 export const useFormulaToken = (text: string) => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
-    const [sequenceNodes, sequenceNodesSet] = useState<(string | ISequenceNode)[]>([]);
+    const [sequenceNodes, sequenceNodesSet] = useState<INode[]>([]);
 
     useEffect(() => {
         sequenceNodesSet(lexerTreeBuilder.sequenceNodesBuilder(text) ?? []);

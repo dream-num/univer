@@ -15,8 +15,6 @@
  */
 
 import type { ITextRange } from '../../../../sheets/typedef';
-import type { IDeleteAction, IRetainAction } from '../action-types';
-import { TextXActionType } from '../action-types';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -44,38 +42,5 @@ export function normalizeSelection(selection: ITextRange): ITextRange {
 
 export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
     return Math.max(start, start2) <= Math.min(end, end2);
-}
-
-export function getRetainAndDeleteFromReplace(
-    range: ITextRange,
-    segmentId: string = '',
-    memoryCursor: number
-) {
-    const { startOffset, endOffset } = range;
-    const dos: Array<IRetainAction | IDeleteAction> = [];
-    const textStart = startOffset - memoryCursor;
-    const textEnd = endOffset - memoryCursor;
-
-    if (textStart > 0) {
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: textStart,
-        });
-    }
-
-    let cursor = textStart;
-
-    if (cursor < textEnd) {
-        dos.push({
-            t: TextXActionType.DELETE,
-            len: textEnd - cursor,
-        });
-        cursor = textEnd + 1;
-    }
-
-    return {
-        dos,
-        cursor,
-    };
 }
 

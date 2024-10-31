@@ -18,7 +18,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
-import type { IDeleteAction, IRetainAction, TextXAction } from '../action-types';
+import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
@@ -158,68 +158,51 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
-// eslint-disable-next-line max-lines-per-function
-export function getRetainAndDeleteAndExcludeLineBreak(
-    selection: ITextRange,
+
+export function deleteSelectionTextX(
+    selections: ITextRange[],
     body: IDocumentBody,
     memoryCursor: number = 0,
-    preserveLineBreak: boolean = true
-): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = selection;
-    const dos: Array<IRetainAction | IDeleteAction> = [];
+    insertBody: Nullable<IDocumentBody> = null,
+    keepBullet: boolean = true
+): Array<TextXAction> {
+    selections.sort((a, b) => a.startOffset - b.startOffset);
+    const dos: Array<TextXAction> = [];
     const { paragraphs = [] } = body;
 
-    const textStart = startOffset - memoryCursor;
-    const textEnd = endOffset - memoryCursor;
-
     const paragraphInRange = paragraphs?.find(
-        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
+        (p) => p.startIndex >= selections[0].startOffset && p.startIndex < selections[0].endOffset
     );
-
-    const retainPoints = new Set<number>();
-
-    if (textStart > 0) {
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: textStart,
-        });
-    }
-
-    if (preserveLineBreak) {
-        if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
-            const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
-            retainPoints.add(paragraphIndex);
+    let cursor = memoryCursor;
+    selections.forEach((selection) => {
+        const { startOffset, endOffset } = selection;
+        if (startOffset - memoryCursor > cursor) {
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: startOffset - memoryCursor,
+            });
+            cursor = startOffset;
         }
-    }
 
-    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
-
-    let cursor = textStart;
-    sortedRetains.forEach((pos) => {
-        const len = pos - cursor;
-        if (len > 0) {
+        if (cursor < endOffset) {
             dos.push({
                 t: TextXActionType.DELETE,
-                len,
+                len: endOffset - memoryCursor - cursor,
             });
+            cursor = endOffset;
         }
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-        });
-        cursor = pos + 1;
     });
 
-    if (cursor < textEnd) {
+    if (insertBody) {
         dos.push({
-            t: TextXActionType.DELETE,
-            len: textEnd - cursor,
+            t: TextXActionType.INSERT,
+            body: insertBody,
+            len: insertBody.dataStream.length,
         });
-        cursor = textEnd;
     }
 
-    if (!preserveLineBreak) {
-        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
+    if (paragraphInRange && keepBullet) {
+        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= (selections[selections.length - 1].endOffset - 1));
         if (nextParagraph) {
             if (nextParagraph.startIndex > cursor) {
                 dos.push({

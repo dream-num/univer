@@ -322,6 +322,7 @@ export function composeBody(
     if (paragraphs.length) {
         retBody.paragraphs = paragraphs;
     }
+
     return retBody;
 }
 

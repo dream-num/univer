@@ -16,6 +16,7 @@
 
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
+import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -325,6 +326,7 @@ describe('compose test cases', () => {
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
+            coverType: UpdateDocsAttributeType.COVER,
             body: {
                 dataStream: '',
                 textRuns: [{

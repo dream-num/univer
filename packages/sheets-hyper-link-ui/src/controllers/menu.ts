@@ -100,7 +100,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
 
     return disableRange$.pipe(
         distinctUntilChanged(),
-        switchMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell))))
+        switchMap((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))
     );
 };
 

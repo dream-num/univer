@@ -17,14 +17,15 @@
         "./vite": "./vite/index.js"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.8.1",
-        "@vitejs/plugin-react": "^4.3.2",
-        "@vitest/coverage-istanbul": "^2.1.2",
+        "@typescript-eslint/parser": "^8.12.2",
+        "@vitejs/plugin-react": "^4.3.3",
+        "@vitest/coverage-istanbul": "^2.1.4",
+        "fs-extra": "^11.2.0",
         "happy-dom": "15.0.0",
         "javascript-obfuscator": "^4.1.1",
-        "vite": "^5.4.8",
-        "vite-plugin-dts": "^4.2.3",
+        "vite": "^5.4.10",
+        "vite-plugin-dts": "^4.3.0",
         "vite-plugin-external": "^4.3.1",
-        "vitest": "^2.1.2"
+        "vitest": "^2.1.4"
     }
 }

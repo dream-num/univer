@@ -167,10 +167,10 @@ export function deleteSelectionTextX(
     let cursor = memoryCursor;
     selections.forEach((selection) => {
         const { startOffset, endOffset } = selection;
-        if (startOffset - memoryCursor > cursor) {
+        if (startOffset > cursor) {
             dos.push({
                 t: TextXActionType.RETAIN,
-                len: startOffset - memoryCursor,
+                len: startOffset - cursor,
             });
             cursor = startOffset;
         }
@@ -178,7 +178,7 @@ export function deleteSelectionTextX(
         if (cursor < endOffset) {
             dos.push({
                 t: TextXActionType.DELETE,
-                len: endOffset - memoryCursor - cursor,
+                len: endOffset - cursor,
             });
             cursor = endOffset;
         }

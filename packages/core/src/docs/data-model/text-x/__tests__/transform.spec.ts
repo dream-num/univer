@@ -746,7 +746,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,
@@ -768,7 +768,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,

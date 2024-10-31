@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
@@ -468,7 +468,12 @@ export class SelectionControl extends Disposable {
         this._refreshControlPosition();
     }
 
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>): void {
+    /**
+     * Update range, primary may be null, especially for moving handler.
+     * @param range
+     * @param primaryCell
+     */
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithCoord>): void {
         this._selectionModel.setValue(range, primaryCell);
         this._setSizeAndStyleForSelectionControl(this._currentStyle);
         this._refreshControlPosition();
@@ -488,7 +493,7 @@ export class SelectionControl extends Disposable {
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        primaryCell?: Nullable<ISelectionCellWithMergeInfo>
+        primaryCell?: Nullable<ISelectionCellWithCoord>
     ): void {
         this._selectionModel.setValue(newSelectionRange, primaryCell);
         this._rowHeaderWidth = rowHeaderWidth;
@@ -502,7 +507,7 @@ export class SelectionControl extends Disposable {
      * update primary range
      * @param primaryCell model.current (aka: highlight)
      */
-    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithMergeInfo>): void {
+    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithCoord>): void {
         this._selectionModel.setCurrentCell(primaryCell);
     }
 

@@ -41,7 +41,6 @@ export {
     type ISheetRangeLocation,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-    transformCellDataToSelectionData,
 } from './basics/selection';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
 export { type IUniverSheetsConfig } from './controllers/config.schema';

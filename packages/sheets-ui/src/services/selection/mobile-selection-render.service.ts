@@ -21,7 +21,7 @@ import type {
     IDisposable,
     IRange,
     IRangeWithCoord,
-    ISelectionCellWithMergeInfo,
+    ISelectionCellWithCoord,
     Nullable,
     Workbook,
 } from '@univerjs/core';
@@ -301,7 +301,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
         viewport?: Viewport
     ) {
-        this._shouldDetectMergedCells = rangeType === RANGE_TYPE.NORMAL;
+        this._rangeType = rangeType;
 
         const skeleton = this._skeleton;
         const scene = this._scene;
@@ -321,7 +321,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // this._startViewportPosY = viewportPosY;
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const cursorCellRangeInfo = this._getCellRangeByCursorPosition(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
+        const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return false;
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
@@ -357,8 +357,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 
-        this._updateSelectionControlByRange(
-            activeSelectionControl,
+        activeSelectionControl.updateRange(
             cursorCellRangeWithRangeType,
             primaryCursorCellRange
         );
@@ -526,48 +525,48 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // #endregion
     }
 
-    private _changeCurrCellWhenControlPointerDown(): ISelectionCellWithMergeInfo {
+    private _changeCurrCellWhenControlPointerDown(): ISelectionCellWithCoord {
         const activeSelectionControl = this.getActiveSelectionControl<MobileSelectionControl>()!;
         const skeleton = this._skeleton;
 
-        let currCellRange: ISelectionCellWithMergeInfo;
+        let currCellRange: ISelectionCellWithCoord;
 
         const { startRow, startColumn, endRow, endColumn } = activeSelectionControl.model;
         switch (this.expandingControlMode) {
             case ExpandingControl.TOP_LEFT:
-                currCellRange = skeleton.getCellByIndex(endRow, endColumn);
+                currCellRange = skeleton.getCellWithCoordByIndex(endRow, endColumn);
                 break;
             case ExpandingControl.BOTTOM_RIGHT:
                 currCellRange =
-                        skeleton.getCellByIndex(startRow, startColumn);
+                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 break;
             case ExpandingControl.LEFT:
                 currCellRange =
-                        skeleton.getCellByIndex(startRow, endColumn);
+                        skeleton.getCellWithCoordByIndex(startRow, endColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.RIGHT:
                 currCellRange =
-                        skeleton.getCellByIndex(startRow, startColumn);
+                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.TOP:
                 currCellRange =
-                        skeleton.getCellByIndex(endRow, startColumn);
+                        skeleton.getCellWithCoordByIndex(endRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             case ExpandingControl.BOTTOM:
                 currCellRange =
-                        skeleton.getCellByIndex(startRow, startColumn);
+                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
                 currCellRange.isMerged = false;
                 currCellRange.isMergedMainCell = false;
                 break;
             default:
                 currCellRange =
-                        skeleton.getCellByIndex(startRow, startColumn);
+                        skeleton.getCellWithCoordByIndex(startRow, startColumn);
         }
         activeSelectionControl.updateCurrCell(currCellRange);
         return currCellRange;
@@ -586,7 +585,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         activeSelectionControl: MobileSelectionControl,
         rangeType: RANGE_TYPE
     ) {
-        this._shouldDetectMergedCells = rangeType === RANGE_TYPE.NORMAL;
+        this._rangeType = rangeType;
         const skeleton = this._skeleton;
         const scene = this._scene;
 
@@ -618,7 +617,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             offsetY = Number.POSITIVE_INFINITY;
         }
 
-        const cursorCellRangeInfo = this._getCellRangeByCursorPosition(offsetX, offsetY, scaleX, scaleY, scrollXY);
+        const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) {
             return false;
         }
@@ -639,7 +638,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         };
 
         if (rangeType === RANGE_TYPE.NORMAL) {
-            newSelectionRange = skeleton.getSelectionMergeBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
+            newSelectionRange = skeleton.getMergeBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
         } else if (rangeType === RANGE_TYPE.COLUMN) {
             newSelectionRange = {
                 startRow: Math.min(cursorCellRange.startRow, currCellRange?.actualRow ?? -1),
@@ -683,7 +682,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (rangeChanged) {
             if (activeSelectionControl) {
-                this._updateSelectionControlByRange(activeSelectionControl, newSelectionRangeWithCoord);
+                activeSelectionControl.updateRange(newSelectionRangeWithCoord);
                 this._selectionMoving$.next(this.getSelectionDataWithStyle());
             }
         }

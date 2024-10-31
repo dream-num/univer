@@ -204,7 +204,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         if (isChangeStart) {
-            const newCoord = this._selectionRenderService.getSelectionCellByPosition(startX, startY);
+            const newCoord = this._selectionRenderService.getCellWithCoordByOffset(startX, startY);
             if (newCoord == null) {
                 return;
             }
@@ -221,7 +221,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             rowOffset: 0,
         };
 
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth, startY + imageHeight);
+        const endSelectionCell = this._selectionRenderService.getCellWithCoordByOffset(startX + imageWidth, startY + imageHeight);
 
         if (endSelectionCell == null) {
             return;

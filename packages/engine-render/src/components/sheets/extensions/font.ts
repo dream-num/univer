@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -46,12 +46,12 @@ interface IRenderFontContext {
     diffRanges: IRange[];
     spreadsheetSkeleton: SpreadsheetSkeleton;
     overflowRectangle: Nullable<IRange>;
-    cellData: ICellDataForSheetInterceptor;
+    cellData: Nullable<ICellDataForSheetInterceptor>;
     startY: number;
     endY: number;
     startX: number;
     endX: number;
-    cellInfo: ISelectionCellWithMergeInfo;
+    cellInfo: ISelectionCellWithCoord;
 }
 
 export class Font extends SheetExtension {
@@ -102,22 +102,20 @@ export class Font extends SheetExtension {
         } as IRenderFontContext;
         ctx.save();
 
-        // old way, it lags, because it has too many loops, fontMatrix holds all sheet font data.
-        // fontMatrix.forValue((row: number, col: number, fontsConfig: IFontCacheItem) => {
-        //     this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
-        // });
-
         const uniqueMergeRanges: IRange[] = [];
         const mergeRangeIDSet = new Set();
+
+        const lastRowIndex = spreadsheetSkeleton.getRowCount() - 1;
+        const lastColIndex = spreadsheetSkeleton.getColumnCount() - 1;
 
         // Currently, viewRanges has only one range.
         viewRanges.forEach((range) => {
             range.startColumn -= EXPAND_SIZE_FOR_RENDER_OVERFLOW;
             range.endColumn += EXPAND_SIZE_FOR_RENDER_OVERFLOW;
-            range = clampRange(range);
+            range = clampRange(range, lastRowIndex, lastColIndex);
 
             // collect unique merge ranges intersect with view range.
-            // The ranges in mergeRanges must be unique. Otherwise, the font will rereder, text redrawing causes jagged edges or artifacts.
+            // The ranges in mergeRanges must be unique. Otherwise, the font will render, text redrawing causes jagged edges or artifacts.
             const intersectMergeRangesWithViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
             intersectMergeRangesWithViewRanges.forEach((mergeRange) => {
                 const mergeRangeIndex = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(mergeRange.startRow, mergeRange.startColumn);
@@ -133,24 +131,24 @@ export class Font extends SheetExtension {
                 if (index !== -1) {
                     return;
                 }
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                 if (!cellInfo) return;
 
                 renderFontContext.cellInfo = cellInfo;
-                this.renderFontEachCell(renderFontContext, row, col, fontMatrix);
+                this._renderFontEachCell(renderFontContext, row, col, fontMatrix);
             });
         });
 
         uniqueMergeRanges.forEach((range) => {
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+            const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
-            this.renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix);
+            this._renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix);
         });
 
         ctx.restore();
     }
 
-    renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+    _renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
         const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontCtx;
 
         //#region merged cell
@@ -218,6 +216,14 @@ export class Font extends SheetExtension {
 
         ctx.closePath();
         ctx.restore();
+
+        renderFontCtx.startX = 0;
+        renderFontCtx.startY = 0;
+        renderFontCtx.endX = 0;
+        renderFontCtx.endY = 0;
+        renderFontCtx.overflowRectangle = null;
+        renderFontCtx.cellData = null;
+        return false;
     };
 
     /**

@@ -17,8 +17,6 @@
 import type { IFontLocale } from '../basics/interfaces';
 import { Disposable, Inject, LocaleService } from '@univerjs/core';
 
-import { Disposable, Inject, LocaleService } from '@univerjs/core';
-
 export class Skeleton extends Disposable {
     private _fontLocale!: IFontLocale;
 

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Range, sortRules } from '@univerjs/core';
 import type { IRange, IScale } from '@univerjs/core';
-import { SpreadsheetExtensionRegistry } from '../../extension';
-import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import { Range, sortRules } from '@univerjs/core';
+import { SpreadsheetExtensionRegistry } from '../../extension';
+import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultCustomExtension';
 
@@ -52,7 +52,7 @@ export class Custom extends SheetExtension {
                 return;
             }
 
-            let primaryWithCoord = skeleton.getCellByIndexWithNoHeader(row, col);
+            let primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col, false);
 
             const { mergeInfo } = primaryWithCoord;
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
@@ -78,7 +78,7 @@ export class Custom extends SheetExtension {
                     return;
                 }
 
-                primaryWithCoord = skeleton.getCellByIndex(mainCell.row, mainCell.col);
+                primaryWithCoord = skeleton.getCellWithCoordByIndex(mainCell.row, mainCell.col);
             }
 
             const renderInfo = {

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 import type {
     IRange,
     ISelection,
-    ISelectionCellWithMergeInfo,
+    ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
     ThemeService,
 } from '@univerjs/core';
+import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
@@ -143,6 +143,11 @@ export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
     style: Nullable<ISelectionStyle>;
 }
 
+/**
+ * range: IRange;
+ * primary: Nullable<ISelectionCell>;
+ * style: Nullable<ISelectionStyle>;
+ */
 export interface ISelectionWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
@@ -217,7 +222,7 @@ export function convertSelectionDataToRange(
     return result;
 }
 
-export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithMergeInfo) {
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
     const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
     const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
     return {

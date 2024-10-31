@@ -156,7 +156,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
 
                     const selectionRange = ranges?.find((range) => {
                         const transformCoord = getTransformCoord(position.x, position.y, position.scene, position.skeleton);
-                        const cellPosition = position.skeleton.getCellByIndex(range.endRow, range.endColumn);
+                        const cellPosition = position.skeleton.getCellWithCoordByIndex(range.endRow, range.endColumn);
                         const missX = Math.abs(cellPosition.endX - transformCoord.x);
                         const missY = Math.abs(cellPosition.endY - transformCoord.y);
                         return missX <= 5 && missY <= 5;

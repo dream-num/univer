@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Range } from '@univerjs/core';
 import type { IRange, IScale } from '@univerjs/core';
-import { SpreadsheetExtensionRegistry } from '../../extension';
-import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import { Range } from '@univerjs/core';
+import { SpreadsheetExtensionRegistry } from '../../extension';
+import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultMarkerExtension';
 
@@ -55,7 +55,7 @@ export class Marker extends SheetExtension {
             }
 
             let cellData = worksheet.getCell(row, col);
-            const cellInfo = skeleton.getCellByIndexWithNoHeader(row, col);
+            const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
             let { startY, endY, startX, endX } = cellInfo;
 

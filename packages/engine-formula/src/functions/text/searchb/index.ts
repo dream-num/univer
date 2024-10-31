@@ -101,7 +101,7 @@ export class Searchb extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const result = charLenByte(withinTextValue.substring(0, index + 1));
+        const result = charLenByte(withinTextValue.substring(0, index)) + 1;
 
         return NumberValueObject.create(result);
     }

@@ -130,6 +130,11 @@ describe('Test searchb function', () => {
             expect(getObjectValue(result2)).toStrictEqual([
                 [5, 10, 16, ErrorType.VALUE],
             ]);
+
+            const findText2 = StringValueObject.create('欢迎');
+            const withinText2 = StringValueObject.create('你好，欢迎');
+            const result3 = testFunction.calculate(findText2, withinText2);
+            expect(getObjectValue(result3)).toStrictEqual(7);
         });
     });
 });

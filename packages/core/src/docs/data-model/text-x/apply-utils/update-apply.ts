@@ -39,6 +39,7 @@ import {
     insertSectionBreaks,
     insertTables,
     insertTextRuns,
+    mergeContinuousRanges,
     normalizeTextRuns,
 } from './common';
 
@@ -484,8 +485,7 @@ function updateCustomRanges(
         });
     }
 
-    body.customRanges = newCustomRanges;
-    body.customRanges.sort((a, b) => a.startIndex - b.startIndex);
+    body.customRanges = mergeContinuousRanges(newCustomRanges.sort((a, b) => a.startIndex - b.startIndex));
     return removeCustomRanges;
 }
 

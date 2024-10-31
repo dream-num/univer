@@ -16,13 +16,12 @@
 
 import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
-import type { IDocumentBody } from '../../../../types/interfaces';
+import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
-import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { getBodySlice } from '../utils';
@@ -33,7 +32,6 @@ export interface IDeleteCustomRangeParam {
     segmentId?: string;
     documentDataModel: DocumentDataModel;
     insert?: Nullable<IDocumentBody>;
-    textRange?: { index: number };
 }
 
 export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
@@ -58,14 +56,7 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         len,
         body: {
             dataStream: '',
-            customRanges: [
-                {
-                    startIndex: 0,
-                    endIndex: len - 1,
-                    rangeId,
-                    rangeType: CustomRangeType.DELTED,
-                },
-            ],
+            customRanges: [],
         },
     });
 

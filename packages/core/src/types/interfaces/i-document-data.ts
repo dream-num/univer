@@ -355,7 +355,7 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
      * properties of custom range,
      * for example, hyperlink: `{ url: string }`
      */
-    properties?: T;
+    properties: T;
 }
 
 export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;

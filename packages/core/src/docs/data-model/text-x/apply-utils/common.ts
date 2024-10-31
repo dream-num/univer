@@ -347,19 +347,20 @@ export function sliceByParagraph(body: IDocumentBody) {
     return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
 }
 
-const isSameId = (a: string, b: string) => a.replaceAll('$', '') === b.replaceAll('$', '');
+const getRootId = (id: string) => id.split('_')[0];
 
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     if (ranges.length <= 1) return ranges;
 
     const mergedRanges: ICustomRange[] = [];
     let currentRange = { ...ranges[0] };
+    currentRange.rangeId = getRootId(currentRange.rangeId);
 
     for (let i = 1; i < ranges.length; i++) {
         const nextRange = ranges[i];
-
+        nextRange.rangeId = getRootId(nextRange.rangeId);
         if (
-            isSameId(currentRange.rangeId, nextRange.rangeId) &&
+            nextRange.rangeId === currentRange.rangeId &&
             shallowEqual(currentRange.properties, nextRange.properties) &&
             currentRange.endIndex + 1 >= nextRange.startIndex
         ) {
@@ -368,13 +369,24 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         } else {
             // Push current range and start a new one
             mergedRanges.push(currentRange);
-
             currentRange = { ...nextRange };
         }
     }
-
     // Push the last range
     mergedRanges.push(currentRange);
+
+    const idMap: Record<string, number> = Object.create(null);
+    for (let i = 0, len = mergedRanges.length; i < len; i++) {
+        const range = mergedRanges[i];
+        const id = range.rangeId;
+        if (idMap[id]) {
+            range.rangeId = `${id}_${idMap[id]}`;
+            idMap[id] = idMap[id] + 1;
+        } else {
+            idMap[id] = 1;
+        }
+    }
+
     return mergedRanges;
 }
 
@@ -823,7 +835,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             }
             newCustomRanges.push(customRange);
         }
-        body.customRanges = newCustomRanges;
+
+        body.customRanges = mergeContinuousRanges(newCustomRanges.sort((a, b) => a.startIndex - b.startIndex));
     }
     return removeCustomRanges;
 }

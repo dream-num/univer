@@ -15,7 +15,7 @@
  */
 
 import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Skeleton, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 /* eslint-disable max-lines-per-function */
 import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
@@ -26,6 +26,7 @@ import type { SelectionControl } from './selection-control';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { attachPrimaryWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -179,6 +180,12 @@ export class SelectionShapeExtension {
         });
     }
 
+    /**
+     * Move the whole selection control after cursor turn into move state.
+     * NOT same as widgetMoving, that's for 8 control points.
+     * @param moveOffsetX
+     * @param moveOffsetY
+     */
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
 
@@ -257,7 +264,10 @@ export class SelectionShapeExtension {
             startColumn,
             endColumn,
         };
-
+        const primaryCell = this._skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn);
+        const primaryCellWithMergeInfo = attachPrimaryWithCoord(primaryCell, this._skeleton);
+        this._control.updateCurrCell(primaryCellWithMergeInfo);
+        
         this._control.selectionMoving$.next(this._targetSelection);
     }
 
@@ -528,7 +538,7 @@ export class SelectionShapeExtension {
         );
 
         const { row, column } = moveActualSelection;
-        const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
+        // const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
         // const maxRow = this._skeleton.getRowCount() - 1;
         // const maxColumn = this._skeleton.getColumnCount() - 1;
         let startRow = this._relativeSelectionPositionRow;
@@ -596,8 +606,8 @@ export class SelectionShapeExtension {
             endColumn,
         };
 
-        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.currentStyle);
-        this._control.clearHighlight();
+        const primary = this._control.model.currentCell; // selectionModel.currentCell;
+        this._control.updateRange(this._targetSelection, primary);
         this._control.selectionScaling$.next(this._targetSelection);
     }
 

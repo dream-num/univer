@@ -293,6 +293,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._initContextListener();
         // this.updateDataMerge();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+
+        window.sk = this;
     }
 
     get rowHeightAccumulation(): number[] {

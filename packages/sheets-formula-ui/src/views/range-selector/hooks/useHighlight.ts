@@ -16,6 +16,7 @@
 
 import type { ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
+import type { IRange, ITextRun, Nullable, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
@@ -26,6 +27,8 @@ import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useMemo } from 'react';
+import { attachPrimaryWithCoord, attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { useEffect, useMemo, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 interface IRefSelection {
@@ -77,10 +80,10 @@ export function useSheetHighlight(unitId: string) {
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-
+            const primaryRange = worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
             selectionWithStyle.push({
                 range,
-                primary: null,
+                primary: primaryRange || null,
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }

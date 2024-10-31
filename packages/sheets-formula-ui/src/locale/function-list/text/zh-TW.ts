@@ -433,8 +433,6 @@ export default {
         functionParameter: {
             text: { name: '文字', detail: '要重複的文字。' },
             numberTimes: { name: '重複次數', detail: '指定文字重複次數的正數。' },
-            text: { name: '文字', detail: '要重複的文字。' },
-            numberTimes: { name: '重複次數', detail: '指定文字重複次數的正數。' },
         },
     },
     RIGHT: {
@@ -549,7 +547,6 @@ export default {
         ],
         functionParameter: {
             text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
-            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
             matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
@@ -567,7 +564,6 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },

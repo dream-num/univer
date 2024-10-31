@@ -72,7 +72,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
@@ -689,6 +689,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param colIndex
      * @returns {number} width
      */
+    // eslint-disable-next-line max-lines-per-function
     private _calculateColWidth(colIndex: number): number {
         const MEASURE_EXTENT = 10000;
         const MEASURE_EXTENT_FOR_PARAGRAPH = MEASURE_EXTENT / 10;
@@ -738,7 +739,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         const rowIdxArr = createRowSequence(checkStart, checkEnd, otherRowIndex);
 
         const preColIndex = Math.max(0, colIndex - 1);
-        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        let currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        if (colIndex === 0) {
+            currColWidth = this._columnWidthAccumulation[colIndex];
+        }
+
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
 
@@ -771,11 +776,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        // if there are no content in this column( measure result is 0), return current column width.
-        if (colWidth === 0) {
-            return currColWidth;
-        }
-        return colWidth;
+        // min col width is 2
+        return Math.max(MIN_COL_WIDTH, colWidth);
     }
 
     /**
@@ -1393,7 +1395,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param cell
      * @param options
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _getCellDocumentModel(
         cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
@@ -1519,7 +1521,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
@@ -2115,6 +2117,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
+    // eslint-disable-next-line max-lines-per-function
     private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
         if (!this.worksheet || !cache.border) {
             return;

@@ -66,8 +66,6 @@ export class PrefixNode extends BaseAstNode {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
-
-        this.clearChildrenValue();
     }
 
     private _handlerAT(value: FunctionVariantType) {

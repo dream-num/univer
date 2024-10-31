@@ -56,8 +56,6 @@ export class Interpreter extends Disposable {
             return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        node.clearChildrenValue();
-
         return Promise.resolve(value);
     }
 
@@ -81,8 +79,6 @@ export class Interpreter extends Disposable {
         if (value == null) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-
-        node.clearChildrenValue();
 
         return value;
     }

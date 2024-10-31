@@ -116,12 +116,6 @@ export class BaseAstNode {
         return this._token;
     }
 
-    clearChildrenValue() {
-        for (let i = 0; i < this._children.length; i++) {
-            this._children[i].setValue(null);
-        }
-    }
-
     setValue(value: Nullable<FunctionVariantType>) {
         this._valueObject = value;
     }

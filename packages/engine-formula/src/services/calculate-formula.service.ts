@@ -333,6 +333,8 @@ export class CalculateFormulaService extends Disposable {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
+        treeList.length = 0;
+
         return this._runtimeService.getAllRuntimeData();
     }
 

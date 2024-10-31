@@ -85,15 +85,15 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         return (style?.fs ?? 10) * 1.6;
     }
 
-    private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
+    private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[row][column]);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[row][column]);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0]?.[0]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[0]?.[0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1,
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0]?.[0]) : formula1,
             formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
             isFormulaValid,
         };
@@ -189,7 +189,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId, row, col);
+        const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId);
         const params: ISetRangeValuesCommandParams = {
             range: {
                 startColumn: primaryWithCoord.actualColumn,

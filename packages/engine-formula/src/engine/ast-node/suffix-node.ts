@@ -75,7 +75,6 @@ export class SuffixNode extends BaseAstNode {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
-        this.clearChildrenValue();
     }
 
     private _handlerPound(value: FunctionVariantType) {

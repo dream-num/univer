@@ -445,7 +445,6 @@ export function insertCustomRanges(
         }
 
         customRanges.push(...insertRanges);
-        customRanges.sort(sortRulesFactory('startIndex'));
     }
 
     body.customRanges = mergeContinuousRanges(customRanges);

@@ -636,7 +636,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -670,7 +670,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -704,7 +704,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -738,7 +738,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 

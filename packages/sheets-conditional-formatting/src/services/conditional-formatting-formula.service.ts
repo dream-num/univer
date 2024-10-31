@@ -142,8 +142,22 @@ export class ConditionalFormattingFormulaService extends Disposable {
 
                             const resultMatrix = new ObjectMatrix(params.unitOtherData[unitId][subUnitId][formulaId]);
                             const resultObject = new ObjectMatrix<Nullable<CellValue>>();
+
+                            const cfId = item?.cfId;
+
+                            const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
+                            const ranges = rule?.ranges;
+
+                            if (!ranges) {
+                                continue;
+                            }
+
+                            // The engine's calculation result only has the offset, and the actual position needs to be calculated from the upper left corner.
+                            const startRow = ranges[0].startRow;
+                            const startCol = ranges[0].startColumn;
+
                             resultMatrix.forValue((row, col, value) => {
-                                resultObject.setValue(row, col, getResultFromFormula(value));
+                                resultObject.setValue(startRow + row, startCol + col, getResultFromFormula(value));
                             });
 
                             if (item) {

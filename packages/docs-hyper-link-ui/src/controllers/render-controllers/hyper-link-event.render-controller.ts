@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
-import type { DocumentDataModel } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
@@ -69,6 +69,8 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
                             segmentId: link.segmentId,
                             segmentPage: link.segmentPageIndex,
                             rangeId: link.range.rangeId,
+                            startIndex: link.range.startIndex,
+                            endIndex: link.range.endIndex,
                         }
                     );
                 } else {

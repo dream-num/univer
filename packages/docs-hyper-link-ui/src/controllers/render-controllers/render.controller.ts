@@ -41,11 +41,18 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
                 if (!data) {
                     return next(data);
                 }
-                const { unitId } = pos;
+                const { unitId, index } = pos;
                 const activeLink = this._hyperLinkService.showing;
-                const { linkId, unitId: linkUnitId } = activeLink || {};
 
-                const isActive = linkUnitId === unitId && data.rangeId === linkId;
+                if (!activeLink) {
+                    return next({
+                        ...data,
+                        active: false,
+                    });
+                }
+                const { linkId, unitId: linkUnitId, startIndex, endIndex } = activeLink;
+                const isActive = linkUnitId === unitId && data.rangeId === linkId && index >= startIndex && index <= endIndex;
+
                 return next({
                     ...data,
                     active: isActive,

@@ -25,6 +25,7 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { getBodySlice } from '../utils';
@@ -357,26 +358,15 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
 
         if (
             currentRange.rangeId === nextRange.rangeId &&
+            shallowEqual(currentRange.properties, nextRange.properties) &&
             currentRange.endIndex + 1 >= nextRange.startIndex
         ) {
             // Merge continuous ranges with same rangeId
             currentRange.endIndex = nextRange.endIndex;
-            // Merge properties if they exist
-            if (nextRange.properties) {
-                currentRange.properties = {
-                    ...currentRange.properties,
-                    ...nextRange.properties,
-                };
-            }
         } else {
             // Push current range and start a new one
             mergedRanges.push(currentRange);
             currentRange = { ...nextRange };
-
-            // If ranges have same ID but aren't continuous, generate new unique ID
-            if (currentRange.rangeId === mergedRanges[mergedRanges.length - 1].rangeId) {
-                currentRange.rangeId = `${currentRange.rangeId}_`;
-            }
         }
     }
 

@@ -61,7 +61,7 @@ export class SheetsGenerateFilterValuesService extends Disposable {
 
         this._logService.debug('[SheetsGenerateFilterValuesService]', 'getFilterValues for', { unitId, subUnitId });
 
-        return getFilterTreeByValueItems(filters, this._localeService, iterateRange, worksheet, new Set(filteredOutRowsByOtherColumns), new Set(alreadyChecked.map(String)), blankChecked, workbook.getStyles()); ;
+        return getFilterTreeByValueItems(filters, this._localeService, iterateRange, worksheet, new Set(filteredOutRowsByOtherColumns), new Set(alreadyChecked.map(String)), blankChecked, workbook.getStyles());
     }
 }
 
@@ -151,7 +151,7 @@ export function getFilterTreeByValueItems(
     const treeMap: Map<string, string[]> = new Map();
 
     const DefaultPattern = 'yyyy-mm-dd';
-    const canSplitPatternSet = new Set(['yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm']);
+    const canSplitPatternSet = new Set(['yyyy-mm-dd', 'yyyy-m-d am/pm h:mm', 'yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm']);
     const EmptyKey = 'empty';
 
     let emptyCount = 0;

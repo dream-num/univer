@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { getTwoArrayNumberValues } from '../../../basics/statistical';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Rsq extends BaseFunction {
     override minParams = 2;
@@ -57,8 +57,6 @@ export class Rsq extends BaseFunction {
             if (_array1.isNull() || _array2.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
-
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         if (array1RowCount * array1ColumnCount !== array2RowCount * array2ColumnCount) {
@@ -91,6 +89,10 @@ export class Rsq extends BaseFunction {
     }
 
     private _getResult(array1: number[], array2: number[]): BaseValueObject {
+        if (array1.length === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
         const n = array1.length;
 
         let sumX = 0;

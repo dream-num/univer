@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { studentTCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Tdist extends BaseFunction {
     override minParams = 3;
@@ -96,7 +96,7 @@ export class Tdist extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        let result = 1 - studentTCDF(xValue, degFreedomValue);
+        let result = studentTCDF(-xValue, degFreedomValue);
 
         if (tailsValue === 2) {
             result *= 2;

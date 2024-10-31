@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { studentTCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class TDistRt extends BaseFunction {
     override minParams = 2;
@@ -85,7 +85,7 @@ export class TDistRt extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = 1 - studentTCDF(xValue, degFreedomValue);
+        const result = studentTCDF(-xValue, degFreedomValue);
 
         if (Number.isNaN(result) || !Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);

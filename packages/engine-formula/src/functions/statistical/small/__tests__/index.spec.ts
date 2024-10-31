@@ -42,7 +42,7 @@ describe('Test small function', () => {
             });
             const k = NumberValueObject.create(2.5);
             const result = testFunction.calculate(array, k);
-            expect(getObjectValue(result)).toStrictEqual(3);
+            expect(getObjectValue(result)).toStrictEqual(2);
         });
 
         it('Value is number string', () => {

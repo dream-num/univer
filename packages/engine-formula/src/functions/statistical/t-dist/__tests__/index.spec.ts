@@ -33,7 +33,7 @@ describe('Test tDist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.788675134594813);
+            expect(getObjectValue(result)).toBe(0.7886751345947991);
         });
 
         it('DegFreedom value test', () => {
@@ -45,7 +45,7 @@ describe('Test tDist function', () => {
 
             const degFreedom2 = NumberValueObject.create(10 ** 10 + 1);
             const result2 = testFunction.calculate(x, degFreedom2, cumulative);
-            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
+            expect(getObjectValue(result2)).toBe(0.8413445661820564);
         });
 
         it('Cumulative value test', () => {
@@ -69,7 +69,7 @@ describe('Test tDist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.788675134594813);
+            expect(getObjectValue(result)).toBe(0.7886751345947991);
         });
 
         it('Value is null', () => {
@@ -77,7 +77,7 @@ describe('Test tDist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.5000000000000002);
+            expect(getObjectValue(result)).toBe(0.5);
         });
 
         it('Value is error', () => {
@@ -114,9 +114,17 @@ describe('Test tDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom, cumulative);
             expect(getObjectValue(result)).toStrictEqual([
-                [0.788675134594813, ErrorType.VALUE, 0.8281271921680471, 0.788675134594813, 0.5000000000000002, 0.5000000000000002],
-                [0.5000000000000002, 0.9999500074987503, 0.9279202455242208, ErrorType.VALUE, 0.04773298313335454, ErrorType.NAME],
+                [0.7886751345947991, ErrorType.VALUE, 0.8281271922251572, 0.7886751345947991, 0.5, 0.5],
+                [0.5, 0.9999500074987502, 0.9279202455248455, ErrorType.VALUE, 0.04773298313135456, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const x = NumberValueObject.create(0.1);
+            const degFreedom = NumberValueObject.create(900000000);
+            const cumulative = NumberValueObject.create(1);
+            const result = testFunction.calculate(x, degFreedom, cumulative);
+            expect(getObjectValue(result)).toBe(0.5398278542610474);
         });
     });
 });

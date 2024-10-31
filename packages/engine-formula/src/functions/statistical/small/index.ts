@@ -63,7 +63,7 @@ export class Small extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        kValue = Math.ceil(kValue);
+        kValue = Math.floor(kValue);
 
         return NumberValueObject.create(array[kValue - 1]);
     }

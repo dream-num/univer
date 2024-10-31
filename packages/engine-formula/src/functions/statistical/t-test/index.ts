@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { getTwoArrayNumberValues, studentTCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,15 +22,20 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class TTest extends BaseFunction {
     override minParams = 4;
 
     override maxParams = 4;
 
+    // eslint-disable-next-line
     override calculate(array1: BaseValueObject, array2: BaseValueObject, tails: BaseValueObject, type: BaseValueObject): BaseValueObject {
-        const { isError, errorObject, array1Values, array2Values } = this._handleArray1AndArray2(array1, array2);
+        // Calculate first array1 and array2
+        // type === 1
+        const { isError: isError_sp, errorObject: errorObject_sp, array1Values: array1Values_sp, array2Values: array2Values_sp } = this._handleArray1AndArray2(array1, array2);
+        // type !== 1
+        const array1Values = this._getArrayValues(array1);
+        const array2Values = this._getArrayValues(array2);
 
         const maxRowLength = Math.max(
             tails.isArray() ? (tails as ArrayValueObject).getRowCount() : 1,
@@ -63,11 +69,39 @@ export class TTest extends BaseFunction {
                 return typeObject;
             }
 
+            const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(tailsObject, typeObject);
+
             if (isError) {
                 return errorObject as ErrorValueObject;
             }
 
-            return this._handleSignleObject(array1Values as number[], array2Values as number[], tailsObject, typeObject);
+            const [_tailsObject, _typeObject] = variants as BaseValueObject[];
+
+            const tailsValue = Math.floor(+_tailsObject.getValue());
+            const typeValue = Math.floor(+_typeObject.getValue());
+
+            if (![1, 2].includes(tailsValue) || ![1, 2, 3].includes(typeValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
+            if (typeValue === 1 && isError_sp) {
+                return errorObject_sp as ErrorValueObject;
+            }
+
+            if (typeValue !== 1 && array1Values instanceof ErrorValueObject) {
+                return array1Values as ErrorValueObject;
+            }
+
+            if (typeValue !== 1 && array2Values instanceof ErrorValueObject) {
+                return array2Values as ErrorValueObject;
+            }
+
+            return this._handleSignleObject(
+                (typeValue === 1 ? array1Values_sp : array1Values) as number[],
+                (typeValue === 1 ? array2Values_sp : array2Values) as number[],
+                tailsValue,
+                typeValue
+            );
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -80,33 +114,22 @@ export class TTest extends BaseFunction {
     private _handleSignleObject(
         array1Values: number[],
         array2Values: number[],
-        tails: BaseValueObject,
-        type: BaseValueObject
+        tails: number,
+        type: number
     ): BaseValueObject {
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(tails, type);
+        if (array1Values.length < 2 || array2Values.length < 2) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        const { isError, errorObject, x, degFreedom } = this._getTDistParamByArrayValues(array1Values, array2Values, type);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [tailsObject, typeObject] = variants as BaseValueObject[];
+        let result = studentTCDF(-x, degFreedom);
 
-        const tailsValue = Math.floor(+tailsObject.getValue());
-        const typeValue = Math.floor(+typeObject.getValue());
-
-        const { isError: _isError, errorObject: _errorObject, x, degFreedom } = this._getTDistParamByArrayValues(array1Values, array2Values, typeValue);
-
-        if (_isError) {
-            return _errorObject as ErrorValueObject;
-        }
-
-        if (![1, 2].includes(tailsValue) || ![1, 2, 3].includes(typeValue)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        let result = 1 - studentTCDF(x, degFreedom);
-
-        if (tailsValue === 2) {
+        if (tails === 2) {
             result *= 2;
         }
 
@@ -115,6 +138,39 @@ export class TTest extends BaseFunction {
         }
 
         return NumberValueObject.create(result);
+    }
+
+    private _getArrayValues(array: BaseValueObject): number[] | ErrorValueObject {
+        const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+        const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+        const arrayValues: number[] = [];
+
+        for (let r = 0; r < rowCount; r++) {
+            for (let c = 0; c < columnCount; c++) {
+                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+
+                if (valueObject.isError()) {
+                    return valueObject as ErrorValueObject;
+                }
+
+                if (valueObject.isNull()) {
+                    if (rowCount * columnCount === 1) {
+                        return ErrorValueObject.create(ErrorType.VALUE);
+                    }
+
+                    continue;
+                }
+
+                if (valueObject.isBoolean() || valueObject.isString()) {
+                    continue;
+                }
+
+                arrayValues.push(+valueObject.getValue());
+            }
+        }
+
+        return arrayValues;
     }
 
     // eslint-disable-next-line
@@ -262,63 +318,72 @@ export class TTest extends BaseFunction {
     }
 
     private _getTDistParamByType2(array1Values: number[], array2Values: number[]) {
-        const n = array1Values.length;
+        const array1Length = array1Values.length;
+        const array2Length = array2Values.length;
 
         let sum1 = 0;
-        let sum2 = 0;
         let sumSquare1 = 0;
+
+        for (let i = 0; i < array1Length; i++) {
+            sum1 += array1Values[i];
+            sumSquare1 += array1Values[i] ** 2;
+        }
+
+        let sum2 = 0;
         let sumSquare2 = 0;
 
-        for (let i = 0; i < n; i++) {
-            sum1 += array1Values[i];
+        for (let i = 0; i < array2Length; i++) {
             sum2 += array2Values[i];
-            sumSquare1 += array1Values[i] ** 2;
             sumSquare2 += array2Values[i] ** 2;
         }
 
-        const degFreedom = n - 1;
-
-        const temp1 = (sumSquare1 - sum1 ** 2 / n) / degFreedom;
-        const temp2 = (sumSquare2 - sum2 ** 2 / n) / degFreedom;
-
-        const den = Math.sqrt((temp1 + temp2) * degFreedom);
+        const temp1 = sumSquare1 - sum1 ** 2 / array1Length;
+        const temp2 = sumSquare2 - sum2 ** 2 / array2Length;
+        const den = Math.sqrt(temp1 + temp2);
 
         if (den === 0) {
             return {
                 isError: true,
                 errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
                 x: 0,
-                degFreedom,
+                degFreedom: 0,
             };
         }
 
-        const x = Math.abs((sum1 - sum2) / n) / den * Math.sqrt(n * degFreedom);
+        const degFreedom = array1Length - 1 + array2Length - 1;
+        const temp3 = Math.sqrt(array1Length * array2Length * degFreedom / (array1Length + array2Length));
+        const x = Math.abs(sum1 / array1Length - sum2 / array2Length) / den * temp3;
 
         return {
             isError: false,
             errorObject: null,
             x,
-            degFreedom: degFreedom * 2,
+            degFreedom,
         };
     }
 
     private _getTDistParamByType3(array1Values: number[], array2Values: number[]) {
-        const n = array1Values.length;
+        const array1Length = array1Values.length;
+        const array2Length = array2Values.length;
 
         let sum1 = 0;
-        let sum2 = 0;
         let sumSquare1 = 0;
+
+        for (let i = 0; i < array1Length; i++) {
+            sum1 += array1Values[i];
+            sumSquare1 += array1Values[i] ** 2;
+        }
+
+        let sum2 = 0;
         let sumSquare2 = 0;
 
-        for (let i = 0; i < n; i++) {
-            sum1 += array1Values[i];
+        for (let i = 0; i < array2Length; i++) {
             sum2 += array2Values[i];
-            sumSquare1 += array1Values[i] ** 2;
             sumSquare2 += array2Values[i] ** 2;
         }
 
-        const temp1 = (sumSquare1 - sum1 ** 2 / n) / ((n - 1) * n);
-        const temp2 = (sumSquare2 - sum2 ** 2 / n) / ((n - 1) * n);
+        const temp1 = (sumSquare1 - sum1 ** 2 / array1Length) / (array1Length * (array1Length - 1));
+        const temp2 = (sumSquare2 - sum2 ** 2 / array2Length) / (array2Length * (array2Length - 1));
 
         if (temp1 + temp2 === 0) {
             return {
@@ -331,8 +396,8 @@ export class TTest extends BaseFunction {
 
         const temp3 = temp1 / (temp1 + temp2);
 
-        const x = Math.abs((sum1 - sum2) / n) / Math.sqrt(temp1 + temp2);
-        const degFreedom = 1 / ((temp3 ** 2 + (1 - temp3) ** 2) / (n - 1));
+        const x = Math.abs(sum1 / array1Length - sum2 / array2Length) / Math.sqrt(temp1 + temp2);
+        const degFreedom = 1 / (temp3 ** 2 / (array1Length - 1) + ((1 - temp3) ** 2) / (array2Length - 1));
 
         return {
             isError: false,

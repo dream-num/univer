@@ -91,7 +91,7 @@ export class PercentrankInc extends BaseFunction {
 
         const n = array.length;
 
-        if (xValue < array[0] || xValue > array[n - 1]) {
+        if (n === 0 || xValue < array[0] || xValue > array[n - 1]) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
@@ -158,10 +158,6 @@ export class PercentrankInc extends BaseFunction {
 
                 values.push(+value);
             }
-        }
-
-        if (values.length === 0) {
-            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         return values.sort((a, b) => a - b);

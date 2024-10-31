@@ -119,5 +119,27 @@ describe('Test poissonDist function', () => {
                 [0.006737946999085467, 1, 0.12465201948308113, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
+
+        it('More test', () => {
+            const x = NumberValueObject.create(17.16017);
+            const mean = NumberValueObject.create(0.1);
+            const cumulative = BooleanValueObject.create(false);
+            const result = testFunction.calculate(x, mean, cumulative);
+            expect(getObjectValue(result)).toBe(2.543911722940471e-32);
+
+            const mean2 = NumberValueObject.create(2);
+            const result2 = testFunction.calculate(x, mean2, cumulative);
+            expect(getObjectValue(result2)).toBe(4.987150189520231e-11);
+
+            const x2 = NumberValueObject.create(0.25);
+            const mean3 = NumberValueObject.create(0);
+            const result3 = testFunction.calculate(x2, mean3, cumulative);
+            expect(getObjectValue(result3)).toBe(1);
+
+            const x3 = NumberValueObject.create(139.7316);
+            const mean4 = NumberValueObject.create(161);
+            const result4 = testFunction.calculate(x3, mean4, cumulative);
+            expect(getObjectValue(result4)).toBe(0.00698880992304486);
+        });
     });
 });

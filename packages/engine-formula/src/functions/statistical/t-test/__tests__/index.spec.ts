@@ -54,7 +54,7 @@ describe('Test tTest function', () => {
             const tails = NumberValueObject.create(2);
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(array1, array2, tails, type);
-            expect(getObjectValue(result)).toBe(0.19601578492529903);
+            expect(getObjectValue(result)).toBe(0.19601578492531546);
         });
 
         it('Array1 and array2 value test', () => {
@@ -217,7 +217,7 @@ describe('Test tTest function', () => {
             const type = NumberValueObject.create(1);
             const result = testFunction.calculate(array1, array2, tails, type);
             expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.NUM, 0.09800789246264952, 0.19601578492529903, ErrorType.NUM, 0.09800789246264952, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.NUM, 0.09800789246265773, 0.19601578492531546, ErrorType.NUM, 0.09800789246265773, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
 
@@ -258,8 +258,46 @@ describe('Test tTest function', () => {
             });
             const result = testFunction.calculate(array1, array2, tails, type);
             expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.NUM, 0.19601578492529903, 0.1919958867535514, 0.20229392337016794, 0.19601578492529903, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.NUM, ErrorType.NUM, 0.19601578492531546, 0.1919958867250542, 0.20229392336804775, 0.19601578492531546, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const array1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [-10, 1],
+                    [-8, 3],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const array2 = NumberValueObject.create(0);
+            const tails = NumberValueObject.create(2);
+            const type = NumberValueObject.create(2);
+            const result = testFunction.calculate(array1, array2, tails, type);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
+
+            const array3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(array1, array3, tails, type);
+            expect(getObjectValue(result2)).toBe(0.3609071062401591);
+
+            const type2 = NumberValueObject.create(3);
+            const result3 = testFunction.calculate(array1, array3, tails, type2);
+            expect(getObjectValue(result3)).toBe(0.21930610212734247);
         });
     });
 });

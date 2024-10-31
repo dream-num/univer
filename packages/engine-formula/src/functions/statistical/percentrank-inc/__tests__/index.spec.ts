@@ -74,7 +74,7 @@ describe('Test percentrankInc function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(array2, x);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
 
             const array3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -190,6 +190,24 @@ describe('Test percentrankInc function', () => {
             expect(getObjectValue(result6)).toStrictEqual([
                 [0.45, 0.45811, 0.4581111111111],
             ]);
+        });
+
+        it('More test', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, 'test'],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const x = StringValueObject.create('test');
+            const significance = NullValueObject.create();
+            const result = testFunction.calculate(array, x, significance);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

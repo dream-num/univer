@@ -694,9 +694,9 @@ export function poissonPDF(x: number, mean: number): number {
 }
 
 export function studentTCDF(x: number, degFreedom: number): number {
-    const sqrt = Math.sqrt(x ** 2 + degFreedom);
+    const result = 0.5 * incompleteBetaFunction(degFreedom / (x ** 2 + degFreedom), degFreedom / 2, 0.5);
 
-    return incompleteBetaFunction((x + sqrt) / (2 * sqrt), degFreedom / 2, degFreedom / 2);
+    return x < 0 ? result : 1 - result;
 }
 
 export function studentTPDF(x: number, degFreedom: number): number {

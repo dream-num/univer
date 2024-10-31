@@ -103,9 +103,20 @@ describe('Test permutationa function', () => {
             const numberChosen = NumberValueObject.create(2);
             const result = testFunction.calculate(number, numberChosen);
             expect(getObjectValue(result)).toStrictEqual([
-                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM],
-                [ErrorType.NUM, 10000, 4, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+                [1, ErrorType.VALUE, 1, 1, 0, 0],
+                [0, 10000, 4, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const number = NumberValueObject.create(0);
+            const numberChosen = NumberValueObject.create(0);
+            const result = testFunction.calculate(number, numberChosen);
+            expect(getObjectValue(result)).toBe(1);
+
+            const numberChosen2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(number, numberChosen2);
+            expect(getObjectValue(result2)).toBe(0);
         });
     });
 });

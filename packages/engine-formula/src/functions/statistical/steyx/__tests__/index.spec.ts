@@ -307,5 +307,48 @@ describe('Test steyx function', () => {
             const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
+
+        it('More test', () => {
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [30.329, 44],
+                    [31.34199, 45],
+                    [32.35498, 46],
+                    [33.36797, 47],
+                    [34.38095, 48],
+                    [35.39394, 49],
+                    [36.40693, 50],
+                    [37.41991, 51],
+                    [38.4329, 53],
+                ]),
+                rowCount: 9,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, -0.15],
+                    [null, -0.16],
+                    [null, -0.17],
+                    [null, -0.18],
+                    [null, -0.19],
+                    [null, null],
+                    [null, null],
+                    [null, null],
+                    [null, null],
+                ]),
+                rowCount: 9,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(knownYs, knownXs);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
     });
 });

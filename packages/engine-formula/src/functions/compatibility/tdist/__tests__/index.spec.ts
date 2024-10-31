@@ -33,7 +33,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.21132486540518702);
+            expect(getObjectValue(result)).toBe(0.2113248654052009);
         });
 
         it('DegFreedom value test', () => {
@@ -53,7 +53,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.42264973081037405);
+            expect(getObjectValue(result)).toBe(0.4226497308104018);
 
             const tails2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(x, degFreedom, tails2);
@@ -73,7 +73,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.21132486540518702);
+            expect(getObjectValue(result)).toBe(0.2113248654052009);
         });
 
         it('Value is null', () => {
@@ -81,7 +81,7 @@ describe('Test tdist function', () => {
             const degFreedom = NumberValueObject.create(2);
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
-            expect(getObjectValue(result)).toBe(0.4999999999999998);
+            expect(getObjectValue(result)).toBe(0.5);
         });
 
         it('Value is error', () => {
@@ -118,9 +118,17 @@ describe('Test tdist function', () => {
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
             expect(getObjectValue(result)).toStrictEqual([
-                [0.21132486540518702, ErrorType.VALUE, 0.1718728078319529, 0.21132486540518702, 0.4999999999999998, 0.4999999999999998],
-                [0.4999999999999998, 0.00004999250124970711, 0.07207975447577919, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+                [0.2113248654052009, ErrorType.VALUE, 0.1718728077748428, 0.2113248654052009, 0.5, 0.5],
+                [0.5, 0.00004999250124977886, 0.07207975447515451, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const x = NumberValueObject.create(0.1);
+            const degFreedom = NumberValueObject.create(900000000);
+            const tails = NumberValueObject.create(1);
+            const result = testFunction.calculate(x, degFreedom, tails);
+            expect(getObjectValue(result)).toBe(0.4601721457389526);
         });
     });
 });

@@ -32,7 +32,7 @@ describe('Test tDist2t function', () => {
             const x = NumberValueObject.create(1);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.42264973081037405);
+            expect(getObjectValue(result)).toBe(0.4226497308104018);
         });
 
         it('DegFreedom value test', () => {
@@ -57,14 +57,14 @@ describe('Test tDist2t function', () => {
             const x = BooleanValueObject.create(true);
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.42264973081037405);
+            expect(getObjectValue(result)).toBe(0.4226497308104018);
         });
 
         it('Value is null', () => {
             const x = NullValueObject.create();
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
-            expect(getObjectValue(result)).toBe(0.9999999999999996);
+            expect(getObjectValue(result)).toBe(1);
         });
 
         it('Value is error', () => {
@@ -95,9 +95,16 @@ describe('Test tDist2t function', () => {
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
             expect(getObjectValue(result)).toStrictEqual([
-                [0.42264973081037405, ErrorType.VALUE, 0.3437456156639058, 0.42264973081037405, 0.9999999999999996, 0.9999999999999996],
-                [0.9999999999999996, 0.00009998500249941422, 0.14415950895155838, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
+                [0.4226497308104018, ErrorType.VALUE, 0.3437456155496856, 0.4226497308104018, 1, 1],
+                [1, 0.00009998500249955772, 0.14415950895030902, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const x = NumberValueObject.create(0.1);
+            const degFreedom = NumberValueObject.create(900000000);
+            const result = testFunction.calculate(x, degFreedom);
+            expect(getObjectValue(result)).toBe(0.9203442914779052);
         });
     });
 });

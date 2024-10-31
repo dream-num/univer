@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { poissonCDF, poissonPDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class PoissonDist extends BaseFunction {
     override minParams = 3;
@@ -88,7 +88,7 @@ export class PoissonDist extends BaseFunction {
 
         const [_xObject, _meanObject, _cumulativeObject] = variants as BaseValueObject[];
 
-        const xValue = +_xObject.getValue();
+        const xValue = Math.floor(+_xObject.getValue());
         const meanValue = +_meanObject.getValue();
         const cumulativeValue = +_cumulativeObject.getValue();
 

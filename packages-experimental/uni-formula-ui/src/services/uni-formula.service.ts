@@ -20,6 +20,7 @@ import type {
     ICommand,
     IDisposable,
     IDocumentBody,
+    IRange,
     Nullable,
     SlideDataModel } from '@univerjs/core';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
@@ -320,7 +321,15 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+                // TODO@Dushusir: Solve the TS error and verify whether it is correct after the uni formula is fixed
+                const ranges: IRange[] = [{
+                    startRow: 0,
+                    endRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                }];
+
+                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, ranges);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }
@@ -354,7 +363,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                         const docItem = this._docFormulas.get(key);
                         if (docItem) {
-                            const r = result.result?.[0][0];
+                            const r = result.result?.[0][0][0][0]; // Ranges defaults to one row and one column
                             if (docItem.v === r?.v && docItem.t === r?.t) return null;
 
                             return { position: { rangeId: docItem.rangeId }, unitId: docItem.unitId, cache: r };
@@ -362,7 +371,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                         const slideItem = this._slideFormulas.get(key);
                         if (slideItem) {
-                            const r = result.result?.[0][0];
+                            const r = result.result?.[0][0][0][0]; // Ranges defaults to one row and one column
                             if (slideItem.v === r?.v && slideItem.t === r?.t) return null;
 
                             return {

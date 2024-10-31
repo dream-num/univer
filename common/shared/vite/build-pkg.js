@@ -71,14 +71,6 @@ exports.buildPkg = function buildPkg() {
                 './*': './src/*',
             }, pkg.exports);
 
-            const facadeEntry = path.resolve(process.cwd(), 'src/facade/index.ts');
-            if (fs.existsSync(facadeEntry)) {
-                pkg.publishConfig.exports['./facade'] = {
-                    import: './lib/es/facade.js',
-                    types: './lib/types/facade/index.d.ts',
-                };
-            }
-
             // main
             pkg.main = './src/index.ts';
 
@@ -99,6 +91,14 @@ exports.buildPkg = function buildPkg() {
                     './lib/*': './lib/*',
                 },
             };
+
+            const facadeEntry = path.resolve(process.cwd(), 'src/facade/index.ts');
+            if (fs.existsSync(facadeEntry)) {
+                pkg.publishConfig.exports['./facade'] = {
+                    import: './lib/es/facade.js',
+                    types: './lib/types/facade/index.d.ts',
+                };
+            }
 
             // locale
             const localeDir = path.resolve(process.cwd(), 'src/locale');

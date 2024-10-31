@@ -41,7 +41,11 @@
                 "import": "./lib/es/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            }
         }
     },
     "directories": {
@@ -83,6 +87,10 @@
             "import": "./lib/es/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*"
+        "./lib/*": "./lib/*",
+        "./facade": {
+            "import": "./lib/es/facade.js",
+            "types": "./lib/types/facade/index.d.ts"
+        }
     }
 }

@@ -29,13 +29,11 @@ import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from
 import {
     BuildTextUtils,
     CommandType,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
+    SHEET_EDITOR_UNITS,
     TextX,
     TextXActionType,
     Tools,
@@ -82,8 +80,7 @@ export interface IInnerPasteCommandParams {
     textRanges: ITextRangeWithStyle[];
 }
 
-const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-
+const UNITS = SHEET_EDITOR_UNITS;
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',

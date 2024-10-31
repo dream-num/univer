@@ -17,7 +17,7 @@
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
@@ -25,7 +25,6 @@ import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
-const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 export class DocInputController extends Disposable implements IRenderModule {
     private _onInputSubscription: Nullable<Subscription>;
 
@@ -77,7 +76,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             // Insert content's style should follow the text style of the current position.
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, cacheStyle);
-            const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, UNITS.includes(unitId));
+            const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,

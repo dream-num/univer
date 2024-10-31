@@ -140,9 +140,17 @@ export class ConditionalFormattingFormulaService extends Disposable {
                         for (const formulaId in params.unitOtherData[unitId]![subUnitId]) {
                             const item = map.getValue(formulaId, ['formulaId']);
 
-                            const resultMatrix = new ObjectMatrix(params.unitOtherData[unitId][subUnitId][formulaId]);
-                            const resultObject = new ObjectMatrix<Nullable<CellValue>>();
+                            if (!item) {
+                                continue;
+                            }
 
+                            if (!item?.result) {
+                                item.result = {};
+                            }
+
+                            const resultMatrix = new ObjectMatrix(params.unitOtherData[unitId][subUnitId][formulaId]);
+                            const result = item?.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>;
+                            const resultObject = new ObjectMatrix<Nullable<CellValue>>(result);
                             const cfId = item?.cfId;
 
                             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
@@ -160,11 +168,8 @@ export class ConditionalFormattingFormulaService extends Disposable {
                                 resultObject.setValue(startRow + row, startCol + col, getResultFromFormula(value));
                             });
 
-                            if (item) {
-                                item.result = resultObject.clone();
-                                item.status = FormulaResultStatus.SUCCESS;
-                                cfIdSet.add(item.cfId);
-                            }
+                            item.status = FormulaResultStatus.SUCCESS;
+                            cfIdSet.add(item.cfId);
                         }
                         for (const cfId of cfIdSet) {
                             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);

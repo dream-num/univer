@@ -58,6 +58,22 @@ export class BinomDist extends BaseFunction {
             const probabilitySObject = probabilitySArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (numberSObject.isError()) {
+                return numberSObject;
+            }
+
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(numberSObject, trialsObject, probabilitySObject, cumulativeObject);
         });
 

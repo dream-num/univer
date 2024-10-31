@@ -53,6 +53,18 @@ export class ExponDist extends BaseFunction {
             const lambdaObject = lambdaArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (lambdaObject.isError()) {
+                return lambdaObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(xObject, lambdaObject, cumulativeObject);
         });
 

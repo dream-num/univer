@@ -48,6 +48,14 @@ export class ChisqInv extends BaseFunction {
         const resultArray = probabilityArray.mapValue((probabilityObject, rowIndex, columnIndex) => {
             const degFreedomObject = degFreedomArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (probabilityObject.isError()) {
+                return probabilityObject;
+            }
+
+            if (degFreedomObject.isError()) {
+                return degFreedomObject;
+            }
+
             return this._handleSignleObject(probabilityObject, degFreedomObject);
         });
 

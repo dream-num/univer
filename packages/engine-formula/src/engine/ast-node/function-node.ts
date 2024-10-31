@@ -163,14 +163,21 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
 
-        const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+        let lookupCountRow: number;
+        let lookupCountColumn: number;
+
+        if (lookupVectorOrArray?.isReferenceObject()) {
+            const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+            const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
+
+            lookupCountRow = endRow - startRow + 1;
+            lookupCountColumn = endColumn - startColumn + 1;
+        } else {
+            lookupCountRow = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getRowCount() : 1;
+            lookupCountColumn = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getColumnCount() : 1;
+        }
 
         const resultVectorRange = (resultVector as BaseReferenceObject).getRangeData();
-
-        const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
-
-        const lookupCountRow = endRow - startRow + 1;
-        const lookupCountColumn = endColumn - startColumn + 1;
 
         const { startRow: reStartRow, startColumn: reStartColumn, endRow: reEndRow, endColumn: reEndColumn } = resultVectorRange;
 

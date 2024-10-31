@@ -53,6 +53,18 @@ export class BinomInv extends BaseFunction {
             const probabilitySObject = probabilitySArray.get(rowIndex, columnIndex) as BaseValueObject;
             const alphaObject = alphaArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
+
             return this._handleSignleObject(trialsObject, probabilitySObject, alphaObject);
         });
 

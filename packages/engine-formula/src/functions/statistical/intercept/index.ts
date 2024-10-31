@@ -54,7 +54,7 @@ export class Intercept extends BaseFunction {
         }
 
         if (knownYsRowCount * knownYsColumnCount === 1 || knownXsRowCount * knownXsColumnCount === 1) {
-            if (knownYs.isNull() || knownXs.isNull()) {
+            if (_knownYs.isNull() || _knownXs.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 

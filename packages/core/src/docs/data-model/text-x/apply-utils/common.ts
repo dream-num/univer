@@ -347,7 +347,8 @@ export function sliceByParagraph(body: IDocumentBody) {
     return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
 }
 
-const getRootId = (id: string) => id.split('_')[0];
+const ID_SPLIT_SYMBOL = '$';
+const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
 
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     if (ranges.length <= 1) return ranges;
@@ -380,7 +381,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         const range = mergedRanges[i];
         const id = range.rangeId;
         if (idMap[id]) {
-            range.rangeId = `${id}_${idMap[id]}`;
+            range.rangeId = `${id}${ID_SPLIT_SYMBOL}${idMap[id]}`;
             idMap[id] = idMap[id] + 1;
         } else {
             idMap[id] = 1;

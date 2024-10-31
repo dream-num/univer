@@ -257,6 +257,16 @@ export const CellLinkEdit = () => {
         };
     }, [contextService, zenZoneService]);
 
+    useEffect(() => {
+        if (isFocusRangeSelector) {
+            editorBridgeService.enableForceKeepVisible();
+
+            return () => {
+                editorBridgeService.disableForceKeepVisible();
+            };
+        }
+    }, [isFocusRangeSelector, editorBridgeService]);
+
     const linkTypeOptions: Array<{
         label: string;
         value: SheetHyperLinkType | string;

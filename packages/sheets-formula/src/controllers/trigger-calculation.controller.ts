@@ -103,13 +103,13 @@ export class TriggerCalculationController extends Disposable {
         this._emitProgress('Analyzing dependencies');
     }
 
-    private _calculateProgress(): void {
+    private _calculateProgress(label: string): void {
         if (this._executionInProgressParams) {
             const { totalFormulasToCalculate, completedFormulasCount, totalArrayFormulasToCalculate, completedArrayFormulasCount } = this._executionInProgressParams;
             this._doneCalculationTaskCount = completedFormulasCount + completedArrayFormulasCount;
             this._totalCalculationTaskCount = totalFormulasToCalculate + totalArrayFormulasToCalculate;
 
-            this._emitProgress('Start calculating');
+            this._emitProgress(label);
         }
     }
 
@@ -351,11 +351,17 @@ export class TriggerCalculationController extends Disposable {
                             startDependencyTimer = null;
                             this._startProgress();
                         }, 1000);
-                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING || stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            this._calculateProgress();
+                            this._calculateProgress('Start calculating');
+                        }
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                        this._executionInProgressParams = params.stageInfo;
+
+                        if (startDependencyTimer === null) {
+                            this._calculateProgress('Array formula calculating');
                         }
                     }
                 } else {

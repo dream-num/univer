@@ -57,8 +57,8 @@ export class CheckboxValidator extends BaseDataValidator {
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string; row: number; column: number }) => {
-        const { unitId, subUnitId, row, column } = pos;
-        const { formula1, formula2 } = this.parseFormulaSync(rule, unitId, subUnitId, row, column);
+        const { unitId, subUnitId } = pos;
+        const { formula1, formula2 } = this.parseFormulaSync(rule, unitId, subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
 
@@ -94,7 +94,7 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<ICheckboxFormulaResult> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<ICheckboxFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
 
@@ -117,7 +117,7 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
-    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): ICheckboxFormulaResult {
+    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string): ICheckboxFormulaResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
         const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1;
@@ -134,8 +134,8 @@ export class CheckboxValidator extends BaseDataValidator {
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { value, unitId, subUnitId, row, column } = cellInfo;
-        const { formula1, formula2, originFormula1, originFormula2 } = await this.parseFormula(rule, unitId, subUnitId, row, column);
+        const { value, unitId, subUnitId } = cellInfo;
+        const { formula1, formula2, originFormula1, originFormula2 } = await this.parseFormula(rule, unitId, subUnitId);
         if (!Tools.isDefine(formula1) || !Tools.isDefine(formula2)) {
             return true;
         }

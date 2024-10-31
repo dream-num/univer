@@ -37,7 +37,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
         };
     }
 
-    override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
+    override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string): Promise<IFormulaResult> {
         return {
             formula1: undefined,
             formula2: undefined,

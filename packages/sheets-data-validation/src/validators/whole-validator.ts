@@ -68,7 +68,7 @@ export class WholeValidator extends BaseDataValidator<number> {
         return +formula;
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 

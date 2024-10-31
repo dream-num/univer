@@ -114,7 +114,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        const result = validator.parseFormulaSync(rule, unitId, subUnitId, row, col);
+        const result = validator.parseFormulaSync(rule, unitId, subUnitId);
         const { formula1 } = result;
         const layout = this._calc(cellBounding, style);
         const { a: scaleX, d: scaleY } = ctx.getTransform();

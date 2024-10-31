@@ -31,6 +31,39 @@ export class CalculateResultApplyController extends Disposable {
         this._initialize();
     }
 
+    // unitIds.forEach((unitId) => {
+    //     const sheetData = unitData[unitId];
+
+    //     if (sheetData == null) {
+    //         return true;
+    //     }
+
+    //     const sheetIds = Object.keys(sheetData);
+
+    //     sheetIds.forEach((sheetId) => {
+    //         const cellData = sheetData[sheetId];
+
+    //         // const arrayFormula = arrayFormulaRange[unitId][sheetId];
+
+    //         if (cellData == null) {
+    //             return true;
+    //         }
+
+    //         const cellValue = this._getMergedCellData(unitId, sheetId, cellData);
+
+    //         const setRangeValuesMutation = {
+    //             subUnitId: sheetId,
+    //             unitId,
+    //             cellValue,
+    //         };
+
+    //         redoMutationsInfo.push({
+    //             id: SetRangeValuesMutation.id,
+    //             params: setRangeValuesMutation,
+    //         });
+    //     });
+    // });
+
     private _initialize(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -47,22 +80,22 @@ export class CalculateResultApplyController extends Disposable {
                 // Update each calculated value, possibly involving all cells
                 const redoMutationsInfo: ICommandInfo[] = [];
 
-                unitIds.forEach((unitId) => {
+                for (let i = 0; i < unitIds.length; i++) {
+                    const unitId = unitIds[i];
                     const sheetData = unitData[unitId];
 
                     if (sheetData == null) {
-                        return true;
+                        continue;
                     }
 
                     const sheetIds = Object.keys(sheetData);
 
-                    sheetIds.forEach((sheetId) => {
+                    for (let j = 0; j < sheetIds.length; j++) {
+                        const sheetId = sheetIds[j];
                         const cellData = sheetData[sheetId];
 
-                        // const arrayFormula = arrayFormulaRange[unitId][sheetId];
-
                         if (cellData == null) {
-                            return true;
+                            continue;
                         }
 
                         const cellValue = this._getMergedCellData(unitId, sheetId, cellData);
@@ -77,8 +110,8 @@ export class CalculateResultApplyController extends Disposable {
                             id: SetRangeValuesMutation.id,
                             params: setRangeValuesMutation,
                         });
-                    });
-                });
+                    }
+                }
 
                 const result = redoMutationsInfo.every((m) =>
                     this._commandService.executeCommand(m.id, m.params, {

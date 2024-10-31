@@ -39,7 +39,9 @@ export interface IDependencyManagerService {
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
     getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<number>;
     clearFormulaDependency(unitId: string, sheetId?: string): void;
+
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
     searchDependency(search: IUnitRange[]): Set<number>;
@@ -400,7 +402,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
     }
 
-    addFormulaDependencyByDefinedName(unitId: string, definedName: string, treeId: number) {
+    private _addDefinedName(unitId: string, definedName: string, treeId: number) {
         if (!this._definedNameMap.has(unitId)) {
             this._definedNameMap.set(unitId, new Map<string, Set<number>>());
         }
@@ -413,6 +415,17 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
         const treeSet = unitMap.get(definedName)!;
         treeSet.add(treeId);
+    }
+
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree) {
+        const treeId = tree.treeId;
+        const node = tree.node;
+
+        const definedNames = node?.getDefinedNames() || [];
+
+        for (const definedName of definedNames) {
+            this._addDefinedName(tree.unitId, definedName, treeId);
+        }
     }
 
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string) {

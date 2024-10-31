@@ -360,6 +360,7 @@ export class FormulaDependencyGenerator extends Disposable {
                                     treeList.push(firstFDtree);
                                     this._dependencyTreeCache.set(firstFDtree.treeId, firstFDtree);
                                     this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, firstFDtree);
+                                    this._dependencyManagerService.addFormulaDependencyByDefinedName(firstFDtree);
                                     continue;
                                 }
 
@@ -371,6 +372,7 @@ export class FormulaDependencyGenerator extends Disposable {
                                 virtual.refOffsetY = y;
                                 virtual.isCache = isCache;
                                 this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, virtual);
+                                this._dependencyManagerService.addFormulaDependencyByDefinedName(virtual);
                                 treeList.push(virtual);
                                 this._dependencyTreeCache.set(virtual.treeId, virtual);
                             }
@@ -423,10 +425,10 @@ export class FormulaDependencyGenerator extends Disposable {
                         FDtree.treeId = treeId;
                     } else {
                         this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
+                        this._dependencyManagerService.addFormulaDependencyByDefinedName(FDtree);
                     }
 
                     sIdCache.set(si, FDtree);
-                    this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
                     treeList.push(FDtree);
 
                     this._dependencyTreeCache.set(FDtree.treeId, FDtree);
@@ -459,10 +461,10 @@ export class FormulaDependencyGenerator extends Disposable {
                         FDtree.treeId = treeId;
                     } else {
                         this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
+                        this._dependencyManagerService.addFormulaDependencyByDefinedName(FDtree);
                     }
 
                     treeList.push(FDtree);
-
                     this._dependencyTreeCache.set(FDtree.treeId, FDtree);
                 });
 
@@ -1031,6 +1033,8 @@ export class FormulaDependencyGenerator extends Disposable {
                 cacheStack.add(parentTree);
             }
 
+            searchResults.clear();
+
             if (cacheStack.size === 0) {
                 yield tree;
                 tree.setSkip();
@@ -1042,6 +1046,8 @@ export class FormulaDependencyGenerator extends Disposable {
                 }
             }
         }
+
+        cacheStack.clear();
     }
 
     private _calculateRunList(treeList: IFormulaDependencyTree[]) {
@@ -1050,6 +1056,6 @@ export class FormulaDependencyGenerator extends Disposable {
             formulaRunList.push(tree);
         }
 
-        return formulaRunList.reverse();
+        return formulaRunList;
     }
 }

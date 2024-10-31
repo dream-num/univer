@@ -80,11 +80,13 @@ export type IFormulaDependencyTree = FormulaDependencyTree | FormulaDependencyTr
 export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculator {
     treeId: number;
     refTree: Nullable<FormulaDependencyTree>;
-    refOffsetX: number = 0;
-    refOffsetY: number = 0;
+    refOffsetX: number = -1;
+    refOffsetY: number = -1;
     isCache: boolean = false;
 
-    node: Nullable<AstRootNode>;
+    get node() {
+        return this.refTree?.node;
+    }
 
     get isVirtual() {
         return true;
@@ -153,15 +155,8 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     }
 
     get nodeData() {
-        if (this.refTree == null) {
-            return {
-                node: null,
-                refOffsetX: -1,
-                refOffsetY: -1,
-            };
-        }
         return {
-            node: this.refTree.node,
+            node: this.node,
             refOffsetX: this.refOffsetX,
             refOffsetY: this.refOffsetY,
         };

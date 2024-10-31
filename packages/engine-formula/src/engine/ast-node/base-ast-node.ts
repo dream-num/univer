@@ -176,6 +176,10 @@ export class BaseAstNode {
     setDefinedNames(definedNames: Array<string>) {
         this._definedNames = definedNames;
     }
+
+    getDefinedNames() {
+        return this._definedNames;
+    }
 }
 
 export class ErrorNode extends BaseAstNode {

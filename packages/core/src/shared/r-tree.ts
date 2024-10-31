@@ -223,21 +223,19 @@ export class RTree {
         }
     }
 
-    search(search: IUnitRange): StringOrNumber[] {
+    *searchGenerator(search: IUnitRange): IterableIterator<StringOrNumber> {
         const { unitId, sheetId: subUnitId, range } = search;
 
-        const results: StringOrNumber[] = [];
-
-        if (this._enableOneCellCache && this._enableOneCellCache) {
+        if (this._enableOneCellCache) {
             const oneCellResults = this._searchByOneCellCache(search);
             for (const result of oneCellResults) {
-                results.push(result);
+                yield result;
             }
         }
 
         const tree = this._tree.get(unitId)?.get(subUnitId);
         if (!tree) {
-            return results;
+            return;
         }
 
         const searchData = tree.search({
@@ -248,17 +246,14 @@ export class RTree {
         }) as unknown as IRTreeItem[];
 
         for (const item of searchData) {
-            results.push(item.id);
+            yield item.id;
         }
-
-        return results;
     }
 
     bulkSearch(searchList: IUnitRange[]): Set<StringOrNumber> {
         const result = new Set<StringOrNumber>();
         for (const search of searchList) {
-            const items = this.search(search);
-            for (const item of items) {
+            for (const item of this.searchGenerator(search)) {
                 result.add(item);
             }
         }

@@ -248,9 +248,10 @@ export class CalculateFormulaService extends Disposable {
 
         const config = this._configService.getConfig(PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
-
-        for (let i = 0, len = treeList.length; i < len; i++) {
-            const tree = treeList[i];
+        let i = 0;
+        const treeCount = treeList.length;
+        while (treeList.length > 0) {
+            const tree = treeList.pop()!;
             const nodeData = tree.nodeData;
             const getDirtyData = tree.getDirtyData;
 
@@ -321,19 +322,21 @@ export class CalculateFormulaService extends Disposable {
                     this._runtimeService.setRuntimeData(value);
                 }
             }
+
+            i++;
         }
 
         // clear all pending tasks
         pendingTasks.forEach((cancel) => cancel());
         pendingTasks = [];
 
-        if (treeList.length > 0) {
+        if (treeCount > 0) {
             this._runtimeService.markedAsSuccessfullyExecuted();
         } else if (!isArrayFormulaState) {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
-        treeList.length = 0;
+        // treeList.length = 0;
 
         return this._runtimeService.getAllRuntimeData();
     }

@@ -41,6 +41,10 @@
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*",
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./locale/*": {
                 "import": "./lib/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
@@ -99,6 +103,10 @@
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*",
+        "./facade": {
+            "import": "./lib/es/facade.js",
+            "types": "./lib/types/facade/index.d.ts"
+        },
         "./locale/*": {
             "import": "./lib/locale/*.js",
             "types": "./lib/types/locale/*.d.ts"

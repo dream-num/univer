@@ -49,7 +49,7 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }

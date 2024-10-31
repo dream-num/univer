@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: '限制特定大小的陣列結果',
+        abstract: '限制特定大小的陣列結果',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3267036?hl=zh-Hant&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: '陣列', detail: '限制的範圍。' },
+            numRows: { name: '列數', detail: '結果所包含的列數。' },
+            numCols: { name: '欄數', detail: '結果所包含的欄數。' },
+        },
+    },
+};

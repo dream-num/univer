@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: '配列の結果を指定したサイズに抑えます',
+        abstract: '配列の結果を指定したサイズに抑えます',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3267036?hl=ja&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: '配列', detail: '制約対象の範囲です。' },
+            numRows: { name: '行の数', detail: '結果に含める行の数です。' },
+            numCols: { name: '列の数', detail: '結果に含める列の数です。' },
+        },
+    },
+};

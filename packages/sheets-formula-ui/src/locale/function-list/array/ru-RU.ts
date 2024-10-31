@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-import enUS from './en-US';
-
-export default enUS;
-
-// export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: 'Задает размер массива, в который будут помещены результаты.',
+        abstract: 'Задает размер массива, в который будут помещены результаты.',
+        links: [
+            {
+                title: 'Инструкция',
+                url: 'https://support.google.com/docs/answer/3267036?hl=ru&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: 'массива', detail: 'диапазон для ограничения.' },
+            numRows: { name: 'количество_строк', detail: 'количество строк, которое должен содержать результат.' },
+            numCols: { name: 'количество_столбцов', detail: 'количество столбцов, которое должен содержать результат.' },
+        },
+    },
+};

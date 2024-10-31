@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
+        abstract: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/3267036?hl=vi&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: 'mảng', detail: 'Dải ô giới hạn.' },
+            numRows: { name: 'số hàng', detail: 'Số hàng mà kết quả cần có.' },
+            numCols: { name: 'số cột', detail: 'Số cột mà kết quả cần có' },
+        },
+    },
+};

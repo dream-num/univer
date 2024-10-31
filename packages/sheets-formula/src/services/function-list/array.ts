@@ -15,5 +15,36 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_ARRAY, FunctionType } from '@univerjs/engine-formula';
 
-export const FUNCTION_LIST_ARRAY: IFunctionInfo[] = [];
+export const FUNCTION_LIST_ARRAY: IFunctionInfo[] = [
+    {
+        functionName: FUNCTION_NAMES_ARRAY.ARRAY_CONSTRAIN,
+        functionType: FunctionType.Array,
+        description: 'formula.functionList.ARRAY_CONSTRAIN.description',
+        abstract: 'formula.functionList.ARRAY_CONSTRAIN.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.inputRange.name',
+                detail: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.inputRange.detail',
+                example: 'A1:C3',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.numRows.name',
+                detail: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.numRows.detail',
+                example: '2',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.numCols.name',
+                detail: 'formula.functionList.ARRAY_CONSTRAIN.functionParameter.numCols.detail',
+                example: '2',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+];

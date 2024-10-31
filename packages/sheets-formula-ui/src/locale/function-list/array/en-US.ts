@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: 'Constrains an array result to a specified size.',
+        abstract: 'Constrains an array result to a specified size.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: 'input_range', detail: 'The range to constrain.' },
+            numRows: { name: 'num_rows', detail: 'The number of rows the result should contain.' },
+            numCols: { name: 'num_cols', detail: 'The number of columns the result should contain' },
+        },
+    },
+};

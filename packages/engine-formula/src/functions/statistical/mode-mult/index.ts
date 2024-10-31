@@ -64,7 +64,7 @@ export class ModeMult extends BaseFunction {
                         return valueObject;
                     }
 
-                    if (valueObject.isNull() || valueObject.isBoolean()) {
+                    if (valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
                         continue;
                     }
 

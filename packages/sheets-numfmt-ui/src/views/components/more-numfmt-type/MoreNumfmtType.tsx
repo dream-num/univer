@@ -18,11 +18,12 @@ import type { FormatType } from '@univerjs/sheets';
 
 import { ICommandService, LocaleService, Range, useDependency, useInjector } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { getPatternPreview, getPatternType, OpenNumfmtPanelOperator, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { getPatternPreview, getPatternType, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { ILayoutService } from '@univerjs/ui';
 import React from 'react';
-import { MENU_OPTIONS } from '../../../controllers/menu';
+import { OpenNumfmtPanelOperator } from '../../../commands/operations/open.numfmt.panel.operation';
 
+import { MENU_OPTIONS } from '../../../controllers/menu';
 // FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 

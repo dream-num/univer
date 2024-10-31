@@ -24,7 +24,6 @@ import { SetPercentCommand } from './commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
 import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
 import { NumfmtCurrencyController } from './controllers/numfmt-currency.controller';
-import { INumfmtController } from './controllers/type';
 import { MenuCurrencyService } from './service/menu.currency.service';
 
 @DependentOn(UniverSheetsPlugin)
@@ -50,7 +49,6 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
 
     override onRendered(): void {
         touchDependencies(this._injector, [
-            [INumfmtController],
             [SheetsNumfmtCellContentController],
             [NumfmtCurrencyController],
         ]);

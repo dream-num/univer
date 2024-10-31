@@ -88,8 +88,9 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
+        const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
-        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen, styleCache);
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen, defaultTextStyle, styleCache);
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();

@@ -53,7 +53,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         }
 
         const previousActiveRange = imeInputManagerService.getActiveRange();
-        if (!previousActiveRange) {
+        if (previousActiveRange == null) {
             return false;
         }
 
@@ -66,7 +66,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const insertRange = BuildTextUtils.selection.getInsertSelection(previousActiveRange, body);
         Object.assign(previousActiveRange, insertRange);
-        const { startOffset } = previousActiveRange;
+        const { startOffset, endOffset } = previousActiveRange;
 
         const len = newText.length;
 
@@ -90,7 +90,12 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const defaultTextStyle = docMenuStyleService.getDefaultStyle();
         const styleCache = docMenuStyleService.getStyleCache();
-        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen, defaultTextStyle, styleCache);
+        const curTextRun = getTextRunAtPosition(
+            body.textRuns ?? [],
+            isCompositionStart ? endOffset : startOffset + oldTextLen,
+            defaultTextStyle,
+            styleCache
+        );
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();

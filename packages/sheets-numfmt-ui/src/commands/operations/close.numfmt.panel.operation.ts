@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-import { INumfmtController } from '../../controllers/type';
-
-export const OpenNumfmtPanelOperator: ICommand = {
-    id: 'sheet.operation.open.numfmt.panel',
+export const CloseNumfmtPanelOperator: ICommand = {
+    id: 'sheet.operation.close.numfmt.panel',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor) => {
-        const numfmtController = accessor.get(INumfmtController);
-        numfmtController.openPanel();
-        return true;
-    },
+    handler: () =>
+        // do nothing, just notify panel is closed
+        true,
 };

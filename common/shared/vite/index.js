@@ -81,6 +81,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             dts({
                 entryRoot: 'src',
                 outDir: 'lib/types',
+                clearPureImport: false,
             }),
             buildPkg(),
         ],

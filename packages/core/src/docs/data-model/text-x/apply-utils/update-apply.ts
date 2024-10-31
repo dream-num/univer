@@ -448,7 +448,7 @@ function updateCustomRanges(
         body.customRanges = [];
     }
     const { customRanges } = body;
-    const { customRanges: updateDataCustomRanges = [] } = updateBody;
+    const { customRanges: updateDataCustomRanges } = updateBody;
     const rangeMap: Record<string, ICustomRange> = Object.create(null);
 
     for (const customRange of customRanges) {
@@ -476,6 +476,10 @@ function updateCustomRanges(
             };
         });
     } else {
+        if (!updateDataCustomRanges) {
+            return removeCustomRanges;
+        }
+
         const relativeCustomRanges = new Set<string>();
         for (let index = 0; index < customRanges.length; index++) {
             const customRange = customRanges[index];

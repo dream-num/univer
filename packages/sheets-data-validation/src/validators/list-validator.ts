@@ -186,7 +186,7 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[row][column]) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
     async getListAsync(rule: IDataValidationRule, row: number, column: number, currentUnitId?: string, currentSubUnitId?: string) {

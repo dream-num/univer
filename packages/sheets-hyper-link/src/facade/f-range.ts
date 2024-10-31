@@ -17,7 +17,7 @@
 import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
 import type { ICancelHyperLinkCommandParams } from '../commands/commands/remove-hyper-link.command';
 import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
-import { CustomRangeType, generateRandomId } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
@@ -39,6 +39,7 @@ interface IFRangeHyperlinkMixin {
     getHyperLinks(): ICellHyperLink[];
     /**
      * Update hyperlink in the cell in the range.
+     * [!important] This method is async.
      * @param id id of the hyperlink
      * @param url url
      * @param label optional, label of the url
@@ -47,6 +48,7 @@ interface IFRangeHyperlinkMixin {
     updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
     /**
      * Cancel hyperlink in the cell in the range.
+     * [!important] This method is async.
      * @param id id of the hyperlink
      * @returns success or not
      */
@@ -56,6 +58,13 @@ interface IFRangeHyperlinkMixin {
 class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
+    /**
+     * Set hyperlink in the cell in the range.
+     * [!important] This method is async.
+     * @param url url
+     * @param label optional, label of the url
+     * @returns success or not
+     */
     setHyperLink(url: string, label?: string): Promise<boolean> {
         const params: IAddHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -72,6 +81,10 @@ class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
         return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
     }
 
+    /**
+     * Get all hyperlinks in the cell in the range.
+     * @returns hyperlinks
+     */
     override getHyperLinks(): ICellHyperLink[] {
         const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
         if (!cellValue?.p) {
@@ -85,10 +98,18 @@ class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
                 startIndex: range.startIndex,
                 endIndex: range.endIndex,
                 url: range.properties?.url ?? '',
-                label: cellValue.p?.body?.dataStream.slice(range.startIndex + 1, range.endIndex) ?? '',
+                label: cellValue.p?.body?.dataStream.slice(range.startIndex, range.endIndex + 1).replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '') ?? '',
             })) ?? [];
     }
 
+    /**
+     * Update hyperlink in the cell in the range.
+     * [!important] This method is async.
+     * @param id id of the hyperlink
+     * @param url url
+     * @param label optional, label of the url
+     * @returns success or not
+     */
     override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
         const params: IUpdateHyperLinkCommandParams = {
             unitId: this.getUnitId(),

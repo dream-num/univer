@@ -186,6 +186,14 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 }
             }
 
+            const customRange = originBody.customRanges?.find((range) => range.startIndex < endOffset && range.endIndex >= endOffset);
+            if (customRange) {
+                cloneBody.customRanges = [{
+                    ...customRange,
+                    startIndex: 0,
+                    endIndex: body.dataStream.length,
+                }];
+            }
             if (collapsed) {
                 textX.push({
                     t: TextXActionType.RETAIN,

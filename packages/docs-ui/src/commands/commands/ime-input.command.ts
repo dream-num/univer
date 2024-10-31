@@ -19,7 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getTextRunAtPosition } from '../../basics/paragraph';
+import { getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
@@ -90,6 +90,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const styleCache = docMenuStyleService.getStyleCache();
         const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen, styleCache);
+        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen);
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -125,6 +126,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                         ...curTextRun,
                         st: 0,
                         ed: newText.length,
+                    }]
+                    : [],
+                customRanges: curCustomRange
+                    ? [{
+                        ...curCustomRange,
+                        startIndex: 0,
+                        endIndex: newText.length,
                     }]
                     : [],
             },

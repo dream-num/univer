@@ -34,6 +34,7 @@ export interface ISheetsGenerateFilterValuesService {
 }
 export const SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME = 'sheets-filter.generate-filter-values.service';
 export const ISheetsGenerateFilterValuesService = createIdentifier<ISheetsGenerateFilterValuesService>(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME);
+const CAN_PARSE_DATE_FORMAT = ['yyyy-mm-dd', 'yyyy-mm-dd;@', 'yyyy/mm/dd;@', 'yyyy/mm/dd hh:mm', 'yyyy-m-d am/pm h:mm', 'yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy/mm/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm'];
 
 export class SheetsGenerateFilterValuesService extends Disposable {
     constructor(
@@ -151,7 +152,7 @@ export function getFilterTreeByValueItems(
     const treeMap: Map<string, string[]> = new Map();
 
     const DefaultPattern = 'yyyy-mm-dd';
-    const canSplitPatternSet = new Set(['yyyy-mm-dd', 'yyyy/mm/dd hh:mm', 'yyyy-m-d am/pm h:mm', 'yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm']);
+    const canSplitPatternSet = new Set(CAN_PARSE_DATE_FORMAT);
     const EmptyKey = 'empty';
 
     let emptyCount = 0;

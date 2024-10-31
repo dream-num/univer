@@ -312,7 +312,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div
-                className={sClassName}
+                className={clsx(sClassName, className)}
                 ref={selectorRef}
                 style={{ width, height, cursor: dialogOnly ? 'pointer' : undefined }}
                 onClickCapture={(event) => {

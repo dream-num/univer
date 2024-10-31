@@ -27,6 +27,8 @@ import type {
 } from '../../../../types/interfaces';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
+import { DataStreamTreeTokenType } from '../../types';
+import { getBodySlice } from '../utils';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -313,12 +315,53 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     }
 }
 
+export function sliceByParagraph(body: IDocumentBody) {
+    const { dataStream, paragraphs = [] } = body;
+    const ranges = [];
+
+    let cursor = 0;
+    for (let i = 0, len = paragraphs.length; i < len; i++) {
+        const paragraph = paragraphs[i];
+        const { startIndex } = paragraph;
+        if (cursor < startIndex) {
+            ranges.push({
+                startOffset: cursor,
+                endOffset: startIndex,
+            });
+            cursor = startIndex;
+        }
+        ranges.push({
+            startOffset: startIndex,
+            endOffset: startIndex + 1,
+        });
+        cursor = startIndex + 1;
+    }
+
+    if (cursor < dataStream.length) {
+        ranges.push({
+            startOffset: cursor,
+            endOffset: dataStream.length,
+        });
+    }
+
+    return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
+}
+
 export function insertCustomRanges(
     body: IDocumentBody,
     insertBody: IDocumentBody,
     textLength: number,
     currentIndex: number
 ) {
+    if (insertBody.dataStream.indexOf(DataStreamTreeTokenType.PARAGRAPH) > -1 && insertBody.dataStream.length > 1) {
+        let cursor = 0;
+        sliceByParagraph(insertBody).forEach((slice) => {
+            insertCustomRanges(body, slice, slice.dataStream.length, currentIndex + cursor);
+            cursor += slice.dataStream.length;
+        });
+        return;
+    }
+
     if (!body.customRanges) {
         body.customRanges = [];
     }
@@ -337,7 +380,19 @@ export function insertCustomRanges(
         }
     }
 
-    const insertCustomRanges: ICustomRange[] = [];
+    if (insertBody.dataStream === DataStreamTreeTokenType.PARAGRAPH) {
+        const customRange = customRanges.find((c) => c.startIndex < currentIndex && c.endIndex > currentIndex);
+        if (customRange) {
+            const copy = Tools.deepClone(customRange);
+            customRange.endIndex = currentIndex;
+
+            copy.startIndex = currentIndex + 1;
+            customRanges.push(copy);
+            copy.rangeId = `${customRange.rangeId}-`;
+        }
+    }
+
+    const insertRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
@@ -360,12 +415,14 @@ export function insertCustomRanges(
                 continue;
             }
             // new custom range
-            insertCustomRanges.push(customRange);
+            insertRanges.push(customRange);
         }
 
-        customRanges.push(...insertCustomRanges);
+        customRanges.push(...insertRanges);
         customRanges.sort(sortRulesFactory('startIndex'));
     }
+
+    customRanges.sort((a, b) => a.startIndex - b.startIndex);
 }
 
 interface IIndexRange {

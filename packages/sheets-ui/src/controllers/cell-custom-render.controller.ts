@@ -81,7 +81,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                         y: activeViewport.viewportScrollY,
                     };
 
-                    const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+                    const cellPos = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
                     // const mergeCell = skeleton.mergeData.find((range) => {
                     //     const { startColumn, startRow, endColumn, endRow } = range;
@@ -119,7 +119,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const info: ICellRenderContext = {
                         data: cellData,
                         style: skeleton.getsStyles().getStyleByCell(cellData),
-                        primaryWithCoord: skeleton.getCellByIndex(cellIndex.actualRow, cellIndex.actualCol),
+                        primaryWithCoord: skeleton.getCellWithCoordByIndex(cellIndex.actualRow, cellIndex.actualCol),
                         unitId,
                         subUnitId,
                         row,

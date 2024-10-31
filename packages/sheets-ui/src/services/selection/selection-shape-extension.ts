@@ -15,7 +15,7 @@
  */
 
 import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Skeleton, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 /* eslint-disable max-lines-per-function */
 import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
@@ -193,7 +193,7 @@ export class SelectionShapeExtension {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -265,9 +265,9 @@ export class SelectionShapeExtension {
             endColumn,
         };
         const primaryCell = this._skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn);
-        const primaryCellWithMergeInfo = attachPrimaryWithCoord(primaryCell, this._skeleton);
-        this._control.updateCurrCell(primaryCellWithMergeInfo);
-        
+        const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(primaryCell, this._skeleton);
+        this._control.updateCurrCell(primaryWithCoordAndMergeInfo);
+
         this._control.selectionMoving$.next(this._targetSelection);
     }
 
@@ -288,7 +288,7 @@ export class SelectionShapeExtension {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const actualSelection = this._skeleton.getCellPositionByOffset(
+        const actualSelection = this._skeleton.getCellIndexByOffset(
             newEvtOffsetX,
             newEvtOffsetY,
             scaleX,
@@ -529,7 +529,7 @@ export class SelectionShapeExtension {
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -606,8 +606,8 @@ export class SelectionShapeExtension {
             endColumn,
         };
 
-        const primary = this._control.model.currentCell; // selectionModel.currentCell;
-        this._control.updateRange(this._targetSelection, primary);
+        // const primary = this._control.model.currentCell; // selectionModel.currentCell;
+        // this._control.updateRange(this._targetSelection, primary);
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
@@ -639,7 +639,7 @@ export class SelectionShapeExtension {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,

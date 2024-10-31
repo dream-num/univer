@@ -485,7 +485,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (selectionRenderService == null) {
             return;
         }
-        const start = selectionRenderService.getSelectionCellByPosition(startX, startY);
+        const start = selectionRenderService.getCellWithCoordByOffset(startX, startY);
         if (start == null) {
             return;
         }
@@ -497,7 +497,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             rowOffset: startY - start.startY,
         };
 
-        const end = selectionRenderService.getSelectionCellByPosition(endX, endY);
+        const end = selectionRenderService.getCellWithCoordByOffset(endX, endY);
 
         if (end == null) {
             return;

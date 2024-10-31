@@ -595,30 +595,56 @@ export interface ISingleCell {
 export interface IRangeWithCoord extends IPosition, IRange { }
 
 /**
- * startRow,
- * endRow,
- * startColumn,
- * endColumn,
- * actualRow: number;
- * actualColumn: number;
- * isMerged: boolean;
- * isMergedMainCell: boolean;
- * rangeType?: RANGE_TYPE;
+ * Range & SingleCell & isMerged.
  */
 export interface ISelectionCell extends IRange, ISingleCell { }
 
 /**
- * startX: number;
- * startY: number;
- * endX: number;
- * endY: number;
- * actualRow: number;
- * actualColumn: number;
- * isMerged: boolean;
- * isMergedMainCell: boolean;
- * mergeInfo
+ * @deprecated use ISelectionCellWithCoordAndMergeInfo instead.
  */
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
+}
+
+/**
+ * SingleCell with coordinate and mergeRange with coordinate.
+ */
+// Original name: ISelectionCellWithMergeInfo
+export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startY: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endY: number;
+    /**
+     * The raw row index calculated by the offsetX (Without considering merged cells, this value is simply the row index.If there are merged cells, this value refers to the cell where the mouse was clicked.)
+     */
+    actualRow: number;
+
+    /**
+     * The raw col index calculated by the offsetX (Without considering merged cells)
+     */
+    actualColumn: number;
+    /**
+     * Whether the cell is merged. But main merged cell is false.
+     */
+    isMerged: boolean;
+    /**
+     * if Merged and is main merged cell.
+     */
+    isMergedMainCell: boolean;
+
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
@@ -630,6 +656,8 @@ export interface ISelection {
 
     /**
      * The highlighted cell in the selection range. If there are several selections, only one selection would have a primary cell.
+     *
+     * This cell range should consider the merged cells.
      */
     primary: Nullable<ISelectionCell>;
 }
@@ -640,7 +668,7 @@ export interface ISelection {
  */
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
-    primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;
+    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
 }
 
 export interface ITextRangeStart {

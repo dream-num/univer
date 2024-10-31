@@ -187,9 +187,10 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     // data source: scroll-manager.service.ts@_scrollInfo
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = rawScrollInfo;
 
-                    const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                    const { startX, startY } = skeleton.getCellWithCoordByIndex(
                         sheetViewStartRow,
-                        sheetViewStartColumn
+                        sheetViewStartColumn,
+                        false
                     );
 
                     // viewportScrollXByEvent is not same as viewportScrollX, by event, the value may be negative, or over max

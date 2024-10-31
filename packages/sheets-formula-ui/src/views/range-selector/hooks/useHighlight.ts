@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, ITextRun, Nullable, Workbook } from '@univerjs/core';
+import type { ITextRun, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
@@ -23,7 +23,7 @@ import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-fo
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachPrimaryWithCoord, attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 

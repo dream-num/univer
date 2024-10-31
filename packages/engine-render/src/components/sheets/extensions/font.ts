@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -51,7 +51,7 @@ interface IRenderFontContext {
     endY: number;
     startX: number;
     endX: number;
-    cellInfo: ISelectionCellWithMergeInfo;
+    cellInfo: ISelectionCellWithCoord;
 }
 
 export class Font extends SheetExtension {
@@ -133,7 +133,7 @@ export class Font extends SheetExtension {
                 if (index !== -1) {
                     return;
                 }
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                 if (!cellInfo) return;
 
                 renderFontContext.cellInfo = cellInfo;
@@ -142,7 +142,7 @@ export class Font extends SheetExtension {
         });
 
         uniqueMergeRanges.forEach((range) => {
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+            const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
             renderFontContext.cellInfo = cellInfo;
             this.renderFontEachCell(renderFontContext, range.startRow, range.startColumn, fontMatrix);
         });

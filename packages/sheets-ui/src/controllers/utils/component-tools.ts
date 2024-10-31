@@ -96,7 +96,7 @@ export function getSheetObject(
 }
 
 export function getCoordByCell(row: number, col: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
-    const { startX, startY, endX, endY } = skeleton.getCellByIndex(row, col);
+    const { startX, startY, endX, endY } = skeleton.getCellWithCoordByIndex(row, col);
     return { startX, startY, endX, endY };
 }
 
@@ -116,7 +116,7 @@ export function getCoordByOffset(
 
     const { scaleX, scaleY } = scene.getAncestorScale();
 
-    const moveActualSelection = skeleton.getCellPositionByOffset(
+    const moveActualSelection = skeleton.getCellIndexByOffset(
         newEvtOffsetX,
         newEvtOffsetY,
         scaleX,

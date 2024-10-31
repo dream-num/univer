@@ -1105,7 +1105,9 @@ export class Worksheet {
         return new DocumentDataModel(documentData);
     }
 
-    // Only used for cell edit, and no need to rotate text when edit cell content!
+    /**
+     * Only used for cell edit, and no need to rotate text when edit cell content!
+     */
     getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
         const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
 

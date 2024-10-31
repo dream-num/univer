@@ -123,20 +123,20 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
         y: activeViewport.viewportScrollY,
     };
 
-    const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+    const cellIndex = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
     // const mergeCell = skeleton.mergeData.find((range) => {
     //     const { startColumn, startRow, endColumn, endRow } = range;
     //     return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
     // });
-    const mergeCell = skeleton.worksheet.getMergedCell(cellPos.row, cellPos.column);
+    const mergeCell = skeleton.worksheet.getMergedCell(cellIndex.row, cellIndex.column);
 
     const params = {
-        actualRow: mergeCell ? mergeCell.startRow : cellPos.row,
-        actualCol: mergeCell ? mergeCell.startColumn : cellPos.column,
+        actualRow: mergeCell ? mergeCell.startRow : cellIndex.row,
+        actualCol: mergeCell ? mergeCell.startColumn : cellIndex.column,
         mergeCell,
-        row: cellPos.row,
-        col: cellPos.column,
+        row: cellIndex.row,
+        col: cellIndex.column,
     };
 
     return params;
@@ -229,7 +229,7 @@ export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skele
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualCol);
 
     const location: ISheetLocation = {
         unitId: workbook.getUnitId(),
@@ -272,7 +272,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualCol);
     const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);
     let anchorCell: IRange;
     if (actualCell.mergeInfo) {

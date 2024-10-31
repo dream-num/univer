@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithMergeInfo, ISelectionWithCoord, Nullable } from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithCoord, ISelectionWithCoord, Nullable } from '@univerjs/core';
 import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 
 export class SelectionRenderModel implements IRangeWithCoord {
@@ -30,7 +30,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
     /**
      * The highlight cell of a selection. aka: current cell
      */
-    private _primary: Nullable<ISelectionCellWithMergeInfo>;
+    private _primary: Nullable<ISelectionCellWithCoord>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
     get startColumn() { return this._startColumn; }
@@ -126,7 +126,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         };
     }
 
-    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithMergeInfo>) {
+    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithCoord>) {
         const {
             startColumn,
             startRow,
@@ -152,7 +152,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         if (rangeType !== undefined) {
             this._rangeType = rangeType;
         }
-        if(currentCell !== undefined) {
+        if (currentCell !== undefined) {
             this.setCurrentCell(currentCell);
         }
     }
@@ -160,10 +160,10 @@ export class SelectionRenderModel implements IRangeWithCoord {
     /**
      * Set primary cell.
      *
-     * TODO @lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
+     * @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
      * @param currentCell
      */
-    setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
+    setCurrentCell(currentCell: Nullable<ISelectionCellWithCoord>) {
         if (currentCell) {
             this._primary = currentCell;
         }

@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import type {
+    EventState,
+    IRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
 import {
     createInterceptorKey, Disposable, ICommandService,
     Inject,
@@ -32,16 +40,8 @@ import {
     MoveRowsCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
-import type {
-    EventState,
-    IRange,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 
-import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
@@ -367,7 +367,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = skeleton.getCellPositionByOffset(
+        const moveActualSelection = skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,

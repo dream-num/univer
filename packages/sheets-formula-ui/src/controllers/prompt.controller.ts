@@ -1545,7 +1545,6 @@ export class PromptController extends Disposable {
         }
 
         let { startRow, endRow, startColumn, endColumn } = toRange;
-        // const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
         const primary = skeleton
             ? skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn)
             : {

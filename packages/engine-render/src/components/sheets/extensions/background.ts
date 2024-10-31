@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale, ISelectionCellWithMergeInfo, ObjectMatrix } from '@univerjs/core';
+import type { IRange, IScale, ISelectionCellWithCoord, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -36,14 +36,14 @@ const PRINTING_Z_INDEX = 21;
 interface IRenderBGContext {
     ctx: UniverRenderingContext;
     spreadsheetSkeleton: SpreadsheetSkeleton;
-    backgroundPositions: ObjectMatrix<ISelectionCellWithMergeInfo>;
+    backgroundPositions: ObjectMatrix<ISelectionCellWithCoord>;
     checkOutOfViewBound: boolean;
     backgroundPaths: Path2D;
     scaleX: number;
     scaleY: number;
     viewRanges: IRange[];
     diffRanges: IRange[];
-    cellInfo: ISelectionCellWithMergeInfo;
+    cellInfo: ISelectionCellWithCoord;
 }
 
 export class Background extends SheetExtension {
@@ -113,7 +113,7 @@ export class Background extends SheetExtension {
                     if (index !== -1) {
                         return;
                     }
-                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                    const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                     if (!cellInfo) return;
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
@@ -136,7 +136,7 @@ export class Background extends SheetExtension {
                 // bgConfig is requried to be checked in each color loop.
                 const bgConfig = bgColorMatrix.getValue(range.startRow, range.startColumn);
                 if (bgConfig) {
-                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+                    const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
                     if (!cellInfo) return;
                     renderBGContext.cellInfo = cellInfo;
                     this.renderBGByCell(renderBGContext, range.startRow, range.startColumn);

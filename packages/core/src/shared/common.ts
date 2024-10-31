@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../sheets/typedef';
-import { RANGE_TYPE } from '../sheets/typedef';
+import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
+import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { Nullable } from './types';
+import { RANGE_TYPE } from '../sheets/typedef';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -25,13 +28,15 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
-import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRangeWithCoord {
+/**
+ * Get selection range & coord by primary cell
+ * @param cellInfo
+ * @returns IRangeWithCoord
+ */
+export function makeCellToSelection(cellInfo: ISelectionCellWithCoord): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;

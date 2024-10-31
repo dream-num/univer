@@ -362,7 +362,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         if (!maxSize) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
 
-        const cell = skeleton.getCellByIndex(row, column);
+        const cell = skeleton.getCellWithCoordByIndex(row, column);
         const height = Math.min((cell.mergeInfo.endY - cell.mergeInfo.startY) * scaleY, clientHeight) * scaleAdjust;
         const width = Math.min((cell.mergeInfo.endX - cell.mergeInfo.startX) * scaleX, clientWidth) * scaleAdjust;
         const currentHeight = state.endY! - state.startY!;

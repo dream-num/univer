@@ -64,7 +64,7 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
     private _initReRender() {
         this.disposeWithMe(this._hyperLinkService.showingLink$
             .pipe(
-                distinctUntilChanged((prev, aft) => prev?.linkId === aft?.linkId && prev?.unitId === aft?.unitId),
+                distinctUntilChanged((prev, aft) => prev?.linkId === aft?.linkId && prev?.unitId === aft?.unitId && prev?.startIndex === aft?.startIndex),
                 pairwise()
             )
             .subscribe(([preLink, link]) => {

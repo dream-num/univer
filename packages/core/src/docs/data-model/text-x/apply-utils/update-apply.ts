@@ -18,7 +18,6 @@ import type { Nullable } from '../../../../shared';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import {
     CustomDecorationType,
-    CustomRangeType,
     type ICustomBlock,
     type ICustomDecoration,
     type ICustomRange,
@@ -447,73 +446,45 @@ function updateCustomRanges(
     if (!body.customRanges) {
         body.customRanges = [];
     }
-    const { customRanges } = body;
+    const start = currentIndex;
+    const end = currentIndex + textLength - 1;
     const { customRanges: updateDataCustomRanges } = updateBody;
-    const rangeMap: Record<string, ICustomRange> = Object.create(null);
-
-    for (const customRange of customRanges) {
-        const { rangeId } = customRange;
-        rangeMap[rangeId] = customRange;
-    }
+    const newCustomRanges: ICustomRange[] = [];
+    const relativeCustomRanges = new Map<string, ICustomRange>();
+    body.customRanges.forEach((customRange) => {
+        const { startIndex, endIndex } = customRange;
+        if (startIndex >= start && endIndex <= end) {
+            relativeCustomRanges.set(customRange.rangeId, customRange);
+        } else {
+            newCustomRanges.push(customRange);
+        }
+    });
 
     const removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        for (let index = 0; index < customRanges.length; index++) {
-            const customRange = customRanges[index];
-            const { startIndex, endIndex } = customRange;
-            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
-                delete rangeMap[customRange.rangeId];
-                removeCustomRanges.push(customRange);
-            }
-        }
-
         updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;
-            rangeMap[customRange.rangeId] = {
+            newCustomRanges.push({
                 ...customRange,
                 startIndex: startIndex + currentIndex,
                 endIndex: endIndex + currentIndex,
-            };
+            });
         });
     } else {
         if (!updateDataCustomRanges) {
             return removeCustomRanges;
         }
-
-        const relativeCustomRanges = new Set<string>();
-        for (let index = 0; index < customRanges.length; index++) {
-            const customRange = customRanges[index];
+        updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;
-            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
-                relativeCustomRanges.add(customRange.rangeId);
-            }
-        }
-
-        for (const updateCustomRange of updateDataCustomRanges) {
-            const { rangeId } = updateCustomRange;
-            updateCustomRange.startIndex = updateCustomRange.startIndex + currentIndex;
-            updateCustomRange.endIndex = updateCustomRange.endIndex + currentIndex;
-            const oldCustomRange = rangeMap[rangeId];
-            relativeCustomRanges.delete(rangeId);
-            if (oldCustomRange) {
-                if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
-                    removeCustomRanges.push(oldCustomRange);
-                    delete rangeMap[rangeId];
-                    continue;
-                }
-                Object.assign(oldCustomRange, { properties: updateCustomRange.properties });
-            } else {
-                rangeMap[rangeId] = updateCustomRange;
-            }
-        }
-
-        relativeCustomRanges.forEach((rangeId) => {
-            removeCustomRanges.push(rangeMap[rangeId]);
-            delete rangeMap[rangeId];
+            newCustomRanges.push({
+                ...customRange,
+                startIndex: startIndex + currentIndex,
+                endIndex: endIndex + currentIndex,
+            });
         });
     }
 
-    body.customRanges = Object.values(rangeMap);
+    body.customRanges = newCustomRanges;
     body.customRanges.sort((a, b) => a.startIndex - b.startIndex);
     return removeCustomRanges;
 }

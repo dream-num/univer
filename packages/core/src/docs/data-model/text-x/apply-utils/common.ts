@@ -347,6 +347,8 @@ export function sliceByParagraph(body: IDocumentBody) {
     return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
 }
 
+const isSameId = (a: string, b: string) => a.replaceAll('$', '') === b.replaceAll('$', '');
+
 export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     if (ranges.length <= 1) return ranges;
 
@@ -357,7 +359,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         const nextRange = ranges[i];
 
         if (
-            currentRange.rangeId === nextRange.rangeId &&
+            isSameId(currentRange.rangeId, nextRange.rangeId) &&
             shallowEqual(currentRange.properties, nextRange.properties) &&
             currentRange.endIndex + 1 >= nextRange.startIndex
         ) {
@@ -366,6 +368,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
         } else {
             // Push current range and start a new one
             mergedRanges.push(currentRange);
+
             currentRange = { ...nextRange };
         }
     }
@@ -386,27 +389,29 @@ export function insertCustomRanges(
     }
 
     const { customRanges } = body;
-    const customRangeMap: Record<string, ICustomRange> = {};
     const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
     const matchedCustomRange = customRanges[matchedCustomRangeIndex];
 
     if (matchedCustomRange) {
         customRanges.splice(matchedCustomRangeIndex, 1);
         customRanges.push({
-            ...matchedCustomRange,
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
             startIndex: matchedCustomRange.startIndex,
             endIndex: currentIndex - 1,
+            properties: { ...matchedCustomRange.properties },
         });
         customRanges.push({
-            ...matchedCustomRange,
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
             startIndex: currentIndex,
             endIndex: matchedCustomRange.endIndex,
+            properties: { ...matchedCustomRange.properties },
         });
     }
 
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
-        customRangeMap[customRange.rangeId] = customRange;
         const { startIndex } = customRange;
         // move custom range when insert text before it
         if (startIndex >= currentIndex) {
@@ -419,16 +424,8 @@ export function insertCustomRanges(
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
-            const oldCustomRange = customRangeMap[customRange.rangeId];
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
-            // merge into old custom range
-            if (oldCustomRange) {
-                oldCustomRange.properties = {
-                    ...oldCustomRange.properties,
-                    ...customRange.properties,
-                };
-            }
             // new custom range
             insertRanges.push(customRange);
         }

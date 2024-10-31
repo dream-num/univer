@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
 import type { CFNumberOperator } from '../../base/const';
-import { CFRuleType } from '../../base/const';
-
-import type { IIconSetRenderParams } from '../../render/type';
 import type { IConditionFormattingRule, IIconSet } from '../../models/type';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { compareWithNumber, filterRange, getOppositeOperator, getValueByType, isNullable } from './utils';
+import type { IIconSetRenderParams } from '../../render/type';
+
 import type { ICalculateUnit } from './type';
+import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { CFRuleType } from '../../base/const';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { EMPTY_STYLE } from './type';
+import { compareWithNumber, filterRange, getOppositeOperator, getValueByType, isNullable } from './utils';
 
 export const iconSetCalculateUnit: ICalculateUnit = {
     type: CFRuleType.iconSet,
@@ -53,7 +53,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const splitValueResult = ruleConfig.config.map((v) => getValueByType(v.value, matrix, { ...context, cfId: rule.cfId }));
+        const splitValueResult = ruleConfig.config.map((v) => getValueByType(v.value, matrix, { ...context, cfId: rule.cfId }, ranges));
 
         const isFormulaWithoutSuccess = splitValueResult.some((item) => item.status !== FormulaResultStatus.SUCCESS);
         if (isFormulaWithoutSuccess) {

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { CellValue, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+import type { IConditionFormattingRule, IDataBar } from '../../models/type';
+import type { IDataBarRenderParams } from '../../render/type';
+import type { ICalculateUnit } from './type';
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
 import { CFRuleType } from '../../base/const';
-import type { IDataBarRenderParams } from '../../render/type';
-import type { IConditionFormattingRule, IDataBar } from '../../models/type';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { defaultDataBarNativeColor, defaultDataBarPositiveColor } from '../../render/data-bar.render';
-import { filterRange, getValueByType, isNullable } from './utils';
-import type { ICalculateUnit } from './type';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { EMPTY_STYLE } from './type';
+import { filterRange, getMaxInFormulaResult, getMinInFormulaResult, getValueByType, isNullable } from './utils';
 
 export const dataBarCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.dataBar,
@@ -52,8 +53,8 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const _min = getValueByType(ruleConfig.config.min, matrix, { ...context, cfId: rule.cfId });
-        const _max = getValueByType(ruleConfig.config.max, matrix, { ...context, cfId: rule.cfId });
+        const _min = getValueByType(ruleConfig.config.min, matrix, { ...context, cfId: rule.cfId }, ranges);
+        const _max = getValueByType(ruleConfig.config.max, matrix, { ...context, cfId: rule.cfId }, ranges);
         let min = 0;
         let max = 0;
 
@@ -62,7 +63,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         if (_min.status === FormulaResultStatus.WAIT) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) || computeResult;
         } else if (_min.status === FormulaResultStatus.SUCCESS) {
-            const v = Number(_min.result);
+            const v = Number(getMinInFormulaResult(_min.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>)); // Get the minimum value
             min = Number.isNaN(v) ? 0 : v;
         } else {
             return computeResult;
@@ -70,7 +71,8 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         if (_max.status === FormulaResultStatus.WAIT) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) || computeResult;
         } else if (_max.status === FormulaResultStatus.SUCCESS) {
-            const v = Number.isNaN(Number(_max.result)) ? 0 : Number(_max.result);
+            const maxResult = Number(getMaxInFormulaResult(_max.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>)); // Get the maximum value
+            const v = Number.isNaN(maxResult) ? 0 : maxResult;
             max = Math.max(v, min);
             min = Math.min(v, min);
         } else {

@@ -39,6 +39,10 @@ export function getTextRunAtPosition(textRuns: ITextRun[], position: number, cac
     return cacheStyle ? { ts: cacheStyle } : null;
 }
 
-export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number) {
+export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {
+    if (extendRange) {
+        return customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+    }
+
     return customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
 }

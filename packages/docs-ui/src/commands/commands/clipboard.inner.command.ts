@@ -29,6 +29,9 @@ import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from
 import {
     BuildTextUtils,
     CommandType,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -38,6 +41,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getCustomRangeAtPosition } from '../../basics/paragraph';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -77,6 +81,8 @@ export interface IInnerPasteCommandParams {
     doc: Partial<IDocumentData>;
     textRanges: ITextRangeWithStyle[];
 }
+
+const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
@@ -186,7 +192,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 }
             }
 
-            const customRange = originBody.customRanges?.find((range) => range.startIndex < endOffset && range.endIndex >= endOffset);
+            const customRange = getCustomRangeAtPosition(originBody.customRanges ?? [], endOffset, UNITS.includes(unitId));
             if (customRange) {
                 cloneBody.customRanges = [{
                     ...customRange,

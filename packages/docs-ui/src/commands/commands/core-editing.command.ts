@@ -36,7 +36,6 @@ export interface IInsertCommandParams {
     range: ITextRange;
     segmentId?: string;
     cursorOffset?: number;
-    extendLastRange?: boolean;
 }
 
 export const EditorInsertTextCommandId = 'doc.command.insert-text';
@@ -51,7 +50,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
+        const { range, segmentId, body, unitId, cursorOffset } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 

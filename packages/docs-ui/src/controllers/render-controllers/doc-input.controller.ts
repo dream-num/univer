@@ -25,6 +25,7 @@ import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
+const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 export class DocInputController extends Disposable implements IRenderModule {
     private _onInputSubscription: Nullable<Subscription>;
 
@@ -69,14 +70,14 @@ export class DocInputController extends Disposable implements IRenderModule {
             }
 
             const { segmentId } = activeRange;
-            const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
             const docDataModel = this._context.unit;
             const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
             // Insert content's style should follow the text style of the current position.
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, cacheStyle);
-            const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset);
+            const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, UNITS.includes(unitId));
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,
@@ -101,7 +102,6 @@ export class DocInputController extends Disposable implements IRenderModule {
                 },
                 range: activeRange,
                 segmentId,
-                extendLastRange: UNITS.includes(unitId),
             });
 
             // Space

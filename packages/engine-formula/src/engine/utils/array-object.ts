@@ -14,62 +14,48 @@
  * limitations under the License.
  */
 
-import { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, IArrayValueObject } from '../value-object/base-value-object';
+import { ArrayValueObject } from '../value-object/array-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 
 export function expandArrayValueObject(rowCount: number, columnCount: number, valueObject: BaseValueObject, defaultValue?: BaseValueObject) {
+    const valueRowCount = valueObject.isArray() ? (valueObject as ArrayValueObject).getRowCount() : 1;
+    const valueColumnCount = valueObject.isArray() ? (valueObject as ArrayValueObject).getColumnCount() : 1;
+
     const result: BaseValueObject[][] = [];
 
-    if (valueObject.isArray()) {
-        const valueRowCount = (valueObject as ArrayValueObject).getRowCount();
-        const valueColumnCount = (valueObject as ArrayValueObject).getColumnCount();
+    for (let r = 0; r < rowCount; r++) {
+        const row = [];
 
-        if (valueRowCount === 1 && valueColumnCount === 1) {
-            const v = (valueObject as ArrayValueObject).getFirstCell() as BaseValueObject;
-            for (let r = 0; r < rowCount; r++) {
-                const row = [];
-                for (let c = 0; c < columnCount; c++) {
-                    row.push(v);
-                }
-                result.push(row);
+        for (let c = 0; c < columnCount; c++) {
+            if (valueRowCount === 1 && valueColumnCount === 1) {
+                const value = valueObject.isArray() ? (valueObject as ArrayValueObject).get(0, 0) as BaseValueObject : valueObject;
+                row.push(value);
+                continue;
             }
-        } else if (valueRowCount === 1 && valueColumnCount > 1) {
-            for (let r = 0; r < rowCount; r++) {
-                const row = [];
-                for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(0, c) as BaseValueObject || (defaultValue ?? NullValueObject.create());
-                    row.push(v);
-                }
-                result.push(row);
+
+            if (valueRowCount === 1 && c < valueColumnCount) {
+                const value = (valueObject as ArrayValueObject).get(0, c) as BaseValueObject;
+                row.push(value);
+                continue;
             }
-        } else if (valueColumnCount === 1 && valueRowCount > 1) {
-            for (let r = 0; r < rowCount; r++) {
-                const row = [];
-                for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(r, 0) as BaseValueObject || (defaultValue ?? NullValueObject.create());
-                    row.push(v);
-                }
-                result.push(row);
+
+            if (valueColumnCount === 1 && r < valueRowCount) {
+                const value = (valueObject as ArrayValueObject).get(r, 0) as BaseValueObject;
+                row.push(value);
+                continue;
             }
-        } else {
-            for (let r = 0; r < rowCount; r++) {
-                const row = [];
-                for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(r, c) as BaseValueObject || (defaultValue ?? NullValueObject.create());
-                    row.push(v);
-                }
-                result.push(row);
+
+            if (r >= valueRowCount || c >= valueColumnCount) {
+                row.push(defaultValue ?? NullValueObject.create());
+                continue;
             }
+
+            const value = (valueObject as ArrayValueObject).get(r, c) as BaseValueObject;
+            row.push(value);
         }
-    } else {
-        for (let r = 0; r < rowCount; r++) {
-            const row = [];
-            for (let c = 0; c < columnCount; c++) {
-                row.push(valueObject);
-            }
-            result.push(row);
-        }
+
+        result.push(row);
     }
 
     return createNewArray(result, rowCount, columnCount);

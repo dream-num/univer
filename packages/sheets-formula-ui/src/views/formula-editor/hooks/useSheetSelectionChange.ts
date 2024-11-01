@@ -62,6 +62,7 @@ export const useSheetSelectionChange = (
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
+            // eslint-disable-next-line complexity
             const handleSelectionsChange = (selections: ISelectionWithCoordAndStyle[]) => {
                 if (isFirst || isScalingRef.current) {
                     isFirst = false;
@@ -142,7 +143,9 @@ export const useSheetSelectionChange = (
                         const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
                         theLastList.push(refRanges[0]);
                     }
-                    const result = `${currentText}${theLastList.length && currentText.length ? ',' : ''}${theLastList.join(',')}`;
+                    const preNode = sequenceNodes[sequenceNodes.length - 1];
+                    const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
+                    const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
                     handleRangeChange(result, result.length);
                 }
             };

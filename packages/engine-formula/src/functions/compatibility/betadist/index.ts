@@ -91,6 +91,26 @@ export class Betadist extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
+        if (xObject.isError()) {
+            return xObject;
+        }
+
+        if (alphaObject.isError()) {
+            return alphaObject;
+        }
+
+        if (betaObject.isError()) {
+            return betaObject;
+        }
+
+        if (AObject.isError()) {
+            return AObject;
+        }
+
+        if (BObject.isError()) {
+            return BObject;
+        }
+
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(xObject, alphaObject, betaObject, AObject, BObject);
 
         if (isError) {

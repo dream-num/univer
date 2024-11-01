@@ -475,7 +475,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
 
         const bounds = viewport.getBounding();
-        return skeleton.getRowColumnSegmentByViewBound(bounds.viewBound);
+        return skeleton.getRangeByViewBound(bounds.viewBound);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

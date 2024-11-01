@@ -606,6 +606,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY])) ??
                 this._getViewportByCell(selection?.endRow, selection?.endColumn);
 
+            // find viewports that can be crossed by selection.
             const isCrossableViewports = () => {
                 if (!startViewport || !endViewport || !viewportMain) {
                     return false;
@@ -752,13 +753,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        return skeleton.calculateCellIndexByPosition(
-            x,
-            y,
-            scaleX,
-            scaleY,
-            scrollXY
-        ) as Nullable<ISelectionCellWithMergeInfo>;
+        const { row, column } = skeleton.getCellPositionByOffset(x, y, scaleX, scaleY, scrollXY);
+        const cell = skeleton.getCellByIndex(row, column) as Nullable<ISelectionCellWithMergeInfo>;
+        return cell;
     }
 
     /**
@@ -909,13 +906,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         scrollXY: { x: number; y: number }
     ): Nullable<ISelectionWithCoord> {
         if (this._shouldDetectMergedCells) {
-            const primaryWithCoord = this._skeleton?.calculateCellIndexByPosition(
-                offsetX,
-                offsetY,
-                scaleX,
-                scaleY,
-                scrollXY
-            );
+            const { row, column } = this._skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, { visibleOnly: true });
+            const primaryWithCoord = this._skeleton.getCellByIndex(row, column) as Nullable<ISelectionCellWithMergeInfo>;
 
             if (!primaryWithCoord) return;
 

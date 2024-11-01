@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { binomialCDF, binomialPDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class BinomDist extends BaseFunction {
     override minParams = 4;
@@ -57,6 +57,22 @@ export class BinomDist extends BaseFunction {
             const trialsObject = trialsArray.get(rowIndex, columnIndex) as BaseValueObject;
             const probabilitySObject = probabilitySArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (numberSObject.isError()) {
+                return numberSObject;
+            }
+
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
 
             return this._handleSignleObject(numberSObject, trialsObject, probabilitySObject, cumulativeObject);
         });

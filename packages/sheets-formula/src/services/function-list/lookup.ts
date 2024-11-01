@@ -113,7 +113,7 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.CHOOSECOLS.functionParameter.array.name',
                 detail: 'formula.functionList.CHOOSECOLS.functionParameter.array.detail',
-                example: '{1,2,3;2,3,4}',
+                example: 'A1:C2',
                 require: 1,
                 repeat: 0,
             },
@@ -142,7 +142,7 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.CHOOSEROWS.functionParameter.array.name',
                 detail: 'formula.functionList.CHOOSEROWS.functionParameter.array.detail',
-                example: '{1,2,3;2,3,4}',
+                example: 'A1:C2',
                 require: 1,
                 repeat: 0,
             },

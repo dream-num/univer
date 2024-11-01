@@ -15,7 +15,6 @@
  */
 
 import type { IUniverInstanceService, Nullable } from '@univerjs/core';
-import { UniverInstanceType, Workbook } from '@univerjs/core';
 import type {
     Engine,
     IRenderContext,
@@ -28,6 +27,7 @@ import type {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
+import { UniverInstanceType, Workbook } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
 import { SHEET_VIEW_KEY } from '../../common/keys';
@@ -122,7 +122,7 @@ export function getCoordByOffset(
         scaleX,
         scaleY,
         scrollXY,
-        closeFirst
+        { closeFirst }
     );
 
     const { row, column } = moveActualSelection;

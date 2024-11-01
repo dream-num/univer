@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
+import type { ILayoutContext } from '../../tools';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { Lang } from '../../hyphenation/lang';
 import { LineBreaker } from '../../line-breaker';
@@ -31,12 +37,6 @@ import { textShape } from '../../shaping-engine/text-shaping';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
-import type { ILayoutContext } from '../../tools';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
 // Requirements, section 3.1.6.1 Punctuation Adjustment Space, and Japanese Layout

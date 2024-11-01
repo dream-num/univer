@@ -85,7 +85,7 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
             subscriber.next(true);
         });
 
-        subscriber.next(true);
+        subscriber.next(false);
 
         return () => observable.unsubscribe();
     });

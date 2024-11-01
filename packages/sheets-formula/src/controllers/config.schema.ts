@@ -49,7 +49,7 @@ export interface IUniverSheetsFormulaBaseConfig {
     /**
      * Define the calculation mode during initialization, default is `WHEN_EMPTY`
      */
-    calculationMode?: CalculationMode;
+    initialFormulaComputing?: CalculationMode;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};

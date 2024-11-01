@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
@@ -25,7 +25,7 @@ import type {
     ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
-import { Disposable, ICommandService, IConfigService, ILogService, Inject, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, ILogService, Inject, IUniverInstanceService } from '@univerjs/core';
 import {
     FormulaDataModel,
     FormulaExecutedStateType,
@@ -84,6 +84,8 @@ export class TriggerCalculationController extends Disposable {
 
     private _restartCalculation = false;
 
+    private _calculationMode: CalculationMode = CalculationMode.WHEN_EMPTY;
+
     /**
      * The mark of forced calculation. If a new mutation triggers dirty area calculation during the forced calculation process, forced calculation is still required.
      */
@@ -134,6 +136,9 @@ export class TriggerCalculationController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+        this._calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
 
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();
@@ -321,6 +326,11 @@ export class TriggerCalculationController extends Disposable {
                         this._forceCalculating = true;
                     }
 
+                    // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
+                    if (this._calculationMode === CalculationMode.NO_CALCULATION) {
+                        return;
+                    }
+
                     // When calculations are started multiple times in succession, only the first time is recognized
                     if (calculationProcessCount === 0) {
                         this._startExecutionTime = performance.now();
@@ -456,9 +466,7 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
-        const calculationMode = config?.calculationMode ?? CalculationMode.WHEN_EMPTY;
-        const params = this._getDiryDataByCalculationMode(calculationMode);
+        const params = this._getDiryDataByCalculationMode(this._calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
     }
 
@@ -466,7 +474,7 @@ export class TriggerCalculationController extends Disposable {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data
-        const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._getFormulaRanges() : [];
+        const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
 
         const dirtyNameMap: IDirtyUnitSheetNameMap = {};
         const dirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
@@ -483,83 +491,5 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
         };
-    }
-
-    /**
-     * Function to get all formula ranges
-     * @returns
-     */
-    private _getFormulaRanges(): IUnitRange[] {
-        const formulaData = this._formulaDataModel.getFormulaData();
-
-        const dirtyRanges: IUnitRange[] = [];
-
-        for (const unitId in formulaData) {
-            const workbook = formulaData[unitId];
-
-            if (!workbook) continue;
-
-            const workbookInstance = this._univerInstanceService.getUnit<Workbook>(unitId);
-
-            if (!workbookInstance) continue;
-
-            for (const sheetId in workbook) {
-                const sheet = workbook[sheetId];
-
-                if (!sheet) continue;
-
-                const sheetInstance = workbookInstance.getSheetBySheetId(sheetId);
-
-                if (!sheetInstance) continue;
-
-                // Object to store continuous cell ranges by column
-                const columnRanges: { [column: number]: { startRow: number; endRow: number }[] } = {};
-
-                for (const rowStr of Object.keys(sheet)) {
-                    const row = Number(rowStr);
-
-                    for (const columnStr in sheet[row]) {
-                        const column = Number(columnStr);
-
-                        const currentCell = sheetInstance.getCellRaw(row, column);
-                        // Calculation is only required when there is only a formula and no value
-                        if (!currentCell || !currentCell.f || ('v' in currentCell)) continue;
-
-                        if (!columnRanges[column]) columnRanges[column] = [];
-
-                        const lastRange = columnRanges[column].slice(-1)[0];
-
-                        // If the current row is continuous with the last range, extend endRow
-                        if (lastRange && lastRange.endRow === row - 1) {
-                            lastRange.endRow = row;
-                        } else {
-                            // Otherwise, start a new range
-                            columnRanges[column].push({ startRow: row, endRow: row });
-                        }
-                    }
-                }
-
-                // Convert collected column ranges to IUnitRange format
-                for (const column in columnRanges) {
-                    const currentColumnRanges = columnRanges[column];
-                    for (let i = 0; i < currentColumnRanges.length; i++) {
-                        const range = currentColumnRanges[i];
-                        dirtyRanges.push({
-                            unitId,
-                            sheetId,
-                            range: {
-                                rangeType: RANGE_TYPE.NORMAL,
-                                startRow: range.startRow,
-                                endRow: range.endRow, // Use endRow as the inclusive end row
-                                startColumn: Number(column),
-                                endColumn: Number(column),
-                            },
-                        });
-                    }
-                }
-            }
-        }
-
-        return dirtyRanges;
     }
 }

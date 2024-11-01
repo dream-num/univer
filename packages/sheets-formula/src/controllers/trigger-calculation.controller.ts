@@ -321,9 +321,21 @@ export class TriggerCalculationController extends Disposable {
             // eslint-disable-next-line max-lines-per-function, complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStartMutation.id) {
-                    const { forceCalculation } = command.params as ISetFormulaCalculationStartMutation;
+                    const { forceCalculation = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {} } = command.params as ISetFormulaCalculationStartMutation;
+
                     if (forceCalculation) {
                         this._forceCalculating = true;
+                    }
+
+                    if (
+                        dirtyRanges.length === 0 &&
+                        Object.keys(dirtyNameMap).length === 0 &&
+                        Object.keys(dirtyDefinedNameMap).length === 0 &&
+                        Object.keys(dirtyUnitFeatureMap).length === 0 &&
+                        Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
+                        forceCalculation === false
+                    ) {
+                        return;
                     }
 
                     // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start

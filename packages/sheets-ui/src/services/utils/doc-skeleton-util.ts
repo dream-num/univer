@@ -34,7 +34,7 @@ const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleto
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, !(end - range.startOffset === 1), range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -288,6 +288,6 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
             right: rect.right + canvasClientRect.left,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };

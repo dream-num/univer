@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
+import { InsertCellImageCommand, InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'sheet.menu.image';
@@ -41,5 +41,13 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         title: 'sheetImage.upload.float',
         type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
+    return {
+        id: InsertCellImageCommand.id,
+        title: 'sheetImage.upload.cell',
+        type: MenuItemType.BUTTON,
     };
 }

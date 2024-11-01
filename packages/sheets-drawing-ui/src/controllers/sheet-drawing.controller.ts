@@ -20,7 +20,7 @@ import { AddImageSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -61,6 +61,7 @@ export class SheetDrawingUIController extends Disposable {
     private _initCommands() {
         [
             InsertFloatImageCommand,
+            InsertCellImageCommand,
             InsertSheetDrawingCommand,
             RemoveSheetDrawingCommand,
             SetSheetDrawingCommand,

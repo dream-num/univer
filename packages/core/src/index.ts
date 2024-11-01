@@ -166,7 +166,7 @@ export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
 export { isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
-
+export { createDocumentModelWithStyle } from './sheets/util';
 // #endregion
 
 export { getWorksheetUID, Workbook } from './sheets/workbook';

@@ -21,10 +21,11 @@ import type { WorkbookSelections } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
@@ -162,7 +163,116 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         } as IInsertDrawingCommandParams);
     }
 
-    private async _insertCellImage(file: File) {}
+    // eslint-disable-next-line max-lines-per-function
+    private async _insertCellImage(file: File) {
+        let imageParam: Nullable<IImageIoServiceParam>;
+        try {
+            imageParam = await this._imageIoService.saveImage(file);
+        } catch (error) {
+            const type = (error as Error).message;
+            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImageType'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImage'),
+                });
+            }
+        }
+
+        if (imageParam == null) {
+            return;
+        }
+
+        const { imageId, imageSourceType, source, base64Cache } = imageParam;
+        const { width, height, image } = await getImageSize(base64Cache || '');
+        this._imageIoService.addImageSourceCache(source, imageSourceType, image);
+
+        // let scale = 1;
+        // if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+            // const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+            // const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
+            // scale = Math.max(scaleWidth, scaleHeight);
+        // }
+
+        const docTransform = {
+            size: {
+                width,
+                height,
+            },
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.PAGE,
+                posOffset: 0,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                posOffset: 0,
+            },
+            angle: 0,
+        };
+
+        const docDataModel = createDocumentModelWithStyle('', {});
+        const docDrawingParam = {
+            unitId: docDataModel.getUnitId(),
+            subUnitId: docDataModel.getUnitId(),
+            drawingId: imageId,
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            imageSourceType,
+            source,
+            transform: docDrawingPositionToTransform(docTransform),
+            docTransform,
+            behindDoc: BooleanNumber.FALSE,
+            title: '',
+            description: '',
+            layoutType: PositionedObjectLayoutType.INLINE, // Insert inline drawing by default.
+            wrapText: WrapTextType.BOTH_SIDES,
+            distB: 0,
+            distL: 0,
+            distR: 0,
+            distT: 0,
+        };
+
+        const jsonXActions = BuildTextUtils.drawing.add({
+            documentDataModel: docDataModel,
+            drawings: [docDrawingParam],
+            selection: {
+                collapsed: true,
+                startOffset: 0,
+                endOffset: 0,
+            },
+        });
+
+        if (jsonXActions) {
+            docDataModel.apply(jsonXActions);
+
+            const selection = this._workbookSelections.getCurrentLastSelection();
+            if (selection) {
+                // console.log('==set', docDataModel.getSnapshot());
+                this._commandService.executeCommand(SetRangeValuesCommand.id, {
+                    value: {
+                        p: docDataModel.getSnapshot(),
+                    },
+                    range: [{
+                        startRow: selection.primary.actualRow,
+                        endRow: selection.primary.actualRow,
+                        startColumn: selection.primary.actualColumn,
+                        endColumn: selection.primary.actualColumn,
+                    }],
+                });
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private _getUnitInfo() {
         const workbook = this._context.unit;

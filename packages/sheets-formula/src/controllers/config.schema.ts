@@ -26,17 +26,17 @@ export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 
 export enum CalculationMode {
     /**
-     * Forced calculation
+     * Force calculation of all formulas
      */
     FORCED,
 
     /**
-     * Calculate when the data is empty
+     * Partial calculation, only cells with formulas but no v values are calculated
      */
     WHEN_EMPTY,
 
     /**
-     * No calculation
+     * All formulas are not calculated
      */
     NO_CALCULATION,
 }
@@ -47,7 +47,7 @@ export interface IUniverSheetsFormulaBaseConfig {
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 
     /**
-     * Calculation mode, default is `WHEN_EMPTY`
+     * Define the calculation mode during initialization, default is `WHEN_EMPTY`
      */
     calculationMode?: CalculationMode;
 }

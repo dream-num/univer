@@ -14,45 +14,18 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocumentData } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
-import { DataStreamTreeTokenType, Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-
-function findFirstCursorOffset(snapshot: IDocumentData) {
-    const { dataStream } = snapshot.body ?? {};
-    const EXCLUDE_TOKENS: string[] = [
-        DataStreamTreeTokenType.TABLE_START,
-        DataStreamTreeTokenType.TABLE_CELL_END,
-        DataStreamTreeTokenType.TABLE_CELL_START,
-        DataStreamTreeTokenType.TABLE_END,
-        DataStreamTreeTokenType.TABLE_ROW_END,
-        DataStreamTreeTokenType.TABLE_ROW_START,
-        DataStreamTreeTokenType.COLUMN_BREAK,
-        DataStreamTreeTokenType.PAGE_BREAK,
-        DataStreamTreeTokenType.TAB,
-        DataStreamTreeTokenType.DOCS_END,
-        DataStreamTreeTokenType.CUSTOM_BLOCK,
-    ];
-
-    if (typeof dataStream === 'string') {
-        for (let i = 0; i < dataStream.length; i++) {
-            const char = dataStream[i];
-            if (!EXCLUDE_TOKENS.includes(char)) {
-                return i;
-            }
-        }
-    }
-
-    return 0;
-}
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();

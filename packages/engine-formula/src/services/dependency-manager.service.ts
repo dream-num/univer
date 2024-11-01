@@ -44,7 +44,7 @@ export interface IDependencyManagerService {
     addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
-    searchDependency(search: IUnitRange[]): Set<number>;
+    searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
     getLastTreeId(): number;
 
@@ -80,8 +80,8 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         this.reset();
     }
 
-    searchDependency(search: IUnitRange[]): Set<number> {
-        return this._dependencyRTreeCache.bulkSearch(search) as Set<number>;
+    searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number> {
+        return this._dependencyRTreeCache.bulkSearch(search, exceptTreeIds) as Set<number>;
     }
 
     reset() {

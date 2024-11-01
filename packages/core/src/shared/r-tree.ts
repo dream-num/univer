@@ -250,10 +250,13 @@ export class RTree {
         }
     }
 
-    bulkSearch(searchList: IUnitRange[]): Set<StringOrNumber> {
+    bulkSearch(searchList: IUnitRange[], exceptTreeIds?: Set<number>): Set<StringOrNumber> {
         const result = new Set<StringOrNumber>();
         for (const search of searchList) {
             for (const item of this.searchGenerator(search)) {
+                if (exceptTreeIds?.has(item as number) === true) {
+                    continue;
+                }
                 result.add(item);
             }
         }

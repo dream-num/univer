@@ -1001,13 +1001,13 @@ export class FormulaDependencyGenerator extends Disposable {
     //     return formulaRunList.reverse();
     // }
 
-    private *_traverse(treeList: IFormulaDependencyTree[]) {
-        const stack = treeList.slice();
+    private *_traverse(treeList: IFormulaDependencyTree[], skippedTreeIds: Set<number>) {
+        const stack = treeList;
         const cacheStack: Set<IFormulaDependencyTree> = new Set();
 
         while (stack.length > 0) {
             const tree = stack.pop();
-
+            cacheStack.clear();
             if (tree === undefined || tree.isSkip()) {
                 continue;
             }
@@ -1015,12 +1015,11 @@ export class FormulaDependencyGenerator extends Disposable {
             if (tree.isAdded()) {
                 yield tree;
                 tree.setSkip();
+                skippedTreeIds.add(tree.treeId);
                 continue;
             }
 
-            cacheStack.clear();
-
-            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
+            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem(), skippedTreeIds);
 
             for (const parentTreeId of searchResults) {
                 const parentTree = this._dependencyTreeCache.get(parentTreeId);
@@ -1038,6 +1037,7 @@ export class FormulaDependencyGenerator extends Disposable {
             if (cacheStack.size === 0) {
                 yield tree;
                 tree.setSkip();
+                skippedTreeIds.add(tree.treeId);
             } else {
                 tree.setAdded();
                 stack.push(tree);
@@ -1047,12 +1047,15 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        stack.length = 0;
+
         cacheStack.clear();
     }
 
     private _calculateRunList(treeList: IFormulaDependencyTree[]) {
         const formulaRunList = [];
-        for (const tree of this._traverse(treeList)) {
+        const skippedTreeIds = new Set<number>();
+        for (const tree of this._traverse(treeList, skippedTreeIds)) {
             formulaRunList.push(tree);
         }
 

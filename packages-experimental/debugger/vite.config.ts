@@ -11,7 +11,7 @@ export default ({ mode }) => createViteConfig({
         react: true,
         css: true,
         dom: true,
-        vue: true,
+        umd: 'ignore',
     },
 });
 

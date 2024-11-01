@@ -22,6 +22,7 @@ export { MoreFunctionsOperation } from './commands/operations/more-functions.ope
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
 export { RangeSelector } from './views/range-selector/index';
+export { FormulaEditor } from './views/formula-editor/index';
 export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 
 // #region - all commands

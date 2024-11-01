@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { forecastLinear, getTwoArrayNumberValues } from '../../../basics/statistical';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Intercept extends BaseFunction {
     override minParams = 2;
@@ -54,7 +54,7 @@ export class Intercept extends BaseFunction {
         }
 
         if (knownYsRowCount * knownYsColumnCount === 1 || knownXsRowCount * knownXsColumnCount === 1) {
-            if (knownYs.isNull() || knownXs.isNull()) {
+            if (_knownYs.isNull() || _knownXs.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 

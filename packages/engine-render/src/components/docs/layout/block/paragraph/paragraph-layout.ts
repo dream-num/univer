@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { ILayoutContext } from '../../tools';
 import { DataStreamTreeNodeType } from '@univerjs/core';
 import { clearFontCreateConfigCache } from '../../tools';
 import { createTableSkeleton } from '../table';
 import { lineAdjustment } from './line-adjustment';
 import { lineBreaking } from './linebreaking';
 import { shaping } from './shaping';
-import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { ILayoutContext } from '../../tools';
 
 export function dealWidthParagraph(
     ctx: ILayoutContext,

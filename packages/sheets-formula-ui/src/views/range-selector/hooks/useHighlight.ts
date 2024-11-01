@@ -81,7 +81,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
             selectionWithStyle.push({
                 range,
-                primary: undefined,
+                primary: null,
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }
@@ -90,24 +90,19 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
     useEffect(() => {
         const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-        if (skeleton) {
+        if (skeleton && isNeed) {
             const allControls = refSelectionsRenderService?.getSelectionControls() || [];
             if (allControls.length === ranges.length) {
                 allControls.forEach((control, index) => {
                     const selection = ranges[index];
-                    const primaryCell = skeleton.getCellByIndex(selection.range.startRow, selection.range.startColumn);
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), primaryCell);
+                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
                     control.updateStyle(selection.style!);
                 });
             } else {
                 refSelectionsService.setSelections(ranges);
             }
         }
-    }, [ranges, sheetSkeletonManagerService]);
-
-    useEffect(() => () => {
-        refSelectionsService.setSelections([]);
-    }, []);
+    }, [ranges, isNeed]);
 }
 
 export function useDocHight(editorId: string, sequenceNodes: (string | ISequenceNode)[]) {

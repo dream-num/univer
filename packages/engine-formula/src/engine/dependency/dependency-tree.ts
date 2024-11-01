@@ -23,9 +23,6 @@ import type {
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
-import type { AstRootNode } from '../ast-node/ast-root-node';
-import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
-
 import { type IRange, type IUnitRange, moveRangeByOffset, type Nullable } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -83,10 +80,7 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     refOffsetX: number = -1;
     refOffsetY: number = -1;
     isCache: boolean = false;
-
-    get node() {
-        return this.refTree?.node;
-    }
+    isDirty: boolean = false;
 
     get isVirtual() {
         return true;
@@ -134,6 +128,10 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
         return this.refTree.subUnitId;
     }
 
+    get formula() {
+        return this.refTree?.formula ?? '';
+    }
+
     dispose() {
         this.refTree = null;
     }
@@ -152,14 +150,6 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
             });
         }
         return unitRangeList;
-    }
-
-    get nodeData() {
-        return {
-            node: this.node,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
-        };
     }
 
     toRTreeItem(): IUnitRange[] {
@@ -278,7 +268,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     unitId: string = '';
 
-    node: Nullable<AstRootNode>;
     rangeList: IUnitRange[] = [];
 
     formula: string = '';
@@ -291,6 +280,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     columnCount: number = Number.NEGATIVE_INFINITY;
 
+    isDirty: boolean = false;
+
     constructor(treeId: number) {
         super();
         this.treeId = treeId;
@@ -298,14 +289,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     get isVirtual() {
         return false;
-    }
-
-    get nodeData(): IExecuteAstNodeData {
-        return {
-            node: this.node,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
-        };
     }
 
     toJson() {
@@ -324,8 +307,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         this.rangeList = [];
 
         // this.nodeData?.node.dispose();
-
-        this.node = null;
 
         this.getDirtyData = null;
     }

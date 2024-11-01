@@ -15,6 +15,7 @@
  */
 
 import type { IRange, IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
+import type { AstRootNode } from '../engine/ast-node';
 import type { FormulaDependencyTree, IFormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
@@ -41,7 +42,7 @@ export interface IDependencyManagerService {
     clearFormulaDependency(unitId: string, sheetId?: string): void;
 
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
-    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree): void;
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>): void;
 
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
     searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
@@ -417,9 +418,9 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         treeSet.add(treeId);
     }
 
-    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree) {
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>) {
         const treeId = tree.treeId;
-        const node = tree.node;
+        // const node = tree.node;
 
         const definedNames = node?.getDefinedNames() || [];
 

@@ -17,11 +17,9 @@
 import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IFeatureDirtyRangeType, IFormulaData, IFormulaDataItem, IOtherFormulaData, IUnitData } from '../../basics/common';
 
-import type { ErrorType } from '../../basics/error-type';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { LexerNode } from '../analysis/lexer-node';
 import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
@@ -30,7 +28,6 @@ import type { PreCalculateNodeType } from '../utils/node-type';
 import type { IFormulaDependencyTree } from './dependency-tree';
 import { Disposable, Inject, ObjectMatrix } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
@@ -39,9 +36,9 @@ import { IOtherFormulaManagerService } from '../../services/other-formula-manage
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { Lexer } from '../analysis/lexer';
 import { AstTreeBuilder } from '../analysis/parser';
-import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
+import { generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
 import { FormulaDependencyTree, FormulaDependencyTreeType, FormulaDependencyTreeVirtual } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 5000;
@@ -214,6 +211,9 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
+            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
+            tree.isDirty = this._includeTree(tree, node);
+
             if (tree.isVirtual) {
                 continue;
             }
@@ -227,7 +227,11 @@ export class FormulaDependencyGenerator extends Disposable {
                 tree.unitId
             );
 
-            const rangeList = await this._getRangeListByNode(tree.nodeData);
+            const rangeList = await this._getRangeListByNode({
+                node,
+                refOffsetX: tree.refOffsetX,
+                refOffsetY: tree.refOffsetY,
+            });
             (tree as FormulaDependencyTree).pushRangeList(rangeList);
         }
 
@@ -334,7 +338,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     if (hasOtherFormula) {
                         isCache = true;
                     }
-                    const node = this._generateAstNode(unitId, formulaString);
+                    // const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
                     const { firstRow, firstColumn } = this._getFirstCellOfRange(ranges);
 
                     const treeMatrix = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
@@ -350,7 +354,7 @@ export class FormulaDependencyGenerator extends Disposable {
                                 const x = c - firstColumn;
                                 const y = r - firstRow;
                                 if (x === 0 && y === 0) {
-                                    firstFDtree.node = node;
+                                    // firstFDtree.node = node;
                                     firstFDtree.formula = formulaString;
                                     firstFDtree.unitId = unitId;
                                     firstFDtree.subUnitId = subUnitId;
@@ -480,9 +484,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const sheetItem = unitData[unitId][sheetId];
 
-        const node = this._generateAstNode(unitId, formulaString);
+        // const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
 
-        FDtree.node = node;
+        // FDtree.node = node;
         FDtree.formula = formulaString;
         FDtree.unitId = unitId;
         FDtree.subUnitId = sheetId;
@@ -527,36 +531,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
             this._addFlattenCache(unitId, sheetId, range);
         }
-    }
-
-    private _generateAstNode(unitId: string, formulaString: string): AstRootNode {
-        // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
-        let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}`);
-
-        if (astNode && !this._isDirtyDefinedForNode(astNode)) {
-            // astNode.setRefOffset(refOffsetX, refOffsetY);
-            return astNode;
-        }
-
-        const lexerNode = this._lexer.treeBuilder(formulaString);
-
-        if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
-            return ErrorNode.create(lexerNode as ErrorType);
-        }
-
-        // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-
-        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
-
-        if (astNode == null) {
-            throw new Error('astNode is null');
-        }
-
-        // astNode.setRefOffset(refOffsetX, refOffsetY);
-
-        this._formulaASTCache.set(`${unitId}${formulaString}`, astNode);
-
-        return astNode;
     }
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
@@ -711,22 +685,6 @@ export class FormulaDependencyGenerator extends Disposable {
         return rangeList;
     }
 
-    private _isDirtyDefinedForNode(node: BaseAstNode) {
-        const definedNameMap = this._currentConfigService.getDirtyDefinedNameMap();
-        const executeUnitId = this._currentConfigService.getExecuteUnitId();
-        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
-            const names = Object.keys(definedNameMap[executeUnitId]!);
-            for (let i = 0, len = names.length; i < len; i++) {
-                const name = names[i];
-                if (node.hasDefinedName(name)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     /**
      * Build a formula dependency tree based on the dependency relationships.
      * @param treeList
@@ -752,12 +710,12 @@ export class FormulaDependencyGenerator extends Disposable {
             if (
                 (
                     forceCalculate ||
+                    tree.isDirty ||
                     tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) || //O(n) n=tree.rangeList.length
                     (
                         treeIds.has(treeId)// O(1)
                         && !tree.isExcludeRange(this._currentConfigService.getExcludedRange()) //worst O(n^2), best O(n)  n^2=tree.rangeList.length*excludedRange.length, excludedRange.length is usually small
-                    ) ||
-                    this._includeTree(tree) //O(n) n=tree.rangeList.length
+                    )
                 ) && !existTree.has(treeId) //O(1)
             ) {
                 newTreeList.push(tree);
@@ -835,23 +793,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    private _includeDefinedName(tree: IFormulaDependencyTree) {
-        /**
-         * Detect whether the dirty map contains a defined name.
-         */
-        const node = tree.nodeData?.node;
-        if (node != null) {
-            const dirtyDefinedName = this._isDirtyDefinedForNode(node);
-            if (dirtyDefinedName) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private _detectForcedRecalculationNode(tree: IFormulaDependencyTree) {
-        const node = tree.nodeData?.node;
-
+    private _detectForcedRecalculationNode(tree: IFormulaDependencyTree, node: Nullable<BaseAstNode>) {
         if (node == null) {
             return false;
         }
@@ -880,14 +822,14 @@ export class FormulaDependencyGenerator extends Disposable {
      * If they are within the dirty area, return true, indicating that this node needs to be calculated.
      * @param tree
      */
-    private _includeTree(tree: IFormulaDependencyTree) {
+    private _includeTree(tree: IFormulaDependencyTree, node: BaseAstNode) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
 
         /**
          * RAND, RANDBETWEEN, NOW, TODAY are volatile functions that are marked dirty and recalculated every time a calculation occurs.
          */
-        if (this._detectForcedRecalculationNode(tree) === true) {
+        if (this._detectForcedRecalculationNode(tree, node) === true) {
             return true;
         }
 
@@ -899,7 +841,7 @@ export class FormulaDependencyGenerator extends Disposable {
             return true;
         }
 
-        if (this._includeDefinedName(tree) === true) {
+        if (includeDefinedName(tree, node, this._currentConfigService) === true) {
             return true;
         }
 

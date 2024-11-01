@@ -16,9 +16,9 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { IStyleBase } from '@univerjs/core';
+import type { CellValue, IObjectMatrixPrimitiveType, IStyleBase, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
-import type { ICalculateUnit } from './type';
+import type { ICalculateUnit, IContext } from './type';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import dayjs from 'dayjs';
@@ -31,6 +31,11 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.highlightCell,
     handle: async (rule: IConditionFormattingRule, context) => {
         const ruleConfig = rule.rule as IHighlightCell;
+
+        if (ruleConfig.subType === CFSubRuleType.formula) {
+            return handleFormula(rule, context);
+        }
+
         const { worksheet } = context;
         const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
 
@@ -382,3 +387,70 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
         return computeResult;
     },
 };
+
+/**
+ * Handle formula type
+ * @param rule
+ * @param context
+ * @returns
+ */
+function handleFormula(rule: IConditionFormattingRule, context: IContext): ObjectMatrix<IStyleBase> {
+    const subRuleConfig = rule.rule as IFormulaHighlightCell;
+
+    // get current formula
+    const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
+    const formulaString = subRuleConfig.value;
+    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+
+    // get current range list
+    const { worksheet, unitId, subUnitId } = context;
+    const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
+
+    const computeResult = new ObjectMatrix<IStyleBase>();
+
+    if (!sequenceNodes) {
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                // Returns an empty property indicating that it has been processed.
+                computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
+            });
+        });
+
+        return computeResult;
+    }
+
+    const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
+
+    conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, rule.cfId, formulaString, ranges);
+
+    ranges.forEach((range) => {
+        Range.foreach(range, (row, col) => {
+            const formulaItem = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
+
+            let result = false;
+            if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
+                const itemResult = formulaItem.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>;
+
+                if (Tools.isObject(itemResult)) {
+                    result = itemResult[row]?.[col] === true;
+                }
+            } else {
+                // If the formula triggers the calculation, wait for the result,
+                // and use the previous style cache until the result comes out
+                const cache = conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId);
+                const style = cache?.getValue(row, col);
+                result = style !== EMPTY_STYLE;
+            }
+
+            if (result) {
+                computeResult.setValue(row, col, subRuleConfig.style);
+            } else {
+                // Returns an empty property indicating that it has been processed.
+                computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
+            }
+        });
+    });
+
+    return computeResult;
+}
+

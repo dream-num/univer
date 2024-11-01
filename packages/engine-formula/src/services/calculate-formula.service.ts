@@ -127,6 +127,8 @@ export class CalculateFormulaService extends Disposable {
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
 
         CELL_INVERTED_INDEX_CACHE.clear();
+
+        this._runtimeService.reset();
     }
 
     private async _execute() {
@@ -314,7 +316,7 @@ export class CalculateFormulaService extends Disposable {
                 }
 
                 if (tree.formulaId != null) {
-                    this._runtimeService.setRuntimeOtherData(tree.formulaId, value);
+                    this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {
                     this._runtimeService.setRuntimeData(value);
                 }
@@ -331,7 +333,7 @@ export class CalculateFormulaService extends Disposable {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
-        this._runtimeService.clearReferenceAndNumberformatCache();
+        treeList.length = 0;
 
         return this._runtimeService.getAllRuntimeData();
     }

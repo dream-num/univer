@@ -149,11 +149,11 @@ export class ListValidator extends BaseDataValidator {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
         const { formula1 = '' } = rule;
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1));
 
         return {
-            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
+            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1),
             formula2: undefined,
             isFormulaValid,
         };
@@ -186,7 +186,7 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
     async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
@@ -201,7 +201,7 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
     getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {

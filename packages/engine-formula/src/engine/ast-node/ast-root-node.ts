@@ -32,6 +32,7 @@ export class AstRootNode extends BaseAstNode {
 
         if (children.length > 1) {
             this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+
             return;
         }
 

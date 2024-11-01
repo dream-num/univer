@@ -47,7 +47,7 @@ export class FunctionNode extends BaseAstNode {
         private _runtimeService: IFormulaRuntimeService,
         private _definedNamesService: IDefinedNamesService
     ) {
-        super(token);
+        super('');
 
         if (this._functionExecutor.isAsync()) {
             this.setAsync();
@@ -78,7 +78,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
             if (object == null) {
                 continue;
             }
@@ -100,6 +101,7 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result);
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -111,7 +113,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
 
             if (object == null) {
                 continue;
@@ -298,6 +301,7 @@ export class ErrorFunctionNode extends BaseAstNode {
 
     override async executeAsync() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -337,7 +341,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._runtimeService);
 
         if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
             return ErrorNode.create(ErrorType.VALUE);

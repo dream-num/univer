@@ -432,7 +432,7 @@ export class BooleanValueObject extends BaseValueObject {
     }
 }
 
-const NUMBER_CACHE_LRU_COUNT = 200000;
+const NUMBER_CACHE_LRU_COUNT = 100000;
 
 export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBER_CACHE_LRU_COUNT);
 

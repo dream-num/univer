@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 3.8.0
-        version: 3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@commitlint/cli':
         specifier: ^19.5.0
         version: 19.5.0(@types/node@22.8.4)(typescript@5.6.3)
@@ -1982,16 +1982,16 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.1
-        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.0.5
-        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-cell-image-ui:
     dependencies:
       '@univerjs/icons':
         specifier: latest
-        version: 0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2022,10 +2022,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.1
-        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.0.5
-        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -5403,8 +5403,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/icons@0.2.2':
-    resolution: {integrity: sha512-cG8hDoPESqxoDMcCktqnN4tHUxC/oVgCJE2gBDJnqFf3zvJeudVnDx3AATh0ulkx2QWU7Q1YBaNCXRAei4S1WQ==}
+  '@univerjs/icons@0.2.3':
+    resolution: {integrity: sha512-R+jpVrAvb4NtC08BcidmFSxbZD+2zYUEGfNiwMuckXYF/Xk7qoSkmUVMrzEbxDkGMxqPYxyS6L4AGryg5nxuWQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -10771,7 +10771,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
-  '@antfu/eslint-config@3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@antfu/eslint-config@3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -10780,7 +10780,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.9.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/parser': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
-      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.13.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.13.0(jiti@1.21.6))
       eslint-flat-config-utils: 0.4.0
@@ -12778,7 +12778,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/icons@0.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@univerjs/icons@0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -12820,7 +12820,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@typescript-eslint/utils': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       eslint: 9.13.0(jiti@1.21.6)

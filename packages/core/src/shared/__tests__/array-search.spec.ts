@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { binSearchFirstGreaterThanTarget, orderSearchArray, searchArray } from '../array-search';
+import { binSearchFirstGreaterThanTarget, searchArray, searchInOrderedArray } from '../array-search';
 
 describe('test searchArray function', () => {
     const array = [0, 1, 2, 3, 4, 4, 4, 5, 5, 5];
@@ -26,14 +26,18 @@ describe('test searchArray function', () => {
         expect(searchArray(array, 4)).toBe(array.indexOf(5));
         expect(searchArray(array, 5)).toBe(array.length - 1);
         expect(searchArray(array, 8)).toBe(array.length - 1);
+
+        expect(searchArray(array, 4, true)).toBe(array.indexOf(5));
+        expect(searchArray(array, 5, true)).toBe(array.indexOf(5));
+        expect(searchArray(array, 8, true)).toBe(array.indexOf(5));
     });
 
-    it('orderSearchArray test', () => {
-        expect(orderSearchArray(array, -1)).toBe(array.indexOf(0));
-        expect(orderSearchArray(array, 0)).toBe(array.indexOf(1));
-        expect(orderSearchArray(array, 4)).toBe(array.indexOf(5));
-        expect(orderSearchArray(array, 5)).toBe(array.length - 1);
-        expect(orderSearchArray(array, 8)).toBe(array.length - 1);
+    it('searchInOrderedArray test', () => {
+        expect(searchInOrderedArray(array, -1)).toBe(array.indexOf(0));
+        expect(searchInOrderedArray(array, 0)).toBe(array.indexOf(1));
+        expect(searchInOrderedArray(array, 4)).toBe(array.indexOf(5));
+        expect(searchInOrderedArray(array, 5)).toBe(array.length - 1);
+        expect(searchInOrderedArray(array, 8)).toBe(array.length - 1);
     });
 
     it('binSearchFirstGreaterThanTarget test', () => {

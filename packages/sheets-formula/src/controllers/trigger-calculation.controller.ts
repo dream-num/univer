@@ -320,6 +320,26 @@ export class TriggerCalculationController extends Disposable {
                     if (forceCalculation) {
                         this._forceCalculating = true;
                     }
+
+                    // When calculations are started multiple times in succession, only the first time is recognized
+                    if (calculationProcessCount === 0) {
+                        this._startExecutionTime = performance.now();
+                    }
+
+                    // Increment the calculation process count and assign a new ID
+                    calculationProcessCount++;
+
+                    // Clear any existing timer to prevent duplicate executions
+                    if (startDependencyTimer !== null) {
+                        clearTimeout(startDependencyTimer);
+                        startDependencyTimer = null;
+                    }
+
+                    // If the total calculation time exceeds 1s, a progress bar is displayed.
+                    startDependencyTimer = setTimeout(() => {
+                        startDependencyTimer = null;
+                        this._startProgress();
+                    }, 1000);
                 } else if (command.id === SetFormulaCalculationStopMutation.id) {
                     this.clearProgress();
                 }
@@ -335,27 +355,7 @@ export class TriggerCalculationController extends Disposable {
                         stage,
                     } = params.stageInfo;
 
-                    if (stage === FormulaExecuteStageType.START) {
-                        // When calculations are started multiple times in succession, only the first time is recognized
-                        if (calculationProcessCount === 0) {
-                            this._startExecutionTime = performance.now();
-                        }
-
-                        // Increment the calculation process count and assign a new ID
-                        calculationProcessCount++;
-
-                        // Clear any existing timer to prevent duplicate executions
-                        if (startDependencyTimer !== null) {
-                            clearTimeout(startDependencyTimer);
-                            startDependencyTimer = null;
-                        }
-
-                        // If the total calculation time exceeds 1s, a progress bar is displayed.
-                        startDependencyTimer = setTimeout(() => {
-                            startDependencyTimer = null;
-                            this._startProgress();
-                        }, 1000);
-                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                    if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {

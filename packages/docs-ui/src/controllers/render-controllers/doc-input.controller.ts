@@ -74,9 +74,10 @@ export class DocInputController extends Disposable implements IRenderModule {
             const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
             // Insert content's style should follow the text style of the current position.
+            const defaultTextStyle = this._docMenuStyleService.getDefaultStyle();
             const cacheStyle = this._docMenuStyleService.getStyleCache();
-            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, cacheStyle);
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
+            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, defaultTextStyle, cacheStyle);
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,

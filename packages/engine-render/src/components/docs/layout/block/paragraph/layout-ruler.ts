@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import type { INumberUnit, IParagraphProperties, IParagraphStyle, Nullable } from '@univerjs/core';
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type {
+    ILayoutContext,
+} from '../../tools';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -46,20 +60,6 @@ import {
     mergeByV,
 } from '../../tools';
 import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
-import type {
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSection,
-    IDocumentSkeletonTable,
-} from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type {
-    ILayoutContext,
-} from '../../tools';
 
 export function layoutParagraph(
     ctx: ILayoutContext,

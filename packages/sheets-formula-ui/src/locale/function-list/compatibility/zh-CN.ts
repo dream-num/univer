@@ -220,8 +220,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 GAMMADIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     GAMMAINV: {
@@ -234,8 +236,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与伽玛分布相关的概率。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
         },
     },
     HYPGEOMDIST: {
@@ -248,13 +251,16 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '样本成功次数', detail: '样本中成功的次数。' },
+            numberSample: { name: '样本大小', detail: '样本大小。' },
+            populationS: { name: '总体成功次数', detail: '总体中成功的次数。' },
+            numberPop: { name: '总体大小', detail: '总体大小。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 HYPGEOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     LOGINV: {
-        description: '返回对数累积分布函数的反函数',
-        abstract: '返回对数累积分布函数的反函数',
+        description: '返回对数正态累积分布的反函数',
+        abstract: '返回对数正态累积分布的反函数',
         links: [
             {
                 title: '教学',
@@ -262,13 +268,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于对数正态分布的概率。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
         },
     },
     LOGNORMDIST: {
-        description: '返回对数累积分布函数',
-        abstract: '返回对数累积分布函数',
+        description: '返回对数正态累积分布',
+        abstract: '返回对数正态累积分布',
         links: [
             {
                 title: '教学',
@@ -276,8 +283,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 LOGNORMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     MODE: {
@@ -290,8 +299,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算众数的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算众数的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     NEGBINOMDIST: {
@@ -304,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: '失败次数', detail: '失败的次数。' },
+            numberS: { name: '成功次数', detail: '成功次数的阈值。' },
+            probabilityS: { name: '成功概率', detail: '成功的概率。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NEGBINOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORMDIST: {
@@ -366,8 +377,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: '返回区域中数值的第 k 个百分点的值',
-        abstract: '返回区域中数值的第 k 个百分点的值',
+        description: '返回数据集中第 k 个百分点的值 (包含 0 和 1)',
+        abstract: '返回数据集中第 k 个百分点的值 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -375,13 +386,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '定义相对位置的数组或数据区域。' },
+            k: { name: 'k', detail: '0 到 1 之间的百分点值 (包含 0 和 1)。' },
         },
     },
     PERCENTRANK: {
-        description: '返回数据集中值的百分比排位',
-        abstract: '返回数据集中值的百分比排位',
+        description: '返回数据集中值的百分比排位 (包含 0 和 1)',
+        abstract: '返回数据集中值的百分比排位 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -389,8 +400,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '定义相对位置的数组或数据区域。' },
+            x: { name: 'x', detail: '需要得到其排位的值。' },
+            significance: { name: '有效位数', detail: '用于标识返回的百分比值的有效位数的值。 如果省略，则 PERCENTRANK 使用 3 位小数 (0.xxx)。' },
         },
     },
     POISSON: {
@@ -403,13 +415,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 POISSON 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     QUARTILE: {
-        description: '返回一组数据的四分位点',
-        abstract: '返回一组数据的四分位点',
+        description: '返回数据集的四分位数 (包含 0 和 1)',
+        abstract: '返回数据集的四分位数 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -417,8 +430,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要求得四分位数值的数组或数据区域。' },
+            quart: { name: '四分位值', detail: '要返回的四分位数值。' },
         },
     },
     RANK: {
@@ -465,8 +478,8 @@ export default {
         },
     },
     TDIST: {
-        description: '返回学生 t-分布',
-        abstract: '返回学生 t-分布',
+        description: '返回学生的 t 概率分布',
+        abstract: '返回学生的 t 概率分布',
         links: [
             {
                 title: '教学',
@@ -474,13 +487,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
+            tails: { name: '尾部特性', detail: '指定返回的分布函数是单尾分布还是双尾分布。 如果 Tails = 1，则 TDIST 返回单尾分布。 如果Tails = 2，则 TDIST 返回双尾分布。' },
         },
     },
     TINV: {
-        description: '返回学生 t-分布的反函数',
-        abstract: '返回学生 t-分布的反函数',
+        description: '返回学生的 t 概率分布的反函数 (双尾)',
+        abstract: '返回学生的 t 概率分布的反函数 (双尾)',
         links: [
             {
                 title: '教学',
@@ -488,8 +502,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与学生的 t 分布相关的概率。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     TTEST: {
@@ -502,8 +516,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
+            tails: { name: '尾部特性', detail: '指定分布尾数。 如果 tails = 1，则 TTEST 使用单尾分布。 如果 tails = 2，则 TTEST 使用双尾分布。' },
+            type: { name: '检验类型', detail: '要执行的 t 检验的类型。' },
         },
     },
     VAR: {
@@ -544,8 +560,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 WEIBULL 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     ZTEST: {
@@ -558,8 +576,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '用来检验 x 的数组或数据区域。' },
+            x: { name: 'x', detail: '要测试的值。' },
+            sigma: { name: '标准偏差', detail: '总体（已知）标准偏差。 如果省略，则使用样本标准偏差。' },
         },
     },
 };

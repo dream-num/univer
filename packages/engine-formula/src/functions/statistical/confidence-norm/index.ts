@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { normalINV } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class ConfidenceNorm extends BaseFunction {
     override minParams = 3;
@@ -48,6 +48,18 @@ export class ConfidenceNorm extends BaseFunction {
         const resultArray = alphaArray.mapValue((alphaObject, rowIndex, columnIndex) => {
             const standardDevObject = standardDevArray.get(rowIndex, columnIndex) as BaseValueObject;
             const sizeObject = sizeArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
+
+            if (standardDevObject.isError()) {
+                return standardDevObject;
+            }
+
+            if (sizeObject.isError()) {
+                return sizeObject;
+            }
 
             const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(alphaObject, standardDevObject, sizeObject);
 

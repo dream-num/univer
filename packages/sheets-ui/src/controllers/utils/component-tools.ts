@@ -122,7 +122,7 @@ export function getCoordByOffset(
         scaleX,
         scaleY,
         scrollXY,
-        closeFirst
+        { closeFirst }
     );
 
     const { row, column } = moveActualSelection;

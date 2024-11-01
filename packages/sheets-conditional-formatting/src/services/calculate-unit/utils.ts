@@ -89,7 +89,7 @@ export const serialTimeToTimestamp = (value: number) => {
     return result;
 };
 // eslint-disable-next-line max-lines-per-function
-export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>, context: IContext & { cfId: string }, ranges: IRange[]) => {
+export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>, context: IContext & { cfId: string }) => {
     switch (value.type) {
         case CFValueType.max: {
             let max = 0;
@@ -158,8 +158,8 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
             const { accessor, unitId, subUnitId, cfId } = context;
             const formulaText = String(value.value);
             const conditionalFormattingFormulaService = accessor.get(ConditionalFormattingFormulaService);
-            conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, cfId, formulaText, ranges);
-            const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaText);
+            conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, cfId, formulaText);
+            const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, cfId, formulaText);
             return result;
         }
         case CFValueType.num: {
@@ -308,12 +308,4 @@ export function getMaxInFormulaResult(result: IObjectMatrixPrimitiveType<Nullabl
         max = Math.max(Number.isNaN(max) ? 0 : max, Number(value));
     });
     return max;
-}
-
-export function getMinInFormulaResult(result: IObjectMatrixPrimitiveType<Nullable<CellValue>>) {
-    let min = 0;
-    new ObjectMatrix(result).forValue((row, col, value) => {
-        min = Math.min(Number.isNaN(min) ? 0 : min, Number(value));
-    });
-    return min;
 }

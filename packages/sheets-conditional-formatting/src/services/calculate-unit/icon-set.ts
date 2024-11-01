@@ -46,14 +46,14 @@ export const iconSetCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const computeResult = new ObjectMatrix<IIconSetRenderParams >();
+        const computeResult = new ObjectMatrix<IIconSetRenderParams>();
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 computeResult.setValue(row, col, EMPTY_STYLE as IIconSetRenderParams);
             });
         });
 
-        const splitValueResult = ruleConfig.config.map((v) => getValueByType(v.value, matrix, { ...context, cfId: rule.cfId }, ranges));
+        const splitValueResult = ruleConfig.config.map((v) => getValueByType(v.value, matrix, { ...context, cfId: rule.cfId }));
 
         const isFormulaWithoutSuccess = splitValueResult.some((item) => item.status !== FormulaResultStatus.SUCCESS);
         if (isFormulaWithoutSuccess) {
@@ -74,7 +74,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                 }
             }
             return result;
-        }, [] as { operator: CFNumberOperator;value: number;iconType: string;iconId: string }[]);
+        }, [] as { operator: CFNumberOperator; value: number; iconType: string; iconId: string }[]);
 
         const isShowValue = ruleConfig.isShowValue === undefined ? true : !!ruleConfig.isShowValue;
         matrix.forValue((row, col, value) => {

@@ -51,7 +51,7 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
 
         const _configList = [...ruleConfig.config].sort((a, b) => a.index - b.index).map((config) => {
             return {
-                value: getValueByType(config.value, matrix, { ...context, cfId: rule.cfId }, ranges), color: new ColorKit(config.color),
+                value: getValueByType(config.value, matrix, { ...context, cfId: rule.cfId }), color: new ColorKit(config.color),
             };
         });
         // If the formula triggers the calculation, wait for the result,

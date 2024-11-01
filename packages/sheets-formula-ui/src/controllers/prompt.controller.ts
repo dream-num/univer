@@ -97,7 +97,7 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter, merge } from 'rxjs';
+import { distinctUntilChanged, distinctUntilKeyChanged, filter, merge } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -452,7 +452,7 @@ export class PromptController extends Disposable {
             const selectionControls = this._allSelectionRenderServices.map((s) => s.getSelectionControls()).flat();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();
-                d.add(merge(c.selectionMoving$, c.selectionScaling$).pipe(debounceTime(30)).subscribe((toRange) => {
+                d.add(merge(c.selectionMoving$, c.selectionScaling$).subscribe((toRange) => {
                     const docID = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
                     if (isRangeSelector(docID) || isEmbeddingFormulaEditor(docID)) {
                         d.dispose();

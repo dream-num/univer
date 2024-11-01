@@ -207,7 +207,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     len: body.dataStream.length,
                 });
             } else {
-                const dos = BuildTextUtils.selection.getDeleteActions([selection], body, memoryCursor.cursor, cloneBody, selections.length === 1);
+                const dos = BuildTextUtils.selection.delete([selection], body, memoryCursor.cursor, cloneBody, selections.length === 1);
                 textX.push(...dos);
             }
 
@@ -266,7 +266,7 @@ function getCutActionsFromTextRanges(
                 len,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.getDeleteActions([selection], originBody, memoryCursor.cursor, null, selections.length === 1));
+            textX.push(...BuildTextUtils.selection.delete([selection], originBody, memoryCursor.cursor, null, selections.length === 1));
         }
 
         memoryCursor.reset();

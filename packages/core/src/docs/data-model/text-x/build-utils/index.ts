@@ -33,7 +33,7 @@ export class BuildTextUtils {
         replace: replaceSelectionTextX,
         makeSelection,
         normalizeSelection,
-        getDeleteActions: deleteSelectionTextX,
+        delete: deleteSelectionTextX,
     };
 
     static range = {

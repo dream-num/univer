@@ -30,4 +30,18 @@ export default {
             numCols: { name: '列数', detail: '结果中应包含的列数。' },
         },
     },
+    FLATTEN: {
+        description: '将一个或多个范围中的所有值合并到单列',
+        abstract: '将一个或多个范围中的所有值合并到单列',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: '范围1', detail: '要合并的第一个范围。' },
+            range2: { name: '范围2', detail: '要合并的其他范围。' },
+        },
+    },
 };

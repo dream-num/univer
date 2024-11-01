@@ -30,4 +30,18 @@ export default {
             numCols: { name: '欄數', detail: '結果所包含的欄數。' },
         },
     },
+    FLATTEN: {
+        description: '將一或多個範圍中的所有值合併至單一欄',
+        abstract: '將一或多個範圍中的所有值合併至單一欄',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hant&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: '範圍1', detail: '第一個要合併的範圍。' },
+            range2: { name: '範圍2', detail: '其他要合併的範圍。' },
+        },
+    },
 };

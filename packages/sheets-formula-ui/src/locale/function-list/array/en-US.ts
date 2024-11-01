@@ -30,4 +30,18 @@ export default {
             numCols: { name: 'num_cols', detail: 'The number of columns the result should contain' },
         },
     },
+    FLATTEN: {
+        description: 'Flattens all the values from one or more ranges into a single column.',
+        abstract: 'Flattens all the values from one or more ranges into a single column.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: 'range1', detail: 'The first range to flatten.' },
+            range2: { name: 'range2', detail: 'Additional ranges to flatten.' },
+        },
+    },
 };

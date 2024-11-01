@@ -30,4 +30,18 @@ export default {
             numCols: { name: 'số cột', detail: 'Số cột mà kết quả cần có' },
         },
     },
+    FLATTEN: {
+        description: 'Làm phẳng tất cả giá trị trong một hoặc nhiều dải ô thành một cột duy nhất.',
+        abstract: 'Làm phẳng tất cả giá trị trong một hoặc nhiều dải ô thành một cột duy nhất.',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/10307761?hl=vi&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: 'dải ô 1', detail: 'Dải ô đầu tiên cần làm phẳng.' },
+            range2: { name: 'dải ô 2', detail: 'Các dải ô bổ sung để làm phẳng.' },
+        },
+    },
 };

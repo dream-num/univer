@@ -47,4 +47,26 @@ export const FUNCTION_LIST_ARRAY: IFunctionInfo[] = [
             },
         ],
     },
+    {
+        functionName: FUNCTION_NAMES_ARRAY.FLATTEN,
+        functionType: FunctionType.Array,
+        description: 'formula.functionList.FLATTEN.description',
+        abstract: 'formula.functionList.FLATTEN.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.FLATTEN.functionParameter.range1.name',
+                detail: 'formula.functionList.FLATTEN.functionParameter.range1.detail',
+                example: 'A1:C3',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.FLATTEN.functionParameter.range2.name',
+                detail: 'formula.functionList.FLATTEN.functionParameter.range2.detail',
+                example: 'D1:F3',
+                require: 0,
+                repeat: 1,
+            },
+        ],
+    },
 ];

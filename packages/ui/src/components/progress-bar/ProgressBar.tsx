@@ -61,7 +61,15 @@ export function ProgressBar(props: IProgressBarProps) {
         // Update the width of the progress bar
         else if (count > 0) {
             setVisible(true);
-            progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+
+            // Trigger the animation to prevent the progress bar from not being closed due to reaching 100% too quickly without animation
+            if (done === count) {
+                requestAnimationFrame(() => {
+                    progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+                });
+            } else {
+                progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+            }
         }
         // Else, wait for the transition to end before hiding
 

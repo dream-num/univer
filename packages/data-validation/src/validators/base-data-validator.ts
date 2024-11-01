@@ -108,7 +108,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${errorMsg}`;
     }
 
-    getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }): Nullable<IStyleData> {}
+    getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }, row: number, column: number): Nullable<IStyleData> {}
 
     getRuleFinalError(rule: IDataValidationRule) {
         if (rule.showErrorMessage && rule.error) {

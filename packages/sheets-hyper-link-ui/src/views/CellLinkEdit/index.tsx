@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, CustomRangeType, DataStreamTreeTokenType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
@@ -27,7 +27,7 @@ import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { isLegalLink, serializeUrl } from '../../common/util';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -39,7 +39,7 @@ import styles from './index.module.less';
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
     const [hide, setHide] = useState(false);
-    const [display, setDisplay] = useState('');
+    const [display, _setDisplay] = useState('');
     const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
@@ -81,6 +81,11 @@ export const CellLinkEdit = () => {
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
+    // to polyfill the display value on old version data
+    // case split tag is no longer needed
+    const setDisplay = useCallback((value: string) => {
+        _setDisplay(value.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, ''));
+    }, [_setDisplay]);
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
@@ -115,7 +120,7 @@ export const CellLinkEdit = () => {
                     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                     const currentSelection = textSelectionService.getActiveTextRange();
                     const body = doc?.getBody();
-                    const selection = currentSelection && body ? BuildTextUtils.selection.getInsertSelection(currentSelection, body) : null;
+                    const selection = currentSelection && body ? currentSelection : null;
                     const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
 
                     setShowLabel(false);
@@ -256,6 +261,16 @@ export const CellLinkEdit = () => {
             }
         };
     }, [contextService, zenZoneService]);
+
+    useEffect(() => {
+        if (isFocusRangeSelector) {
+            editorBridgeService.enableForceKeepVisible();
+
+            return () => {
+                editorBridgeService.disableForceKeepVisible();
+            };
+        }
+    }, [isFocusRangeSelector, editorBridgeService]);
 
     const linkTypeOptions: Array<{
         label: string;

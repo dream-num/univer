@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../basics/error-type';
 import type { compareToken } from '../../basics/token';
-import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import type { Compare } from '../../functions/meta/compare';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { ErrorType } from '../../basics/error-type';
+import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -33,10 +33,10 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class OperatorNode extends BaseAstNode {
     constructor(
-        private _operatorString: string,
+        operatorString: string,
         private _functionExecutor: BaseFunction
     ) {
-        super(_operatorString);
+        super(operatorString);
     }
 
     override get nodeType() {
@@ -48,8 +48,12 @@ export class OperatorNode extends BaseAstNode {
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
-        let object1 = children[0]?.getValue();
-        let object2 = children[1]?.getValue();
+
+        const child1 = children[0];
+        const child2 = children[1];
+
+        let object1 = child1?.getValue();
+        let object2 = child2?.getValue();
 
         const token = this.getToken();
 

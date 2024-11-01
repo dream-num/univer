@@ -50,10 +50,6 @@ import { LexerNode } from './lexer-node';
 export class AstTreeBuilder extends Disposable {
     private _astNodeFactoryList: AstRootNodeFactory[] = [];
 
-    private _refOffsetX = 0;
-
-    private _refOffsetY = 0;
-
     constructor(
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(AstRootNodeFactory) private readonly _astRootNodeFactory: AstRootNodeFactory,

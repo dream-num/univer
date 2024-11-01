@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { FunctionNode } from '../ast-node/function-node';
 import type { LambdaNode } from '../ast-node/lambda-node';
@@ -39,7 +40,7 @@ export class Interpreter extends Disposable {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!nodeData) {
+        if (!nodeData || !nodeData.node) {
             return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
@@ -63,7 +64,7 @@ export class Interpreter extends Disposable {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!nodeData) {
+        if (!nodeData || !nodeData.node) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -87,7 +88,10 @@ export class Interpreter extends Disposable {
         return node.getValue();
     }
 
-    checkAsyncNode(node: BaseAstNode) {
+    checkAsyncNode(node: Nullable<BaseAstNode>) {
+        if (node == null) {
+            return false;
+        }
         const result: boolean[] = [];
         this._checkAsyncNode(node, result);
 

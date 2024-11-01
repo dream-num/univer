@@ -89,8 +89,8 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
-        const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result);
-        const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result);
+        const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result?.[0][0]);
+        const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {

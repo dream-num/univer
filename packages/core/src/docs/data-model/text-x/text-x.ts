@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '../../../sheets/typedef';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
@@ -416,6 +417,10 @@ export class TextX {
         return this;
     }
 }
+
+export type TextXSelection = TextX & {
+    selections?: ITextRange[];
+};
 
 // FIXME: @Jocs, Use to avoid storybook error. and move the static name property to here.
 Object.defineProperty(TextX, 'name', {

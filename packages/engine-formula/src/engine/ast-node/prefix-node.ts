@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { BaseFunction } from '../../functions/base-function';
 
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
@@ -34,7 +33,7 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class PrefixNode extends BaseAstNode {
     constructor(
-        private _accessor: IAccessor,
+        private _runtimeService: IFormulaRuntimeService,
         private _operatorString: string,
         private _functionExecutor?: Nullable<BaseFunction>
     ) {
@@ -80,7 +79,7 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const runtimeService = this._accessor.get(IFormulaRuntimeService);
+        const runtimeService = this._runtimeService;
 
         const currentRow = runtimeService.currentRow || 0;
         const currentColumn = runtimeService.currentColumn || 0;
@@ -115,7 +114,7 @@ export class PrefixNode extends BaseAstNode {
 export class PrefixNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(Injector) private readonly _injector: Injector
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService
     ) {
         super();
     }
@@ -140,7 +139,7 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
         if (tokenTrim === prefixToken.MINUS) {
             functionName = FUNCTION_NAMES_META.MINUS;
         } else if (tokenTrim === prefixToken.AT) {
-            return new PrefixNode(this._injector, tokenTrim);
+            return new PrefixNode(this._runtimeService, tokenTrim);
         } else {
             return;
         }
@@ -150,6 +149,6 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
             console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new PrefixNode(this._injector, tokenTrim, functionExecutor);
+        return new PrefixNode(this._runtimeService, tokenTrim, functionExecutor);
     }
 }

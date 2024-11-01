@@ -15,13 +15,16 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { CellValueType } from '@univerjs/core';
+import { ErrorType } from '../../basics/error-type';
+import { CellReferenceObject } from '../reference-object/cell-reference-object';
+import { ColumnReferenceObject } from '../reference-object/column-reference-object';
+import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
-import { ErrorType } from '../../basics/error-type';
 import { expandArrayValueObject } from './array-object';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
@@ -267,4 +270,65 @@ export function isSameValueObjectType(left: BaseValueObject, right: BaseValueObj
     }
 
     return false;
+}
+
+export enum ReferenceObjectType {
+    CELL,
+    COLUMN,
+    ROW,
+}
+
+const referenceObjectFromCache: Map<string, BaseReferenceObject> = new Map();
+
+export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
+    const o = referenceObjectFromCache.get(trimToken);
+    if (o) {
+        return o;
+    }
+
+    let referenceObject: BaseReferenceObject;
+    switch (type) {
+        case ReferenceObjectType.CELL:
+            referenceObject = new CellReferenceObject(trimToken);
+            break;
+        case ReferenceObjectType.COLUMN:
+            referenceObject = new ColumnReferenceObject(trimToken);
+            break;
+        case ReferenceObjectType.ROW:
+            referenceObject = new RowReferenceObject(trimToken);
+            break;
+        default:
+            throw new Error('Unknown reference object type');
+    }
+
+    referenceObjectFromCache.set(trimToken, referenceObject);
+
+    return referenceObject;
+}
+
+export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
+    const key = `${variant1.getToken()}:${variant2.getToken()}`;
+    const o = referenceObjectFromCache.get(key);
+    if (o) {
+        const { x, y } = variant1.getRefOffset();
+        o.setRefOffset(x, y);
+        return o;
+    }
+    let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);
+    if (variant1.isCell() && variant2.isCell()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+    } else if (variant1.isRow() && variant2.isRow()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+    } else if (variant1.isColumn() && variant2.isColumn()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+    }
+
+    return referenceObject;
+}
+
+export function clearReferenceObjectCache() {
+    referenceObjectFromCache.clear();
 }

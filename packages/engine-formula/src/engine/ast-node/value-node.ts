@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanValue } from '../../basics/common';
 import type { ErrorType } from '../../basics/error-type';
+import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { LexerNode } from '../analysis/lexer-node';
 import { ValueObjectFactory } from '../value-object/array-value-object';
@@ -24,8 +24,8 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class ValueNode extends BaseAstNode {
-    constructor(private _operatorString: string) {
-        super(_operatorString);
+    constructor(operatorString: string) {
+        super(operatorString);
     }
 
     override get nodeType(): NodeType {
@@ -33,7 +33,7 @@ export class ValueNode extends BaseAstNode {
     }
 
     override execute(): void {
-        this.setValue(ValueObjectFactory.create(this._operatorString));
+        this.setValue(ValueObjectFactory.create(this.getToken()));
     }
 }
 

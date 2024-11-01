@@ -192,7 +192,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                         const styleMap = workbook.getStyles();
                                         return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                                     },
-                                }),
+                                }, row, col),
                             },
                             interceptorAutoHeight: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)
@@ -359,7 +359,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                         const styleMap = workbook.getStyles();
                                         return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                                     },
-                                }),
+                                }, row, col),
                             },
                             interceptorAutoHeight: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)

@@ -49,7 +49,7 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, !(end - range.startOffset === 1), range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -104,7 +104,7 @@ interface IBulletActive {
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
-    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
+    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
 
     private readonly _clickCustomRanges$ = new Subject<ICustomRangeActive>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();

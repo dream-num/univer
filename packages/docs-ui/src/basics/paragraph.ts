@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type { ICustomRange, ICustomTable, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 
 export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
     return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
@@ -55,4 +55,12 @@ export function getTextRunAtPosition(
     }
 
     return retTextRun;
+}
+
+export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {
+    if (extendRange) {
+        return customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+    }
+
+    return customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
 }

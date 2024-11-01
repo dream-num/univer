@@ -237,7 +237,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
             right: rect.right + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };
 
@@ -288,6 +288,6 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
             right: rect.right + canvasClientRect.left,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };

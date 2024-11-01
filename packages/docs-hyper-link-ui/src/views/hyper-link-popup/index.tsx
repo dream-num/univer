@@ -16,14 +16,14 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import React from 'react';
-import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
-import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
+import { CopySingle, LinkSingle, UnlinkSingle, WriteSingle } from '@univerjs/icons';
 import { IMessageService, useObservable } from '@univerjs/ui';
-import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+import cs from 'clsx';
+import React from 'react';
 import { DeleteDocHyperLinkCommand } from '../../commands/commands/delete-link.command';
 import { ShowDocHyperLinkEditPopupOperation } from '../../commands/operations/popup.operation';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import styles from './index.module.less';
 
 export const DocLinkPopup = () => {
@@ -37,10 +37,10 @@ export const DocLinkPopup = () => {
         return null;
     }
 
-    const { unitId, linkId, segmentId } = currentPopup;
+    const { unitId, linkId, segmentId, startIndex, endIndex } = currentPopup;
     const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
     const body = doc?.getSelfOrHeaderFooterModel(segmentId).getBody();
-    const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK);
+    const link = body?.customRanges?.find((range) => range.rangeId === linkId && range.rangeType === CustomRangeType.HYPERLINK && range.startIndex === startIndex && range.endIndex === endIndex);
 
     if (!link) {
         return null;

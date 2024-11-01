@@ -52,7 +52,7 @@ export const SheetPermissionUserDialog = () => {
         <div className={styles.sheetPermissionUserDialogWrapper}>
             <div className={styles.sheetPermissionUserDialogSearch}>
                 <Input
-                    placeholder="search"
+                    placeholder={localeService.t('permission.dialog.search')}
                     className={styles.sheetPermissionUserDialogSearchInput}
                     value={inputValue}
                     onChange={(v) => setInputValue(v)}

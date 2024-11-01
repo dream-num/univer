@@ -215,7 +215,7 @@ export class TriggerCalculationController extends Disposable {
             const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
 
             if (dirtyRanges != null) {
-                allDirtyRanges.push(...dirtyRanges);
+                this._mergeDirtyRanges(allDirtyRanges, dirtyRanges);
             }
 
             if (dirtyNameMap != null) {
@@ -274,6 +274,37 @@ export class TriggerCalculationController extends Disposable {
             forceCalculation: !!this._forceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
         };
+    }
+
+    /**
+     * dirtyRanges may overlap with the ranges in allDirtyRanges and need to be deduplicated
+     * @param allDirtyRanges
+     * @param dirtyRanges
+     */
+    private _mergeDirtyRanges(allDirtyRanges: IUnitRange[], dirtyRanges: IUnitRange[]) {
+        for (const range of dirtyRanges) {
+            let isDuplicate = false;
+            for (const existingRange of allDirtyRanges) {
+                // Check if the ranges are in the same unit and sheet
+                if (range.unitId === existingRange.unitId && range.sheetId === existingRange.sheetId) {
+                    // Check if the ranges overlap
+                    const { startRow, startColumn, endRow, endColumn } = range.range;
+                    const { startRow: existingStartRow, startColumn: existingStartColumn, endRow: existingEndRow, endColumn: existingEndColumn } = existingRange.range;
+                    if (
+                        startRow === existingStartRow &&
+                    startColumn === existingStartColumn &&
+                    endRow === existingEndRow &&
+                    endColumn === existingEndColumn
+                    ) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            }
+            if (!isDuplicate) {
+                allDirtyRanges.push(range);
+            }
+        }
     }
 
     private _mergeDirtyNameMap(allDirtyNameMap: IDirtyUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {

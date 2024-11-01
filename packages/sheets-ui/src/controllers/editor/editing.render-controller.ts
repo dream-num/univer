@@ -760,8 +760,15 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
+    if (snapshot.drawingsOrder?.length) {
+        cellData.v = '';
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = snapshot;
+        cellData.t = CellValueType.STRING;
+    }
     // Text format ('@@@') has the highest priority
-    if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
+    else if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
         // If the style is text format ('@@@'), the data should be set as a string.
         cellData.v = newDataStream;
         cellData.f = null;

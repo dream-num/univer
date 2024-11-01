@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocumentBody, IDrawings, IParagraph, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
@@ -74,6 +74,8 @@ export class EditorDataSyncController extends Disposable {
     // Sync cell content to formula editor bar when sheet selection changed or visible changed.
     private _editorSyncHandler(param: ICellEditorState) {
         let body = Tools.deepClone(param.documentLayoutObject.documentModel?.getBody());
+        const drawings = Tools.deepClone(param.documentLayoutObject.documentModel?.drawings);
+        const drawingsOrder = Tools.deepClone(param.documentLayoutObject.documentModel?.getDrawingsOrder());
 
         if (
             !body || (
@@ -92,7 +94,7 @@ export class EditorDataSyncController extends Disposable {
             };
         }
 
-        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body);
+        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, drawings, drawingsOrder);
     }
 
     private _commandExecutedListener() {
@@ -199,7 +201,9 @@ export class EditorDataSyncController extends Disposable {
 
     private _syncContentAndRender(
         unitId: string,
-        body: IDocumentBody
+        body: IDocumentBody,
+        drawings: Nullable<IDrawings>,
+        drawingsOrder: Nullable<string[]>
     ) {
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             if (body.paragraphs) {
@@ -217,6 +221,8 @@ export class EditorDataSyncController extends Disposable {
         }
 
         docDataModel.getSnapshot().body = body;
+        docDataModel.getSnapshot().drawings = drawings ?? {};
+        docDataModel.getSnapshot().drawingsOrder = drawingsOrder ?? [];
 
         this._checkAndSetRenderStyleConfig(docDataModel);
 

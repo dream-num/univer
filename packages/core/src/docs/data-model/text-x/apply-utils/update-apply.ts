@@ -346,8 +346,11 @@ function updateCustomBlocks(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
-    const { customBlocks } = body;
+    if (body.customBlocks == null) {
+        body.customBlocks = [];
+    }
 
+    const { customBlocks } = body;
     const { customBlocks: updateDataCustomBlocks } = updateBody;
 
     if (customBlocks == null || updateDataCustomBlocks == null) {

@@ -257,11 +257,11 @@ export function insertCustomBlocks(
     textLength: number,
     currentIndex: number
 ) {
-    const { customBlocks } = body;
-
-    if (customBlocks == null) {
-        return;
+    if (body.customBlocks == null) {
+        body.customBlocks = [];
     }
+
+    const { customBlocks } = body;
 
     for (let i = 0, len = customBlocks.length; i < len; i++) {
         const customBlock = customBlocks[i];
@@ -739,8 +739,10 @@ export function deleteSectionBreaks(body: IDocumentBody, textLength: number, cur
 }
 
 export function deleteCustomBlocks(body: IDocumentBody, textLength: number, currentIndex: number) {
+    if (body.customBlocks == null) {
+        body.customBlocks = [];
+    }
     const { customBlocks } = body;
-
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;

@@ -198,6 +198,7 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _addDrawings(unitId: string, drawings: IDocDrawing[]) {
+        // console.log('=addDrawings', drawings);
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 

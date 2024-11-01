@@ -20,21 +20,39 @@ export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[
     return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
 }
 
-export function getTextRunAtPosition(textRuns: ITextRun[], position: number, cacheStyle?: Nullable<ITextStyle>) {
+export function getTextRunAtPosition(
+    textRuns: ITextRun[],
+    position: number,
+    defaultStyle: ITextStyle,
+    cacheStyle: Nullable<ITextStyle>
+): ITextRun {
+    const retTextRun: ITextRun = {
+        st: 0,
+        ed: 0,
+        ts: defaultStyle,
+    };
+
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
         if (position > st && position <= ed) {
-            return {
-                ...textRun,
-                ts: {
-                    ...textRun.ts,
-                    ...cacheStyle,
-                },
+            retTextRun.st = st;
+            retTextRun.ed = ed;
+
+            retTextRun.ts = {
+                ...retTextRun.ts,
+                ...textRun.ts,
             };
         }
     }
 
-    return cacheStyle ? { ts: cacheStyle } : null;
+    if (cacheStyle) {
+        retTextRun.ts = {
+            ...retTextRun.ts,
+            ...cacheStyle,
+        };
+    }
+
+    return retTextRun;
 }

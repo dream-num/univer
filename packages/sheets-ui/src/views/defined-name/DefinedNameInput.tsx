@@ -70,9 +70,9 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         return;
     }
 
-    const unitId = workbook.getUnitId();
+    const unitId = useMemo(() => workbook.getUnitId(), []);
 
-    const subUnitId = workbook.getActiveSheet().getSheetId();
+    const subUnitId = useMemo(() => workbook.getActiveSheet().getSheetId(), []);
 
     const [nameValue, setNameValue] = useState(name);
 
@@ -252,6 +252,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         unitId={unitId}
                         subUnitId={subUnitId}
                         isFocus={isFocusFormulaEditor}
+                        isSupportAcrossSheet
                         onChange={(v = '') => {
                             const formula = v || '';
                             formulaEditorChange(formula);
@@ -259,6 +260,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         onVerify={(res: boolean) => {
                             setValidFormulaOrRange(res);
                         }}
+
                         onFocus={() => isFocusFormulaEditorSet(true)}
                         actions={formulaEditorActionsRef.current}
                     />

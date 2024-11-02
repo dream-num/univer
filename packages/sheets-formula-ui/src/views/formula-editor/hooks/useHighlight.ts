@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { ColorKit, IUniverInstanceService, ThemeService, useDependency, useObservable } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -27,6 +27,7 @@ import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/she
 import { useEffect, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { buildTextRuns, useColor } from '../../range-selector/hooks/useHighlight';
+import { useStateRef } from './useStateRef';
 
 interface IRefSelection {
     refIndex: number;
@@ -51,34 +52,42 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
     const [ranges, rangesSet] = useState<ISelectionWithStyle[]>([]);
 
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId);
+    const worksheet = workbook?.getSheetBySheetId(subUnitId);
+
+    const activeSheet = useObservable(workbook?.activeSheet$);
+    const contextRef = useStateRef({ activeSheet, sheetName: worksheet?.getName() });
+
     useEffect(() => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-        const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
-        if (!workbook || !worksheet || !isNeed) {
+        const { activeSheet, sheetName } = contextRef.current;
+        if (!workbook || !activeSheet || !isNeed) {
             rangesSet(selectionWithStyle);
             return;
         }
-        const currentSheetId = worksheet?.getSheetId();
-        const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
             const { themeColor, token, refIndex } = refSelection;
 
             const unitRangeName = deserializeRangeWithSheet(token);
-            const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
-            if (refUnitId && unitId !== refUnitId) {
+            if (!unitRangeName.unitId) {
+                unitRangeName.unitId = unitId;
+            }
+            if (!unitRangeName.sheetName) {
+                unitRangeName.sheetName = sheetName || '';
+            }
+            const { unitId: refUnitId, sheetName: rangeSheetName, range: rawRange } = unitRangeName;
+            if (unitId !== refUnitId) {
                 continue;
             }
 
-            const refSheetId = getSheetIdByName(sheetName);
-
-            if (refSheetId && refSheetId !== currentSheetId) {
+            if (rangeSheetName !== activeSheet.getName()) {
                 continue;
             }
 
-            const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
+            const range = setEndForRange(rawRange, activeSheet.getRowCount(), activeSheet.getColumnCount());
 
             selectionWithStyle.push({
                 range,

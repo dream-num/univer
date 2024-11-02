@@ -392,17 +392,7 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     return mergedRanges;
 }
 
-export function insertCustomRanges(
-    body: IDocumentBody,
-    insertBody: IDocumentBody,
-    textLength: number,
-    currentIndex: number
-) {
-    if (!body.customRanges) {
-        body.customRanges = [];
-    }
-
-    const { customRanges } = body;
+export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
     const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
     const matchedCustomRange = customRanges[matchedCustomRangeIndex];
 
@@ -423,6 +413,20 @@ export function insertCustomRanges(
             properties: { ...matchedCustomRange.properties },
         });
     }
+}
+
+export function insertCustomRanges(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    if (!body.customRanges) {
+        body.customRanges = [];
+    }
+
+    const { customRanges } = body;
+    splitCustomRangesByIndex(customRanges, currentIndex);
 
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];

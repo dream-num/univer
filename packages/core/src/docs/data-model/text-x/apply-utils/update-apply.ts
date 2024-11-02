@@ -41,6 +41,7 @@ import {
     insertTextRuns,
     mergeContinuousRanges,
     normalizeTextRuns,
+    splitCustomRangesByIndex,
 } from './common';
 
 export function updateAttribute(
@@ -447,6 +448,9 @@ function updateCustomRanges(
     if (!body.customRanges) {
         body.customRanges = [];
     }
+
+    splitCustomRangesByIndex(body.customRanges, currentIndex);
+    splitCustomRangesByIndex(body.customRanges, currentIndex + textLength);
     const start = currentIndex;
     const end = currentIndex + textLength - 1;
     const { customRanges: updateDataCustomRanges } = updateBody;
@@ -473,6 +477,7 @@ function updateCustomRanges(
         });
     } else {
         if (!updateDataCustomRanges) {
+            body.customRanges = mergeContinuousRanges(newCustomRanges);
             return removeCustomRanges;
         }
         updateBody.customRanges?.forEach((customRange) => {

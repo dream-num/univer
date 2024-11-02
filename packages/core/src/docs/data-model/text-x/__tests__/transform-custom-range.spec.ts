@@ -17,6 +17,7 @@
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
+import { BooleanNumber } from '../../../../types/enum';
 import { CustomRangeType, type ICustomRange, type IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -94,6 +95,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -116,6 +118,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -206,6 +209,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -228,6 +232,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -337,6 +342,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {} as ICustomRange,
                     ],
@@ -351,6 +357,7 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -362,6 +369,114 @@ describe('transform custom range in body', () => {
                             },
                         },
                     ],
+                },
+            },
+        ];
+
+        expect(TextX.transform(actionsB, actionsA, 'left')).toEqual(expectedTransformedActionTrue);
+        expect(TextX.transform(actionsB, actionsA, 'right')).toEqual(expectedTransformedActionFalse);
+
+        const doc1 = getDefaultDocWithCustomRange();
+        const doc2 = getDefaultDocWithCustomRange();
+        const doc3 = getDefaultDocWithCustomRange();
+        const doc4 = getDefaultDocWithCustomRange();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        // expect(resultA).toEqual(resultB);
+        // expect(resultC).toEqual(resultD);
+        // expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should pass test when any is empty', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 6,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 6,
+                            ts: {
+                                it: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 6,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 6,
+                            ts: {
+                                bl: BooleanNumber.FALSE,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                },
+            },
+        ];
+
+        const expectedTransformedActionFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 6,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 6,
+                            ts: {
+                                bl: BooleanNumber.FALSE,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                },
+            },
+        ];
+
+        const expectedTransformedActionTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 6,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 6,
+                            ts: {
+                                bl: BooleanNumber.FALSE,
+                            },
+                        },
+                    ],
+                    customRanges: [],
                 },
             },
         ];

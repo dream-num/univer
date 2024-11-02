@@ -38,7 +38,7 @@ function transformTextRuns(
     transformType: TextXTransformType
 ) {
     if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
-        return targetTextRuns;
+        return [];
     }
 
     targetTextRuns = Tools.deepClone(targetTextRuns);
@@ -381,9 +381,8 @@ export function transformBody(
     } else {
         textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER);
     }
-    if (textRuns.length) {
-        retBody.textRuns = textRuns;
-    }
+
+    retBody.textRuns = textRuns;
 
     let customRanges: ICustomRange[] = [];
     if (priority) {
@@ -404,9 +403,7 @@ export function transformBody(
         );
     }
 
-    if (customRanges.length) {
-        retBody.customRanges = customRanges;
-    }
+    retBody.customRanges = customRanges;
 
     const paragraphs: IParagraph[] = [];
 

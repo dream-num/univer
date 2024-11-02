@@ -351,6 +351,7 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -371,6 +372,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -474,6 +476,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -496,6 +499,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -595,6 +599,8 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -614,6 +620,8 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -678,6 +686,8 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -697,6 +707,8 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -722,6 +734,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -766,6 +779,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -788,6 +802,7 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,

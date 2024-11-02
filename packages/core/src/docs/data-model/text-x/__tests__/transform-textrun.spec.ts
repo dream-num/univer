@@ -87,6 +87,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,
@@ -106,6 +107,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,
@@ -192,6 +194,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,
@@ -210,6 +213,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,
@@ -323,6 +327,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,
@@ -341,6 +346,7 @@ describe('transform textRun in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    customRanges: [],
                     textRuns: [{
                         st: 0,
                         ed: 1,

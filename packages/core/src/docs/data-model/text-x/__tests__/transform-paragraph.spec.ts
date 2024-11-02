@@ -90,6 +90,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {
@@ -115,6 +117,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {
@@ -212,6 +216,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {
@@ -240,6 +246,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {
@@ -362,6 +370,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {
@@ -385,6 +395,8 @@ describe('transform paragraph in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
+                    textRuns: [],
+                    customRanges: [],
                     paragraphs: [{
                         startIndex: 0,
                         paragraphStyle: {

@@ -25,7 +25,6 @@ export enum SliceBodyType {
     cut,
 }
 
-// TODO: Support other properties like custom ranges, tables, etc.
 // eslint-disable-next-line max-lines-per-function, complexity
 export function getBodySlice(
     body: IDocumentBody,

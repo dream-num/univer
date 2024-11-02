@@ -479,8 +479,7 @@ function updateCustomRanges(
         });
     } else {
         if (!updateDataCustomRanges) {
-            body.customRanges = mergeContinuousRanges(newCustomRanges);
-            return removeCustomRanges;
+            return [];
         }
         updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;

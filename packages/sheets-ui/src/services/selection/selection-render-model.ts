@@ -17,6 +17,10 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, ISelectionWithCoord, Nullable } from '@univerjs/core';
 import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 
+/**
+ * Data model for SelectionControl.model
+ * NOT Same as @univerjs/sheet.WorkbookSelectionDataModel, that's data model for Workbook
+ */
 export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;
     private _startRow: number = -1;
@@ -32,6 +36,9 @@ export class SelectionRenderModel implements IRangeWithCoord {
      */
     private _primary: Nullable<ISelectionCellWithCoord>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
+
+    constructor() {
+    }
 
     get startColumn() { return this._startColumn; }
     get startRow() { return this._startRow; }
@@ -160,7 +167,8 @@ export class SelectionRenderModel implements IRangeWithCoord {
     /**
      * Set primary cell.
      *
-     * @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
+     * @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight
+     * highlight is best. primary sometimes means the actual cell(actual means ignore merge)
      * @param currentCell
      */
     setCurrentCell(currentCell: Nullable<ISelectionCellWithCoord>) {

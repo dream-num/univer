@@ -51,12 +51,12 @@ export { WorksheetPermissionService } from './services/permission/worksheet-perm
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
     DISABLE_NORMAL_SELECTIONS,
+    IRefSelectionsService,
+    RefSelectionsService,
     SelectionMoveType,
     SheetsSelectionsService,
-    WorkbookSelections,
-} from './services/selections/selection-manager.service';
-export { IRefSelectionsService, RefSelectionsService } from './services/selections/ref-selections.service';
-
+    WorkbookSelectionDataModel,
+} from './services/selections';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';

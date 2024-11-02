@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelections } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionDataModel } from '@univerjs/sheets';
+import type { SelectionControl } from '@univerjs/sheets-ui/services/selection/selection-control.js';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
@@ -35,7 +36,7 @@ import { merge } from 'rxjs';
  *
  */
 export class RefSelectionsRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionDataModel;
 
     private _eventDisposables: Nullable<IDisposable>;
 
@@ -248,6 +249,142 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
     private _getSheetObject() {
         return getSheetObject(this._context.unit, this._context)!;
+    }
+
+    /**
+     * Handle pointer down event, bind pointermove & pointerup handler.
+     * then trigger selectionMoveStart$.
+     *
+     * @param evt
+     * @param _zIndex
+     * @param rangeType
+     * @param viewport
+     * @param scrollTimerType
+     */
+    // eslint-disable-next-line max-lines-per-function, complexity
+    protected _onPointerDown(
+        evt: IPointerEvent | IMouseEvent,
+        _zIndex = 0,
+        rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
+        viewport: Nullable<Viewport>,
+        scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
+    ): void {
+        this._rangeType = rangeType;
+
+        const skeleton = this._skeleton;
+        const scene = this._scene;
+        if (!scene || !skeleton) {
+            return;
+        }
+
+        if (viewport) {
+            this._activeViewport = viewport;
+        }
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewportMain) return;
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        let { x: viewportPosX, y: viewportPosY } = relativeCoords;
+        this._startViewportPosX = viewportPosX;
+        this._startViewportPosY = viewportPosY;
+
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const { scaleX, scaleY } = scene.getAncestorScale();
+        const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
+        if (!cursorCellRangeInfo) return;
+
+        const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
+        const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
+        this._startRangeWhenPointerDown = { ...cursorCellRange, rangeType };
+
+        let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
+        const curControls = this.getSelectionControls();
+        for (const control of curControls) {
+            // right click
+            if (evt.button === 2 && control.model.isInclude(cursorCellRangeWithRangeType)) {
+                activeSelectionControl = control;
+                return;
+            }
+            // Click to an existing selection, then what?
+            // if (control.model.isEqual(cursorCellRangeWithRangeType)) {
+            //     activeSelectionControl = control;
+            //     break;
+            // }
+        }
+
+        this._checkClearPreviousControls(evt);
+
+        const currentCell = activeSelectionControl?.model.currentCell;
+        const expandByShiftKey = evt.shiftKey && currentCell;
+        const remainLastEnable = this._remainLastEnabled &&
+            !evt.ctrlKey &&
+            !evt.shiftKey &&
+            !this._skipLastEnabled &&
+            !this._singleSelectionEnabled;
+
+        //#region update selection control
+        if (expandByShiftKey && currentCell) {
+            // Perform pointer down selection.
+            this._performSelectionByTwoCells(
+                currentCell,
+                cursorCellRangeWithRangeType,
+                skeleton,
+                rangeType,
+                activeSelectionControl! // Get updated in this method
+            );
+        } else if (remainLastEnable && activeSelectionControl) {
+            // Supports the formula ref text selection feature,
+            // under the condition of preserving all previous selections, it modifies the position of the latest selection.
+
+            activeSelectionControl.updateRange(cursorCellRangeWithRangeType, primaryCursorCellRange);
+        } else {
+            // In normal situation, pointerdown ---> Create new SelectionControl,
+            activeSelectionControl = this.newSelectionControl(scene, rangeType, skeleton);
+
+            activeSelectionControl.updateRange(cursorCellRangeWithRangeType, primaryCursorCellRange);
+        }
+        //#endregion
+
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+
+        scene.disableObjectsEvent();
+        this._clearUpdatingListeners();
+        this._addEndingListeners();
+
+        scene.getTransformer()?.clearSelectedObjects();
+
+        if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
+            if (rangeType === RANGE_TYPE.ROW) {
+                viewportPosX = 0;
+            } else if (rangeType === RANGE_TYPE.COLUMN) {
+                viewportPosY = 0;
+            }
+            // TODO @lumixraku. This is so bad! There should be a explicit way to update col&row range. But now depends on the side effect of _movingHandler.
+            // call _movingHandler to update range, col selection, endRow should be last row of current sheet.
+            this._movingHandler(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
+        }
+
+        this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, viewportPosX, viewportPosY);
+
+        this._escapeShortcutDisposable = this._shortcutService.forceEscape();
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
+            this._clearUpdatingListeners();
+
+            // selection control would be disposed in _selectionMoveEnd$.
+            // SelectionRenderService@selectionMoveEnd$ exec SetSelectionsOperation
+            // SheetsSelectionsService@setSelections
+            // SelectionRenderService._workbookSelections.selectionMoveEnd$ call _reset() to clear selectionControl.
+            this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            this._escapeShortcutDisposable?.dispose();
+            this._escapeShortcutDisposable = null;
+        });
+
+        // clear highlight except last one.
+        for (let i = 0; i < this.getSelectionControls().length - 1; i++) {
+            this.getSelectionControls()[i].clearHighlight();
+        }
     }
 }
 

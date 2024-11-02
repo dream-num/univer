@@ -26,7 +26,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelectionDataModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import {
     ICommandService,
@@ -59,7 +59,7 @@ enum ExpandingControl {
     BOTTOM = 'bottom',
 }
 export class MobileSheetsSelectionRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionDataModel;
     private _renderDisposable: Nullable<IDisposable> = null;
 
     _expandingSelection: boolean = false;
@@ -353,7 +353,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         // TODO merge to _checkClearPreviousControls
         if (activeSelectionControl?.model.rangeType !== rangeType) {
-            this._clearSelectionControls();
+            this._clearAllSelectionControls();
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 

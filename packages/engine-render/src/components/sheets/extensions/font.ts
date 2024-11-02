@@ -250,8 +250,8 @@ export class Font extends SheetExtension {
             }
         }
 
-        const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
-        const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+        const rightOffset = cellData?.fontRenderExtension?.rightOffset ?? 0;
+        const leftOffset = cellData?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;
 
         if (vertexAngle === 0) {

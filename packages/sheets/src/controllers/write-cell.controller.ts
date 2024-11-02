@@ -15,9 +15,8 @@
  */
 
 import type { ICellData, IDocumentBody, IDocumentData, IStyleData, Nullable } from '@univerjs/core';
-import type { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import { CellValueType, Disposable, numfmt } from '@univerjs/core';
-import { AFTER_CELL_EDIT } from '../services/sheet-interceptor/sheet-interceptor.service';
+import { CellValueType, Disposable, Inject, numfmt } from '@univerjs/core';
+import { AFTER_CELL_EDIT, SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
 export function isRichText(body: IDocumentBody): boolean {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
@@ -100,7 +99,9 @@ export function normalizeRichText(cellData: ICellData, snapshot: IDocumentData) 
 }
 
 export class DefaultWriteCellController extends Disposable {
-    constructor(private readonly _sheetInterceptorService: SheetInterceptorService) {
+    constructor(
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+    ) {
         super();
 
         this._initAfterEditor();
@@ -108,7 +109,7 @@ export class DefaultWriteCellController extends Disposable {
 
     private _initAfterEditor() {
         this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
-            priority: -1,
+            priority: 9999,
             handler: (cell, context, next) => {
                 if (!cell) {
                     return next(cell);

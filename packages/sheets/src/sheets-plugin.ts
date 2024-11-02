@@ -126,13 +126,13 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [WorkbookPermissionService],
             [WorksheetPermissionService],
-            [DefaultWriteCellController],
         ]);
     }
 
     override onRendered(): void {
         touchDependencies(this._injector, [
             [INumfmtService],
+            [DefaultWriteCellController],
         ]);
     }
 

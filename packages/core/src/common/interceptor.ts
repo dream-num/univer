@@ -28,6 +28,10 @@ export enum InterceptorEffectEnum {
     Value = 2, // 1<< 1
 }
 export interface IInterceptor<M, C> {
+    /**
+     * The priority of the interceptor, the larger the number, the higher the priority.
+     * @default 0
+     */
     priority?: number;
     handler: InterceptorHandler<M, C>;
 }

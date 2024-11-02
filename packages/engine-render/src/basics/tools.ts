@@ -770,12 +770,12 @@ export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) 
     return mainRanges.concat(intersects); // do not use [...mainRanges, ...intersects], because concat is slightly faster than spread
 }
 
-export function clampRange(range: IRange) {
+export function clampRange(range: IRange, maxRow: number, maxColumn: number) {
     return {
-        startRow: Math.max(0, range.startRow),
-        startColumn: Math.max(0, range.startColumn),
-        endRow: Math.max(0, range.endRow),
-        endColumn: Math.max(0, range.endColumn),
+        startRow: Tools.clamp(range.startRow, 0, maxRow),
+        endRow: Tools.clamp(range.endRow, 0, maxRow),
+        startColumn: Tools.clamp(range.startColumn, 0, maxColumn),
+        endColumn: Tools.clamp(range.endColumn, 0, maxColumn),
     };
 }
 

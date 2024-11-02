@@ -40,10 +40,10 @@ export interface IAttachTreeProps {
     count?: number;
 }
 
-type TreeItemProps = ITreeNodeProps & IAttachTreeProps;
+type ITreeItemProps = ITreeNodeProps & IAttachTreeProps;
 
 export interface ITreeProps {
-    data?: TreeItemProps[];
+    data?: ITreeItemProps[];
 
     defaultExpandAll?: boolean;
 
@@ -59,7 +59,7 @@ export interface ITreeProps {
 
     itemHeight?: number;
 
-    attachRender?: (node: TreeItemProps) => React.ReactNode;
+    attachRender?: (node: ITreeItemProps) => React.ReactNode;
 
     treeNodeClassName?: string;
 
@@ -68,8 +68,8 @@ export interface ITreeProps {
     defaultCache?: Map<string, string[]>;
 }
 
-function flattenTree(items: TreeItemProps[], expandedKeys: Set<string>, level = 1): TreeItemProps[] {
-    const flatItems: TreeItemProps[] = [];
+function flattenTree(items: ITreeItemProps[], expandedKeys: Set<string>, level = 1): ITreeItemProps[] {
+    const flatItems: ITreeItemProps[] = [];
 
     items.forEach((item) => {
         flatItems.push({ ...item, level });
@@ -116,11 +116,11 @@ export function Tree(props: ITreeProps) {
 
     const flatData = useMemo(() => flattenTree(data, expandKeySet), [data, update, expandKeySet]);
 
-    function handleChange(treeItem: TreeItemProps) {
+    function handleChange(treeItem: ITreeItemProps) {
         const path: string[] = findNode.findNodePathFromTreeWithCache(treeItem.key);
     }
 
-    function handleExpendItem(treeItem: TreeItemProps) {
+    function handleExpendItem(treeItem: ITreeItemProps) {
         if (treeItem.children?.length) {
             if (expandKeySet.has(treeItem.key)) {
                 expandKeySet.delete(treeItem.key);
@@ -138,7 +138,7 @@ export function Tree(props: ITreeProps) {
         onExpend?.(treeItem.key);
     }
 
-    function renderTreeItem(treeItem: TreeItemProps) {
+    function renderTreeItem(treeItem: ITreeItemProps) {
         const { title, key, level = 0 } = treeItem;
         const treeNodeClassName = props.treeNodeClassName;
         const expended = expandKeySet.has(key);
@@ -202,7 +202,7 @@ export function Tree(props: ITreeProps) {
                     height={height}
                     itemHeight={itemHeight}
                 >
-                    {(item: TreeItemProps) => renderTreeItem(item)}
+                    {(item: ITreeItemProps) => renderTreeItem(item)}
                 </VirtualList>
             </div>
 

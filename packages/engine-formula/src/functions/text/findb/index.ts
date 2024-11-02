@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { charLenByte } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -74,17 +75,8 @@ export class Findb extends BaseFunction {
     }
 
     private _handleSingleObject(findText: BaseValueObject, withinText: BaseValueObject, startNum: BaseValueObject): BaseValueObject {
-        let findTextValue = `${findText.getValue()}`;
-
-        if (findText.isBoolean()) {
-            findTextValue = findTextValue.toLocaleUpperCase();
-        }
-
-        let withinTextValue = `${withinText.getValue()}`;
-
-        if (withinText.isBoolean()) {
-            withinTextValue = withinTextValue.toLocaleUpperCase();
-        }
+        const findTextValue = getTextValueOfNumberFormat(findText);
+        const withinTextValue = getTextValueOfNumberFormat(withinText);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum);
 

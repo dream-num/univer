@@ -126,9 +126,17 @@ describe('Test find function', () => {
             const findText = StringValueObject.create('o');
             const withinText = StringValueObject.create('Hello中文o😊Wo😊rld');
             const startNum = ArrayValueObject.create('{1,6,9,13}');
-            const result2 = testFunction.calculate(findText, withinText, startNum);
-            expect(getObjectValue(result2)).toStrictEqual([
+            const result = testFunction.calculate(findText, withinText, startNum);
+            expect(getObjectValue(result)).toStrictEqual([
                 [5, 8, 12, ErrorType.VALUE],
+            ]);
+
+            const findText2 = StringValueObject.create('2');
+            const withinText2 = StringValueObject.create('2012-2-2');
+            const startNum2 = ArrayValueObject.create('{1,2,5,7}');
+            const result2 = testFunction.calculate(findText2, withinText2, startNum2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [1, 4, 6, 8],
             ]);
         });
     });

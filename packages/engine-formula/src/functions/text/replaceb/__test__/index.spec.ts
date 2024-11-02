@@ -108,7 +108,7 @@ describe('Test replaceb function', () => {
             const oldText = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', '中文测试', true, false, null],
-                    [0, '100', '2.34', '2-way street', -3, ErrorType.NAME],
+                    [0, '2012-2-2', '2.34', '2-way street', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -123,7 +123,7 @@ describe('Test replaceb function', () => {
             const result = testFunction.calculate(oldText, startNum, numBytes, newText);
             expect(getObjectValue(result)).toStrictEqual([
                 ['~', '~', '~文测试', '~UE', '~LSE', '~'],
-                ['~', '~0', '~34', '~way street', '~', ErrorType.NAME],
+                ['~', '~12-2-2', '~34', '~way street', '~', ErrorType.NAME],
             ]);
         });
 
@@ -141,6 +141,11 @@ describe('Test replaceb function', () => {
             expect(getObjectValue(result2)).toStrictEqual([
                 ['~lo中文o😊Wo😊rld', '~中文o😊Wo😊rld', '~文o😊Wo😊rld', '~😊Wo😊rld', '~o😊rld'],
             ]);
+
+            const oldText3 = NumberValueObject.create(0.01, '0%');
+            const numChars3 = NumberValueObject.create(1);
+            const result3 = testFunction.calculate(oldText3, startNum, numChars3, newText);
+            expect(getObjectValue(result3)).toStrictEqual('~%');
         });
     });
 });

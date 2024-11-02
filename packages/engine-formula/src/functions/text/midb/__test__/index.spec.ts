@@ -119,6 +119,10 @@ describe('Test midb function', () => {
             expect(getObjectValue(result2)).toStrictEqual([
                 ['Hel', 'Hello', 'Hello中', 'Hello中文o', 'Hello中文o😊W'],
             ]);
+
+            const text3 = StringValueObject.create('2012-2-2');
+            const result3 = testFunction.calculate(text3, startNum, numBytes);
+            expect(getObjectValue(result3)).toStrictEqual('2012');
         });
     });
 });

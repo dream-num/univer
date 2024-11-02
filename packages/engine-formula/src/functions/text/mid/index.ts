@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -71,11 +72,7 @@ export class Mid extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject, startNum: BaseValueObject, numChars: BaseValueObject): BaseValueObject {
-        let textValue = `${text.getValue()}`;
-
-        if (text.isBoolean()) {
-            textValue = textValue.toLocaleUpperCase();
-        }
+        const textValue = getTextValueOfNumberFormat(text);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum, numChars);
 

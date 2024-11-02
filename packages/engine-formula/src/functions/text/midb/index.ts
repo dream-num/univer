@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { getCharLenByteInText } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -72,11 +73,7 @@ export class Midb extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject, startNum: BaseValueObject, numBytes: BaseValueObject): BaseValueObject {
-        let textValue = `${text.getValue()}`;
-
-        if (text.isBoolean()) {
-            textValue = textValue.toLocaleUpperCase();
-        }
+        let textValue = getTextValueOfNumberFormat(text);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum, numBytes);
 

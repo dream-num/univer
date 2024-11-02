@@ -16,6 +16,7 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { getCharLenByteInText } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -95,25 +96,8 @@ export class Replaceb extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let oldTextValue = `${oldText.getValue()}`;
-
-        if (oldText.isBoolean()) {
-            oldTextValue = oldTextValue.toLocaleUpperCase();
-        }
-
-        if (oldText.isNull()) {
-            oldTextValue = '';
-        }
-
-        let newTextValue = `${newText.getValue()}`;
-
-        if (newText.isBoolean()) {
-            newTextValue = newTextValue.toLocaleUpperCase();
-        }
-
-        if (newText.isNull()) {
-            newTextValue = '';
-        }
+        let oldTextValue = getTextValueOfNumberFormat(oldText);
+        const newTextValue = getTextValueOfNumberFormat(newText);
 
         let result = oldTextValue.substring(0, startNumValue - 1);
 

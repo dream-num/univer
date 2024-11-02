@@ -554,6 +554,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         worksheet = workbook.getActiveSheet();
 
         // If cross-sheet operation, switch current sheet first, then const cellData
+        // This should moved to after cell editor
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
             documentDataModel,

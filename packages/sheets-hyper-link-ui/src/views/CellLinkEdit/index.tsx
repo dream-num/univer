@@ -89,7 +89,12 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
-            const { label, customRange, row, col } = editing;
+            const { customRange, row, col } = editing;
+            let { label } = editing;
+            if (typeof label === 'number') {
+                label = `${label}`;
+            }
+
             let link;
             if (customRange) {
                 link = {
@@ -106,7 +111,7 @@ export const CellLinkEdit = () => {
                     const cell = worksheet?.getCellRaw(editing.row, editing.col);
                     const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
                     const cellValue = cell?.v;
-                    if (cell && (!BuildTextUtils.transform.isEmptyDocument(cell.p?.body?.dataStream) || cellValue)) {
+                    if (cell && (!BuildTextUtils.transform.isEmptyDocument(cell.p?.body?.dataStream) || Tools.isDefine(cellValue))) {
                         setShowLabel(false);
                     }
                     link = {

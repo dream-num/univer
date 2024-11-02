@@ -256,6 +256,14 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     }
 
     let { actualCol, actualRow } = cellIndex;
+    const originLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: actualRow,
+        col: actualCol,
+    };
 
     skeleton.overflowCache.forValue((r, c, range) => {
         if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
@@ -265,15 +273,6 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     });
 
     const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
-    const originLocation = {
-        unitId,
-        subUnitId: sheetId,
-        workbook,
-        worksheet,
-        row: actualCell.actualRow,
-        col: actualCell.actualColumn,
-    };
-
     const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);
     let anchorCell: IRange;
     if (actualCell.mergeInfo) {

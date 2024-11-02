@@ -63,6 +63,7 @@ import { HypgeomDist } from './hypgeom-dist';
 import { Intercept } from './intercept';
 import { Kurt } from './kurt';
 import { Large } from './large';
+import { Linest } from './linest';
 import { LognormDist } from './lognorm-dist';
 import { LognormInv } from './lognorm-inv';
 import { Max } from './max';
@@ -169,6 +170,7 @@ export const functionStatistical = [
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
     [Kurt, FUNCTION_NAMES_STATISTICAL.KURT],
     [Large, FUNCTION_NAMES_STATISTICAL.LARGE],
+    [Linest, FUNCTION_NAMES_STATISTICAL.LINEST],
     [LognormDist, FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST],
     [LognormInv, FUNCTION_NAMES_STATISTICAL.LOGNORM_INV],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],

@@ -113,7 +113,7 @@ describe('Test growth function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
 
             const knownYs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -361,10 +361,10 @@ describe('Test growth function', () => {
             const knownXs = ErrorValueObject.create(ErrorType.NAME);
             const newXs = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
 
             const result2 = testFunction.calculate(knownYs, undefined, newXs);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('More test', () => {

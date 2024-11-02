@@ -15,9 +15,11 @@
  */
 
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { erf, erfcINV } from './engineering';
+import { ErrorType } from './error-type';
 import { calculateCombin, calculateFactorial } from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
@@ -775,5 +777,216 @@ export function getTwoArrayNumberValues(
         array1Values,
         array2Values,
         noCalculate,
+    };
+}
+
+// eslint-disable-next-line
+export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: BaseValueObject, newXs?: BaseValueObject) {
+    const knownYsRowCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getRowCount() : 1;
+    const knownYsColumnCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getColumnCount() : 1;
+
+    let knownXsRowCount = knownYsRowCount;
+    let knownXsColumnCount = knownYsColumnCount;
+
+    if (knownXs) {
+        knownXsRowCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getRowCount() : 1;
+        knownXsColumnCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getColumnCount() : 1;
+
+        if (
+            (knownYsRowCount === 1 && knownXsColumnCount !== knownYsColumnCount) ||
+            (knownYsColumnCount === 1 && knownXsRowCount !== knownYsRowCount) ||
+            (knownYsRowCount !== 1 && knownYsColumnCount !== 1 && (knownXsRowCount !== knownYsRowCount || knownXsColumnCount !== knownYsColumnCount))
+        ) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.REF),
+            };
+        }
+    }
+
+    if (newXs) {
+        const newXsRowCount = newXs.isArray() ? (newXs as ArrayValueObject).getRowCount() : 1;
+        const newXsColumnCount = newXs.isArray() ? (newXs as ArrayValueObject).getColumnCount() : 1;
+
+        if (
+            (knownYsRowCount === 1 && knownXsRowCount > 1 && newXsRowCount !== knownXsRowCount) ||
+            (knownYsColumnCount === 1 && knownXsColumnCount > 1 && newXsColumnCount !== knownXsColumnCount)
+        ) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.REF),
+            };
+        }
+    }
+
+    return {
+        isError: false,
+        errorObject: null,
+    };
+}
+
+export function getKnownsArrayValues(array: BaseValueObject): number[][] | ErrorValueObject {
+    const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+    const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+    const values: number[][] = [];
+
+    for (let r = 0; r < rowCount; r++) {
+        values[r] = [];
+
+        for (let c = 0; c < columnCount; c++) {
+            const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+
+            if (valueObject.isError() || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            values[r].push(+valueObject.getValue());
+        }
+    }
+
+    return values;
+}
+
+export function getSerialNumbersByRowsColumns(rowCount: number, columnCount: number): number[][] {
+    const values: number[][] = [];
+
+    let n = 1;
+
+    for (let r = 0; r < rowCount; r++) {
+        values[r] = [];
+
+        for (let c = 0; c < columnCount; c++) {
+            values[r].push(n++);
+        }
+    }
+
+    return values;
+}
+
+export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: number[], constb: number, isExponentialTransform: boolean) {
+    let slope, intercept;
+
+    if (constb) {
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, knownYsValues));
+    } else {
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, knownYsValues));
+    }
+
+    if (isExponentialTransform) {
+        slope = Math.exp(slope);
+        intercept = Math.exp(intercept);
+    }
+
+    if (Number.isNaN(slope) && !constb) {
+        slope = 0;
+    }
+
+    return { slope, intercept };
+}
+
+function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {
+    const n = knownYsValues.length;
+
+    let sumX = 0;
+    let sumY = 0;
+    let sumX2 = 0;
+    let sumXY = 0;
+
+    for (let i = 0; i < n; i++) {
+        sumX += knownXsValues[i];
+        sumY += knownYsValues[i];
+        sumX2 += knownXsValues[i] * knownXsValues[i];
+        sumXY += knownXsValues[i] * knownYsValues[i];
+    }
+
+    const temp = n * sumXY - sumX * sumY;
+    const slope = temp / (n * sumX2 - sumX * sumX);
+    const intercept = 1 / n * sumY - slope * (1 / n) * sumX;
+
+    return {
+        slope,
+        intercept,
+    };
+}
+
+function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsValues: number[]) {
+    const matrixX = [[...knownXsValues]];
+    const matrixY = [...knownYsValues];
+
+    let rowCount = matrixX.length;
+    let columnCount = matrixX[0].length;
+    let minCount = Math.min(rowCount, columnCount);
+    const newMatrix = new Array(minCount).fill(0);
+
+    for (let i = 0; i < minCount; i++) {
+        const matrixXRow = matrixX[i];
+
+        let sumSquare = 0;
+
+        for (let j = 0; j < columnCount; j++) {
+            sumSquare += matrixXRow[j] ** 2;
+        }
+
+        const value = matrixXRow[i] < 0 ? Math.sqrt(sumSquare) : -Math.sqrt(sumSquare);
+
+        newMatrix[i] = value;
+
+        if (value !== 0) {
+            matrixXRow[i] -= value;
+
+            for (let j = i + 1; j < rowCount; j++) {
+                let sum = 0;
+
+                for (let k = i; k < columnCount; k++) {
+                    sum -= matrixX[j][k] * matrixXRow[k];
+                }
+
+                sum /= (value * matrixXRow[i]);
+
+                for (let k = i; k < columnCount; k++) {
+                    matrixX[j][k] -= sum * matrixXRow[k];
+                }
+            }
+        }
+    }
+
+    rowCount = matrixX.length;
+    columnCount = matrixX[0].length;
+    minCount = Math.min(rowCount, columnCount);
+    const result = new Array(rowCount).fill(0);
+
+    for (let i = 0; i < minCount; i++) {
+        const matrixXRow = matrixX[i];
+
+        let sum = 0;
+
+        for (let j = 0; j < columnCount; j++) {
+            sum += matrixY[j] * matrixXRow[j];
+        }
+
+        sum /= (newMatrix[i] * matrixXRow[i]);
+
+        for (let j = 0; j < columnCount; j++) {
+            matrixY[j] += sum * matrixXRow[j];
+        }
+    }
+
+    for (let i = newMatrix.length - 1; i >= 0; i--) {
+        matrixY[i] /= newMatrix[i];
+
+        const temp = matrixY[i];
+        const matrixXRow = matrixX[i];
+
+        result[i] = temp;
+
+        for (let j = 0; j < i; j++) {
+            matrixY[j] -= temp * matrixXRow[j];
+        }
+    }
+
+    return {
+        slope: result[0],
+        intercept: 0,
     };
 }

@@ -1,0 +1,173 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { checkKnownsArrayDimensions, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
+
+export class Linest extends BaseFunction {
+    override minParams = 1;
+
+    override maxParams = 4;
+
+    override calculate(knownYs: BaseValueObject, knownXs?: BaseValueObject, constb?: BaseValueObject, stats?: BaseValueObject): BaseValueObject {
+        const { isError, errorObject } = checkKnownsArrayDimensions(knownYs, knownXs);
+
+        if (isError) {
+            return errorObject as ErrorValueObject;
+        }
+
+        const knownYsValues = getKnownsArrayValues(knownYs);
+
+        if (knownYsValues instanceof ErrorValueObject) {
+            return knownYsValues;
+        }
+
+        const knownXsValues = this._getKnownXsValues(knownYsValues, knownXs);
+
+        if (knownXsValues instanceof ErrorValueObject) {
+            return knownXsValues;
+        }
+
+        let _constb = constb ?? BooleanValueObject.create(true);
+
+        if (_constb.isArray()) {
+            _constb = (_constb as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        let _stats = stats ?? BooleanValueObject.create(false);
+
+        if (_stats.isArray()) {
+            _stats = (_stats as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        const { isError: _isError, errorObject: _errorObject, variants } = checkVariantsErrorIsStringToNumber(_constb, _stats);
+
+        if (_isError) {
+            return _errorObject as ErrorValueObject;
+        }
+
+        const [constbObject, statsObject] = variants as BaseValueObject[];
+
+        return this._getResult(knownYsValues, knownXsValues, +constbObject.getValue(), +statsObject.getValue());
+    }
+
+    private _getResult(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
+        if ((knownYsValues.length === 1 && knownXsValues.length > 1) || (knownYsValues[0].length === 1 && knownXsValues[0].length > 1)) {
+            return this._getResultByMultipleVariables(knownYsValues, knownXsValues, constb, stats);
+        }
+
+        return this._getResultBySimpleVariables(knownYsValues, knownXsValues, constb, stats);
+    }
+
+    private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
+
+    }
+
+    private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
+        const knownYsValuesFlat = knownYsValues.flat();
+        const knownXsValuesFlat = knownXsValues.flat();
+        const { slope: m, intercept: b } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
+
+        if (Number.isNaN(m)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        let result: Array<Array<number | string>> = [];
+
+        if (stats) {
+            const n = knownYsValues.length;
+
+            let sumY = 0;
+            let sumX = 0;
+
+            for (let i = 0; i < n; i++) {
+                sumY += knownYsValuesFlat[i];
+                sumX += knownXsValuesFlat[i];
+            }
+
+            let meanY = sumY / n;
+            let meanX = sumX / n;
+            let df = n - 2;
+
+            if (!constb) {
+                meanY = 0;
+                meanX = 0;
+                df = n - 1;
+            }
+
+            let sstotal = 0;
+            let ssresid = 0;
+            let ssx = 0;
+
+            for (let i = 0; i < n; i++) {
+                sstotal += (knownYsValuesFlat[i] - meanY) ** 2;
+                ssresid += (knownYsValuesFlat[i] - (m * knownXsValuesFlat[i] + b)) ** 2;
+                ssx += (knownXsValuesFlat[i] - meanX) ** 2;
+            }
+
+            const ssreg = sstotal - ssresid;
+            const r2 = sstotal === 0 ? 0 : ssreg / sstotal;
+
+            let se = 0;
+            let seb: number | ErrorType = 0;
+            let sey = 0;
+            let F = 0;
+
+            if (df > 0) {
+                if (ssx > 0) {
+                    se = Math.sqrt(ssresid / df / ssx);
+                    seb = Math.sqrt(ssresid / df * (1 / n + meanX ** 2 / ssx));
+                }
+
+                sey = Math.sqrt(ssresid / df);
+                F = (ssreg / 1) / (ssresid / df);
+            }
+
+            // seb = #N/A when const is FALSE
+            if (!constb) {
+                seb = ErrorType.NA;
+            }
+
+            result = [
+                [m, b], // [m, b]
+                [se, seb], // [se, seb]
+                [r2, sey], // [r2, sey]
+                [F, df], // [F, df]
+                [ssreg, ssresid], // [ssreg, ssresid]
+            ];
+        } else {
+            result = [
+                [m, b], // [m, b]
+            ];
+        }
+
+        return ArrayValueObject.createByArray(result);
+    }
+
+    private _getKnownXsValues(knownYsValues: number[][], knownXs?: BaseValueObject): number[][] | ErrorValueObject {
+        if (!knownXs || knownXs.isNull()) {
+            return getSerialNumbersByRowsColumns(knownYsValues.length, knownYsValues[0].length);
+        }
+
+        return getKnownsArrayValues(knownXs);
+    }
+}

@@ -334,7 +334,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
             const _ruleConfig = ruleConfig as IFormulaHighlightCell;
             const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
             const aliasItemMap = conditionalFormattingFormulaService.getSubUnitFormulaMap(unitId, subUnitId);
-            const item = aliasItemMap?.getValue(`${rule.cfId}_${_ruleConfig.value}`, ['id']);
+            const item = aliasItemMap?.getValue(conditionalFormattingFormulaService.createCFormulaId(rule.cfId, _ruleConfig.value), ['id']);
             if (!item || (item.status !== FormulaResultStatus.SUCCESS)) {
                 return conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId) || computeResult;
             }

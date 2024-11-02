@@ -15,7 +15,7 @@
  */
 
 import type { IHyperLinkPopup } from '../../services/popup.service';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
@@ -47,7 +47,6 @@ export const CellLinkPopup = () => {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
     const zenZoneService = useDependency(IZenZoneService);
-    const visible = useObservable(zenZoneService.visible$);
 
     useEffect(() => {
         setCurrentPopup(popupService.currentPopup);

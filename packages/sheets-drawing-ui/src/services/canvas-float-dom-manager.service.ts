@@ -269,6 +269,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         this.disposeWithMe(
             // eslint-disable-next-line max-lines-per-function
             this._drawingManagerService.add$.subscribe((params) => {
+
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const activeSheetId = workbook.getActiveSheet().getSheetId();
+
                 // eslint-disable-next-line max-lines-per-function
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
@@ -299,6 +303,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     if (transform == null) {
                         return true;
+                    }
+                    if(activeSheetId !== subUnitId){
+                        return;
                     }
 
                     const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;

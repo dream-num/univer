@@ -91,7 +91,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                         return;
                     }
 
-                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params);
+                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params, {
+                        unitId: this._context.unitId,
+                        subUnitId: this._context.unitId,
+                    });
                 })
         );
     }

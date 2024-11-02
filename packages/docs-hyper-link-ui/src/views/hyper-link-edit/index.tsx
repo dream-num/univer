@@ -63,16 +63,16 @@ export const DocHyperLinkEdit = () => {
 
         if (editing) {
             const body = doc?.getSelfOrHeaderFooterModel(editing.segmentId)?.getBody();
-            const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId);
+            const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId && i.startIndex === editing.startIndex && i.endIndex === editing.endIndex);
             if (doc && matchedRange) {
                 setLink(matchedRange.properties?.url ?? '');
-                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex).dataStream));
+                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream));
             }
             return;
         }
 
         const body = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
-        const selection = body ? BuildTextUtils.selection.getInsertSelection(activeRange, body) : null;
+        const selection = body ? activeRange : null;
         const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
         if (doc && matchedRange) {
             setLink(matchedRange?.properties?.url ?? '');

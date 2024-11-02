@@ -266,7 +266,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 this._editPopup,
                 DOCS_ZEN_EDITOR_UNIT_ID_KEY
             );
-            const label = document.getBody()?.dataStream.slice(range.startOffset, range.endOffset - 1);
+            const label = document.getBody()?.dataStream.slice(range.startOffset, range.endOffset);
             this._currentEditing$.next({
                 ...link,
                 label,
@@ -317,7 +317,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         if (link.type === HyperLinkEditSourceType.ZEN_EDITOR) {
             const document: Nullable<DocumentDataModel> = this._univerInstanceService.getUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
             customRange = document?.getBody()?.customRanges?.find((range) => range.rangeId === link.customRangeId);
-            label = customRange ? document?.getBody()?.dataStream.slice(customRange.startIndex + 1, customRange.endIndex) : '';
+            label = customRange ? document?.getBody()?.dataStream.slice(customRange.startIndex, customRange.endIndex + 1) : '';
             if (!customRange || !label) {
                 return;
             }

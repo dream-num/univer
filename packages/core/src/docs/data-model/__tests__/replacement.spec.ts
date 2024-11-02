@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { IDocumentBody } from '../../../types/interfaces';
 
+import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../../types/enum/text-style';
 import { replaceInDocumentBody } from '../replacement';
-import type { IDocumentBody } from '../../../types/interfaces';
 
 function getTestDocumentBody() {
     const documentBody = {
@@ -147,7 +147,7 @@ describe('test case in replaceInDocumentBody utils', () => {
             ],
         } as IDocumentBody;
 
-        expect(replaceInDocumentBody(documentBody, '月色', 'Jocs')).toEqual(expectedBody);
+        expect(replaceInDocumentBody(documentBody, '月色', 'Jocs', true)).toEqual(expectedBody);
     });
 
     it('Should replace all `query` to `target` when `target` is empty', () => {
@@ -205,12 +205,12 @@ describe('test case in replaceInDocumentBody utils', () => {
             ],
         } as IDocumentBody;
 
-        expect(replaceInDocumentBody(documentBody, '月色', '')).toEqual(expectedBody);
+        expect(replaceInDocumentBody(documentBody, '月色', '', true)).toEqual(expectedBody);
     });
 
     it('Should return the origin body when the query is empty', () => {
         const documentBody = getTestDocumentBody();
 
-        expect(replaceInDocumentBody(documentBody, '', 'Jocs')).toEqual(documentBody);
+        expect(replaceInDocumentBody(documentBody, '', 'Jocs', true)).toEqual(documentBody);
     });
 });

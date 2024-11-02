@@ -25,11 +25,12 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { DefaultWriteCellController } from './controllers/write-cell.controller';
 import { RangeProtectionCache } from './model/range-protection.cache';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
-import { BorderStyleManagerService } from './services/border-style-manager.service';
 
+import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
@@ -87,6 +88,7 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [NumberCellDisplayController],
             [DefinedNameDataController],
+            [DefaultWriteCellController],
 
             // permission
             [WorksheetPermissionService],
@@ -124,6 +126,7 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [WorkbookPermissionService],
             [WorksheetPermissionService],
+            [DefaultWriteCellController],
         ]);
     }
 

@@ -19,9 +19,10 @@ import type { IFunctionService } from '@univerjs/engine-formula';
 import { CellValueType, IConfigService, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { isRichText } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { normalizeString } from '../../utils/char-tools';
-import { getCellDataByInput, isRichText } from '../editing.render-controller';
+import { getCellDataByInput } from '../editing.render-controller';
 import { createTestBed } from './create-test-bed';
 import { IMockFunctionService, MockFunctionService } from './mock-function.service';
 

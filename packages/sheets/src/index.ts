@@ -178,7 +178,7 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { copyRangeStyles } from './commands/commands/utils/selection-utils';
-
+export { getCellStyleBySnapshot, isRichText } from './controllers/write-cell.controller';
 // #region - all commands
 
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';

@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelections } from '@univerjs/sheets';
@@ -36,7 +36,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
-    numfmt,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -729,7 +728,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 }
 
-// eslint-disable-next-line
 export function getCellDataByInput(
     cellData: ICellData,
     documentDataModel: Nullable<DocumentDataModel>,
@@ -790,83 +788,16 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (isRichText(body)) {
-        if (body.dataStream === '\r\n') {
-            cellData.v = '';
-            cellData.f = null;
-            cellData.si = null;
-            cellData.p = null;
-        } else {
-            cellData.p = snapshot;
-            cellData.v = null;
-            cellData.f = null;
-            cellData.si = null;
-        }
-    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.NUMBER;
     } else {
-        // If the data is empty, the data is set to null.
-        if (newDataStream === '' && cellData.v == null && cellData.p == null) {
-            return null;
-        }
-        cellData.v = newDataStream;
+        cellData.p = snapshot;
         cellData.f = null;
-        cellData.si = null;
+        cellData.si = null; // Disassociate from the original formula
+        cellData.v = null;
         cellData.p = null;
-        // If the style length in textRun.ts is equal to the content length, it should be set as the cell style
-        const style = getCellStyleBySnapshot(snapshot);
-        if (style) {
-            cellData.s = style;
-        }
+        cellData.t = CellValueType.STRING;
     }
 
     return cellData;
-}
-
-export function isRichText(body: IDocumentBody): boolean {
-    const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
-
-    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
-
-    // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
-    const richTextStyle = ['va'];
-
-    return (
-        textRuns.some((textRun) => {
-            const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
-                return richTextStyle.includes(property);
-            }));
-            return hasRichTextStyle || (Object.keys(textRun.ts ?? {}).length && (textRun.ed - textRun.st < bodyNoLineBreak.length));
-        }) ||
-        paragraphs.some((paragraph) => paragraph.bullet) ||
-        paragraphs.length >= 2 ||
-        Boolean(customRanges?.length) ||
-        customBlocks.length > 0
-    );
-}
-
-export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyleData> {
-    const { body } = snapshot;
-    if (!body) return null;
-    const { textRuns = [] } = body;
-
-    let style = {};
-    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
-    textRuns.forEach((textRun) => {
-        const { st, ed, ts } = textRun;
-        if (ed - st >= bodyNoLineBreak.length) {
-            style = { ...style, ...ts };
-        }
-    });
-    if (Object.keys(style).length) {
-        return style;
-    }
-    return null;
 }
 
 function resetBodyStyle(body: IDocumentBody, removeStyle = false) {

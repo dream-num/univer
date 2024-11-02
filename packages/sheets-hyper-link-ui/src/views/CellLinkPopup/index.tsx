@@ -79,6 +79,10 @@ export const CellLinkPopup = () => {
                         return;
                     }
 
+                    if (isError) {
+                        return;
+                    }
+
                     resolverService.navigate(linkObj);
                 }}
             >

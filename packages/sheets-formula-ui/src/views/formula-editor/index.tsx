@@ -30,6 +30,7 @@ import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useRefocus } from '../range-selector/hooks/useRefocus';
 import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
+import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
@@ -59,6 +60,7 @@ const noop = () => { };
 export function FormulaEditor(props: IFormulaEditorProps) {
     const { errorText, initValue, unitId, subUnitId, isFocus: _isFocus = true, isSupportAcrossSheet = false,
             onFocus = noop,
+            onBlur = noop,
             onChange,
             onVerify,
             actions,
@@ -95,7 +97,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
-    const { sequenceNodes } = useFormulaToken(formulaWithoutEqualSymbol);
+    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -137,6 +139,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
     useRefocus();
+    useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => sequenceNodesSet((pre) => [...pre]));
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);

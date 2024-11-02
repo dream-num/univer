@@ -38,9 +38,6 @@ export class Skeleton extends Disposable {
     }
 
     makeDirty(state: boolean) {
-        if (state) {
-            console.log('sk makedirty', state);
-        }
         this._dirty = state;
     }
 

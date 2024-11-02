@@ -294,11 +294,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._initContextListener();
         // this.updateDataMerge();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
-
-        if (!window.sk) {
-            window.sk = {};
-        }
-        window.sk[this.worksheet.getName()] = this;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -454,7 +449,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns boolean
      */
     updateVisibleRange(bounds?: IViewportInfo): boolean {
-        // console.log('updateVisibleRange');
         if (!this._worksheetData) {
             return false;
         }
@@ -857,7 +851,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
      */
     private _updateLayout(): void {
-        console.log('updateLayout', this.dirty);
         if (!this.dirty) {
             return;
         }
@@ -879,7 +872,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             rowData,
             defaultRowHeight
         );
-        console.log('updateLayout', rowHeightAccumulation);
 
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
             columnCount,
@@ -1010,11 +1002,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         columnCount: number
     ): IColumnRange {
         const contentWidth = contentSize?.width ?? 0;
-
         let startColumn = column;
         let endColumn = column;
-
-        // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);

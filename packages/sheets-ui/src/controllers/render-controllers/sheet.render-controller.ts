@@ -30,7 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import {
@@ -381,12 +381,14 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     return;
                 }
 
+                // DO NOT judge if SetWorksheetActiveOperation is executed.
+                // issue #univer-pro/issues/2310
                 // if (commandId !== SetWorksheetActiveOperation.id) {
+                // }
                 this._sheetSkeletonManagerService.makeDirty({
                     sheetId: worksheetId,
                     commandId,
                 }, true);
-                // }
 
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,

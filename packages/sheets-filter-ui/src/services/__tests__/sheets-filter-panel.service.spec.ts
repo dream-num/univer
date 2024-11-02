@@ -426,7 +426,7 @@ describe('test "SheetsFilterPanelService"', () => {
             expect(await filterByModel.apply()).toBeTruthy();
 
             const filterModel = sheetsFilterService.activeFilterModel;
-            expect(filterModel!.filteredOutRows).toEqual(new Set([1, 2, 3, 5, 6, 7, 8, 9, 10]));
+            expect(filterModel!.filteredOutRows).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
 
         describe('with searching', async () => {
@@ -471,7 +471,7 @@ describe('test "SheetsFilterPanelService"', () => {
 
                 filterByModel.setSearchString('e');
                 vitest.advanceTimersByTime(600);
-                expect(filterByModel.filterItems.length).toBe(6);
+                expect(filterByModel.filterItems.length).toBe(3);
                 expect(getAllLeafNodes(filterByModel.filterItems).length).toBe(7);
                 filterByModel.onCheckAllToggled(true);
                 expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(7); // the original "1" should be checked as well
@@ -491,9 +491,9 @@ describe('test "SheetsFilterPanelService"', () => {
 
                 filterByModel.setSearchString('e');
                 vitest.advanceTimersByTime(600);
-                expect(filterByModel.filterItems.length).toBe(6);
-                filterByModel.onFilterOnly([filterByModel.filterItems[5].key]);
-                expect(filterByModel.rawFilterItems.filter((i) => i.checked).length).toBe(1); // the original "1" should be checked as well
+                expect(filterByModel.filterItems.length).toBe(3);
+                filterByModel.onFilterOnly([filterByModel.filterItems[2].key]);
+                expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(1); // the original "1" should be checked as well
             });
         });
     });

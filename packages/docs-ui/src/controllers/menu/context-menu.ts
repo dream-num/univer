@@ -57,7 +57,7 @@ function notInTableSubscriber(subscriber: Subscriber<boolean>, docSelectionManag
     const rectRanges = docSelectionManagerService.getRectRanges();
     const activeRange = docSelectionManagerService.getActiveTextRange();
 
-    if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
+    if (rectRanges && rectRanges.length && inSameTable(rectRanges) && activeRange == null) {
         subscriber.next(false);
         return;
     }

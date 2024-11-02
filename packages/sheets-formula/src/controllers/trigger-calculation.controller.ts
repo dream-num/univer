@@ -112,12 +112,16 @@ export class TriggerCalculationController extends Disposable {
             this._doneCalculationTaskCount = completedFormulasCount + completedArrayFormulasCount;
             this._totalCalculationTaskCount = totalFormulasToCalculate + totalArrayFormulasToCalculate;
 
+            if (this._totalCalculationTaskCount === 0) {
+                return;
+            }
+
             this._emitProgress(label);
         }
     }
 
     private _completeProgress(): void {
-        this._doneCalculationTaskCount = this._totalCalculationTaskCount;
+        this._doneCalculationTaskCount = this._totalCalculationTaskCount = 1;
         this._emitProgress('Done');
     }
 
@@ -358,16 +362,17 @@ export class TriggerCalculationController extends Disposable {
                         this._forceCalculating = true;
                     }
 
-                    if (
-                        dirtyRanges.length === 0 &&
-                        Object.keys(dirtyNameMap).length === 0 &&
-                        Object.keys(dirtyDefinedNameMap).length === 0 &&
-                        Object.keys(dirtyUnitFeatureMap).length === 0 &&
-                        Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
-                        forceCalculation === false
-                    ) {
-                        return;
-                    }
+                    // Trigger necessary dependency analysis
+                    // if (
+                    //     dirtyRanges.length === 0 &&
+                    //     Object.keys(dirtyNameMap).length === 0 &&
+                    //     Object.keys(dirtyDefinedNameMap).length === 0 &&
+                    //     Object.keys(dirtyUnitFeatureMap).length === 0 &&
+                    //     Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
+                    //     forceCalculation === false
+                    // ) {
+                    //     return;
+                    // }
 
                     // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
                     if (this._calculationMode === CalculationMode.NO_CALCULATION) {

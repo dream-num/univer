@@ -65,6 +65,7 @@ describe('Test dependency', () => {
     describe('dependency normal', () => {
         it('test formula dependency simple ref', async () => {
             const testOtherFormulaId = 'sheet.cf_workbook-01_Q2oij1uNg7HLUT7aT2ikk_yhq9VWH_';
+            const testOtherFormulaId2 = 'sheet.cf_workbook-01_Q2oij1uNg7HLUT7aT2ikk_idjs46G_';
             formulaCurrentConfigService.load({
                 formulaData: {
                     [testUnitId]: {
@@ -119,6 +120,7 @@ describe('Test dependency', () => {
                     [testUnitId]: {
                         [testSheetId]: {
                             [testOtherFormulaId]: true,
+                            [testOtherFormulaId2]: true,
                         },
                     },
                 },
@@ -145,6 +147,17 @@ describe('Test dependency', () => {
                                 },
                             ],
                         },
+                        [testOtherFormulaId2]: {
+                            f: '=A1>1',
+                            ranges: [
+                                {
+                                    startRow: 0,
+                                    startColumn: 0,
+                                    endRow: 0,
+                                    endColumn: 0,
+                                },
+                            ],
+                        },
                     },
                 },
             });
@@ -162,16 +175,17 @@ describe('Test dependency', () => {
                     '=A1>1',
                     '=A1>1',
                     '=A1>1',
+                    '=A1>1',
                 ]
             );
 
             // Check the offset position of other formula
             // Note that the order is reversed
-            const tree = treeList[1] as FormulaDependencyTreeVirtual;
+            const tree = treeList[2] as FormulaDependencyTreeVirtual;
             expect(tree.refOffsetX).toEqual(0);
             expect(tree.refOffsetY).toEqual(1);
 
-            const tree2 = treeList[0] as FormulaDependencyTreeVirtual;
+            const tree2 = treeList[1] as FormulaDependencyTreeVirtual;
             expect(tree2.refOffsetX).toEqual(0);
             expect(tree2.refOffsetY).toEqual(2);
         });

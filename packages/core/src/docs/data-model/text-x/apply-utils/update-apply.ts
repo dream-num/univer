@@ -39,8 +39,10 @@ import {
     insertSectionBreaks,
     insertTables,
     insertTextRuns,
+    mergeContinuousDecorations,
     mergeContinuousRanges,
     normalizeTextRuns,
+    splitCustomDecroatesByIndex,
     splitCustomRangesByIndex,
 } from './common';
 
@@ -506,14 +508,11 @@ function updateCustomDecorations(
         body.customDecorations = [];
     }
 
+    splitCustomDecroatesByIndex(body.customDecorations, currentIndex);
+    splitCustomDecroatesByIndex(body.customDecorations, currentIndex + textLength);
     const removeCustomDecorations: ICustomDecoration[] = [];
-    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
     const { customDecorations } = body;
     const { customDecorations: updateDataCustomDecorations = [] } = updateBody;
-    for (const customDecoration of customDecorations) {
-        const { id } = customDecoration;
-        decorationMap[id] = customDecoration;
-    }
 
     if (coverType === UpdateDocsAttributeType.REPLACE) {
         for (let index = 0; index < customDecorations.length; index++) {
@@ -535,13 +534,11 @@ function updateCustomDecorations(
     } else {
         for (const updateCustomDecoration of updateDataCustomDecorations) {
             const { id } = updateCustomDecoration;
-            const oldCustomDecoration = decorationMap[id];
-            if (oldCustomDecoration) {
-                if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
-                    removeCustomDecorations.push(oldCustomDecoration);
-                    continue;
+            if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+                const oldCustomDecorations = customDecorations.filter((d) => d.id === id);
+                if (oldCustomDecorations.length) {
+                    removeCustomDecorations.push(...oldCustomDecorations);
                 }
-                Object.assign(oldCustomDecoration, updateCustomDecoration);
             } else {
                 customDecorations.push({
                     ...updateCustomDecoration,
@@ -560,5 +557,6 @@ function updateCustomDecorations(
         }
     }
 
+    body.customDecorations = mergeContinuousDecorations(customDecorations);
     return removeCustomDecorations;
 }

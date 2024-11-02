@@ -31,9 +31,14 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                 value={value?.formula1 ?? ''}
                 id={createInternalEditorID(`dataValidation-custom-formula-${unitId}-${subUnitId}`)}
                 onChange={(newValue) => {
+                    const newFormula = (newValue ?? '').trim();
+                    if (newFormula === value?.formula1) {
+                        return;
+                    }
+
                     onChange?.({
                         ...value,
-                        formula1: (newValue ?? '').trim(),
+                        formula1: newFormula,
                     });
                 }}
                 onlyInputFormula

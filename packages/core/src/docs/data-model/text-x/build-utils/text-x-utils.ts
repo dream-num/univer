@@ -105,13 +105,13 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     let cursor = 0;
     const textX: TextX & { selections?: ITextRange[] } = new TextX();
 
-    const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
+    const addCustomRange = (startIndex: number, endIndex: number) => {
         const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
         const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
         const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
 
         const customRange = {
-            rangeId: index ? `${rangeId}$${index}` : rangeId,
+            rangeId,
             rangeType,
             startIndex: 0,
             endIndex: rangeEndIndex - rangeStartIndex,
@@ -137,7 +137,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     };
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
     const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
-    newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
+    newRanges.forEach(([start, end]) => addCustomRange(start, end));
 
     textX.selections = [{
         startOffset: actualRange.endOffset,

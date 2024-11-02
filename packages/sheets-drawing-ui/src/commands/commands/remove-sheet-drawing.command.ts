@@ -61,17 +61,19 @@ export const RemoveSheetDrawingCommand: ICommand = {
         const removeMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } };
         const undoRemoveMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } };
 
-        const result = sequenceExecute([removeMutation, ...intercepted.redos], commandService);
+        const result = sequenceExecute([...(intercepted.preRedos ?? []), removeMutation, ...intercepted.redos], commandService);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...intercepted.undos,
+                    ...(intercepted.preUndos ?? []),
                     undoRemoveMutation,
+                    ...intercepted.undos,
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     removeMutation,
                     ...intercepted.redos,
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },

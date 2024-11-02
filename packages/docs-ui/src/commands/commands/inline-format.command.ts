@@ -17,6 +17,8 @@
 import type {
     DocumentDataModel,
     ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+    ITextStyle,
+    Nullable,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
@@ -231,7 +233,7 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
@@ -327,9 +329,18 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
             if (startOffset === endOffset) {
                 // Cache the menu style for next input.
+                const cacheStyle = docMenuStyleService.getStyleCache();
+                const key = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
+
                 docMenuStyleService.setStyleCache(
                     {
-                        [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
+                        [key]: cacheStyle?.[key] !== undefined
+                            ? getReverseFormatValue(
+                                cacheStyle,
+                                key,
+                                preCommandId
+                            )
+                            : formatValue,
                     }
                 );
                 continue;
@@ -383,12 +394,40 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
     return value !== null && typeof value === 'object';
 }
 
+function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, preCommandId: string) {
+    if (/bl|it/.test(key)) {
+        return ts?.[key] === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    }
+
+    if (/ul|st/.test(key)) {
+        return isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.TRUE
+            ? {
+                s: BooleanNumber.FALSE,
+            }
+            : {
+                s: BooleanNumber.TRUE,
+            };
+    }
+
+    if (/va/.test(key)) {
+        if (preCommandId === SetInlineFormatSubscriptCommand.id) {
+            return ts?.[key] === BaselineOffset.SUBSCRIPT
+                ? BaselineOffset.NORMAL
+                : BaselineOffset.SUBSCRIPT;
+        } else {
+            return ts?.[key] === BaselineOffset.SUPERSCRIPT
+                ? BaselineOffset.NORMAL
+                : BaselineOffset.SUPERSCRIPT;
+        }
+    }
+}
+
 /**
  * When clicking on a Bold menu item, you should un-bold if there is bold in the selections,
  * or bold if there is no bold text. This method is used to get the reverse style value calculated
  * from textRuns in the selection
  */
-// eslint-disable-next-line complexity
+
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     preCommandId: string,
@@ -409,30 +448,10 @@ function getReverseFormatValueInSelection(
         } else if (ed <= startOffset!) {
             ti++;
         } else {
-            if (/bl|it/.test(key)) {
-                return ts?.[key] === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
-            }
+            const reverseValue = getReverseFormatValue(ts, key, preCommandId);
 
-            if (/ul|st/.test(key)) {
-                return isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.TRUE
-                    ? {
-                        s: BooleanNumber.FALSE,
-                    }
-                    : {
-                        s: BooleanNumber.TRUE,
-                    };
-            }
-
-            if (/va/.test(key)) {
-                if (preCommandId === SetInlineFormatSubscriptCommand.id) {
-                    return ts?.[key] === BaselineOffset.SUBSCRIPT
-                        ? BaselineOffset.NORMAL
-                        : BaselineOffset.SUBSCRIPT;
-                } else {
-                    return ts?.[key] === BaselineOffset.SUPERSCRIPT
-                        ? BaselineOffset.NORMAL
-                        : BaselineOffset.SUPERSCRIPT;
-                }
+            if (reverseValue !== undefined) {
+                return reverseValue;
             }
 
             ti++;

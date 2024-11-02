@@ -468,28 +468,18 @@ function updateCustomRanges(
     });
 
     const removeCustomRanges: ICustomRange[] = [];
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
-        updateBody.customRanges?.forEach((customRange) => {
-            const { startIndex, endIndex } = customRange;
-            newCustomRanges.push({
-                ...customRange,
-                startIndex: startIndex + currentIndex,
-                endIndex: endIndex + currentIndex,
-            });
-        });
-    } else {
-        if (!updateDataCustomRanges) {
-            return [];
-        }
-        updateBody.customRanges?.forEach((customRange) => {
-            const { startIndex, endIndex } = customRange;
-            newCustomRanges.push({
-                ...customRange,
-                startIndex: startIndex + currentIndex,
-                endIndex: endIndex + currentIndex,
-            });
-        });
+
+    if (!updateDataCustomRanges) {
+        return [];
     }
+    updateBody.customRanges?.forEach((customRange) => {
+        const { startIndex, endIndex } = customRange;
+        newCustomRanges.push({
+            ...customRange,
+            startIndex: startIndex + currentIndex,
+            endIndex: endIndex + currentIndex,
+        });
+    });
 
     body.customRanges = mergeContinuousRanges(newCustomRanges);
     return removeCustomRanges;

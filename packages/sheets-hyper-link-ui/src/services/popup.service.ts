@@ -20,7 +20,7 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -36,8 +36,9 @@ export interface IHyperLinkPopup {
     col: number;
     editPermission?: boolean;
     copyPermission?: boolean;
-    customRange?: ICustomRange;
+    customRange?: Nullable<ICustomRange>;
     type: HyperLinkEditSourceType;
+    showAll?: boolean;
 }
 
 interface IHyperLinkEditing {
@@ -65,6 +66,7 @@ interface IHyperLinkPopupOptions extends ISheetLocationBase {
     copyPermission?: boolean;
     customRange?: Nullable<ICustomRange>;
     customRangeRect?: Nullable<IBoundRectNoAngle>;
+    showAll?: boolean;
     type: HyperLinkEditSourceType;
 }
 
@@ -94,8 +96,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
@@ -132,9 +132,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
 
         const { unitId, subUnitId, row, col, customRangeRect, customRange } = location;
-        if (!customRange) {
-            return;
-        }
         let disposable: Nullable<INeedCheckDisposable>;
         const popup: ICanvasPopup = {
             componentKey: CellLinkPopup.componentKey,
@@ -147,11 +144,17 @@ export class SheetsHyperLinkPopupService extends Disposable {
             },
         };
         if (location.type === HyperLinkEditSourceType.EDITING) {
+            if (!customRange) {
+                return;
+            }
             disposable = customRangeRect && this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
                 customRangeRect,
                 popup
             );
         } else if (location.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+            if (!customRange) {
+                return;
+            }
             disposable = this._docCanvasPopManagerService.attachPopupToRange(
                 {
                     startOffset: customRange.startIndex,
@@ -162,10 +165,18 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 DOCS_ZEN_EDITOR_UNIT_ID_KEY
             );
         } else {
-            disposable = customRangeRect && this._sheetCanvasPopManagerService.attachPopupByPosition(
-                customRangeRect,
-                popup
-            );
+            if (location.showAll) {
+                disposable = this._sheetCanvasPopManagerService.attachPopupToCell(location.row, location.col, popup, unitId, subUnitId);
+            } else {
+                if (!customRange) {
+                    return;
+                }
+
+                disposable = customRangeRect && this._sheetCanvasPopManagerService.attachPopupByPosition(
+                    customRangeRect,
+                    popup
+                );
+            }
         }
 
         if (disposable) {
@@ -179,6 +190,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 copyPermission: !!location.copyPermission,
                 customRange,
                 type: location.type,
+                showAll: location.showAll,
             };
             this._currentPopup$.next(this._currentPopup);
         }
@@ -307,6 +319,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
     }
 
+    // eslint-disable-next-line complexity, max-lines-per-function
     startEditing(link: Required<IHyperLinkEditing>) {
         this._currentEditingPopup?.dispose();
         this.hideCurrentPopup(undefined, true);
@@ -356,18 +369,34 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 subUnitId
             );
         } else {
+            const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getSheetBySheetId(subUnitId);
+            const cell = worksheet?.getCellRaw(link.row, link.col);
+            const style = workbook?.getStyles().getStyleByCell(cell);
+            const tr = style?.tr;
+
             const customRangeInfo = getCustomRangePosition(this._injector, link.unitId, link.subUnitId, link.row, link.col, link.customRangeId);
             if (!customRangeInfo || !customRangeInfo.rects?.length) {
                 return;
             }
             customRange = customRangeInfo.customRange;
             label = customRangeInfo.label;
-            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
-                customRangeInfo.rects.pop()!,
-                this._editPopup,
-                unitId,
-                subUnitId
-            );
+            if (tr) {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
+                    link.row,
+                    link.col,
+                    this._editPopup,
+                    unitId,
+                    subUnitId
+                );
+            } else {
+                this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
+                    customRangeInfo.rects.pop()!,
+                    this._editPopup,
+                    unitId,
+                    subUnitId
+                );
+            }
         }
         this._currentEditing$.next({
             ...link,

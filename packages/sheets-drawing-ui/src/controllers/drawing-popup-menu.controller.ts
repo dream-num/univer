@@ -118,7 +118,11 @@ export class DrawingPopupMenuController extends RxDisposable {
                         return;
                     }
 
-                    const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                    const { unitId, subUnitId, drawingId, drawingType, data } = drawingParam;
+                    // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
+                    if(data && data.disablePopup){
+                        return;
+                    }
                     singletonPopupDisposer?.dispose();
                     singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,

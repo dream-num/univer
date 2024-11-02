@@ -493,7 +493,7 @@ export const CellLinkEdit = () => {
                                 }
                                 setHide(true);
                             } else {
-                                await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
+                                await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     await commandService.executeCommand(SetSelectionsOperation.id, {
                                         unitId: editing.unitId,
@@ -570,7 +570,7 @@ export const CellLinkEdit = () => {
                 <Button
                     onClick={() => {
                         if (editing) {
-                            resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
+                            resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col }, true);
                         }
                         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}

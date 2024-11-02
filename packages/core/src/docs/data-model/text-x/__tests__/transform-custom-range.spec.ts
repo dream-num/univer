@@ -145,10 +145,6 @@ describe('transform custom range in body', () => {
         const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
         const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
 
-        // console.log(JSON.stringify(TextX.transform(actionsB, actionsA, 'left'), null, 2));
-        // console.log(JSON.stringify(composedAction1, null, 2));
-        // console.log(JSON.stringify(composedAction2, null, 2));
-
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
@@ -260,14 +256,6 @@ describe('transform custom range in body', () => {
 
         const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
         const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
-
-        // console.log(JSON.stringify(TextX.transform(actionsA, actionsB, 'right'), null, 2));
-        // console.log('resultA');
-        // console.log(JSON.stringify(resultA, null, 2));
-        // console.log('resultB');
-        // console.log(JSON.stringify(resultB, null, 2));
-        // console.log(JSON.stringify(composedAction1, null, 2));
-        // console.log(JSON.stringify(composedAction2, null, 2));
 
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
@@ -391,11 +379,6 @@ describe('transform custom range in body', () => {
 
         const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
         const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
-
-        // console.log(JSON.stringify(TextX.transform(actionsB, actionsA, 'left'), null, 2));
-        // console.log(JSON.stringify(TextX.transform(actionsA, actionsB, 'right'), null, 2));
-        // console.log(JSON.stringify(composedAction1, null, 2));
-        // console.log(JSON.stringify(composedAction2, null, 2));
 
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);

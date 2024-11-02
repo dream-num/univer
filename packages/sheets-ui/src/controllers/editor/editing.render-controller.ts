@@ -793,7 +793,6 @@ export function getCellDataByInput(
         cellData.f = null;
         cellData.si = null; // Disassociate from the original formula
         cellData.v = null;
-        cellData.p = null;
         cellData.t = CellValueType.STRING;
     }
 

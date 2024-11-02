@@ -117,7 +117,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
         formulaMatrix.setValue(dependencyTree.refOffsetX, dependencyTree.refOffsetY, dependencyTree.treeId);
 
-        this._addAllTreeMap(dependencyTree);
+        // this._addAllTreeMap(dependencyTree);
     }
 
     removeOtherFormulaDependency(unitId: string, sheetId: string, formulaIds: string[]) {
@@ -225,7 +225,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         const sheetMap = unitMap.get(sheetId)!;
         sheetMap.set(featureId, dependencyTree.treeId);
         // this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
-        this._addAllTreeMap(dependencyTree);
+        // this._addAllTreeMap(dependencyTree);
     }
 
     removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]) {
@@ -292,7 +292,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
         sheetMatrix.setValue(row, column, dependencyTree.treeId);
         // this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
-        this._addAllTreeMap(dependencyTree);
+        // this._addAllTreeMap(dependencyTree);
     }
 
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
@@ -363,6 +363,8 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
 
         this._dependencyRTreeCache.bulkInsert(searchRanges);
+
+        this._addAllTreeMap(tree);
     }
 
     private _restDependencyTreeId() {
@@ -461,18 +463,17 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     private _addAllTreeMap(tree: IFormulaDependencyTree) {
         const rangeList = tree.rangeList;
-        const oldTreeMap = this._allTreeMap.get(tree.treeId);
+        let oldTreeMap = this._allTreeMap.get(tree.treeId);
         for (let i = 0; i < rangeList.length; i++) {
             const unitRangeWithNum = rangeList[i];
             let { unitId, sheetId, range } = unitRangeWithNum;
-            if (!this._allTreeMap.has(tree.treeId)) {
-                this._allTreeMap.set(tree.treeId, new Map<string, Map<string, IRange>>());
+            if (!oldTreeMap) {
+                oldTreeMap = new Map<string, Map<string, IRange>>();
+                this._allTreeMap.set(tree.treeId, oldTreeMap);
             }
 
-            const treeMap = this._allTreeMap.get(tree.treeId)!;
-
-            if (!treeMap.has(unitId)) {
-                treeMap.set(unitId, new Map<string, IRange>());
+            if (!oldTreeMap.has(unitId)) {
+                oldTreeMap.set(unitId, new Map<string, IRange>());
             }
 
             const oldRange = oldTreeMap?.get(unitId)?.get(sheetId);
@@ -485,8 +486,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 };
             }
 
-            const unitMap = treeMap.get(unitId)!;
-            unitMap.set(sheetId, range);
+            oldTreeMap.get(unitId)?.set(sheetId, range);
         }
     }
 }

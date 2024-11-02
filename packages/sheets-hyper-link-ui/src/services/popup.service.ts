@@ -174,7 +174,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
 
                 disposable = customRangeRect && this._sheetCanvasPopManagerService.attachPopupByPosition(
                     customRangeRect,
-                    popup
+                    popup,
+                    location
                 );
             }
         }
@@ -393,8 +394,12 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupByPosition(
                     customRangeInfo.rects.pop()!,
                     this._editPopup,
-                    unitId,
-                    subUnitId
+                    {
+                        unitId,
+                        subUnitId,
+                        row: link.row,
+                        col: link.col,
+                    }
                 );
             }
         }

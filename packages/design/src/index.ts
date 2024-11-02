@@ -46,7 +46,7 @@ export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu } from './components/menu';
 export { type IMessageOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
-export { type IPopupProps, type IRectPopupProps, Popup, RectPopup } from './components/popup';
+export { type IPopupProps, Popup } from './components/popup';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';

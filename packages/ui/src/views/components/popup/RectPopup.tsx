@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { RefObject } from 'react';
+import type { Observable } from 'rxjs';
 import { useEvent } from 'rc-util';
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import styles from './index.module.less';
 
 interface IAbsolutePosition {
@@ -25,7 +28,7 @@ interface IAbsolutePosition {
     bottom: number;
 }
 
-const RectPopupContext = createContext({ top: 0, bottom: 0, left: 0, right: 0 });
+const RectPopupContext = createContext<RefObject<IAbsolutePosition | undefined>>({ current: undefined });
 
 export interface IRectPopupProps {
     children?: React.ReactNode;
@@ -33,8 +36,8 @@ export interface IRectPopupProps {
     /**
      * the anchor element bounding rect
      */
-    anchorRect: IAbsolutePosition;
-    excludeRects?: IAbsolutePosition[];
+    anchorRect$: Observable<IAbsolutePosition>;
+    excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
     direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
 
     hidden?: boolean;
@@ -103,46 +106,47 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
+    const { children, anchorRect$, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
-    const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
+    const positionRef = useRef<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
     });
-    const excludeRectsRef = useRef(excludeRects);
-    excludeRectsRef.current = excludeRects;
+    const excludeRectsRef = excludeRects;
+    const anchorRectRef = useRef<IAbsolutePosition>();
 
-    const style = useMemo(() => ({ ...position }), [position]);
     useEffect(() => {
-        requestAnimationFrame(() => {
-            if (!nodeRef.current) return;
+        const anchorRectSub = anchorRect$.subscribe((anchorRect) => {
+            anchorRectRef.current = anchorRect;
+            requestAnimationFrame(() => {
+                if (!nodeRef.current) return;
 
-            const { clientWidth, clientHeight } = nodeRef.current;
-            const innerWidth = window.innerWidth;
-            const innerHeight = window.innerHeight;
+                const { clientWidth, clientHeight } = nodeRef.current;
+                const innerWidth = window.innerWidth;
+                const innerHeight = window.innerHeight;
 
-            setPosition(calcPopupPosition(
-                {
-                    position: anchorRect,
-                    width: clientWidth,
-                    height: clientHeight,
-                    containerWidth: innerWidth,
-                    containerHeight: innerHeight,
-                    direction,
-                }
-            ));
+                positionRef.current = calcPopupPosition(
+                    {
+                        position: anchorRect,
+                        width: clientWidth,
+                        height: clientHeight,
+                        containerWidth: innerWidth,
+                        containerHeight: innerHeight,
+                        direction,
+                    }
+                );
+                nodeRef.current.style.top = `${positionRef.current.top}px`;
+                nodeRef.current.style.left = `${positionRef.current.left}px`;
+            });
         });
+
+        return () => anchorRectSub.unsubscribe();
     },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-        anchorRect.left,
-        anchorRect.top,
-        anchorRect.bottom,
-        anchorRect.right,
-        direction,
-    ]);
+
+    [anchorRect$, direction]
+    );
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
@@ -158,7 +162,10 @@ function RectPopup(props: IRectPopupProps) {
             }
             const x = e.clientX;
             const y = e.clientY;
-            const rects = [anchorRect, ...excludeRectsRef.current ?? []];
+            const rects = [...excludeRectsRef?.current ?? []];
+            if (anchorRectRef.current) {
+                rects.push(anchorRectRef.current);
+            }
             for (const rect of rects) {
                 if (x <= rect.right && x >= rect.left && y <= rect.bottom && y >= rect.top) {
                     return;
@@ -171,7 +178,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => {
             window.removeEventListener('pointerdown', handleClickOther);
         };
-    }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
+    }, [clickOtherFn, excludeOutside, excludeRectsRef]);
 
     useEffect(() => {
         const handleContextMenu = (e: MouseEvent) => {
@@ -191,12 +198,12 @@ function RectPopup(props: IRectPopupProps) {
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
             ref={nodeRef}
-            style={{ ...style, ...hidden ? { display: 'none' } : null }}
+            style={{ ...positionRef.current, ...hidden ? { display: 'none' } : null }}
             className={styles.popupFixed}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onClick}
         >
-            <RectPopupContext.Provider value={anchorRect}>
+            <RectPopupContext.Provider value={anchorRectRef}>
                 {children}
             </RectPopupContext.Provider>
         </section>

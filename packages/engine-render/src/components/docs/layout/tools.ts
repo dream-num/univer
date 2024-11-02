@@ -853,9 +853,9 @@ export function getFontCreateConfig(
 
     textStyle = {
         ...documentTextStyle,
+        ...customRangeStyle,
         ...textStyle,
         ...customDecorationStyle,
-        ...customRangeStyle,
         ...bulletTextStyle,
     };
 

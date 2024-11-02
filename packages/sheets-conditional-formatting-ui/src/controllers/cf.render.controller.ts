@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
 import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
@@ -254,6 +254,23 @@ export class SheetsCfRenderController extends Disposable {
                     cloneCell.fontRenderExtension.leftOffset = DEFAULT_PADDING + DEFAULT_WIDTH;
                 }
 
+                // TODO: move to skeleton
+                if (cloneCell.p) {
+                    const { bg, ...ts } = s;
+                    const p = Tools.deepClone(cloneCell.p);
+                    if (p.body!.textRuns) {
+                        p.body!.textRuns?.forEach((textRun) => {
+                            textRun.ts = {
+                                ...textRun.ts,
+                                ...ts,
+                            };
+                        });
+                    } else {
+                        p.body!.textRuns = [{ ts, st: 0, ed: p.body!.dataStream.length - 1 }];
+                    }
+                    cloneCell.p = p;
+                    return next(cloneCell);
+                }
                 return next(cloneCell);
             },
             priority: 10,

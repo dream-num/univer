@@ -950,7 +950,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const curTextRun = textRuns[i];
 
-        if (curTextRun.st <= startOffset && startOffset <= curTextRun.ed) {
+        if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
             textRun = curTextRun;
             break;
         }

@@ -21,10 +21,10 @@ import type { Editor } from '@univerjs/docs-ui';
 
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
-import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
@@ -53,6 +53,9 @@ export const useSheetSelectionChange = (
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = (sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '';
+    const sheetName = useMemo(() => getSheetNameById(subUnitId), [subUnitId]);
+    const activeSheet = useObservable(workbook?.activeSheet$);
+    const contextRef = useStateRef({ activeSheet, sheetName });
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
@@ -89,7 +92,8 @@ export const useSheetSelectionChange = (
                             unitId: range.rangeWithCoord.unitId ?? unitId,
                             sheetName: getSheetNameById(rangeSheetId),
                         };
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        const isAcrossSheet = rangeSheetId !== subUnitId;
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                         sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                         const result = sequenceNodeToText(newSequenceNodes);
@@ -102,7 +106,8 @@ export const useSheetSelectionChange = (
                             unitId: range.rangeWithCoord.unitId ?? unitId,
                             sheetName: getSheetNameById(rangeSheetId),
                         };
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        const isAcrossSheet = rangeSheetId !== subUnitId;
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                         sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const result = sequenceNodeToText(sequenceNodes);
                         handleRangeChange(result, refRanges[0].length);
@@ -115,6 +120,17 @@ export const useSheetSelectionChange = (
                             return item;
                         }
                         if (item.nodeType === sequenceNodeType.REFERENCE) {
+                            const nodeRange = deserializeRangeWithSheet(item.token);
+                            if (!nodeRange.sheetName) {
+                                nodeRange.sheetName = sheetName;
+                            }
+
+                            if (isSupportAcrossSheet) {
+                                // 直接跳过非当前表的 node 节点
+                                if (contextRef.current.activeSheet?.getName() !== nodeRange.sheetName) {
+                                    return item.token;
+                                }
+                            }
                             const selection = selections[currentRefIndex];
                             currentRefIndex++;
                             if (!selection) {
@@ -140,7 +156,8 @@ export const useSheetSelectionChange = (
                             unitId: selection.rangeWithCoord.unitId ?? unitId,
                             sheetName: getSheetNameById(rangeSheetId),
                         };
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        const isAcrossSheet = rangeSheetId !== subUnitId;
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                         theLastList.push(refRanges[0]);
                     }
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
@@ -172,8 +189,8 @@ export const useSheetSelectionChange = (
                 let currentIndex = 0;
                 let offset = 0;
                 let isFinish = false;
-                const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-                const currentSheetName = workbook?.getActiveSheet()?.getName() || '';
+                const { sheetName } = contextRef.current;
+
                 const newSequenceNodes = sequenceNodesRef.current.map((node) => {
                     if (typeof node === 'string') {
                         if (!isFinish) {
@@ -181,20 +198,36 @@ export const useSheetSelectionChange = (
                         }
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
-                        const unitRange = deserializeRangeWithSheet(token);
-                        unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
-                        unitRange.sheetName = unitRange.sheetName === '' ? currentSheetName : unitRange.sheetName;
+                        const unitRange = deserializeRangeWithSheet(node.token);
+                        if (!unitRange.unitId) {
+                            unitRange.unitId = unitId;
+                        }
+                        if (!unitRange.sheetName) {
+                            unitRange.sheetName = sheetName;
+                        }
+                        if (isSupportAcrossSheet) {
+                            // 直接跳过非当前表的 node 节点
+                            if (contextRef.current.activeSheet?.getName() !== unitRange.sheetName) {
+                                if (!isFinish) {
+                                    offset += node.token.length;
+                                }
+                                return node;
+                            }
+                        }
                         if (currentIndex === index) {
                             isFinish = true;
                             const cloneNode = { ...node, token };
                             if (isSupportAcrossSheet) {
-                                cloneNode.token = serializeRangeWithSheet(unitRange.sheetName, unitRange.range);
+                                if (unitRange.sheetName !== sheetName) {
+                                    cloneNode.token = serializeRangeWithSheet(unitRange.sheetName, deserializeRangeWithSheet(token).range);
+                                } else {
+                                    cloneNode.token = token;
+                                }
                             } else {
-                                cloneNode.token = serializeRange(unitRange.range);
+                                cloneNode.token = token;
                             }
                             offset += cloneNode.token.length;
                             currentIndex++;
-
                             return cloneNode;
                         }
                         if (!isFinish) {

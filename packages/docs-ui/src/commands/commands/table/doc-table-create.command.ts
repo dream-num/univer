@@ -36,7 +36,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
     id: CreateDocTableCommandId,
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: ICreateDocTableCommandParams) => {
         const { rowCount, colCount } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -66,16 +66,17 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
-        const line = curGlyph?.parent?.parent;
-        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
-        const isInParagraph = preGlyph && preGlyph.content !== '\r';
+        // const line = curGlyph?.parent?.parent;
+        // const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+        // const isInParagraph = preGlyph && preGlyph.content !== '\r';
 
-        if (curGlyph == null || line == null) {
+        if (curGlyph == null) {
             return false;
         }
 
         // Also need to create new paragraph when there is already a table in paragraph.
-        const needCreateParagraph = isInParagraph || line.isBehindTable;
+        // Always inert a paragraph before table.
+        const needCreateParagraph = true; // isInParagraph || line.isBehindTable;
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();

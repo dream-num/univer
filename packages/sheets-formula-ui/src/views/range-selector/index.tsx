@@ -23,13 +23,12 @@ import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { filter } from 'rxjs';
+import { filter, noop } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 
 import { useEditorInput } from './hooks/useEditorInput';
@@ -43,6 +42,7 @@ import { useRefocus } from './hooks/useRefocus';
 import { useResetSelection } from './hooks/useResetSelection';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
+import { useSwitchSheet } from './hooks/useSwitchSheet';
 import { useVerify } from './hooks/useVerify';
 import styles from './index.module.less';
 import { rangePreProcess } from './utils/rangePreProcess';
@@ -247,6 +247,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useRefocus();
 
+    useSwitchSheet(!rangeDialogVisible && isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => sequenceNodesSet((pre) => [...pre]));
+
     useEffect(() => {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
@@ -261,17 +263,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [editor]);
 
     useEffect(() => {
-        const d1 = commandService.beforeCommandExecuted((info) => {
-            if (info.id === SetWorksheetActiveOperation.id && !isSupportAcrossSheet) {
-                isFocusSet(false);
-                onBlur();
-                // Refresh the component
-                sequenceNodesSet((pre) => [...pre]);
-                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-                editor?.focus();
-            }
-        });
-        const d2 = commandService.onCommandExecuted((info) => {
+        const d = commandService.onCommandExecuted((info) => {
             if (info.id === SetCellEditVisibleOperation.id) {
                 rangeDialogVisibleSet(false);
                 onRangeSelectorDialogVisibleChange(false);
@@ -280,8 +272,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             }
         });
         return () => {
-            d1.dispose();
-            d2.dispose();
+            d.dispose();
         };
     }, [isSupportAcrossSheet]);
 
@@ -454,6 +445,8 @@ function RangeSelectorDialog(props: {
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
     useRefactorEffect(focusIndex >= 0, unitId);
     useOnlyOneRange(unitId, isOnlyOneRange);
+    useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, () => sequenceNodesSet((pre) => [...pre]));
+
     // 如果只有一个空 range,那么默认自动添加 range
     useEffect(() => {
         if (ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {

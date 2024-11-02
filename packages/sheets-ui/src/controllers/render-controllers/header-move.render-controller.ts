@@ -21,7 +21,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelectionDataModel } from '@univerjs/sheets';
 import {
     createInterceptorKey, Disposable, ICommandService,
     Inject,
@@ -77,7 +77,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     public readonly interceptor = new InterceptorManager({ HEADER_MOVE_PERMISSION_CHECK });
 
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionDataModel;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,

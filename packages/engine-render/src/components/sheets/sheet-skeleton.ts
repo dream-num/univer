@@ -31,7 +31,6 @@ import type {
     IRowAutoHeightInfo,
     IRowData,
     IRowRange,
-    ISelectionCell,
     ISelectionCellWithCoord,
     ISize,
     IStyleData,

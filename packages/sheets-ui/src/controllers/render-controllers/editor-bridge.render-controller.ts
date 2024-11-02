@@ -46,7 +46,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        // FIXME: should use WorkbookSelections
+        // FIXME: should use WorkbookSelectionDataModel
         // FIXME: should check if it is the current sheet, if it becomes the current sheet,
         // it should update cell params, otherwise it should do nothing.
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,

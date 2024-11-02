@@ -17,24 +17,12 @@
 import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { ISelectionWithStyle } from '../../basics/selection';
-import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ISelectionManagerSearchParam } from './type';
 
-import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
-
-export interface ISelectionManagerSearchParam {
-    unitId: string;
-    sheetId: string;
-}
-
-export enum SelectionMoveType {
-    MOVE_START,
-    MOVING,
-    MOVE_END,
-    /**
-     * Events are not triggered by the API
-     */
-    ONLY_SET,
-}
+import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { of, shareReplay, switchMap, takeUntil } from 'rxjs';
+import { WorkbookSelectionDataModel } from './selection-data-model';
+import { SelectionMoveType } from './type';
 
 export class SheetsSelectionsService extends RxDisposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
@@ -109,7 +97,7 @@ export class SheetsSelectionsService extends RxDisposable {
     setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     /**
-     * Set selection data to WorkbookSelections.
+     * Set selection data to WorkbookSelectionDataModel.
      * If type is not specified, this method would clear all existing selections.
      * @param unitIdOrSelections
      * @param worksheetIdOrType
@@ -177,12 +165,12 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._ensureWorkbookSelection(unitId).getSelectionOfWorksheet(sheetId);
     }
 
-    getWorkbookSelections(unitId: string): WorkbookSelections {
+    getWorkbookSelections(unitId: string): WorkbookSelectionDataModel {
         return this._ensureWorkbookSelection(unitId);
     }
 
-    protected _workbookSelections = new Map<string, WorkbookSelections>();
-    protected _ensureWorkbookSelection(unitId: string): WorkbookSelections {
+    protected _workbookSelections = new Map<string, WorkbookSelectionDataModel>();
+    protected _ensureWorkbookSelection(unitId: string): WorkbookSelectionDataModel {
         let wbSelection = this._workbookSelections.get(unitId);
         if (!wbSelection) {
             const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
@@ -190,7 +178,7 @@ export class SheetsSelectionsService extends RxDisposable {
                 throw new Error(`[SheetsSelectionsService]: cannot resolve unit with id "${unitId}"!`);
             }
 
-            wbSelection = new WorkbookSelections(workbook);
+            wbSelection = new WorkbookSelectionDataModel(workbook);
             this._workbookSelections.set(unitId, wbSelection);
         }
 
@@ -199,130 +187,6 @@ export class SheetsSelectionsService extends RxDisposable {
 
     protected _removeWorkbookSelection(unitId: string): void {
         this._workbookSelections.delete(unitId);
-    }
-}
-
-/**
- * This class manages selections in a single workbook.
- */
-export class WorkbookSelections extends Disposable {
-    private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
-    readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
-
-    private readonly _selectionMoving$ = new Subject<Nullable<ISelectionWithStyle[]>>();
-    readonly selectionMoving$ = this._selectionMoving$.asObservable();
-
-    readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-
-    private readonly _selectionSet$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
-    readonly selectionSet$ = this._selectionSet$.asObservable();
-
-    private readonly _beforeSelectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
-    readonly beforeSelectionMoveEnd$ = this._beforeSelectionMoveEnd$.asObservable();
-
-    constructor(
-        private readonly _workbook: Workbook
-    ) {
-        super();
-    }
-
-    override dispose(): void {
-        super.dispose();
-
-        this._beforeSelectionMoveEnd$.complete();
-        this._selectionMoveEnd$.complete();
-        this._selectionMoving$.complete();
-        this._selectionMoveStart$.complete();
-    }
-
-    /** Clear all selections in this workbook. */
-    clear(): void {
-        this._worksheetSelections.clear();
-        this._emitOnEnd([]);
-    }
-
-    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
-        const selections = this._ensureSheetSelection(sheetId);
-        selections.push(...selectionDatas);
-        this._emitOnEnd(selections);
-    }
-
-    /**
-     * Set selectionDatas to _worksheetSelections, and emit selectionDatas by type.
-     * If type is not specfied, this method would clear all existing selections.
-     * @param sheetId
-     * @param selectionDatas
-     * @param type
-     */
-    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[] = [], type: SelectionMoveType): void {
-        // selectionDatas should not be same variable as this._worksheetSelections !!!
-        // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
-        // see univer/pull/2909
-        this._ensureSheetSelection(sheetId).length = 0;
-        this._ensureSheetSelection(sheetId).push(...selectionDatas);
-
-        switch (type) {
-            case SelectionMoveType.MOVE_START:
-                this._selectionMoveStart$.next(selectionDatas);
-                break;
-            case SelectionMoveType.MOVING:
-                this._selectionMoving$.next(selectionDatas);
-                break;
-            case SelectionMoveType.MOVE_END:
-                this._emitOnEnd(selectionDatas);
-                break;
-            case SelectionMoveType.ONLY_SET: {
-                this._selectionSet$.next(selectionDatas);
-                break;
-            }
-            default:
-                this._emitOnEnd(selectionDatas);
-                break;
-        }
-    }
-
-    getCurrentSelections(): Readonly<ISelectionWithStyle[]> {
-        return this._getCurrentSelections();
-    }
-
-    getSelectionOfWorksheet(sheetId: string): ISelectionWithStyle[] {
-        if (!this._worksheetSelections.has(sheetId)) {
-            return [];
-        }
-
-        return this._worksheetSelections.get(sheetId)!;
-    }
-
-    private _getCurrentSelections() {
-        return this.getSelectionOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
-    }
-
-    getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
-        const selectionData = this._getCurrentSelections();
-        return selectionData[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
-    }
-
-    private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
-
-    /**
-     * Same as _getCurrentSelections(which return this._worksheetSelections), but this method would set [] if no selection.
-     * @param sheetId
-     * @returns this._worksheetSelections
-     */
-    private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
-        let worksheetSelection = this._worksheetSelections.get(sheetId);
-        if (!worksheetSelection) {
-            worksheetSelection = [];
-            this._worksheetSelections.set(sheetId, worksheetSelection);
-        }
-
-        return worksheetSelection;
-    }
-
-    private _emitOnEnd(selections: ISelectionWithStyle[]): void {
-        this._beforeSelectionMoveEnd$.next(selections);
-        this._selectionMoveEnd$.next(selections);
     }
 }
 

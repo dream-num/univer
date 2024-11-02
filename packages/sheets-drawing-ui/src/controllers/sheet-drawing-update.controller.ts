@@ -17,7 +17,7 @@
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
+import type { WorkbookSelectionDataModel } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
@@ -36,7 +36,7 @@ import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.c
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionDataModel;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService,

@@ -19,7 +19,7 @@
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
+import type { WorkbookSelectionDataModel } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -88,7 +88,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
-    private _workbookSelections: WorkbookSelections;
+    private _workbookSelections: WorkbookSelectionDataModel;
 
     private _d: Nullable<IDisposable>;
     _cursorTimeout: NodeJS.Timeout;

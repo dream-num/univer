@@ -44,8 +44,6 @@ export enum SELECTION_MANAGER_KEY {
     // fillTopLeft & fillBottomRight are used for mobile selection
     fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
     fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
-    fillTopLeftInner = '__SpreadsheetSelectionFillControlTopLeftInner__',
-    fillBottomRightInner = '__SpreadsheetSelectionFillControlBottomRightInner__',
 
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
@@ -86,7 +84,7 @@ export class SelectionControl extends Disposable {
     private _backgroundControlMiddleLeft!: Rect;
     private _backgroundControlMiddleRight!: Rect;
 
-    private _fillControl: Rect;
+    private _autoFillControl: Rect;
 
     private _selectionShapeGroup!: Group;
 
@@ -179,7 +177,7 @@ export class SelectionControl extends Disposable {
     }
 
     get fillControl(): Rect {
-        return this._fillControl;
+        return this._autoFillControl;
     }
 
     get backgroundControlTop(): Rect {
@@ -530,7 +528,7 @@ export class SelectionControl extends Disposable {
         this._backgroundControlMiddleLeft?.dispose();
         this._backgroundControlMiddleRight?.dispose();
         this._backgroundControlBottom?.dispose();
-        this._fillControl.dispose();
+        this._autoFillControl.dispose();
         this._selectionShapeGroup?.dispose();
 
         this._rowHeaderBackground?.dispose();
@@ -659,11 +657,11 @@ export class SelectionControl extends Disposable {
 
         // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
         // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
-        this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
+        this._autoFillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             zIndex: zIndex + 1,
         });
 
-        // That weird, new Dashedrect should called when strokeDash. not every selectionControl need dashedRect.
+        // @TODO lumixraku weird!! new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
         // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
         this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
@@ -672,7 +670,7 @@ export class SelectionControl extends Disposable {
         });
 
         const shapes = [
-            this._fillControl,
+            this._autoFillControl,
             this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
             this._backgroundControlTop, this._backgroundControlMiddleLeft,
             this._backgroundControlMiddleRight, this._backgroundControlBottom,

@@ -130,6 +130,7 @@ export class TextX {
         return this._transform(otherActions, thisActions, priority === 'left' ? 'right' : 'left');
     }
 
+    // otherActions is the actions to be transformed.
     static _transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
 

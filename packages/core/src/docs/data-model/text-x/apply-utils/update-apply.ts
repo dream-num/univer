@@ -523,7 +523,7 @@ function updateCustomDecorations(
     } else {
         for (const updateCustomDecoration of updateDataCustomDecorations) {
             const { id } = updateCustomDecoration;
-            if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+            if (updateCustomDecoration.type === CustomDecorationType.DELETED) {
                 const oldCustomDecorations = customDecorations.filter((d) => d.id === id);
                 if (oldCustomDecorations.length) {
                     removeCustomDecorations.push(...oldCustomDecorations);

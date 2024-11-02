@@ -17,9 +17,9 @@
 /* eslint-disable no-param-reassign */
 
 import type { Nullable } from '../../../shared';
-import type { ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
+import { CustomDecorationType, type ICustomDecoration, type ICustomRange, type IDocumentBody, type IParagraph, type IParagraphStyle, type ITextRun, type ITextStyle } from '../../../types/interfaces';
 import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {
@@ -348,6 +348,42 @@ function transformParagraph(
     return paragraph;
 }
 
+function transformCustomDecorations(
+    originCustomDecorations: ICustomDecoration[],
+    targetCustomDecorations: ICustomDecoration[]
+) {
+    if (originCustomDecorations.length === 0 || targetCustomDecorations.length === 0) {
+        return Tools.deepClone(targetCustomDecorations);
+    }
+
+    const customDecorations: ICustomDecoration[] = [];
+
+    for (const decoration of targetCustomDecorations) {
+        const { id, type } = decoration;
+
+        let pushed = false;
+
+        for (const originDecoration of originCustomDecorations) {
+            if (originDecoration.id === id) {
+                if (originDecoration.type === CustomDecorationType.DELETED || type === CustomDecorationType.DELETED) {
+                    pushed = true;
+                    customDecorations.push({
+                        ...decoration,
+                        type: CustomDecorationType.DELETED,
+                    });
+                }
+                break;
+            }
+        }
+
+        if (!pushed) {
+            customDecorations.push(decoration);
+        }
+    }
+
+    return customDecorations;
+}
+
 interface ITransformBodyResult {
     body: IDocumentBody;
     coverType: UpdateDocsAttributeType;
@@ -372,38 +408,34 @@ export function transformBody(
 
     const coverType = otherCoverType;
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [] } = otherBody;
+    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [], customDecorations: thisCustomDecorations = [] } = thisBody;
+    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [], customDecorations: otherCustomDecorations = [] } = otherBody;
 
-    let textRuns: ITextRun[] = [];
-    if (priority) {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER_ONLY_NOT_EXISTED);
-    } else {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER);
+    retBody.textRuns = transformTextRuns(
+        thisTextRuns,
+        otherTextRuns,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    retBody.customRanges = transformCustomRanges(
+        thisCustomRanges,
+        otherCustomRanges,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    // Transform custom decorations.
+    const customDecorations = transformCustomDecorations(
+        thisCustomDecorations,
+        otherCustomDecorations
+    );
+
+    if (customDecorations.length) {
+        retBody.customDecorations = customDecorations;
     }
-
-    retBody.textRuns = textRuns;
-
-    let customRanges: ICustomRange[] = [];
-    if (priority) {
-        customRanges = transformCustomRanges(
-            thisCustomRanges,
-            otherCustomRanges,
-            thisCoverType,
-            otherCoverType,
-            TextXTransformType.COVER_ONLY_NOT_EXISTED
-        );
-    } else {
-        customRanges = transformCustomRanges(
-            thisCustomRanges,
-            otherCustomRanges,
-            thisCoverType,
-            otherCoverType,
-            TextXTransformType.COVER
-        );
-    }
-
-    retBody.customRanges = customRanges;
 
     const paragraphs: IParagraph[] = [];
 

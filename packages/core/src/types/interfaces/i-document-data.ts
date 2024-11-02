@@ -385,8 +385,7 @@ export interface ICustomBlock {
 
 export enum CustomDecorationType {
     COMMENT,
-
-    DELTED = 9999,
+    DELETED = 9999,
 }
 
 export interface ICustomDecoration {

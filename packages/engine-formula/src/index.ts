@@ -59,6 +59,12 @@ export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './co
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export { CalculateController } from './controller/calculate.controller';
+export { FormulaController } from './controller/formula.controller';
+export { type IUniverEngineFormulaConfig } from './controller/config.schema';
+export { SetSuperTableController } from './controller/set-super-table.controller';
+export { SetOtherFormulaController } from './controller/set-other-formula.controller';
+export { SetDependencyController } from './controller/set-dependency.controller';
+export { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 export { SetDefinedNameController } from './controller/set-defined-name.controller';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';

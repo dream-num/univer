@@ -397,15 +397,14 @@ export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIn
     const matchedCustomRange = customRanges[matchedCustomRangeIndex];
 
     if (matchedCustomRange) {
-        customRanges.splice(matchedCustomRangeIndex, 1);
-        customRanges.push({
+        customRanges.splice(matchedCustomRangeIndex, 1, {
             rangeId: matchedCustomRange.rangeId,
             rangeType: matchedCustomRange.rangeType,
             startIndex: matchedCustomRange.startIndex,
             endIndex: currentIndex - 1,
             properties: { ...matchedCustomRange.properties },
-        });
-        customRanges.push({
+        },
+        {
             rangeId: matchedCustomRange.rangeId,
             rangeType: matchedCustomRange.rangeType,
             startIndex: currentIndex,
@@ -445,14 +444,14 @@ export function splitCustomDecroatesByIndex(customDecorations: ICustomDecoration
     const matcheds = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
 
     matcheds.forEach((matched) => {
-        customDecorations.splice(customDecorations.indexOf(matched), 1);
-        customDecorations.push({
+        const index = customDecorations.indexOf(matched);
+        customDecorations.splice(index, 1, {
             id: matched.id,
             type: matched.type,
             startIndex: matched.startIndex,
             endIndex: currentIndex - 1,
-        });
-        customDecorations.push({
+        },
+        {
             id: matched.id,
             type: matched.type,
             startIndex: currentIndex,

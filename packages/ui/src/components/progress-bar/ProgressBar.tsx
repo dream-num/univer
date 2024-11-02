@@ -49,14 +49,15 @@ export function ProgressBar(props: IProgressBarProps) {
         // Hide immediately if both count and done are zero
         if (count === 0 && done === 0) {
             setVisible(false);
+            progressBarInner.style.width = '0%';
         }
         // Handle the special case if count and done are equal for the first time and not from a previous progress change
         else if (count === done && prevCount === 0 && prevDone === 0) {
             setVisible(true);
-            progressBarInner.style.width = '0%';
             requestAnimationFrame(() => {
                 progressBarInner.style.width = '100%';
             });
+            onClearProgress && onClearProgress();
         }
         // Update the width of the progress bar
         else if (count > 0) {
@@ -75,17 +76,13 @@ export function ProgressBar(props: IProgressBarProps) {
 
         // Listen for the transitionend event
         const handleTransitionEnd = () => {
-            if ((count === 0 && done === 0) || done === count) {
+            if (done === count) {
                 // Hide the progress bar after the animation finishes
                 setVisible(false);
-                // Reset the width for future progress bars
-                progressBarInner.style.width = '0%';
 
                 // Notify the parent component to reset the progress after the animation ends
                 // After the progress bar is completed 100%, the upper props data source may not be reset, resulting in count and done still being the previous values (displaying 100%) when the progress bar is triggered next time, so a message is reported here to trigger clearing.
-                if (done === count && onClearProgress) {
-                    onClearProgress();
-                }
+                onClearProgress && onClearProgress();
             }
         };
 

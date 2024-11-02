@@ -150,7 +150,7 @@ describe('Test dependency', () => {
             });
 
             const treeList = await formulaDependencyGenerator.generate();
-            const treeJson = treeList.map((tree) => tree instanceof FormulaDependencyTree ? tree.formula : tree.refTree?.formula);
+            const treeJson = treeList.map((tree) => tree instanceof FormulaDependencyTree ? tree.formula : tree.refTree?.formula).reverse();
 
             expect(treeJson).toEqual(
                 [
@@ -166,11 +166,12 @@ describe('Test dependency', () => {
             );
 
             // Check the offset position of other formula
-            const tree = treeList[6] as FormulaDependencyTreeVirtual;
+            // Note that the order is reversed
+            const tree = treeList[1] as FormulaDependencyTreeVirtual;
             expect(tree.refOffsetX).toEqual(0);
             expect(tree.refOffsetY).toEqual(1);
 
-            const tree2 = treeList[7] as FormulaDependencyTreeVirtual;
+            const tree2 = treeList[0] as FormulaDependencyTreeVirtual;
             expect(tree2.refOffsetX).toEqual(0);
             expect(tree2.refOffsetY).toEqual(2);
         });

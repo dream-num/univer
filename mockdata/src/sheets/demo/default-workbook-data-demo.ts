@@ -16,6 +16,7 @@
 
 import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
+import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
@@ -14018,23 +14019,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     0: {
                         f: '=A2',
                     },
-                    1: {
-                        f: '=A2',
-                        v: 2,
-                    },
-                    2: {
-                        f: '=A2',
-                    },
                     10: {
                         v: 0,
                     },
                     11: {
                         v: 235,
-                    },
-                },
-                3: {
-                    0: {
-                        f: '=A2',
                     },
                 },
                 4: {
@@ -14046,9 +14035,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 5: {
-                    0: {
-                        f: '=A2',
-                    },
                     5: {
                         s: 'uJSelZ11',
                         v: 'sadf',
@@ -14070,9 +14056,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 6: {
-                    0: {
-                        f: '=A2',
-                    },
                     5: {
                         s: 'uJSelZ22',
                         v: '123123',
@@ -24018,13 +24001,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         // },
     },
     resources: [
-        // {
-        //     name: DATA_VALIDATION_PLUGIN_NAME,
-        //     data: JSON.stringify({
-        //         'sheet-0011': dataValidation,
-        //         'dv-test': dv2,
-        //     }),
-        // },
+        {
+            name: DATA_VALIDATION_PLUGIN_NAME,
+            data: JSON.stringify({
+                'sheet-0011': dataValidation,
+                'dv-test': dv2,
+            }),
+        },
         {
             name: 'SHEET_FILTER_PLUGIN',
             data: JSON.stringify({

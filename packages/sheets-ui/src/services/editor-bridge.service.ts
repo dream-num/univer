@@ -347,7 +347,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             location
         );
 
-        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell, true);
 
             // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;

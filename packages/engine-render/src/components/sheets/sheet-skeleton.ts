@@ -187,10 +187,11 @@ interface ICellDocumentModelOption {
     isDeepClone?: boolean;
     displayRawFormula?: boolean;
     ignoreTextRotation?: boolean;
+    forEditor?: boolean;
 }
 
 const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
-    isDeepClone: false,
+    isDeepClone: true,
     displayRawFormula: false,
     ignoreTextRotation: false,
 };
@@ -1342,11 +1343,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
+    getCellDocumentModelWithFormula(cell: ICellData, forEditor?: boolean): Nullable<IDocumentLayoutObject> {
         return this._getCellDocumentModel(cell, {
             isDeepClone: true,
             displayRawFormula: true,
             ignoreTextRotation: true,
+            forEditor,
         });
     }
 
@@ -1357,12 +1359,12 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param cell
      * @param options
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _getCellDocumentModel(
         cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
     ): Nullable<IDocumentLayoutObject> {
-        const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
+        const { isDeepClone, displayRawFormula, ignoreTextRotation, forEditor } = {
             ...DEFAULT_CELL_DOCUMENT_MODEL_OPTION,
             ...options,
         };
@@ -1384,6 +1386,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+        const textStyle = getFontFormat(style);
 
         if (cell.f && displayRawFormula) {
             // The formula does not detect horizontal alignment and rotation.
@@ -1404,7 +1407,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
             );
         } else if (cell.v != null) {
-            const textStyle = getFontFormat(style);
             fontString = getFontStyleString(textStyle).fontCache;
 
             let cellText = extractPureTextFromCell(cell);
@@ -1420,6 +1422,21 @@ export class SpreadsheetSkeleton extends Skeleton {
                 textRotation,
                 cellValueType: cell.t!,
             });
+        }
+        if (!forEditor && documentModel) {
+            const { bg, ...ts } = textStyle;
+            const body = documentModel.getBody();
+            const textRuns = body?.textRuns;
+            if (textRuns) {
+                textRuns?.forEach((textRun) => {
+                    textRun.ts = {
+                        ...textRun.ts,
+                        ...ts,
+                    };
+                });
+            } else {
+                body!.textRuns = [{ ts, st: 0, ed: body!.dataStream.length - 1 }];
+            }
         }
 
         // This is a compatible code. cc @weird94

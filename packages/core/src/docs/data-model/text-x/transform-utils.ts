@@ -201,19 +201,47 @@ function transformTextRuns(
 function transformCustomRanges(
     originCustomRanges: ICustomRange[],
     targetCustomRanges: ICustomRange[],
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
 ): ICustomRange[] {
-    if (originCustomRanges.length === 0) {
+    if (originCustomRanges.length === 0 || targetCustomRanges.length === 0) {
         return Tools.deepClone(targetCustomRanges);
     }
 
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
+    if (originCustomRanges.length > 1 || targetCustomRanges.length > 1) {
+        throw new Error('CustomRanges is only supported transform for length one now.');
+    }
+
+    const originCustomRange = originCustomRanges[0];
+    const targetCustomRange = targetCustomRanges[0];
+
+    if (originCoverType === UpdateDocsAttributeType.REPLACE) {
         return transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-            ? Tools.deepClone(originCustomRanges)
-            : Tools.deepClone(targetCustomRanges);
+            ? [Tools.deepClone(originCustomRange)]
+            : [Tools.deepClone(targetCustomRange)];
     } else {
-        throw new Error('CustomRanges is only supported in replace mode.');
+        if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
+            }
+
+            return [customRange];
+        } else {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                const keys = Object.keys(originCustomRange);
+
+                for (const key of keys) {
+                    if (customRange[key as keyof ICustomRange] !== undefined) {
+                        delete customRange[key as keyof ICustomRange];
+                    }
+                }
+            }
+
+            return [customRange];
+        }
     }
 }
 
@@ -359,9 +387,21 @@ export function transformBody(
 
     let customRanges: ICustomRange[] = [];
     if (priority) {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED, thisCoverType);
+        customRanges = transformCustomRanges(
+            thisCustomRanges,
+            otherCustomRanges,
+            thisCoverType,
+            otherCoverType,
+            TextXTransformType.COVER_ONLY_NOT_EXISTED
+        );
     } else {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER, thisCoverType);
+        customRanges = transformCustomRanges(
+            thisCustomRanges,
+            otherCustomRanges,
+            thisCoverType,
+            otherCoverType,
+            TextXTransformType.COVER
+        );
     }
 
     if (customRanges.length) {

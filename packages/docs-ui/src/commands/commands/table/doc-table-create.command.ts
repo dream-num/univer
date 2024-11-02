@@ -19,6 +19,8 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getTextRunAtPosition } from '../../../basics/paragraph';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
@@ -42,6 +44,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (activeRange == null) {
@@ -107,6 +110,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             });
         }
 
+        // Insert a paragraph before table.
         if (needCreateParagraph) {
             textX.push({
                 t: TextXActionType.INSERT,
@@ -119,6 +123,14 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         }
 
         // Step 2: Insert table.
+        const defaultTextStyle = docMenuStyleService.getDefaultStyle();
+        const styleCache = docMenuStyleService.getStyleCache();
+        const curTextRun = getTextRunAtPosition(
+            body.textRuns ?? [],
+            startOffset,
+            defaultTextStyle,
+            styleCache
+        );
         const { dataStream: tableDataStream, paragraphs: tableParagraphs, sectionBreaks } = genEmptyTable(rowCount, colCount);
         const page = curGlyph.parent?.parent?.parent?.parent?.parent;
         if (page == null) {
@@ -133,6 +145,11 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
                 dataStream: tableDataStream,
                 paragraphs: tableParagraphs,
                 sectionBreaks,
+                textRuns: [{
+                    ...curTextRun,
+                    st: 0,
+                    ed: tableDataStream.length,
+                }],
                 tables: [
                     {
                         startIndex: 0,

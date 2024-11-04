@@ -97,13 +97,13 @@ export class DocInputController extends Disposable implements IRenderModule {
                         ? [{
                             ...curCustomRange,
                             startIndex: 0,
-                            endIndex: content.length,
+                            endIndex: content.length - 1,
                         }]
                         : [],
                     customDecorations: curCustomDecorations.map((customDecoration) => ({
                         ...customDecoration,
                         startIndex: 0,
-                        endIndex: content.length,
+                        endIndex: content.length - 1,
                     })),
                 },
                 range: activeRange,

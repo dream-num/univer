@@ -133,7 +133,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
             },
             coverType: UpdateDocsAttributeType.COVER,
         });
-        cursor = rangeEndIndex;
+        cursor = rangeEndIndex + 1;
     };
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
     const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));

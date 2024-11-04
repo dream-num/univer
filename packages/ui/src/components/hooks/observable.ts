@@ -16,9 +16,10 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Nullable } from '@univerjs/core';
+import type { RefObject } from 'react';
 import type { Observable, Subscription } from 'rxjs';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
 
@@ -91,4 +92,20 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     }
 
     return valueRef.current;
+}
+
+export function useObservableRef<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T): RefObject<Nullable<T>> {
+    const ref = useRef<Nullable<T>>(defaultValue);
+
+    useEffect(() => {
+        if (observable) {
+            const sub = unwrap(observable).subscribe((value) => {
+                ref.current = value;
+            });
+
+            return () => sub.unsubscribe();
+        }
+    }, [observable]);
+
+    return ref;
 }

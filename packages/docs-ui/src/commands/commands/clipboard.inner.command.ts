@@ -39,7 +39,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCustomRangeAtPosition } from '../../basics/paragraph';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -189,12 +189,20 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             }
 
             const customRange = getCustomRangeAtPosition(originBody.customRanges ?? [], endOffset, UNITS.includes(unitId));
+            const customDecorations = getCustomDecorationAtPosition(originBody.customDecorations ?? [], endOffset);
             if (customRange) {
                 cloneBody.customRanges = [{
                     ...customRange,
                     startIndex: 0,
-                    endIndex: body.dataStream.length,
+                    endIndex: body.dataStream.length - 1,
                 }];
+            }
+            if (customDecorations.length) {
+                cloneBody.customDecorations = customDecorations.map((customDecoration) => ({
+                    ...customDecoration,
+                    startIndex: 0,
+                    endIndex: body.dataStream.length - 1,
+                }));
             }
             if (collapsed) {
                 textX.push({

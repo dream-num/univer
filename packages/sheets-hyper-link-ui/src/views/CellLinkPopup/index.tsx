@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICustomRange, Nullable, Workbook } from '@univerjs/core';
 import type { IHyperLinkPopup } from '../../services/popup.service';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
@@ -37,33 +38,28 @@ const iconsMap = {
     [SheetHyperLinkType.INVALID]: <AllBorderSingle />,
 };
 
-export const CellLinkPopup = () => {
+interface ICellLinkPopupPureProps {
+    customRange?: Nullable<ICustomRange>;
+    row: number;
+    col: number;
+    unitId: string;
+    subUnitId: string;
+    editPermission?: boolean;
+    copyPermission?: boolean;
+    type: HyperLinkEditSourceType;
+}
+
+export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
-    const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
     const zenZoneService = useDependency(IZenZoneService);
-    const visible = useObservable(zenZoneService.visible$);
+    const { customRange, row, col, unitId, subUnitId, editPermission, copyPermission, type } = props;
 
-    useEffect(() => {
-        setCurrentPopup(popupService.currentPopup);
-        const ob = popupService.currentPopup$.subscribe((popup) => {
-            setCurrentPopup(popup);
-        });
-        return () => {
-            ob.unsubscribe();
-        };
-    }, [popupService.currentPopup, popupService.currentPopup$]);
-
-    if (!currentPopup) {
-        return null;
-    }
-
-    const { unitId, subUnitId, customRange, row, col } = currentPopup;
     if (!customRange?.properties?.url) {
         return null;
     }
@@ -79,6 +75,10 @@ export const CellLinkPopup = () => {
                         return;
                     }
 
+                    if (isError) {
+                        return;
+                    }
+
                     resolverService.navigate(linkObj);
                 }}
             >
@@ -90,7 +90,7 @@ export const CellLinkPopup = () => {
                 </Tooltip>
             </div>
             <div className={styles.cellLinkOperations}>
-                {currentPopup.copyPermission && (
+                {copyPermission && (
                     <div
                         className={cs(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
                         onClick={() => {
@@ -116,7 +116,7 @@ export const CellLinkPopup = () => {
 
                     </div>
                 )}
-                {currentPopup.editPermission && (
+                {editPermission && (
                     <>
                         <div
                             className={styles.cellLinkOperation}
@@ -127,7 +127,7 @@ export const CellLinkPopup = () => {
                                     row,
                                     col,
                                     customRangeId: customRange.rangeId,
-                                    type: currentPopup.type,
+                                    type,
                                 });
                             }}
                         >
@@ -138,14 +138,14 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                const commandId = (currentPopup.type === HyperLinkEditSourceType.EDITING || currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                                const commandId = (type === HyperLinkEditSourceType.EDITING || type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
                                 if (commandService.syncExecuteCommand(commandId, {
                                     unitId,
                                     subUnitId,
                                     id: customRange.rangeId,
                                     row,
                                     column: col,
-                                    documentId: currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                                    documentId: type === HyperLinkEditSourceType.ZEN_EDITOR ?
                                         DOCS_ZEN_EDITOR_UNIT_ID_KEY
                                         : editorBridgeService.getCurrentEditorId(),
                                 })) {
@@ -162,6 +162,42 @@ export const CellLinkPopup = () => {
             </div>
         </div>
     );
+};
+
+export const CellLinkPopup = () => {
+    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    useEffect(() => {
+        setCurrentPopup(popupService.currentPopup);
+        const ob = popupService.currentPopup$.subscribe((popup) => {
+            setCurrentPopup(popup);
+        });
+        return () => {
+            ob.unsubscribe();
+        };
+    }, [popupService.currentPopup, popupService.currentPopup$]);
+
+    if (!currentPopup) {
+        return null;
+    }
+    if (currentPopup.showAll) {
+        const workbook = univerInstanceService.getUnit<Workbook>(currentPopup.unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(currentPopup.subUnitId);
+        const cell = worksheet?.getCell(currentPopup.row, currentPopup.col);
+        const customRanges = cell?.p?.body?.customRanges;
+        return customRanges?.length
+            ? (
+                <div>
+                    {customRanges.map((customRange) => {
+                        return <CellLinkPopupPure key={customRange.rangeId} {...currentPopup} customRange={customRange} />;
+                    })}
+                </div>
+            )
+            : null;
+    }
+    return <CellLinkPopupPure {...currentPopup} />;
 };
 
 CellLinkPopup.componentKey = 'univer.sheet.cell-link-popup';

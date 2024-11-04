@@ -148,19 +148,19 @@ export function getViewportByCell(row: number, column: number, scene: Scene, wor
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row > freeze.startRow && column > freeze.startColumn) {
+    if (row >= freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row <= freeze.startRow && column <= freeze.startColumn) {
+    if (row < freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
     }
 
-    if (row <= freeze.startRow && column > freeze.startColumn) {
+    if (row < freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
     }
 
-    if (row > freeze.startRow && column <= freeze.startColumn) {
+    if (row >= freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
     }
 }
@@ -256,6 +256,14 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     }
 
     let { actualCol, actualRow } = cellIndex;
+    const originLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: actualRow,
+        col: actualCol,
+    };
 
     skeleton.overflowCache.forValue((r, c, range) => {
         if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
@@ -265,15 +273,6 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     });
 
     const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
-    const originLocation = {
-        unitId,
-        subUnitId: sheetId,
-        workbook,
-        worksheet,
-        row: actualCell.actualRow,
-        col: actualCell.actualColumn,
-    };
-
     const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);
     let anchorCell: IRange;
     if (actualCell.mergeInfo) {

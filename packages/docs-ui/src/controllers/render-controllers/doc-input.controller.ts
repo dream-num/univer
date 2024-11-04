@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { Disposable, ICommandService, Inject, SHEET_EDITOR_UNITS } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -78,6 +78,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             const cacheStyle = this._docMenuStyleService.getStyleCache();
             const curCustomRange = getCustomRangeAtPosition(originBody?.customRanges ?? [], activeRange.endOffset, SHEET_EDITOR_UNITS.includes(unitId));
             const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, defaultTextStyle, cacheStyle);
+            const curCustomDecorations = getCustomDecorationAtPosition(originBody?.customDecorations ?? [], activeRange.endOffset);
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,
@@ -96,9 +97,14 @@ export class DocInputController extends Disposable implements IRenderModule {
                         ? [{
                             ...curCustomRange,
                             startIndex: 0,
-                            endIndex: content.length,
+                            endIndex: content.length - 1,
                         }]
                         : [],
+                    customDecorations: curCustomDecorations.map((customDecoration) => ({
+                        ...customDecoration,
+                        startIndex: 0,
+                        endIndex: content.length - 1,
+                    })),
                 },
                 range: activeRange,
                 segmentId,

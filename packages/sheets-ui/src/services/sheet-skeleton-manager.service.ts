@@ -155,6 +155,11 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         param.skeleton.calculate();
     }
 
+    /**
+     * Make param dirty, if param is dirty, then the skeleton will be makeDirty in _reCalculate()
+     * @param searchParm
+     * @param state
+     */
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {
         const param = this._getSkeleton(searchParm);
         if (param == null) {

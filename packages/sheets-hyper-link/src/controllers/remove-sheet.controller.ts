@@ -18,7 +18,9 @@ import type { Workbook } from '@univerjs/core';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
+import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
+import { HyperLinkModel } from '../models/hyper-link.model';
 
 export class SheetsHyperLinkRemoveSheetController extends Disposable {
     constructor(

@@ -275,6 +275,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
 
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId)!;
+                    if (!workbook) {
+                        return;
+                    }
+
+                    const activeSheetId = workbook.getActiveSheet().getSheetId();
+
                     if (!floatDomParam || !target) {
                         return;
                     }
@@ -299,6 +306,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     if (transform == null) {
                         return true;
+                    }
+
+                    if (activeSheetId !== subUnitId) {
+                        return;
                     }
 
                     const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;

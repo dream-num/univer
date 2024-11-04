@@ -592,8 +592,8 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
-            return one || two || three;
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), (one, two) => {
+            return one || two;
         }),
     };
 }
@@ -950,7 +950,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const curTextRun = textRuns[i];
 
-        if (curTextRun.st <= startOffset && startOffset <= curTextRun.ed) {
+        if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
             textRun = curTextRun;
             break;
         }

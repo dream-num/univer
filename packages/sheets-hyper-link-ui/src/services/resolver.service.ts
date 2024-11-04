@@ -129,7 +129,7 @@ export class SheetsHyperLinkResolverService {
         this.navigateToSheetById(unitId, gid);
     }
 
-    async navigateToRange(unitId: string, subUnitId: string, range: IRange) {
+    async navigateToRange(unitId: string, subUnitId: string, range: IRange, forceTop?: boolean) {
         const worksheet = await this.navigateToSheetById(unitId, subUnitId);
         if (worksheet) {
             const realRange = getContainRange(range, worksheet);
@@ -146,6 +146,7 @@ export class SheetsHyperLinkResolverService {
             );
             await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                 range: realRange,
+                forceTop,
             });
         }
     }

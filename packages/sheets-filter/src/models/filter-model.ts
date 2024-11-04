@@ -553,4 +553,3 @@ function extractFilterValueFromCell(cell: ICellData): string | number {
 
     return '';
 }
-

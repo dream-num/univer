@@ -22,6 +22,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BaselineOffset, BooleanNumber, CommandType,
+    DOC_RANGE_TYPE,
     ICommandService, IUniverInstanceService,
     JSONX, MemoryCursor,
     TextX, TextXActionType,
@@ -244,7 +245,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        const segmentId = docRanges[0].segmentId;
+        const { segmentId } = docRanges[0];
 
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
@@ -313,10 +314,15 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         memoryCursor.reset();
 
         for (const range of docRanges) {
-            const { startOffset, endOffset } = range;
+            let { startOffset, endOffset, rangeType } = range;
 
             if (startOffset == null || endOffset == null) {
                 continue;
+            }
+
+            // Use to fix https://github.com/dream-num/univer-pro/issues/3101
+            if (rangeType === DOC_RANGE_TYPE.RECT) {
+                startOffset = startOffset - 1;
             }
 
             if (startOffset === endOffset) {

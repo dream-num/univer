@@ -19,7 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
@@ -100,6 +100,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             styleCache
         );
 
+        const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], startOffset + oldTextLen);
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
@@ -140,9 +141,14 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                     ? [{
                         ...curCustomRange,
                         startIndex: 0,
-                        endIndex: newText.length,
+                        endIndex: newText.length - 1,
                     }]
                     : [],
+                customDecorations: customDecorations.map((customDecoration) => ({
+                    ...customDecoration,
+                    startIndex: 0,
+                    endIndex: newText.length - 1,
+                })),
             },
             len: newText.length,
         });

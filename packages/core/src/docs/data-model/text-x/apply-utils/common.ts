@@ -392,6 +392,74 @@ export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
     return mergedRanges;
 }
 
+export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
+    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+
+    if (matchedCustomRange) {
+        customRanges.splice(matchedCustomRangeIndex, 1, {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: matchedCustomRange.startIndex,
+            endIndex: currentIndex - 1,
+            properties: { ...matchedCustomRange.properties },
+        },
+        {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: currentIndex,
+            endIndex: matchedCustomRange.endIndex,
+            properties: { ...matchedCustomRange.properties },
+        });
+    }
+}
+
+export function mergeContinuousDecorations(ranges: ICustomDecoration[]): ICustomDecoration[] {
+    if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+
+    const mergedRanges: ICustomDecoration[] = [];
+    let currentRange = { ...ranges[0] };
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+        if (
+            nextRange.id === currentRange.id &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+        }
+    }
+    // Push the last range
+    mergedRanges.push(currentRange);
+    return mergedRanges;
+}
+
+export function splitCustomDecroatesByIndex(customDecorations: ICustomDecoration[], currentIndex: number) {
+    const matcheds = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+
+    matcheds.forEach((matched) => {
+        const index = customDecorations.indexOf(matched);
+        customDecorations.splice(index, 1, {
+            id: matched.id,
+            type: matched.type,
+            startIndex: matched.startIndex,
+            endIndex: currentIndex - 1,
+        },
+        {
+            id: matched.id,
+            type: matched.type,
+            startIndex: currentIndex,
+            endIndex: matched.endIndex,
+        });
+    });
+}
+
 export function insertCustomRanges(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -403,26 +471,7 @@ export function insertCustomRanges(
     }
 
     const { customRanges } = body;
-    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
-    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
-
-    if (matchedCustomRange) {
-        customRanges.splice(matchedCustomRangeIndex, 1);
-        customRanges.push({
-            rangeId: matchedCustomRange.rangeId,
-            rangeType: matchedCustomRange.rangeType,
-            startIndex: matchedCustomRange.startIndex,
-            endIndex: currentIndex - 1,
-            properties: { ...matchedCustomRange.properties },
-        });
-        customRanges.push({
-            rangeId: matchedCustomRange.rangeId,
-            rangeType: matchedCustomRange.rangeType,
-            startIndex: currentIndex,
-            endIndex: matchedCustomRange.endIndex,
-            properties: { ...matchedCustomRange.properties },
-        });
-    }
+    splitCustomRangesByIndex(customRanges, currentIndex);
 
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
@@ -501,51 +550,34 @@ export function insertCustomDecorations(
     if (!body.customDecorations) {
         body.customDecorations = [];
     }
+
     const { customDecorations } = body;
-    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
+    splitCustomDecroatesByIndex(customDecorations, currentIndex);
 
     for (let i = 0, len = customDecorations.length; i < len; i++) {
         const customDecoration = customDecorations[i];
-        const { id } = customDecoration;
-        decorationMap[id] = customDecoration;
-    }
-
-    if (textLength > 0) {
-        for (let i = 0, len = customDecorations.length; i < len; i++) {
-            const customDecoration = customDecorations[i];
-            const { startIndex, endIndex } = customDecoration;
-            if (startIndex >= currentIndex) {
-                customDecoration.startIndex += textLength;
-                customDecoration.endIndex += textLength;
-            } else if (endIndex > currentIndex - 1) {
-                customDecoration.endIndex += textLength;
-            }
+        const { startIndex } = customDecoration;
+        // move custom range when insert text before it
+        if (startIndex >= currentIndex) {
+            customDecoration.startIndex += textLength;
+            customDecoration.endIndex += textLength;
         }
     }
 
+    const insertRanges: ICustomDecoration[] = [];
     if (insertBody.customDecorations) {
-        const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;
-            if (decorationMap[customDecoration.id]) {
-                const oldCustomDecoration = decorationMap[customDecoration.id];
-                if (oldCustomDecoration.endIndex === customDecoration.startIndex - 1) {
-                    oldCustomDecoration.endIndex = customDecoration.endIndex;
-                }
-
-                if (oldCustomDecoration.startIndex === customDecoration.endIndex + 1) {
-                    oldCustomDecoration.startIndex = customDecoration.startIndex;
-                }
-            }
-            insertCustomDecorations.push(customDecoration);
+            // new custom range
+            insertRanges.push(customDecoration);
         }
 
-        customDecorations.push(...insertCustomDecorations);
-        body.customDecorations = mergeDecorations(customDecorations);
-        body.customDecorations.sort(sortRulesFactory('startIndex'));
+        customDecorations.push(...insertRanges);
     }
+
+    body.customDecorations = mergeContinuousDecorations(customDecorations);
 }
 
 // eslint-disable-next-line max-lines-per-function

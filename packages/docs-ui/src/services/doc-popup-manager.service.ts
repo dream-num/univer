@@ -93,8 +93,8 @@ export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOuts
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, range.segmentPage);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, false, range.segmentId, range.segmentPage);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
+    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {

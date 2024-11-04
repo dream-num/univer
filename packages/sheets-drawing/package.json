@@ -53,10 +53,6 @@
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
-    "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/drawing": "workspace:*"
-    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",

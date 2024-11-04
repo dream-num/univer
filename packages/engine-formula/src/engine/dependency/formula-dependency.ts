@@ -20,14 +20,13 @@ import type { IFeatureDirtyRangeType, IFormulaData, IFormulaDataItem, IOtherForm
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
+import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { IFormulaDependencyTree } from './dependency-tree';
 import { Disposable, Inject, ObjectMatrix } from '@univerjs/core';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
@@ -55,7 +54,6 @@ function generateRandomDependencyTreeId(dependencyManagerService: IDependencyMan
 }
 
 export class FormulaDependencyGenerator extends Disposable {
-    private _formulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
     private _dependencyTreeCache = new Map<number, IFormulaDependencyTree>();
 
@@ -74,7 +72,8 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     override dispose(): void {
-        this._formulaASTCache.clear();
+        this._updateRangeFlattenCache.clear();
+        this._dependencyTreeCache.clear();
     }
 
     async generate() {
@@ -199,7 +198,6 @@ export class FormulaDependencyGenerator extends Disposable {
         const forceCalculate = this._currentConfigService.isForceCalculate();
         if (forceCalculate) {
             this._dependencyManagerService.reset();
-            this._formulaASTCache.clear();
         }
 
         this._registerFormulas(formulaDataKeys, formulaData, unitData, treeList);
@@ -851,13 +849,7 @@ export class FormulaDependencyGenerator extends Disposable {
          * The position of the primary cell in the array formula needs to be excluded when calculating the impact of the array formula on dependencies.
          * This is because its impact was already considered during the first calculation.
          */
-        let isExclude = false;
-        excludedCell?.forValue((row, column) => {
-            if (tree.row === row && tree.column === column) {
-                isExclude = true;
-                return false;
-            }
-        });
+        const isExclude = excludedCell?.getValue(tree.row, tree.column) != null;
 
         if (isExclude) {
             return false;

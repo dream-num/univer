@@ -164,7 +164,7 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
                     startIndex: 0,
                     endIndex: len - 1,
                     id,
-                    type: CustomDecorationType.DELTED,
+                    type: CustomDecorationType.DELETED,
                 },
             ],
         },

@@ -437,13 +437,14 @@ export function mergeContinuousDecorations(ranges: ICustomDecoration[]): ICustom
     }
     // Push the last range
     mergedRanges.push(currentRange);
+
     return mergedRanges;
 }
 
-export function splitCustomDecroatesByIndex(customDecorations: ICustomDecoration[], currentIndex: number) {
-    const matcheds = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+export function splitCustomDecoratesByIndex(customDecorations: ICustomDecoration[], currentIndex: number) {
+    const matches = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
 
-    matcheds.forEach((matched) => {
+    matches.forEach((matched) => {
         const index = customDecorations.indexOf(matched);
         customDecorations.splice(index, 1, {
             id: matched.id,
@@ -552,7 +553,7 @@ export function insertCustomDecorations(
     }
 
     const { customDecorations } = body;
-    splitCustomDecroatesByIndex(customDecorations, currentIndex);
+    splitCustomDecoratesByIndex(customDecorations, currentIndex);
 
     for (let i = 0, len = customDecorations.length; i < len; i++) {
         const customDecoration = customDecorations[i];

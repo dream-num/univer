@@ -75,8 +75,6 @@ describe('Test action iterator', () => {
                         bl: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
             },
             len: 2,
         });
@@ -89,8 +87,6 @@ describe('Test action iterator', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'llo',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [{
                     st: 0,
                     ed: 3,

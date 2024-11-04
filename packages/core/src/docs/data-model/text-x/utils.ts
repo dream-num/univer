@@ -426,9 +426,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns = [], paragraphs = [], customRanges = [], customBlocks = [], customDecorations = [] } = body;
+    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables } = body;
 
-    if (textRuns.length === 0 && paragraphs.length === 0 && customRanges.length === 0 && customBlocks.length === 0 && customDecorations.length === 0) {
+    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null) {
         return true;
     }
 

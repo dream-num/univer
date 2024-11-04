@@ -371,7 +371,23 @@ describe('transform()', () => {
             },
         ];
 
-        const expectedActions2: TextXAction[] = [];
+        const expectedActions2: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {},
+                        },
+                    ],
+                },
+            },
+        ];
 
         expect(TextX._transform(actionsA1, actionsB1, 'left')).toEqual(expectedActions1);
         expect(TextX._transform(actionsB2, actionsA2, 'left')).toEqual(expectedActions2);

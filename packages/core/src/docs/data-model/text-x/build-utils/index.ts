@@ -15,6 +15,7 @@
  */
 
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
+import { addDrawing } from './drawings';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';

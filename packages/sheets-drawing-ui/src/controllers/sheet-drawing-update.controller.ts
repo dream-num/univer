@@ -255,17 +255,15 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
             const selection = this._workbookSelections.getCurrentLastSelection();
             if (selection) {
-                // console.log('==set', docDataModel.getSnapshot());
                 this._commandService.executeCommand(SetRangeValuesCommand.id, {
                     value: {
-                        p: docDataModel.getSnapshot(),
+                        [selection.primary.actualRow]: {
+                            [selection.primary.actualColumn]: {
+                                p: docDataModel.getSnapshot(),
+                                t: 1,
+                            },
+                        },
                     },
-                    range: [{
-                        startRow: selection.primary.actualRow,
-                        endRow: selection.primary.actualRow,
-                        startColumn: selection.primary.actualColumn,
-                        endColumn: selection.primary.actualColumn,
-                    }],
                 });
                 return true;
             }

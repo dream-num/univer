@@ -15,9 +15,8 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../basics/error-type';
-import { calculateMmult, inverseMatrixByUSV, matrixTranspose } from '../../../basics/math';
-import { checkKnownsArrayDimensions, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { matrixTranspose } from '../../../basics/math';
+import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
@@ -83,41 +82,49 @@ export class Growth extends BaseFunction {
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constbValue: number): BaseValueObject {
         const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
-        let logYs: number[][] = [];
-        let X: number[][] = [];
+        // let logYs: number[][] = [];
+        // let X: number[][] = [];
 
-        if (isOneRow) {
-            logYs = matrixTranspose(knownYsValues).map((row) => row.map((value) => Math.log(value)));
-            X = constbValue ? matrixTranspose(knownXsValues).map((row) => [...row, 1]) : matrixTranspose(knownXsValues);
-        } else {
-            logYs = knownYsValues.map((row) => row.map((value) => Math.log(value)));
-            X = constbValue ? knownXsValues.map((row) => [...row, 1]) : knownXsValues;
+        // if (isOneRow) {
+        //     logYs = matrixTranspose(knownYsValues).map((row) => row.map((value) => Math.log(value)));
+        //     X = constbValue ? matrixTranspose(knownXsValues).map((row) => [...row, 1]) : matrixTranspose(knownXsValues);
+        // } else {
+        //     logYs = knownYsValues.map((row) => row.map((value) => Math.log(value)));
+        //     X = constbValue ? knownXsValues.map((row) => [...row, 1]) : knownXsValues;
+        // }
+
+        // const XT = matrixTranspose(X);
+        // const XTX = calculateMmult(XT, X);
+        // const XTY = calculateMmult(XT, logYs);
+        // const XTXInv = inverseMatrixByUSV(XTX);
+
+        // if (!XTXInv) {
+        //     return ErrorValueObject.create(ErrorType.NA);
+        // }
+
+        // const coefficients = calculateMmult(XTXInv, XTY).map((row) => row[0]);
+
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, constbValue, true);
+
+        if (_coefficients instanceof ErrorValueObject) {
+            return _coefficients;
         }
 
-        const XT = matrixTranspose(X);
-        const XTX = calculateMmult(XT, X);
-        const XTY = calculateMmult(XT, logYs);
-        const XTXInv = inverseMatrixByUSV(XTX);
-
-        if (!XTXInv) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        const coefficients = calculateMmult(XTXInv, XTY).map((row) => row[0]);
+        const { coefficients } = _coefficients;
 
         let result: number[][] = [];
 
         if (isOneRow) {
             result = matrixTranspose(newXsValues).map((row) => {
                 const newX = constbValue ? [...row, 1] : row;
-                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index], 0);
+                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index][0], 0);
                 return [Math.exp(logY)];
             });
             result = matrixTranspose(result);
         } else {
             result = newXsValues.map((row) => {
                 const newX = constbValue ? [...row, 1] : row;
-                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index], 0);
+                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index][0], 0);
                 return [Math.exp(logY)];
             });
         }

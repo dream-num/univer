@@ -16,7 +16,7 @@
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { checkKnownsArrayDimensions, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
+import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -72,6 +72,22 @@ export class Linest extends BaseFunction {
 
     private _getResult(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         if ((knownYsValues.length === 1 && knownXsValues.length > 1) || (knownYsValues[0].length === 1 && knownXsValues[0].length > 1)) {
+            if (knownYsValues.length === 1 && knownXsValues.length > 1) {
+                const count = constb ? knownXsValues.length + 1 : knownXsValues.length;
+
+                if (count > knownYsValues[0].length) {
+                    return ErrorValueObject.create(ErrorType.NA);
+                }
+            }
+
+            if (knownYsValues[0].length === 1 && knownXsValues[0].length > 1) {
+                const count = constb ? knownXsValues[0].length + 1 : knownXsValues[0].length;
+
+                if (count > knownYsValues.length) {
+                    return ErrorValueObject.create(ErrorType.NA);
+                }
+            }
+
             return this._getResultByMultipleVariables(knownYsValues, knownXsValues, constb, stats);
         }
 
@@ -79,7 +95,80 @@ export class Linest extends BaseFunction {
     }
 
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, constb, false);
 
+        if (_coefficients instanceof ErrorValueObject) {
+            return _coefficients;
+        }
+
+        const { coefficients, X, XTXInverse } = _coefficients;
+
+        let result: Array<Array<number | string>> = [];
+
+        if (stats) {
+            const _knownYsValues = knownYsValues.flat();
+            const n = _knownYsValues.length;
+            const k = XTXInverse.length;
+            const df = n - k;
+            const cl = coefficients[0].length;
+            const fillNa = new Array(cl - 2).fill(ErrorType.NA);
+            const meanY = !constb ? 0 : _knownYsValues.reduce((acc, value) => acc + value, 0) / n;
+
+            const b = coefficients[0][coefficients[0].length - 1];
+            const sumX = [];
+
+            for (let i = 0; i < X.length; i++) {
+                let sum = b;
+
+                for (let j = cl - 2; j >= 0; j--) {
+                    sum += coefficients[0][cl - 2 - j] * X[i][j];
+                }
+
+                sumX.push(sum);
+            }
+
+            let sstotal = 0;
+            let ssresid = 0;
+
+            for (let i = 0; i < n; i++) {
+                sstotal += (_knownYsValues[i] - meanY) ** 2;
+                ssresid += (_knownYsValues[i] - sumX[i]) ** 2;
+            }
+
+            const ssreg = sstotal - ssresid;
+            const r2 = sstotal === 0 ? 0 : ssreg / sstotal;
+
+            const seList = [];
+
+            for (let i = k - 1; i >= 0; i--) {
+                const se = df > 0 ? Math.sqrt(ssresid / df * XTXInverse[i][i]) : 0;
+                seList.push(se);
+            }
+
+            if (constb) {
+                const seb = seList.shift();
+                seList.push(seb);
+            } else {
+                seList.push(ErrorType.NA);
+            }
+
+            const sey = df > 0 ? Math.sqrt(ssresid / df) : 0;
+            const F = df > 0 ? (ssreg / (cl - 1)) / (ssresid / df) : ErrorType.NUM;
+
+            result = [
+                coefficients[0], // [mn, mn-1, ..., m1, b]
+                [...seList], // [sen, sen-1, ..., se1, seb]
+                [r2, sey, ...fillNa], // [r2, sey]
+                [F, df, ...fillNa], // [F, df]
+                [ssreg, ssresid, ...fillNa], // [ssreg, ssresid]
+            ];
+        } else {
+            result = [
+                coefficients[0], // [mn, mn-1, ..., m1, b]
+            ];
+        }
+
+        return ArrayValueObject.createByArray(result);
     }
 
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
@@ -96,22 +185,22 @@ export class Linest extends BaseFunction {
         if (stats) {
             const n = knownYsValues.length;
 
-            let sumY = 0;
-            let sumX = 0;
+            let meanY = 0;
+            let meanX = 0;
+            let df = n - 1;
 
-            for (let i = 0; i < n; i++) {
-                sumY += knownYsValuesFlat[i];
-                sumX += knownXsValuesFlat[i];
-            }
+            if (constb) {
+                let sumY = 0;
+                let sumX = 0;
 
-            let meanY = sumY / n;
-            let meanX = sumX / n;
-            let df = n - 2;
+                for (let i = 0; i < n; i++) {
+                    sumY += knownYsValuesFlat[i];
+                    sumX += knownXsValuesFlat[i];
+                }
 
-            if (!constb) {
-                meanY = 0;
-                meanX = 0;
-                df = n - 1;
+                meanY = sumY / n;
+                meanX = sumX / n;
+                df = n - 2;
             }
 
             let sstotal = 0;

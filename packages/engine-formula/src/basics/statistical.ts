@@ -20,7 +20,7 @@ import { isRealNum } from '@univerjs/core';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { erf, erfcINV } from './engineering';
 import { ErrorType } from './error-type';
-import { calculateCombin, calculateFactorial } from './math';
+import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByUSV, matrixTranspose } from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -788,12 +788,12 @@ export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: B
     let knownXsRowCount = knownYsRowCount;
     let knownXsColumnCount = knownYsColumnCount;
 
-    if (knownXs) {
+    if (knownXs && !knownXs.isNull()) {
         knownXsRowCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getRowCount() : 1;
         knownXsColumnCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getColumnCount() : 1;
 
         if (
-            (knownYsRowCount === 1 && knownXsColumnCount !== knownYsColumnCount) ||
+            (knownYsRowCount === 1 && (knownXsColumnCount !== knownYsColumnCount)) ||
             (knownYsColumnCount === 1 && knownXsRowCount !== knownYsRowCount) ||
             (knownYsRowCount !== 1 && knownYsColumnCount !== 1 && (knownXsRowCount !== knownYsRowCount || knownXsColumnCount !== knownYsColumnCount))
         ) {
@@ -804,7 +804,7 @@ export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: B
         }
     }
 
-    if (newXs) {
+    if (newXs && !newXs.isNull()) {
         const newXsRowCount = newXs.isArray() ? (newXs as ArrayValueObject).getRowCount() : 1;
         const newXsColumnCount = newXs.isArray() ? (newXs as ArrayValueObject).getColumnCount() : 1;
 
@@ -988,5 +988,60 @@ function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsVal
     return {
         slope: result[0],
         intercept: 0,
+    };
+}
+
+export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], constb: number, isExponentialTransform: boolean) {
+    const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
+
+    let Y = knownYsValues;
+
+    if (isExponentialTransform) {
+        Y = knownYsValues.map((row) => row.map((value) => Math.log(value)));
+    }
+
+    let X = knownXsValues;
+
+    if (isOneRow) {
+        Y = matrixTranspose(Y);
+        X = matrixTranspose(X);
+    }
+
+    if (constb) {
+        X = X.map((row) => [...row, 1]);
+    }
+
+    const XT = matrixTranspose(X);
+    const XTX = calculateMmult(XT, X);
+    const XTY = calculateMmult(XT, Y);
+    const XTXInverse = inverseMatrixByUSV(XTX);
+
+    if (!XTXInverse) {
+        return ErrorValueObject.create(ErrorType.NA);
+    }
+
+    let coefficients = calculateMmult(XTXInverse, XTY);
+
+    if (!constb) {
+        coefficients.push([0]);
+    }
+
+    coefficients = matrixTranspose(coefficients);
+
+    const pop = coefficients[0].pop() as number;
+
+    coefficients[0].reverse();
+    coefficients[0].push(pop);
+
+    if (isExponentialTransform) {
+        for (let i = 0; i < coefficients[0].length; i++) {
+            coefficients[0][i] = Math.exp(coefficients[0][i]);
+        }
+    }
+
+    return {
+        coefficients,
+        X,
+        XTXInverse,
     };
 }

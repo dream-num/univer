@@ -36,11 +36,14 @@ export class MobileSelectionControl extends SelectionControl {
     constructor(
         protected override _scene: Scene,
         protected override _zIndex: number,
-        protected override _highlightHeader: boolean = true,
         protected override readonly _themeService: ThemeService,
         protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
-        super(_scene, _zIndex, _themeService, _highlightHeader);
+        super(_scene, _zIndex, _themeService, {
+            highlightHeader: true,
+            rowHeaderWidth: 0,
+            columnHeaderHeight: 0,
+        });
         this.initControlPoints();
     }
 

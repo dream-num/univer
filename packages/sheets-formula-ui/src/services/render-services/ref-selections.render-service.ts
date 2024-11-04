@@ -17,7 +17,7 @@
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionDataModel } from '@univerjs/sheets';
-import type { SelectionControl } from '@univerjs/sheets-ui/services/selection/selection-control.js';
+import type { SelectionControl } from '@univerjs/sheets-ui';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';

@@ -44,6 +44,8 @@ export enum SELECTION_MANAGER_KEY {
     // fillTopLeft & fillBottomRight are used for mobile selection
     fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
     fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
+    fillTopLeftInner = '__SpreadsheetSelectionFillControlTopLeftInner__',
+    fillBottomRightInner = '__SpreadsheetSelectionFillControlBottomRightInner__',
 
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
@@ -115,9 +117,11 @@ export class SelectionControl extends Disposable {
     // protected _selectionStyle: Nullable<ISelectionStyle>;
     private _defaultStyle!: ISelectionStyle;
     private _currentStyle: ISelectionStyle;
-
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
+    // this is controlled by currentStyle, which is set in @update
+    private _enableAutoFill: boolean = true;
+    private _highlightHeader: boolean = true;
 
     protected _widgetRects: Rect[] = [];
 
@@ -135,22 +139,25 @@ export class SelectionControl extends Disposable {
     readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
 
     private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
-
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
-
     private _isHelperSelection: boolean = true;
+
+    private _showAutoFill: boolean = false;
 
     constructor(
         protected _scene: Scene,
         protected _zIndex: number,
         protected readonly _themeService: ThemeService,
-        protected _highlightHeader: boolean = true,
         options?: {
+            highlightHeader?: boolean;
+            enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
         }
     ) {
         super();
+        this._enableAutoFill = options?.enableAutoFill || true;
+        this._highlightHeader = options?.highlightHeader || true;
         this._rowHeaderWidth = (options?.rowHeaderWidth) || 0;
         this._columnHeaderHeight = (options?.columnHeaderHeight) || 0;
         this._initialize();
@@ -279,6 +286,7 @@ export class SelectionControl extends Disposable {
     set currentStyle(style: Nullable<ISelectionStyle>) {
         if (style) {
             this._currentStyle = style;
+            this._enableAutoFill = style.hasAutoFill;
         }
     }
 
@@ -326,12 +334,10 @@ export class SelectionControl extends Disposable {
         const {
             stroke = defaultStyle.stroke!,
             widgets = defaultStyle.widgets!,
-            hasAutoFill = defaultStyle.hasAutoFill!,
             AutofillStroke = defaultStyle.AutofillStroke!,
             strokeDash,
             isAnimationDash,
         } = currentStyle;
-
         let {
             strokeWidth = defaultStyle.strokeWidth!,
             AutofillSize = defaultStyle.AutofillSize!,
@@ -425,8 +431,8 @@ export class SelectionControl extends Disposable {
 
             this.dashedRect.show();
         }
-
-        if (hasAutoFill === true && !this._hasWidgets(widgets)) {
+        this._showAutoFill = this._showAutoFill && this._enableAutoFill;
+        if (this._showAutoFill && !this._hasWidgets(widgets)) {
             const fillProps: IRectProps = {
                 fill: stroke,
                 stroke: AutofillStroke,
@@ -439,11 +445,11 @@ export class SelectionControl extends Disposable {
                 top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 strokeWidth: AutofillStrokeWidth,
             };
-            this.fillControl.setProps(fillProps);
-            this.fillControl.transformByState(sizeState);
-            this.fillControl.show();
+            this._autoFillControl.setProps(fillProps);
+            this._autoFillControl.transformByState(sizeState);
+            this._autoFillControl.show();
         } else {
-            this.fillControl.hide();
+            this._autoFillControl.hide();
         }
 
         this._updateBackgroundControl(selectionStyle);
@@ -452,9 +458,9 @@ export class SelectionControl extends Disposable {
     }
 
     /**
-     * update selection control position by curr selection model
+     * update selection control coordination by curr selection model
      */
-    protected _refreshControlPosition(): void {
+    protected _updateControlCoord(): void {
         const { startX, startY } = this._selectionModel;
         this.selectionShapeGroup.show();
         this.selectionShapeGroup.translate(startX, startY);
@@ -463,7 +469,7 @@ export class SelectionControl extends Disposable {
 
     updateStyle(style: ISelectionStyle): void {
         this._setSizeAndStyleForSelectionControl(style);
-        this._refreshControlPosition();
+        this._updateControlCoord();
     }
 
     /**
@@ -473,8 +479,9 @@ export class SelectionControl extends Disposable {
      */
     updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithCoord>): void {
         this._selectionModel.setValue(range, primaryCell);
+        this._showAutoFill = primaryCell !== null;
         this._setSizeAndStyleForSelectionControl(this._currentStyle);
-        this._refreshControlPosition();
+        this._updateControlCoord();
     }
 
     /**
@@ -493,23 +500,27 @@ export class SelectionControl extends Disposable {
         style?: Nullable<ISelectionStyle>,
         primaryCell?: Nullable<ISelectionCellWithCoord>
     ): void {
-        this._selectionModel.setValue(newSelectionRange, primaryCell);
         this._rowHeaderWidth = rowHeaderWidth;
         this._columnHeaderHeight = columnHeaderHeight;
-
-        this._setSizeAndStyleForSelectionControl(style || this._currentStyle);
-        this._refreshControlPosition();
+        this.updateRange(newSelectionRange, primaryCell);
+        if (style) {
+            this.updateStyle(style);
+        }
     }
 
     /**
      * update primary range
      * @param primaryCell model.current (aka: highlight)
      */
-    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithCoord>): void {
+    updateCurrCell(primaryCell: Nullable<ISelectionCellWithCoord>): void {
+        // in multiple selection shape, only shape with highlight has auto fill.
+        this._showAutoFill = primaryCell !== null;
         this._selectionModel.setCurrentCell(primaryCell);
     }
 
     clearHighlight(): void {
+        // in multiple selection shape, only shape with highlight has auto fill.
+        this._showAutoFill = false;
         this._selectionModel.clearCurrentCell();
         this._setSizeAndStyleForSelectionControl(this._currentStyle);
     }
@@ -660,8 +671,9 @@ export class SelectionControl extends Disposable {
         this._autoFillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             zIndex: zIndex + 1,
         });
+        this._autoFillControl.hide();
 
-        // @TODO lumixraku weird!! new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
+        // That weird, new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
         // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
         this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
@@ -694,7 +706,7 @@ export class SelectionControl extends Disposable {
                     }
 
                     this._setSizeAndStyleForSelectionControl(this._currentStyle);
-                    this._refreshControlPosition();
+                    this._updateControlCoord();
                 })
             )
         );

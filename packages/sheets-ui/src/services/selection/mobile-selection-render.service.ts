@@ -390,7 +390,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
     override newSelectionControl(scene: Scene, rangeType: RANGE_TYPE): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
 
-        const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService, rangeType);
+        const control = new MobileSelectionControl(scene, selectionControls.length, this._themeService, rangeType);
         this._selectionControls.push(control);
 
         const { expandingModeForTopLeft, expandingModeForBottomRight } = (() => {

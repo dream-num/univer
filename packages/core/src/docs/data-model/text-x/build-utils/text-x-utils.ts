@@ -254,7 +254,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
                     body: {
-                        ...getBodySlice(insertBody, cursor, cursor + text.length),
+                        ...getBodySlice(insertBody, cursor, cursor + text.length, false),
                         dataStream: '',
                     },
                     len: text.length,

@@ -15,9 +15,9 @@
  */
 
 import type { BooleanNumber, IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { ITransformState } from './interface';
+import { createIdentifier } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 

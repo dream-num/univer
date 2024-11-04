@@ -460,5 +460,276 @@ describe('Test EndEditController', () => {
             const isRichTextWithCellBody2 = isRichText(cellBody2);
             expect(isRichTextWithCellBody2).toBe(false);
         });
+
+        it('test number can not set style', () => {
+            const dataStreamOnlyHaveNumber = {
+                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                documentStyle: {
+                    pageSize: {
+                        width: 320.4903259277344,
+                    },
+                    marginTop: 0,
+                    marginBottom: 2,
+                    marginRight: 2,
+                    marginLeft: 2,
+                    renderConfig: {
+                        verticalAlign: 0,
+                        horizontalAlign: 0,
+                        wrapStrategy: 0,
+                        background: {},
+                        centerAngle: 0,
+                        vertexAngle: 0,
+                    },
+                },
+                body: {
+                    dataStream: '111111111111111\r\n',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 15,
+                            ts: {
+                                fs: 28,
+                            },
+                        },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 15,
+                            paragraphStyle: {
+                                horizontalAlign: 0,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                drawings: {},
+                drawingsOrder: [],
+                settings: {
+                    zoomRatio: 1,
+                },
+                resources: [
+                    {
+                        name: 'SHEET_THREAD_COMMENT_PLUGIN',
+                        data: '{}',
+                    },
+                    {
+                        name: 'DOC_HYPER_LINK_PLUGIN',
+                        data: '{"links":[]}',
+                    },
+                    {
+                        name: 'SHEET_AuthzIoMockService_PLUGIN',
+                        data: '{}',
+                    },
+                ],
+            };
+            const res = getCellDataByInputCell({}, { p: dataStreamOnlyHaveNumber });
+            // Because the previous cell had no style, and the value set now can be converted to a number, the style set this time is not retained.
+            expect(res?.s).toBeUndefined();
+
+            const dataStreamHaveString = {
+                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                documentStyle: {
+                    pageSize: {
+                        width: 220.712890625,
+                    },
+                    marginTop: 0,
+                    marginBottom: 1,
+                    marginRight: 2,
+                    marginLeft: 2,
+                    renderConfig: {
+                        verticalAlign: 0,
+                        horizontalAlign: 0,
+                        wrapStrategy: 0,
+                        background: {},
+                        centerAngle: 0,
+                        vertexAngle: 0,
+                    },
+                },
+                body: {
+                    dataStream: 'qqqqqwwww\r\n',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 9,
+                            ts: {
+                                fs: 28,
+                            },
+                        },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 9,
+                            paragraphStyle: {
+                                horizontalAlign: 0,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                drawings: {},
+                drawingsOrder: [],
+                settings: {
+                    zoomRatio: 1,
+                },
+                resources: [
+                    {
+                        name: 'SHEET_THREAD_COMMENT_PLUGIN',
+                        data: '{}',
+                    },
+                    {
+                        name: 'DOC_HYPER_LINK_PLUGIN',
+                        data: '{"links":[]}',
+                    },
+                    {
+                        name: 'SHEET_AuthzIoMockService_PLUGIN',
+                        data: '{}',
+                    },
+                ],
+            };
+            const res2 = getCellDataByInputCell({}, { p: dataStreamHaveString });
+            expect(res2?.s).toStrictEqual({
+                fs: 28,
+            });
+        });
+
+        describe('normalizeStringByLexer', () => {
+            it('should convert leading . to 0.', () => {
+                expect(normalizeStringByLexer('=.07/0.1')).toBe('=0.07/0.1');
+            });
+
+            it('should remove unnecessary trailing zeros', () => {
+                expect(normalizeStringByLexer('=1.0+2.00')).toBe('=1+2');
+            });
+
+            it('should not modify normal cell references', () => {
+                expect(normalizeStringByLexer('=A1+B2')).toBe('=A1+B2');
+                expect(normalizeStringByLexer('=Sheet1!A1')).toBe('=Sheet1!A1');
+            });
+
+            it('should not modify function names', () => {
+                expect(normalizeStringByLexer('=SUM(A1:A10)')).toBe('=SUM(A1:A10)');
+                expect(normalizeStringByLexer('=IF(A1>0, "Yes", "No")')).toBe('=IF(A1>0, "Yes", "No")');
+            });
+
+            it('should handle negative numbers', () => {
+                expect(normalizeStringByLexer('=-.5*-2.00')).toBe('=-0.5*-2');
+            });
+
+            it('should handle numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=001.00+000.20')).toBe('=1+0.2');
+            });
+
+            it('should handle percentages', () => {
+                expect(normalizeStringByLexer('=50% + .5')).toBe('=50% + 0.5');
+            });
+
+            it('should handle scientific notation', () => {
+                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1e3 + 2E-2');
+                expect(normalizeStringByLexer('=1.00E+03')).toBe('=1000');
+
+                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
+                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
+                expect(normalizeStringByLexer('=1e20 + 2E-2')).toBe('=100000000000000000000 + 0.02');
+                expect(normalizeStringByLexer('=1e21 + 2E-2')).toBe('=1E+21 + 0.02');
+                expect(normalizeStringByLexer('=1E+21 + 2E-19')).toBe('=1E+21 + 0.0000000000000000002');
+                expect(normalizeStringByLexer('=1E+21 + 2E-20')).toBe('=1E+21 + 2E-20');
+            });
+
+            it('should handle dates', () => {
+                expect(normalizeStringByLexer('="2023-01-01"')).toBe('="2023-01-01"');
+            });
+
+            it('should handle complex expressions', () => {
+                expect(normalizeStringByLexer('=SUM(A1:A10)/.5 - 2.00')).toBe('=SUM(A1:A10)/0.5 - 2');
+            });
+
+            it('should not modify logical operators', () => {
+                expect(normalizeStringByLexer('=A1>=B2')).toBe('=A1>=B2');
+            });
+
+            it('should handle names with numbers', () => {
+                expect(normalizeStringByLexer('=Rate1 + Rate2')).toBe('=Rate1 + Rate2');
+            });
+
+            it('should handle underscores in names', () => {
+                expect(normalizeStringByLexer('=_myVar + another_var')).toBe('=_myVar + another_var');
+            });
+
+            it('should handle numbers adjacent to letters', () => {
+                expect(normalizeStringByLexer('=A1*B2')).toBe('=A1*B2');
+                expect(normalizeStringByLexer('=C3/2.0')).toBe('=C3/2');
+            });
+
+            it('should handle decimal numbers without leading zero', () => {
+                expect(normalizeStringByLexer('=.123')).toBe('=0.123');
+            });
+
+            it('should handle multiple numbers in expression', () => {
+                expect(normalizeStringByLexer('=.1 + .2 + .3')).toBe('=0.1 + 0.2 + 0.3');
+            });
+
+            it('should not modify cell ranges', () => {
+                expect(normalizeStringByLexer('=SUM(A1:B2)')).toBe('=SUM(A1:B2)');
+            });
+
+            it('should handle complex numbers', () => {
+                expect(normalizeStringByLexer('=COMPLEX(0, .5)')).toBe('=COMPLEX(0, 0.5)');
+            });
+
+            it('should handle percentage calculations', () => {
+                expect(normalizeStringByLexer('=.5*50%')).toBe('=0.5*50%');
+            });
+
+            it('should handle brackets', () => {
+                expect(normalizeStringByLexer('=(.5 + .25)/(.1)')).toBe('=(0.5 + 0.25)/(0.1)');
+            });
+
+            it('should not modify text outside of formulas', () => {
+                expect(normalizeStringByLexer('Just some text.')).toBe('Just some text.');
+            });
+
+            it('should handle formulas starting with + or -', () => {
+                expect(normalizeStringByLexer('=+1.0+-2.00')).toBe('=+1+-2'); // Follows Google Sheets' behavior
+            });
+
+            it('should handle numbers in logical expressions', () => {
+                expect(normalizeStringByLexer('=IF(A1>.5, TRUE, FALSE)')).toBe('=IF(A1>0.5, TRUE, FALSE)');
+                expect(normalizeStringByLexer('=IF("A1>.5", TRUE, FALSE)')).toBe('=IF("A1>.5", TRUE, FALSE)');
+            });
+
+            it('should handle exponents', () => {
+                expect(normalizeStringByLexer('=2^0.0')).toBe('=2^0');
+            });
+
+            it('should not modify quoted numbers', () => {
+                expect(normalizeStringByLexer('="The value is .5"')).toBe('="The value is .5"');
+            });
+
+            it('should handle numbers with only zeros', () => {
+                expect(normalizeStringByLexer('=0.0 + 0.00')).toBe('=0 + 0');
+            });
+
+            it('should handle zero with decimal point', () => {
+                expect(normalizeStringByLexer('=0. + .0')).toBe('=0 + 0');
+            });
+
+            it('should handle negative numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=-0002.00')).toBe('=-2');
+            });
+
+            it('should handle positive numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=+0002.50')).toBe('=+2.5'); // Follows Google Sheets' behavior
+            });
+
+            it('should handle numbers with exponentials', () => {
+                expect(normalizeStringByLexer('=1.00E+03')).toBe('=1E+03');
+            });
+
+            it('should handle escaped quotes in strings', () => {
+                expect(normalizeStringByLexer('="He said, ""Hello, .5!"""')).toBe('="He said, ""Hello, .5!"""');
+            });
+        });
     });
 });

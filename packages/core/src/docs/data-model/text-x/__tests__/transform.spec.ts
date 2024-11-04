@@ -30,8 +30,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: 'h',
-                    customRanges: [],
-                    customDecorations: [],
                 },
             },
         ];
@@ -55,8 +53,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: 'e',
-                    customRanges: [],
-                    customDecorations: [],
                 },
             },
         ];
@@ -67,8 +63,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: 'e',
-                    customRanges: [],
-                    customDecorations: [],
                 },
             },
         ];
@@ -115,8 +109,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: '',
-                    customRanges: [],
-                    customDecorations: [],
                     textRuns: [
                         {
                             st: 0,
@@ -140,8 +132,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: '',
-                    customRanges: [],
-                    customDecorations: [],
                     textRuns: [
                         {
                             st: 0,
@@ -211,8 +201,6 @@ describe('transform()', () => {
                 len: 1,
                 body: {
                     dataStream: 'h',
-                    customRanges: [],
-                    customDecorations: [],
                 },
             },
         ];
@@ -277,8 +265,6 @@ describe('transform()', () => {
                 t: TextXActionType.INSERT,
                 body: {
                     dataStream: 'h',
-                    customRanges: [],
-                    customDecorations: [],
                 },
                 len: 1,
             },
@@ -372,7 +358,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -476,7 +461,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -499,7 +483,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    customRanges: [],
                     textRuns: [
                         {
                             st: 0,
@@ -599,8 +582,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -620,8 +601,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -686,8 +665,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -707,8 +684,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     paragraphs: [
                         {
                             startIndex: 0,
@@ -779,7 +754,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -802,7 +776,6 @@ describe('transform()', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -861,8 +834,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: 'e',
-                customRanges: [],
-                customDecorations: [],
             },
         }];
 
@@ -871,8 +842,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: '',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [
                     {
                         st: 0,
@@ -920,8 +889,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: 'e',
-                customRanges: [],
-                customDecorations: [],
             },
         }];
 
@@ -933,8 +900,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: '',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [
                     {
                         st: 0,
@@ -988,8 +953,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: 'e',
-                customRanges: [],
-                customDecorations: [],
             },
         }];
 
@@ -998,8 +961,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: '',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [
                     {
                         st: 0,
@@ -1018,8 +979,6 @@ describe('transform()', () => {
             len: 1,
             body: {
                 dataStream: '',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [
                     {
                         st: 0,

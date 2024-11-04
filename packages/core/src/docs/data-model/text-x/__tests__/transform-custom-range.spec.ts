@@ -18,7 +18,7 @@ import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
-import { CustomRangeType, type ICustomRange, type IDocumentBody } from '../../../../types/interfaces/i-document-data';
+import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
@@ -95,7 +95,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -118,7 +117,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -151,9 +149,9 @@ describe('transform custom range in body', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(resultA).toEqual(resultC);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
     });
 
@@ -209,7 +207,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -232,7 +229,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -265,9 +261,9 @@ describe('transform custom range in body', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(resultA).toEqual(resultC);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
 
         const doc5 = getDefaultDocWithCustomRange();
@@ -284,9 +280,9 @@ describe('transform custom range in body', () => {
         const resultG = TextX.apply(doc7, composedAction3);
         const resultH = TextX.apply(doc8, composedAction4);
 
-        // expect(resultE).toEqual(resultF);
-        // expect(resultG).toEqual(resultH);
-        // expect(resultE).toEqual(resultG);
+        expect(resultE).toEqual(resultF);
+        expect(resultG).toEqual(resultH);
+        expect(resultE).toEqual(resultG);
         expect(composedAction3).toEqual(composedAction4);
     });
 
@@ -342,9 +338,16 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
-                        {} as ICustomRange,
+                        {
+                            startIndex: 0,
+                            endIndex: 5,
+                            rangeId: 'jocsId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.baidu.com',
+                            },
+                        },
                     ],
                 },
             },
@@ -357,7 +360,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
-                    textRuns: [],
                     customRanges: [
                         {
                             startIndex: 0,
@@ -390,9 +392,9 @@ describe('transform custom range in body', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(resultA).toEqual(resultC);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
     });
 
@@ -498,9 +500,9 @@ describe('transform custom range in body', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(resultA).toEqual(resultC);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
     });
 });

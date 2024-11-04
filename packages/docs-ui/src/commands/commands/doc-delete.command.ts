@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     CommandType,
     DataStreamTreeTokenType,
-    generateRandomId,
-    getCustomDecorationSlice,
-    getCustomRangeSlice,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -667,76 +664,6 @@ export const DeleteRightCommand: ICommand = {
         return result;
     },
 };
-
-function getParagraphBody(
-    accessor: IAccessor,
-    unitId: string,
-    body: IDocumentBody,
-    start: number,
-    end: number
-): IDocumentBody {
-    const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
-    const dataStream = body.dataStream.substring(start, end);
-
-    const bodySlice: IDocumentBody = {
-        dataStream,
-        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => ({
-            ...Tools.deepClone(range),
-            rangeId: generateRandomId(),
-        })),
-        customDecorations: getCustomDecorationSlice(body, start, end),
-    };
-
-    const textRuns: ITextRun[] = [];
-
-    for (const textRun of originTextRuns) {
-        const { st, ed } = textRun;
-        if (ed <= start || st >= end) {
-            continue;
-        }
-
-        if (st < start) {
-            textRuns.push({
-                ...textRun,
-                st: 0,
-                ed: ed - start,
-            });
-        } else if (ed > end) {
-            textRuns.push({
-                ...textRun,
-                st: st - start,
-                ed: end - start,
-            });
-        } else {
-            textRuns.push({
-                ...textRun,
-                st: st - start,
-                ed: ed - start,
-            });
-        }
-    }
-
-    if (textRuns.length > 0) {
-        bodySlice.textRuns = textRuns;
-    }
-
-    const customBlocks: ICustomBlock[] = [];
-    for (const block of originCustomBlocks) {
-        const { startIndex } = block;
-        if (startIndex >= start && startIndex <= end) {
-            customBlocks.push({
-                ...block,
-                startIndex: startIndex - start,
-            });
-        }
-    }
-
-    if (customBlocks.length > 0) {
-        bodySlice.customBlocks = customBlocks;
-    }
-
-    return bodySlice;
-}
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
 function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {

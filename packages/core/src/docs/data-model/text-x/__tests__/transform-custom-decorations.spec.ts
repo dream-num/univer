@@ -86,8 +86,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     customDecorations: [
                         {
                             startIndex: 0,
@@ -107,8 +105,6 @@ describe('transform custom range in body', () => {
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
-                    textRuns: [],
-                    customRanges: [],
                     customDecorations: [
                         {
                             startIndex: 0,
@@ -138,9 +134,9 @@ describe('transform custom range in body', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(resultA).toEqual(resultC);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
     });
 
@@ -210,7 +206,6 @@ describe('transform custom range in body', () => {
                             },
                         },
                     ],
-                    customRanges: [],
                     customDecorations: [
                         {
                             startIndex: 0,
@@ -239,7 +234,6 @@ describe('transform custom range in body', () => {
                             },
                         },
                     ],
-                    customRanges: [],
                     customDecorations: [
                         {
                             startIndex: 0,

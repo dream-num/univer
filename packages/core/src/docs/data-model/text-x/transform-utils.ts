@@ -31,12 +31,16 @@ enum TextXTransformType {
 
 // eslint-disable-next-line max-lines-per-function, complexity
 function transformTextRuns(
-    originTextRuns: ITextRun[],
-    targetTextRuns: ITextRun[],
+    originTextRuns: ITextRun[] | undefined,
+    targetTextRuns: ITextRun[] | undefined,
     originCoverType: UpdateDocsAttributeType,
     targetCoverType: UpdateDocsAttributeType,
     transformType: TextXTransformType
-) {
+): ITextRun[] | undefined {
+    if (originTextRuns == null || targetTextRuns == null) {
+        return targetTextRuns;
+    }
+
     if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
         return [];
     }
@@ -70,13 +74,7 @@ function transformTextRuns(
             newTs = { ...targetStyle };
 
             if (originCoverType === UpdateDocsAttributeType.COVER && targetCoverType === UpdateDocsAttributeType.REPLACE && originStyle) {
-                const keys = Object.keys(originStyle);
-
-                for (const key of keys) {
-                    if (newTs[key as keyof ITextStyle] === undefined) {
-                        newTs[key as keyof ITextStyle] = originStyle[key as keyof ITextStyle] as any;
-                    }
-                }
+                newTs = Object.assign({}, originStyle, newTs);
             }
         } else {
             newTs = { ...targetStyle };
@@ -199,14 +197,18 @@ function transformTextRuns(
 }
 
 function transformCustomRanges(
-    originCustomRanges: ICustomRange[],
-    targetCustomRanges: ICustomRange[],
+    originCustomRanges: ICustomRange[] | undefined,
+    targetCustomRanges: ICustomRange[] | undefined,
     originCoverType: UpdateDocsAttributeType,
     targetCoverType: UpdateDocsAttributeType,
     transformType: TextXTransformType
-): ICustomRange[] {
+): ICustomRange[] | undefined {
+    if (originCustomRanges == null || targetCustomRanges == null) {
+        return targetCustomRanges;
+    }
+
     if (originCustomRanges.length === 0 || targetCustomRanges.length === 0) {
-        return Tools.deepClone(targetCustomRanges);
+        return [];
     }
 
     if (originCustomRanges.length > 1 || targetCustomRanges.length > 1) {
@@ -231,13 +233,17 @@ function transformCustomRanges(
         } else {
             const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
             if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
-                const keys = Object.keys(originCustomRange);
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
 
-                for (const key of keys) {
-                    if (customRange[key as keyof ICustomRange] !== undefined) {
-                        delete customRange[key as keyof ICustomRange];
-                    }
-                }
+                // Because customRange behavior like REPLACE.
+                // const keys = Object.keys(originCustomRange);
+
+                // for (const key of keys) {
+                //     // Should not delete `startIndex` and `endIndex`.
+                //     if (customRange[key as keyof ICustomRange] !== undefined) {
+                //         delete customRange[key as keyof ICustomRange];
+                //     }
+                // }
             }
 
             return [customRange];
@@ -349,9 +355,13 @@ function transformParagraph(
 }
 
 function transformCustomDecorations(
-    originCustomDecorations: ICustomDecoration[],
-    targetCustomDecorations: ICustomDecoration[]
+    originCustomDecorations: ICustomDecoration[] | undefined,
+    targetCustomDecorations: ICustomDecoration[] | undefined
 ) {
+    if (originCustomDecorations == null || targetCustomDecorations == null) {
+        return targetCustomDecorations;
+    }
+
     if (originCustomDecorations.length === 0 || targetCustomDecorations.length === 0) {
         return Tools.deepClone(targetCustomDecorations);
     }
@@ -408,10 +418,20 @@ export function transformBody(
 
     const coverType = otherCoverType;
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [], customDecorations: thisCustomDecorations = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [], customDecorations: otherCustomDecorations = [] } = otherBody;
+    const {
+        textRuns: thisTextRuns,
+        paragraphs: thisParagraphs = [],
+        customRanges: thisCustomRanges,
+        customDecorations: thisCustomDecorations,
+    } = thisBody;
+    const {
+        textRuns: otherTextRuns,
+        paragraphs: otherParagraphs = [],
+        customRanges: otherCustomRanges,
+        customDecorations: otherCustomDecorations,
+    } = otherBody;
 
-    retBody.textRuns = transformTextRuns(
+    const textRuns = transformTextRuns(
         thisTextRuns,
         otherTextRuns,
         thisCoverType,
@@ -419,7 +439,11 @@ export function transformBody(
         priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
     );
 
-    retBody.customRanges = transformCustomRanges(
+    if (textRuns) {
+        retBody.textRuns = textRuns;
+    }
+
+    const customRanges = transformCustomRanges(
         thisCustomRanges,
         otherCustomRanges,
         thisCoverType,
@@ -427,13 +451,17 @@ export function transformBody(
         priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
     );
 
+    if (customRanges) {
+        retBody.customRanges = customRanges;
+    }
+
     // Transform custom decorations.
     const customDecorations = transformCustomDecorations(
         thisCustomDecorations,
         otherCustomDecorations
     );
 
-    if (customDecorations.length) {
+    if (customDecorations) {
         retBody.customDecorations = customDecorations;
     }
 

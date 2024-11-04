@@ -73,7 +73,7 @@ export class ActionIterator {
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
-                    body: getBodySlice(nextAction.body!, offset, offset + length),
+                    body: getBodySlice(nextAction.body!, offset, offset + length, false),
                 });
             }
         } else {

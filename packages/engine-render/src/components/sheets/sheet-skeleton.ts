@@ -31,6 +31,7 @@ import type {
     IRowAutoHeightInfo,
     IRowData,
     IRowRange,
+    ISelectionCell,
     ISelectionCellWithCoord,
     ISize,
     IStyleData,
@@ -706,7 +707,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param colIndex
      * @returns {number} width
      */
-    // eslint-disable-next-line max-lines-per-function
+
     private _calculateColWidth(colIndex: number): number {
         const worksheet = this.worksheet;
 

@@ -37,12 +37,12 @@ import { BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorSe
 import {
     ISheetSelectionRenderService,
     SELECTION_SHAPE_DEPTH,
-    SelectionShape,
+    SelectionControl,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
-    private _previousShape: Nullable<SelectionShape>;
+    private _previousShape: Nullable<SelectionControl>;
     private _skeleton: SpreadsheetSkeleton;
 
     constructor(
@@ -242,8 +242,13 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
         if (!scene || !skeleton) return;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionShape(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, false);
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        const control = new SelectionControl(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, {
+            highlightHeader: false,
+            rowHeaderWidth,
+            columnHeaderHeight,
+        });
+        control.updateRange(rangeWithCoord, primaryWithCoord);
+        control.updateStyle(style);
         control.setEvent(false);
         this._previousShape = control;
     }

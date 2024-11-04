@@ -135,7 +135,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _skeleton!: SpreadsheetSkeleton;
     protected _scene!: Scene;
 
-    // The type of selector determines the type of data range and the highlighting style of the title bar
+    // The type of selector determines the type of data range and the highlighting style of the title bar, now it always true. In future, this could be configurable by user.
     protected _isHeaderHighlight: boolean = true;
 
     // protected _shouldDetectMergedCells: boolean = true;
@@ -257,7 +257,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
         const zIndex = this.getSelectionControls().length;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionControl(scene, zIndex, this._themeService, this._isHeaderHighlight, {
+        const control = new SelectionControl(scene, zIndex, this._themeService, {
+            highlightHeader: this._isHeaderHighlight,
             rowHeaderWidth,
             columnHeaderHeight,
         });

@@ -99,7 +99,11 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionControl(scene, zIndex, this._themeService, false, { rowHeaderWidth, columnHeaderHeight });
+            const control = new SelectionControl(scene, zIndex, this._themeService, {
+                highlightHeader: false,
+                rowHeaderWidth,
+                columnHeaderHeight,
+            });
             const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
             control.updateRange(rangeWithCoord, primaryWithCoord);
             const { style } = selection;

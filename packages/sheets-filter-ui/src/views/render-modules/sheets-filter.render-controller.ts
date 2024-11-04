@@ -23,7 +23,7 @@ import { CommandType, fromCallback, ICommandService, Inject, Injector, Intercept
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
 
-import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
@@ -40,7 +40,7 @@ interface ISheetsFilterRenderParams {
 }
 
 export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
-    private _filterRangeShape: SelectionShape | null = null;
+    private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
 
@@ -113,9 +113,16 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const filterRangeShape = this._filterRangeShape = new SelectionShape(scene, DEFAULT_Z_INDEX, this._themeService, true);
-        filterRangeShape.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, {
-            hasAutoFill: false,
+        const filterRangeShape = this._filterRangeShape = new SelectionControl(
+            scene, DEFAULT_Z_INDEX, this._themeService, {
+                rowHeaderWidth,
+                columnHeaderHeight,
+                enableAutoFill: false,
+                highlightHeader: true,
+            });
+
+        filterRangeShape.updateRange(rangeWithCoord);
+        filterRangeShape.updateStyle({
             fill: 'rgba(0, 0, 0, 0.0)',
             ...style,
         } as ISelectionStyle);

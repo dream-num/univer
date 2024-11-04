@@ -31,7 +31,7 @@ import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-f
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { EditorBridgeService, SelectionControl } from '@univerjs/sheets-ui';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { AbsoluteRefType,
     Direction,
@@ -1473,7 +1473,7 @@ export class PromptController extends Disposable {
         const controls = refSelectionRenderService.getSelectionControls();
         const [unitId, sheetId] = refSelectionRenderService.getLocation();
 
-        const matchedControls = new Set<SelectionShape>();
+        const matchedControls = new Set<SelectionControl>();
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
             const { refIndex, themeColor, token } = refSelection;
@@ -1533,7 +1533,7 @@ export class PromptController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
+    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionControl) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
         // const { unitId, sheetId } = toRange;

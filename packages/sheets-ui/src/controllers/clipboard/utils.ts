@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-import { cellToRange, CustomRangeType, DataStreamTreeTokenType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IMoveRangeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
+} from '@univerjs/sheets';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
+import { cellToRange, CustomRangeType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+
 import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
@@ -29,18 +39,8 @@ import {
     SetSelectionsOperation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
-
-import type {
-    IAddWorksheetMergeMutationParams,
-    IMoveRangeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetSelectionsOperationParams,
-} from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 export function getDefaultOnPasteCellMutations(
@@ -605,7 +605,7 @@ export function getClearAndSetMergeMutations(
 export function generateBody(text: string): IDocumentBody {
     if (!text.includes('\r') && Tools.isLegalUrl(text)) {
         const id = generateRandomId();
-        const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+        const urlText = `${text}`;
         const range: ICustomRange = {
             startIndex: 0,
             endIndex: urlText.length - 1,

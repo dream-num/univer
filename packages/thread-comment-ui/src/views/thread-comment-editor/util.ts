@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, type IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
+import { CustomRangeType, type IDocumentBody } from '@univerjs/core';
 
 export type TextNode = {
     type: 'text';
@@ -128,6 +128,7 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
                     rangeType: CustomRangeType.MENTION,
                     startIndex: start,
                     endIndex: end,
+                    properties: {},
                 });
                 break;
             }

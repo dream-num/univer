@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Frequency extends BaseFunction {
     override minParams = 2;

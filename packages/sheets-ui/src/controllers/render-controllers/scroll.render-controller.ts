@@ -61,7 +61,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._initSkeletonListener();
     }
 
-    scrollToRange(range: IRange): boolean {
+    scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
         let { endRow, endColumn, startColumn, startRow } = range;
         const bounding = this._getViewportBounding();
         if (range.rangeType === RANGE_TYPE.ROW) {
@@ -72,12 +72,12 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             endRow = 0;
         }
 
-        if (bounding) {
+        if (bounding && !forceTop && !forceLeft) {
             const row = bounding.startRow > endRow ? startRow : endRow;
             const col = bounding.startColumn > endColumn ? startColumn : endColumn;
             return this._scrollToCell(row, col);
         } else {
-            return this._scrollToCell(startRow, startColumn);
+            return this._scrollToCell(startRow, startColumn, forceTop, forceLeft);
         }
     }
 
@@ -479,7 +479,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _scrollToCell(row: number, column: number): boolean {
+    private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
@@ -561,8 +561,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: startSheetViewRow,
-            sheetViewStartColumn: startSheetViewColumn,
+            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : startSheetViewRow,
+            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : startSheetViewColumn,
             offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });

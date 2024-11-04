@@ -17,13 +17,13 @@
 import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import { distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
@@ -87,12 +87,17 @@ const getLinkDisable$ = (accessor: IAccessor) => {
 
             const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
                 .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
+            const focusingFxBarEditor$ = accessor.get(IContextService).subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
 
-            return isEditing$.pipe(
+            return combineLatest([isEditing$, focusingFxBarEditor$]).pipe(
                 switchMap(
-                    (editing) => editing ?
-                        getEditingLinkDisable$(accessor, editing)
-                        : of(false)
+                    ([editing, focusingFxBarEditor]) => {
+                        return editing ?
+                            focusingFxBarEditor
+                                ? of(true)
+                                : getEditingLinkDisable$(accessor, editing)
+                            : of(false);
+                    }
                 )
             );
         })

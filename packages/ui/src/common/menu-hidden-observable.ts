@@ -22,7 +22,7 @@ export function getMenuHiddenObservable(
     accessor: IAccessor,
     targetUniverType: UniverInstanceType,
     matchUnitId?: string,
-    needHideUnitId?: string
+    needHideUnitId?: string | string[]
 ): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -34,7 +34,7 @@ export function getMenuHiddenObservable(
             if (matchUnitId && matchUnitId !== unitId) {
                 return subscriber.next(true);
             }
-            if (needHideUnitId && needHideUnitId === unitId) {
+            if (needHideUnitId && (Array.isArray(needHideUnitId) ? needHideUnitId.includes(unitId) : needHideUnitId === unitId)) {
                 return subscriber.next(true);
             }
             const univerType = univerInstanceService.getUnitType(unitId);

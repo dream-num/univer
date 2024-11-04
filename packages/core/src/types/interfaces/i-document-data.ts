@@ -369,6 +369,8 @@ export enum CustomRangeType {
     CUSTOM,
     MENTION,
     UNI_FORMULA,
+
+    DELTED = 9999,
 }
 
 /**
@@ -383,6 +385,8 @@ export interface ICustomBlock {
 
 export enum CustomDecorationType {
     COMMENT,
+
+    DELTED = 9999,
 }
 
 export interface ICustomDecoration {

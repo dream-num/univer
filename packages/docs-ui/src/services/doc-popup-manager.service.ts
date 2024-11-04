@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
+import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map } from 'rxjs';
-import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
-import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
-import type { IPopup } from '@univerjs/ui';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
@@ -92,8 +93,8 @@ export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOuts
 export const calcDocRangePositions = (range: ITextRangeParam, currentRender: IRender): IBoundRectNoAngle[] | undefined => {
     const { scene, mainComponent, engine } = currentRender;
     const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, range.segmentPage);
-    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, false, range.segmentId, range.segmentPage);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, range.segmentPage);
+    const endPosition = skeleton.findNodePositionByCharIndex(range.endOffset, true, range.segmentId, range.segmentPage);
     const document = mainComponent as Documents;
 
     if (!endPosition || !startPosition) {
@@ -168,8 +169,11 @@ export class DocCanvasPopManagerService extends Disposable {
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetDocZoomRatioOperation.id) {
-                position$.next(calc());
+            if (commandInfo.id === SetDocZoomRatioOperation.id || commandInfo.id === RichTextEditingMutation.id) {
+                const newPosition = calc();
+                if (newPosition) {
+                    position$.next(newPosition);
+                }
             }
         }));
 
@@ -193,10 +197,13 @@ export class DocCanvasPopManagerService extends Disposable {
         const disposable = new DisposableCollection();
 
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetDocZoomRatioOperation.id) {
-                const position = calcDocRangePositions(range, currentRender);
-                if (position) {
-                    positions$.next(position);
+            if (commandInfo.id === SetDocZoomRatioOperation.id || commandInfo.id === RichTextEditingMutation.id) {
+                const params = commandInfo.params as IRichTextEditingMutationParams;
+                if (params.unitId === currentRender.unitId) {
+                    const position = calcDocRangePositions(range, currentRender);
+                    if (position) {
+                        positions$.next(position);
+                    }
                 }
             }
         }));

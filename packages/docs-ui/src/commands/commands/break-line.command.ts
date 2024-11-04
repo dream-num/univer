@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph } from '@univerjs/core';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocMenuStyleService } from '../../services/doc-menu-style.service';
@@ -91,7 +91,7 @@ export const BreakLineCommand: ICommand = {
 
         const unitId = docDataModel.getUnitId();
 
-        const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
+        const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

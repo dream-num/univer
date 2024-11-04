@@ -76,6 +76,8 @@ export class HoverManagerService extends Disposable {
                 && pre?.location?.col === aft?.location?.col
                 && pre?.customRange?.rangeId === aft?.customRange?.rangeId
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
+                && pre?.customRange?.startIndex === aft?.customRange?.startIndex
+                && pre?.customRange?.endIndex === aft?.customRange?.endIndex
             )
         ),
         map((cell) => cell && {

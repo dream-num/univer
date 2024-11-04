@@ -885,7 +885,7 @@ export class SheetFindModel extends FindModel {
         const isRichText = !!currentContent.p?.body;
         if (isRichText) {
             const clonedRichText = Tools.deepClone(currentContent.p!);
-            replaceInDocumentBody(clonedRichText.body!, findString, replaceString);
+            replaceInDocumentBody(clonedRichText.body!, findString, replaceString, this._query!.caseSensitive);
             return { p: clonedRichText };
         }
 

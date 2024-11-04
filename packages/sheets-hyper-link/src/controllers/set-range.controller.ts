@@ -16,20 +16,18 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { AFTER_CELL_EDIT, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
+import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
+import { HyperLinkModel } from '../models/hyper-link.model';
 
 export class SheetHyperLinkSetRangeController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -171,10 +169,10 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             collapsed: false,
                         },
                         body: {
-                            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${cell.v}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                            dataStream: `${cell.v}`,
                             customRanges: [{
                                 startIndex: 0,
-                                endIndex: cell.v.length + 1,
+                                endIndex: cell.v.length - 1,
                                 rangeId: generateRandomId(),
                                 rangeType: CustomRangeType.HYPERLINK,
                                 properties: {

@@ -19,7 +19,8 @@ import { DocumentDataModel } from './document-data-model';
 import { JSONX } from './json-x/json-x';
 import { TextX } from './text-x/text-x';
 
-export function replaceInDocumentBody(body: IDocumentBody, query: string, target: string): IDocumentBody {
+// TODO: this function should be replaced by replaceSelection
+export function replaceInDocumentBody(body: IDocumentBody, query: string, target: string, caseSensitive: boolean): IDocumentBody {
     if (query === '') {
         return body;
     }
@@ -36,7 +37,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
     let index;
 
     // eslint-disable-next-line no-cond-assign
-    while ((index = documentDataModel.getBody()!.dataStream.indexOf(query)) >= 0) {
+    while ((index = (caseSensitive ? documentDataModel.getBody()!.dataStream : documentDataModel.getBody()!.dataStream.toLowerCase()).indexOf(query)) >= 0) {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
@@ -55,6 +56,15 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
                     ...sliceBody.textRuns[0],
                     st: 0,
                     ed: target.length,
+                }];
+            }
+
+            if (sliceBody?.customRanges?.length) {
+                const customRange = sliceBody.customRanges[0];
+                replaceBody.customRanges = [{
+                    ...customRange,
+                    startIndex: 0,
+                    endIndex: target.length - 1,
                 }];
             }
 

@@ -854,11 +854,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeader,
             showGridlines,
         } = this._worksheetData;
+
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
             rowCount,
             rowData,
             defaultRowHeight
         );
+
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
             columnCount,
             columnData,
@@ -988,11 +990,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         columnCount: number
     ): IColumnRange {
         const contentWidth = contentSize?.width ?? 0;
-
         let startColumn = column;
         let endColumn = column;
-
-        // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
@@ -1814,10 +1813,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._overflowCache.reset();
     }
 
-    private _makeDocumentSkeletonDirty(row: number, col: number): void {
-        if (this._stylesCache.fontMatrix == null) return;
-        this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
-    }
+    // private _makeDocumentSkeletonDirty(row: number, col: number): void {
+    //     if (this._stylesCache.fontMatrix == null) return;
+    //     this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
+    // }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
         mergeRange?: IRange;

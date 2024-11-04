@@ -30,8 +30,14 @@ enum TextXTransformType {
 }
 
 // eslint-disable-next-line max-lines-per-function, complexity
-function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[], transformType: TextXTransformType) {
-    if (originTextRuns.length === 0) {
+function transformTextRuns(
+    originTextRuns: ITextRun[],
+    targetTextRuns: ITextRun[],
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
+) {
+    if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
         return targetTextRuns;
     }
 
@@ -55,7 +61,6 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
         return false;
     }
 
-    // TODO: @JOCS, I think no need to iterate over the text runs and compare them! because the textRuns length is always 1.
     while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: targetStyle } = targetTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: originStyle, sId } = originTextRuns[removeIndex];
@@ -63,15 +68,58 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
 
         if (transformType === TextXTransformType.COVER) {
             newTs = { ...targetStyle };
-        } else {
-            newTs = { ...targetStyle };
 
-            if (originStyle) {
+            if (originCoverType === UpdateDocsAttributeType.COVER && targetCoverType === UpdateDocsAttributeType.REPLACE && originStyle) {
                 const keys = Object.keys(originStyle);
 
                 for (const key of keys) {
-                    if (newTs[key as keyof ITextStyle]) {
-                        delete newTs[key as keyof ITextStyle];
+                    if (newTs[key as keyof ITextStyle] === undefined) {
+                        newTs[key as keyof ITextStyle] = originStyle[key as keyof ITextStyle] as any;
+                    }
+                }
+            }
+        } else {
+            newTs = { ...targetStyle };
+
+            if (originCoverType === UpdateDocsAttributeType.REPLACE) {
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    // If they are all REPLACE types, the highest priority is retained when transforming.
+                    newTs = { ...originStyle };
+                } else {
+                    // If the target action is COVER and has a low priority, then the origin field should not be cover.
+                    if (targetStyle && originStyle) {
+                        const keys = Object.keys(targetStyle);
+
+                        for (const key of keys) {
+                            if (originStyle[key as keyof ITextStyle]) {
+                                delete newTs[key as keyof ITextStyle];
+                            }
+                        }
+                    }
+                }
+            } else {
+                // If the origin is of type Cover and the target action is of type REPLACE
+                // and has a low priority, then all fields in origin should be copied to the target
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (originStyle) {
+                        const keys = Object.keys(originStyle);
+
+                        for (const key of keys) {
+                            if (originStyle[key as keyof ITextStyle] !== undefined) {
+                                newTs[key as keyof ITextStyle] = originStyle[key as keyof ITextStyle] as any;
+                            }
+                        }
+                    }
+                } else {
+                    // If they are all of the Cover type, then the fields in the Origin need to be deleted.
+                    if (originStyle) {
+                        const keys = Object.keys(originStyle);
+
+                        for (const key of keys) {
+                            if (newTs[key as keyof ITextStyle] !== undefined) {
+                                delete newTs[key as keyof ITextStyle];
+                            }
+                        }
                     }
                 }
             }
@@ -172,37 +220,76 @@ function transformCustomRanges(
 // At present, only the two properties of paragraphStyle and bullet are handled,
 // paragraphStyle is treated separately, while bullet is treated as a whole because
 // the properties in bullet are related
+
+// eslint-disable-next-line complexity, max-lines-per-function
 function transformParagraph(
     originParagraph: IParagraph,
     targetParagraph: IParagraph,
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
 ): IParagraph {
     const paragraph: IParagraph = {
         startIndex: targetParagraph.startIndex,
     };
 
     if (targetParagraph.paragraphStyle) {
-        if (originParagraph.paragraphStyle == null) {
-            paragraph.paragraphStyle = {
-                ...targetParagraph.paragraphStyle,
-            };
-        } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.paragraphStyle = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.paragraphStyle }
-                    : { ...targetParagraph.paragraphStyle };
+        paragraph.paragraphStyle = Tools.deepClone(targetParagraph.paragraphStyle);
+
+        if (originParagraph.paragraphStyle) {
+            if (originCoverType === UpdateDocsAttributeType.REPLACE) {
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        paragraph.paragraphStyle = {
+                            ...originParagraph.paragraphStyle,
+                        };
+                    }
+                } else {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    }
+                }
             } else {
-                paragraph.paragraphStyle = {
-                    ...targetParagraph.paragraphStyle,
-                };
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
 
-                if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
-                    const keys = Object.keys(originParagraph.paragraphStyle);
+                        for (const key of keys) {
+                            if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
 
-                    for (const key of keys) {
-                        if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
-                            delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    }
+                } else {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
+                                delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                            }
                         }
                     }
                 }
@@ -210,18 +297,22 @@ function transformParagraph(
         }
     }
 
-    if (targetParagraph.bullet) {
-        if (originParagraph.bullet == null) {
-            paragraph.bullet = {
-                ...targetParagraph.bullet,
-            };
+    if (originCoverType === UpdateDocsAttributeType.REPLACE && targetCoverType === UpdateDocsAttributeType.REPLACE) {
+        paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+            ? Tools.deepClone(originParagraph.bullet)
+            : Tools.deepClone(targetParagraph.bullet);
+    } else {
+        if (originParagraph.bullet === undefined) {
+            paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
         } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.bullet }
-                    : { ...targetParagraph.bullet };
+            if (originCoverType === UpdateDocsAttributeType.REPLACE || targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.bullet = transformType === TextXTransformType.COVER && targetParagraph.bullet
+                    ? Tools.deepClone(targetParagraph.bullet)
+                    : Tools.deepClone(originParagraph.bullet);
             } else {
-                throw new Error('Bullet is only supported in replace mode.');
+                if (transformType === TextXTransformType.COVER && targetParagraph.bullet !== undefined) {
+                    paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
+                }
             }
         }
     }
@@ -229,35 +320,38 @@ function transformParagraph(
     return paragraph;
 }
 
+interface ITransformBodyResult {
+    body: IDocumentBody;
+    coverType: UpdateDocsAttributeType;
+}
+
 // eslint-disable-next-line max-lines-per-function, complexity
 export function transformBody(
     thisAction: IRetainAction,
     otherAction: IRetainAction,
     priority: boolean = false
-): IDocumentBody {
-    const { body: thisBody, coverType: thisCoverType } = thisAction;
-    const { body: otherBody, coverType: otherCoverType } = otherAction;
+): ITransformBodyResult {
+    const { body: thisBody, coverType: thisCoverType = UpdateDocsAttributeType.COVER } = thisAction;
+    const { body: otherBody, coverType: otherCoverType = UpdateDocsAttributeType.COVER } = otherAction;
 
     if (thisBody == null || thisBody.dataStream !== '' || otherBody == null || otherBody.dataStream !== '') {
         throw new Error('Data stream is not supported in retain transform.');
-    }
-
-    if (thisCoverType !== otherCoverType) {
-        throw new Error('Cover type is not consistent.');
     }
 
     const retBody: IDocumentBody = {
         dataStream: '',
     };
 
+    const coverType = otherCoverType;
+
     const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [] } = thisBody;
     const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [] } = otherBody;
 
     let textRuns: ITextRun[] = [];
     if (priority) {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, TextXTransformType.COVER_ONLY_NOT_EXISTED);
+        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER_ONLY_NOT_EXISTED);
     } else {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, TextXTransformType.COVER);
+        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER);
     }
     if (textRuns.length) {
         retBody.textRuns = textRuns;
@@ -295,11 +389,18 @@ export function transformBody(
                 paragraph = transformParagraph(
                     thisParagraph,
                     otherParagraph,
-                    TextXTransformType.COVER_ONLY_NOT_EXISTED,
-                    thisCoverType
+                    thisCoverType,
+                    otherCoverType,
+                    TextXTransformType.COVER_ONLY_NOT_EXISTED
                 );
             } else {
-                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER, thisCoverType);
+                paragraph = transformParagraph(
+                    thisParagraph,
+                    otherParagraph,
+                    thisCoverType,
+                    otherCoverType,
+                    TextXTransformType.COVER
+                );
             }
 
             paragraphs.push(paragraph);
@@ -322,5 +423,8 @@ export function transformBody(
         retBody.paragraphs = paragraphs;
     }
 
-    return retBody;
+    return {
+        coverType,
+        body: retBody,
+    };
 }

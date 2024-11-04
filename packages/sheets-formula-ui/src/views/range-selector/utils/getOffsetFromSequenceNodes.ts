@@ -21,6 +21,6 @@ export const getOffsetFromSequenceNodes = (sequenceNode: (string | ISequenceNode
         if (typeof cur === 'string') {
             return pre + cur.length;
         }
-        return pre + cur.endIndex - cur.startIndex + 1;
+        return pre + cur.token.length;
     }, 0);
 };

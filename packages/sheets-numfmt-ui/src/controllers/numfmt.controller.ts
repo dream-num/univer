@@ -42,11 +42,13 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { CloseNumfmtPanelOperator, getPatternPreviewIgnoreGeneral, getPatternType, OpenNumfmtPanelOperator, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { getPatternPreviewIgnoreGeneral, getPatternType, SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
+import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { SheetNumfmtPanel } from '../views/components';
 
 const SHEET_NUMFMT_PANEL = 'SHEET_NUMFMT_PANEL';

@@ -298,7 +298,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: '当您需要查询一行或一列并查找另一行或列中的相同位置的值时使用',
+        description: '当需要查询一行或一列并查找另一行或列中的相同位置的值时使用',
         abstract: '在向量或数组中查找值',
         links: [
             {

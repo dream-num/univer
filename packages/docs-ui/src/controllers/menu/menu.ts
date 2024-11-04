@@ -20,6 +20,7 @@ import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     HorizontalAlign,
@@ -461,7 +462,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         })),
         // disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
-            const defaultValue = FONT_FAMILY_LIST[0].value;
+            const defaultValue = DEFAULT_STYLES.ff;
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -506,7 +507,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         selections: FONT_SIZE_LIST,
         // disabled$,
         value$: new Observable((subscriber) => {
-            const DEFAULT_SIZE = 14;
+            const DEFAULT_SIZE = DEFAULT_STYLES.fs;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
@@ -591,8 +592,8 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
-            return one || two || three;
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), (one, two) => {
+            return one || two;
         }),
     };
 }
@@ -636,7 +637,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -670,7 +671,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -704,7 +705,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -738,7 +739,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -916,13 +917,18 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     const activeTextRange = textSelectionService.getActiveTextRange();
+
+    const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
 
     if (docDataModel == null || activeTextRange == null) {
         return {
-            ts: cacheStyle,
+            ts: {
+                ...defaultTextStyle,
+                ...cacheStyle,
+            },
         };
     }
 
@@ -932,7 +938,10 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     if (textRuns == null) {
         return {
-            ts: cacheStyle,
+            ts: {
+                ...defaultTextStyle,
+                ...cacheStyle,
+            },
         };
     }
 
@@ -950,6 +959,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     return {
         ...textRun,
         ts: {
+            ...defaultTextStyle,
             ...textRun?.ts,
             ...cacheStyle,
         },

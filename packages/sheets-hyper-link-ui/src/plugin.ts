@@ -25,10 +25,7 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
-import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
-import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
-import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
@@ -62,22 +59,19 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkPopupService],
             [SheetsHyperLinkSidePanelService],
 
-            [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRenderManagerController],
-            [SheetHyperLinkSetRangeController],
+
             [SheetsHyperLinkPopupController],
             [SheetsHyperLinkUIController],
             [SheetsHyperLinkAutoFillController],
             [SheetsHyperLinkCopyPasteController],
             [SheetsHyperLinkPermissionController],
             [SheetHyperLinkUrlController],
-            [SheetsHyperLinkRichTextRefRangeController],
+
         ];
         dependencies.forEach((dep) => this._injector.add(dep));
 
         this._injector.get(SheetsHyperLinkRenderManagerController);
-        this._injector.get(SheetsHyperLinkRichTextRefRangeController);
-        this._injector.get(SheetHyperLinkSetRangeController);
     }
 
     override onReady(): void {
@@ -86,7 +80,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
         this._injector.get(SheetsHyperLinkAutoFillController);
         this._injector.get(SheetsHyperLinkCopyPasteController);
-        this._injector.get(SheetsHyperLinkRemoveSheetController);
         this._injector.get(SheetsHyperLinkUIController);
     }
 

@@ -17,6 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { Subscriber } from 'rxjs';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
@@ -52,40 +53,43 @@ function inSameTable(rectRanges: Readonly<IRectRangeWithStyle[]>) {
     return tableIds.every((tableId) => tableId === tableIds[0]);
 }
 
+function notInTableSubscriber(subscriber: Subscriber<boolean>, docSelectionManagerService: DocSelectionManagerService, univerInstanceService: IUniverInstanceService) {
+    const rectRanges = docSelectionManagerService.getRectRanges();
+    const activeRange = docSelectionManagerService.getActiveTextRange();
+
+    if (rectRanges && rectRanges.length && inSameTable(rectRanges) && activeRange == null) {
+        subscriber.next(false);
+        return;
+    }
+
+    if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
+        const { segmentId, startOffset, endOffset } = activeRange;
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+
+        if (tables && tables.length) {
+            if (tables.some((table) => {
+                const { startIndex, endIndex } = table;
+                return (startOffset > startIndex && startOffset < endIndex) || (endOffset > startIndex && endOffset < endIndex);
+            })) {
+                subscriber.next(false);
+                return;
+            }
+        }
+    }
+    subscriber.next(true);
+}
+
 const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable<boolean>((subscriber) => {
         const observable = docSelectionManagerService.textSelection$.subscribe(() => {
-            const rectRanges = docSelectionManagerService.getRectRanges();
-            const activeRange = docSelectionManagerService.getActiveTextRange();
-
-            if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
-                subscriber.next(false);
-                return;
-            }
-
-            if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
-                const { segmentId, startOffset, endOffset } = activeRange;
-                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
-
-                if (tables && tables.length) {
-                    if (tables.some((table) => {
-                        const { startIndex, endIndex } = table;
-                        return (startOffset > startIndex && startOffset < endIndex) || (endOffset > startIndex && endOffset < endIndex);
-                    })) {
-                        subscriber.next(false);
-                        return;
-                    }
-                }
-            }
-
-            subscriber.next(true);
+            notInTableSubscriber(subscriber, docSelectionManagerService, univerInstanceService);
         });
 
-        subscriber.next(true);
+        notInTableSubscriber(subscriber, docSelectionManagerService, univerInstanceService);
 
         return () => observable.unsubscribe();
     });

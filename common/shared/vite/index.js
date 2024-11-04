@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-const { resolve } = require('node:path');
+const path = require('node:path');
 const process = require('node:process');
-
 const react = require('@vitejs/plugin-react');
+const fs = require('fs-extra');
 const { default: dts } = require('vite-plugin-dts');
+
 const vitePluginExternal = require('vite-plugin-external');
 const { defineConfig, mergeConfig } = require('vitest/config');
+
 const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
 const { buildPkg } = require('./build-pkg');
+const { buildUMD } = require('./build-umd');
 const { obfuscator } = require('./obfuscator');
 const { convertLibNameFromPackageName } = require('./utils');
 
@@ -32,6 +35,7 @@ const { convertLibNameFromPackageName } = require('./utils');
  * @property {boolean} react - whether to use react
  * @property {boolean} css - whether to use css
  * @property {boolean} dom - whether to use dom
+ * @property {'ignore' | undefined} umd - whether to use vue
  */
 
 /**
@@ -43,7 +47,7 @@ const { convertLibNameFromPackageName } = require('./utils');
  */
 
 function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
-    const { mode, pkg, features } = options;
+    const { mode, pkg, features = {} } = options;
 
     const dirname = process.cwd();
 
@@ -51,13 +55,22 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
     const originalConfig = {
         esbuild: {},
         build: {
+            emptyOutDir: false,
             target: 'chrome70',
             outDir: 'lib',
             lib: {
-                entry: resolve(dirname, 'src/index.ts'),
+                entry: {
+                    index: path.resolve(dirname, 'src/index.ts'),
+                },
                 name: convertLibNameFromPackageName(pkg.name),
-                fileName: (format) => `${format}/index.js`,
-                formats: ['es', 'umd', 'cjs'],
+                fileName: (format, entryName) => {
+                    if (entryName.startsWith('locale/')) {
+                        return `${entryName}.js`;
+                    } else {
+                        return `${format}/${entryName}.js`;
+                    }
+                },
+                formats: ['es'],
             },
         },
         plugins: [
@@ -68,6 +81,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             dts({
                 entryRoot: 'src',
                 outDir: 'lib/types',
+                clearPureImport: false,
             }),
             buildPkg(),
         ],
@@ -111,6 +125,24 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         },
     };
 
+    const facadeEntry = path.resolve(dirname, 'src/facade/index.ts');
+    if (fs.existsSync(facadeEntry)) {
+        originalConfig.build.lib.entry.facade = facadeEntry;
+    }
+
+    const localeDir = path.resolve(process.cwd(), 'src/locale');
+    if (fs.existsSync(localeDir)) {
+        const locales = fs.readdirSync(localeDir);
+
+        for (const file of locales) {
+            if (fs.statSync(path.resolve(localeDir, file)).isDirectory()) {
+                continue;
+            }
+            const localeValue = file.replace('.ts', '');
+            originalConfig.build.lib.entry[`locale/${localeValue}`] = path.resolve(localeDir, file);
+        }
+    }
+
     if (process.env.APP_TYPE === 'staging') {
         originalConfig.build.sourcemap = true;
 
@@ -125,23 +157,25 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         }
     }
 
-    if (features) {
-        if (features.react) {
-            originalConfig.plugins.push(react());
-        }
+    if (features.react) {
+        originalConfig.plugins.push(react());
+    }
 
-        if (features.css) {
-            originalConfig.css = {
-                modules: {
-                    localsConvention: 'camelCaseOnly',
-                    generateScopedName: 'univer-[local]',
-                },
-            };
-        }
+    if (features.css) {
+        originalConfig.css = {
+            modules: {
+                localsConvention: 'camelCaseOnly',
+                generateScopedName: 'univer-[local]',
+            },
+        };
+    }
 
-        if (features.dom) {
-            originalConfig.test.environment = 'happy-dom';
-        }
+    if (features.dom) {
+        originalConfig.test.environment = 'happy-dom';
+    }
+
+    if (features.umd !== 'ignore') {
+        originalConfig.plugins.push(buildUMD());
     }
 
     return mergeConfig(

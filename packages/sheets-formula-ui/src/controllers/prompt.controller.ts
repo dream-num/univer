@@ -33,13 +33,13 @@ import type {
 } from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
-import {
-    AbsoluteRefType,
+import { AbsoluteRefType,
     Direction,
     Disposable,
     DisposableCollection,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FORMULA_EDITOR_ACTIVATED,
     ICommandService,
@@ -90,13 +90,14 @@ import {
     ExpandSelectionCommand,
     getEditorObject,
     IEditorBridgeService,
+    isEmbeddingFormulaEditor,
     isRangeSelector,
     JumpOver,
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-import { distinctUntilChanged, distinctUntilKeyChanged, filter } from 'rxjs';
+import { distinctUntilChanged, distinctUntilKeyChanged, filter, merge } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -255,7 +256,7 @@ export class PromptController extends Disposable {
             this._docSelectionManagerService.textSelection$
                 .pipe(
                     filter((item) => {
-                        return !isRangeSelector(item.unitId);
+                        return !isRangeSelector(item.unitId) && !isEmbeddingFormulaEditor(item.unitId);
                     })
                 )
                 .subscribe((params) => {
@@ -303,59 +304,60 @@ export class PromptController extends Disposable {
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
         // TODO: @runzhe Should there be a registration mechanism, rather than a unified process here?
-        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
-            const unitId = documentDataModel?.getUnitId();
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(filter((documentDataModel) => {
+                const unitId = documentDataModel?.getUnitId() || '';
+                return !isRangeSelector(unitId) && !isEmbeddingFormulaEditor(unitId);
+            }))
+            .subscribe((documentDataModel) => {
+                const unitId = documentDataModel?.getUnitId();
 
-            if (unitId == null) {
-                return;
-            }
+                if (unitId == null) {
+                    return;
+                }
 
-            if (isRangeSelector(unitId)) {
-                return;
-            }
+                if (this._listenInputCache.has(unitId)) {
+                    return;
+                }
 
-            if (this._listenInputCache.has(unitId)) {
-                return;
-            }
+                const editor = this._editorService.getEditor(unitId);
 
-            const editor = this._editorService.getEditor(unitId);
+                if (editor == null) {
+                    return;
+                }
 
-            if (editor == null) {
-                return;
-            }
+                const docSelectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
 
-            const docSelectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+                if (docSelectionRenderService) {
+                    this.disposeWithMe(
+                        docSelectionRenderService.onInputBefore$.subscribe((param) => {
+                            this._previousSequenceNodes = null;
+                            this._previousInsertRefStringIndex = null;
 
-            if (docSelectionRenderService) {
-                this.disposeWithMe(
-                    docSelectionRenderService.onInputBefore$.subscribe((param) => {
-                        this._previousSequenceNodes = null;
-                        this._previousInsertRefStringIndex = null;
+                            this._selectionRenderService.setSkipLastEnabled(true);
 
-                        this._selectionRenderService.setSkipLastEnabled(true);
+                            const event = param?.event as KeyboardEvent;
+                            if (!event) return;
 
-                        const event = param?.event as KeyboardEvent;
-                        if (!event) return;
+                            if (!arrows.includes(event.which)) {
+                                if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                                    this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                                }
 
-                        if (!arrows.includes(event.which)) {
-                            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
-                                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                                this._inputPanelState = InputPanelState.keyNormal;
+                            } else {
+                                this._inputPanelState = InputPanelState.keyArrow;
                             }
 
-                            this._inputPanelState = InputPanelState.keyNormal;
-                        } else {
-                            this._inputPanelState = InputPanelState.keyArrow;
-                        }
+                            if (event.which !== KeyCode.F4) {
+                                this._userCursorMove = false;
+                            }
+                        })
+                    );
+                }
 
-                        if (event.which !== KeyCode.F4) {
-                            this._userCursorMove = false;
-                        }
-                    })
-                );
-            }
-
-            this._listenInputCache.add(unitId);
-        });
+                this._listenInputCache.add(unitId);
+            });
     }
 
     private _closeRangePromptWhenEditorInvisible() {
@@ -378,25 +380,27 @@ export class PromptController extends Disposable {
 
     private _initialChangeEditor() {
         this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
-                if (documentDataModel == null) {
-                    return;
-                }
+            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+                .pipe(filter((documentDataModel) => {
+                    const editorId = documentDataModel?.getUnitId() || '';
+                    return !isRangeSelector(editorId) && !isEmbeddingFormulaEditor(editorId);
+                }))
+                .subscribe((documentDataModel) => {
+                    if (documentDataModel == null) {
+                        return;
+                    }
 
-                const editorId = documentDataModel.getUnitId();
+                    const editorId = documentDataModel.getUnitId();
 
-                if (isRangeSelector(editorId)) {
-                    return;
-                }
-                if (!this._editorService.isEditor(editorId) || this._previousEditorUnitId === editorId) {
-                    return;
-                }
+                    if (!this._editorService.isEditor(editorId) || this._previousEditorUnitId === editorId) {
+                        return;
+                    }
 
-                if (!this._editorService.isSheetEditor(editorId)) {
-                    this._closeRangePrompt(editorId);
-                    this._previousEditorUnitId = editorId;
-                }
-            })
+                    if (!this._editorService.isSheetEditor(editorId)) {
+                        this._closeRangePrompt(editorId);
+                        this._previousEditorUnitId = editorId;
+                    }
+                })
         );
 
         this.disposeWithMe(
@@ -409,6 +413,10 @@ export class PromptController extends Disposable {
     }
 
     private _closeRangePrompt(editorId: Nullable<string>) {
+        const docId = editorId || this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
+        if (isRangeSelector(docId) || isEmbeddingFormulaEditor(docId) || docId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
         this._insertSelections = [];
         this._refSelectionsService.clear();
 
@@ -437,14 +445,25 @@ export class PromptController extends Disposable {
             // Theme color should be set when SelectionControl is created, it's too late to set theme color at selecitonEnd(pointerup).
             // The logic below has been moved to syncToEditor.
             // this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
-
+            const docID = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
+            if (isRangeSelector(docID) || isEmbeddingFormulaEditor(docID)) {
+                return;
+            }
             const selectionControls = this._allSelectionRenderServices.map((s) => s.getSelectionControls()).flat();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();
-                d.add(c.selectionMoving$.subscribe((toRange) => this._onSelectionControlChange(toRange, c)));
-                d.add(c.selectionScaling$.subscribe((toRange) => this._onSelectionControlChange(toRange, c)));
-                d.add(c.selectionMoved$.subscribe(() => this._formulaPromptService.disableLockedSelectionChange()));
-                d.add(c.selectionScaled$.subscribe(() => this._formulaPromptService.disableLockedSelectionChange()));
+                d.add(merge(c.selectionMoving$, c.selectionScaling$).subscribe((toRange) => {
+                    const docID = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
+                    if (isRangeSelector(docID) || isEmbeddingFormulaEditor(docID)) {
+                        d.dispose();
+                        this._formulaPromptService.disableLockedSelectionChange();
+                        return;
+                    }
+                    this._onSelectionControlChange(toRange, c);
+                }));
+                d.add(merge(c.selectionMoved$, c.selectionScaled$).subscribe(() => {
+                    this._formulaPromptService.disableLockedSelectionChange();
+                }));
             });
         }));
     }
@@ -1736,6 +1755,11 @@ export class PromptController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                const instance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+                const unitId = instance?.getUnitId() || '';
+                if (isRangeSelector(unitId) || isEmbeddingFormulaEditor(unitId)) {
+                    return;
+                }
                 if (command.id === ReferenceAbsoluteOperation.id) {
                     this._changeRefString();
                 } else if (updateCommandList.includes(command.id)) {

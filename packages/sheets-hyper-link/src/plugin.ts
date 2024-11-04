@@ -19,6 +19,9 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependen
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
+import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
+import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
+import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
@@ -44,17 +47,24 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
 
     override onStarting(): void {
         registerDependencies(this._injector, [
+            [HyperLinkModel],
             [SheetsHyperLinkParserService],
             [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [SheetsHyperLinkRefRangeController],
-            [HyperLinkModel],
+            [SheetHyperLinkSetRangeController],
+            [SheetsHyperLinkRemoveSheetController],
+            [SheetsHyperLinkRichTextRefRangeController],
+
         ]);
 
         touchDependencies(this._injector, [
             [SheetsHyperLinkRefRangeController],
             [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
+            [SheetHyperLinkSetRangeController],
+            [SheetsHyperLinkRemoveSheetController],
+            [SheetsHyperLinkRichTextRefRangeController],
         ]);
     }
 }

@@ -368,6 +368,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -470,6 +471,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -491,6 +493,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -589,6 +592,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -607,6 +611,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -719,7 +724,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,
@@ -741,7 +746,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,
@@ -763,7 +768,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,
@@ -785,7 +790,7 @@ describe('transform()', () => {
                     dataStream: '',
                     customRanges: [
                         {
-                            startIndex: -1,
+                            startIndex: 0,
                             endIndex: 0,
                             rangeId: 'rangeId',
                             rangeType: CustomRangeType.HYPERLINK,

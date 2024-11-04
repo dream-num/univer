@@ -16,7 +16,7 @@
 
 import type { ICommand, IDocumentBody } from '@univerjs/core';
 import type { IDocMention } from '../../types/interfaces/i-mention';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
+import { CommandType, CustomRangeType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory, DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 
 export interface IAddDocMentionCommandParams {
@@ -40,7 +40,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         if (!activeRange) {
             return false;
         }
-        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START} @${mention.label} ${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+        const dataStream = ` @${mention.label} `;
         const body: IDocumentBody = {
             dataStream,
             customRanges: [{

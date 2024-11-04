@@ -61,6 +61,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         resolveId(source) {
             if (source.endsWith('.less') || source.endsWith('.css')) {
                 hasCss = true;
+                return null;
             }
 
             if (source in peerDepsMap) {
@@ -124,31 +125,6 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                     peerDependencies[key] = 'workspace:*';
                 }
             });
-            // Array.from(peers)
-            //     .sort()
-            //     .forEach((ext) => {
-            //     console.log(peers.);
-            //     const { version, name, optional } = peers[ext] ?? {};
-
-            //         if (version) {
-            //             if (version !== name) {
-            //                 if (optional) {
-            //                     if (!optionalDependencies) {
-            //                         optionalDependencies = {};
-            //                     }
-            //                     optionalDependencies[ext] = version;
-            //                 } else {
-            //                     peerDependencies[ext] = version;
-            //                 }
-            //             } else {
-            //                 if (!peerDependencies[version]) {
-            //                     peerDependencies[name] = peers[version].version;
-            //                 }
-            //             }
-            //         } else {
-            //             peerDependencies[ext] = 'workspace:*';
-            //         }
-            //     });
 
             if (Object.keys(peerDependencies).length) {
                 pkg.peerDependencies = peerDependencies;

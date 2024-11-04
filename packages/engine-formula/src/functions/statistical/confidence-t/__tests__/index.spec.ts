@@ -98,6 +98,15 @@ describe('Test confidenceT function', () => {
             const size = NumberValueObject.create(50);
             const result = testFunction.calculate(alpha, standardDev, size);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const alpha2 = NumberValueObject.create(0.05);
+            const standardDev2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(alpha2, standardDev2, size);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const size2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(alpha2, standardDev, size2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

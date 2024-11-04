@@ -22,6 +22,7 @@ import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanc
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -90,7 +91,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                         return;
                     }
 
-                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params);
+                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params, {
+                        unitId: this._context.unitId,
+                        subUnitId: this._context.unitId,
+                    });
                 })
         );
     }
@@ -265,10 +269,14 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (!isInternalEditor) {
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();
+                const docDataModel = this._context.unit;
+                const snapshot = docDataModel.getSnapshot();
+                const offset = findFirstCursorOffset(snapshot);
+
                 this._docSelectionManagerService.replaceDocRanges([
                     {
-                        startOffset: 0,
-                        endOffset: 0,
+                        startOffset: offset,
+                        endOffset: offset,
                     },
                 ], {
                     unitId,

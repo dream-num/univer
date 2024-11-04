@@ -70,6 +70,7 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         body: insertBody,
         doc: docDataModel,
     });
+
     if (!textX) {
         return false;
     }

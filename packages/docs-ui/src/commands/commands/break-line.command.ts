@@ -63,7 +63,6 @@ export const BreakLineCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const docMenuStyleService = accessor.get(DocMenuStyleService);
-
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const rectRanges = docSelectionManagerService.getRectRanges();
         if (activeTextRange == null) {

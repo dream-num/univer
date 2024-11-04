@@ -141,13 +141,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                     ? [{
                         ...curCustomRange,
                         startIndex: 0,
-                        endIndex: newText.length,
+                        endIndex: newText.length - 1,
                     }]
                     : [],
                 customDecorations: customDecorations.map((customDecoration) => ({
                     ...customDecoration,
                     startIndex: 0,
-                    endIndex: newText.length,
+                    endIndex: newText.length - 1,
                 })),
             },
             len: newText.length,

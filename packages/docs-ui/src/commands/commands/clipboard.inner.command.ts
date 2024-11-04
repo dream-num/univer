@@ -194,14 +194,14 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 cloneBody.customRanges = [{
                     ...customRange,
                     startIndex: 0,
-                    endIndex: body.dataStream.length,
+                    endIndex: body.dataStream.length - 1,
                 }];
             }
             if (customDecorations.length) {
                 cloneBody.customDecorations = customDecorations.map((customDecoration) => ({
                     ...customDecoration,
                     startIndex: 0,
-                    endIndex: body.dataStream.length,
+                    endIndex: body.dataStream.length - 1,
                 }));
             }
             if (collapsed) {

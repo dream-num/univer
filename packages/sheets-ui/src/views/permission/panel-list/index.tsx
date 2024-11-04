@@ -29,7 +29,7 @@ import clsx from 'clsx';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { merge } from 'rxjs';
+import { distinctUntilChanged, merge } from 'rxjs';
 import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
@@ -121,7 +121,9 @@ export const SheetPermissionPanelList = () => {
     }, [isCurrentSheet]);
 
     useEffect(() => {
-        const subscribe = workbook.activeSheet$.subscribe(async () => {
+        const subscribe = workbook.activeSheet$.pipe(
+            distinctUntilChanged((prevSheet, currSheet) => prevSheet?.getSheetId() === currSheet?.getSheetId())
+        ).subscribe(async () => {
             const ruleList = await getRuleList(isCurrentSheet);
             setRuleList(ruleList);
         });
@@ -195,10 +197,8 @@ export const SheetPermissionPanelList = () => {
         sidebarService.open(sidebarProps);
     };
 
-    const handleChangeHeaderType = async (isCurrentSheet: boolean) => {
+    const handleChangeHeaderType = (isCurrentSheet: boolean) => {
         setIsCurrentSheet(isCurrentSheet);
-        const ruleList = await getRuleList(isCurrentSheet);
-        setRuleList(ruleList);
     };
 
     const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;

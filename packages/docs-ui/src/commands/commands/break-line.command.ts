@@ -119,6 +119,7 @@ export const BreakLineCommand: ICommand = {
         const deleteRange = {
             startOffset,
             endOffset,
+            collapsed: startOffset === endOffset,
         };
 
         const result = await commandService.executeCommand(InsertCommand.id, {

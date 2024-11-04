@@ -269,14 +269,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         this.disposeWithMe(
             // eslint-disable-next-line max-lines-per-function
             this._drawingManagerService.add$.subscribe((params) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const activeSheetId = workbook.getActiveSheet().getSheetId();
-
                 // eslint-disable-next-line max-lines-per-function
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
+
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId)!;
+                    if (!workbook) {
+                        return;
+                    }
+
+                    const activeSheetId = workbook.getActiveSheet().getSheetId();
 
                     if (!floatDomParam || !target) {
                         return;

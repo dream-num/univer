@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
+import type { ISheetLocationBase, WorkbookSelections } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -35,6 +35,36 @@ import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-dra
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
+
+export function getDrawingSizeByCell(
+    accessor: IAccessor,
+    location: ISheetLocationBase,
+    originImageWidth: number,
+    originImageHeight: number
+) {
+    const renderManagerService = accessor.get(IRenderManagerService);
+    const currentRender = renderManagerService.getRenderById(location.unitId);
+    if (!currentRender) {
+        return false;
+    }
+    const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+    const skeleton = skeletonManagerService.getWorksheetSkeleton(location.subUnitId)?.skeleton;
+    if (skeleton == null) {
+        return false;
+    }
+    const cellInfo = skeleton.getCellByIndex(location.row, location.col);
+
+    const cellWidth = cellInfo.endX - cellInfo.startX - 4;
+    const cellHeight = cellInfo.endY - cellInfo.startY - 4;
+    const imageRatio = originImageWidth / originImageHeight;
+    const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
+    const imageHeight = imageWidth / imageRatio;
+
+    return {
+        width: imageWidth,
+        height: imageHeight,
+    };
+}
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelections;
@@ -50,7 +80,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -195,26 +226,30 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
-        const skeleton = this._skeletonManagerService.getCurrent()?.skeleton;
-        if (skeleton == null) {
-            return false;
-        }
         const selection = this._workbookSelections.getCurrentLastSelection();
         if (!selection) {
             return false;
         }
-        const cellInfo = skeleton.getCellByIndex(selection.primary.actualRow, selection.primary.actualColumn);
         const docDataModel = createDocumentModelWithStyle('', {});
 
-        const cellWidth = cellInfo.endX - cellInfo.startX - 4;
-        const cellHeight = cellInfo.endY - cellInfo.startY - 4;
-        const imageRatio = width / height;
-        const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
-        const imageHeight = imageWidth / imageRatio;
+        const imageSize = getDrawingSizeByCell(
+            this._injector,
+            {
+                unitId: this._context.unitId,
+                subUnitId: this._context.unit.getActiveSheet().getSheetId(),
+                row: selection.primary.actualRow,
+                col: selection.primary.actualColumn,
+            },
+            width,
+            height
+        );
+        if (!imageSize) {
+            return false;
+        }
         const docTransform = {
             size: {
-                width: imageWidth,
-                height: imageHeight,
+                width: imageSize.width,
+                height: imageSize.height,
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.PAGE,

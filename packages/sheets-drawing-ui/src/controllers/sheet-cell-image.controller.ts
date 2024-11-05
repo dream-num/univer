@@ -16,11 +16,12 @@
 
 import type { ICellData, IDisposable, IDocDrawingBase, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, ObjectMatrix, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 interface IImageCache {
     image: HTMLImageElement;
@@ -149,13 +150,15 @@ export class SheetCellImageController extends Disposable {
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
         this._initSetRangeValuesCommandListener();
         this._initInterceptor();
         this._initSheetChange();
+        this._initHandleResize();
     }
 
     private _reRender(unitId: string) {
@@ -334,5 +337,79 @@ export class SheetCellImageController extends Disposable {
                 disposable.dispose();
             });
         });
+    }
+
+    private _initHandleResize() {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            const rows = new Set<number>();
+            const cols = new Set<number>();
+            let sheetTarget: Nullable<ReturnType<typeof getSheetCommandTarget>>;
+
+            if (commandInfo.id === SetWorksheetRowHeightMutation.id) {
+                const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
+                params.ranges.forEach((range) => {
+                    for (let row = range.startRow; row <= range.endRow; row++) {
+                        rows.add(row);
+                    }
+                });
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+            } else if (commandInfo.id === SetWorksheetColWidthMutation.id) {
+                const params = commandInfo.params as ISetWorksheetColWidthMutationParams;
+                params.ranges.forEach((range) => {
+                    for (let col = range.startColumn; col <= range.endColumn; col++) {
+                        cols.add(col);
+                    }
+                });
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+            } else if (commandInfo.id === SetWorksheetRowIsAutoHeightMutation.id) {
+                const params = commandInfo.params as ISetWorksheetRowIsAutoHeightMutationParams;
+                params.ranges.forEach((range) => {
+                    for (let row = range.startRow; row <= range.endRow; row++) {
+                        rows.add(row);
+                    }
+                });
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+            } else if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
+                const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+                params.rowsAutoHeightInfo.forEach((info) => {
+                    rows.add(info.row);
+                });
+            }
+
+            if (sheetTarget && (rows.size || cols.size)) {
+                const cellMatrix = sheetTarget.worksheet.getCellMatrix();
+                cellMatrix.forValue((row, col, cellData) => {
+                    if (rows.has(row) || cols.has(col)) {
+                        const imageCache = this._imageMaps.get(sheetTarget.unitId)?.get(sheetTarget.subUnitId)?.getByPosition(row, +col);
+                        if (cellData?.p && cellData.p.drawingsOrder?.length === 1) {
+                            const image = cellData.p.drawings![cellData.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
+                            const imageSize = getDrawingSizeByCell(
+                                this._injector,
+                                {
+                                    unitId: sheetTarget.unitId,
+                                    subUnitId: sheetTarget.subUnitId,
+                                    row,
+                                    col: +col,
+                                },
+                                image.transform!.width!,
+                                image.transform!.height!
+                            );
+
+                            if (imageSize) {
+                                image.transform!.width = imageSize.width;
+                                image.transform!.height = imageSize.height;
+                                image.docTransform!.size.width = imageSize.width;
+                                image.docTransform!.size.height = imageSize.height;
+                                if (imageCache) {
+                                    imageCache[cellData.p.drawingsOrder[0]].image.width = imageSize.width;
+                                    imageCache[cellData.p.drawingsOrder[0]].image.height = imageSize.height;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }));
     }
 }

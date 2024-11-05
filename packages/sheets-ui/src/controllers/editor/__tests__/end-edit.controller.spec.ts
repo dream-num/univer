@@ -16,7 +16,7 @@
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, IConfigService, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -91,7 +91,6 @@ describe('Test EndEditController', () => {
     let contextService: IContextService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
-    let resourceLoaderService: IResourceLoaderService;
     let configService: IConfigService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
     let normalizeStringByLexer: (str: string) => string;
@@ -108,7 +107,6 @@ describe('Test EndEditController', () => {
         localeService = get(LocaleService);
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
-        resourceLoaderService = get(IResourceLoaderService);
         configService = get(IConfigService);
 
         const worksheet = workbook.getActiveSheet()!;
@@ -626,15 +624,24 @@ describe('Test EndEditController', () => {
             });
 
             it('should handle scientific notation', () => {
-                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1e3 + 2E-2');
                 expect(normalizeStringByLexer('=1.00E+03')).toBe('=1000');
+                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
 
-                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
-                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
                 expect(normalizeStringByLexer('=1e20 + 2E-2')).toBe('=100000000000000000000 + 0.02');
-                expect(normalizeStringByLexer('=1e21 + 2E-2')).toBe('=1E+21 + 0.02');
-                expect(normalizeStringByLexer('=1E+21 + 2E-19')).toBe('=1E+21 + 0.0000000000000000002');
-                expect(normalizeStringByLexer('=1E+21 + 2E-20')).toBe('=1E+21 + 2E-20');
+                // Excel =1.1E+21 + 0.02, numfmt =1.1e+21 + 0.02
+                expect(normalizeStringByLexer('=11e20 + 2E-2')).toBe('=1.1e+21 + 0.02');
+                // Excel =1E+21 + 0.02, numfmt =1e+21 + 0.02
+                expect(normalizeStringByLexer('=1e21 + 2E-2')).toBe('=1e+21 + 0.02');
+
+                expect(normalizeStringByLexer('=2e-6')).toBe('=0.000002');
+                // Excel =0.0000002, numfmt =2e-7
+                expect(normalizeStringByLexer('=2e-7')).toBe('=2e-7');
+                // Excel =1E+21 + 0.0000000000000000002, numfmt =1e+21 + 2e-19
+                expect(normalizeStringByLexer('=1E+21 + 2E-19')).toBe('=1e+21 + 2e-19');
+                // Excel =1E+21 + 2E-20, numfmt =1e+21 + 2e-20
+                expect(normalizeStringByLexer('=1E+21 + 0.2E-19')).toBe('=1e+21 + 2e-20');
+                // Excel =1E+21 + 2E-20, numfmt =1e+21 + 2e-20
+                expect(normalizeStringByLexer('=1E+21 + 2E-20')).toBe('=1e+21 + 2e-20');
             });
 
             it('should handle dates', () => {
@@ -721,10 +728,6 @@ describe('Test EndEditController', () => {
 
             it('should handle positive numbers with leading zeros', () => {
                 expect(normalizeStringByLexer('=+0002.50')).toBe('=+2.5'); // Follows Google Sheets' behavior
-            });
-
-            it('should handle numbers with exponentials', () => {
-                expect(normalizeStringByLexer('=1.00E+03')).toBe('=1E+03');
             });
 
             it('should handle escaped quotes in strings', () => {

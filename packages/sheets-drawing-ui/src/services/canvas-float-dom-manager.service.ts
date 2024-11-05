@@ -342,6 +342,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         imageConfig.paintFirst = 'stroke';
                         imageConfig.strokeWidth = 1;
                         imageConfig.borderEnabled = false;
+                        imageConfig.radius = 8;
                     }
 
                     const rect = new Rect(rectShapeKey, imageConfig);

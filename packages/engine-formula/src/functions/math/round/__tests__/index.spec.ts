@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Round } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test round function', () => {
     const testFunction = new Round(FUNCTION_NAMES_MATH.ROUND);
@@ -108,7 +108,7 @@ describe('Test round function', () => {
             });
             const result = testFunction.calculate(number, numDigits);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2.2, 2.1, -1.58, 22, 630, 0, 0, ErrorType.NA, ErrorType.NA],
+                [2.2, 2.1, -1.58, 22, 630, 0, -0, ErrorType.NA, ErrorType.NA],
             ]);
         });
     });

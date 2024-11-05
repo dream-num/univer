@@ -113,6 +113,7 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
                 vertexAngle,
                 wrapStrategy,
                 cellValueType,
+                zeroWidthParagraphBreak: 1,
             },
         },
         drawings: {},

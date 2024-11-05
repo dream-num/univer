@@ -30,7 +30,7 @@ import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../.
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import { getBodySlice } from '../utils';
 
-export function normalizeTextRuns(textRuns: ITextRun[]) {
+export function normalizeTextRuns(textRuns: ITextRun[], reserveEmptyTextRun = false): ITextRun[] {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
@@ -45,7 +45,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
         }
 
         // Delete textRun if it has no style(ts is empty or has no sId)
-        if (Tools.isEmptyObject(ts) && textRun.sId == null) {
+        if (!reserveEmptyTextRun && Tools.isEmptyObject(ts) && textRun.sId == null) {
             continue;
         }
 

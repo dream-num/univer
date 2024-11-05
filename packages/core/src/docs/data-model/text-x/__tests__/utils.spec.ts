@@ -430,7 +430,7 @@ describe('test text-x utils', () => {
         };
 
         expect(isUselessRetainAction(action1)).toBe(true);
-        expect(isUselessRetainAction(action2)).toBe(true);
+        expect(isUselessRetainAction(action2)).toBe(false);
         expect(isUselessRetainAction(action3)).toBe(false);
     });
 });

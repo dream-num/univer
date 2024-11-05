@@ -193,7 +193,7 @@ function transformTextRuns(
         }
     }
 
-    return normalizeTextRuns(newUpdateTextRuns);
+    return normalizeTextRuns(newUpdateTextRuns, true);
 }
 
 function transformCustomRanges(

@@ -43,7 +43,6 @@ import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { FormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
-import { generateAstNode } from '../engine/utils/generate-ast-node';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
@@ -249,16 +248,11 @@ export class CalculateFormulaService extends Disposable {
 
         const config = this._configService.getConfig(PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
-        let i = 0;
+
         const treeCount = treeList.length;
-        while (treeList.length > 0) {
-            const tree = treeList.pop()!;
-            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
-            const nodeData = {
-                node,
-                refOffsetX: tree.refOffsetX,
-                refOffsetY: tree.refOffsetY,
-            };
+        for (let i = 0; i < treeCount; i++) {
+            const tree = treeList[i];
+            const nodeData = tree.nodeData;
             const getDirtyData = tree.getDirtyData;
 
             // Execute the await every 100 iterations
@@ -328,8 +322,6 @@ export class CalculateFormulaService extends Disposable {
                     this._runtimeService.setRuntimeData(value);
                 }
             }
-
-            i++;
         }
 
         // clear all pending tasks

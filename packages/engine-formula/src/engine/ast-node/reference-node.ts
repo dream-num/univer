@@ -16,6 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import {
     regexTestSingeRange,
@@ -42,7 +43,7 @@ export class ReferenceNode extends BaseAstNode {
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
         operatorString: string,
-        private _referenceObjectType: ReferenceObjectType,
+        private _referenceObject: BaseReferenceObject,
         private _isPrepareMerge: boolean = false
     ) {
         super(operatorString);
@@ -56,7 +57,7 @@ export class ReferenceNode extends BaseAstNode {
         const currentConfigService = this._currentConfigService;
         const runtimeService = this._runtimeService;
 
-        const referenceObject = getReferenceObjectFromCache(this.getToken(), this._referenceObjectType);
+        const referenceObject = this._referenceObject;
 
         referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
@@ -148,12 +149,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         let node: Nullable<ReferenceNode>;
         if (regexTestSingeRange(tokenTrim)) {
-            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.CELL, isPrepareMerge);
+            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.CELL), isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
             if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.ROW, isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.ROW), isPrepareMerge);
             } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.COLUMN, isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.COLUMN), isPrepareMerge);
             }
         }
         // else {

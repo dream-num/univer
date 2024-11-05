@@ -55,7 +55,6 @@ function generateRandomDependencyTreeId(dependencyManagerService: IDependencyMan
 
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
-    private _dependencyTreeCache = new Map<number, IFormulaDependencyTree>();
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -73,7 +72,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
     override dispose(): void {
         this._updateRangeFlattenCache.clear();
-        this._dependencyTreeCache.clear();
     }
 
     async generate() {
@@ -107,8 +105,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
 
-        this._dependencyManagerService.openKdTree();
-
         const updateTreeList = this._getUpdateTreeListAndMakeDependency();
 
         const finalTreeList = this._calculateRunList(updateTreeList);
@@ -118,10 +114,6 @@ export class FormulaDependencyGenerator extends Disposable {
         if (isCycleDependency) {
             this._runtimeService.enableCycleDependency();
         }
-
-        this._dependencyTreeCache.clear();
-
-        this._dependencyManagerService.closeKdTree();
 
         return Promise.resolve(finalTreeList);
     }
@@ -138,7 +130,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
             if (color === WHITE) {
                 colorMap.set(currentTreeId, GRAY);
-                const node = this._dependencyTreeCache.get(currentTreeId);
+                const node = this._dependencyManagerService.getTreeById(currentTreeId);
                 if (node == null) {
                     colorMap.set(currentTreeId, BLACK);
                     stack.pop();
@@ -209,7 +201,12 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            const node = generateAstNode(tree.unitId, tree.formula, this._lexer, this._astTreeBuilder, this._currentConfigService);
+            const node = tree.node;
+
+            if (node == null) {
+                continue;
+            }
+
             tree.isDirty = this._includeTree(tree, node);
 
             if (tree.isVirtual) {
@@ -302,8 +299,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
         this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
 
-        this._dependencyTreeCache.set(FDtree.treeId, FDtree);
-
         const treeCache = this._dependencyManagerService.getFeatureFormulaDependency(params.unitId, params.subUnitId, featureId);
         if (treeCache) {
             FDtree.isCache = true;
@@ -336,7 +331,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     if (hasOtherFormula) {
                         isCache = true;
                     }
-                    // const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
+                    const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
                     const { firstRow, firstColumn } = this._getFirstCellOfRange(ranges);
 
                     const treeMatrix = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
@@ -352,7 +347,7 @@ export class FormulaDependencyGenerator extends Disposable {
                                 const x = c - firstColumn;
                                 const y = r - firstRow;
                                 if (x === 0 && y === 0) {
-                                    // firstFDtree.node = node;
+                                    firstFDtree.node = node;
                                     firstFDtree.formula = formulaString;
                                     firstFDtree.unitId = unitId;
                                     firstFDtree.subUnitId = subUnitId;
@@ -360,7 +355,6 @@ export class FormulaDependencyGenerator extends Disposable {
                                     firstFDtree.type = FormulaDependencyTreeType.OTHER_FORMULA;
                                     firstFDtree.isCache = isCache;
                                     treeList.push(firstFDtree);
-                                    this._dependencyTreeCache.set(firstFDtree.treeId, firstFDtree);
                                     this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, firstFDtree);
                                     this._dependencyManagerService.addFormulaDependencyByDefinedName(firstFDtree);
                                     continue;
@@ -376,7 +370,6 @@ export class FormulaDependencyGenerator extends Disposable {
                                 this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, virtual);
                                 this._dependencyManagerService.addFormulaDependencyByDefinedName(virtual);
                                 treeList.push(virtual);
-                                this._dependencyTreeCache.set(virtual.treeId, virtual);
                             }
                         }
                     }
@@ -432,8 +425,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     sIdCache.set(si, FDtree);
                     treeList.push(FDtree);
-
-                    this._dependencyTreeCache.set(FDtree.treeId, FDtree);
                 });
 
                 matrixData.forValue((row, column, formulaDataItem) => {
@@ -467,7 +458,6 @@ export class FormulaDependencyGenerator extends Disposable {
                     }
 
                     treeList.push(FDtree);
-                    this._dependencyTreeCache.set(FDtree.treeId, FDtree);
                 });
 
                 sIdCache.clear();
@@ -482,9 +472,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const sheetItem = unitData[unitId][sheetId];
 
-        // const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
+        const node = generateAstNode(unitId, formulaString, this._lexer, this._astTreeBuilder, this._currentConfigService);
 
-        // FDtree.node = node;
+        FDtree.node = node;
         FDtree.formula = formulaString;
         FDtree.unitId = unitId;
         FDtree.subUnitId = sheetId;
@@ -696,9 +686,10 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
-
-        for (const [treeId, tree] of this._dependencyTreeCache) {
+        const allTree = this._dependencyManagerService.getAllTree();
+        for (const tree of allTree) {
             // const tree = allTree[i];
+            const treeId = tree.treeId;
 
             /**
              * forceCalculate: Mandatory calculation, adding all formulas to dependencies
@@ -720,15 +711,6 @@ export class FormulaDependencyGenerator extends Disposable {
                 existTree.add(treeId);
             }
         }
-
-        for (const [treeId, tree] of this._dependencyTreeCache) {
-            if (tree.isVirtual) {
-                continue;
-            }
-
-            (tree as FormulaDependencyTree).rangeList.length = 0;
-        }
-
         return newTreeList;
     }
 
@@ -884,79 +866,36 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    // /**
-    //  * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
-    //  * @param treeList
-    //  */
-    // private _calculateRunList(treeList: FormulaDependencyTree[]) {
-    //     const stack = treeList;
-    //     const formulaRunList = [];
-    //     const cacheStack: Set<FormulaDependencyTree> = new Set();
-    //     while (stack.length > 0) {
-    //         const tree = stack.pop();
-
-    //         if (tree === undefined || tree.isSkip()) {
-    //             continue;
-    //         }
-
-    //         if (tree.isAdded()) {
-    //             formulaRunList.push(tree);
-    //             // If cacheStack is empty, that is, all parent nodes of the node have been processed, call setSkip() to mark the node as skipped. The premise of this is that the node should have been added to the formulaRunList, that is, the calculation is completed.
-    //             // Make sure setSkip is called after the node is added to formulaRunList to avoid skipping processing early.
-    //             tree.setSkip();
-    //             continue;
-    //         }
-
-    //         // It will clear the array.
-    //         cacheStack.clear();
-
-    //         const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
-
-    //         for (const parentTreeId of searchResults) {
-    //             const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
-    //             if (!parentTree) {
-    //                 throw new Error('ParentDependencyTree object is null');
-    //             }
-    //             if (parentTree.isAdded() || tree.isSkip()) {
-    //                 continue;
-    //             }
-    //             cacheStack.add(parentTree);
-    //         }
-
-    //         if (cacheStack.size === 0) {
-    //             formulaRunList.push(tree);
-    //             tree.setSkip();
-    //         } else {
-    //             tree.setAdded();
-    //             stack.push(tree, ...cacheStack);
-    //         }
-    //     }
-
-    //     return formulaRunList.reverse();
-    // }
-
-    private *_traverse(treeList: IFormulaDependencyTree[], skippedTreeIds: Set<number>) {
+    /**
+     * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
+     * @param treeList
+     */
+    private _calculateRunList(treeList: IFormulaDependencyTree[]) {
         const stack = treeList;
+        const formulaRunList = [];
         const cacheStack: Set<IFormulaDependencyTree> = new Set();
-
         while (stack.length > 0) {
             const tree = stack.pop();
-            cacheStack.clear();
+
             if (tree === undefined || tree.isSkip()) {
                 continue;
             }
 
             if (tree.isAdded()) {
-                yield tree;
+                formulaRunList.push(tree);
+                // If cacheStack is empty, that is, all parent nodes of the node have been processed, call setSkip() to mark the node as skipped. The premise of this is that the node should have been added to the formulaRunList, that is, the calculation is completed.
+                // Make sure setSkip is called after the node is added to formulaRunList to avoid skipping processing early.
                 tree.setSkip();
-                skippedTreeIds.add(tree.treeId);
                 continue;
             }
 
-            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem(), skippedTreeIds);
+            // It will clear the array.
+            cacheStack.clear();
+
+            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
 
             for (const parentTreeId of searchResults) {
-                const parentTree = this._dependencyTreeCache.get(parentTreeId);
+                const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
                     throw new Error('ParentDependencyTree object is null');
                 }
@@ -966,33 +905,15 @@ export class FormulaDependencyGenerator extends Disposable {
                 cacheStack.add(parentTree);
             }
 
-            searchResults.clear();
-
             if (cacheStack.size === 0) {
-                yield tree;
+                formulaRunList.push(tree);
                 tree.setSkip();
-                skippedTreeIds.add(tree.treeId);
             } else {
                 tree.setAdded();
-                stack.push(tree);
-                for (const cacheTree of cacheStack) {
-                    stack.push(cacheTree);
-                }
+                stack.push(tree, ...cacheStack);
             }
         }
 
-        stack.length = 0;
-
-        cacheStack.clear();
-    }
-
-    private _calculateRunList(treeList: IFormulaDependencyTree[]) {
-        const formulaRunList = [];
-        const skippedTreeIds = new Set<number>();
-        for (const tree of this._traverse(treeList, skippedTreeIds)) {
-            formulaRunList.push(tree);
-        }
-
-        return formulaRunList;
+        return formulaRunList.reverse();
     }
 }

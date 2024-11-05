@@ -23,6 +23,7 @@ import type {
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
+import type { AstRootNode } from '../ast-node';
 import { type IRange, type IUnitRange, moveRangeByOffset, type Nullable } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -130,6 +131,18 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
 
     get formula() {
         return this.refTree?.formula ?? '';
+    }
+
+    get nodeData() {
+        return {
+            node: this.node,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
+    get node() {
+        return this.refTree?.node;
     }
 
     dispose() {
@@ -282,6 +295,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     isDirty: boolean = false;
 
+    node: Nullable<AstRootNode>;
+
     constructor(treeId: number) {
         super();
         this.treeId = treeId;
@@ -289,6 +304,14 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     get isVirtual() {
         return false;
+    }
+
+    get nodeData() {
+        return {
+            node: this.node,
+            refOffsetX: 0,
+            refOffsetY: 0,
+        };
     }
 
     toJson() {

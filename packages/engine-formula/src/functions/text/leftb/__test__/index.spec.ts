@@ -24,42 +24,42 @@ import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Leftb } from '../index';
 
 describe('Test LEFTB function', () => {
-    const leftbFunction = new Leftb(FUNCTION_NAMES_TEXT.LEFTB);
+    const testFunction = new Leftb(FUNCTION_NAMES_TEXT.LEFTB);
 
     describe('Leftb', () => {
         describe('Single Value Tests', () => {
             it('Should return leftmost bytes of a single text', () => {
                 const text = StringValueObject.create('Hello World');
                 const numBytes = NumberValueObject.create(5);
-                const result = leftbFunction.calculate(text, numBytes);
+                const result = testFunction.calculate(text, numBytes);
                 expect(getObjectValue(result)).toStrictEqual('Hello');
             });
 
             it('Should return full text if byte length exceeds text length', () => {
                 const text = StringValueObject.create('Hello');
                 const numBytes = NumberValueObject.create(10); // Exceeding text length
-                const result = leftbFunction.calculate(text, numBytes);
+                const result = testFunction.calculate(text, numBytes);
                 expect(getObjectValue(result)).toStrictEqual('Hello');
             });
 
             it('Should handle zero byte length correctly', () => {
                 const text = StringValueObject.create('Hello');
                 const numBytes = NumberValueObject.create(0); // Zero byte length
-                const result = leftbFunction.calculate(text, numBytes);
+                const result = testFunction.calculate(text, numBytes);
                 expect(getObjectValue(result)).toStrictEqual('');
             });
 
             it('Should return ErrorType.VALUE for negative byte length', () => {
                 const text = StringValueObject.create('Hello');
                 const numBytes = NumberValueObject.create(-1); // Negative byte length
-                const result = leftbFunction.calculate(text, numBytes);
+                const result = testFunction.calculate(text, numBytes);
                 expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
             });
 
             it('Should handle emojis and byte length correctly', () => {
                 const text = StringValueObject.create('😊Hello');
                 const numBytes = NumberValueObject.create(3); // Bytes needed to capture '😊'
-                const result = leftbFunction.calculate(text, numBytes);
+                const result = testFunction.calculate(text, numBytes);
                 expect(getObjectValue(result)).toStrictEqual('😊');
             });
         });
@@ -80,7 +80,7 @@ describe('Test LEFTB function', () => {
                 column: 0,
             });
             const numBytes = NumberValueObject.create(3);
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['Hel'], // First character of 'Hello'
                 ['Wor'], // First two characters of 'World'
@@ -118,7 +118,7 @@ describe('Test LEFTB function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['H'], // First character of 'Hello'
                 ['Wo'], // First two characters of 'World'
@@ -142,7 +142,7 @@ describe('Test LEFTB function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = leftbFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
                 ['H'], // Default to first character of 'Hello'
                 ['W'], // Default to first character of 'World'
@@ -154,14 +154,14 @@ describe('Test LEFTB function', () => {
         it('Handles extracting from text with emojis', () => {
             const text = StringValueObject.create('Hello 😊 World');
             const numBytes = NumberValueObject.create(9);
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual('Hello 😊');
         });
 
         it('Handles extracting with numChars as zero', () => {
             const text = StringValueObject.create('Hello');
             const numBytes = NumberValueObject.create(0);
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual('');
         });
 
@@ -179,7 +179,7 @@ describe('Test LEFTB function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = leftbFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
                 ['销'],
                 ['か'],
@@ -202,7 +202,7 @@ describe('Test LEFTB function', () => {
                 column: 0,
             });
             const numBytes = NumberValueObject.create(2);
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['销'],
                 ['か'],
@@ -226,7 +226,7 @@ describe('Test LEFTB function', () => {
                 column: 0,
             });
             const numBytes = NumberValueObject.create(3);
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['销售'],
                 ['uか'],
@@ -269,7 +269,7 @@ describe('Test LEFTB function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = leftbFunction.calculate(text, numBytes);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['1', ' ', '1', 'T', 'F', '', '0', '1', '2', 't', '-', ErrorType.NAME],
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
@@ -284,6 +284,25 @@ describe('Test LEFTB function', () => {
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const text = StringValueObject.create(',。、；:{}');
+            const numChars = NumberValueObject.create(4);
+            const result = testFunction.calculate(text, numChars);
+            expect(getObjectValue(result)).toStrictEqual(',。、');
+
+            const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
+            const numChars2 = ArrayValueObject.create('{3,5,7,10,15}');
+            const result2 = testFunction.calculate(text2, numChars2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                ['Hel', 'Hello', 'Hello中', 'Hello中文o', 'Hello中文o😊W'],
+            ]);
+
+            const text3 = NumberValueObject.create(0.01, '0%');
+            const numChars3 = NumberValueObject.create(2);
+            const result3 = testFunction.calculate(text3, numChars3);
+            expect(getObjectValue(result3)).toStrictEqual('1%');
         });
     });
 });

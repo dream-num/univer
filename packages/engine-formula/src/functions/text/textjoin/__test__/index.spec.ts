@@ -153,5 +153,18 @@ describe('Test textjoin function', () => {
             const result2 = testFunction.calculate(delimiter, ignoreEmpty, text, text2);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
         });
+
+        it('More test', () => {
+            const delimiter = StringValueObject.create('');
+            const ignoreEmpty = StringValueObject.create('true');
+            const text1 = StringValueObject.create('1');
+            const text2 = StringValueObject.create('2');
+            const result = testFunction.calculate(delimiter, ignoreEmpty, text1, text2);
+            expect(getObjectValue(result)).toStrictEqual('12');
+
+            const ignoreEmpty2 = StringValueObject.create('false');
+            const result2 = testFunction.calculate(delimiter, ignoreEmpty2, text1, text2);
+            expect(getObjectValue(result2)).toStrictEqual('12');
+        });
     });
 });

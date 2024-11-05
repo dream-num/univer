@@ -18,7 +18,7 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Textjoin extends BaseFunction {
@@ -38,6 +38,20 @@ export class Textjoin extends BaseFunction {
             }
 
             return resultArray;
+        }
+
+        const _ignoreEmpty = ignoreEmpty;
+
+        if (_ignoreEmpty.isString()) {
+            const ignoreEmptyValue = `${_ignoreEmpty.getValue()}`.toLocaleUpperCase();
+
+            if (ignoreEmptyValue === 'TRUE') {
+                return this._handleSingleObject(delimiterValues, BooleanValueObject.create(true), textValues);
+            }
+
+            if (ignoreEmptyValue === 'FALSE') {
+                return this._handleSingleObject(delimiterValues, BooleanValueObject.create(false), textValues);
+            }
         }
 
         return this._handleSingleObject(delimiterValues, ignoreEmpty, textValues);

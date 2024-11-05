@@ -382,7 +382,8 @@ export class SheetCellImageController extends Disposable {
                 cellMatrix.forValue((row, col, cellData) => {
                     if (rows.has(row) || cols.has(col)) {
                         const imageCache = this._imageMaps.get(sheetTarget.unitId)?.get(sheetTarget.subUnitId)?.getByPosition(row, +col);
-                        if (cellData?.p && cellData.p.drawingsOrder?.length === 1) {
+                        // single image need to reisze by cell
+                        if (cellData?.p && cellData.p.drawingsOrder?.length === 1 && cellData.p.body?.dataStream.length === 3) {
                             const image = cellData.p.drawings![cellData.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
                             const imageSize = getDrawingSizeByCell(
                                 this._injector,

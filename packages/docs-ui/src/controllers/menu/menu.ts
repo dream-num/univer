@@ -582,7 +582,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
     };
@@ -599,7 +599,7 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), (one, two) => {
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY), getInsertTableHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
     };

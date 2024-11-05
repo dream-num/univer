@@ -15,6 +15,7 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 import { matrixTranspose } from '../../../basics/math';
 import { checkKnownsArrayDimensions, getKnownsArrayCoefficients, getKnownsArrayValues, getSerialNumbersByRowsColumns, getSlopeAndIntercept } from '../../../basics/statistical';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -71,73 +72,70 @@ export class Growth extends BaseFunction {
         return this._getResult(knownYsValues, knownXsValues, newXsValues, constbValue);
     }
 
-    private _getResult(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constbValue: number): BaseValueObject {
+    private _getResult(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number): BaseValueObject {
         if ((knownYsValues.length === 1 && knownXsValues.length > 1) || (knownYsValues[0].length === 1 && knownXsValues[0].length > 1)) {
-            return this._getResultByMultipleVariables(knownYsValues, knownXsValues, newXsValues, constbValue);
+            if (knownYsValues.length === 1 && knownXsValues.length > 1) {
+                const count = constb ? knownXsValues.length + 1 : knownXsValues.length;
+
+                if (count > knownYsValues[0].length) {
+                    return ErrorValueObject.create(ErrorType.NA);
+                }
+            }
+
+            if (knownYsValues[0].length === 1 && knownXsValues[0].length > 1) {
+                const count = constb ? knownXsValues[0].length + 1 : knownXsValues[0].length;
+
+                if (count > knownYsValues.length) {
+                    return ErrorValueObject.create(ErrorType.NA);
+                }
+            }
+
+            return this._getResultByMultipleVariables(knownYsValues, knownXsValues, newXsValues, constb);
         }
 
-        return this._getResultBySimpleVariables(knownYsValues, knownXsValues, newXsValues, constbValue);
+        return this._getResultBySimpleVariables(knownYsValues, knownXsValues, newXsValues, constb);
     }
 
-    private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constbValue: number): BaseValueObject {
+    private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number): BaseValueObject {
         const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
-        // let logYs: number[][] = [];
-        // let X: number[][] = [];
-
-        // if (isOneRow) {
-        //     logYs = matrixTranspose(knownYsValues).map((row) => row.map((value) => Math.log(value)));
-        //     X = constbValue ? matrixTranspose(knownXsValues).map((row) => [...row, 1]) : matrixTranspose(knownXsValues);
-        // } else {
-        //     logYs = knownYsValues.map((row) => row.map((value) => Math.log(value)));
-        //     X = constbValue ? knownXsValues.map((row) => [...row, 1]) : knownXsValues;
-        // }
-
-        // const XT = matrixTranspose(X);
-        // const XTX = calculateMmult(XT, X);
-        // const XTY = calculateMmult(XT, logYs);
-        // const XTXInv = inverseMatrixByUSV(XTX);
-
-        // if (!XTXInv) {
-        //     return ErrorValueObject.create(ErrorType.NA);
-        // }
-
-        // const coefficients = calculateMmult(XTXInv, XTY).map((row) => row[0]);
-
-        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, constbValue, true);
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, newXsValues, constb, true);
 
         if (_coefficients instanceof ErrorValueObject) {
             return _coefficients;
         }
 
-        const { coefficients } = _coefficients;
+        const { coefficients, newX } = _coefficients;
+
+        const cl = coefficients[0].length;
+        const b = coefficients[0][cl - 1];
 
         let result: number[][] = [];
 
+        for (let i = 0; i < newX.length; i++) {
+            result[i] = [];
+
+            let value = b;
+
+            for (let j = cl - 2; j >= 0; j--) {
+                value *= (coefficients[0][cl - 2 - j] ** newX[i][j]);
+            }
+
+            result[i].push(value);
+        }
+
         if (isOneRow) {
-            result = matrixTranspose(newXsValues).map((row) => {
-                const newX = constbValue ? [...row, 1] : row;
-                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index][0], 0);
-                return [Math.exp(logY)];
-            });
             result = matrixTranspose(result);
-        } else {
-            result = newXsValues.map((row) => {
-                const newX = constbValue ? [...row, 1] : row;
-                const logY = newX.reduce((acc, value, index) => acc + value * coefficients[index][0], 0);
-                return [Math.exp(logY)];
-            });
         }
 
         return ArrayValueObject.createByArray(result);
     }
 
-    private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constbValue: number): BaseValueObject {
+    private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const logYs = knownYsValuesFlat.map((value) => Math.log(value));
 
-        const { slope, intercept } = getSlopeAndIntercept(knownXsValuesFlat, logYs, constbValue, true);
+        const { slope, intercept } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         const result = newXsValues.map((row) => {
             return row.map((value) => intercept * (slope ** value));

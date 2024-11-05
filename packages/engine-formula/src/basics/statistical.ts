@@ -20,7 +20,7 @@ import { isRealNum } from '@univerjs/core';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { erf, erfcINV } from './engineering';
 import { ErrorType } from './error-type';
-import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByUSV, matrixTranspose } from './math';
+import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByLUD, inverseMatrixByUSV, matrixTranspose } from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -865,12 +865,18 @@ export function getSerialNumbersByRowsColumns(rowCount: number, columnCount: num
 }
 
 export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: number[], constb: number, isExponentialTransform: boolean) {
+    let _knownYsValues = knownYsValues;
+
+    if (isExponentialTransform) {
+        _knownYsValues = knownYsValues.map((value) => Math.log(value));
+    }
+
     let slope, intercept;
 
     if (constb) {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, knownYsValues));
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, _knownYsValues));
     } else {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, knownYsValues));
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, _knownYsValues));
     }
 
     if (isExponentialTransform) {
@@ -991,7 +997,7 @@ function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsVal
     };
 }
 
-export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], constb: number, isExponentialTransform: boolean) {
+export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number, isExponentialTransform: boolean) {
     const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
     let Y = knownYsValues;
@@ -1001,10 +1007,12 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
     }
 
     let X = knownXsValues;
+    let newX = newXsValues;
 
     if (isOneRow) {
         Y = matrixTranspose(Y);
         X = matrixTranspose(X);
+        newX = matrixTranspose(newX);
     }
 
     if (constb) {
@@ -1014,10 +1022,15 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
     const XT = matrixTranspose(X);
     const XTX = calculateMmult(XT, X);
     const XTY = calculateMmult(XT, Y);
-    const XTXInverse = inverseMatrixByUSV(XTX);
+
+    let XTXInverse = inverseMatrixByLUD(XTX);
 
     if (!XTXInverse) {
-        return ErrorValueObject.create(ErrorType.NA);
+        XTXInverse = inverseMatrixByUSV(XTX);
+
+        if (!XTXInverse) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
     }
 
     let coefficients = calculateMmult(XTXInverse, XTY);
@@ -1042,6 +1055,7 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
     return {
         coefficients,
         X,
+        newX,
         XTXInverse,
     };
 }

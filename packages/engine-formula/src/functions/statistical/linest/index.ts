@@ -95,7 +95,7 @@ export class Linest extends BaseFunction {
     }
 
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
-        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, constb, false);
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, false);
 
         if (_coefficients instanceof ErrorValueObject) {
             return _coefficients;
@@ -108,13 +108,15 @@ export class Linest extends BaseFunction {
         if (stats) {
             const _knownYsValues = knownYsValues.flat();
             const n = _knownYsValues.length;
-            const k = XTXInverse.length;
-            const df = n - k;
-            const cl = coefficients[0].length;
-            const fillNa = new Array(cl - 2).fill(ErrorType.NA);
             const meanY = !constb ? 0 : _knownYsValues.reduce((acc, value) => acc + value, 0) / n;
 
-            const b = coefficients[0][coefficients[0].length - 1];
+            const k = XTXInverse.length;
+            const df = n - k;
+
+            const cl = coefficients[0].length;
+            const fillNa = new Array(cl - 2).fill(ErrorType.NA);
+            const b = coefficients[0][cl - 1];
+
             const sumX = [];
 
             for (let i = 0; i < X.length; i++) {
@@ -145,6 +147,7 @@ export class Linest extends BaseFunction {
                 seList.push(se);
             }
 
+            // seb = #N/A when const is FALSE
             if (constb) {
                 const seb = seList.shift();
                 seList.push(seb);

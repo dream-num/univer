@@ -274,10 +274,21 @@ export class SheetCellImageController extends Disposable {
             if (commandInfo.id === SetRangeValuesMutation.id) {
                 const params = commandInfo.params as ISetRangeValuesMutationParams;
                 const { cellValue, unitId, subUnitId } = params;
-                if (!this._initedMap.get(unitId)?.get(subUnitId)) {
+                if (!cellValue || !this._initedMap.get(unitId)?.get(subUnitId)) {
                     return;
                 }
-                cellValue && this._handleMatrix(unitId, subUnitId, new ObjectMatrix(cellValue));
+
+                const cellMatrux = new ObjectMatrix(cellValue);
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
+                    return;
+                }
+                cellMatrux.forValue((row, col) => {
+                    const value = worksheet.getCellRaw(row, col);
+                    cellMatrux.setValue(row, col, value);
+                });
+                this._handleMatrix(unitId, subUnitId, cellMatrux);
             }
         }));
     }

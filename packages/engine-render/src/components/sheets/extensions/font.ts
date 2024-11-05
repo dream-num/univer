@@ -23,7 +23,7 @@ import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import { HorizontalAlign, Range, WrapStrategy } from '@univerjs/core';
+import { HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -219,11 +219,40 @@ export class Font extends SheetExtension {
         ctx.closePath();
         ctx.restore();
 
-        this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY);
+        this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
     };
 
-    private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number) {
-        const { documentSkeleton } = fontsConfig;
+    private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
+        const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
+        const fontHeight = documentSkeleton.getSkeletonData()!.pages[0].height;
+        const fontWidth = documentSkeleton.getSkeletonData()!.pages[0].width;
+
+        let fontX = startX;
+        let fontY = startY;
+        switch (verticalAlign) {
+            case VerticalAlign.TOP:
+                fontY = startY;
+                break;
+            case VerticalAlign.MIDDLE:
+                fontY = (startY + endY) / 2 - fontHeight / 2;
+                break;
+            default:
+                fontY = endY - fontHeight;
+                break;
+        }
+
+        switch (horizontalAlign) {
+            case HorizontalAlign.RIGHT:
+                fontX = endX - fontWidth;
+                break;
+            case HorizontalAlign.CENTER:
+                fontX = (startX + endX) / 2 - fontWidth / 2;
+                break;
+            default:
+                fontX = startX;
+                break;
+        }
+
         const documentDataModel = documentSkeleton.getViewModel().getDataModel();
         if (documentDataModel.getDrawingsOrder()?.length) {
             const drawingDatas = documentDataModel.getDrawings();
@@ -233,8 +262,8 @@ export class Font extends SheetExtension {
                 if (drawingData) {
                     const image = fontsConfig.images?.[drawing.drawingId];
 
-                    const x = startX + drawing.aLeft + 1;
-                    const y = startY + drawing.aTop + 1;
+                    const x = fontX + drawing.aLeft + 1;
+                    const y = fontY + drawing.aTop + 1;
 
                     if (image && image.complete) {
                         ctx.save();

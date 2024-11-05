@@ -233,8 +233,8 @@ export class Font extends SheetExtension {
                 if (drawingData) {
                     const image = fontsConfig.images?.[drawing.drawingId];
 
-                    const x = startX + drawing.aLeft;
-                    const y = startY + drawing.aTop;
+                    const x = startX + drawing.aLeft + 1;
+                    const y = startY + drawing.aTop + 1;
 
                     if (image && image.complete) {
                         ctx.save();

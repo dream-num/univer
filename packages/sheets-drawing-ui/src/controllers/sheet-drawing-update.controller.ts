@@ -21,7 +21,7 @@ import type { WorkbookSelections } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, Tools, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -195,18 +195,26 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
+        const skeleton = this._skeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return false;
+        }
+        const selection = this._workbookSelections.getCurrentLastSelection();
+        if (!selection) {
+            return false;
+        }
+        const cellInfo = skeleton.getCellByIndex(selection.primary.actualRow, selection.primary.actualColumn);
+        const docDataModel = createDocumentModelWithStyle('', {});
 
-        // let scale = 1;
-        // if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
-            // const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
-            // const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-            // scale = Math.max(scaleWidth, scaleHeight);
-        // }
-
+        const cellWidth = cellInfo.endX - cellInfo.startX - 4;
+        const cellHeight = cellInfo.endY - cellInfo.startY - 4;
+        const imageRatio = width / height;
+        const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
+        const imageHeight = imageWidth / imageRatio;
         const docTransform = {
             size: {
-                width,
-                height,
+                width: imageWidth,
+                height: imageHeight,
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.PAGE,
@@ -218,8 +226,6 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             },
             angle: 0,
         };
-
-        const docDataModel = createDocumentModelWithStyle('', {});
         const docDrawingParam = {
             unitId: docDataModel.getUnitId(),
             subUnitId: docDataModel.getUnitId(),
@@ -252,21 +258,16 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         if (jsonXActions) {
             docDataModel.apply(jsonXActions);
-
-            const selection = this._workbookSelections.getCurrentLastSelection();
-            if (selection) {
-                this._commandService.executeCommand(SetRangeValuesCommand.id, {
-                    value: {
-                        [selection.primary.actualRow]: {
-                            [selection.primary.actualColumn]: {
-                                p: Tools.deepClone(docDataModel.getSnapshot()),
-                                t: 1,
-                            },
+            return this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
+                value: {
+                    [selection.primary.actualRow]: {
+                        [selection.primary.actualColumn]: {
+                            p: (docDataModel.getSnapshot()),
+                            t: 1,
                         },
                     },
-                });
-                return true;
-            }
+                },
+            });
         }
 
         return false;

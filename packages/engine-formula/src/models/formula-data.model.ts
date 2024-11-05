@@ -237,8 +237,12 @@ export class FormulaDataModel extends Disposable {
                     return;
                 }
 
+                if (!this._formulaData[unitId]?.[sheetId]) {
+                    this._formulaData[unitId]![sheetId] = {};
+                }
+
                 const sheetFormula = new ObjectMatrix(currentSheetData);
-                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId] || {});
+                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]![sheetId]);
 
                 sheetFormula.forValue((r, c, v) => {
                     if (v == null) {
@@ -247,8 +251,6 @@ export class FormulaDataModel extends Disposable {
                         formulaMatrix.setValue(r, c, v);
                     }
                 });
-
-                this._formulaData[unitId]![sheetId] = formulaMatrix.clone();
             });
         });
     }
@@ -409,7 +411,7 @@ export class FormulaDataModel extends Disposable {
             }
         });
 
-        return newSheetFormulaDataMatrix.clone();
+        return newSheetFormulaDataMatrix.getMatrix();
     }
 
     updateArrayFormulaRange(
@@ -649,8 +651,17 @@ export function initSheetFormulaData(
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
 ): IFormulaData {
+    if (!formulaData[unitId]) {
+        formulaData[unitId] = {};
+    }
+
+    if (!formulaData[unitId][sheetId]) {
+        formulaData[unitId][sheetId] = {};
+    }
+
     const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
-    const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
+    const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
+
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
         const formulaId = cell?.si || '';
@@ -696,13 +707,7 @@ export function initSheetFormulaData(
         }
     });
 
-    if (!formulaData[unitId]) {
-        formulaData[unitId] = {};
-    }
-
-    const newSheetFormulaData = sheetFormulaDataMatrix.clone();
-
-    formulaData[unitId]![sheetId] = newSheetFormulaData;
+    const newSheetFormulaData = sheetFormulaDataMatrix.getMatrix(); // Don't use clone, otherwise it will cause performance problems
 
     return {
         [unitId]: {

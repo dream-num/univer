@@ -144,6 +144,6 @@ export class CalculateResultApplyController extends Disposable {
             cellDataMatrix.setValue(row, col, newCell);
         });
 
-        return cellDataMatrix.clone();
+        return cellDataMatrix.getMatrix();
     }
 }

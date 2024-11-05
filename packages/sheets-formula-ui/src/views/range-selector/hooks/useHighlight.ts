@@ -23,7 +23,7 @@ import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-fo
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachPrimaryWithCoord, attachRangeWithCoord, getSelectionWithStyleByRange, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -51,15 +51,19 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
     const [ranges, rangesSet] = useState<ISelectionWithStyle[]>([]);
 
     useEffect(() => {
-        // const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
-        const selectionWithStyle: ISelectionWithStyle[] = [];
+        const selectionWithStyles: ISelectionWithStyle[] = [];
         if (!workbook || !worksheet || !isNeed) {
-            rangesSet(selectionWithStyle);
+            rangesSet(selectionWithStyles);
             return;
         }
-        const currentSheetId = worksheet?.getSheetId();
+        const currentSheetId = worksheet.getSheetId();
+        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+        if (!skeleton) {
+            rangesSet(selectionWithStyles);
+            return;
+        }
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
@@ -79,14 +83,11 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-            const primaryRange = worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
-            selectionWithStyle.push({
-                range,
-                primary: primaryRange || null,
-                style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
-            });
+            const selectWithStyle = getSelectionWithStyleByRange(skeleton, range);
+            selectWithStyle.style = getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString());
+            selectionWithStyles.push(selectWithStyle);
         }
-        rangesSet(selectionWithStyle);
+        rangesSet(selectionWithStyles);
     }, [unitId, subUnitId, refSelections, isNeed]);
 
     useEffect(() => {
@@ -96,7 +97,9 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             if (allControls.length === ranges.length) {
                 allControls.forEach((control, index) => {
                     const selection = ranges[index];
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
+                    const rangeWithCoord = attachRangeWithCoord(skeleton, selection.range);
+                    const primaryCellWithCoord = attachPrimaryWithCoord(selection.primary!, skeleton);
+                    control.updateRange(rangeWithCoord, primaryCellWithCoord);
                     control.updateStyle(selection.style!);
                 });
             } else {
@@ -255,8 +258,5 @@ function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: strin
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
     };
 }

@@ -23,7 +23,7 @@ import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachPrimaryWithCoord, attachRangeWithCoord, getSelectionWithStyleByRange, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { buildTextRuns, useColor } from '../../range-selector/hooks/useHighlight';
@@ -60,10 +60,16 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
     useEffect(() => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-        const selectionWithStyle: ISelectionWithStyle[] = [];
+        const selectionWithStyles: ISelectionWithStyle[] = [];
         const { activeSheet, sheetName } = contextRef.current;
         if (!workbook || !activeSheet || !isNeed) {
-            rangesSet(selectionWithStyle);
+            rangesSet(selectionWithStyles);
+            return;
+        }
+        const currentSheetId = activeSheet.getSheetId();
+        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+        if (!skeleton) {
+            rangesSet(selectionWithStyles);
             return;
         }
 
@@ -88,14 +94,11 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             }
 
             const range = setEndForRange(rawRange, activeSheet.getRowCount(), activeSheet.getColumnCount());
-
-            selectionWithStyle.push({
-                range,
-                primary: null,
-                style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
-            });
+            const selectWithStyle = getSelectionWithStyleByRange(skeleton, range);
+            selectWithStyle.style = getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString());
+            selectionWithStyles.push(selectWithStyle);
         }
-        rangesSet(selectionWithStyle);
+        rangesSet(selectionWithStyles);
     }, [unitId, subUnitId, refSelections, isNeed]);
 
     useEffect(() => {
@@ -105,7 +108,9 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             if (allControls.length === ranges.length) {
                 allControls.forEach((control, index) => {
                     const selection = ranges[index];
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
+                    const rangeWithCoord = attachRangeWithCoord(skeleton, selection.range);
+                    const primaryCellWithCoord = attachPrimaryWithCoord(selection.primary!, skeleton);
+                    control.updateRange(rangeWithCoord, primaryCellWithCoord);
                     control.updateStyle(selection.style!);
                 });
             } else {
@@ -166,7 +171,7 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
     return ranges;
 }
 
-function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
+function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): Partial<ISelectionStyle> {
     const style = themeService.getCurrentTheme();
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {
@@ -178,8 +183,8 @@ function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: strin
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
+        // hasAutoFill: false,
+        // hasRowHeader: false,
+        // hasColumnHeader: false,
     };
 }

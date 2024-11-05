@@ -34,11 +34,10 @@ import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { getNormalSelectionStyle as getDefaultNormalSelectionStyle } from '@univerjs/sheets';
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
-import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
 import { SelectionShapeExtension } from './selection-shape-extension';
@@ -214,7 +213,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * Reset this._selectionStyle to default normal selection style
      */
     protected _resetSelectionStyle(): void {
-        this._setSelectionStyle(getDefaultNormalSelectionStyle(this._themeService));
+        this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
     }
 
     /** @deprecated This should not be provided by the selection render service. */
@@ -232,7 +231,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle): void {
         const skeleton = this._skeleton;
-        const style = selection.style ?? getDefaultNormalSelectionStyle(this._themeService);
+        const style = selection.style ?? genNormalSelectionStyle(this._themeService);
         const scene = this._scene;
         if (!scene || !skeleton) {
             return;
@@ -250,8 +249,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             },
         });
 
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        control.updateRange(rangeWithCoord, primaryWithCoord);
+        control.updateStyle(style);
     }
 
     newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
@@ -470,7 +469,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
             this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
 
@@ -670,7 +669,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(
+        const scrollXY = scene.getVpScrollXYInfoByViewport(
             Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
             targetViewport
         );
@@ -930,7 +929,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]): void {
         const selections = selectionsData.map((selectionWithStyle) => {
             const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = getDefaultNormalSelectionStyle(this._themeService);
+            selectionData.style = genNormalSelectionStyle(this._themeService);
             return selectionData;
         });
         this.updateControlForCurrentByRangeData(selections);
@@ -946,53 +945,41 @@ export function getAllSelection(skeleton: SpreadsheetSkeleton): ISelectionWithSt
             endColumn: skeleton.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ALL,
         },
-        primary: getTopLeftSelection(skeleton)!.primary,
+        primary: getTopLeftSelectionOfCurrSheet(skeleton)!.primary,
         style: null,
     };
 }
 
-export function getTopLeftSelection(skeleton: SpreadsheetSkeleton): Nullable<ISelectionWithStyle> {
-    const cell = skeleton.worksheet.getCellInfoInMergeData(0, 0);
+export function getTopLeftSelectionOfCurrSheet(skeleton: SpreadsheetSkeleton): ISelectionWithStyle {
+    return getSelectionWithStyleByRange(skeleton, {
+        startRow: 0,
+        startColumn: 0,
+        endRow: 0,
+        endColumn: 0,
+    });
+}
+
+export function getSelectionWithStyleByRange(skeleton: SpreadsheetSkeleton, range: IRange): ISelectionWithStyle {
+    const topLeftCell = skeleton.worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
+    const bottomRightCell = skeleton.worksheet.getCellInfoInMergeData(range.endRow, range.endColumn);
     const rs = {
         range: {
-            startRow: cell.startRow,
-            startColumn: cell.startColumn,
-            endRow: cell.endRow,
-            endColumn: cell.endColumn,
+            startRow: topLeftCell.startRow,
+            startColumn: topLeftCell.startColumn,
+            endRow: bottomRightCell.endRow,
+            endColumn: bottomRightCell.endColumn,
         },
         primary: {
-            actualRow: cell.startRow,
-            actualColumn: cell.startColumn,
-            startRow: cell.startRow,
-            startColumn: cell.startColumn,
-            endRow: cell.endRow,
-            endColumn: cell.endColumn,
-            isMerged: cell.isMerged,
-            isMergedMainCell: cell.isMergedMainCell,
+            actualRow: topLeftCell.startRow,
+            actualColumn: topLeftCell.startColumn,
+            startRow: topLeftCell.startRow,
+            startColumn: topLeftCell.startColumn,
+            endRow: topLeftCell.endRow,
+            endColumn: topLeftCell.endColumn,
+            isMerged: topLeftCell.isMerged,
+            isMergedMainCell: topLeftCell.isMergedMainCell,
         },
         style: null,
     };
     return rs;
-    // const mergeData = skeleton.mergeData;
-    // return (
-    //     transformCellDataToSelectionData(0, 0, mergeData) || {
-    //         range: {
-    //             startRow: 0,
-    //             startColumn: 0,
-    //             endRow: 0,
-    //             endColumn: 0,
-    //         },
-    //         primary: {
-    //             actualRow: 0,
-    //             actualColumn: 0,
-    //             startRow: 0,
-    //             startColumn: 0,
-    //             endRow: 0,
-    //             endColumn: 0,
-    //             isMerged: false,
-    //             isMergedMainCell: false,
-    //         },
-    //         style: null,
-    //     }
-    // );
 }

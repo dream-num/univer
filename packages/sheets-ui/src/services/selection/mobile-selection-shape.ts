@@ -48,12 +48,12 @@ export class MobileSelectionControl extends SelectionControl {
     }
 
     initControlPoints(): void {
-        const defaultStyle = this.defaultStyle!;
+        const defaultStyle = this.currentStyle;
         const expandCornerSize = defaultStyle.expandCornerSize || 0;
         const expandCornerInnerSize = (defaultStyle.expandCornerSize || 0) / 4;
-        const AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth || 0;
+        const AutofillStrokeWidth = defaultStyle.autofillStrokeWidth || 0;
         const stroke = defaultStyle.stroke!;
-        const AutofillStroke = defaultStyle.AutofillStroke!;
+        const AutofillStroke = defaultStyle.autofillStroke!;
         const zIndex = this.zIndex;
         // @transformControlPoint takes care of left & top
         this._fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
@@ -141,19 +141,18 @@ export class MobileSelectionControl extends SelectionControl {
         // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)
 
-        const defaultStyle = this.defaultStyle;
+        const defaultStyle = this.currentStyle;
         if (style == null) {
             style = defaultStyle;
         }
 
         const {
             widgets = defaultStyle.widgets!,
-            hasAutoFill: autoFillEnabled = defaultStyle.hasAutoFill!,
         } = style;
         this.currentStyle = style;
 
         // this condition is derived from selection-shape, I do not understand.
-        if (autoFillEnabled === true && !super._hasWidgets(widgets)) {
+        if (this._enableAutoFill === true && !super._hasWidgets(widgets)) {
             const { viewportScrollX, viewportScrollY } = this.getViewportMainScrollInfo();
             const { endX, endY } = this.selectionModel;
             this.transformControlPoint(viewportScrollX, viewportScrollY, endX, endY);

@@ -28,7 +28,7 @@ import { getCoordByOffset, getSheetObject } from '../../controllers/utils/compon
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelectionOfCurrSheet } from './base-selection-render.service';
 import { attachSelectionWithCoord } from './util';
 
 /**
@@ -228,7 +228,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId,
                     subUnitId: sheetId,
-                    selections: selections.length !== 0 ? selections : [getTopLeftSelection(skeleton)],
+                    selections: selections.length !== 0 ? selections : [getTopLeftSelectionOfCurrSheet(skeleton)],
                 } as ISetSelectionsOperationParams);
             }
 
@@ -282,13 +282,13 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewportMain) return;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         let { x: viewportPosX, y: viewportPosY } = relativeCoords;
         this._startViewportPosX = viewportPosX;
         this._startViewportPosY = viewportPosY;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
         const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return;

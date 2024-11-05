@@ -108,11 +108,11 @@ export function getCoordByOffset(
     viewport?: Viewport,
     closeFirst?: boolean
 ) {
-    const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+    const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
-    const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords, viewport);
+    const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords, viewport);
 
     const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -142,11 +142,11 @@ export function getCoordByOffset(
 }
 
 export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
-    const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+    const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
-    const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords, viewMain);
+    const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords, viewMain);
     const { scaleX, scaleY } = scene.getAncestorScale();
 
     const { x: scrollX, y: scrollY } = scrollXY;

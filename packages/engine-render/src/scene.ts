@@ -672,7 +672,7 @@ export class Scene extends ThinScene {
         //     }
         //     parent = parent?.getParent && parent?.getParent();
         // }
-        coord = this.getRelativeToViewportCoord(coord);
+        coord = this.getCoordRelativeToViewport(coord);
         return this.findViewportByPosToViewport(coord);
     }
 
@@ -682,17 +682,15 @@ export class Scene extends ThinScene {
      * @param pos
      * @param viewPort
      */
-    getVpScrollXYInfoByPosToVp(pos: Vector2, viewPort?: Viewport) {
+    getVpScrollXYInfoByViewport(pos: Vector2, viewPort?: Viewport) {
         if (!viewPort) {
-            viewPort = this.findViewportByPosToViewport(pos);
-        }
-        if (!viewPort) {
-            return {
-                x: 0,
-                y: 0,
-            };
+            viewPort = this.findViewportByPosToViewport(pos) || this.getDefaultViewport();
         }
         return this.getViewportScrollXY(viewPort);
+    }
+
+    getDefaultViewport() {
+        return this.getViewport('viewMain')!;
     }
 
     getViewportScrollXY(viewPort: Viewport) {
@@ -715,7 +713,7 @@ export class Scene extends ThinScene {
      * @param coord Coordinates to be converted.
      * @returns
      */
-    getRelativeToViewportCoord(coord: Vector2) {
+    getCoordRelativeToViewport(coord: Vector2) {
         let parent: any = this.getParent();
 
         const parentList: any[] = [];

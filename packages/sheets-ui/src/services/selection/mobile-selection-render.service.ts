@@ -46,7 +46,7 @@ import { getCoordByOffset, getSheetObject } from '../../controllers/utils/compon
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelectionOfCurrSheet } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
 import { attachSelectionWithCoord } from './util';
 
@@ -120,7 +120,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId,
                     subUnitId: sheetId,
-                    selections: [getTopLeftSelection(skeleton)],
+                    selections: [getTopLeftSelectionOfCurrSheet(skeleton)],
                 } as ISetSelectionsOperationParams);
             }
         }));
@@ -314,12 +314,12 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         let { x: viewportPosX, y: viewportPosY } = relativeCoords;
         // this._startViewportPosX = viewportPosX;
         // this._startViewportPosY = viewportPosY;
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
         const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return false;
@@ -506,7 +506,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         scene.getTransformer()?.clearSelectedObjects();
 
         // #region pointermove
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evt.offsetX, evt.offsetY]));
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, relativeCoords.x, relativeCoords.y);
         // #endregion
 
@@ -600,7 +600,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(
+        const scrollXY = scene.getVpScrollXYInfoByViewport(
             Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
             targetViewport
         );

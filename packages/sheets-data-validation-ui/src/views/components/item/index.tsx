@@ -69,7 +69,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 ids.current = rule.ranges.map((range) => markSelectionService.addShape({
                     range,
                     style: {
-                        hasAutoFill: false,
+                        // hasAutoFill: false,
                         fill: 'rgba(73, 184, 17, 0.05)',
                         strokeWidth: 1,
                         stroke: '#49B811',

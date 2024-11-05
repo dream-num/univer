@@ -41,6 +41,9 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 
+/**
+ * For Array formula in cell editing
+ */
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionControl>;
     private _skeleton: SpreadsheetSkeleton;
@@ -222,12 +225,9 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             stroke: styleSheet.hyacinth700,
             fill,
             widgets: {},
-
-            hasAutoFill: false,
-
-            hasRowHeader: false,
-
-            hasColumnHeader: false,
+            // hasAutoFill: false,
+            // hasRowHeader: false,
+            // hasColumnHeader: false,
         };
 
         const renderUnit = this._renderManagerService.getRenderById(unitId);

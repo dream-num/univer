@@ -46,7 +46,8 @@ const DEFAULT_Z_INDEX = SELECTION_SHAPE_DEPTH.MARK_SELECTION; ;
 export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('univer.mark-selection-service');
 
 /**
- * For condition format selection.
+ * For copy and cut selection.
+ * also for selection when hover on conditional format items in the cf panel on the right.
  */
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
     private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();
@@ -100,6 +101,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
             const control = new SelectionControl(scene, zIndex, this._themeService, {
+                enableAutoFill: false,
                 highlightHeader: false,
                 rowHeaderWidth,
                 columnHeaderHeight,

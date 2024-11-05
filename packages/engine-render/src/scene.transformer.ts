@@ -1036,7 +1036,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                     topScene.disableObjectsEvent();
 
-                    const viewportActualXY = topScene.getVpScrollXYInfoByPosToVp(Vector2.create(evtOffsetX, evtOffsetY));
+                    const viewportActualXY = topScene.getVpScrollXYInfoByViewport(Vector2.create(evtOffsetX, evtOffsetY));
 
                     this._viewportScrollX = viewportActualXY.x;
                     this._viewportScrollY = viewportActualXY.y;

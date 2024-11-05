@@ -19,6 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
+import { attachRangeWithCoord } from './selection/util';
 
 export interface ISheetSkeletonManagerParam {
     unitId: string;
@@ -229,31 +230,4 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         return spreadsheetSkeleton;
     }
-}
-
-export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
-    const { startRow, startColumn, endRow, endColumn, rangeType } = range;
-
-    // after the selection is moved, it may be stored endRow < startRow or endColumn < startColumn
-    // so startCell and endCell need get min value to draw the selection
-    const _startRow = endRow < startRow ? endRow : startRow;
-    const _endRow = endRow < startRow ? startRow : endRow;
-
-    const _startColumn = endColumn < startColumn ? endColumn : startColumn;
-    const _endColumn = endColumn < startColumn ? startColumn : endColumn;
-
-    const startCell = skeleton.getNoMergeCellPositionByIndex(_startRow, _startColumn);
-    const endCell = skeleton.getNoMergeCellPositionByIndex(_endRow, _endColumn);
-
-    return {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-        rangeType,
-        startY: startCell?.startY || 0,
-        endY: endCell?.endY || 0,
-        startX: startCell?.startX || 0,
-        endX: endCell?.endX || 0,
-    };
 }

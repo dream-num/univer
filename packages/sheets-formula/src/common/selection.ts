@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ColorKit, type ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
+import { ColorKit, type ThemeService } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 
@@ -31,8 +31,5 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
     };
 }

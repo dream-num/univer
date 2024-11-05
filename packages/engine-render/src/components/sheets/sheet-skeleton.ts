@@ -39,18 +39,16 @@ import type {
     IWorksheetData,
     Nullable,
     Styles,
-    TextDirection,
     VerticalAlign,
     Worksheet,
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import {
+    addLinkToDocumentModel,
     BooleanNumber,
-    BuildTextUtils,
     CellValueType,
     composeStyles,
-    CustomRangeType,
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
@@ -66,7 +64,6 @@ import {
     LocaleService,
     ObjectMatrix,
     searchArray,
-    TextX,
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
@@ -88,33 +85,6 @@ import { Skeleton } from '../skeleton';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
-
-function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
-    const body = documentModel.getBody()!;
-    if (body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
-        return;
-    }
-
-    const textX = BuildTextUtils.customRange.add({
-        range: {
-            startOffset: 0,
-            endOffset: body.dataStream.length - 1,
-            collapsed: false,
-        },
-        rangeId: linkId,
-        rangeType: CustomRangeType.HYPERLINK,
-        body,
-        properties: {
-            url: linkUrl,
-            refId: linkId,
-        },
-    });
-    if (!textX) {
-        return;
-    }
-
-    TextX.apply(body, textX.serialize());
-}
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -169,16 +139,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         width: allRotatedWidth,
         height: allRotatedHeight,
     };
-}
-
-interface ICellOtherConfig {
-    textRotation?: ITextRotation;
-    textDirection?: Nullable<TextDirection>;
-    horizontalAlign?: HorizontalAlign;
-    verticalAlign?: VerticalAlign;
-    wrapStrategy?: WrapStrategy;
-    paddingData?: IPaddingData;
-    cellValueType?: CellValueType;
 }
 
 interface ICellDocumentModelOption {
@@ -1181,8 +1141,8 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scrollXY scrollXY
      * @returns column index
      */
-    getColumnIndexByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
+    getColumnIndexByOffsetX(evtOffsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
+        const offsetX = this.getTransformOffsetX(evtOffsetX, scaleX, scrollXY);
         const { columnWidthAccumulation } = this;
         let column = searchArray(columnWidthAccumulation, offsetX, options?.firstMatch);
 
@@ -1232,9 +1192,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { x: scrollX } = scrollXY;
 
         // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
+        const afterOffsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
 
-        return offsetX;
+        return afterOffsetX;
     }
 
     getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {

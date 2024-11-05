@@ -31,8 +31,8 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
+        // hasAutoFill: false,
+        // hasRowHeader: false,
+        // hasColumnHeader: false,
     };
 }

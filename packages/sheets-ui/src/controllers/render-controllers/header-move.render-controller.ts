@@ -181,7 +181,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-            const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+            const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
             const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -213,7 +213,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             }
             // if matchSelectionData true, then into grab header mode.
 
-            const startScrollXY = scene.getVpScrollXYInfoByPosToVp(
+            const startScrollXY = scene.getVpScrollXYInfoByViewport(
                 Vector2.FromArray([this._startOffsetX, this._startOffsetY])
             );
 
@@ -242,7 +242,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 initScrollTimer();
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                     Vector2.FromArray([moveOffsetX, moveOffsetY])
                 );
 

@@ -21,12 +21,12 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { BooleanValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Linest } from '../index';
+import { Logest } from '../index';
 
-describe('Test linest function', () => {
-    const testFunction = new Linest(FUNCTION_NAMES_STATISTICAL.LINEST);
+describe('Test logest function', () => {
+    const testFunction = new Logest(FUNCTION_NAMES_STATISTICAL.LOGEST);
 
-    describe('Linest', () => {
+    describe('Logest', () => {
         it('Value is normal', () => {
             const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -60,21 +60,21 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
-                [1, -4],
-                [0, 0],
-                [1, 0],
-                [ErrorType.NUM, 2],
-                [5, 0],
+                [1.5784365299976528, 0.11391384443661104],
+                [0.06522558747032602, 0.4301922951970874],
+                [0.9607604883077162, 0.1458488474560075],
+                [48.96903385760741, 2],
+                [1.0416637206477855, 0.0425437726084915],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2)).toStrictEqual([
-                [0.4022988505747127, 0],
-                [0.05935606660854279, ErrorType.NA],
-                [0.9386973180076628, 0.7829602926862714],
-                [45.937499999999986, 3],
-                [28.160919540229884, 1.8390804597701154],
+                [1.1409215862229016, 1],
+                [0.033475302155726666, ErrorType.NA],
+                [0.8379284156943257, 0.4415695626609612],
+                [15.510339198892915, 3],
+                [3.024262994397811, 0.5849510360057776],
             ]);
         });
 
@@ -97,7 +97,7 @@ describe('Test linest function', () => {
             });
             const result = testFunction.calculate(knownYs);
             expect(getObjectValue(result)).toStrictEqual([
-                [36445.71428571428, -23993.33333333333],
+                [1.463275628116175, 22291.223298465353],
             ]);
         });
 
@@ -148,27 +148,27 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
-                [204.08084300495466, -3407.546483120881, 12743.55283648931, -127.71202270661888, 303849.43123394996],
-                [651.0984780422234, 27243.518202120504, 20457.15431476776, 281.25469710804725, 634296.6471140139],
-                [0.10746482202373192, 49689.654678752704, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [0.18060602765382994, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1783709761.9833107, 14814370692.562143, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1.0022562631143823, 0.9559927432167645, 1.3220173520215017, 0.9979673263194307, 1251594.7569785423],
+                [0.01111894485530442, 0.4652432570026924, 0.3493511018583655, 0.004803045273340239, 10.832016475252525],
+                [0.12342791182815234, 0.8485606231387034, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.21121122864903766, 6, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.6083349157737983, 4.320330786849268, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2)).toStrictEqual([
-                [104.93150874658363, -10969.550675692437, 12875.375874994475, 6.253966373496326, 0],
-                [582.3580513522538, 20946.225096188875, 19296.67873890206, 28.224249026281957, ErrorType.NA],
-                [0.3786001300516361, 46875.144599683044, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1.066222024870103, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [9371149831.311636, 15380954268.688364, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [0.9976750487463316, 0.6740699096298128, 1.330094504910363, 1.0041640514348724, 1],
+                [0.01104236602940002, 0.3971712658719937, 0.3658934383957033, 0.0005351733146462942, ErrorType.NA],
+                [0.9948092355194054, 0.8888217534708093, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [335.3872379814746, 7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1059.8291850403075, 5.530028766100469, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const stats2 = BooleanValueObject.create(false);
             const result3 = testFunction.calculate(knownYs, knownXs, constb, stats2);
             expect(getObjectValue(result3)).toStrictEqual([
-                [204.08084300495466, -3407.546483120881, 12743.55283648931, -127.71202270661888, 303849.43123394996],
+                [1.0022562631143823, 0.9559927432167645, 1.3220173520215017, 0.9979673263194307, 1251594.7569785423],
             ]);
         });
 
@@ -202,21 +202,21 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
-                [0.2595190981297719, 0.0006299216330276636, 0.17259280062947369, 0.5480680786089209, -0.13484243565471843],
+                [1.0324032624317834, 0.999873102005119, 1.0215735856682533, 0.950065530364825, 1.9506552207912204],
                 [0, 0, 0, 0, 0],
-                [0.9999999999999984, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 [ErrorType.NUM, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [152301876.79999977, 2.446228251051695e-7, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [67.25895433112856, 0, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
 
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, constb2, stats);
             expect(getObjectValue(result2)).toStrictEqual([
-                [0.2546042576432228, 0.0005859795492142439, 0.17634578794240952, 0.5493251606822014, 0],
-                [0.07725154448946374, 0.001052591394934137, 0.12712504469774474, 0.048004226190790644, ErrorType.NA],
-                [0.9999999998277429, 0.18882049421003608, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [1451318743.3340783, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
-                [206976507.96434683, 0.03565317903372227, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [1.0578548634220857, 1.000090838078794, 1.0027512055146457, 0.9441658222150167, 1],
+                [0.38279330040800214, 0.005215752470850025, 0.6299241749270339, 0.23786833387662884, ErrorType.NA],
+                [0.9945738822026658, 0.9356346289385562, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [45.82345607624384, 1, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [160.4576424421718, 0.8754121588689897, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });
 
@@ -253,7 +253,7 @@ describe('Test linest function', () => {
             const stats = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, constb, stats);
             expect(getObjectValue(result)).toStrictEqual([
-                [1, -4],
+                [1.5784365299976528, 0.11391384443661104],
             ]);
 
             const stats2 = StringValueObject.create('test');

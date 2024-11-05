@@ -112,6 +112,7 @@ import { TDistRt } from './t-dist-rt';
 import { TInv } from './t-inv';
 import { TInv2t } from './t-inv-2t';
 import { TTest } from './t-test';
+import { Trend } from './trend';
 import { Trimmean } from './trimmean';
 import { VarP } from './var-p';
 import { VarS } from './var-s';
@@ -220,6 +221,7 @@ export const functionStatistical = [
     [TInv, FUNCTION_NAMES_STATISTICAL.T_INV],
     [TInv2t, FUNCTION_NAMES_STATISTICAL.T_INV_2T],
     [TTest, FUNCTION_NAMES_STATISTICAL.T_TEST],
+    [Trend, FUNCTION_NAMES_STATISTICAL.TREND],
     [Trimmean, FUNCTION_NAMES_STATISTICAL.TRIMMEAN],
     [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],

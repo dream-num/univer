@@ -94,6 +94,7 @@ export class Logest extends BaseFunction {
         return this._getResultBySimpleVariables(knownYsValues, knownXsValues, constb, stats);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, knownXsValues, constb, true);
 
@@ -101,12 +102,12 @@ export class Logest extends BaseFunction {
             return _coefficients;
         }
 
-        const { coefficients, X, XTXInverse } = _coefficients;
+        const { coefficients, Y, X, XTXInverse } = _coefficients;
 
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
-            const _knownYsValues = knownYsValues.flat();
+            const _knownYsValues = Y.flat();
             const n = _knownYsValues.length;
             const meanY = !constb ? 0 : _knownYsValues.reduce((acc, value) => acc + value, 0) / n;
 
@@ -117,16 +118,16 @@ export class Logest extends BaseFunction {
             const fillNa = new Array(cl - 2).fill(ErrorType.NA);
             const b = coefficients[0][cl - 1];
 
-            const sumX = [];
+            const newY = [];
 
             for (let i = 0; i < X.length; i++) {
-                let sum = b;
+                let value = b;
 
                 for (let j = cl - 2; j >= 0; j--) {
-                    sum += coefficients[0][cl - 2 - j] * X[i][j];
+                    value *= coefficients[0][cl - 2 - j] ** X[i][j];
                 }
 
-                sumX.push(sum);
+                newY.push(Math.log(value));
             }
 
             let sstotal = 0;
@@ -134,7 +135,16 @@ export class Logest extends BaseFunction {
 
             for (let i = 0; i < n; i++) {
                 sstotal += (_knownYsValues[i] - meanY) ** 2;
-                ssresid += (_knownYsValues[i] - sumX[i]) ** 2;
+
+                if (!constb && !Number.isFinite(newY[i])) {
+                    continue;
+                }
+
+                ssresid += (_knownYsValues[i] - newY[i]) ** 2;
+            }
+
+            if (!Number.isFinite(ssresid)) {
+                ssresid = 0;
             }
 
             const ssreg = sstotal - ssresid;

@@ -1054,6 +1054,7 @@ export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsVal
 
     return {
         coefficients,
+        Y,
         X,
         newX,
         XTXInverse,

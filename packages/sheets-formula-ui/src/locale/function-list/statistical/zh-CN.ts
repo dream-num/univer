@@ -836,9 +836,9 @@ export default {
             },
         ],
         functionParameter: {
-            knownYs: { name: '已知数据_y', detail: '关系表达式 y = b*m^x 中已知的 y 值集合。' },
-            knownXs: { name: '已知数据_x', detail: '关系表达式 y = b*m^x 中已知的 x 值集合。' },
-            constb: { name: 'b', detail: '一个逻辑值，用于指定是否将常量 b 强制设为 1。' },
+            knownYs: { name: '已知数据_y', detail: '关系表达式 y = m*x+b 中已知的 y 值集合。' },
+            knownXs: { name: '已知数据_x', detail: '关系表达式 y = m*x+b 中已知的 x 值集合。' },
+            constb: { name: 'b', detail: '一个逻辑值，用于指定是否将常量 b 强制设为 0。' },
             stats: { name: '统计', detail: '一个逻辑值，用于指定是否返回附加回归统计值。' },
         },
     },
@@ -852,8 +852,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知数据_y', detail: '关系表达式 y = b*m^x 中已知的 y 值集合。' },
+            knownXs: { name: '已知数据_x', detail: '关系表达式 y = b*m^x 中已知的 x 值集合。' },
+            constb: { name: 'b', detail: '一个逻辑值，用于指定是否将常量 b 强制设为 1。' },
+            stats: { name: '统计', detail: '一个逻辑值，用于指定是否返回附加回归统计值。' },
         },
     },
     LOGNORM_DIST: {
@@ -1559,8 +1561,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知数据_y', detail: '关系表达式 y = m*x+b 中已知的 y 值集合。' },
+            knownXs: { name: '已知数据_x', detail: '关系表达式 y = m*x+b 中已知的 x 值集合。' },
+            newXs: { name: '新数据_x', detail: '需要 TREND 返回对应 y 值的新 x 值。' },
+            constb: { name: 'b', detail: '一个逻辑值，用于指定是否将常量 b 强制设为 0。' },
         },
     },
     TRIMMEAN: {

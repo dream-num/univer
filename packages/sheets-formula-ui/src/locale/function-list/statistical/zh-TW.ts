@@ -836,9 +836,9 @@ export default {
             },
         ],
         functionParameter: {
-            knownYs: { name: '已知資料_y', detail: '在 y = b*m^x 關係中一組已知的 y 值。' },
-            knownXs: { name: '已知資料_x', detail: '在 y = b*m^x 關係中一組已知的 x 值。' },
-            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 1 的邏輯值。' },
+            knownYs: { name: '已知資料_y', detail: '在 y = m*x+b 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = m*x+b 關係中一組已知的 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 0 的邏輯值。' },
             stats: { name: '統計', detail: '指定是否要傳回額外迴歸統計值的邏輯值。' },
         },
     },
@@ -852,8 +852,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '在 y = b*m^x 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = b*m^x 關係中一組已知的 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 1 的邏輯值。' },
+            stats: { name: '統計', detail: '指定是否要傳回額外迴歸統計值的邏輯值。' },
         },
     },
     LOGNORM_DIST: {
@@ -1559,8 +1561,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '在 y = m*x+b 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = m*x+b 關係中一組已知的 x 值。' },
+            newXs: { name: '新資料_x', detail: '要 TREND 傳回對應 y 值的新 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 0 的邏輯值。' },
         },
     },
     TRIMMEAN: {

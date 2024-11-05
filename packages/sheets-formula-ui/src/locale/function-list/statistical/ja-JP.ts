@@ -811,9 +811,9 @@ export default {
             },
         ],
         functionParameter: {
-            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
-            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
-            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
             stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
@@ -827,8 +827,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
+            stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
     LOGNORM_DIST: {
@@ -1522,8 +1524,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            newXs: { name: '新しい x', detail: 'TREND 関数を利用して、対応する y の値を計算する新しい x の値を指定します。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
         },
     },
     TRIMMEAN: {

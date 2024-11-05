@@ -117,16 +117,16 @@ export class Linest extends BaseFunction {
             const fillNa = new Array(cl - 2).fill(ErrorType.NA);
             const b = coefficients[0][cl - 1];
 
-            const sumX = [];
+            const newY = [];
 
             for (let i = 0; i < X.length; i++) {
-                let sum = b;
+                let value = b;
 
                 for (let j = cl - 2; j >= 0; j--) {
-                    sum += coefficients[0][cl - 2 - j] * X[i][j];
+                    value += coefficients[0][cl - 2 - j] * X[i][j];
                 }
 
-                sumX.push(sum);
+                newY.push(value);
             }
 
             let sstotal = 0;
@@ -134,7 +134,7 @@ export class Linest extends BaseFunction {
 
             for (let i = 0; i < n; i++) {
                 sstotal += (_knownYsValues[i] - meanY) ** 2;
-                ssresid += (_knownYsValues[i] - sumX[i]) ** 2;
+                ssresid += (_knownYsValues[i] - newY[i]) ** 2;
             }
 
             const ssreg = sstotal - ssresid;

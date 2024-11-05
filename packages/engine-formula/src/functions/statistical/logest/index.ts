@@ -177,7 +177,7 @@ export class Logest extends BaseFunction {
     private _getResultBySimpleVariables(knownYsValues: number[][], knownXsValues: number[][], constb: number, stats: number): BaseValueObject {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
-        const { slope: m, intercept: b } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const { slope: m, intercept: b, Y } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
 
         if (Number.isNaN(m)) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -186,7 +186,7 @@ export class Logest extends BaseFunction {
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
-            const n = knownYsValues.length;
+            const n = Y.length;
 
             let meanY = 0;
             let meanX = 0;
@@ -197,7 +197,7 @@ export class Logest extends BaseFunction {
                 let sumX = 0;
 
                 for (let i = 0; i < n; i++) {
-                    sumY += knownYsValuesFlat[i];
+                    sumY += Y[i];
                     sumX += knownXsValuesFlat[i];
                 }
 
@@ -211,8 +211,8 @@ export class Logest extends BaseFunction {
             let ssx = 0;
 
             for (let i = 0; i < n; i++) {
-                sstotal += (knownYsValuesFlat[i] - meanY) ** 2;
-                ssresid += (knownYsValuesFlat[i] - b * (m ** knownXsValuesFlat[i])) ** 2;
+                sstotal += (Y[i] - meanY) ** 2;
+                ssresid += (Y[i] - Math.log(b * (m ** knownXsValuesFlat[i]))) ** 2;
                 ssx += (knownXsValuesFlat[i] - meanX) ** 2;
             }
 

@@ -865,18 +865,18 @@ export function getSerialNumbersByRowsColumns(rowCount: number, columnCount: num
 }
 
 export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: number[], constb: number, isExponentialTransform: boolean) {
-    let _knownYsValues = knownYsValues;
+    let Y = knownYsValues;
 
     if (isExponentialTransform) {
-        _knownYsValues = knownYsValues.map((value) => Math.log(value));
+        Y = knownYsValues.map((value) => Math.log(value));
     }
 
     let slope, intercept;
 
     if (constb) {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, _knownYsValues));
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
     } else {
-        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, _knownYsValues));
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, Y));
     }
 
     if (isExponentialTransform) {
@@ -888,7 +888,7 @@ export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: num
         slope = 0;
     }
 
-    return { slope, intercept };
+    return { slope, intercept, Y };
 }
 
 function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {

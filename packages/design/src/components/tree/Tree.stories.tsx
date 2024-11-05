@@ -15,9 +15,9 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
-
 import type { ITreeNodeProps } from './Tree';
+
+import React, { useState } from 'react';
 import { Tree, TreeSelectionMode } from './Tree';
 
 const meta: Meta<typeof Tree> = {
@@ -107,10 +107,9 @@ export const TreeBasic = {
     render() {
         const [valueGroup, valueGroupSet] = useState<string[]>([]);
 
-        function handleSelected(node: ITreeNodeProps, result: ITreeNodeProps[]) {
-            valueGroupSet(result.map((e) => e.key));
+        function handleSelected(node: ITreeNodeProps) {
             // eslint-disable-next-line no-console
-            console.log('all leafNode', node, result);
+            console.log('all leafNode', node);
         }
 
         return (

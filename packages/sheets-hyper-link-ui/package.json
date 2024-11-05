@@ -76,7 +76,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.2",
+        "@univerjs/icons": "^0.2.3",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
@@ -86,6 +86,7 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
         "vite": "^5.4.10",

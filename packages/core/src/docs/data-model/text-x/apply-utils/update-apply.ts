@@ -42,7 +42,7 @@ import {
     mergeContinuousDecorations,
     mergeContinuousRanges,
     normalizeTextRuns,
-    splitCustomDecroatesByIndex,
+    splitCustomDecoratesByIndex,
     splitCustomRangesByIndex,
 } from './common';
 
@@ -109,7 +109,9 @@ export function coverTextRuns(
         return updateDataTextRuns;
     }
 
+    // eslint-disable-next-line no-param-reassign
     updateDataTextRuns = Tools.deepClone(updateDataTextRuns);
+    // eslint-disable-next-line no-param-reassign
     originTextRuns = Tools.deepClone(originTextRuns);
 
     const newUpdateTextRuns: ITextRun[] = [];
@@ -442,7 +444,6 @@ function updateTables(
 }
 
 // retain
-
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -456,11 +457,13 @@ function updateCustomRanges(
 
     splitCustomRangesByIndex(body.customRanges, currentIndex);
     splitCustomRangesByIndex(body.customRanges, currentIndex + textLength);
+
     const start = currentIndex;
     const end = currentIndex + textLength - 1;
     const { customRanges: updateDataCustomRanges } = updateBody;
     const newCustomRanges: ICustomRange[] = [];
     const relativeCustomRanges = new Map<string, ICustomRange>();
+
     body.customRanges.forEach((customRange) => {
         const { startIndex, endIndex } = customRange;
         if (startIndex >= start && endIndex <= end) {
@@ -475,7 +478,8 @@ function updateCustomRanges(
     if (!updateDataCustomRanges) {
         return [];
     }
-    updateBody.customRanges?.forEach((customRange) => {
+
+    updateDataCustomRanges.forEach((customRange) => {
         const { startIndex, endIndex } = customRange;
         newCustomRanges.push({
             ...customRange,
@@ -485,6 +489,7 @@ function updateCustomRanges(
     });
 
     body.customRanges = mergeContinuousRanges(newCustomRanges);
+
     return removeCustomRanges;
 }
 
@@ -500,8 +505,9 @@ function updateCustomDecorations(
         body.customDecorations = [];
     }
 
-    splitCustomDecroatesByIndex(body.customDecorations, currentIndex);
-    splitCustomDecroatesByIndex(body.customDecorations, currentIndex + textLength);
+    splitCustomDecoratesByIndex(body.customDecorations, currentIndex);
+    splitCustomDecoratesByIndex(body.customDecorations, currentIndex + textLength);
+
     const removeCustomDecorations: ICustomDecoration[] = [];
     const { customDecorations } = body;
     const { customDecorations: updateDataCustomDecorations = [] } = updateBody;
@@ -510,12 +516,13 @@ function updateCustomDecorations(
         for (let index = 0; index < customDecorations.length; index++) {
             const customDecoration = customDecorations[index];
             const { startIndex, endIndex } = customDecoration;
+
             if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
                 removeCustomDecorations.push(customDecoration);
             }
         }
 
-        updateDataCustomDecorations?.forEach((customDecoration) => {
+        updateDataCustomDecorations.forEach((customDecoration) => {
             const { startIndex, endIndex } = customDecoration;
             customDecorations.push({
                 ...customDecoration,
@@ -526,7 +533,8 @@ function updateCustomDecorations(
     } else {
         for (const updateCustomDecoration of updateDataCustomDecorations) {
             const { id } = updateCustomDecoration;
-            if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+
+            if (updateCustomDecoration.type === CustomDecorationType.DELETED) {
                 const oldCustomDecorations = customDecorations.filter((d) => d.id === id);
                 if (oldCustomDecorations.length) {
                     removeCustomDecorations.push(...oldCustomDecorations);
@@ -550,5 +558,6 @@ function updateCustomDecorations(
     }
 
     body.customDecorations = mergeContinuousDecorations(customDecorations);
+
     return removeCustomDecorations;
 }

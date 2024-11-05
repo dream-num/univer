@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { IConditionFormattingRule, IDataBar } from '../../models/type';
+import type { IDataBarRenderParams } from '../../render/type';
+import type { ICalculateUnit } from './type';
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
 import { CFRuleType } from '../../base/const';
-import type { IDataBarRenderParams } from '../../render/type';
-import type { IConditionFormattingRule, IDataBar } from '../../models/type';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { defaultDataBarNativeColor, defaultDataBarPositiveColor } from '../../render/data-bar.render';
-import { filterRange, getValueByType, isNullable } from './utils';
-import type { ICalculateUnit } from './type';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { EMPTY_STYLE } from './type';
+import { filterRange, getValueByType, isNullable } from './utils';
 
 export const dataBarCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.dataBar,
@@ -103,7 +103,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                 }
                 if (value > 0) {
                     const v = getSafeValue(Math.min(value / max, 1) * 100);
-                    computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient, isShowValue });
+                    computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor || defaultDataBarPositiveColor, startPoint, value: v, isGradient, isShowValue });
                 } else {
                     const v = getSafeValue(Math.min(Math.abs(value) / Math.abs(min), 1) * 100);
                     computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor || defaultDataBarNativeColor, startPoint, value: -v, isGradient, isShowValue });

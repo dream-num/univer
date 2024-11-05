@@ -45,11 +45,14 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
             [MenuCurrencyService],
             [NumfmtCurrencyController],
         ]);
+
+        touchDependencies(this._injector, [
+            [SheetsNumfmtCellContentController],
+        ]);
     }
 
     override onRendered(): void {
         touchDependencies(this._injector, [
-            [SheetsNumfmtCellContentController],
             [NumfmtCurrencyController],
         ]);
 

@@ -253,7 +253,10 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
             case 0: {
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
-                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    body: {
+                        ...getBodySlice(insertBody, cursor, cursor + text.length, false),
+                        dataStream: '',
+                    },
                     len: text.length,
                 };
                 cursor += text.length;

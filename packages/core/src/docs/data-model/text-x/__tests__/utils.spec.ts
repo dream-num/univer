@@ -48,7 +48,7 @@ describe('test text-x utils', () => {
             }],
         };
 
-        const sliceBody = getBodySlice(body, 3, 8);
+        const sliceBody = getBodySlice(body, 3, 8, false);
         expect(sliceBody).toEqual({
             dataStream: 'lo\nwo',
             textRuns: [
@@ -71,8 +71,6 @@ describe('test text-x utils', () => {
             paragraphs: [{
                 startIndex: 2,
             }],
-            customDecorations: [],
-            customRanges: [],
         } as IDocumentBody);
     });
 
@@ -108,10 +106,8 @@ describe('test text-x utils', () => {
             }],
         };
 
-        const sliceBody = getBodySlice(body, 2, 8);
+        const sliceBody = getBodySlice(body, 2, 8, false);
         expect(sliceBody).toEqual({
-            customDecorations: [],
-            customRanges: [],
             dataStream: 'llo\nwo',
             textRuns: [
                 {
@@ -434,7 +430,7 @@ describe('test text-x utils', () => {
         };
 
         expect(isUselessRetainAction(action1)).toBe(true);
-        expect(isUselessRetainAction(action2)).toBe(true);
+        expect(isUselessRetainAction(action2)).toBe(false);
         expect(isUselessRetainAction(action3)).toBe(false);
     });
 });

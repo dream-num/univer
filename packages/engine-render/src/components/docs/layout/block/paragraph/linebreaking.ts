@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
 import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
-import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import { createSkeletonPage } from '../../model/page';
-import { setColumnFullState } from '../../model/section';
-import { getLastNotFullColumnInfo } from '../../tools';
-import { dealWithBullet } from './bullet';
-import { layoutParagraph } from './layout-ruler';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ILayoutContext } from '../../tools';
 import type { IShapedText } from './shaping';
+import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
+import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
+import { createSkeletonPage } from '../../model/page';
+import { setColumnFullState } from '../../model/section';
+import { getLastNotFullColumnInfo } from '../../tools';
+import { dealWithBullet } from './bullet';
+import { layoutParagraph } from './layout-ruler';
 
 function _getListLevelAncestors(
     bullet?: IBullet,

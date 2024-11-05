@@ -218,7 +218,33 @@ export class Font extends SheetExtension {
 
         ctx.closePath();
         ctx.restore();
+
+        this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY);
     };
+
+    private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number) {
+        const { documentSkeleton } = fontsConfig;
+        const documentDataModel = documentSkeleton.getViewModel().getDataModel();
+        if (documentDataModel.getDrawingsOrder()?.length) {
+            const drawingDatas = documentDataModel.getDrawings();
+            const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
+            drawings?.forEach((drawing) => {
+                const drawingData = drawingDatas?.[drawing.drawingId];
+                if (drawingData) {
+                    const image = fontsConfig.images?.[drawing.drawingId];
+
+                    const x = startX + drawing.aLeft;
+                    const y = startY + drawing.aTop;
+
+                    if (image && image.complete) {
+                        ctx.save();
+                        ctx.drawImage(image, x, y, drawing.width, drawing.height);
+                        ctx.restore();
+                    }
+                }
+            });
+        }
+    }
 
     /**
      * Change font render bounds, for overflow and filter icon & custom render.
@@ -340,13 +366,14 @@ export class Font extends SheetExtension {
         const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
         const cellHeight = endY - startY;
         const cellWidth = endX - startX;
+        const documentDataModel = documentSkeleton.getViewModel().getDataModel();
 
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
+            documentDataModel.updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
         } else {
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
+            documentDataModel.updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
         }
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
@@ -357,7 +384,7 @@ export class Font extends SheetExtension {
         if (isOverflow) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
-            const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
+            const documentStyle = documentDataModel.getSnapshot().documentStyle;
             if (contentSize && documentStyle) {
                 const { width } = contentSize;
                 const { marginRight = 0, marginLeft = 0 } = documentStyle;

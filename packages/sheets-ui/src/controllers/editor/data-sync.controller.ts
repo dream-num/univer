@@ -78,10 +78,8 @@ export class EditorDataSyncController extends Disposable {
         const drawingsOrder = Tools.deepClone(param.documentLayoutObject.documentModel?.getDrawingsOrder());
 
         if (
-            !body || (
-                param.isInArrayFormulaRange === true &&
-                this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick
-            )
+            !body ||
+            (param.isInArrayFormulaRange === true && this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick)
         ) {
             body = {
                 dataStream: '\r\n',
@@ -152,12 +150,14 @@ export class EditorDataSyncController extends Disposable {
                     }
 
                     if (needUpdate) {
-                        const body = editCellState.documentLayoutObject.documentModel?.getBody();
+                        const body = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getBody());
+                        const drawings = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.drawings);
+                        const drawingsOrder = Tools.deepClone(editCellState.documentLayoutObject.documentModel?.getDrawingsOrder());
 
                         if (body == null) {
                             return;
                         }
-                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Tools.deepClone(body));
+                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body, drawings, drawingsOrder);
                     }
                 }
             })

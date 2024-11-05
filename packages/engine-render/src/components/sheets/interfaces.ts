@@ -50,6 +50,7 @@ export interface IFontCacheItem {
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;
     // content?: string;
+    images?: Record<string, HTMLImageElement>;
 }
 
 type colorString = string;

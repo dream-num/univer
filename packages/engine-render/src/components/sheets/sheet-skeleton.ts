@@ -1876,7 +1876,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellData>) {
+    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellDataForSheetInterceptor>) {
         if (isNullCell(cell)) return;
 
         this._handleFontMatrix.setValue(row, col, true);
@@ -1911,6 +1911,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
+                images: cell?.images,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
             // fontFamilyMatrix.setValue(row, col, config);

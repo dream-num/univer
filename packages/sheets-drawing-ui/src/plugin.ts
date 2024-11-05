@@ -33,6 +33,7 @@ import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
+import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
@@ -72,10 +73,12 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
+            [SheetCellImageController],
         ]);
 
         touchDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
+            [SheetCellImageController],
         ]);
     }
 

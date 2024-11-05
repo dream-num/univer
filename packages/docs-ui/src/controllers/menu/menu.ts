@@ -15,6 +15,8 @@
  */
 
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
+import type {
+    IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {
@@ -32,13 +34,13 @@ import {
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
-    getHeaderFooterMenuHiddenObservable,
     getMenuHiddenObservable,
     MenuItemType,
 } from '@univerjs/ui';
@@ -99,43 +101,49 @@ function getInsertTableHiddenObservable(
     });
 }
 
-function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<boolean> {
+function getHeaderFooterMenuHiddenObservable(
+    accessor: IAccessor
+): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
     return new Observable((subscriber) => {
         const subscription0 = commandService.onCommandExecuted((command) => {
-            if (command.id === SwitchDocModeCommand.id) {
-                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+            if (command.id === RichTextEditingMutation.id) {
+                const { unitId } = command.params as IRichTextEditingMutationParams;
+                const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
                 if (docDataModel == null) {
                     subscriber.next(true);
                     return;
                 }
+                const { documentStyle } = docDataModel.getSnapshot();
 
-                const documentStyle = docDataModel.getSnapshot().documentStyle;
                 subscriber.next(documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
             }
         });
 
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
             if (unitId == null) {
-                subscriber.next(true);
-                return;
+                return subscriber.next(true);
             }
+            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
-            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-
-            if (docDataModel == null) {
-                subscriber.next(true);
-                return;
-            }
-
-            return subscriber.next(docDataModel.getSnapshot().documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
+            subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (docDataModel == null) {
+            return subscriber.next(true);
+        }
+
+        const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
+        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
+
         return () => {
-            subscription.unsubscribe();
             subscription0.dispose();
+            subscription.unsubscribe();
         };
     });
 }
@@ -574,7 +582,6 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
-        disabled$: getHeaderFooterDisabledObservable(accessor),
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -853,7 +860,7 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
         activated$: new Observable<boolean>((subscriber) => {
             const subscription = commandService.onCommandExecuted((c) => {
-                if (c.id === SwitchDocModeCommand.id) {
+                if (c.id === RichTextEditingMutation.id) {
                     const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
                     subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);

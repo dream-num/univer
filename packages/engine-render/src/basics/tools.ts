@@ -20,7 +20,7 @@ import type {
     IRangeWithCoord,
     IScale,
     ISelectionCell,
-    ISelectionCellWithCoord,
+    IActualCellWithCoord,
     IStyleBase,
     Nullable,
 } from '@univerjs/core';
@@ -529,7 +529,7 @@ export function getCellPositionByIndex(
  * @param {number[]} rowHeightAccumulation The accumulated height of each row
  * @param {number[]} columnWidthAccumulation The accumulated width of each column
  * @param {ISelectionCell} mergeData The merge information of the cell
- * @returns {ISelectionCellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
+ * @returns {IActualCellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
  */
 export function getCellWithCoordByIndexCore(
     row: number,
@@ -537,7 +537,7 @@ export function getCellWithCoordByIndexCore(
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
     mergeDataInfo: ISelectionCell
-): ISelectionCellWithCoord {
+): IActualCellWithCoord {
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,

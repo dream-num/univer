@@ -61,11 +61,13 @@ export {
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
-export { getAllSelection, getTopLeftSelection } from './services/selection/base-selection-render.service';
+export { genSelectionByRange, getAllSelection, getTopLeftSelectionOfCurrSheet } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 export { SelectionControl as SelectionShape, SelectionControl } from './services/selection/selection-control';
+export { genNormalSelectionStyle } from './services/selection/const';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
-export { attachRangeWithCoord, SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+export { attachPrimaryWithCoord, attachRangeWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { UniverSheetsUIPlugin } from './plugin';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { HoverManagerService } from './services/hover-manager.service';
@@ -105,7 +107,6 @@ export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
-export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
 export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/isEmbeddingFormulaEditor';

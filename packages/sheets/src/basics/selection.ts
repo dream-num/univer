@@ -17,12 +17,11 @@
 import type {
     IRange,
     ISelection,
-    ISelectionCellWithCoord,
+    IActualCellWithCoord,
     ISelectionWithCoord,
     Nullable,
-    ThemeService,
 } from '@univerjs/core';
-import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
+import { getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
@@ -53,7 +52,7 @@ export interface ISelectionWidgetConfig {
 /**
  * https://support.microsoft.com/en-us/office/select-cell-contents-in-excel-23f64223-2b6b-453a-8688-248355f10fa9
  */
-export interface ISelectionStyle {
+export interface IStyleForSelection {
     /**
      * Assign an ID to a selection area.
      * The current scenario is to identify the formula string corresponding to the selection area
@@ -91,7 +90,7 @@ export interface ISelectionStyle {
     /**
      * The volume of the touch points.
      */
-    widgetSize?: number;
+    widgetSize: number;
     /**
      * The thickness of the border of the touch points
      */
@@ -105,15 +104,11 @@ export interface ISelectionStyle {
      * https://support.microsoft.com/en-us/office/copy-a-formula-by-dragging-the-fill-handle-in-excel-for-mac-dd928259-622b-473f-9a33-83aa1a63e218
      * Whether to show the drop-down fill button at the bottom right corner of the selection.
      */
-    hasAutoFill: boolean;
-    AutofillSize?: number; // The size of the fill button.
-    AutofillStrokeWidth?: number; // The border size of the fill button.
-    AutofillStroke?: string; // The color of the fill button.
+    // hasAutoFill?: boolean;
+    autofillSize?: number; // The size of the fill button.
+    autofillStrokeWidth?: number; // The border size of the fill button.
+    autofillStroke?: string; // The color of the fill button.
 
-    /**
-     * Whether to synchronize the display of row title highlights, the highlighting range is consistent with the horizontal range of the selection.
-     */
-    hasRowHeader?: boolean;
     /**
      * The color of the row title highlight.
      * A level of transparency should be set to avoid covering the row title content.
@@ -128,10 +123,6 @@ export interface ISelectionStyle {
      */
     rowHeaderStrokeWidth?: number;
 
-    /**
-     * The setting of column title highlight is similar to that of row title.
-     */
-    hasColumnHeader?: boolean;
     columnHeaderFill?: string;
     columnHeaderStroke?: string;
     columnHeaderStrokeWidth?: number;
@@ -139,56 +130,29 @@ export interface ISelectionStyle {
     expandCornerSize?: number;
 }
 
+/**
+ * Extend ISelectionWithCoord with style
+ * rangeWithCoord
+ * primaryWithCoord
+ * style
+ */
 export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
-    style: Nullable<ISelectionStyle>;
+    style: Nullable<IStyleForSelection>;
 }
 
 /**
  * range: IRange;
  * primary: Nullable<ISelectionCell>;
- * style: Nullable<ISelectionStyle>;
+ * style: Nullable<IStyleForSelection>;
  */
 export interface ISelectionWithStyle extends ISelection {
-    style: Nullable<ISelectionStyle>;
+    style: Nullable<Partial<IStyleForSelection>>;
 }
 
 export interface ISheetRangeLocation {
     range: IRange;
     subUnitId: string;
     unitId: string;
-}
-
-// The default configuration of the selection.
-export function getNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
-    const styleSheet = themeService.getCurrentTheme();
-    const fill = new ColorKit(styleSheet.primaryColor).setAlpha(0.07).toRgbString();
-    return {
-        strokeWidth: 1,
-        stroke: styleSheet.primaryColor,
-        fill,
-        // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
-        widgets: {},
-        widgetSize: 6,
-        widgetStrokeWidth: 1,
-        widgetStroke: styleSheet.colorWhite,
-
-        hasAutoFill: true,
-        AutofillSize: 6,
-        AutofillStrokeWidth: 1,
-        AutofillStroke: styleSheet.colorWhite,
-
-        hasRowHeader: true,
-        rowHeaderFill: fill,
-        rowHeaderStroke: styleSheet.primaryColor,
-        rowHeaderStrokeWidth: 1,
-
-        hasColumnHeader: true,
-        columnHeaderFill: fill,
-        columnHeaderStroke: styleSheet.primaryColor,
-        columnHeaderStrokeWidth: 1,
-
-        expandCornerSize: 40,
-    };
 }
 
 /**
@@ -222,7 +186,7 @@ export function convertSelectionDataToRange(
     return result;
 }
 
-export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: IActualCellWithCoord) {
     const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
     const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
     return {

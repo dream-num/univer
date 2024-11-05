@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { IActualCellWithCoord, IRangeWithCoord, ISelectionWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionWidgetConfig, ISelectionWithCoordAndStyle, ISelectionWithStyle, IStyleForSelection } from '@univerjs/sheets';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import {
-    getNormalSelectionStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
 
 export enum SELECTION_MANAGER_KEY {
@@ -76,28 +76,42 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
+    private _isHelperSelection: boolean = true;
+
+    /**
+     * For ref selections, there is no auto fill.
+     */
+    protected _enableAutoFill: boolean = true;
+    /**
+     * Only normal selections with primary cell has auto fill.
+     * This works for multiple normal selections. Only last selection has primary cell and auto fill.
+     */
+    private _showAutoFill: boolean = false;
+
+    /**
+     * If rowHeader & col Header would be highlighted with selection.
+     */
+    protected _highlightHeader: boolean = true;
+
+    protected _selectionModel!: SelectionRenderModel;
+
     private _leftBorder!: Rect;
     private _rightBorder!: Rect;
     private _topBorder!: Rect;
     private _bottomBorder!: Rect;
-
     private _backgroundControlTop!: Rect;
     private _backgroundControlBottom!: Rect;
     private _backgroundControlMiddleLeft!: Rect;
     private _backgroundControlMiddleRight!: Rect;
-
     private _autoFillControl: Rect;
-
     private _selectionShapeGroup!: Group;
-
     private _rowHeaderBackground!: Rect;
     private _rowHeaderBorder!: Rect;
     private _rowHeaderGroup!: Group;
-    // private _rowHeaderHighlight!: Rect;
     private _columnHeaderBackground!: Rect;
     private _columnHeaderBorder!: Rect;
     private _columnHeaderGroup!: Group;
-    // private _columnHeaderHighlight!: Rect;
+    private _dashedRect!: Rect;
 
     // for ref selection
     private _topLeftWidget!: Rect;
@@ -109,19 +123,12 @@ export class SelectionControl extends Disposable {
     private _bottomCenterWidget!: Rect;
     private _bottomRightWidget!: Rect;
 
-    private _dashedRect!: Rect;
-
-    protected _selectionModel!: SelectionRenderModel;
-
     // why three style prop? what's diff between _selectionStyle & _currentStyle?
-    // protected _selectionStyle: Nullable<ISelectionStyle>;
-    private _defaultStyle!: ISelectionStyle;
-    private _currentStyle: ISelectionStyle;
+    // protected _selectionStyle: Nullable<IStyleForSelection>;
+    private _defaultStyle!: IStyleForSelection;
+    private _currentStyle: IStyleForSelection;
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
-    // this is controlled by currentStyle, which is set in @update
-    private _enableAutoFill: boolean = true;
-    private _highlightHeader: boolean = true;
 
     protected _widgetRects: Rect[] = [];
 
@@ -140,9 +147,6 @@ export class SelectionControl extends Disposable {
 
     private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
-    private _isHelperSelection: boolean = true;
-
-    private _showAutoFill: boolean = false;
 
     constructor(
         protected _scene: Scene,
@@ -156,11 +160,192 @@ export class SelectionControl extends Disposable {
         }
     ) {
         super();
-        this._enableAutoFill = options?.enableAutoFill || true;
-        this._highlightHeader = options?.highlightHeader || true;
-        this._rowHeaderWidth = (options?.rowHeaderWidth) || 0;
-        this._columnHeaderHeight = (options?.columnHeaderHeight) || 0;
-        this._initialize();
+        this._enableAutoFill = options?.enableAutoFill ?? true;
+        this._highlightHeader = options?.highlightHeader ?? true;
+        this._rowHeaderWidth = options?.rowHeaderWidth ?? 0;
+        this._columnHeaderHeight = options?.columnHeaderHeight ?? 0;
+        this._initializeSheetBody();
+        this._initialHeader();
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _initializeSheetBody(): void {
+        this._defaultStyle = genNormalSelectionStyle(this._themeService);
+        this._currentStyle = genNormalSelectionStyle(this._themeService);
+
+        this._selectionModel = new SelectionRenderModel();
+        const zIndex = this._zIndex;
+        this._leftBorder = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
+            zIndex,
+        });
+
+        this._rightBorder = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
+            zIndex,
+        });
+
+        this._topBorder = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
+            zIndex,
+        });
+
+        this._bottomBorder = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
+            zIndex,
+        });
+
+        this._backgroundControlTop = new Rect(SELECTION_MANAGER_KEY.backgroundTop + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._backgroundControlBottom = new Rect(SELECTION_MANAGER_KEY.backgroundBottom + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._backgroundControlMiddleLeft = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleLeft + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+        this._backgroundControlMiddleRight = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleRight + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
+        // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
+        this._autoFillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
+            zIndex: zIndex + 1,
+        });
+        this._autoFillControl.hide();
+
+        // That weird, new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
+        // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
+        this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
+            zIndex: zIndex + 2,
+            evented: false,
+            stroke: '#fff',
+        });
+
+        const shapes = [
+            this._autoFillControl,
+            this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
+            this._backgroundControlTop, this._backgroundControlMiddleLeft,
+            this._backgroundControlMiddleRight, this._backgroundControlBottom,
+            this._dashedRect,
+        ];
+
+        this._widgetRects = this._initialWidget();
+        this._selectionShapeGroup = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
+        this._selectionShapeGroup.hide();
+        this._selectionShapeGroup.evented = false;
+        this._selectionShapeGroup.zIndex = zIndex;
+
+        const scene = this.getScene();
+        scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+
+        this.disposeWithMe(
+            toDisposable(
+                scene.onTransformChange$.subscribeEvent((state) => {
+                    if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+                        return;
+                    }
+
+                    this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
+                    this._updateControlCoord();
+                })
+            )
+        );
+    }
+
+    private _initialHeader(): void {
+        const zIndex = this._zIndex;
+        this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._rowHeaderBorder = new Rect(SELECTION_MANAGER_KEY.rowHeaderBorder + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._rowHeaderGroup = new Group(
+            SELECTION_MANAGER_KEY.rowHeaderGroup + zIndex,
+            this._rowHeaderBackground,
+            this._rowHeaderBorder
+        );
+
+        this._rowHeaderGroup.hide();
+        this._rowHeaderGroup.evented = false;
+        this._rowHeaderGroup.zIndex = zIndex;
+
+        this._columnHeaderBackground = new Rect(SELECTION_MANAGER_KEY.columnHeaderBackground + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._columnHeaderBorder = new Rect(SELECTION_MANAGER_KEY.columnHeaderBorder + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._columnHeaderGroup = new Group(
+            SELECTION_MANAGER_KEY.columnHeaderGroup + zIndex,
+            this._columnHeaderBackground,
+            this._columnHeaderBorder
+        );
+
+        this._columnHeaderGroup.hide();
+        this._columnHeaderGroup.evented = false;
+        this._columnHeaderGroup.zIndex = zIndex;
+
+        const scene = this.getScene();
+        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
+    }
+
+    private _initialWidget(): Rect[] {
+        const zIndex = this._zIndex;
+        this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._topCenterWidget = new Rect(SELECTION_MANAGER_KEY.topCenterWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._topRightWidget = new Rect(SELECTION_MANAGER_KEY.topRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._middleLeftWidget = new Rect(SELECTION_MANAGER_KEY.middleLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._middleRightWidget = new Rect(SELECTION_MANAGER_KEY.middleRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomLeftWidget = new Rect(SELECTION_MANAGER_KEY.bottomLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomCenterWidget = new Rect(SELECTION_MANAGER_KEY.bottomCenterWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomRightWidget = new Rect(SELECTION_MANAGER_KEY.bottomRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        return [
+            this._topLeftWidget,
+            this._topCenterWidget,
+            this._topRightWidget,
+            this._middleLeftWidget,
+            this._middleRightWidget,
+            this._bottomLeftWidget,
+            this._bottomCenterWidget,
+            this._bottomRightWidget,
+        ];
     }
 
     get zIndex(): number {
@@ -267,27 +452,24 @@ export class SelectionControl extends Disposable {
         this._selectionModel = model;
     }
 
-    get defaultStyle(): ISelectionStyle {
-        return this._defaultStyle;
+    // get defaultStyle(): IStyleForSelection {
+    //     return this._defaultStyle;
+    // }
+
+    // set defaultStyle(style: IStyleForSelection) {
+    //     this._defaultStyle = style;
+    // }
+
+    get currentStyle(): IStyleForSelection {
+        return this._currentStyle;
     }
 
-    set defaultStyle(style: ISelectionStyle) {
-        this._defaultStyle = style;
+    set currentStyle(style: IStyleForSelection) {
+        this._currentStyle = style;
     }
 
     get dashedRect(): Rect {
         return this._dashedRect;
-    }
-
-    get currentStyle(): Nullable<ISelectionStyle> {
-        return this._currentStyle;
-    }
-
-    set currentStyle(style: Nullable<ISelectionStyle>) {
-        if (style) {
-            this._currentStyle = style;
-            this._enableAutoFill = style.hasAutoFill;
-        }
     }
 
     get isHelperSelection(): boolean {
@@ -321,38 +503,39 @@ export class SelectionControl extends Disposable {
         this._selectionFilled$.next(val);
     }
 
+    private _updateLayoutOfSelectionControl(): void {
+        this._updateLayoutOfSelectionControlByStyle(this.currentStyle);
+    }
+
     /**
      * Update Control Style And Position of SelectionControl
      * @param selectionStyle
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _setSizeAndStyleForSelectionControl(selectionStyle: ISelectionStyle): void {
-        this.currentStyle = selectionStyle;
-        const defaultStyle = this._defaultStyle;
-        const currentStyle = this.currentStyle;
+    protected _updateLayoutOfSelectionControlByStyle(selectionStyle: Partial<IStyleForSelection>): void {
+        this.currentStyle = Object.assign({}, this._defaultStyle, selectionStyle);
+        const currentStyle = this.currentStyle as Required<IStyleForSelection>;
 
         const {
-            stroke = defaultStyle.stroke!,
-            widgets = defaultStyle.widgets!,
-            AutofillStroke = defaultStyle.AutofillStroke!,
+            stroke,
+            widgets,
+            autofillStroke: AutofillStroke,
             strokeDash,
             isAnimationDash,
         } = currentStyle;
-        let {
-            strokeWidth = defaultStyle.strokeWidth!,
-            AutofillSize = defaultStyle.AutofillSize!,
-            AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
-        } = currentStyle;
+        let autofillSize = currentStyle.autofillSize;
+        let strokeWidth = currentStyle.strokeWidth;
+        let autofillStrokeWidth = currentStyle.autofillStrokeWidth;
         const scale = this._getScale();
         const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
         strokeWidth /= scale;
-        AutofillSize /= scale;
-        AutofillStrokeWidth /= scale < 1 ? 1 : scale;
+        autofillSize /= scale;
+        autofillStrokeWidth /= scale < 1 ? 1 : scale;
         // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
         const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
-        // startX startY shares same coordinate with viewport.(include row & colheader)
+        // startX startY shares same coordinate with viewport.(include row & col header)
         const { startX, startY, endX, endY } = this._selectionModel;
         this.leftControl.transformByState({
             height: endY - startY,
@@ -439,11 +622,11 @@ export class SelectionControl extends Disposable {
                 strokeScaleEnabled: false,
             };
             const sizeState: IObjectFullState = {
-                width: AutofillSize - AutofillStrokeWidth,
-                height: AutofillSize - AutofillStrokeWidth,
-                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                strokeWidth: AutofillStrokeWidth,
+                width: autofillSize - autofillStrokeWidth,
+                height: autofillSize - autofillStrokeWidth,
+                left: endX - startX - autofillSize / 2 + autofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                top: endY - startY - autofillSize / 2 + autofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                strokeWidth: autofillStrokeWidth,
             };
             this._autoFillControl.setProps(fillProps);
             this._autoFillControl.transformByState(sizeState);
@@ -452,9 +635,9 @@ export class SelectionControl extends Disposable {
             this._autoFillControl.hide();
         }
 
-        this._updateBackgroundControl(selectionStyle);
-        this._updateHeaderBackground(selectionStyle);
-        this._updateWidgets(selectionStyle);
+        this._updateBackgroundControl(currentStyle);
+        this._updateHeaderBackground(currentStyle);
+        this._updateWidgets(currentStyle);
     }
 
     /**
@@ -467,8 +650,8 @@ export class SelectionControl extends Disposable {
         this.selectionShapeGroup.makeDirtyNoDebounce(true);
     }
 
-    updateStyle(style: ISelectionStyle): void {
-        this._setSizeAndStyleForSelectionControl(style);
+    updateStyle(style: Partial<IStyleForSelection>): void {
+        this._updateLayoutOfSelectionControlByStyle(style);
         this._updateControlCoord();
     }
 
@@ -477,10 +660,17 @@ export class SelectionControl extends Disposable {
      * @param range
      * @param primaryCell
      */
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithCoord>): void {
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<IActualCellWithCoord>): void {
         this._selectionModel.setValue(range, primaryCell);
         this._showAutoFill = primaryCell !== null;
-        this._setSizeAndStyleForSelectionControl(this._currentStyle);
+        this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
+        this._updateControlCoord();
+    }
+
+    updateBySelectionWithCoord(selection: ISelectionWithCoord) {
+        this._selectionModel.setValue(selection.rangeWithCoord, selection.primaryWithCoord);
+        this._showAutoFill = selection.primaryWithCoord !== null;
+        this._updateLayoutOfSelectionControl();
         this._updateControlCoord();
     }
 
@@ -497,8 +687,8 @@ export class SelectionControl extends Disposable {
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
-        style?: Nullable<ISelectionStyle>,
-        primaryCell?: Nullable<ISelectionCellWithCoord>
+        style?: Nullable<IStyleForSelection>,
+        primaryCell?: Nullable<IActualCellWithCoord>
     ): void {
         this._rowHeaderWidth = rowHeaderWidth;
         this._columnHeaderHeight = columnHeaderHeight;
@@ -512,7 +702,7 @@ export class SelectionControl extends Disposable {
      * update primary range
      * @param primaryCell model.current (aka: highlight)
      */
-    updateCurrCell(primaryCell: Nullable<ISelectionCellWithCoord>): void {
+    updateCurrCell(primaryCell: Nullable<IActualCellWithCoord>): void {
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = primaryCell !== null;
         this._selectionModel.setCurrentCell(primaryCell);
@@ -522,7 +712,7 @@ export class SelectionControl extends Disposable {
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = false;
         this._selectionModel.clearCurrentCell();
-        this._setSizeAndStyleForSelectionControl(this._currentStyle);
+        this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
     }
 
     getScene(): Scene {
@@ -624,201 +814,14 @@ export class SelectionControl extends Disposable {
         this._isHelperSelection = false;
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _initialize(): void {
-        this._defaultStyle = getNormalSelectionStyle(this._themeService);
-        this._currentStyle = getNormalSelectionStyle(this._themeService);
-
-        this._selectionModel = new SelectionRenderModel();
-        const zIndex = this._zIndex;
-        this._leftBorder = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
-            zIndex,
-        });
-
-        this._rightBorder = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
-            zIndex,
-        });
-
-        this._topBorder = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
-            zIndex,
-        });
-
-        this._bottomBorder = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
-            zIndex,
-        });
-
-        this._backgroundControlTop = new Rect(SELECTION_MANAGER_KEY.backgroundTop + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._backgroundControlBottom = new Rect(SELECTION_MANAGER_KEY.backgroundBottom + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._backgroundControlMiddleLeft = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleLeft + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-        this._backgroundControlMiddleRight = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleRight + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
-        // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
-        this._autoFillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
-            zIndex: zIndex + 1,
-        });
-        this._autoFillControl.hide();
-
-        // That weird, new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
-        // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
-        this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
-            zIndex: zIndex + 2,
-            evented: false,
-            stroke: '#fff',
-        });
-
-        const shapes = [
-            this._autoFillControl,
-            this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
-            this._backgroundControlTop, this._backgroundControlMiddleLeft,
-            this._backgroundControlMiddleRight, this._backgroundControlBottom,
-            this._dashedRect,
-        ];
-
-        this._widgetRects = this._initialWidget();
-        this._selectionShapeGroup = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
-        this._selectionShapeGroup.hide();
-        this._selectionShapeGroup.evented = false;
-        this._selectionShapeGroup.zIndex = zIndex;
-
-        const scene = this.getScene();
-        scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
-
-        this.disposeWithMe(
-            toDisposable(
-                scene.onTransformChange$.subscribeEvent((state) => {
-                    if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
-                        return;
-                    }
-
-                    this._setSizeAndStyleForSelectionControl(this._currentStyle);
-                    this._updateControlCoord();
-                })
-            )
-        );
-
-        this._initialHeader();
-    }
-
-    private _initialHeader(): void {
-        const zIndex = this._zIndex;
-        this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._rowHeaderBorder = new Rect(SELECTION_MANAGER_KEY.rowHeaderBorder + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._rowHeaderGroup = new Group(
-            SELECTION_MANAGER_KEY.rowHeaderGroup + zIndex,
-            this._rowHeaderBackground,
-            this._rowHeaderBorder
-        );
-
-        this._rowHeaderGroup.hide();
-        this._rowHeaderGroup.evented = false;
-        this._rowHeaderGroup.zIndex = zIndex;
-
-        this._columnHeaderBackground = new Rect(SELECTION_MANAGER_KEY.columnHeaderBackground + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._columnHeaderBorder = new Rect(SELECTION_MANAGER_KEY.columnHeaderBorder + zIndex, {
-            zIndex: zIndex - 1,
-            evented: false,
-        });
-
-        this._columnHeaderGroup = new Group(
-            SELECTION_MANAGER_KEY.columnHeaderGroup + zIndex,
-            this._columnHeaderBackground,
-            this._columnHeaderBorder
-        );
-
-        this._columnHeaderGroup.hide();
-        this._columnHeaderGroup.evented = false;
-        this._columnHeaderGroup.zIndex = zIndex;
-
-        const scene = this.getScene();
-        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
-    }
-
-    private _initialWidget(): Rect[] {
-        const zIndex = this._zIndex;
-        this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._topCenterWidget = new Rect(SELECTION_MANAGER_KEY.topCenterWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._topRightWidget = new Rect(SELECTION_MANAGER_KEY.topRightWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._middleLeftWidget = new Rect(SELECTION_MANAGER_KEY.middleLeftWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._middleRightWidget = new Rect(SELECTION_MANAGER_KEY.middleRightWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._bottomLeftWidget = new Rect(SELECTION_MANAGER_KEY.bottomLeftWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._bottomCenterWidget = new Rect(SELECTION_MANAGER_KEY.bottomCenterWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        this._bottomRightWidget = new Rect(SELECTION_MANAGER_KEY.bottomRightWidget + zIndex, {
-            zIndex: zIndex + 1,
-        });
-
-        return [
-            this._topLeftWidget,
-            this._topCenterWidget,
-            this._topRightWidget,
-            this._middleLeftWidget,
-            this._middleRightWidget,
-            this._bottomLeftWidget,
-            this._bottomCenterWidget,
-            this._bottomRightWidget,
-        ];
-    }
-
-    private _updateHeaderBackground(style: Nullable<ISelectionStyle>): void {
+    private _updateHeaderBackground(style: IStyleForSelection): void {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
-        const defaultStyle = this._defaultStyle;
-
-        if (style == null) {
-            style = defaultStyle;
-        }
-
+        const defaultStyle = this._currentStyle;
         const scale = this._getScale();
 
         const {
-            stroke, hasRowHeader, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
-            hasColumnHeader, columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
+            stroke, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
+            columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
         } = style;
 
         let {
@@ -832,9 +835,9 @@ export class SelectionControl extends Disposable {
         const rowHeaderWidth = this._rowHeaderWidth;
         const columnHeaderHeight = this._columnHeaderHeight;
 
-        if (hasColumnHeader === true) {
+        if (this._highlightHeader && columnHeaderHeight > 0) {
             let highlightTitleColor = columnHeaderFill;
-            if (this._highlightHeader && rangeType === RANGE_TYPE.COLUMN) {
+            if (rangeType === RANGE_TYPE.COLUMN) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
@@ -859,9 +862,9 @@ export class SelectionControl extends Disposable {
 
         this._columnHeaderGroup.makeDirty(true);
 
-        if (hasRowHeader === true) {
+        if (this._highlightHeader && rowHeaderWidth > 0) {
             let highlightTitleColor = rowHeaderFill;
-            if (this._highlightHeader && rangeType === RANGE_TYPE.ROW) {
+            if (rangeType === RANGE_TYPE.ROW) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({
@@ -887,18 +890,12 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    private _updateBackgroundControl(style: Nullable<ISelectionStyle>): void {
+    private _updateBackgroundControl(style: IStyleForSelection): void {
         const { startX, startY, endX, endY } = this._selectionModel;
 
-        const defaultStyle = this._defaultStyle;
-
-        if (style == null) {
-            style = defaultStyle;
-        }
-
         const scale = this._getScale();
-        const { fill = defaultStyle.fill! } = style;
-        let { strokeWidth = defaultStyle.strokeWidth! } = style;
+        const { fill = style.fill! } = style;
+        let { strokeWidth } = style;
         strokeWidth /= scale;
         const highlightSelection = this._selectionModel.highlightToSelection();
 
@@ -968,17 +965,12 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    private _updateWidgets(style: Nullable<ISelectionStyle>): void {
+    private _updateWidgets(style: Required<IStyleForSelection>): void {
         const { startX, startY, endX, endY } = this._selectionModel;
-        const defaultStyle = this._defaultStyle;
 
-        if (style == null) {
-            style = defaultStyle;
-        }
-
-        const { stroke = defaultStyle.stroke!, widgets = defaultStyle.widgets!, widgetStroke = defaultStyle.widgetStroke! } = style;
+        const { stroke = style.stroke!, widgets = style.widgets!, widgetStroke = style.widgetStroke! } = style;
         const scale = this._getScale();
-        let { widgetSize = defaultStyle.widgetSize!, widgetStrokeWidth = defaultStyle.widgetStrokeWidth! } = style;
+        let { widgetSize, widgetStrokeWidth } = style;
 
         widgetSize /= scale;
         widgetStrokeWidth /= scale;
@@ -1064,7 +1056,7 @@ export class SelectionControl extends Disposable {
             }
         }
 
-        return true;
+        return false;
     }
 
     private _getScale(): number {

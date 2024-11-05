@@ -17,7 +17,7 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Nullable } from '../../shared';
-import type { ICellDataForSheetInterceptor, ISelectionCellWithCoord } from '../../sheets/typedef';
+import type { ICellDataForSheetInterceptor, IActualCellWithCoord } from '../../sheets/typedef';
 import type { Workbook } from '../../sheets/workbook';
 import type { Worksheet } from '../../sheets/worksheet';
 import type { IStyleData } from './i-style-data';
@@ -25,7 +25,7 @@ import type { IStyleData } from './i-style-data';
 export interface ICellRenderContext {
     data: ICellDataForSheetInterceptor;
     style: Nullable<IStyleData>;
-    primaryWithCoord: ISelectionCellWithCoord;
+    primaryWithCoord: IActualCellWithCoord;
     unitId: string;
     subUnitId: string;
     row: number;

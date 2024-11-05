@@ -14,34 +14,61 @@
  * limitations under the License.
  */
 
-import type { ISelectionCell, ISelectionCellWithCoord } from '@univerjs/core';
+import type { IActualCellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { attachRangeWithCoord } from '../sheet-skeleton-manager.service';
-// const nilSelection = {
-//   startRow: -1,
-//   startColumn: -1,
-//   endRow: -1,
-//   endColumn: -1,
-//   startY: 0,
-//   endY: 0,
-//   startX: 0,
-//   endX: 0,
-//   rangeType: RANGE_TYPE.NORMAL,
-// }
 
+/**
+ * Add startXY endXY to range, XY are no merge cell position.
+ * @param skeleton
+ * @param range
+ * @returns {IRangeWithCoord}
+ */
+export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
+    const { startRow, startColumn, endRow, endColumn, rangeType } = range;
+
+    // after the selection is moved, it may be stored endRow < startRow or endColumn < startColumn
+    // so startCell and endCell need get min value to draw the selection
+    const _startRow = endRow < startRow ? endRow : startRow;
+    const _endRow = endRow < startRow ? startRow : endRow;
+
+    const _startColumn = endColumn < startColumn ? endColumn : startColumn;
+    const _endColumn = endColumn < startColumn ? startColumn : endColumn;
+
+    const startCell = skeleton.getNoMergeCellPositionByIndex(_startRow, _startColumn);
+    const endCell = skeleton.getNoMergeCellPositionByIndex(_endRow, _endColumn);
+
+    return {
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+        rangeType,
+        startY: startCell?.startY || 0,
+        endY: endCell?.endY || 0,
+        startX: startCell?.startX || 0,
+        endX: endCell?.endX || 0,
+    };
+}
+
+/**
+ * Return selection with coord and style from selection, which has range & primary & style.
+ * @param selection
+ * @param skeleton
+ * @returns {ISelectionWithCoordAndStyle} selection with coord and style
+ */
 export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleton: SpreadsheetSkeleton): ISelectionWithCoordAndStyle {
     const { range, primary, style } = selection;
     const rangeWithCoord = attachRangeWithCoord(skeleton, range);
-
+    const primaryWithCoord = primary ? attachPrimaryWithCoord(skeleton, primary) : null;
     return {
         rangeWithCoord,
-        primaryWithCoord: primary ? attachPrimaryWithCoord(primary, skeleton) : null,
+        primaryWithCoord,
         style,
     } as ISelectionWithCoordAndStyle;
 }
 
-export function attachPrimaryWithCoord(primary: ISelectionCell, skeleton: SpreadsheetSkeleton): ISelectionCellWithCoord {
+export function attachPrimaryWithCoord(skeleton: SpreadsheetSkeleton, primary: ISelectionCell): IActualCellWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = primary;
     const cellPosition = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn);
     const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
@@ -66,5 +93,5 @@ export function attachPrimaryWithCoord(primary: ISelectionCell, skeleton: Spread
             startX: startCell?.startX || 0,
             endX: endCell?.endX || 0,
         },
-    };
+    } as IActualCellWithCoord;
 }

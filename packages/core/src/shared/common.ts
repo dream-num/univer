@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../sheets/typedef';
+import type { IActualCellWithCoord, ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
@@ -32,11 +32,11 @@ import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 
 /**
- * Get selection range & coord by primary cell
+ * Data type convert, convert IActualCellWithCoord to IRaneWithCoord
  * @param cellInfo
  * @returns IRangeWithCoord
  */
-export function makeCellToSelection(cellInfo: ISelectionCellWithCoord): IRangeWithCoord {
+export function convertCellToRange(cellInfo: IActualCellWithCoord): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;
@@ -70,9 +70,7 @@ export function makeCellToSelection(cellInfo: ISelectionCellWithCoord): IRangeWi
         endY = mergeInfo.endY;
         startX = mergeInfo.startX;
         endX = mergeInfo.endX;
-
         endRow = mergeInfo.endRow;
-
         endColumn = mergeInfo.endColumn;
     }
 

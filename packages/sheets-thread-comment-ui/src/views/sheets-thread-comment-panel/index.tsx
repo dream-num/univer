@@ -83,7 +83,7 @@ export const SheetsThreadCommentPanel = () => {
                 return markSelectionService.addShape({
                     range: mergeInfo,
                     style: {
-                        hasAutoFill: false,
+                        // hasAutoFill: false,
                         fill: 'rgb(255, 189, 55, 0.35)',
                         strokeWidth: 1,
                         stroke: '#FFBD37',

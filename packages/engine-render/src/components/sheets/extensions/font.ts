@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, IActualCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -51,7 +51,7 @@ interface IRenderFontContext {
     endY: number;
     startX: number;
     endX: number;
-    cellInfo: ISelectionCellWithCoord;
+    cellInfo: IActualCellWithCoord;
 }
 
 export class Font extends SheetExtension {

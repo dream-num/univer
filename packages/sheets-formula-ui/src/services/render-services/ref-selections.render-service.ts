@@ -15,13 +15,12 @@
  */
 
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionDataModel } from '@univerjs/sheets';
-import type { SelectionControl } from '@univerjs/sheets-ui';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { IStyleForSelection, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionDataModel } from '@univerjs/sheets';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
-import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
+import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 import { merge } from 'rxjs';
 
@@ -63,6 +62,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
         this._setSelectionStyle(getDefaultRefSelectionStyle(this._themeService));
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
+        this._isHeaderHighlight = false;
     }
 
     getLocation(): [string, string] {
@@ -284,13 +284,13 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewportMain) return;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         let { x: viewportPosX, y: viewportPosY } = relativeCoords;
         this._startViewportPosX = viewportPosX;
         this._startViewportPosY = viewportPosY;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
         const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return;
@@ -302,16 +302,16 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
         for (const control of curControls) {
-            // right click
+            // right click should not create a new selection, it pops up the context menu.
             if (evt.button === 2 && control.model.isInclude(cursorCellRangeWithRangeType)) {
                 activeSelectionControl = control;
                 return;
             }
-            // Click to an existing selection, then what?
-            // if (control.model.isEqual(cursorCellRangeWithRangeType)) {
-            //     activeSelectionControl = control;
-            //     break;
-            // }
+            // Click to an existing selection,
+            if (control.model.isEqual(cursorCellRangeWithRangeType)) {
+                activeSelectionControl = control;
+                break;
+            }
         }
 
         this._checkClearPreviousControls(evt);
@@ -386,6 +386,20 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             this.getSelectionControls()[i].clearHighlight();
         }
     }
+
+    override newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
+        const zIndex = this.getSelectionControls().length;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        const control = new SelectionControl(scene, zIndex, this._themeService, {
+            highlightHeader: false,
+            enableAutoFill: false,
+            rowHeaderWidth,
+            columnHeaderHeight,
+        });
+        this._selectionControls.push(control);
+
+        return control;
+    }
 }
 
 /**
@@ -393,11 +407,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
  * @param themeService
  * @returns The selection's style.
  */
-function getDefaultRefSelectionStyle(themeService: ThemeService): ISelectionStyle {
-    const style = getNormalSelectionStyle(themeService);
-    style.hasAutoFill = false;
-    style.hasRowHeader = false;
-    style.hasColumnHeader = false;
+function getDefaultRefSelectionStyle(themeService: ThemeService): IStyleForSelection {
+    const style = genNormalSelectionStyle(themeService);
     style.widgets = { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true };
     return style;
 }

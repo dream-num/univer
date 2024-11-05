@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
+import type { IDisposable, IActualCellWithCoord, Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId } from '@univerjs/core';
@@ -44,7 +44,7 @@ interface IFRangeSheetsUIMixin {
      * Return this cell information, including whether it is merged and cell coordinates
      * @returns The cell information
      */
-    getCell(): ISelectionCellWithCoord;
+    getCell(): IActualCellWithCoord;
     /**
      * Returns the coordinates of this cell,does not include units
      * @returns coordinates of the cell， top, right, bottom, left
@@ -72,7 +72,7 @@ interface IFRangeSheetsUIMixin {
 }
 
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
-    override getCell(): ISelectionCellWithCoord {
+    override getCell(): IActualCellWithCoord {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();

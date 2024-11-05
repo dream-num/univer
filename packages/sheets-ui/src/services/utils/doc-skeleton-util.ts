@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, Injector, IParagraph, ISelectionCellWithCoord, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { ICustomRange, Injector, IParagraph, IActualCellWithCoord, ITextRangeParam, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IFontCacheItem } from '@univerjs/engine-render';
 import { CustomRangeType, HorizontalAlign, IUniverInstanceService, PresetListType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
@@ -144,7 +144,7 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     };
 };
 
-export function calcPadding(cell: ISelectionCellWithCoord, font: IFontCacheItem) {
+export function calcPadding(cell: IActualCellWithCoord, font: IFontCacheItem) {
     const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
     const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;

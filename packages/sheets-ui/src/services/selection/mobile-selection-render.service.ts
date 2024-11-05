@@ -21,12 +21,13 @@ import type {
     IDisposable,
     IRange,
     IRangeWithCoord,
-    ISelectionCellWithCoord,
+    ISelection,
+    IActualCellWithCoord,
     Nullable,
     Workbook,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelectionDataModel } from '@univerjs/sheets';
+import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionDataModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import {
     ICommandService,
@@ -46,7 +47,7 @@ import { getCoordByOffset, getSheetObject } from '../../controllers/utils/compon
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelectionOfCurrSheet } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
 import { attachSelectionWithCoord } from './util';
 
@@ -120,7 +121,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId,
                     subUnitId: sheetId,
-                    selections: [getTopLeftSelection(skeleton)],
+                    selections: [getTopLeftSelectionOfCurrSheet(skeleton)],
                 } as ISetSelectionsOperationParams);
             }
         }));
@@ -314,14 +315,14 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         }
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         let { x: viewportPosX, y: viewportPosY } = relativeCoords;
         // this._startViewportPosX = viewportPosX;
         // this._startViewportPosY = viewportPosY;
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
+        const cursorCellRangeInfo = this._getSelectionWithCoordByOffset(viewportPosX, viewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return false;
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
@@ -331,25 +332,12 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         let activeSelectionControl = this.getActiveSelectionControl<MobileSelectionControl>();
 
         for (const control of this.getSelectionControls()) {
-            // in curr selection
-            // if (control.model.isInclude(cursorCellRangeWithRangeType)) {
-            //     activeSelectionControl = control;
-            //     return;
-            // }
             // Click to an existing selection
             if (control.model.isEqual(cursorCellRangeWithRangeType)) {
                 activeSelectionControl = control;
                 break;
             }
-
-            // There can only be one highlighted cell, so clear the highlighted cell of the existing selection
-            // if (!expandingMode) {
-            //     control.clearHighlight();
-            // }
         }
-
-        // In addition to pressing the ctrl or shift key, we must clear the previous selection
-        // this._checkClearPreviousControls(evt);
 
         // TODO merge to _checkClearPreviousControls
         if (activeSelectionControl?.model.rangeType !== rangeType) {
@@ -506,7 +494,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         scene.getTransformer()?.clearSelectedObjects();
 
         // #region pointermove
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evt.offsetX, evt.offsetY]));
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, relativeCoords.x, relativeCoords.y);
         // #endregion
 
@@ -525,11 +513,11 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // #endregion
     }
 
-    private _changeCurrCellWhenControlPointerDown(): ISelectionCellWithCoord {
+    private _changeCurrCellWhenControlPointerDown(): IActualCellWithCoord {
         const activeSelectionControl = this.getActiveSelectionControl<MobileSelectionControl>()!;
         const skeleton = this._skeleton;
 
-        let currCellRange: ISelectionCellWithCoord;
+        let currCellRange: IActualCellWithCoord;
 
         const { startRow, startColumn, endRow, endColumn } = activeSelectionControl.model;
         switch (this.expandingControlMode) {
@@ -600,7 +588,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(
+        const scrollXY = scene.getVpScrollXYInfoByViewport(
             Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
             targetViewport
         );
@@ -617,7 +605,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             offsetY = Number.POSITIVE_INFINITY;
         }
 
-        const cursorCellRangeInfo = this._getSelectRangeWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+        const cursorCellRangeInfo = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) {
             return false;
         }
@@ -660,20 +648,21 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         if (!newSelectionRange) {
             return false;
         }
+        const newSelection: ISelectionWithStyle = { range: newSelectionRange, style: null, primary: null };
+        const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton).rangeWithCoord;
+        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
+        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
-        const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
-
-        const newSelectionRangeWithCoord: IRangeWithCoord = {
-            startColumn: newSelectionRange.startColumn,
-            startRow: newSelectionRange.startRow,
-            endColumn: newSelectionRange.endColumn,
-            endRow: newSelectionRange.endRow,
-            startY: startCellXY?.startY || 0,
-            endY: endCellXY?.endY || 0,
-            startX: startCellXY?.startX || 0,
-            endX: endCellXY?.endX || 0,
-        };
+        // const newSelectionRangeWithCoord: IRangeWithCoord = {
+        //     startColumn: newSelectionRange.startColumn,
+        //     startRow: newSelectionRange.startRow,
+        //     endColumn: newSelectionRange.endColumn,
+        //     endRow: newSelectionRange.endRow,
+        //     startY: startCellXY?.startY || 0,
+        //     endY: endCellXY?.endY || 0,
+        //     startX: startCellXY?.startX || 0,
+        //     endX: endCellXY?.endX || 0,
+        // };
 
         const rangeChanged =
             currSelectionRange.startRow !== newSelectionRange.startRow ||

@@ -208,7 +208,7 @@ export const CellLinkEdit = () => {
                         endRow: editing.row,
                     },
                     style: {
-                        hasAutoFill: false,
+                        // hasAutoFill: false,
                         fill: `rgb(${color.r}, ${color.g}, ${color.b}, 0.12)`,
                         strokeWidth: 1,
                         stroke: '#FFBD37',

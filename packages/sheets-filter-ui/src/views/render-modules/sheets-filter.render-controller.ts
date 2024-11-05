@@ -16,7 +16,7 @@
 
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
 import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
@@ -39,6 +39,9 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
+/**
+ * Show selected range in filter.
+ */
 export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
     private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
@@ -118,14 +121,14 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 rowHeaderWidth,
                 columnHeaderHeight,
                 enableAutoFill: false,
-                highlightHeader: true,
+                highlightHeader: false,
             });
 
         filterRangeShape.updateRange(rangeWithCoord);
         filterRangeShape.updateStyle({
             fill: 'rgba(0, 0, 0, 0.0)',
             ...style,
-        } as ISelectionStyle);
+        });
         filterRangeShape.setEvent(false);
 
         scene.makeDirty(true);

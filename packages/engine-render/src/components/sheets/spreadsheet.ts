@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IRange, IActualCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
@@ -667,7 +667,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext2D, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
+    private _clearBackground(ctx: UniverRenderingContext2D, backgroundPositions?: ObjectMatrix<IActualCellWithCoord>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

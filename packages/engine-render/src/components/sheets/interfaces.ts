@@ -17,7 +17,7 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
-    ISelectionCellWithCoord,
+    IActualCellWithCoord,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -55,7 +55,7 @@ export interface IFontCacheItem {
 type colorString = string;
 export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
-    backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>;
+    backgroundPositions?: ObjectMatrix<IActualCellWithCoord>;
     font?: Record<string, ObjectMatrix<IFontCacheItem>>;
     fontMatrix: ObjectMatrix<IFontCacheItem>;
     border?: ObjectMatrix<BorderCache>;

@@ -103,7 +103,7 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
-import { getFormulaRefSelectionStyle } from '../common/selection';
+import { genFormulaRefSelectionStyle } from '../common/selection';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
 
@@ -1066,7 +1066,7 @@ export class PromptController extends Disposable {
             selectionWithStyle.push({
                 range,
                 primary,
-                style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+                style: genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
             });
         }
 
@@ -1129,7 +1129,7 @@ export class PromptController extends Disposable {
         return {
             range,
             primary,
-            style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+            style: genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
         };
     }
 
@@ -1525,7 +1525,7 @@ export class PromptController extends Disposable {
             });
 
             if (control) {
-                const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
+                const style = genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
                 control.updateStyle(style);
                 matchedControls.add(control);
             }
@@ -1621,7 +1621,7 @@ export class PromptController extends Disposable {
         }
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
-        selectionControl.update(toRange, undefined, undefined, undefined, this._selectionRenderService.attachPrimaryWithCoord(primary));
+        selectionControl.updateRange(toRange, this._selectionRenderService.attachPrimaryWithCoord(primary));
     }
 
     private _refreshFormulaAndCellEditor(unitIds: string[]) {

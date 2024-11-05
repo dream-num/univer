@@ -108,13 +108,13 @@ export class WorkbookSelectionDataModel extends Disposable {
 
     getSelectionOfWorksheet(sheetId: string): ISelectionWithStyle[] {
         if (!this._worksheetSelections.has(sheetId)) {
-            return [];
+            this._worksheetSelections.set(sheetId, []);
         }
 
         return this._worksheetSelections.get(sheetId)!;
     }
 
-    private _getCurrentSelections() {
+    private _getCurrentSelections(): ISelectionWithStyle[] {
         return this.getSelectionOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
     }
 

@@ -29,6 +29,7 @@ import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/she
 import { useMemo } from 'react';
 import { attachPrimaryWithCoord, attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
+import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 interface IRefSelection {
@@ -60,7 +61,9 @@ export function useSheetHighlight(unitId: string) {
             refSelectionsService.setSelections(selectionWithStyle);
             return;
         }
-        const currentSheetId = worksheet?.getSheetId();
+        const currentSheetId = worksheet.getSheetId();
+        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+                
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
@@ -80,12 +83,9 @@ export function useSheetHighlight(unitId: string) {
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-            const primaryRange = worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
-            selectionWithStyle.push({
-                range,
-                primary: primaryRange || null,
-                style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
-            });
+            const selectWithStyle = genSelectionByRange(skeleton, range);
+            selectWithStyle.style = genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString());
+            selectionWithStyles.push(selectWithStyle);
         }
         const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
 
@@ -252,20 +252,3 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
 
     return { textRuns, refSelections };
 };
-function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
-    const style = themeService.getCurrentTheme();
-    const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
-    return {
-        id,
-        strokeWidth: 1,
-        stroke: refColor,
-        fill,
-        widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
-        widgetSize: 6,
-        widgetStrokeWidth: 1,
-        widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
-    };
-}

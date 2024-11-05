@@ -595,22 +595,12 @@ export interface ISingleCell {
 export interface IRangeWithCoord extends IPosition, IRange { }
 
 /**
- * Range & SingleCell & isMerged.
- */
-export interface ISelectionCell extends IRange, ISingleCell { }
-
-/**
- * @deprecated use ISelectionCellWithCoordAndMergeInfo instead.
- */
-export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
-    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
-}
-
-/**
- * SingleCell with coordinate and mergeRange with coordinate.
+ * SingleCell & coordinate and mergeRange.
  */
 // Original name: ISelectionCellWithMergeInfo
-export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
+export interface IActualCellWithCoord extends IPosition, ISingleCell {
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
+
     /**
      * Coordinate of the single cell(actual row and column).
      */
@@ -627,6 +617,8 @@ export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
      * Coordinate of the single cell(actual row and column).
      */
     endY: number;
+
+    // part of singleCell
     /**
      * The raw row index calculated by the offsetX (Without considering merged cells, this value is simply the row index.If there are merged cells, this value refers to the cell where the mouse was clicked.)
      */
@@ -644,7 +636,17 @@ export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
      * if Merged and is main merged cell.
      */
     isMergedMainCell: boolean;
+}
 
+/**
+ * Range & SingleCell & isMerged.
+ */
+export interface ISelectionCell extends IRange, ISingleCell { }
+
+/**
+ * @deprecated use IActualCellWithCoord instead.
+ */
+export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
@@ -665,10 +667,12 @@ export interface ISelection {
 /**
  * Selection range Info, contains selection range & primary range
  * primary range is the range of the highlighted cell.
+ * rangeWithCoord: IRangeWithCoord;
+ * primaryWithCoord: Nullable<IActualCellWithCoord>;
  */
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
-    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
+    primaryWithCoord: Nullable<IActualCellWithCoord>;
 }
 
 export interface ITextRangeStart {

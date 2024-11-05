@@ -33,8 +33,7 @@ export {
 export {
     convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
-    getNormalSelectionStyle,
-    type ISelectionStyle,
+    type IStyleForSelection,
     type ISelectionWidgetConfig,
     type ISelectionWithCoordAndStyle,
     type ISelectionWithStyle,

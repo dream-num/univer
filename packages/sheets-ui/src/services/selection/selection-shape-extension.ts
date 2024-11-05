@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { ISelectionWithStyle, IStyleForSelection } from '@univerjs/sheets';
 import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
+import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 /* eslint-disable max-lines-per-function */
 import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
@@ -25,7 +26,7 @@ import type { Subscription } from 'rxjs';
 import type { SelectionControl } from './selection-control';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
-import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { attachPrimaryWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
@@ -188,12 +189,10 @@ export class SelectionShapeExtension {
      */
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
-
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
+        const scrollXY = scene.getVpScrollXYInfoByViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellIndexByOffset(
+        const actualCellIndex = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -201,47 +200,34 @@ export class SelectionShapeExtension {
             scrollXY
         );
 
-        const { row, column } = moveActualSelection;
-
+        const { row, column } = actualCellIndex;
         const maxRow = this._skeleton.getRowCount() - 1;
-
         const maxColumn = this._skeleton.getColumnCount() - 1;
 
-        let startRow = row + this._relativeSelectionPositionRow;
-
-        if (startRow < 0) {
-            startRow = 0;
-        }
-
+        let startRow = Math.max(0, row + this._relativeSelectionPositionRow);
         let endRow = startRow + this._relativeSelectionRowLength;
-
         if (endRow > maxRow) {
             endRow = maxRow;
-
             if (endRow - startRow < this._relativeSelectionRowLength) {
                 startRow = endRow - this._relativeSelectionRowLength;
             }
         }
 
-        let startColumn = column + this._relativeSelectionPositionColumn;
-
-        if (startColumn < 0) {
-            startColumn = 0;
-        }
-
+        let startColumn = Math.max(0, column + this._relativeSelectionPositionColumn);
         let endColumn = startColumn + this._relativeSelectionColumnLength;
-
         if (endColumn > maxColumn) {
             endColumn = maxColumn;
-
             if (endColumn - startColumn < this._relativeSelectionColumnLength) {
                 startColumn = endColumn - this._relativeSelectionColumnLength;
             }
         }
-
+        const primaryCell = this._skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn);
+        const selection: ISelectionWithStyle = {
+            range: { startRow, endRow, startColumn, endColumn },
+            primary: primaryCell,
+        };
         const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
         const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
-
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
         const startX = startCell?.startX || 0;
@@ -264,10 +250,8 @@ export class SelectionShapeExtension {
             startColumn,
             endColumn,
         };
-        const primaryCell = this._skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn);
-        const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(primaryCell, this._skeleton);
-        this._control.updateCurrCell(primaryWithCoordAndMergeInfo);
-
+        const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(this._skeleton, primaryCell);
+        this._control.updateRange(this._targetSelection, primaryWithCoordAndMergeInfo);
         this._control.selectionMoving$.next(this._targetSelection);
     }
 
@@ -280,11 +264,11 @@ export class SelectionShapeExtension {
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByViewport(relativeCoords);
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -358,7 +342,7 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -442,7 +426,7 @@ export class SelectionShapeExtension {
         const scene = this._scene;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
@@ -491,7 +475,7 @@ export class SelectionShapeExtension {
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -527,7 +511,7 @@ export class SelectionShapeExtension {
     private _widgetMoving(moveOffsetX: number, moveOffsetY: number, cursor: CURSOR_TYPE) {
         const scene = this._scene;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getVpScrollXYInfoByViewport(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
         const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
@@ -605,9 +589,11 @@ export class SelectionShapeExtension {
             startColumn,
             endColumn,
         };
-
         // const primary = this._control.model.currentCell; // selectionModel.currentCell;
-        // this._control.updateRange(this._targetSelection, primary);
+        // const primary = getTopLeftAsPrimaryOfCurrRange(this._skeleton, { startRow, startColumn, endRow, endColumn });
+        const primaryWithCoord = this._skeleton.getCellWithCoordByIndex(startRow, startColumn);
+
+        this._control.updateRange(this._targetSelection, primaryWithCoord);
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
@@ -649,7 +635,7 @@ export class SelectionShapeExtension {
 
         const { row, column } = moveActualSelection;
 
-        const moveRelativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        const moveRelativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const maxRow = this._skeleton.getRowCount() - 1;
 
@@ -779,7 +765,7 @@ export class SelectionShapeExtension {
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -807,7 +793,7 @@ export class SelectionShapeExtension {
         const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
-        const defaultStyle = getNormalSelectionStyle(this._themeService);
+        const defaultStyle = genNormalSelectionStyle(this._themeService);
         if (stroke == null) {
             stroke = defaultStyle.stroke;
         }
@@ -862,7 +848,7 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 

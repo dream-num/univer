@@ -242,8 +242,9 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const docRanges = docSelectionManagerService.getDocRanges();
+        const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
-        if (docRanges.length === 0) {
+        if (docRanges.length === 0 || activeTextRange == null) {
             return false;
         }
 
@@ -268,7 +269,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 formatValue = getReverseFormatValueInSelection(
                     docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.textRuns!,
                     preCommandId,
-                    docRanges
+                    activeTextRange
                 );
 
                 break;
@@ -431,30 +432,34 @@ function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, 
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     preCommandId: string,
-    docRanges: ITextRangeWithStyle[]
+    activeTextRange: ITextRangeWithStyle
 ): BooleanNumber | ITextDecoration | BaselineOffset {
-    let ti = 0;
-    let si = 0;
     const key: keyof IStyleBase = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
+    const { startOffset, endOffset, collapsed } = activeTextRange;
 
-    while (ti !== textRuns.length && si !== docRanges.length) {
-        const { startOffset, endOffset } = docRanges[si];
+    let textRun;
 
-        // TODO: @jocs handle sid in textRun
-        const { st, ed, ts } = textRuns[ti];
-
-        if (endOffset! <= st) {
-            si++;
-        } else if (ed <= startOffset!) {
-            ti++;
-        } else {
-            const reverseValue = getReverseFormatValue(ts, key, preCommandId);
-
-            if (reverseValue !== undefined) {
-                return reverseValue;
+    for (let i = textRuns.length - 1; i >= 0; i--) {
+        const curTextRun = textRuns[i];
+        if (collapsed) {
+            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
             }
+        } else {
+            if (curTextRun.st <= startOffset && endOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
+            }
+        }
+    }
 
-            ti++;
+    if (textRun) {
+        const { ts } = textRun;
+        const reverseValue = getReverseFormatValue(ts, key, preCommandId);
+
+        if (reverseValue !== undefined) {
+            return reverseValue;
         }
     }
 

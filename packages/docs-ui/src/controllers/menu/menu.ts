@@ -939,7 +939,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const { startOffset, segmentId } = activeTextRange;
+    const { startOffset, endOffset, collapsed, segmentId } = activeTextRange;
 
     const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
 
@@ -956,10 +956,16 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const curTextRun = textRuns[i];
-
-        if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
-            textRun = curTextRun;
-            break;
+        if (collapsed) {
+            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
+            }
+        } else {
+            if (curTextRun.st <= startOffset && endOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
+            }
         }
     }
 

@@ -93,6 +93,7 @@ export {
 export { IConfigService } from './services/config/config.service';
 export { ConfigService } from './services/config/config.service';
 export * from './services/context/context';
+export { isRichText } from './docs/data-model/util';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
 export { IUniverInstanceService } from './services/instance/instance.service';

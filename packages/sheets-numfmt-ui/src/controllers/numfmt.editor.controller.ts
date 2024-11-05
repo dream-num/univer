@@ -26,6 +26,7 @@ import {
     Disposable,
     Inject,
     Injector,
+    isRichText,
     IUniverInstanceService,
     numfmt,
     Optional,
@@ -148,6 +149,7 @@ export class NumfmtEditorController extends Disposable {
                         handler: (value, context, next) => {
                             // clear the effect
                             this._collectEffectMutation.clean();
+                            const { worksheet, row, col } = context;
                             const currentNumfmtValue = this._numfmtService.getValue(
                                 context.unitId,
                                 context.subUnitId,
@@ -169,17 +171,22 @@ export class NumfmtEditorController extends Disposable {
                                 return next(value);
                             }
 
-                            if (value.p?.body?.dataStream) {
-                                const dataStreamWithoutEnd = value.p.body.dataStream.replace(/\r\n$/, '');
+                            const body = value.p?.body;
+                            const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
+                            const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+
+                            if (body && isRichText(body)) {
+                                const { dataStream, paragraphs } = body;
+                                const dataStreamWithoutEnd = dataStream.replace(/\r\n$/, '');
                                 const num = Number(dataStreamWithoutEnd);
-                                if (Number.isNaN(num)) {
+                                const hasBullet = paragraphs?.some((paragraph) => paragraph.bullet);
+                                if (hasBullet) {
+                                    return next(value);
+                                }
+                                if (Number.isNaN(num) && !numfmtInfo) {
                                     return next(value);
                                 }
                             }
-
-                            const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
-
-                            const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
 
                             if (numfmtInfo) {
                                 if (numfmtInfo.z) {
@@ -194,11 +201,10 @@ export class NumfmtEditorController extends Disposable {
                                     );
                                 }
                                 const v = Number(numfmtInfo.v);
-                                return { ...value, v, p: null, t: CellValueType.NUMBER };
-                            } else if (
-                                ['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) ||
-                                !isNumeric(content)
-                            ) {
+                                // The format needs to discard the current style settings
+                                const originStyle = worksheet.getCellStyleOnly(row, col)?.s;
+                                return { ...value, v, p: null, s: originStyle, t: CellValueType.NUMBER };
+                            } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
                                 clean();
                             }
                             return next(value);

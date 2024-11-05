@@ -33,6 +33,7 @@ import {
     IContextService,
     Inject,
     isFormulaString,
+    isRichText,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -818,28 +819,6 @@ export function getCellDataByInput(
     }
 
     return cellData;
-}
-
-export function isRichText(body: IDocumentBody): boolean {
-    const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
-
-    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
-
-    // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
-    const richTextStyle = ['va'];
-
-    return (
-        textRuns.some((textRun) => {
-            const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
-                return richTextStyle.includes(property);
-            }));
-            return hasRichTextStyle || (Object.keys(textRun.ts ?? {}).length && (textRun.ed - textRun.st < bodyNoLineBreak.length));
-        }) ||
-        paragraphs.some((paragraph) => paragraph.bullet) ||
-        paragraphs.length >= 2 ||
-        Boolean(customRanges?.length) ||
-        customBlocks.length > 0
-    );
 }
 
 export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyleData> {

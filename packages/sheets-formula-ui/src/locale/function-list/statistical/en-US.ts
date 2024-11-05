@@ -836,8 +836,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = b*m^x.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = b*m^x.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 1.' },
+            stats: { name: 'stats', detail: 'A logical value specifying whether to return additional regression statistics.' },
         },
     },
     LOGEST: {

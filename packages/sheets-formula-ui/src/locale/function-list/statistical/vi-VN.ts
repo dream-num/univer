@@ -758,6 +758,22 @@ export default {
             k: { name: 'k', detail: 'Vị trí (tính từ lớn nhất) trong mảng hoặc phạm vi ô dữ liệu cần trả về.' },
         },
     },
+    LINEST: {
+        description: 'Trả về các tham số của xu hướng tuyến tính',
+        abstract: 'Trả về các tham số của xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = b*m^x.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = b*m^x.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 1 hay không.' },
+            stats: { name: 'thống kê', detail: 'Giá trị lô-gic chỉ rõ có trả về các thống kê hồi quy bổ sung hay không.' },
+        },
+    },
     LOGNORM_DIST: {
         description: 'Trả về phân bố chuẩn lô-ga-rít của',
         abstract: 'Trả về phân bố chuẩn lô-ga-rít của',

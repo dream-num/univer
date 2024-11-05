@@ -1130,6 +1130,9 @@ importers:
       rc-util:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-virtual-list:
+        specifier: ^3.14.8
+        version: 3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-draggable:
         specifier: ^4.4.6
         version: 4.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

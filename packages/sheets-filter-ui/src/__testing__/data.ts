@@ -68,50 +68,120 @@ export function WithCustomFilterModelFactory(): IWorkbookData {
     };
 }
 
+/* eslint-disable max-lines-per-function */
 export function WithValuesFilterModelFactory(): IWorkbookData {
     return {
         id: 'test',
+        sheetOrder: [
+            'sheet1',
+        ],
+        name: '',
         appVersion: '3.0.0-alpha',
+        locale: LocaleType.ZH_CN,
+        styles: {
+            GOAhZb: {
+                n: {
+                    pattern: 'yyyy-mm-dd',
+                },
+            },
+            'A-iqEg': {
+                n: {
+                    pattern: 'yyyy/mm/dd',
+                },
+            },
+            _yIXzW: {
+                n: {
+                    pattern: 'yyyy-m-d am/pm h:mm',
+                },
+            },
+            qLSh7Z: {
+                n: {
+                    pattern: 'yyyy"年"MM"月"dd"日"',
+                },
+            },
+        },
         sheets: {
             sheet1: {
                 id: 'sheet1',
                 cellData: {
-                    0: { 0: { v: 'Column Header' } }, // this row should not appear in filter panel
-                    1: { 0: { v: '1' } },
-                    2: { 0: { v: '2' } },
-                    3: { 0: { v: 'Michael Jackson King of Pop' } },
-                    4: { 0: { v: 'Michael' } },
-                    5: { 0: { v: 'Jackson' } },
-                    6: { 0: { v: 'Evan Wallace' } },
-                    7: { 0: { v: 'Evan' } },
-                    8: { 0: { v: 'Wallace' } },
-                    9: { 0: { v: 'Steve' } },
-                    10: { 0: { v: 'Minecraft' } },
+                    0: {
+                        0: {
+                            v: 'Column Header',
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: '1',
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: '2',
+                        },
+                    },
+                    3: {
+                        0: {
+                            v: 'Michael Jackson King of Pop',
+                        },
+                    },
+                    4: {
+                        0: {
+                            v: 'Michael',
+                        },
+                    },
+                    5: {
+                        0: {
+                            v: 'Jackson',
+                        },
+                    },
+                    6: {
+                        0: {
+                            v: 44876,
+                            t: 2,
+                            s: 'GOAhZb',
+                        },
+                    },
+                    7: {
+                        0: {
+                            v: 44877,
+                            t: 2,
+                            s: 'GOAhZb',
+                        },
+                    },
+                    8: {
+                        0: {
+                            v: 44878,
+                            t: 2,
+                            s: 'A-iqEg',
+                        },
+                    },
+                    9: {
+                        0: {
+                            v: 44879,
+                            t: 2,
+                            s: '_yIXzW',
+                        },
+                    },
+                    10: {
+                        0: {
+                            v: 44880,
+                            t: 2,
+                            s: 'qLSh7Z',
+                        },
+                    },
                 },
+                name: 'Sheet1',
+                rowCount: 1000,
+                columnCount: 20,
+                mergeData: [],
             },
         },
         resources: [
             {
-                name: SHEET_FILTER_SNAPSHOT_ID,
-                data: JSON.stringify({
-                    sheet1: {
-                        ref: { startColumn: 0, startRow: 0, endColumn: 10, endRow: 10 },
-                        filterColumns: [
-                            {
-                                colId: 0,
-                                filters: { filters: ['1'] },
-                            },
-                        ],
-                    },
-                }),
+                name: 'SHEET_FILTER_PLUGIN',
+                data: '{"sheet1":{"ref":{"startRow":0,"startColumn":0,"endRow":10,"endColumn":10},"filterColumns":[],"cachedFilteredOut":[]}}',
             },
         ],
-        locale: LocaleType.ZH_CN,
-        name: '',
-        sheetOrder: [
-            'sheet1',
-        ],
-        styles: {},
     };
 }
 
@@ -309,125 +379,251 @@ export function WithMergedCellFilterFactory(): IWorkbookData {
 
 export const ITEMS = [
     {
+        title: '2022',
+        key: '2022',
+        children: [
+            {
+                title: 'sheets-filter.date.11',
+                key: '2022-11',
+                children: [
+                    {
+                        title: '11',
+                        key: '2022-11-11',
+                        count: 1,
+                        originValues: new Set(['44876']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '12',
+                        key: '2022-11-12',
+                        count: 1,
+                        originValues: new Set(['44877']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '13',
+                        key: '2022-11-13',
+                        count: 1,
+                        originValues: new Set(['44878']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '14',
+                        key: '2022-11-14',
+                        count: 1,
+                        originValues: new Set(['44879']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '15',
+                        key: '2022-11-15',
+                        count: 1,
+                        originValues: new Set(['44880']),
+                        leaf: true,
+                        checked: true,
+                    },
+                ],
+                count: 5,
+                leaf: false,
+                checked: false,
+            },
+        ],
+        count: 5,
+        leaf: false,
+        checked: false,
+    },
+    {
+        title: 'Michael Jackson King of Pop',
+        leaf: true,
         checked: true,
+        key: 'Michael Jackson King of Pop',
         count: 1,
-        index: 0,
-        isEmpty: false,
-        value: '1',
     },
     {
-        checked: false,
+        title: 'Michael',
+        leaf: true,
+        checked: true,
+        key: 'Michael',
         count: 1,
-        index: 1,
-        isEmpty: false,
-        value: '2',
     },
     {
-        checked: false,
+        title: 'Jackson',
+        leaf: true,
+        checked: true,
+        key: 'Jackson',
         count: 1,
-        index: 2,
-        isEmpty: false,
-        value: 'Michael Jackson King of Pop',
     },
     {
-        checked: false,
+        title: '2',
+        leaf: true,
+        checked: true,
+        key: '2',
         count: 1,
-        index: 3,
-        isEmpty: false,
-        value: 'Michael',
     },
     {
-        checked: false,
+        title: '1',
+        leaf: true,
+        checked: true,
+        key: '1',
         count: 1,
-        index: 4,
-        isEmpty: false,
-        value: 'Jackson',
+    },
+];
+
+export const ITEMS_WITH_EMPTY = [
+    {
+        title: 'Wallace',
+        leaf: true,
+        checked: false,
+        key: 'Wallace',
+        count: 1,
     },
     {
+        title: 'Steve',
+        leaf: true,
         checked: false,
+        key: 'Steve',
         count: 1,
-        index: 5,
-        isEmpty: false,
-        value: 'Evan Wallace',
     },
     {
-        checked: false,
+        title: 'sheets-filter.panel.empty',
         count: 1,
-        index: 6,
-        isEmpty: false,
-        value: 'Evan',
+        leaf: true,
+        checked: true,
+        key: 'empty',
     },
     {
+        title: 'Minecraft',
+        leaf: true,
         checked: false,
+        key: 'Minecraft',
         count: 1,
-        index: 7,
-        isEmpty: false,
-        value: 'Wallace',
     },
     {
+        title: 'Michael Jackson King of Pop',
+        leaf: true,
         checked: false,
+        key: 'Michael Jackson King of Pop',
         count: 1,
-        index: 8,
-        isEmpty: false,
-        value: 'Steve',
     },
     {
+        title: 'Michael',
+        leaf: true,
         checked: false,
+        key: 'Michael',
         count: 1,
-        index: 9,
-        isEmpty: false,
-        value: 'Minecraft',
+    },
+    {
+        title: 'Jackson',
+        leaf: true,
+        checked: false,
+        key: 'Jackson',
+        count: 1,
+    },
+    {
+        title: 'Evan Wallace',
+        leaf: true,
+        checked: false,
+        key: 'Evan Wallace',
+        count: 1,
+    },
+    {
+        title: 'Evan',
+        leaf: true,
+        checked: false,
+        key: 'Evan',
+        count: 1,
+    },
+    {
+        title: '2',
+        leaf: true,
+        checked: false,
+        key: '2',
+        count: 1,
+    },
+    {
+        title: '1',
+        leaf: true,
+        checked: true,
+        key: '1',
+        count: 1,
     },
 ];
 
 export const E_ITEMS = [
     {
+        title: '2022',
+        key: '2022',
+        children: [
+            {
+                title: 'sheets-filter.date.11',
+                key: '2022-11',
+                children: [
+                    {
+                        title: '11',
+                        key: '2022-11-11',
+                        count: 1,
+                        originValues: new Set(['44876']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '12',
+                        key: '2022-11-12',
+                        count: 1,
+                        originValues: new Set(['44877']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '13',
+                        key: '2022-11-13',
+                        count: 1,
+                        originValues: new Set(['44878']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '14',
+                        key: '2022-11-14',
+                        count: 1,
+                        originValues: new Set(['44879']),
+                        leaf: true,
+                        checked: true,
+                    },
+                    {
+                        title: '15',
+                        key: '2022-11-15',
+                        count: 1,
+                        originValues: new Set(['44880']),
+                        leaf: true,
+                        checked: true,
+                    },
+                ],
+                count: 5,
+                leaf: false,
+                checked: false,
+            },
+        ],
+        count: 5,
+        leaf: false,
         checked: false,
-        count: 1,
-        index: 2,
-        isEmpty: false,
-        value: 'Michael Jackson King of Pop',
     },
     {
-        checked: false,
+        title: 'Michael Jackson King of Pop',
+        leaf: true,
+        checked: true,
+        key: 'Michael Jackson King of Pop',
         count: 1,
-        index: 3,
-        isEmpty: false,
-        value: 'Michael',
     },
     {
-        checked: false,
+        title: 'Michael',
+        leaf: true,
+        checked: true,
+        key: 'Michael',
         count: 1,
-        index: 5,
-        isEmpty: false,
-        value: 'Evan Wallace',
-    },
-    {
-        checked: false,
-        count: 1,
-        index: 6,
-        isEmpty: false,
-        value: 'Evan',
-    },
-    {
-        checked: false,
-        count: 1,
-        index: 7,
-        isEmpty: false,
-        value: 'Wallace',
-    },
-    {
-        checked: false,
-        count: 1,
-        index: 8,
-        isEmpty: false,
-        value: 'Steve',
-    },
-    {
-        checked: false,
-        count: 1,
-        index: 9,
-        isEmpty: false,
-        value: 'Minecraft',
     },
 ];

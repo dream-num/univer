@@ -72,7 +72,7 @@ const nextNodeAddToken = [
     matchToken.CLOSE_BRACKET,
 ];
 
-const getContent = (node: INode) => typeof node === 'string' ? node : node.token;
+const getContent = (node: INode) => node ? (typeof node === 'string' ? node : node.token) : '';
 /**
  * 根据输入内容,以及当前光标位置判断下一个 mouseDown 事件是不是需要新增选区
  *

@@ -86,7 +86,7 @@ export interface IRangeSelectorProps {
 
 const noopFunction = () => { };
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { initValue, unitId, subUnitId, errorText, placeholder, actions,
+    const { initValue, errorText, placeholder, actions,
             onChange = noopFunction,
             onVerify = noopFunction,
             onRangeSelectorDialogVisibleChange = noopFunction,
@@ -101,6 +101,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
+    // eslint-disable-next-line react/prefer-destructuring-assignment
+    const { unitId, subUnitId } = useMemo(() => ({ unitId: props.unitId, subUnitId: props.subUnitId }), []);
     const rangeSelectorWrapRef = useRef<HTMLDivElement>(null);
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(_isFocus);

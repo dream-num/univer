@@ -142,7 +142,8 @@ export const useSheetSelectionChange = (
                                 unitId: selection.rangeWithCoord.unitId ?? unitId,
                                 sheetName: getSheetNameById(rangeSheetId),
                             };
-                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                            const isAcrossSheet = rangeSheetId !== subUnitId;
+                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                             return refRanges[0];
                         }
                         return item.token;

@@ -347,6 +347,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             initValue={formulaStr as any}
                             unitId={unitId}
                             subUnitId={subUnitId}
+                            isSupportAcrossSheet
                             isFocus={isFocusFormulaEditor}
                             onChange={(v = '') => {
                                 const str = (v ?? '').trim();

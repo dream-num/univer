@@ -51,6 +51,10 @@ export interface IFormulaEditorProps {
     isFocus?: boolean;
     onFocus?: () => void;
     onBlur?: () => void;
+    /**
+     * The selection is based on the `unitId/subUnitId` of the first rendering to determine whether the selection spans subtables.
+     * `sheetName` is appended if there is a cross sheet
+     */
     isSupportAcrossSheet?: boolean;
     actions?: {
         handleOutClick?: (e: MouseEvent, cb: () => void) => void;
@@ -58,7 +62,7 @@ export interface IFormulaEditorProps {
 }
 const noop = () => { };
 export function FormulaEditor(props: IFormulaEditorProps) {
-    const { errorText, initValue, unitId, subUnitId, isFocus: _isFocus = true, isSupportAcrossSheet = false,
+    const { errorText, initValue, isFocus: _isFocus = true, isSupportAcrossSheet = false,
             onFocus = noop,
             onBlur = noop,
             onChange,
@@ -91,6 +95,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [formulaText]);
 
     const searchFunctionRef = useRef<HTMLElement>(null);
+    // eslint-disable-next-line react/prefer-destructuring-assignment
+    const { unitId, subUnitId } = useMemo(() => ({ unitId: props.unitId, subUnitId: props.subUnitId }), []);
     const [editor, editorSet] = useState<Editor>();
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);

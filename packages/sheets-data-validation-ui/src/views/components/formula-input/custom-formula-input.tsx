@@ -35,6 +35,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
             unitId={unitId}
             subUnitId={subUnitId}
             isFocus={isFocusFormulaEditor}
+            isSupportAcrossSheet
             onChange={(v = '') => {
                 const formula = v || '';
                 onChange?.({

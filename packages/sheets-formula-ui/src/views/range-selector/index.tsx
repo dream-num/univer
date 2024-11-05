@@ -32,6 +32,7 @@ import { filter, noop } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 
 import { useEditorInput } from './hooks/useEditorInput';
+import { useEmitChange } from './hooks/useEmitChange';
 import { useFocus } from './hooks/useFocus';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
@@ -161,33 +162,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
     }, 30), [isSupportAcrossSheet]);
 
-    const handleConfirm = (ranges: IUnitRangeName[]) => {
-        const text = unitRangesToText(ranges, isSupportAcrossSheet).join(matchToken.COMMA);
-        rangeStringSet(text);
-        onChange(text);
-        rangeDialogVisibleSet(false);
-        onRangeSelectorDialogVisibleChange(false);
-        setTimeout(() => {
-            editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
-        }, 30);
-    };
-
-    const handleClose = () => {
-        rangeDialogVisibleSet(false);
-        onRangeSelectorDialogVisibleChange(false);
-    };
-
-    const handleOpenModal = () => {
-        if (!isError) {
-            focus();
-            // 从另一个 editor 直接打开的时候,调整下事件监听顺序,确保打开面板的逻辑在 editor 切换之后
-            setTimeout(() => {
-                rangeDialogVisibleSet(true);
-                onRangeSelectorDialogVisibleChange(true);
-            }, 30);
-        }
-    };
-
     const focus = useFocus(editor);
 
     useLayoutEffect(() => {
@@ -211,10 +185,15 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const { checkScrollBar } = useResize(editor);
 
+    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeString);
+    const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
+
+    const needEmit = useEmitChange(sequenceNodes, handleInputDebounce, editor);
+
     const handleSheetSelectionChange = useMemo(() => {
         return (text: string, offset: number) => {
             rangeStringSet(text);
-            onChange(text);
+            needEmit();
             focus();
             if (offset !== -1) {
                 // 在渲染结束之后再设置选区
@@ -229,8 +208,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
         };
     }, [editor]);
 
-    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeString);
-    const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
     useSheetHighlight(!rangeDialogVisible && isFocus, unitId, subUnitId, sheetHighlightRanges);
 
     useSheetSelectionChange(!rangeDialogVisible && isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
@@ -253,8 +230,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',').replaceAll(/(^,)/g, '');
+                needEmit();
                 rangeStringSet(text);
-                handleInputDebounce(text);
             });
             return () => {
                 dispose.unsubscribe();
@@ -307,6 +284,33 @@ export function RangeSelector(props: IRangeSelectorProps) {
             focus();
             isFocusSet(true);
         }, 30);
+    };
+
+    const handleConfirm = (ranges: IUnitRangeName[]) => {
+        const text = unitRangesToText(ranges, isSupportAcrossSheet).join(matchToken.COMMA);
+        needEmit();
+        rangeStringSet(text);
+        rangeDialogVisibleSet(false);
+        onRangeSelectorDialogVisibleChange(false);
+        setTimeout(() => {
+            editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
+        }, 30);
+    };
+
+    const handleClose = () => {
+        rangeDialogVisibleSet(false);
+        onRangeSelectorDialogVisibleChange(false);
+    };
+
+    const handleOpenModal = () => {
+        if (!isError) {
+            focus();
+            // 从另一个 editor 直接打开的时候,调整下事件监听顺序,确保打开面板的逻辑在 editor 切换之后
+            setTimeout(() => {
+                rangeDialogVisibleSet(true);
+                onRangeSelectorDialogVisibleChange(true);
+            }, 30);
+        }
     };
 
     return (

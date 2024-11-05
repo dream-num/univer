@@ -36,7 +36,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
-    numfmt,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -729,7 +728,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 }
 
-// eslint-disable-next-line
 export function getCellDataByInput(
     cellData: ICellData,
     documentDataModel: Nullable<DocumentDataModel>,
@@ -802,13 +800,6 @@ export function getCellDataByInput(
             cellData.f = null;
             cellData.si = null;
         }
-    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.NUMBER;
     } else {
         // If the data is empty, the data is set to null.
         if (newDataStream === '' && cellData.v == null && cellData.p == null) {

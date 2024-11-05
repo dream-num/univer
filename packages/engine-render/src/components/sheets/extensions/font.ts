@@ -226,30 +226,30 @@ export class Font extends SheetExtension {
         const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
         const fontHeight = documentSkeleton.getSkeletonData()!.pages[0].height;
         const fontWidth = documentSkeleton.getSkeletonData()!.pages[0].width;
-
+        const PADDING = 2;
         let fontX = startX;
         let fontY = startY;
         switch (verticalAlign) {
             case VerticalAlign.TOP:
-                fontY = startY;
+                fontY = startY + PADDING;
                 break;
             case VerticalAlign.MIDDLE:
                 fontY = (startY + endY) / 2 - fontHeight / 2;
                 break;
             default:
-                fontY = endY - fontHeight;
+                fontY = endY - fontHeight - PADDING;
                 break;
         }
 
         switch (horizontalAlign) {
             case HorizontalAlign.RIGHT:
-                fontX = endX - fontWidth;
+                fontX = endX - fontWidth - PADDING;
                 break;
             case HorizontalAlign.CENTER:
                 fontX = (startX + endX) / 2 - fontWidth / 2;
                 break;
             default:
-                fontX = startX;
+                fontX = startX + PADDING;
                 break;
         }
 
@@ -262,8 +262,8 @@ export class Font extends SheetExtension {
                 if (drawingData) {
                     const image = fontsConfig.images?.[drawing.drawingId];
 
-                    const x = fontX + drawing.aLeft + 1;
-                    const y = fontY + drawing.aTop + 1;
+                    const x = fontX + drawing.aLeft;
+                    const y = fontY + drawing.aTop;
 
                     if (image && image.complete) {
                         ctx.save();

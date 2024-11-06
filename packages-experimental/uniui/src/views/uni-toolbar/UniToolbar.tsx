@@ -65,7 +65,7 @@ export function UniToolbar() {
         }
     };
 
-      // Listen for menu changes and update visible items
+    // Listen for menu changes and update visible items
     useEffect(() => {
         updateVisibleItems();
     }, [isMenuChange]);

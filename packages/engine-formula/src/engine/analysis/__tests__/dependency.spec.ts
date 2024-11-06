@@ -22,12 +22,12 @@ import { IFormulaCurrentConfigService } from '../../../services/current-data.ser
 import { IOtherFormulaManagerService } from '../../../services/other-formula-manager.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyTree } from '../../dependency/dependency-tree';
-import { FormulaDependencyGenerator } from '../../dependency/formula-dependency';
+import { IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test dependency', () => {
     let get: Injector['get'];
-    let formulaDependencyGenerator: FormulaDependencyGenerator;
+    let formulaDependencyGenerator: IFormulaDependencyGenerator;
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let otherFormulaManagerService: IOtherFormulaManagerService;
     let testUnitId = 'test';
@@ -38,7 +38,7 @@ describe('Test dependency', () => {
 
         get = testBed.get;
 
-        formulaDependencyGenerator = get(FormulaDependencyGenerator);
+        formulaDependencyGenerator = get(IFormulaDependencyGenerator);
 
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
 

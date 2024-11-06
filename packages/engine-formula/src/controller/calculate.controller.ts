@@ -32,13 +32,13 @@ import {
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import { CalculateFormulaService } from '../services/calculate-formula.service';
+import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
+        @ICalculateFormulaService private readonly _calculateFormulaService: ICalculateFormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();

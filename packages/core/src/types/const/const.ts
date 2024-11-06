@@ -154,6 +154,23 @@ export const DEFAULT_STYLES = {
         l: 0,
     },
     n: null,
+    /**
+     * border
+     */
+    bd: {
+        b: {
+            s: 0,
+        },
+        l: {
+            s: 0,
+        },
+        r: {
+            s: 0,
+        },
+        t: {
+            s: 0,
+        },
+    },
 };
 
 export const DEFAULT_SLIDE = {

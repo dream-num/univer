@@ -18,6 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import { debounce, FUniver } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctionService } from '../services/register-function.service';
+import { FSheetsFormula } from './f-sheets-formula';
 
 interface IFUniverSheetsFormulaMixin {
     /**
@@ -29,6 +30,8 @@ interface IFUniverSheetsFormulaMixin {
     registerFunction(config: IRegisterFunctionParams): IDisposable;
 
     // TODO@Dushusir: this API should be implemented on FFormula.
+
+    getSheetsFormula(): FSheetsFormula;
 }
 
 class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
@@ -71,6 +74,10 @@ class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormula
         // TODO@Dushusir: this should be moved to the services not API.
         this._debouncedFormulaCalculation();
         return functionsDisposable;
+    }
+
+    override getSheetsFormula(): FSheetsFormula {
+        return this._injector.createInstance(FSheetsFormula);
     }
 }
 

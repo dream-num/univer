@@ -19,7 +19,7 @@ import type { AstRootNode } from '../engine/ast-node';
 import type { FormulaDependencyTree, IFormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
-export interface IDependencyManagerService {
+export interface IDependencyManagerBaseService {
     dispose(): void;
 
     reset(): void;
@@ -49,11 +49,13 @@ export interface IDependencyManagerService {
 
     getLastTreeId(): number;
 
+    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
+
+}
+export interface IDependencyManagerService extends IDependencyManagerBaseService {
     getTreeById(treeId: number): Nullable<IFormulaDependencyTree>;
 
     getAllTree(): IFormulaDependencyTree[];
-
-    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
 
 }
 
@@ -64,19 +66,19 @@ export interface IDependencyManagerService {
  * thereby completing the calculation of the entire dependency tree.
  */
 export class DependencyManagerService extends Disposable implements IDependencyManagerService {
-    private _otherFormulaData: Map<string, Map<string, Map<string, ObjectMatrix<number>>>> = new Map(); //  [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Set<number> } }>;
+    protected _otherFormulaData: Map<string, Map<string, Map<string, ObjectMatrix<number>>>> = new Map(); //  [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Set<number> } }>;
 
-    private _featureFormulaData: Map<string, Map<string, Map<string, Nullable<number>>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: Nullable<number> } }>;
+    protected _featureFormulaData: Map<string, Map<string, Map<string, Nullable<number>>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: Nullable<number> } }>;
 
-    private _formulaData: Map<string, Map<string, ObjectMatrix<number>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<number> }>;
+    protected _formulaData: Map<string, Map<string, ObjectMatrix<number>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<number> }>;
 
-    private _definedNameMap: Map<string, Map<string, Set<number>>> = new Map(); // unitId -> definedName -> treeId
+    protected _definedNameMap: Map<string, Map<string, Set<number>>> = new Map(); // unitId -> definedName -> treeId
 
-    private _allTreeMap: Map<number, IFormulaDependencyTree> = new Map();
+    protected _allTreeMap: Map<number, IFormulaDependencyTree> = new Map();
 
-    private _otherFormulaDataMainData: Set<string> = new Set();
+    protected _otherFormulaDataMainData: Set<string> = new Set();
 
-    private _dependencyRTreeCache: RTree = new RTree();
+    protected _dependencyRTreeCache: RTree = new RTree();
 
     private _dependencyTreeIdLast: number = 0;
 
@@ -509,7 +511,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         return id;
     }
 
-    private _removeDependencyRTreeCacheById(unitId: string, sheetId: string) {
+    protected _removeDependencyRTreeCacheById(unitId: string, sheetId: string) {
         this._dependencyRTreeCache.removeById(unitId, sheetId);
     }
 
@@ -579,7 +581,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
     }
 
-    private _removeAllTreeMap(treeId: Nullable<number>) {
+    protected _removeAllTreeMap(treeId: Nullable<number>) {
         if (treeId == null) {
             return;
         }

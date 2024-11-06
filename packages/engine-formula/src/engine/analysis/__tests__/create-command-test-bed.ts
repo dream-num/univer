@@ -31,7 +31,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FormulaDataModel } from '../../../models/formula-data.model';
-import { CalculateFormulaService } from '../../../services/calculate-formula.service';
+import { CalculateFormulaService, ICalculateFormulaService } from '../../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
@@ -53,7 +53,7 @@ import { ReferenceNodeFactory } from '../../ast-node/reference-node';
 import { SuffixNodeFactory } from '../../ast-node/suffix-node';
 import { UnionNodeFactory } from '../../ast-node/union-node';
 import { ValueNodeFactory } from '../../ast-node/value-node';
-import { FormulaDependencyGenerator } from '../../dependency/formula-dependency';
+import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../../dependency/formula-dependency';
 import { Interpreter } from '../../interpreter/interpreter';
 import { Lexer } from '../lexer';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
@@ -291,7 +291,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 }
 
 function registerFormulaDependencies(injector: Injector) {
-    injector.add([CalculateFormulaService]);
+    injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
     injector.add([Lexer]);
     injector.add([LexerTreeBuilder]);
 
@@ -304,7 +304,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
     injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
 
-    injector.add([FormulaDependencyGenerator]);
+    injector.add([IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }]);
     injector.add([Interpreter]);
     injector.add([AstTreeBuilder]);
 

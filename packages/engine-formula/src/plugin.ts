@@ -38,11 +38,11 @@ import { ReferenceNodeFactory } from './engine/ast-node/reference-node';
 import { SuffixNodeFactory } from './engine/ast-node/suffix-node';
 import { UnionNodeFactory } from './engine/ast-node/union-node';
 import { ValueNodeFactory } from './engine/ast-node/value-node';
-import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
+import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
-import { CalculateFormulaService } from './services/calculate-formula.service';
+import { CalculateFormulaService, ICalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
 import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
@@ -91,8 +91,8 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
     override onRendered(): void {
         if (!this._config?.notExecuteFormula) {
-            this._injector.get(CalculateFormulaService);
-            this._injector.get(FormulaDependencyGenerator);
+            this._injector.get(ICalculateFormulaService);
+            this._injector.get(IFormulaDependencyGenerator);
         }
     }
 
@@ -121,7 +121,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             // only worker
             dependencies.push(
                 // Services
-                [CalculateFormulaService],
+                [ICalculateFormulaService, { useClass: CalculateFormulaService }],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
@@ -135,7 +135,8 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [SetFeatureCalculationController],
 
                 // Calculation engine
-                [FormulaDependencyGenerator],
+                [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
+
                 [Interpreter],
                 [AstTreeBuilder],
                 [Lexer],

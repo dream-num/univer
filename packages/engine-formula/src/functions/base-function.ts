@@ -155,10 +155,6 @@ export class BaseFunction {
         this._sheetNameMap = sheetNameMap;
     }
 
-    getFormulaDataModel() {
-        return this._formulaDataModel;
-    }
-
     setFormulaDataModel(_formulaDataModel: FormulaDataModel) {
         this._formulaDataModel = _formulaDataModel;
     }

@@ -17,6 +17,7 @@
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { FormulaDataModel } from '../../../models/formula-data.model';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -48,7 +49,7 @@ export class Formulatext extends BaseFunction {
             const cellValue = cellData.getValue(startRow + rowIndex, startColumn + columnIndex);
 
             if (cellValue?.f || cellValue?.si) {
-                const formulaString = this.getFormulaDataModel().getFormulaStringByCell(startRow + rowIndex, startColumn + columnIndex, sheetId, unitId);
+                const formulaString = (this._formulaDataModel as FormulaDataModel).getFormulaStringByCell(startRow + rowIndex, startColumn + columnIndex, sheetId, unitId);
 
                 return StringValueObject.create(formulaString as string);
             }

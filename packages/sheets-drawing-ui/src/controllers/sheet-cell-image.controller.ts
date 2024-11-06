@@ -22,7 +22,7 @@ import { DocDrawingController } from '@univerjs/docs-drawing';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 interface IImageCache {
@@ -164,6 +164,7 @@ export class SheetCellImageController extends Disposable {
         this._initSheetChange();
         this._initHandleResize();
         this._handleInitEditor();
+        this._handleWriteCell();
     }
 
     private _reRender(unitId: string) {
@@ -423,8 +424,10 @@ export class SheetCellImageController extends Disposable {
         this.disposeWithMe(
             this._univerInstanceService.unitAdded$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC && unit.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    this._docDrawingController.loadDrawingDataForUnit(unit.getUnitId());
-                    this._drawingManagerService.initializeNotification(unit.getUnitId());
+                    const unitId = unit.getUnitId();
+                    this._drawingManagerService.removeDrawingDataForUnit(unitId);
+                    this._docDrawingController.loadDrawingDataForUnit(unitId);
+                    this._drawingManagerService.initializeNotification(unitId);
                 }
             })
         );
@@ -434,10 +437,45 @@ export class SheetCellImageController extends Disposable {
                 const params = commandInfo.params;
                 const { unitId } = params as { unitId: string };
                 if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                    this._drawingManagerService.removeDrawingDataForUnit(unitId);
                     this._docDrawingController.loadDrawingDataForUnit(unitId);
                     this._drawingManagerService.initializeNotification(unitId);
                 }
             }
+        }));
+    }
+
+    private _handleWriteCell() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(AFTER_CELL_EDIT, {
+            priority: 9999,
+            handler: (cell, context, next) => {
+                if (cell?.p?.body?.dataStream.length === 3 && cell.p?.drawingsOrder?.length === 1) {
+                    const image = cell.p.drawings![cell.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
+                    const imageSize = getDrawingSizeByCell(
+                        this._injector,
+                        {
+                            unitId: context.unitId,
+                            subUnitId: context.subUnitId,
+                            row: context.row,
+                            col: context.col,
+                        },
+                        image.transform!.width!,
+                        image.transform!.height!
+                    );
+
+                    if (imageSize) {
+                        image.transform!.width = imageSize.width;
+                        image.transform!.height = imageSize.height;
+                        image.docTransform!.size.width = imageSize.width;
+                        image.docTransform!.size.height = imageSize.height;
+                        image.transform!.left = 0;
+                        image.transform!.top = 0;
+                        image.docTransform!.positionH.posOffset = 0;
+                        image.docTransform!.positionV.posOffset = 0;
+                    }
+                }
+                return next(cell);
+            },
         }));
     }
 }

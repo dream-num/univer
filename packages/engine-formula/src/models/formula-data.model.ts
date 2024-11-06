@@ -603,8 +603,12 @@ export class FormulaDataModel extends Disposable {
                         const column = Number(columnStr);
 
                         const currentCell = sheetInstance.getCellRaw(row, column);
+
                         // Calculation is only required when there is only a formula and no value
-                        if (!currentCell || !currentCell.f || ('v' in currentCell)) continue;
+                        const isFormula = isFormulaString(currentCell?.f) || isFormulaId(currentCell?.si);
+                        const noValue = currentCell?.v === undefined;
+
+                        if (!(isFormula && noValue)) continue;
 
                         if (!columnRanges[column]) columnRanges[column] = [];
 

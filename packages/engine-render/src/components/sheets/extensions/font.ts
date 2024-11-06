@@ -222,7 +222,7 @@ export class Font extends SheetExtension {
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix);
+            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix, 2);
             this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
@@ -285,7 +285,7 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontMatrix
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
@@ -340,7 +340,8 @@ export class Font extends SheetExtension {
                         endColumn,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
                     this._clipRectangleForOverflow(
@@ -351,7 +352,8 @@ export class Font extends SheetExtension {
                         col,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 } else {
                     this._clipRectangleForOverflow(
@@ -362,7 +364,8 @@ export class Font extends SheetExtension {
                         endColumn,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 }
             }
@@ -442,7 +445,8 @@ export class Font extends SheetExtension {
         endColumn: number,
         scale: number,
         rowHeightAccumulation: number[],
-        columnWidthAccumulation: number[]
+        columnWidthAccumulation: number[],
+        padding = 0
     ) {
         const startY = rowHeightAccumulation[startRow - 1] || 0;
         const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
@@ -450,7 +454,7 @@ export class Font extends SheetExtension {
         const startX = columnWidthAccumulation[startColumn - 1] || 0;
         const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-        ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
+        ctx.rectByPrecision(startX + padding, startY + padding, endX - startX - 2 * padding, endY - startY - 2 * padding);
         ctx.clip();
         // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }

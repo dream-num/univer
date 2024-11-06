@@ -44,7 +44,7 @@ export class BaseFunction {
     private _locale: LocaleType;
     private _sheetOrder: string[];
     private _sheetNameMap: { [sheetId: string]: string };
-    private _formulaDataModel: FormulaDataModel;
+    protected _formulaDataModel: Nullable<FormulaDataModel>;
 
     /**
      * Whether the function needs to expand the parameters

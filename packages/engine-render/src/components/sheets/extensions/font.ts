@@ -220,6 +220,7 @@ export class Font extends SheetExtension {
         ctx.restore();
 
         ctx.save();
+        ctx.beginPath();
         ctx.rectByPrecision(renderFontCtx.startX + 2, renderFontCtx.startY + 2, renderFontCtx.endX - renderFontCtx.startX - 4, renderFontCtx.endY - renderFontCtx.startY - 4);
         ctx.clip();
         this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);

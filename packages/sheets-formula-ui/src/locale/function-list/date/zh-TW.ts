@@ -128,6 +128,20 @@ export default {
             months: { name: '月份數', detail: '開始日期之前或之後的月份數。' },
         },
     },
+    EPOCHTODATE: {
+        description: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式',
+        abstract: '將 Unix Epoch 紀元時間戳記 (以秒、毫秒或微秒為單位) 轉換為世界標準時間 (UTC) 的日期時間格式',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hant&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            timestamp: { name: '時間戳記', detail: '以秒、毫秒或微秒為單位的 Unix Epoch 紀元時間戳記。' },
+            unit: { name: '時間單位', detail: '時間戳記的表示單位。預設值是 1: \n1 表示以秒為單位。\n2 表示以毫秒為單位。\n3 表示以微秒為單位。' },
+        },
+    },
     HOUR: {
         description: '將序號轉換為小時',
         abstract: '將序號轉換為小時',
@@ -262,6 +276,19 @@ export default {
         ],
         functionParameter: {
             timeText: { name: '時間文字', detail: '以任何一種時間格式表示的文字字串；例如，"6:45 PM" 和 "18:45"，引號中的文字字串表示時間。' },
+        },
+    },
+    TO_DATE: {
+        description: '將指定數字轉換成日期',
+        abstract: '將指定數字轉換成日期',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3094239?hl=zh-Hant&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要轉換成日期的引數或儲存格參照。' },
         },
     },
     TODAY: {

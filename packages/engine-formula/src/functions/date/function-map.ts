@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_DATE } from './function-names';
 import { DateFunction } from './date';
 import { Datedif } from './datedif';
 import { Datevalue } from './datevalue';
@@ -23,6 +22,8 @@ import { Days } from './days';
 import { Days360 } from './days360';
 import { Edate } from './edate';
 import { Eomonth } from './eomonth';
+import { Epochtodate } from './epochtodate';
+import { FUNCTION_NAMES_DATE } from './function-names';
 import { Hour } from './hour';
 import { Isoweeknum } from './isoweeknum';
 import { Minute } from './minute';
@@ -33,6 +34,7 @@ import { Now } from './now';
 import { Second } from './second';
 import { Time } from './time';
 import { Timevalue } from './timevalue';
+import { ToDate } from './to-date';
 import { Today } from './today';
 import { Weekday } from './weekday';
 import { Weeknum } from './weeknum';
@@ -50,6 +52,7 @@ export const functionDate = [
     [Days360, FUNCTION_NAMES_DATE.DAYS360],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Eomonth, FUNCTION_NAMES_DATE.EOMONTH],
+    [Epochtodate, FUNCTION_NAMES_DATE.EPOCHTODATE],
     [Hour, FUNCTION_NAMES_DATE.HOUR],
     [Isoweeknum, FUNCTION_NAMES_DATE.ISOWEEKNUM],
     [Minute, FUNCTION_NAMES_DATE.MINUTE],
@@ -60,6 +63,7 @@ export const functionDate = [
     [Second, FUNCTION_NAMES_DATE.SECOND],
     [Time, FUNCTION_NAMES_DATE.TIME],
     [Timevalue, FUNCTION_NAMES_DATE.TIMEVALUE],
+    [ToDate, FUNCTION_NAMES_DATE.TO_DATE],
     [Today, FUNCTION_NAMES_DATE.TODAY],
     [Weekday, FUNCTION_NAMES_DATE.WEEKDAY],
     [Weeknum, FUNCTION_NAMES_DATE.WEEKNUM],

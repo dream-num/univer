@@ -69,6 +69,19 @@ export default {
             value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
+    ISDATE: {
+        description: 'は、値が日付かどうかを返します',
+        abstract: 'は、値が日付かどうかを返します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9061381?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: '日付であるかを検証する値です。' },
+        },
+    },
     ISERR: {
         description: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
         abstract: '対象が #N/A 以外のエラー値のときに TRUE を返します。',

@@ -69,6 +69,19 @@ export default {
             value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
         },
     },
+    ISDATE: {
+        description: 'Returns whether a value is a date.',
+        abstract: 'Returns whether a value is a date.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9061381?hl=en&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as a date.' },
+        },
+    },
     ISERR: {
         description: 'Returns TRUE if the value is any error value except #N/A',
         abstract: 'Returns TRUE if the value is any error value except #N/A',

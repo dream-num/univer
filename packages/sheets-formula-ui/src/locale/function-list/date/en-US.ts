@@ -128,6 +128,20 @@ export default {
             months: { name: 'months', detail: 'The number of months before or after start_date.' },
         },
     },
+    EPOCHTODATE: {
+        description: 'Converts a Unix epoch timestamp in seconds, milliseconds, or microseconds to a datetime in Universal Time Coordinated (UTC).',
+        abstract: 'Converts a Unix epoch timestamp in seconds, milliseconds, or microseconds to a datetime in Universal Time Coordinated (UTC).',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            timestamp: { name: 'timestamp', detail: 'A Unix epoch timestamp, in seconds, milliseconds, or microseconds.' },
+            unit: { name: 'unit', detail: 'The unit of time in which the timestamp is expressed. 1 by default: \n1 indicates the time unit is seconds. \n2 indicates the time unit is milliseconds.\n3 indicates the time unit is microseconds.' },
+        },
+    },
     HOUR: {
         description: 'Converts a serial number to an hour',
         abstract: 'Converts a serial number to an hour',
@@ -262,6 +276,19 @@ export default {
         ],
         functionParameter: {
             timeText: { name: 'time_text', detail: 'A text string that represents a time in any one of the Microsoft Excel time formats; for example, "6:45 PM" and "18:45" text strings within quotation marks that represent time.' },
+        },
+    },
+    TO_DATE: {
+        description: 'Converts a provided number to a date.',
+        abstract: 'Converts a provided number to a date.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3094239?hl=en&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The argument or reference to a cell to be converted to a date.' },
         },
     },
     TODAY: {

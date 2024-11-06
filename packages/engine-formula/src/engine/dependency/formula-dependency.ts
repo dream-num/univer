@@ -105,9 +105,18 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
 
-        const updateTreeList = this._getUpdateTreeListAndMakeDependency();
+        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
-        const finalTreeList = this._calculateRunList(updateTreeList);
+        let finalTreeList = this._calculateRunList(updateTreeList);
+
+        const hasFeatureCalculation = this._dependencyFeatureCalculation(finalTreeList);
+
+        if (hasFeatureCalculation) {
+            finalTreeList.forEach((tree) => {
+                tree.resetState();
+            });
+            finalTreeList = this._calculateRunList(finalTreeList);
+        }
 
         const isCycleDependency = this._checkIsCycleDependency(finalTreeList);
 
@@ -118,55 +127,177 @@ export class FormulaDependencyGenerator extends Disposable {
         return Promise.resolve(finalTreeList);
     }
 
-    private _isCyclicUtil(treeId: number, colorMap: Map<number, number>): boolean {
-        const WHITE = 0;
-        const GRAY = 1;
-        const BLACK = 2;
-        const stack: number[] = [treeId];
+    private _dependencyFeatureCalculation(newTreeList: IFormulaDependencyTree[]) {
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
-        while (stack.length > 0) {
-            const currentTreeId = stack[stack.length - 1];
-            const color = colorMap.get(currentTreeId) || WHITE;
-
-            if (color === WHITE) {
-                colorMap.set(currentTreeId, GRAY);
-                const node = this._dependencyManagerService.getTreeById(currentTreeId);
-                if (node == null) {
-                    colorMap.set(currentTreeId, BLACK);
-                    stack.pop();
-                    continue;
-                }
-
-                const parents = this._dependencyManagerService.searchDependency(node.toRTreeItem());
-                for (const parentTreeId of parents) {
-                    const parentColor = colorMap.get(parentTreeId) || WHITE;
-                    if (parentColor === GRAY) {
-                        return true; // 发现环
-                    } else if (parentColor === WHITE) {
-                        stack.push(parentTreeId);
-                    }
-                }
-            } else {
-                colorMap.set(currentTreeId, BLACK);
-                stack.pop();
-            }
+        if (featureMap.size === 0) {
+            return;
         }
 
-        return false;
+        /**
+         * Clear the dependency relationships of all featureCalculation nodes in the tree.
+         * Because each execution requires rebuilding the reverse dependencies,
+         * the previous dependencies may become outdated due to data changes in applications such as pivot tables,
+         * which can result in an outdated dirty mark range.
+         */
+        this._clearFeatureCalculationNode(newTreeList);
+
+        let hasFeatureCalculation = false;
+
+        featureMap.forEach((subUnitMap, _) => {
+            subUnitMap.forEach((featureMap, _) => {
+                featureMap.forEach((params, featureId) => {
+                    const { unitId, subUnitId, getDirtyData } = params;
+                    const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
+                    const dirtyRanges = this._convertDirtyRangesToUnitRange(allDependency.dirtyRanges);
+                    const intersectTrees = this._intersectFeatureCalculation(dirtyRanges, newTreeList, { unitId, subUnitId, featureId });
+                    if (intersectTrees.length > 0) {
+                        let featureTree = this._getExistTreeList({ unitId, subUnitId, featureId }, newTreeList);
+                        if (featureTree == null) {
+                            featureTree = this._getFeatureFormulaTree(featureId, generateRandomDependencyTreeId(this._dependencyManagerService), params);
+                            newTreeList.push(featureTree);
+                        }
+                        featureTree.parents = new Set<number>();
+                        intersectTrees.forEach((tree) => {
+                            if (tree.hasChildren(featureTree!.treeId)) {
+                                return;
+                            }
+                            tree.pushChildren(featureTree!);
+                        });
+
+                        hasFeatureCalculation = true;
+                    }
+                });
+            });
+        });
+
+        return hasFeatureCalculation;
     }
 
-    private _checkIsCycleDependency(treeList: IFormulaDependencyTree[]): boolean {
-        const colorMap = new Map<number, number>();
+    private _clearFeatureCalculationNode(newTreeList: IFormulaDependencyTree[]) {
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
-        for (const tree of treeList) {
-            if (!colorMap.has(tree.treeId)) {
-                if (this._isCyclicUtil(tree.treeId, colorMap)) {
+        newTreeList.forEach((tree) => {
+            const newChildren = new Set<number>();
+            for (const childTreeId of tree.children) {
+                const child = this._dependencyManagerService.getTreeById(childTreeId);
+                if (!child) {
+                    continue;
+                }
+                if (!child.featureId) {
+                    newChildren.add(childTreeId);
+                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
+                    newChildren.add(childTreeId);
+                }
+            }
+            tree.children = newChildren;
+
+            const newParents = new Set<number>();
+            for (const parentTreeId of tree.parents) {
+                const parent = this._dependencyManagerService.getTreeById(parentTreeId);
+                if (!parent) {
+                    continue;
+                }
+                if (!parent.featureId) {
+                    newParents.add(parentTreeId);
+                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
+                    newParents.add(parentTreeId);
+                }
+            }
+            tree.parents = newParents;
+        });
+    }
+
+    /**
+     * TODO @DR-Univer: The next step will be to try changing the incoming dirtyRanges to an array, thus avoiding conversion.
+     * @param dirtyRanges
+     * @returns
+     */
+    private _convertDirtyRangesToUnitRange(dirtyRanges: IFeatureDirtyRangeType) {
+        const unitRange: IUnitRange[] = [];
+        for (const unitId in dirtyRanges) {
+            const unitMap = dirtyRanges[unitId];
+            for (const subUnitId in unitMap) {
+                const ranges = unitMap[subUnitId];
+                for (const range of ranges) {
+                    unitRange.push({
+                        unitId,
+                        sheetId: subUnitId,
+                        range,
+                    });
+                }
+            }
+        }
+        return unitRange;
+    }
+
+    private _intersectFeatureCalculation(dirtyRanges: IUnitRange[], newTreeList: IFormulaDependencyTree[], param: IFeatureFormulaParam) {
+        const dependencyTree = [];
+        const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges);
+        for (let i = 0, len = newTreeList.length; i < len; i++) {
+            const tree = newTreeList[i];
+            if (tree.unitId === param.unitId && tree.subUnitId === param.subUnitId && tree.featureId === param.featureId) {
+                continue;
+            }
+            const isAdded = treeIds.has(tree.treeId);
+            if (isAdded) {
+                dependencyTree.push(tree);
+            }
+        }
+        return dependencyTree;
+    }
+
+    private _getExistTreeList(param: IFeatureFormulaParam, treeList: IFormulaDependencyTree[]) {
+        const { unitId, subUnitId, featureId } = param;
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            if (tree.unitId === unitId && tree.subUnitId === subUnitId && tree.featureId === featureId) {
+                return tree;
+            }
+        }
+    }
+
+    private _isCyclicUtil(
+        treeId: number,
+        visited: Set<number>,
+        recursionStack: Set<number>
+    ) {
+        const node = this._dependencyManagerService.getTreeById(treeId);
+        if (node == null) {
+            return false;
+        }
+        if (!visited.has(node.treeId)) {
+            // Mark the current node as visited and part of recursion stack
+            visited.add(node.treeId);
+            recursionStack.add(node.treeId);
+
+            // Recur for all the children of this node
+            for (const childTreeId of node.children) {
+                if (!visited.has(childTreeId) && this._isCyclicUtil(childTreeId, visited, recursionStack)) {
+                    return true;
+                }
+                if (recursionStack.has(childTreeId)) {
                     return true;
                 }
             }
         }
+        recursionStack.delete(node.treeId); // remove the node from recursion stack
+        return false;
+    }
 
-        colorMap.clear();
+    private _checkIsCycleDependency(treeList: IFormulaDependencyTree[]) {
+        const visited = new Set<number>();
+        const recursionStack = new Set<number>();
+
+        // Call the recursive helper function to detect cycle in different
+        // DFS trees
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            const isCycle = this._isCyclicUtil(tree.treeId, visited, recursionStack);
+            if (isCycle === true) {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -677,7 +808,7 @@ export class FormulaDependencyGenerator extends Disposable {
      * Build a formula dependency tree based on the dependency relationships.
      * @param treeList
      */
-    private _getUpdateTreeListAndMakeDependency() {
+    private _getUpdateTreeListAndMakeDependency(treeList: IFormulaDependencyTree[]) {
         const newTreeList: IFormulaDependencyTree[] = [];
         const existTree = new Set<number>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
@@ -686,7 +817,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
-        const allTree = this._dependencyManagerService.getAllTree();
+
+        const allTree: IFormulaDependencyTree[] = this._dependencyManagerService.buildDependencyTree(treeList);
+
         for (const tree of allTree) {
             // const tree = allTree[i];
             const treeId = tree.treeId;
@@ -712,29 +845,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
         return newTreeList;
-    }
-
-    /**
-     * TODO @DR-Univer: The next step will be to try changing the incoming dirtyRanges to an array, thus avoiding conversion.
-     * @param dirtyRanges
-     * @returns
-     */
-    private _convertDirtyRangesToUnitRange(dirtyRanges: IFeatureDirtyRangeType) {
-        const unitRange: IUnitRange[] = [];
-        for (const unitId in dirtyRanges) {
-            const unitMap = dirtyRanges[unitId];
-            for (const subUnitId in unitMap) {
-                const ranges = unitMap[subUnitId];
-                for (const range of ranges) {
-                    unitRange.push({
-                        unitId,
-                        sheetId: subUnitId,
-                        range,
-                    });
-                }
-            }
-        }
-        return unitRange;
     }
 
     private _includeTreeFeature(tree: FormulaDependencyTree) {
@@ -873,7 +983,7 @@ export class FormulaDependencyGenerator extends Disposable {
     private _calculateRunList(treeList: IFormulaDependencyTree[]) {
         const stack = treeList;
         const formulaRunList = [];
-        const cacheStack: Set<IFormulaDependencyTree> = new Set();
+        const cacheStack: IFormulaDependencyTree[] = [];
         while (stack.length > 0) {
             const tree = stack.pop();
 
@@ -890,11 +1000,9 @@ export class FormulaDependencyGenerator extends Disposable {
             }
 
             // It will clear the array.
-            cacheStack.clear();
+            cacheStack.length = 0;
 
-            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
-
-            for (const parentTreeId of searchResults) {
+            for (const parentTreeId of tree.parents) {
                 const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
                     throw new Error('ParentDependencyTree object is null');
@@ -902,10 +1010,10 @@ export class FormulaDependencyGenerator extends Disposable {
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;
                 }
-                cacheStack.add(parentTree);
+                cacheStack.push(parentTree);
             }
 
-            if (cacheStack.size === 0) {
+            if (cacheStack.length === 0) {
                 formulaRunList.push(tree);
                 tree.setSkip();
             } else {
@@ -914,6 +1022,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        return formulaRunList.reverse();
+        return formulaRunList;
     }
 }

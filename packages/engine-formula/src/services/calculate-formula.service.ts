@@ -228,7 +228,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-        const treeList = await this._formulaDependencyGenerator.generate();
+        const treeList = (await this._formulaDependencyGenerator.generate()).reverse();
 
         const interpreter = this._interpreter;
 

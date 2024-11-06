@@ -53,6 +53,8 @@ export interface IDependencyManagerService {
 
     getAllTree(): IFormulaDependencyTree[];
 
+    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
+
 }
 
 /**
@@ -80,6 +82,81 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     override dispose(): void {
         this.reset();
+    }
+
+    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees: IFormulaDependencyTree[] = []): IFormulaDependencyTree[] {
+        const allTrees = this.getAllTree();
+        if (shouldBeBuildTrees.length === 0) {
+            this._buildReverseDependency(allTrees, dependencyTrees);
+            return allTrees;
+        }
+
+        this._buildDependencyTree(allTrees, shouldBeBuildTrees);
+        this._buildReverseDependency(allTrees, shouldBeBuildTrees);
+        return allTrees;
+    }
+
+    /**
+     * Build the dependency relationship between the trees.
+     * @param allTrees  all FormulaDependencyTree
+     * @param shouldBeBuildTrees  FormulaDependencyTree[] | FormulaDependencyTreeCache
+     */
+    private _buildDependencyTree(allTrees: IFormulaDependencyTree[], shouldBeBuildTrees: IFormulaDependencyTree[]) {
+        const shouldBeBuildTreeMap = new Map<number, IFormulaDependencyTree>();
+        for (let i = 0; i < shouldBeBuildTrees.length; i++) {
+            const tree = shouldBeBuildTrees[i];
+            shouldBeBuildTreeMap.set(tree.treeId, tree);
+        }
+
+        for (let i = 0; i < allTrees.length; i++) {
+            const tree = allTrees[i];
+            const RTreeItem = tree.toRTreeItem();
+
+            const searchResults = this._dependencyRTreeCache.bulkSearch(RTreeItem);
+
+            for (const id of searchResults) {
+                const shouldBeBuildTree = shouldBeBuildTreeMap.get(id as number);
+
+                if (shouldBeBuildTree && tree !== shouldBeBuildTree && !shouldBeBuildTree.hasChildren(tree.treeId)) {
+                    shouldBeBuildTree.pushChildren(tree);
+                }
+            }
+        }
+
+        // console.log('searchResultsCount:', count);
+
+        shouldBeBuildTreeMap.clear();
+    }
+
+    /**
+     * Build the reverse dependency relationship between the trees.
+     * @param allTrees
+     * @param dependencyTrees
+     */
+    private _buildReverseDependency(allTrees: IFormulaDependencyTree[], dependencyTrees: IFormulaDependencyTree[]) {
+        const allTreeMap = new Map<number, IFormulaDependencyTree>();
+
+        for (let i = 0; i < allTrees.length; i++) {
+            const tree = allTrees[i];
+            allTreeMap.set(tree.treeId, tree);
+        }
+
+        for (let i = 0; i < dependencyTrees.length; i++) {
+            const tree = dependencyTrees[i];
+            const RTreeItem = tree.toRTreeItem();
+
+            const searchResults = this._dependencyRTreeCache.bulkSearch(RTreeItem);
+
+            for (const id of searchResults) {
+                const allTree = allTreeMap.get(id as number);
+
+                if (allTree && tree !== allTree && !allTree.hasChildren(tree.treeId)) {
+                    allTree.pushChildren(tree);
+                }
+            }
+        }
+
+        allTreeMap.clear();
     }
 
      /**
@@ -152,6 +229,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
                 treeSet.forValue((row, column, treeId) => {
                     this._removeDependencyRTreeCache(treeId);
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
                     this._removeAllTreeMap(treeId);
                 });
 
@@ -197,6 +275,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 formulaTreeSet.forValue((row, column, treeId) => {
                     const tree = this._allTreeMap.get(treeId);
                     if (tree) {
+                        this.clearDependencyForTree(tree);
                         this._removeAllTreeMap(treeId);
                     }
                 });
@@ -218,6 +297,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                     formulaTreeSet.forValue((row, column, treeId) => {
                         const tree = this._allTreeMap.get(treeId);
                         if (tree) {
+                            this.clearDependencyForTree(tree);
                             this._removeAllTreeMap(treeId);
                         }
                     });
@@ -260,6 +340,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 this._removeDependencyRTreeCache(deleteTreeId);
 
                 sheetMap.delete(featureId);
+                this.clearDependencyForTree(this._allTreeMap.get(deleteTreeId));
                 this._removeAllTreeMap(deleteTreeId);
             });
         }
@@ -275,6 +356,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 if (featureTreeId == null) {
                     return;
                 }
+                this.clearDependencyForTree(this._allTreeMap.get(featureTreeId));
                 this._removeAllTreeMap(featureTreeId);
             });
 
@@ -286,6 +368,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                     if (featureTreeId == null) {
                         return;
                     }
+                    this.clearDependencyForTree(this._allTreeMap.get(featureTreeId));
                     this._removeAllTreeMap(featureTreeId);
                 });
             });
@@ -326,6 +409,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             this._removeDependencyRTreeCache(deleteTreeId);
 
             sheetMatrix.realDeleteValue(row, column);
+            this.clearDependencyForTree(this._allTreeMap.get(deleteTreeId));
             this._removeAllTreeMap(deleteTreeId);
         }
     }
@@ -341,7 +425,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 if (treeId == null) {
                     return true;
                 }
-
+                this.clearDependencyForTree(this._allTreeMap.get(treeId));
                 this._removeAllTreeMap(treeId);
             });
 
@@ -354,7 +438,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                     if (treeId == null) {
                         return true;
                     }
-
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
                     this._removeAllTreeMap(treeId);
                 });
             });
@@ -384,6 +468,35 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         this._dependencyRTreeCache.bulkInsert(searchRanges);
 
         this._addAllTreeMap(tree);
+    }
+
+    /**
+     * Clear the dependency relationship of the tree.
+     * establish the relationship between the parent and the child.
+     * @param shouldBeClearTree
+     */
+    clearDependencyForTree(shouldBeClearTree: Nullable<IFormulaDependencyTree>) {
+        if (shouldBeClearTree == null) {
+            return;
+        }
+
+        const parents = shouldBeClearTree.parents;
+
+        const children = shouldBeClearTree.children;
+
+        const allTreeMap = this._allTreeMap;
+
+        for (const parentTreeId of parents) {
+            const parent = allTreeMap.get(parentTreeId);
+            parent?.children.delete(shouldBeClearTree.treeId);
+        }
+
+        for (const childTreeId of children) {
+            const child = allTreeMap.get(childTreeId);
+            child?.parents.delete(shouldBeClearTree.treeId);
+        }
+
+        shouldBeClearTree.dispose();
     }
 
     private _restDependencyTreeId() {
@@ -458,6 +571,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             if (treeSet) {
                 for (const treeId of treeSet) {
                     this._removeDependencyRTreeCache(treeId);
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
                     this._removeAllTreeMap(treeId);
                 }
                 treeSet.clear();

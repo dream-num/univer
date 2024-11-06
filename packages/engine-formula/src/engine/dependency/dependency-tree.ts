@@ -65,6 +65,25 @@ class FormulaDependencyTreeCalculator {
     isSkip() {
         return this._state === FDtreeStateType.SKIP;
     }
+
+    treeId: number;
+
+    children: Set<number> = new Set();
+
+    parents: Set<number> = new Set();
+
+    pushChildren(tree: FormulaDependencyTreeCalculator) {
+        this.children.add(tree.treeId);
+        tree._pushParent(this);
+    }
+
+    hasChildren(treeId: number) {
+        return this.children.has(treeId);
+    }
+
+    private _pushParent(tree: FormulaDependencyTreeCalculator) {
+        this.parents.add(tree.treeId);
+    }
 }
 
 type GetDirtyDataType = Nullable<
@@ -76,7 +95,6 @@ type GetDirtyDataType = Nullable<
 export type IFormulaDependencyTree = FormulaDependencyTree | FormulaDependencyTreeVirtual;
 
 export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculator {
-    treeId: number;
     refTree: Nullable<FormulaDependencyTree>;
     refOffsetX: number = -1;
     refOffsetY: number = -1;
@@ -263,8 +281,6 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
  * is used to determine the order of formula calculations.
  */
 export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
-    treeId: number = -1;
-
     isCache: boolean = false;
 
     featureId: Nullable<string>;

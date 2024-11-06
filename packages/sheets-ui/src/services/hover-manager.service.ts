@@ -46,6 +46,8 @@ export interface IHoverRichTextPosition extends IHoverCellPosition {
      * rect of custom-range or bullet
      */
     rect?: Nullable<IBoundRectNoAngle>;
+
+    drawing?: Nullable<string>;
 }
 
 export class HoverManagerService extends Disposable {
@@ -78,6 +80,7 @@ export class HoverManagerService extends Disposable {
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
                 && pre?.customRange?.startIndex === aft?.customRange?.startIndex
                 && pre?.customRange?.endIndex === aft?.customRange?.endIndex
+                && pre?.drawing === aft?.drawing
             )
         ),
         map((cell) => cell && {
@@ -88,6 +91,7 @@ export class HoverManagerService extends Disposable {
             customRange: cell.customRange,
             bullet: cell.bullet,
             rect: cell.rect,
+            drawing: cell.drawing,
         })
     );
 
@@ -157,6 +161,10 @@ export class HoverManagerService extends Disposable {
             rect: IBoundRectNoAngle;
             paragraph: IParagraph;
         }> = null;
+        let drawing: Nullable<{
+            rect: IBoundRectNoAngle;
+            drawingId: string;
+        }> = null;
 
         const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
         const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
@@ -170,16 +178,17 @@ export class HoverManagerService extends Disposable {
             const innerY = offsetY - position.startY - topOffset;
             customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));
             bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top) <= innerY && innerY <= (list.rect.bottom));
+            drawing = rects.drawings.find((drawing) => drawing.rect.left <= innerX && innerX <= drawing.rect.right && (drawing.rect.top) <= innerY && innerY <= (drawing.rect.bottom));
         }
 
-        const rect = customRange?.rects.pop() ?? bullet?.rect;
-
+        const rect = customRange?.rects.pop() ?? bullet?.rect ?? drawing?.rect;
         return {
             location,
             position,
             overflowLocation,
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
+            drawing: drawing?.drawingId,
             rect: rect && {
                 top: rect.top + cell.mergeInfo.startY + topOffset,
                 bottom: rect.bottom + cell.mergeInfo.startY + topOffset,

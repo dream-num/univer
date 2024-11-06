@@ -60,6 +60,7 @@ import {
 } from '../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetProtectionCommand } from '../commands/commands/set-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
 import {
@@ -111,8 +112,8 @@ import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-works
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
-import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 
+import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
@@ -278,6 +279,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 DeleteWorksheetProtectionMutation,
                 SetWorksheetPermissionPointsMutation,
                 AddRangeProtectionCommand,
+                SetProtectionCommand,
                 DeleteRangeProtectionCommand,
                 AddRangeProtectionMutation,
                 DeleteRangeProtectionMutation,

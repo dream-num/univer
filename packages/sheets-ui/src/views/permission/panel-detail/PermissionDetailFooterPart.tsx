@@ -20,10 +20,9 @@ import type { IPermissionPanelRule } from '../../../services/permission/sheet-pe
 import { IAuthzIoService, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { ObjectScope, UnitAction, UnitRole } from '@univerjs/protocol';
-import { AddRangeProtectionCommand, EditStateEnum, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { AddRangeProtectionCommand, EditStateEnum, SetProtectionCommand, UnitObject, ViewStateEnum } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
 import React from 'react';
-import { SetProtectionCommand } from '../../../commands/commands/range-protection.command';
 import { AddWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { getUserListEqual } from '../../../common/utils';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';

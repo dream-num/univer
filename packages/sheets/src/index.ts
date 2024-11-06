@@ -315,6 +315,7 @@ export {
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
+export { SetProtectionCommand } from './commands/commands/set-protection.command';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
 export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteRangeProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';

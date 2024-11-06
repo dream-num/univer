@@ -377,7 +377,6 @@ export class CommandService extends Disposable implements ICommandService {
                 // If need custom logic, can add it here
                 return false as R;
             } else {
-                this._logService.error(error);
                 throw error;
             }
         }
@@ -427,7 +426,6 @@ export class CommandService extends Disposable implements ICommandService {
             if (error instanceof CustomCommandExecutionError) {
                 return false as R;
             } else {
-                this._logService.error(error);
                 throw error;
             }
         }

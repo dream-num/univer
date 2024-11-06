@@ -16,9 +16,8 @@
 
 import type { ICommand, Workbook } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
-import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, Tools, UniverInstanceType } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetProtectionMutation, SheetsSelectionsService, UnitObject, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, RangeProtectionRuleModel, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SheetPermissionOpenPanelOperation } from '../operations/sheet-permission-open-panel.operation';
 import { DeleteWorksheetProtectionCommand } from './worksheet-protection.command';
 
@@ -33,11 +32,6 @@ export interface IDeleteRangeProtectionParams {
     unitId: string;
     subUnitId: string;
     rule: IRangeProtectionRule;
-}
-
-export interface ISetProtectionParams {
-    rule: IPermissionPanelRule;
-    oldRule: IPermissionPanelRule;
 }
 
 export const AddRangeProtectionFromToolbarCommand: ICommand = {
@@ -86,76 +80,6 @@ export const ViewSheetPermissionFromSheetBarCommand: ICommand = {
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: false });
-        return true;
-    },
-};
-
-export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.add-range-protection',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
-        const { rule, permissionId } = params;
-
-        const { unitId, subUnitId, ranges, description } = rule;
-        const rules = [{
-            ranges,
-            permissionId,
-            id: selectionProtectionModel.createRuleId(unitId, subUnitId),
-            description,
-        }];
-
-        const result = await commandService.executeCommand(AddRangeProtectionMutation.id, {
-            unitId,
-            subUnitId,
-            rules,
-        });
-
-        if (result) {
-            const redoMutations = [{ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules } }];
-            const undoMutations = [{ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: rules.map((rule) => rule.id) } }];
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                redoMutations,
-                undoMutations,
-            });
-        }
-
-        return true;
-    },
-};
-
-export const DeleteRangeSelectionCommand: ICommand<IDeleteRangeProtectionParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.delete-range-protection',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const { unitId, subUnitId, rule } = params;
-
-        const redoMutationParam = {
-            unitId,
-            subUnitId,
-            ruleIds: [rule.id],
-        };
-        const result = await commandService.executeCommand(DeleteRangeProtectionMutation.id, redoMutationParam);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                redoMutations: [{ id: DeleteRangeProtectionMutation.id, params: redoMutationParam }],
-                undoMutations: [{ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [rule] } }],
-            });
-        }
-
         return true;
     },
 };
@@ -261,61 +185,3 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
     },
 };
 
-export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-protection',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
-        const { rule, oldRule } = params;
-        const { unitId, subUnitId } = rule;
-
-        const redoMutations = [];
-        const undoMutations = [];
-
-        if (oldRule?.unitType === rule.unitType) {
-            if (rule.unitType === UnitObject.Worksheet) {
-                redoMutations.push({ id: SetWorksheetProtectionMutation.id, params: { unitId, subUnitId, rule } });
-                undoMutations.push({ id: SetWorksheetProtectionMutation.id, params: { unitId, subUnitId, rule: oldRule } });
-            } else {
-                redoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, rule, ruleId: (rule as IRangeProtectionRule).id } });
-                undoMutations.push({ id: SetRangeProtectionMutation.id, params: { unitId, subUnitId, ruleId: (oldRule as IRangeProtectionRule).id, rule: oldRule } });
-            }
-        } else {
-            if (oldRule) {
-                if (oldRule.unitType === UnitObject.Worksheet) {
-                    redoMutations.push({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
-                    undoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule: oldRule, subUnitId: oldRule.subUnitId } });
-                } else if (oldRule.unitType === UnitObject.SelectRange) {
-                    redoMutations.push({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [(oldRule as IRangeProtectionRule).id] } });
-                    undoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [oldRule] } });
-                }
-            }
-
-            if (rule.unitType === UnitObject.Worksheet) {
-                redoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } });
-                undoMutations.unshift({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
-            } else if (rule.unitType === UnitObject.SelectRange) {
-                (rule as IRangeProtectionRule).id = rangeProtectionRuleModel.createRuleId(unitId, subUnitId);
-                redoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [rule] } });
-                undoMutations.unshift({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [(rule as IRangeProtectionRule).id] } });
-            }
-        }
-
-        const result = sequenceExecute(redoMutations, commandService);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations,
-                redoMutations,
-            });
-        }
-
-        return true;
-    },
-};

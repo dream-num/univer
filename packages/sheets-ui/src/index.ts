@@ -145,13 +145,10 @@ export {
 export { InsertRangeMoveDownConfirmCommand } from './commands/commands/insert-range-move-down-confirm.command';
 export { InsertRangeMoveRightConfirmCommand } from './commands/commands/insert-range-move-right-confirm.command';
 export {
-    AddRangeProtectionCommand,
     AddRangeProtectionFromContextMenuCommand,
     AddRangeProtectionFromSheetBarCommand,
     AddRangeProtectionFromToolbarCommand,
     DeleteRangeProtectionFromContextMenuCommand,
-    DeleteRangeSelectionCommand,
-    SetProtectionCommand,
     SetRangeProtectionFromContextMenuCommand,
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,

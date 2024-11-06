@@ -17,8 +17,10 @@
 import type { ICellData, IDisposable, IDocDrawingBase, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import type { ISetRangeValuesMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, ObjectMatrix, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IImageIoService, ImageSourceType } from '@univerjs/drawing';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, ObjectMatrix, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocDrawingController } from '@univerjs/docs-drawing';
+import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
+import { IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
@@ -151,7 +153,9 @@ export class SheetCellImageController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(DocDrawingController) private readonly _docDrawingController: DocDrawingController
     ) {
         super();
 
@@ -159,6 +163,7 @@ export class SheetCellImageController extends Disposable {
         this._initInterceptor();
         this._initSheetChange();
         this._initHandleResize();
+        this._handleInitEditor();
     }
 
     private _reRender(unitId: string) {
@@ -410,6 +415,28 @@ export class SheetCellImageController extends Disposable {
                         }
                     }
                 });
+            }
+        }));
+    }
+
+    private _handleInitEditor() {
+        this.disposeWithMe(
+            this._univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (unit.type === UniverInstanceType.UNIVER_DOC && unit.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    this._docDrawingController.loadDrawingDataForUnit(unit.getUnitId());
+                    this._drawingManagerService.initializeNotification(unit.getUnitId());
+                }
+            })
+        );
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === ReplaceSnapshotCommand.id) {
+                const params = commandInfo.params;
+                const { unitId } = params as { unitId: string };
+                if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                    this._docDrawingController.loadDrawingDataForUnit(unitId);
+                    this._drawingManagerService.initializeNotification(unitId);
+                }
             }
         }));
     }

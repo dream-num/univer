@@ -88,10 +88,10 @@ export class DocDrawingController extends Disposable {
         }
 
         documentDataModel.resetDrawing(drawingMapItem.data, drawingMapItem.order);
-        this._initDataLoader(unitId);
+        this.loadDrawingDataForUnit(unitId);
     }
 
-    private _initDataLoader(unitId: string): boolean {
+    loadDrawingDataForUnit(unitId: string): boolean {
         const dataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!dataModel) {
             return false;

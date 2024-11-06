@@ -219,7 +219,11 @@ export class Font extends SheetExtension {
         ctx.closePath();
         ctx.restore();
 
+        ctx.save();
+        ctx.rect(renderFontCtx.startX + 2, renderFontCtx.startY + 2, renderFontCtx.endX - renderFontCtx.startX - 4, renderFontCtx.endY - renderFontCtx.startY - 4);
+        ctx.clip();
         this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
+        ctx.restore();
     };
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
@@ -266,9 +270,7 @@ export class Font extends SheetExtension {
                     const y = fontY + drawing.aTop;
 
                     if (image && image.complete) {
-                        ctx.save();
                         ctx.drawImage(image, x, y, drawing.width, drawing.height);
-                        ctx.restore();
                     }
                 }
             });

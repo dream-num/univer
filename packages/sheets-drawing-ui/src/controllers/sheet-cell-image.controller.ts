@@ -23,6 +23,7 @@ import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetRangeValuesMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 interface IImageCache {
@@ -155,7 +156,8 @@ export class SheetCellImageController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(DocDrawingController) private readonly _docDrawingController: DocDrawingController
+        @Inject(DocDrawingController) private readonly _docDrawingController: DocDrawingController,
+        @Inject(IEditorBridgeService) private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
 
@@ -425,7 +427,7 @@ export class SheetCellImageController extends Disposable {
             this._univerInstanceService.unitAdded$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC && unit.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                     const unitId = unit.getUnitId();
-                    this._drawingManagerService.removeDrawingDataForUnit(unitId);
+                    // this._drawingManagerService.removeDrawingDataForUnit(unitId);
                     this._docDrawingController.loadDrawingDataForUnit(unitId);
                     this._drawingManagerService.initializeNotification(unitId);
                 }
@@ -441,6 +443,12 @@ export class SheetCellImageController extends Disposable {
                     this._docDrawingController.loadDrawingDataForUnit(unitId);
                     this._drawingManagerService.initializeNotification(unitId);
                 }
+            }
+        }));
+
+        this.disposeWithMe(this._editorBridgeService.visible$.subscribe((param) => {
+            if (!param.visible) {
+                this._drawingManagerService.removeDrawingDataForUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             }
         }));
     }

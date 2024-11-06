@@ -570,7 +570,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
-
+        // console.log('===finalCell', Tools.deepClone(finalCell));
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,

@@ -67,7 +67,7 @@ export class BaseFunction {
     needsSheetsInfo: boolean = false;
 
     /**
-     * Whether the function needs sheets info
+     * Whether the function needs function methods in FormulaDataModel
      */
     needsFormulaDataModel: boolean = false;
 

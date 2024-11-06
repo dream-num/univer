@@ -140,9 +140,8 @@ export class DrawingRenderService {
         const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
 
         const adjustSize = this._adjustImageSize(width, height, screenWidth, screenHeight);
-
         const dialog = this._dialogService.open({
-            width: adjustSize.width,
+            width: Math.max(adjustSize.width, 200),
             id: dialogId,
             style: { margin: '0', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
             children: {

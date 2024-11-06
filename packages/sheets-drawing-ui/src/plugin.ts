@@ -42,6 +42,7 @@ import { SheetDrawingPrintingController } from './controllers/sheet-drawing-prin
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+import { SheetCellCacheManagerService } from './services/sheet-cell-cache-manager.service';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
@@ -69,6 +70,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     override onStarting(): void {
         registerDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
+            [SheetCellCacheManagerService],
             [SheetDrawingUIController],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
@@ -80,6 +82,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
+            [SheetCellCacheManagerService],
             [SheetCellImageController],
         ]);
     }

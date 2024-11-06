@@ -19,9 +19,12 @@ import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService } from '@univerjs/sheets-ui';
+import { combineLatest } from 'rxjs';
 import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 
 export class SheetCellImageHoverController extends Disposable {
+    private _isSetCursor = false;
+
     constructor(
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
@@ -35,26 +38,25 @@ export class SheetCellImageHoverController extends Disposable {
     }
 
     private _initHover() {
-        let isSetCursor = false;
-        this.disposeWithMe(this._hoverManagerService.currentRichText$.subscribe((hover) => {
+        this.disposeWithMe(combineLatest([this._hoverManagerService.currentRichText$, this._selectionsService.selectionMoveEnd$]).subscribe(([hover]) => {
             if (hover) {
                 const currentSelection = this._selectionsService.getWorkbookSelections(hover.unitId).getSelectionOfWorksheet(hover.subUnitId)[0];
                 const renderer = this._renderManagerService.getRenderById(hover.unitId);
                 if (renderer) {
-                    if (hover.drawing && currentSelection.primary?.actualColumn === hover.col && currentSelection.primary.actualRow === hover.row) {
+                    if (hover.drawing && currentSelection?.primary?.actualColumn === hover.col && currentSelection?.primary?.actualRow === hover.row) {
                         renderer.mainComponent?.setCursor(CURSOR_TYPE.ZOOM_IN);
-                        isSetCursor = true;
+                        this._isSetCursor = true;
                     } else {
                         renderer.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
-                        isSetCursor = false;
+                        this._isSetCursor = false;
                     }
                 }
             } else {
-                if (isSetCursor) {
+                if (this._isSetCursor) {
                     const renderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
                     if (renderer) {
                         renderer.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
-                        isSetCursor = false;
+                        this._isSetCursor = false;
                     }
                 }
             }
@@ -64,12 +66,8 @@ export class SheetCellImageHoverController extends Disposable {
     private _initImageClick() {
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((clickedCell) => {
             if (clickedCell.drawing) {
-                const currentSelection = this._selectionsService.getWorkbookSelections(clickedCell.location.unitId).getSelectionOfWorksheet(clickedCell.location.subUnitId)[0];
-
-                if (currentSelection.primary?.actualColumn === clickedCell.location.col && currentSelection.primary?.actualRow === clickedCell.location.row) {
-                    // const drawings = this
+                if (this._isSetCursor) {
                     const imageElement = this._sheetCellCacheManagerService.getImageElementByKey(clickedCell.location.unitId, clickedCell.location.subUnitId, clickedCell.drawing);
-
                     if (imageElement) {
                         this._drawingRenderService.previewImage(`${clickedCell.drawing}-preview-image`, imageElement.src, imageElement.width, imageElement.height);
                     }

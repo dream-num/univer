@@ -34,14 +34,14 @@
 
 - [🌈 特徴](#-特徴)
 - [✨ 機能](#-機能)
-    - [📊 Univer Sheet](#-univer-sheet)
-    - [📝 Univer Doc](#-univer-doc開発中)
-    - [📽️ Univer Slide](#%EF%B8%8F-univer-slide開発中)
+  - [📊 Univer Sheet](#-univer-sheet)
+  - [📝 Univer Doc（開発中）](#-univer-doc開発中)
+  - [📽️ Univer Slide（開発中）](#️-univer-slide開発中)
 - [🌐 国際化](#-国際化)
-- [👾 ショーケース](#-ショーケース)<!-- - [📦 Ecosystem](#-ecosystem) -->
+- [👾 ショーケース](#-ショーケース)
 - [💬 コミュニティ](#-コミュニティ)
 - [🤝 コントリビュート](#-コントリビュート)
-- [❤️ スポンサー](#%EF%B8%8F-スポンサー)
+- [❤️ スポンサー](#️-スポンサー)
 - [📄 ライセンス](#-ライセンス)
 
 </details>
@@ -296,5 +296,5 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

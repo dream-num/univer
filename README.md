@@ -32,14 +32,15 @@ Extensible. High-performance. Embedded to your application.
 
 - [🌈 Highlights](#-highlights)
 - [✨ Features](#-features)
-    - [📊 Univer Sheet](#-univer-sheet)
-    - [📝 Univer Doc](#-univer-doc-under-development)
-    - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-under-development)
+  - [📊 Univer Sheet](#-univer-sheet)
+  - [📝 Univer Doc (beta)](#-univer-doc-beta)
+  - [📽️ Univer Slide (Under Development)](#️-univer-slide-under-development)
 - [🌐 Internationalization](#-internationalization)
-- [👾 Showcase](#-showcase)<!-- - [📦 Ecosystem](#-ecosystem) -->
+- [👾 Showcase](#-showcase)
+- [🔗 Links](#-links)
 - [💬 Community](#-community)
 - [🤝 Contribution](#-contribution)
-- [❤️ Sponsor](#%EF%B8%8F-sponsors)
+- [❤️ Sponsors](#️-sponsors)
 - [📄 License](#-license)
 
 </details>
@@ -301,5 +302,5 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

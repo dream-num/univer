@@ -25,7 +25,7 @@ import type {
     ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
-import { Disposable, ICommandService, IConfigService, ILogService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
 import {
     FormulaDataModel,
     FormulaExecutedStateType,
@@ -103,7 +103,8 @@ export class TriggerCalculationController extends Disposable {
         this._doneCalculationTaskCount = 0;
         this._totalCalculationTaskCount = 1;
 
-        this._emitProgress('Analyzing');
+        const analyzing = this._localeService.t('formula.progress.analyzing');
+        this._emitProgress(analyzing);
     }
 
     private _calculateProgress(label: string): void {
@@ -122,7 +123,9 @@ export class TriggerCalculationController extends Disposable {
 
     private _completeProgress(): void {
         this._doneCalculationTaskCount = this._totalCalculationTaskCount = 1;
-        this._emitProgress('Done');
+
+        const done = this._localeService.t('formula.progress.done');
+        this._emitProgress(done);
     }
 
     clearProgress(): void {
@@ -137,7 +140,7 @@ export class TriggerCalculationController extends Disposable {
         @ILogService private readonly _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -356,23 +359,11 @@ export class TriggerCalculationController extends Disposable {
             // eslint-disable-next-line max-lines-per-function, complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStartMutation.id) {
-                    const { forceCalculation = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {} } = command.params as ISetFormulaCalculationStartMutation;
+                    const { forceCalculation = false } = command.params as ISetFormulaCalculationStartMutation;
 
                     if (forceCalculation) {
                         this._forceCalculating = true;
                     }
-
-                    // Trigger necessary dependency analysis
-                    // if (
-                    //     dirtyRanges.length === 0 &&
-                    //     Object.keys(dirtyNameMap).length === 0 &&
-                    //     Object.keys(dirtyDefinedNameMap).length === 0 &&
-                    //     Object.keys(dirtyUnitFeatureMap).length === 0 &&
-                    //     Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
-                    //     forceCalculation === false
-                    // ) {
-                    //     return;
-                    // }
 
                     // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
                     if (this._calculationMode === CalculationMode.NO_CALCULATION) {
@@ -417,19 +408,22 @@ export class TriggerCalculationController extends Disposable {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            this._calculateProgress('Calculating');
+                            const calculating = this._localeService.t('formula.progress.calculating');
+                            this._calculateProgress(calculating);
                         }
                     } else if (stage === FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            this._calculateProgress('Array Analysis');
+                            const arrayAnalysis = this._localeService.t('formula.progress.array-analysis');
+                            this._calculateProgress(arrayAnalysis);
                         }
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {
-                            this._calculateProgress('Array Calculation');
+                            const arrayCalculation = this._localeService.t('formula.progress.array-calculation');
+                            this._calculateProgress(arrayCalculation);
                         }
                     }
                 } else {

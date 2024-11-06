@@ -86,18 +86,6 @@ export class CalculateController extends Disposable {
     ) {
         const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
 
-        // Trigger necessary dependency analysis
-        // if (
-        //     dirtyRanges.length === 0 &&
-        //     Object.keys(dirtyNameMap).length === 0 &&
-        //     Object.keys(dirtyDefinedNameMap).length === 0 &&
-        //     Object.keys(dirtyUnitFeatureMap).length === 0 &&
-        //     Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
-        //     forceCalculate === false
-        // ) {
-        //     return;
-        // }
-
         const formulaData = this._formulaDataModel.getFormulaData();
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();

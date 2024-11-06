@@ -31,39 +31,6 @@ export class CalculateResultApplyController extends Disposable {
         this._initialize();
     }
 
-    // unitIds.forEach((unitId) => {
-    //     const sheetData = unitData[unitId];
-
-    //     if (sheetData == null) {
-    //         return true;
-    //     }
-
-    //     const sheetIds = Object.keys(sheetData);
-
-    //     sheetIds.forEach((sheetId) => {
-    //         const cellData = sheetData[sheetId];
-
-    //         // const arrayFormula = arrayFormulaRange[unitId][sheetId];
-
-    //         if (cellData == null) {
-    //             return true;
-    //         }
-
-    //         const cellValue = this._getMergedCellData(unitId, sheetId, cellData);
-
-    //         const setRangeValuesMutation = {
-    //             subUnitId: sheetId,
-    //             unitId,
-    //             cellValue,
-    //         };
-
-    //         redoMutationsInfo.push({
-    //             id: SetRangeValuesMutation.id,
-    //             params: setRangeValuesMutation,
-    //         });
-    //     });
-    // });
-
     private _initialize(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

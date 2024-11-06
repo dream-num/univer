@@ -427,7 +427,7 @@ export class SheetCellImageController extends Disposable {
             this._univerInstanceService.unitAdded$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_DOC && unit.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                     const unitId = unit.getUnitId();
-                    // this._drawingManagerService.removeDrawingDataForUnit(unitId);
+                    this._drawingManagerService.removeDrawingDataForUnit(unitId);
                     this._docDrawingController.loadDrawingDataForUnit(unitId);
                     this._drawingManagerService.initializeNotification(unitId);
                 }

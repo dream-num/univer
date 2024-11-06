@@ -618,6 +618,9 @@ export function generateBody(text: string): IDocumentBody {
 
         return {
             dataStream: `${urlText}\r\n`,
+            paragraphs: [{
+                startIndex: urlText.length,
+            }],
             customRanges: [range],
         };
     }

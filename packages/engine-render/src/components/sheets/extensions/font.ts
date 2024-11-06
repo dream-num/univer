@@ -218,13 +218,15 @@ export class Font extends SheetExtension {
 
         ctx.closePath();
         ctx.restore();
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rectByPrecision(renderFontCtx.startX + 2, renderFontCtx.startY + 2, renderFontCtx.endX - renderFontCtx.startX - 4, renderFontCtx.endY - renderFontCtx.startY - 4);
-        ctx.clip();
-        this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
-        ctx.restore();
+        const documentDataModel = fontsConfig.documentSkeleton.getViewModel().getDataModel();
+        if (documentDataModel.getDrawingsOrder()?.length) {
+            ctx.save();
+            ctx.beginPath();
+            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix);
+            this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
+            ctx.closePath();
+            ctx.restore();
+        }
     };
 
     private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
@@ -259,23 +261,21 @@ export class Font extends SheetExtension {
         }
 
         const documentDataModel = documentSkeleton.getViewModel().getDataModel();
-        if (documentDataModel.getDrawingsOrder()?.length) {
-            const drawingDatas = documentDataModel.getDrawings();
-            const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
-            drawings?.forEach((drawing) => {
-                const drawingData = drawingDatas?.[drawing.drawingId];
-                if (drawingData) {
-                    const image = fontsConfig.images?.[drawing.drawingId];
+        const drawingDatas = documentDataModel.getDrawings();
+        const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
+        drawings?.forEach((drawing) => {
+            const drawingData = drawingDatas?.[drawing.drawingId];
+            if (drawingData) {
+                const image = fontsConfig.images?.[drawing.drawingId];
 
-                    const x = fontX + drawing.aLeft;
-                    const y = fontY + drawing.aTop;
+                const x = fontX + drawing.aLeft;
+                const y = fontY + drawing.aTop;
 
-                    if (image && image.complete) {
-                        ctx.drawImage(image, x, y, drawing.width, drawing.height);
-                    }
+                if (image && image.complete) {
+                    ctx.drawImage(image, x, y, drawing.width, drawing.height);
                 }
-            });
-        }
+            }
+        });
     }
 
     /**

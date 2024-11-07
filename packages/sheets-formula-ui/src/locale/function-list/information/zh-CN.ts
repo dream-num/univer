@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: '检查所提供的数值是否介于其他两个数字之间',
+        abstract: '检查所提供的数值是否介于其他两个数字之间',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hans&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: '比较值', detail: '要测试的值，看是否介于“最小值”和“最大值”之间。' },
+            lowerValue: { name: '最小值', detail: '范围的下限值，“比较值”的值可能落入这个范围内。' },
+            upperValue: { name: '最大值', detail: '范围的上限值，“比较值”的值可能落入这个范围内。' },
+            lowerValueIsInclusive: { name: '包括最小值', detail: '用于指定值的范围是否包含“最小值”。默认情况下为“TRUE”。' },
+            upperValueIsInclusive: { name: '包括最大值', detail: '用于指定值的范围是否包含“最大值”。默认情况下为“TRUE”。' },
+        },
+    },
     ISBLANK: {
         description: '如果值为空，则返回 TRUE',
         abstract: '如果值为空，则返回 TRUE',

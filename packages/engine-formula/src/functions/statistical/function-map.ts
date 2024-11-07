@@ -16,6 +16,7 @@
 
 import { Avedev } from './avedev';
 import { Average } from './average';
+import { AverageWeighted } from './average-weighted';
 import { Averagea } from './averagea';
 import { Averageif } from './averageif';
 import { Averageifs } from './averageifs';
@@ -67,6 +68,7 @@ import { Linest } from './linest';
 import { Logest } from './logest';
 import { LognormDist } from './lognorm-dist';
 import { LognormInv } from './lognorm-inv';
+import { Marginoferror } from './marginoferror';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
@@ -124,6 +126,7 @@ import { ZTest } from './z-test';
 export const functionStatistical = [
     [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
+    [AverageWeighted, FUNCTION_NAMES_STATISTICAL.AVERAGE_WEIGHTED],
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],
     [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
@@ -176,6 +179,7 @@ export const functionStatistical = [
     [Logest, FUNCTION_NAMES_STATISTICAL.LOGEST],
     [LognormDist, FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST],
     [LognormInv, FUNCTION_NAMES_STATISTICAL.LOGNORM_INV],
+    [Marginoferror, FUNCTION_NAMES_STATISTICAL.MARGINOFERROR],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],

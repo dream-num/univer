@@ -49,6 +49,22 @@ export default {
             },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: '可在已知實際數值和對應權重的情況下，用來求得多項數值的加權平均值',
+        abstract: '可在已知實際數值和對應權重的情況下，用來求得多項數值的加權平均值',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9084098?hl=zh-Hant&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: '值', detail: '要計算平均值的數值。' },
+            weights: { name: '權重', detail: '要套用的權重對應清單。' },
+            additionalValues: { name: '其他值', detail: '要計算平均值的其他值。' },
+            additionalWeights: { name: '其他權重', detail: '要套用的其他權重。' },
+        },
+    },
     AVERAGEA: {
         description: '傳回其參數的平均值，包括數字、文字和邏輯值。 ',
         abstract: '傳回其參數的平均值，包括數字、文字和邏輯值',
@@ -887,6 +903,20 @@ export default {
             probability: { name: '機率', detail: '對應到對數常態分佈的機率。' },
             mean: { name: '平均值', detail: '分佈的算術平均值。' },
             standardDev: { name: '標準差', detail: '分佈的標準差。' },
+        },
+    },
+    MARGINOFERROR: {
+        description: '計算特定值範圍和信賴水準的誤差範圍',
+        abstract: '計算特定值範圍和信賴水準的誤差範圍',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/12487850?hl=zh-Hant&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: '範圍', detail: '用來計算誤差範圍的值範圍。' },
+            confidence: { name: '信賴水準', detail: '想要的信賴水準介於 (0, 1) 之間。' },
         },
     },
     MAX: {

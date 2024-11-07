@@ -20,7 +20,6 @@ import type {
     ICommand,
     IDisposable,
     IDocumentBody,
-    IRange,
     Nullable,
     SlideDataModel } from '@univerjs/core';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
@@ -236,7 +235,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
             this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -266,7 +265,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
             this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -321,15 +320,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                // TODO@Dushusir: Solve the TS error and verify whether it is correct after the uni formula is fixed
-                const ranges: IRange[] = [{
-                    startRow: 0,
-                    endRow: 0,
-                    startColumn: 0,
-                    endColumn: 0,
-                }];
-
-                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f, ranges);
+                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }

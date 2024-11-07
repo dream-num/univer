@@ -221,7 +221,7 @@ export class RegisterOtherFormulaService extends Disposable {
         return formulaId;
     }
 
-    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[], extra?: Record<string, any>) {
+    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {
         const formulaId = this._createFormulaId(unitId, subUnitId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 

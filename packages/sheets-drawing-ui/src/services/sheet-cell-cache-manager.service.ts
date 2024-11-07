@@ -25,8 +25,6 @@ import { RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 interface IImageCache {
     image: HTMLImageElement;
     disposable: IDisposable;
-    row: number;
-    col: number;
     key: string;
     status: 'loading' | 'loaded' | 'error';
 }
@@ -52,80 +50,32 @@ function makeRecord(imageCache: IImageCache[]) {
 }
 
 class ImageCacheMap {
-    private _map = new Map<string, IImageCache>();
-    private _poistionMap = new Map<number, Map<number, Set<string>>>();
+    private _poistionMap = new ObjectMatrix<Nullable<Map<string, IImageCache>>>();
 
-    set(key: string, imageCache: IImageCache) {
-        this._map.set(key, imageCache);
-
-        this.update(key, imageCache.row, imageCache.col);
+    set(row: number, col: number, cache: IImageCache) {
+        let map = this._poistionMap.getValue(row, col);
+        if (!map) {
+            map = new Map();
+            this._poistionMap.setValue(row, col, map);
+        }
+        map.set(cache.key, cache);
     }
 
-    update(key: string, row: number, col: number) {
-        const item = this._map.get(key);
-        if (item) {
-            const rowMap = this._poistionMap.get(row);
-            if (rowMap) {
-                const colMap = rowMap.get(col);
-                if (colMap) {
-                    colMap.delete(key);
-                }
-            }
-
-            item.row = row;
-            item.col = col;
+    updatePosition(originRow: number, originCol: number, row: number, col: number) {
+        const map = this._poistionMap.getValue(originRow, originCol);
+        if (map) {
+            this._poistionMap.setValue(row, col, map);
         }
-
-        if (row === -1 || col === -1) {
-            return;
-        }
-
-        let rowMap = this._poistionMap.get(row);
-        if (!rowMap) {
-            rowMap = new Map();
-        }
-
-        let colMap = rowMap.get(col);
-        if (!colMap) {
-            colMap = new Set();
-        }
-        colMap.add(key);
-        rowMap.set(col, colMap);
-        this._poistionMap.set(row, rowMap);
-    }
-
-    delete(key: string) {
-        this.update(key, -1, -1);
-        const item = this._map.get(key);
-        if (item) {
-            item.disposable.dispose();
-        }
-        this._map.delete(key);
     }
 
     deleteByPosition(row: number, col: number) {
-        const colMap = this._poistionMap.get(row)?.get(col);
-        if (colMap) {
-            colMap.forEach((key) => {
-                const item = this._map.get(key);
-                if (item) {
-                    item.disposable.dispose();
-                }
-                this._map.delete(key);
-            });
-
-            this._poistionMap.get(row)!.delete(col);
-        }
-    }
-
-    getByKey(key: string) {
-        return this._map.get(key);
+        this._poistionMap.realDeleteValue(row, col);
     }
 
     private _getByPosition(row: number, col: number) {
-        const rowMap = this._poistionMap.get(row);
-        if (rowMap) {
-            return [...(rowMap.get(col) || [])].map((key) => this._map.get(key)).filter(Boolean) as IImageCache[];
+        const map = this._poistionMap.getValue(row, col);
+        if (map) {
+            return Array.from(map.values());
         }
         return [];
     }
@@ -136,6 +86,10 @@ class ImageCacheMap {
 
     getImageCahce(row: number, col: number) {
         return makeImageRecord(this._getByPosition(row, col));
+    }
+
+    getByKey(row: number, col: number, key: string) {
+        return this._poistionMap.getValue(row, col)?.get(key)?.image;
     }
 }
 
@@ -273,11 +227,11 @@ export class SheetCellCacheManagerService extends Disposable {
                                 startColumn: col,
                                 endColumn: col,
                             },
-                            (_, after) => {
+                            (before, after) => {
                                 if (after) {
-                                    map.update(key, after.startRow, after.startColumn);
+                                    map.updatePosition(before.startRow, before.startColumn, after.startRow, after.startColumn);
                                 } else {
-                                    map.delete(key);
+                                    map.deleteByPosition(before.startRow, before.startColumn);
                                 }
                             });
                         const imageElement = new Image();
@@ -285,12 +239,10 @@ export class SheetCellCacheManagerService extends Disposable {
                         const item: IImageCache = {
                             image: imageElement,
                             disposable,
-                            row,
-                            col,
                             key,
                             status: 'loading',
                         };
-                        map.set(key, item);
+                        map.set(row, col, item);
 
                         imageElement.width = drawing.transform?.width || 0;
                         imageElement.height = drawing.transform?.height || 0;
@@ -329,7 +281,7 @@ export class SheetCellCacheManagerService extends Disposable {
         return this._imageMaps.get(unitId)?.get(subUnitId)?.getImageCahce(row, col);
     }
 
-    getImageElementByKey(unitId: string, subUnitId: string, key: string) {
-        return this._imageMaps.get(unitId)?.get(subUnitId)?.getByKey(key)?.image;
+    getImageElementByKey(unitId: string, subUnitId: string, row: number, col: number, key: string) {
+        return this._imageMaps.get(unitId)?.get(subUnitId)?.getByKey(row, col, key);
     }
 }

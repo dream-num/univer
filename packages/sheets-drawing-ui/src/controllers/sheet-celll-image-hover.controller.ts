@@ -67,7 +67,12 @@ export class SheetCellImageHoverController extends Disposable {
         this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((clickedCell) => {
             if (clickedCell.drawing) {
                 if (this._isSetCursor) {
-                    const imageElement = this._sheetCellCacheManagerService.getImageElementByKey(clickedCell.location.unitId, clickedCell.location.subUnitId, clickedCell.drawing);
+                    const imageElement = this._sheetCellCacheManagerService.getImageElementByKey(
+                        clickedCell.location.unitId,
+                        clickedCell.location.subUnitId,
+                        clickedCell.location.row,
+                        clickedCell.location.col,
+                        clickedCell.drawing);
                     if (imageElement) {
                         this._drawingRenderService.previewImage(`${clickedCell.drawing}-preview-image`, imageElement.src, imageElement.width, imageElement.height);
                     }

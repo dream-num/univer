@@ -237,13 +237,14 @@ export function FormulaBar() {
                 <div className={styles.formulaInput}>
                     <TextEditor
                         id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                        isSheetEditor={true}
+                        isSheetEditor
                         resizeCallBack={resizeCallBack}
-                        cancelDefaultResizeListener={true}
+                        cancelDefaultResizeListener
                         onContextMenu={(e) => e.preventDefault()}
                         className={styles.formulaContent}
                         snapshot={INITIAL_SNAPSHOT}
                         isSingle={false}
+                        disabled={disable}
                     />
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down

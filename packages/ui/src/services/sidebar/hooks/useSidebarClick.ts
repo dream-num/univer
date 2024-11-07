@@ -15,8 +15,8 @@
  */
 
 import { useDependency } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
 import { useEffect } from 'react';
+import { ISidebarService } from '../sidebar.service';
 /**
  * Response panel to a click event.
  */

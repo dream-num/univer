@@ -16,10 +16,13 @@
 
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
+import type { FilterColumn } from '../../models/filter-model';
+import type { IAutoFilter, IFilterColumn } from '../../models/types';
+import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../mutations/sheets-filter.mutation';
 import { CommandType, ErrorService, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
+import { SheetsFilterService } from '../../services/sheet-filter.service';
+import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../mutations/sheets-filter.mutation';
 
 /**
  * Parameters of command {@link SetSheetFilterRangeCommand}.

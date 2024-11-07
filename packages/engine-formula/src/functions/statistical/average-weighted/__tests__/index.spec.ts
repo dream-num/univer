@@ -70,7 +70,18 @@ describe('Test averageWeighted function', () => {
             const result = testFunction.calculate(value1, weight1);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
-            const value2 = NumberValueObject.create(2);
+            const value2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                ]),
+                rowCount: 2,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
             const weight2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2.34, true, false, null],

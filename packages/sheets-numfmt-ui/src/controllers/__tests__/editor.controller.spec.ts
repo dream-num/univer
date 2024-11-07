@@ -160,4 +160,162 @@ describe('test editor', () => {
         // The date-time drop is a numeric value, not a literal string
         expect(result?.v).toBe(0.5231712962962963);
     });
+
+    it('edit number will throw style in this editing', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const cellData = {
+            p: {
+                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                documentStyle: {
+                    pageSize: {
+                        width: 230.41758728027344,
+                    },
+                    marginTop: 6,
+                    marginBottom: 2,
+                    marginRight: 2,
+                    marginLeft: 2,
+                    renderConfig: {
+                        verticalAlign: 0,
+                        horizontalAlign: 0,
+                        wrapStrategy: 0,
+                        background: {},
+                        centerAngle: 0,
+                        vertexAngle: 0,
+                    },
+                },
+                body: {
+                    dataStream: '2022-11-11\r\n',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 2,
+                            ts: {
+                                ff: 'Arial',
+                                fs: 11,
+                            },
+                        },
+                        {
+                            st: 2,
+                            ed: 10,
+                            ts: {
+                                ff: 'Arial',
+                                fs: 11,
+                                bl: 1,
+                            },
+                        },
+                    ],
+                    paragraphs: [
+                        {
+                            startIndex: 10,
+                            paragraphStyle: {
+                                horizontalAlign: 0,
+                            },
+                        },
+                    ],
+                    customRanges: [],
+                    customDecorations: [],
+                },
+                drawings: {},
+                drawingsOrder: [],
+                settings: {
+                    zoomRatio: 1,
+                },
+            },
+            v: null,
+            f: null,
+            si: null,
+        };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+        expect(result?.s).toBeFalsy();
+        expect(result?.p).toBeFalsy();
+        expect(result?.v).toBe(44876);
+    });
+
+    it('edit number with bullet should keep rich text', () => {
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
+        const richTextParams = {
+            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+            documentStyle: {
+                pageSize: {
+                    width: 595,
+                },
+                documentFlavor: 0,
+                marginTop: 0,
+                marginBottom: 0,
+                marginRight: 0,
+                marginLeft: 0,
+                renderConfig: {
+                    vertexAngle: 0,
+                    centerAngle: 0,
+                },
+            },
+            drawings: {},
+            drawingsOrder: [],
+            body: {
+                dataStream: '123123123\r\n',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 9,
+                        ts: {
+                            ff: 'Arial',
+                            fs: 11,
+                        },
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 9,
+                        paragraphStyle: {
+                            horizontalAlign: 0,
+                        },
+                        bullet: {
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 20,
+                            },
+                            listType: 'CHECK_LIST',
+                            listId: 'xIECkc',
+                        },
+                    },
+                ],
+                sectionBreaks: [
+                    {
+                        startIndex: 10,
+                    },
+                ],
+                customRanges: [],
+                customDecorations: [],
+            },
+        };
+        const cellData = {
+            p: richTextParams,
+            v: null,
+            f: null,
+            si: null,
+        };
+        const location = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId,
+            row: 0,
+            col: 0,
+            origin: cellData,
+        };
+
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
+        expect(result?.p).toEqual(richTextParams);
+        expect(result?.v).toBeFalsy();
+    });
 });

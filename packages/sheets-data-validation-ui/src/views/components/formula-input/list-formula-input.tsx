@@ -357,13 +357,11 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             onFocus={() => isFocusFormulaEditorSet(true)}
                             actions={formulaEditorActionsRef.current}
                         />
-                        <FormLayout>
-                            <div ref={containerRef}>
-                                {refFinalList.map((item) => {
-                                    return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
-                                })}
-                            </div>
-                        </FormLayout>
+                        <div ref={containerRef} style={{ marginTop: '12px' }}>
+                            {refFinalList.map((item) => {
+                                return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
+                            })}
+                        </div>
                     </>
                 )
                 : (

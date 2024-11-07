@@ -196,7 +196,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const options = list.map((item) => ({
         label: item.label,
         value: item.label,
-        color: showColor ? item.color : 'transparent',
+        color: (showColor || item.color) ? item.color : 'transparent',
     }));
 
     return (

@@ -17,9 +17,8 @@
 import type { ICommand, Workbook } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, RangeProtectionRuleModel, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SheetPermissionOpenPanelOperation } from '../operations/sheet-permission-open-panel.operation';
-import { DeleteWorksheetProtectionCommand } from './worksheet-protection.command';
 
 export interface IAddRangeProtectionParams {
     permissionId: string;

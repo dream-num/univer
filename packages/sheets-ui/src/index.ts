@@ -171,11 +171,8 @@ export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEn
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
 export {
-    AddWorksheetProtectionCommand,
     ChangeSheetProtectionFromSheetBarCommand,
-    DeleteWorksheetProtectionCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
-    SetWorksheetProtectionCommand,
 } from './commands/commands/worksheet-protection.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';

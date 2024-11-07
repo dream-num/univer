@@ -23,14 +23,13 @@ import { Avatar, Button, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { baseProtectionActions, DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { baseProtectionActions, DeleteRangeProtectionCommand, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { distinctUntilChanged, merge } from 'rxjs';
-import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
 import { panelListEmptyBase64 } from './constant';

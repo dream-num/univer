@@ -19,6 +19,7 @@ import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
+import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -26,6 +27,7 @@ import { CopySheetCommand } from '../commands/commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
 import { DeleteRangeProtectionCommand } from '../commands/commands/delete-range-protection.command';
+import { DeleteWorksheetProtectionCommand } from '../commands/commands/delete-worksheet-protection.command';
 import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
@@ -87,6 +89,7 @@ import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
 import { SetWorksheetPermissionPointsCommand } from '../commands/commands/set-worksheet-permission-points.command';
+import { SetWorksheetProtectionCommand } from '../commands/commands/set-worksheet-protection.command';
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,
@@ -109,10 +112,10 @@ import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/n
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
+
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
-
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
@@ -281,6 +284,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 AddRangeProtectionCommand,
                 SetProtectionCommand,
                 DeleteRangeProtectionCommand,
+                AddWorksheetProtectionCommand,
+                DeleteWorksheetProtectionCommand,
+                SetWorksheetProtectionCommand,
                 AddRangeProtectionMutation,
                 DeleteRangeProtectionMutation,
                 SetRangeProtectionMutation,

@@ -77,7 +77,7 @@ import {
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
-import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
+import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../commands/commands/worksheet-protection.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
@@ -273,9 +273,6 @@ export class SheetUIController extends Disposable {
             ChangeSheetProtectionFromSheetBarCommand,
             DeleteRangeProtectionFromContextMenuCommand,
             SetRangeProtectionFromContextMenuCommand,
-            AddWorksheetProtectionCommand,
-            DeleteWorksheetProtectionCommand,
-            SetWorksheetProtectionCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
             SetWorksheetColAutoWidthCommand,
         ].forEach((c) => {

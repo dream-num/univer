@@ -182,6 +182,9 @@ export { copyRangeStyles } from './commands/commands/utils/selection-utils';
 // #region - all commands
 
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
+export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
+export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet-protection.command';
+export { DeleteWorksheetProtectionCommand } from './commands/commands/delete-worksheet-protection.command';
 export {
     addMergeCellsUtil,
     AddWorksheetMergeAllCommand,

@@ -14480,11 +14480,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             showGridlines: 1,
             rowHeader: {
                 width: 46,
-                hidden: 0,
+                hidden: 1,
             },
             columnHeader: {
                 height: 20,
-                hidden: 0,
+                hidden: 1,
             },
             rightToLeft: 0,
         },

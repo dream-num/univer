@@ -252,6 +252,19 @@ export default {
             value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
         },
     },
+    ISURL: {
+        description: 'Checks whether a value is a valid URL.',
+        abstract: 'Checks whether a value is a valid URL.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3256501?hl=en&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as a URL.' },
+        },
+    },
     N: {
         description: 'Returns a value converted to a number',
         abstract: 'Returns a value converted to a number',

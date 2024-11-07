@@ -33,6 +33,7 @@ export enum FUNCTION_NAMES_INFORMATION {
     ISOMITTED = 'ISOMITTED',
     ISREF = 'ISREF',
     ISTEXT = 'ISTEXT',
+    ISURL = 'ISURL',
     N = 'N',
     NA = 'NA',
     SHEET = 'SHEET',

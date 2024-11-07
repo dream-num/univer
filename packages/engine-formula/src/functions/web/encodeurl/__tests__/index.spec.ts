@@ -21,45 +21,45 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { Isemail } from '../index';
+import { FUNCTION_NAMES_WEB } from '../../function-names';
+import { Encodeurl } from '../index';
 
-describe('Test isemail function', () => {
-    const testFunction = new Isemail(FUNCTION_NAMES_INFORMATION.ISEMAIL);
+describe('Test encodeurl function', () => {
+    const testFunction = new Encodeurl(FUNCTION_NAMES_WEB.ENCODEURL);
 
-    describe('Isemail', () => {
+    describe('Encodeurl', () => {
         it('value is normal', () => {
-            const value = StringValueObject.create('developer@univer.ai');
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(true);
+            const text = StringValueObject.create('https://univer.ai/');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toBe('https%3A%2F%2Funiver.ai%2F');
         });
 
         it('value is number', () => {
-            const value = NumberValueObject.create(1);
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(false);
+            const text = NumberValueObject.create(1);
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toBe('1');
         });
 
         it('value is blank cell', () => {
-            const value = NullValueObject.create();
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(false);
+            const text = NullValueObject.create();
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toBe('');
         });
 
         it('value is boolean', () => {
-            const value = BooleanValueObject.create(true);
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(false);
+            const text = BooleanValueObject.create(true);
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toBe('TRUE');
         });
 
         it('value is error', () => {
-            const value = ErrorValueObject.create(ErrorType.NAME);
-            const result = testFunction.calculate(value);
+            const text = ErrorValueObject.create(ErrorType.NAME);
+            const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('value array', () => {
-            const value = ArrayValueObject.create({
+            const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2],
                 ]),
@@ -70,12 +70,14 @@ describe('Test isemail function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['1', '2'],
+            ]);
 
-            const value2 = ArrayValueObject.create({
+            const text2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [`${'abcde'.repeat(50)}@univer.com`],
+                    ['hello, world!'],
                 ]),
                 rowCount: 1,
                 columnCount: 1,
@@ -84,18 +86,8 @@ describe('Test isemail function', () => {
                 row: 0,
                 column: 0,
             });
-            const result2 = testFunction.calculate(value2);
-            expect(getObjectValue(result2)).toBe(false);
-        });
-
-        it('More test', () => {
-            const value = StringValueObject.create('noreply@google.com');
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(true);
-
-            const value2 = StringValueObject.create('johndoe@yourname.com');
-            const result2 = testFunction.calculate(value2);
-            expect(getObjectValue(result2)).toBe(true);
+            const result2 = testFunction.calculate(text2);
+            expect(getObjectValue(result2)).toBe('hello%2C%20world%21');
         });
     });
 });

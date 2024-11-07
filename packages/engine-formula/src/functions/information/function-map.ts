@@ -31,6 +31,7 @@ import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
+import { Isurl } from './isurl';
 import { N } from './n';
 import { Na } from './na';
 import { Sheet } from './sheet';
@@ -54,6 +55,7 @@ export const functionInformation = [
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
+    [Isurl, FUNCTION_NAMES_INFORMATION.ISURL],
     [N, FUNCTION_NAMES_INFORMATION.N],
     [Na, FUNCTION_NAMES_INFORMATION.NA],
     [Sheet, FUNCTION_NAMES_INFORMATION.SHEET],

@@ -22,14 +22,14 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { Isemail } from '../index';
+import { Isurl } from '../index';
 
-describe('Test isemail function', () => {
-    const testFunction = new Isemail(FUNCTION_NAMES_INFORMATION.ISEMAIL);
+describe('Test isurl function', () => {
+    const testFunction = new Isurl(FUNCTION_NAMES_INFORMATION.ISURL);
 
-    describe('Isemail', () => {
+    describe('Isurl', () => {
         it('value is normal', () => {
-            const value = StringValueObject.create('developer@univer.ai');
+            const value = StringValueObject.create('univer.ai');
             const result = testFunction.calculate(value);
             expect(getObjectValue(result)).toBe(true);
         });
@@ -75,7 +75,7 @@ describe('Test isemail function', () => {
 
             const value2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [`${'abcde'.repeat(50)}@univer.com`],
+                    [`${'abcde'.repeat(200)}.univer.ai`],
                 ]),
                 rowCount: 1,
                 columnCount: 1,
@@ -86,16 +86,6 @@ describe('Test isemail function', () => {
             });
             const result2 = testFunction.calculate(value2);
             expect(getObjectValue(result2)).toBe(false);
-        });
-
-        it('More test', () => {
-            const value = StringValueObject.create('noreply@google.com');
-            const result = testFunction.calculate(value);
-            expect(getObjectValue(result)).toBe(true);
-
-            const value2 = StringValueObject.create('johndoe@yourname.com');
-            const result2 = testFunction.calculate(value2);
-            expect(getObjectValue(result2)).toBe(true);
         });
     });
 });

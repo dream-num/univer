@@ -309,6 +309,21 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_INFORMATION.ISURL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISURL.description',
+        abstract: 'formula.functionList.ISURL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISURL.functionParameter.value.name',
+                detail: 'formula.functionList.ISURL.functionParameter.value.detail',
+                example: '"univer.ai"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_INFORMATION.N,
         functionType: FunctionType.Information,
         description: 'formula.functionList.N.description',

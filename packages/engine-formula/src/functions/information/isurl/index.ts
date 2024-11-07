@@ -21,7 +21,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Isemail extends BaseFunction {
+export class Isurl extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -48,16 +48,16 @@ export class Isemail extends BaseFunction {
             return BooleanValueObject.create(false);
         }
 
-        const val = `${_value.getValue()}`;
+        const val = `${_value.getValue()}`.replace(/^\s+|\s+$/g, '');
 
-        if (val.length > 254) {
+        if (val.length > 1000) {
             return BooleanValueObject.create(false);
         }
 
         const topLevelDomain = Tools.topLevelDomainCombiningString();
 
         const reg = new RegExp(
-            `^(?:[\\w+-]+\\.)*[\\w+-]+@[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*\\.(?:${topLevelDomain})$`,
+            `^(?:(?:https?|s?ftp|ftps|nfs|ssh)://+[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*(?::[0-9]+)?(?:/(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@]|%[A-Fa-f0-9]{2})*)*/?(?:[?#]\\S*)?|[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*\\.(?:${topLevelDomain})(?::[0-9]+)?(?:/(?:[A-Za-z0-9\\-._~!$&'()*+,;=:@]|%[A-Fa-f0-9]{2})*)*/?(?:[?#]\\S*)?|mailto:(?:[\\w+-]+\\.)*[\\w+-]+@[a-z0-9_-]+(?:\\.[a-z0-9_-]+)*\\.(?:${topLevelDomain})|(?:news|aim):[%a-z0-9$_\\.+!*(),;/?#:@&~=-]+)$`,
             'i'
         );
 

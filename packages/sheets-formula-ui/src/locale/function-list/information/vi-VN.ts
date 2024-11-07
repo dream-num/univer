@@ -224,6 +224,19 @@ export default {
             value: { name: 'Giá trị', detail: 'Giá trị mà bạn muốn kiểm tra. Đối số giá trị có thể là trống (ô trống), lỗi, giá trị lô-gic, văn bản, số, giá trị tham chiếu hoặc tên tham chiếu tới bất kỳ giá trị nào trong những giá trị này.' },
         },
     },
+    ISURL: {
+        description: 'Kiểm tra liệu giá trị có phải là một URL hợp lệ.',
+        abstract: 'Kiểm tra liệu giá trị có phải là một URL hợp lệ.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/3256501?hl=vi&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'Giá trị', detail: 'Giá trị được xác minh là một URL.' },
+        },
+    },
     N: {
         description: 'Trả về một giá trị được chuyển đổi thành số.',
         abstract: 'Trả về một giá trị được chuyển đổi thành số.',

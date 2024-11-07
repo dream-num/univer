@@ -251,6 +251,19 @@ export default {
             value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
         },
     },
+    ISURL: {
+        description: '檢查特定值是否為有效的網址',
+        abstract: '檢查特定值是否為有效的網址',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hant&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為網址的值。' },
+        },
+    },
     N: {
         description: '返回轉換為數字的值',
         abstract: '返回轉換為數字的值',

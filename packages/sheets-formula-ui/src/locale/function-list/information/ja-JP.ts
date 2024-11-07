@@ -252,6 +252,19 @@ export default {
             value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
         },
     },
+    ISURL: {
+        description: '値が有効な URL であるかどうかを検証します。',
+        abstract: '値が有効な URL であるかどうかを検証します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=ja&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'URL であるかを検証する値を指定します。' },
+        },
+    },
     N: {
         description: '値を数値に変換します。',
         abstract: '値を数値に変換します。',

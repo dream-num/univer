@@ -22,9 +22,9 @@ import { Button, Mention, Mentions } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import styles from './index.module.less';
 import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
 

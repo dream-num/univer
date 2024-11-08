@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule } from '@univerjs/core';
-import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import type { IMutationInfo, IRange, ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, toDisposable } from '@univerjs/core';
-import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import { Disposable, generateRandomId, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, Rectangle, toDisposable } from '@univerjs/core';
+import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { deserializeRangeWithSheetWithCache, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { DataValidationFormulaService } from '../services/dv-formula.service';
 
 export class DataValidationRefRangeController extends Disposable {
     private _disposableMap: Map<string, Set<() => void>> = new Map();
@@ -33,8 +31,8 @@ export class DataValidationRefRangeController extends Disposable {
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private _injector: Injector,
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
-        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
-        @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
+        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
     ) {
         super();
@@ -45,159 +43,235 @@ export class DataValidationRefRangeController extends Disposable {
         return `${unitID}_${subUnitId}_${ruleId}`;
     }
 
+    private _getFormulaDependcy(unitId: string, subUnitId: string, formula: string | undefined, ranges: IRange[]) {
+        const nodes = isFormulaString(formula) ? this._lexerTreeBuilder.sequenceNodesBuilder(formula!) : null;
+
+        const dependencyRanges: { unitId: string; subUnitId: string; ranges: IRange[] }[] = [];
+        nodes?.forEach((node) => {
+            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
+                const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
+                const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
+                const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
+                const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
+                    return;
+                }
+                const realUnitId = workbook!.getUnitId();
+                const realSheetId = worksheet.getSheetId();
+                const orginStartRow = ranges[0].startRow;
+                const orginStartColumn = ranges[0].startColumn;
+                const currentStartRow = range.startRow;
+                const currentStartColumn = range.startColumn;
+
+                const offsetRanges = ranges.map((range) => ({
+                    startRow: range.startRow - orginStartRow + currentStartRow,
+                    endRow: range.endRow - orginStartRow + currentStartRow,
+                    startColumn: range.startColumn - orginStartColumn + currentStartColumn,
+                    endColumn: range.endColumn - orginStartColumn + currentStartColumn,
+                }));
+
+                dependencyRanges.push({
+                    unitId: realUnitId,
+                    subUnitId: realSheetId,
+                    ranges: offsetRanges,
+                });
+            }
+        });
+
+        return dependencyRanges;
+    }
+
     registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
         this.register(unitId, subUnitId, rule);
-        this.registerFormula(unitId, subUnitId, rule);
     };
 
     // eslint-disable-next-line max-lines-per-function
-    registerFormula(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        const ruleId = rule.uid;
-        const id = this._getIdWithUnitId(unitId, subUnitId, ruleId);
-        const disposeSet = this._disposableMap.get(id) ?? new Set();
-        const handleFormulaChange = (type: 'formula1' | 'formula2', formulaString: string) => {
-            const oldRule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-            if (!oldRule) {
-                return { redos: [], undos: [] };
-            }
-            const oldFormula = oldRule[type];
-            if (!oldFormula || oldFormula === formulaString) {
-                return { redos: [], undos: [] };
-            }
-            const redoParams: IUpdateDataValidationMutationParams = {
-                unitId,
-                subUnitId,
-                ruleId: rule.uid,
-                payload: {
-                    type: UpdateRuleType.SETTING,
-                    payload: {
-                        type: oldRule.type,
-                        formula1: oldRule.formula1,
-                        formula2: oldRule.formula2,
-                        [type]: formulaString,
-                    },
-                },
-            };
-            const undoParams: IUpdateDataValidationMutationParams = {
-                unitId,
-                subUnitId,
-                ruleId: rule.uid,
-                payload: {
-                    type: UpdateRuleType.SETTING,
-                    payload: {
-                        type: oldRule.type,
-                        formula1: oldRule.formula1,
-                        formula2: oldRule.formula2,
-                    },
-                },
-            };
-            const redos = [
-                {
-                    id: UpdateDataValidationMutation.id,
-                    params: redoParams,
-                },
-            ];
-            const undos = [
-                {
-                    id: UpdateDataValidationMutation.id,
-                    params: undoParams,
-                },
-            ];
-            return { redos, undos };
-        };
-
-        if (rule.type === DataValidationType.CUSTOM) {
-            const currentFormula = this._dataValidationCustomFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
-            if (currentFormula) {
-                const disposable = this._formulaRefRangeService.registerFormula(
-                    unitId,
-                    subUnitId,
-                    currentFormula.formula,
-                    (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
-                );
-                disposeSet.add(() => disposable.dispose());
-            }
-        } else {
-            const currentFormula = this._dataValidationFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
-
-            if (currentFormula) {
-                const [formula1, formula2] = currentFormula;
-                if (formula1) {
-                    const disposable = this._formulaRefRangeService.registerFormula(
-                        unitId,
-                        subUnitId,
-                        formula1.text,
-                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
-                    );
-                    disposeSet.add(() => disposable.dispose());
-                }
-
-                if (formula2) {
-                    const disposable = this._formulaRefRangeService.registerFormula(
-                        unitId,
-                        subUnitId,
-                        formula2.text,
-                        (newFormulaString) => handleFormulaChange('formula2', newFormulaString)
-                    );
-                    disposeSet.add(() => disposable.dispose());
-                }
-            }
-        }
-    }
-
     register(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
+        const disposeList: (() => void)[] = [];
+
+        const formula1 = rule.formula1;
+        const formula2 = rule.formula2;
+        const formula1Deps = this._getFormulaDependcy(unitId, subUnitId, formula1, rule.ranges);
+        const formula2Deps = this._getFormulaDependcy(unitId, subUnitId, formula2, rule.ranges);
+
+        // WTF!
+        // eslint-disable-next-line max-lines-per-function
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
-            const resultRangesOrigin = oldRanges.map((range) => {
-                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
-            }).filter((range) => !!range);
-            const resultRanges = resultRangesOrigin.flat();
+            const orginStartRow = oldRanges[0].startRow;
+            const orginStartColumn = oldRanges[0].startColumn;
+            const deps = [{ unitId, subUnitId, ranges: oldRanges }, ...formula1Deps, ...formula2Deps];
+            const matchedEffectedRanges: IRange[][] = [];
+            const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
 
-            const isEqual = isRangesEqual(resultRanges, oldRanges);
-            if (isEqual) {
-                return { redos: [], undos: [] };
-            }
+            deps.forEach(({ unitId, subUnitId, ranges }) => {
+                if (unitId === effectedRanges.unitId && subUnitId === effectedRanges.subUnitId) {
+                    const intersectedRanges: IRange[] = [];
+                    const currentStartRow = ranges[0].startRow;
+                    const currentStartColumn = ranges[0].startColumn;
+                    const offsetRow = currentStartRow - orginStartRow;
+                    const offsetColumn = currentStartColumn - orginStartColumn;
 
-            if (resultRanges.length) {
-                const redoParams: IUpdateDataValidationMutationParams = {
-                    unitId,
-                    subUnitId,
-                    ruleId: rule.uid,
-                    payload: {
-                        type: UpdateRuleType.RANGE,
-                        payload: resultRanges,
-                    },
-                    source: 'patched',
+                    effectedRanges.ranges.forEach((range) => {
+                        const intersectedRange = ranges.map((r) => getIntersectRange(range, r)).filter(Boolean) as IRange[];
+                        if (intersectedRange.length > 0) {
+                            intersectedRanges.push(...intersectedRange);
+                        }
+                    });
+
+                    if (intersectedRanges.length > 0) {
+                        matchedEffectedRanges.push(
+                            intersectedRanges.map((range) => ({
+                                startRow: range.startRow - offsetRow,
+                                endRow: range.endRow - offsetRow,
+                                startColumn: range.startColumn - offsetColumn,
+                                endColumn: range.endColumn - offsetColumn,
+                            }))
+                        );
+                    }
+                }
+            });
+
+            if (matchedEffectedRanges.length > 0) {
+                const ranges = Rectangle.splitIntoGrid([...matchedEffectedRanges.flat()]);
+                const noEffectRanges = Rectangle.subtractMulti(oldRanges, ranges);
+
+                const keyMap = new Map<string, { formula1: string; formula2: string; range: IRange }[]>();
+                ranges.forEach((range) => {
+                    const currentRow = range.startRow;
+                    const currentColumn = range.startColumn;
+                    const offsetRow = currentRow - orginStartRow;
+                    const offsetColumn = currentColumn - orginStartColumn;
+                    const isFormula1FormulaString = isFormulaString(formula1);
+                    const isFormula2FormulaString = isFormulaString(formula2);
+                    const formula1String = isFormula1FormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula1!, offsetColumn, offsetRow) : formula1!;
+                    const formula2String = isFormula2FormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula2!, offsetColumn, offsetRow) : formula2!;
+                    const newFormula1 = isFormula1FormulaString ? this._formulaRefRangeService.transformFormulaByEffectCommand(unitId, subUnitId, formula1String, commandInfo) : formula1String;
+                    const newFormula2 = isFormula2FormulaString ? this._formulaRefRangeService.transformFormulaByEffectCommand(unitId, subUnitId, formula2String, commandInfo) : formula2String;
+
+                    const orginFormula1 = newFormula1 === formula1String ? formula1 : this._lexerTreeBuilder.moveFormulaRefOffset(newFormula1, -offsetColumn, -offsetRow);
+                    const orginFormula2 = newFormula2 === formula2String ? formula2 : this._lexerTreeBuilder.moveFormulaRefOffset(newFormula2, -offsetColumn, -offsetRow);
+
+                    const item = {
+                        formula1: newFormula1,
+                        formula2: newFormula2,
+                        range,
+                        key: `${orginFormula1}_${orginFormula2}`,
+                    };
+
+                    if (keyMap.has(item.key)) {
+                        keyMap.get(item.key)!.push(item);
+                    } else {
+                        keyMap.set(item.key, [item]);
+                    }
+                });
+
+                const redos: IMutationInfo[] = [];
+                const undos: IMutationInfo[] = [];
+                if (noEffectRanges.length > 0) {
+                    redos.push({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            ruleId: rule.uid,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: noEffectRanges,
+                            },
+                            unitId,
+                            subUnitId,
+                        } as IUpdateDataValidationMutationParams,
+                    });
+
+                    undos.push({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            ruleId: rule.uid,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: [...oldRanges],
+                            },
+                            unitId,
+                            subUnitId,
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                } else {
+                    redos.push({
+                        id: RemoveDataValidationMutation.id,
+                        params: {
+                            ruleId: rule.uid,
+                            unitId,
+                            subUnitId,
+                        } as IRemoveDataValidationMutationParams,
+                    });
+
+                    undos.push({
+                        id: AddDataValidationMutation.id,
+                        params: {
+                            rule,
+                            unitId,
+                            subUnitId,
+                        } as IAddDataValidationMutationParams,
+                    });
+                }
+
+                Array.from(keyMap.keys()).forEach((key) => {
+                    const ranges = keyMap.get(key)!.sort((a, b) => a.range.startRow - b.range.startRow || a.range.startColumn - b.range.startColumn);
+                    const newRanges = Rectangle.mergeRanges(ranges.map((item) => handleCommonDefaultRangeChangeWithEffectRefCommands(item.range, commandInfo)).filter((range) => !!range).flat());
+                    newRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+
+                    if (newRanges.length) {
+                        const newId = generateRandomId();
+
+                        redos.push({
+                            id: AddDataValidationMutation.id,
+                            params: {
+                                rule: {
+                                    ...rule,
+                                    formula1: ranges[0].formula1,
+                                    formula2: ranges[0].formula2,
+                                    ranges: newRanges,
+                                    uid: newId,
+                                },
+                                unitId,
+                                subUnitId,
+                            } as IAddDataValidationMutationParams,
+                        });
+
+                        undos.push({
+                            id: RemoveDataValidationMutation.id,
+                            params: {
+                                ruleId: newId,
+                                unitId,
+                                subUnitId,
+                            } as IRemoveDataValidationMutationParams,
+                        });
+                    }
+                });
+
+                return {
+                    undos,
+                    redos,
                 };
-                // in ref-range case, there won't be any overlap about rule ranges
-                const redos = [{ id: UpdateDataValidationMutation.id, params: redoParams }];
-                const undos = [{
-                    id: UpdateDataValidationMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        ruleId: rule.uid,
-                        payload: {
-                            type: UpdateRuleType.RANGE,
-                            payload: oldRanges,
-                        },
-                        source: 'patched',
-                    },
-                }];
-                return { redos, undos };
-            } else {
-                const redoParams: IRemoveDataValidationMutationParams = { unitId, subUnitId, ruleId: rule.uid };
-                const redos = [{ id: RemoveDataValidationMutation.id, params: redoParams }];
-                const undos = removeDataValidationUndoFactory(this._injector, redoParams);
-                return { redos, undos };
             }
+
+            return {
+                undos: [],
+                redos: [],
+            };
         };
-        const disposeList: (() => void)[] = [];
 
         rule.ranges.forEach((range) => {
             const disposable = this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId);
             disposeList.push(() => disposable.dispose());
         });
+
+        [...formula1Deps, ...formula2Deps].forEach(({ unitId, subUnitId, ranges }) => {
+            ranges.forEach((range) => {
+                const disposable = this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId);
+                disposeList.push(() => disposable.dispose());
+            });
+        });
+
         const id = this._getIdWithUnitId(unitId, subUnitId, rule.uid);
         const current = this._disposableMap.get(id) ?? new Set();
         current.add(() => disposeList.forEach((dispose) => dispose()));

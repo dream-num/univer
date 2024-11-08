@@ -15,7 +15,7 @@
  */
 
 import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
+import { BooleanNumber, DataValidationType, LocaleType } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -101,57 +101,57 @@ const richTextDemo1: IDocumentData = {
 };
 
 const dataValidation: IDataValidationRule[] = [
-    {
-        uid: 'xxx-1',
-        type: DataValidationType.DECIMAL,
-        ranges: [{
-            startRow: 0,
-            endRow: 5,
-            startColumn: 0,
-            endColumn: 2,
-        }],
-        operator: DataValidationOperator.GREATER_THAN,
-        formula1: '111',
-        errorStyle: DataValidationErrorStyle.STOP,
-    },
-    {
-        uid: 'xxx-0',
-        type: DataValidationType.DATE,
-        ranges: [{
-            startRow: 0,
-            endRow: 5,
-            startColumn: 3,
-            endColumn: 5,
-        }],
-        operator: DataValidationOperator.LESS_THAN_OR_EQUAL,
-        formula1: '2024/04/10',
-        formula2: '2024/10/10',
-        errorStyle: DataValidationErrorStyle.STOP,
-    },
-    {
-        uid: 'xxx-2',
-        type: DataValidationType.CHECKBOX,
-        ranges: [{
-            startRow: 6,
-            endRow: 10,
-            startColumn: 0,
-            endColumn: 5,
-        }],
-        formula1: 'TRUE',
-        formula2: 'FALSE',
-    },
-    {
-        uid: 'xxx-3',
-        type: DataValidationType.LIST,
-        ranges: [{
-            startRow: 11,
-            endRow: 15,
-            startColumn: 0,
-            endColumn: 5,
-        }],
-        formula1: '1,2,3,hahaha,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18',
-        renderMode: 1,
-    },
+    // {
+    //     uid: 'xxx-1',
+    //     type: DataValidationType.DECIMAL,
+    //     ranges: [{
+    //         startRow: 0,
+    //         endRow: 5,
+    //         startColumn: 0,
+    //         endColumn: 2,
+    //     }],
+    //     operator: DataValidationOperator.GREATER_THAN,
+    //     formula1: '111',
+    //     errorStyle: DataValidationErrorStyle.STOP,
+    // },
+    // {
+    //     uid: 'xxx-0',
+    //     type: DataValidationType.DATE,
+    //     ranges: [{
+    //         startRow: 0,
+    //         endRow: 5,
+    //         startColumn: 3,
+    //         endColumn: 5,
+    //     }],
+    //     operator: DataValidationOperator.LESS_THAN_OR_EQUAL,
+    //     formula1: '2024/04/10',
+    //     formula2: '2024/10/10',
+    //     errorStyle: DataValidationErrorStyle.STOP,
+    // },
+    // {
+    //     uid: 'xxx-2',
+    //     type: DataValidationType.CHECKBOX,
+    //     ranges: [{
+    //         startRow: 6,
+    //         endRow: 10,
+    //         startColumn: 0,
+    //         endColumn: 5,
+    //     }],
+    //     formula1: 'TRUE',
+    //     formula2: 'FALSE',
+    // },
+    // {
+    //     uid: 'xxx-3',
+    //     type: DataValidationType.LIST,
+    //     ranges: [{
+    //         startRow: 11,
+    //         endRow: 15,
+    //         startColumn: 0,
+    //         endColumn: 5,
+    //     }],
+    //     formula1: '1,2,3,hahaha,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18',
+    //     renderMode: 1,
+    // },
     {
         uid: 'xxx-4',
         type: DataValidationType.CUSTOM,
@@ -163,17 +163,17 @@ const dataValidation: IDataValidationRule[] = [
         }],
         formula1: '=A1',
     },
-    {
-        uid: 'xxx-5',
-        type: DataValidationType.LIST_MULTIPLE,
-        ranges: [{
-            startRow: 21,
-            endRow: 21,
-            startColumn: 0,
-            endColumn: 0,
-        }],
-        formula1: '1,2,3,4,5,哈哈哈哈',
-    },
+    // {
+    //     uid: 'xxx-5',
+    //     type: DataValidationType.LIST_MULTIPLE,
+    //     ranges: [{
+    //         startRow: 21,
+    //         endRow: 21,
+    //         startColumn: 0,
+    //         endColumn: 0,
+    //     }],
+    //     formula1: '1,2,3,4,5,哈哈哈哈',
+    // },
 ];
 
 const dv2 = [

@@ -16,7 +16,7 @@
 
 import type { Nullable } from './types';
 import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
-import { mergeRanges, multiSubtractSingleRange } from './range';
+import { mergeRanges, multiSubtractSingleRange, splitIntoGrid } from './range';
 
 /**
  * This class provides a set of methods to calculate `IRange`.
@@ -348,6 +348,10 @@ export class Rectangle {
      */
     static mergeRanges(ranges: IRange[]): IRange[] {
         return mergeRanges(ranges);
+    }
+
+    static splitIntoGrid(ranges: IRange[]): IRange[] {
+        return splitIntoGrid(ranges);
     }
 
     static subtractMulti(ranges1: IRange[], ranges2: IRange[]): IRange[] {

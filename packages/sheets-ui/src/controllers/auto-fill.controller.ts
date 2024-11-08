@@ -890,7 +890,6 @@ export class AutoFillController extends Disposable {
         // const intercepted = this._sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
         redos.push({ id: SetRangeValuesMutation.id, params: clearMutationParams });
         undos.unshift({ id: SetRangeValuesMutation.id, params: undoClearMutationParams });
-
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();
         targetRows.forEach((row, rowIndex) => {
@@ -901,16 +900,21 @@ export class AutoFillController extends Disposable {
             });
         });
 
+        const cellValueMatrix = cellValue.getMatrix();
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: cellValue.getMatrix(),
+            cellValue: cellValueMatrix,
         };
 
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(
             SetRangeValuesUndoMutationFactory,
             setRangeValuesMutationParams
         );
+
+        this._autoFillService.getActiveHooks().forEach((hook) => {
+            hook.onBeforeSubmit?.(location, direction, applyType, cellValueMatrix);
+        });
 
         undos.unshift({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
         redos.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });

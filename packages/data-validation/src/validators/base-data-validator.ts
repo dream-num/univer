@@ -126,7 +126,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return false;
     }
 
-    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult>;
+    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult>;
 
     abstract validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult;
 
@@ -185,7 +185,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
             return allowBlank;
         }
 
-        const formulaInfo = await this.parseFormula(rule, unitId, subUnitId);
+        const formulaInfo = await this.parseFormula(rule, unitId, subUnitId, cellInfo.row, cellInfo.column);
 
         if (!formulaInfo.isFormulaValid) {
             return false;

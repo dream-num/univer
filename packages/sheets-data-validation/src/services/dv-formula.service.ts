@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
-import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
@@ -85,23 +85,26 @@ export class DataValidationFormulaService extends Disposable {
         return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId });
     }
 
-    addRule(unitId: string, subUnitId: string, ruleId: string, formula1: string | undefined, formula2: string | undefined, ranges: IRange[]) {
-        const isFormula1Legal = isFormulaString(formula1);
-        const isFormula2Legal = isFormulaString(formula2);
-        if (!isFormula1Legal && !isFormula2Legal) {
-            return;
+    addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
+        if (rule.type === DataValidationType.CHECKBOX || rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
+            const { formula1, formula2, uid: ruleId } = rule;
+            const isFormula1Legal = isFormulaString(formula1);
+            const isFormula2Legal = isFormulaString(formula2);
+            if (!isFormula1Legal && !isFormula2Legal) {
+                return;
+            }
+            const formulaRuleMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+            const item: [IFormulaInfo | undefined, IFormulaInfo | undefined] = [undefined, undefined];
+            if (isFormula1Legal) {
+                const id = this._registerSingleFormula(unitId, subUnitId, formula1!, ruleId);
+                item[0] = { id, text: formula1! };
+            }
+            if (isFormula2Legal) {
+                const id = this._registerSingleFormula(unitId, subUnitId, formula2!, ruleId);
+                item[1] = { id, text: formula2! };
+            }
+            formulaRuleMap.set(ruleId, item);
         }
-        const formulaRuleMap = this._ensureRuleFormulaMap(unitId, subUnitId);
-        const item: [IFormulaInfo | undefined, IFormulaInfo | undefined] = [undefined, undefined];
-        if (isFormula1Legal) {
-            const id = this._registerSingleFormula(unitId, subUnitId, formula1!, ruleId);
-            item[0] = { id, text: formula1! };
-        }
-        if (isFormula2Legal) {
-            const id = this._registerSingleFormula(unitId, subUnitId, formula2!, ruleId);
-            item[1] = { id, text: formula2! };
-        }
-        formulaRuleMap.set(ruleId, item);
     }
 
     removeRule(unitId: string, subUnitId: string, ruleId: string) {
@@ -113,42 +116,6 @@ export class DataValidationFormulaService extends Disposable {
         const [formula1, formula2] = item;
         const idList = [formula1?.id, formula2?.id].filter(Boolean) as string[];
         idList.length && this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, idList);
-    }
-
-    updateRuleFormulaText(unitId: string, subUnitId: string, ruleId: string, formula1: string | undefined, formula2: string | undefined, ranges: IRange[]) {
-        const formulaRuleMap = this._ensureRuleFormulaMap(unitId, subUnitId);
-        const item = formulaRuleMap.get(ruleId);
-        if (!item) {
-            this.addRule(unitId, subUnitId, ruleId, formula1, formula2, ranges);
-            return;
-        }
-
-        const [oldFormula1, oldFormula2] = item;
-        if (oldFormula1?.text !== formula1) {
-            oldFormula1 && this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, [oldFormula1.id]);
-            if (isFormulaString(formula1)) {
-                const formulaId = this._registerSingleFormula(unitId, subUnitId, formula1!, ruleId);
-                item[0] = {
-                    text: formula1!,
-                    id: formulaId,
-                };
-            } else {
-                item[0] = undefined;
-            };
-        }
-
-        if (oldFormula2?.text !== formula2) {
-            oldFormula2 && this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, [oldFormula2.id]);
-            if (isFormulaString(formula2)) {
-                const formulaId = this._registerSingleFormula(unitId, subUnitId, formula2!, ruleId);
-                item[1] = {
-                    text: formula2!,
-                    id: formulaId,
-                };
-            } else {
-                item[1] = undefined;
-            };
-        }
     }
 
     getRuleFormulaResult(unitId: string, subUnitId: string, ruleId: string): Promise<Nullable<[Nullable<IOtherFormulaResult>, Nullable<IOtherFormulaResult>]>> {

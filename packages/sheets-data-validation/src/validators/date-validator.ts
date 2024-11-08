@@ -20,9 +20,9 @@ import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, To
 import { BaseDataValidator } from '@univerjs/data-validation';
 import dayjs from 'dayjs';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
-import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
+import { isLegalFormulaResult } from '../utils/formula';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -61,29 +61,19 @@ export class DateValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    private _formulaService = this.injector.get(DataValidationFormulaService);
+    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {
-        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>> {
+        const formulaResult1 = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, rule.uid, row, column);
+        const formulaResult2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
+
         const { formula1, formula2 } = rule;
-        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0][0]);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1?.v : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2?.v : formula2),
             isFormulaValid,
-        };
-    }
-
-    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
-        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        const { formula1, formula2 } = rule;
-
-        return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2),
         };
     }
 

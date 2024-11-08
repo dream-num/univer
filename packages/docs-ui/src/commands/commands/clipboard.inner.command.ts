@@ -261,11 +261,6 @@ function getCutActionsFromTextRanges(
     for (let i = 0; i < selections.length; i++) {
         const selection = selections[i];
         const { startOffset, endOffset, collapsed } = selection;
-
-        if (startOffset == null || endOffset == null) {
-            continue;
-        }
-
         const len = startOffset - memoryCursor.cursor;
 
         if (collapsed) {

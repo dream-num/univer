@@ -31,10 +31,12 @@
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
@@ -51,12 +53,12 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsx build.ts"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/icons": "^0.2.3",
+        "@univerjs/icons": "^0.2.5",
         "clsx": "^2.1.1"
     },
     "devDependencies": {

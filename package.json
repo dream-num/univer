@@ -30,7 +30,7 @@
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-        "build": "turbo build --no-cache --concurrency=50% --filter=!./common/*",
+        "build": "turbo build --no-cache --concurrency=30% --filter=!./common/*",
         "build:ci": "turbo build --concurrency=100% --filter=!./common/*",
         "build:demo": "pnpm --filter univer-examples build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
@@ -70,6 +70,7 @@
         "react-dom": "18.3.1",
         "release-it": "^17.10.0",
         "serve": "^14.2.4",
+        "tsx": "^4.19.2",
         "turbo": "^2.2.3",
         "typescript": "^5.6.3"
     },

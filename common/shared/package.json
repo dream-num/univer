@@ -14,11 +14,13 @@
     "exports": {
         "./eslint": "./eslint/index.js",
         "./tsconfigs/*": "./tsconfigs/*.json",
-        "./vite": "./vite/index.js"
+        "./vite": "./vite/index.ts",
+        "./vitest": "./vitest/index.js"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.12.2",
+        "@typescript-eslint/parser": "^8.13.0",
         "@vitejs/plugin-react": "^4.3.3",
+        "@vitejs/plugin-vue": "^5.1.4",
         "@vitest/coverage-istanbul": "^2.1.4",
         "fs-extra": "^11.2.0",
         "happy-dom": "15.0.0",
@@ -27,5 +29,8 @@
         "vite-plugin-dts": "^4.3.0",
         "vite-plugin-external": "^4.3.1",
         "vitest": "^2.1.4"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4"
     }
 }

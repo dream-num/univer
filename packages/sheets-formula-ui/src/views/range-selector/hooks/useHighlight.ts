@@ -15,16 +15,17 @@
  */
 
 import type { ITextRun, Workbook } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
+import type { INode } from './useFormulaToken';
 import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 interface IRefSelection {
@@ -39,7 +40,7 @@ interface IRefSelection {
  * @param {IRefSelection[]} refSelections
  */
 
-export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: string, refSelections: IRefSelection[]) {
+export function useSheetHighlight(unitId: string) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);
@@ -48,14 +49,12 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const [ranges, rangesSet] = useState<ISelectionWithStyle[]>([]);
-
-    useEffect(() => {
+    const highlightSheet = (refSelections: IRefSelection[]) => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
-        if (!workbook || !worksheet || !isNeed) {
-            rangesSet(selectionWithStyle);
+        if (!workbook || !worksheet) {
+            refSelectionsService.setSelections(selectionWithStyle);
             return;
         }
         const currentSheetId = worksheet?.getSheetId();
@@ -85,50 +84,45 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }
-        rangesSet(selectionWithStyle);
-    }, [unitId, subUnitId, refSelections, isNeed]);
-
-    useEffect(() => {
         const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-        if (skeleton && isNeed) {
+
+        if (skeleton) {
             const allControls = refSelectionsRenderService?.getSelectionControls() || [];
-            if (allControls.length === ranges.length) {
+            if (allControls.length === selectionWithStyle.length) {
                 allControls.forEach((control, index) => {
-                    const selection = ranges[index];
+                    const selection = selectionWithStyle[index];
                     control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
                     control.updateStyle(selection.style!);
                 });
             } else {
-                refSelectionsService.setSelections(ranges);
+                refSelectionsService.setSelections(selectionWithStyle);
             }
         }
-    }, [ranges, isNeed]);
+    };
+    return highlightSheet;
 }
 
-export function useDocHight(editorId: string, sequenceNodes: (string | ISequenceNode)[]) {
-    const editorService = useDependency(IEditorService);
+export function useDocHight() {
     const descriptionService = useDependency(IDescriptionService);
     const colorMap = useColor();
-    const [ranges, rangesSet] = useState<IRefSelection[]>([]);
 
-    useEffect(() => {
-        const editor = editorService.getEditor(editorId);
-        if (!editor) {
-            return;
-        }
+    const highlightDoc = (editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
         const data = editor.getDocumentData();
         if (!data) {
-            return;
+            return [];
         }
         const body = data.body;
         if (!body) {
-            return;
+            return [];
         }
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             cloneBody.textRuns = [];
             cloneBody.dataStream = '\r\n';
-            rangesSet([]);
+            const cloneData = { ...data, body: cloneBody };
+            const selections = editor.getSelectionRanges();
+            editor.setDocumentData(cloneData, selections);
+            return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
             cloneBody.textRuns = textRuns;
@@ -139,22 +133,24 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
                 return `${pre}${cur.token}`;
             }, '');
             cloneBody.dataStream = `${text}\r\n`;
-            rangesSet(refSelections);
+            let selections;
+            if (isNeedResetSelection) {
+                // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
+                selections = editor.getSelectionRanges();
+                // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
+                const maxOffset = cloneBody.dataStream.length - 2;
+                selections.forEach((selection) => {
+                    selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
+                    selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));
+                });
+            }
+
+            const cloneData = { ...data, body: cloneBody };
+            editor.setDocumentData(cloneData, selections);
+            return refSelections;
         }
-        // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
-        const selections = editor.getSelectionRanges();
-         // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
-        const maxOffset = cloneBody.dataStream.length - 2;
-        selections.forEach((selection) => {
-            selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
-            selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));
-        });
-        const cloneData = { ...data, body: cloneBody };
-
-        editor.setDocumentData(cloneData, selections);
-    }, [editorId, sequenceNodes, colorMap]);
-
-    return ranges;
+    };
+    return highlightDoc;
 }
 
 export function useColor() {

@@ -98,7 +98,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
-    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
+    const getFormulaToken = useFormulaToken();
+    const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol]);
 
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
         onChange(`=${text}`);
@@ -145,7 +146,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
     useRefocus();
-    useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => sequenceNodesSet((pre) => [...pre]));
+    useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);

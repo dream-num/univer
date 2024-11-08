@@ -945,15 +945,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number) {
+        const { _currentSegmentId: segmentId, _currentSegmentPage: segmentPage } = this;
         const focusNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
             strict: true,
-            segmentId: this._currentSegmentId,
-            segmentPage: this._currentSegmentPage,
+            segmentId,
+            segmentPage,
         });
 
         const focusNodePosition = this._getNodePosition(focusNode);
 
-        if (!focusNodePosition || focusNode == null) {
+        if (focusNodePosition == null || focusNode == null) {
             return;
         }
 
@@ -972,23 +973,23 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this._removeAllCacheRanges();
 
-        const { _anchorNodePosition, _focusNodePosition, _selectionStyle, _currentSegmentId, _currentSegmentPage } = this;
+        const { _anchorNodePosition, _selectionStyle } = this;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-        if (_anchorNodePosition == null || _focusNodePosition == null || mainComponent == null) {
+        if (_anchorNodePosition == null || mainComponent == null) {
             return;
         }
 
         const ranges = getRangeListFromSelection(
             _anchorNodePosition,
-            _focusNodePosition,
+            focusNodePosition,
             scene,
             mainComponent as Documents,
             skeleton,
             _selectionStyle,
-            _currentSegmentId,
-            _currentSegmentPage
+            segmentId,
+            segmentPage
         );
 
         if (ranges == null) {

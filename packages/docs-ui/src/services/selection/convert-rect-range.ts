@@ -38,8 +38,8 @@ export function isValidRectRange(anchorNodePosition: INodePosition, focusNodePos
     const rowIndex = anchorPath.indexOf('rows') + 1;
     const cellIndex = anchorPath.indexOf('cells') + 1;
 
-    const anchorTableId = getTableIdAndSliceIndex(anchorPath[tableIdIndex] as string).tableId;
-    const focusTableId = getTableIdAndSliceIndex(focusPath[tableIdIndex] as string).tableId;
+    const { tableId: anchorTableId, sliceIndex: anchorSliceIndex } = getTableIdAndSliceIndex(anchorPath[tableIdIndex] as string);
+    const { tableId: focusTableId, sliceIndex: focusSliceIndex } = getTableIdAndSliceIndex(focusPath[tableIdIndex] as string);
 
     if (anchorTableId !== focusTableId) {
         return false;
@@ -50,7 +50,7 @@ export function isValidRectRange(anchorNodePosition: INodePosition, focusNodePos
     const anchorCellIndex = anchorPath[cellIndex];
     const focusCellIndex = focusPath[cellIndex];
 
-    if (anchorRowIndex === focusRowIndex && anchorCellIndex === focusCellIndex) {
+    if (anchorRowIndex === focusRowIndex && anchorCellIndex === focusCellIndex && anchorSliceIndex === focusSliceIndex) {
         return false;
     }
 

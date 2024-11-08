@@ -22,7 +22,7 @@ import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-form
 
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager, IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
+import { ComponentManager, IDialogService, ISidebarService, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
@@ -329,15 +329,16 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         sheetPermissionPanelModel.setRule(rule);
     };
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const handlePanelClick = (e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     };
 
+    useSidebarClick(handlePanelClick);
     const rangeStr = activeRule?.ranges?.map((i) => serializeRange(i)).join(',');
 
     return (
-        <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
+        <div className={styles.permissionPanelDetailWrapper}>
             {/* <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.name')}>
                 <Input
                     value={activeRule?.name ?? ''}

@@ -33,14 +33,14 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
     const contentLength = content.length;
     const {
         textRotation,
-        paddingData = DEFAULT_PADDING_DATA,
+        paddingData,
         horizontalAlign = HorizontalAlign.UNSPECIFIED,
         verticalAlign = VerticalAlign.UNSPECIFIED,
         wrapStrategy = WrapStrategy.UNSPECIFIED,
         cellValueType,
     } = config;
 
-    const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData;
+    const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || DEFAULT_PADDING_DATA;
     const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
     const documentData: IDocumentData = {
         id: 'd',

@@ -17,9 +17,9 @@
 /* eslint-disable no-param-reassign */
 
 import type { Nullable } from '../../../shared';
-import type { ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
+import { CustomDecorationType, type ICustomDecoration, type ICustomRange, type IDocumentBody, type IParagraph, type IParagraphStyle, type ITextRun, type ITextStyle } from '../../../types/interfaces';
 import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {
@@ -31,14 +31,18 @@ enum TextXTransformType {
 
 // eslint-disable-next-line max-lines-per-function, complexity
 function transformTextRuns(
-    originTextRuns: ITextRun[],
-    targetTextRuns: ITextRun[],
+    originTextRuns: ITextRun[] | undefined,
+    targetTextRuns: ITextRun[] | undefined,
     originCoverType: UpdateDocsAttributeType,
     targetCoverType: UpdateDocsAttributeType,
     transformType: TextXTransformType
-) {
-    if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
+): ITextRun[] | undefined {
+    if (originTextRuns == null || targetTextRuns == null) {
         return targetTextRuns;
+    }
+
+    if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
+        return [];
     }
 
     targetTextRuns = Tools.deepClone(targetTextRuns);
@@ -70,13 +74,7 @@ function transformTextRuns(
             newTs = { ...targetStyle };
 
             if (originCoverType === UpdateDocsAttributeType.COVER && targetCoverType === UpdateDocsAttributeType.REPLACE && originStyle) {
-                const keys = Object.keys(originStyle);
-
-                for (const key of keys) {
-                    if (newTs[key as keyof ITextStyle] === undefined) {
-                        newTs[key as keyof ITextStyle] = originStyle[key as keyof ITextStyle] as any;
-                    }
-                }
+                newTs = Object.assign({}, originStyle, newTs);
             }
         } else {
             newTs = { ...targetStyle };
@@ -195,25 +193,61 @@ function transformTextRuns(
         }
     }
 
-    return normalizeTextRuns(newUpdateTextRuns);
+    return normalizeTextRuns(newUpdateTextRuns, true);
 }
 
 function transformCustomRanges(
-    originCustomRanges: ICustomRange[],
-    targetCustomRanges: ICustomRange[],
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
-): ICustomRange[] {
-    if (originCustomRanges.length === 0) {
-        return Tools.deepClone(targetCustomRanges);
+    originCustomRanges: ICustomRange[] | undefined,
+    targetCustomRanges: ICustomRange[] | undefined,
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
+): ICustomRange[] | undefined {
+    if (originCustomRanges == null || targetCustomRanges == null) {
+        return targetCustomRanges;
     }
 
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
+    if (originCustomRanges.length === 0 || targetCustomRanges.length === 0) {
+        return [];
+    }
+
+    if (originCustomRanges.length > 1 || targetCustomRanges.length > 1) {
+        throw new Error('CustomRanges is only supported transform for length one now.');
+    }
+
+    const originCustomRange = originCustomRanges[0];
+    const targetCustomRange = targetCustomRanges[0];
+
+    if (originCoverType === UpdateDocsAttributeType.REPLACE) {
         return transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-            ? Tools.deepClone(originCustomRanges)
-            : Tools.deepClone(targetCustomRanges);
+            ? [Tools.deepClone(originCustomRange)]
+            : [Tools.deepClone(targetCustomRange)];
     } else {
-        throw new Error('CustomRanges is only supported in replace mode.');
+        if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
+            }
+
+            return [customRange];
+        } else {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
+
+                // Because customRange behavior like REPLACE.
+                // const keys = Object.keys(originCustomRange);
+
+                // for (const key of keys) {
+                //     // Should not delete `startIndex` and `endIndex`.
+                //     if (customRange[key as keyof ICustomRange] !== undefined) {
+                //         delete customRange[key as keyof ICustomRange];
+                //     }
+                // }
+            }
+
+            return [customRange];
+        }
     }
 }
 
@@ -320,6 +354,46 @@ function transformParagraph(
     return paragraph;
 }
 
+function transformCustomDecorations(
+    originCustomDecorations: ICustomDecoration[] | undefined,
+    targetCustomDecorations: ICustomDecoration[] | undefined
+) {
+    if (originCustomDecorations == null || targetCustomDecorations == null) {
+        return targetCustomDecorations;
+    }
+
+    if (originCustomDecorations.length === 0 || targetCustomDecorations.length === 0) {
+        return Tools.deepClone(targetCustomDecorations);
+    }
+
+    const customDecorations: ICustomDecoration[] = [];
+
+    for (const decoration of targetCustomDecorations) {
+        const { id, type } = decoration;
+
+        let pushed = false;
+
+        for (const originDecoration of originCustomDecorations) {
+            if (originDecoration.id === id) {
+                if (originDecoration.type === CustomDecorationType.DELETED || type === CustomDecorationType.DELETED) {
+                    pushed = true;
+                    customDecorations.push({
+                        ...decoration,
+                        type: CustomDecorationType.DELETED,
+                    });
+                }
+                break;
+            }
+        }
+
+        if (!pushed) {
+            customDecorations.push(decoration);
+        }
+    }
+
+    return customDecorations;
+}
+
 interface ITransformBodyResult {
     body: IDocumentBody;
     coverType: UpdateDocsAttributeType;
@@ -344,28 +418,51 @@ export function transformBody(
 
     const coverType = otherCoverType;
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [] } = otherBody;
+    const {
+        textRuns: thisTextRuns,
+        paragraphs: thisParagraphs = [],
+        customRanges: thisCustomRanges,
+        customDecorations: thisCustomDecorations,
+    } = thisBody;
+    const {
+        textRuns: otherTextRuns,
+        paragraphs: otherParagraphs = [],
+        customRanges: otherCustomRanges,
+        customDecorations: otherCustomDecorations,
+    } = otherBody;
 
-    let textRuns: ITextRun[] = [];
-    if (priority) {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER_ONLY_NOT_EXISTED);
-    } else {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, thisCoverType, otherCoverType, TextXTransformType.COVER);
-    }
-    if (textRuns.length) {
+    const textRuns = transformTextRuns(
+        thisTextRuns,
+        otherTextRuns,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    if (textRuns) {
         retBody.textRuns = textRuns;
     }
 
-    let customRanges: ICustomRange[] = [];
-    if (priority) {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED, thisCoverType);
-    } else {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER, thisCoverType);
+    const customRanges = transformCustomRanges(
+        thisCustomRanges,
+        otherCustomRanges,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    if (customRanges) {
+        retBody.customRanges = customRanges;
     }
 
-    if (customRanges.length) {
-        retBody.customRanges = customRanges;
+    // Transform custom decorations.
+    const customDecorations = transformCustomDecorations(
+        thisCustomDecorations,
+        otherCustomDecorations
+    );
+
+    if (customDecorations) {
+        retBody.customDecorations = customDecorations;
     }
 
     const paragraphs: IParagraph[] = [];

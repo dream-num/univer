@@ -140,7 +140,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 partDocData.body!.textRuns = [];
             }
         }
-
         return this._paste(partDocData);
     }
 

@@ -23,6 +23,7 @@ import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEmitChange } from '../range-selector/hooks/useEmitChange';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
@@ -98,6 +99,11 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
+
+    const needEmit = useEmitChange(sequenceNodes, (text: string) => {
+        onChange(`=${text}`);
+    }, editor);
+
     const refSelections = useDocHight(editorId, sequenceNodes);
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -124,8 +130,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const handleSelectionChange = (refString: string, offset: number) => {
         const result = `=${refString}`;
+        needEmit();
         formulaTextSet(result);
-        onChange(result);
         if (offset > -1) {
             setTimeout(() => {
                 editor?.setSelectionRanges([{ startOffset: offset + 1, endOffset: offset + 1 }]);
@@ -148,8 +154,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (editor) {
             const d = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
+                needEmit();
                 formulaTextSet(text);
-                onChange(text);
             });
             return () => {
                 d.unsubscribe();

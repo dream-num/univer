@@ -142,10 +142,16 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
             rangesSet(refSelections);
         }
         // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
-        const selection = editor.getSelectionRanges();
+        const selections = editor.getSelectionRanges();
+         // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
+        const maxOffset = cloneBody.dataStream.length - 2;
+        selections.forEach((selection) => {
+            selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
+            selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));
+        });
         const cloneData = { ...data, body: cloneBody };
 
-        editor.setDocumentData(cloneData, selection);
+        editor.setDocumentData(cloneData, selections);
     }, [editorId, sequenceNodes, colorMap]);
 
     return ranges;

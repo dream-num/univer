@@ -385,8 +385,7 @@ export interface ICustomBlock {
 
 export enum CustomDecorationType {
     COMMENT,
-
-    DELTED = 9999,
+    DELETED = 9999,
 }
 
 export interface ICustomDecoration {
@@ -487,6 +486,7 @@ export interface IDocumentRenderConfig {
     wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
+    zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
 }
 
 export interface ISectionBreakBase {

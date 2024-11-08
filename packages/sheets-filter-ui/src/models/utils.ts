@@ -14,29 +14,41 @@
  * limitations under the License.
  */
 
-import type { IFilterByValueItem } from '../services/sheets-filter-panel.service';
+import type { IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
 
-export function statisticFilterByValueItems(items: IFilterByValueItem[]): {
+export function statisticFilterByValueItems(items: IFilterByValueWithTreeItem[]): {
     checked: number;
     unchecked: number;
-    checkedItems: IFilterByValueItem[];
-    uncheckedItems: IFilterByValueItem[];
+    checkedItems: IFilterByValueWithTreeItem[];
+    uncheckedItems: IFilterByValueWithTreeItem[];
 } {
-    const checkedItems: IFilterByValueItem[] = [];
-    const uncheckedItems: IFilterByValueItem[] = [];
+    const checkedItems: IFilterByValueWithTreeItem[] = [];
+    const uncheckedItems: IFilterByValueWithTreeItem[] = [];
+    let checked = 0;
+    let unchecked = 0;
 
-    for (const item of items) {
-        if (item.checked) {
-            checkedItems.push(item);
-        } else {
-            uncheckedItems.push(item);
+    function traverse(node: IFilterByValueWithTreeItem) {
+        if (node.leaf) {
+            if (node.checked) {
+                checkedItems.push(node);
+                checked += node.count;
+            } else {
+                uncheckedItems.push(node);
+                unchecked += node.count;
+            }
+        }
+
+        if (node.children) {
+            node.children.forEach(traverse);
         }
     }
+
+    items.forEach(traverse);
 
     return {
         checkedItems,
         uncheckedItems,
-        checked: checkedItems.length,
-        unchecked: uncheckedItems.length,
+        checked,
+        unchecked,
     };
 }

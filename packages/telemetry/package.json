@@ -52,9 +52,6 @@
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
-    "peerDependencies": {
-        "@univerjs/core": "workspace:*"
-    },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@vitejs/plugin-react": "4.3.3"
@@ -65,8 +62,6 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "react": "18.3.1",
-        "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
         "vite": "^5.4.10",
         "vitest": "^2.1.4"

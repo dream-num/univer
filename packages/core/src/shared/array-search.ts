@@ -62,13 +62,12 @@ export function searchInOrderedArray(arr: number[], target: number) {
 /**
  * Return the index of the first value in an ascending array that is greater than the target value. If there is no value greater than the target, return last index.
  *
- *
- * binarySearchArray([0,1,2,3,4, 4, 4,5, 5, 5], 1)  return 2
- * binarySearchArray([0,1,2,3,4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
- * binarySearchArray([0,1,2,3,4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
  * @param arr
  * @param pos
  */
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1)  return 2
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
 export function binarySearchArray(arr: number[], pos: number) {
     let low: number = 0;
     let high = arr.length - 1;
@@ -96,12 +95,13 @@ export function binarySearchArray(arr: number[], pos: number) {
  *
  * Alternatively, you can consider inserting a number to ensure the array remains sorted, and return the position for insertion.
  *
- * binarySearchArray([0,1,2,3,4, 4, 4,5, 5, 5], 1)  return 2
- * binarySearchArray([0,1,2,3,4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
- * binarySearchArray([0,1,2,3,4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
  * @param arr
  * @param target
  */
+
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1)  return 2
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
 export function binSearchFirstGreaterThanTarget(arr: number[], target: number) {
     let left = 0;
     let right = arr.length;
@@ -124,7 +124,8 @@ export function binSearchFirstGreaterThanTarget(arr: number[], target: number) {
 
 /**
  * Find value in the data that is just greater than the target; if there are equal values greater than the target, select the last one.
- * Translation: If firstMatch is true, then return the index of the first number greater than the target.
+ * If firstMatch is true, then return the index of the first number greater than the target.
+ * see #univer/pull/3903
  *
  * @param arr ascending array
  * @param target value wants to find

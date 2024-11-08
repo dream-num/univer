@@ -15,15 +15,17 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IRectPopupProps } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
+import type { IRectPopupProps } from '../../views/components/popup/RectPopup';
 import { createIdentifier, Disposable, Tools } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden'> {
+export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden' | 'excludeRects' | 'anchorRect$'> {
     anchorRect$: Observable<IBoundRectNoAngle>;
+    anchorRect?: IBoundRectNoAngle;
     excludeRects$?: Observable<IBoundRectNoAngle[]>;
+    excludeRects?: Nullable<IBoundRectNoAngle[]>;
     componentKey: string;
 
     unitId: string;
@@ -33,6 +35,8 @@ export interface IPopup extends Omit<IRectPopupProps, 'children' | 'hidden'> {
     canvasElement: HTMLCanvasElement;
     hideOnInvisible?: boolean;
     hiddenType?: 'hide' | 'destroy';
+    hiddenRects$?: Observable<IBoundRectNoAngle[]>;
+
 }
 
 export interface ICanvasPopupService {

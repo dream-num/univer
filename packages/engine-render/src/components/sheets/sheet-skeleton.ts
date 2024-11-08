@@ -34,7 +34,6 @@ import type {
     ISelectionCell,
     ISelectionCellWithMergeInfo,
     ISize,
-    IStyleBase,
     IStyleData,
     ITextRotation,
     IWorksheetData,
@@ -72,7 +71,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
@@ -87,7 +86,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import { EXPAND_SIZE_FOR_RENDER_OVERFLOW } from './constants';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
@@ -695,8 +694,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns {number} width
      */
     private _calculateColWidth(colIndex: number): number {
-        const MEASURE_EXTENT = 10000;
-        const MEASURE_EXTENT_FOR_PARAGRAPH = MEASURE_EXTENT / 10;
         const worksheet = this.worksheet;
 
         // row has default height, but col does not, col can be very narrow near zero
@@ -708,13 +705,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         // skip hidden row
         // also handle multiple viewport situation (freeze row & freeze row&col)
         // if there are no content in this column, return current column width.
+
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!visibleRangeViewMain) return colWidth;
 
         const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
         const rowCount = this.worksheet.getRowCount();
-        const checkStart = Math.max(0, startRowOfViewMain - MEASURE_EXTENT); // 0
-        const checkEnd = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
 
         // check width of first row and last row,
         const otherRowIndex: Set<number> = new Set();
@@ -731,7 +727,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         // create a array, which contains all rows need to check
-        // array [start ... end] + additional arr
         const createRowSequence = (start: number, end: number, additionalArr: number[] | Set<number>) => {
             const range = Array.from(
                 { length: end - start + 1 },
@@ -740,47 +735,40 @@ export class SpreadsheetSkeleton extends Skeleton {
             return [...range, ...additionalArr];
         };
 
-        const rowIdxArr = createRowSequence(checkStart, checkEnd, otherRowIndex);
+        const checkStartRow = Math.max(0, startRowOfViewMain - MEASURE_EXTENT); // 0
+        const checkEndRow = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
+        const rowIdxArr = createRowSequence(checkStartRow, checkEndRow, otherRowIndex);
 
         const preColIndex = Math.max(0, colIndex - 1);
-        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        let currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        if (colIndex === 0) {
+            currColWidth = this._columnWidthAccumulation[colIndex];
+        }
+
         for (let i = 0; i < rowIdxArr.length; i++) {
             const row = rowIdxArr[i];
-
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
             if (isMerged && !isMergedMainCell) continue;
-
             if (!this.worksheet.getRowVisible(row)) continue;
-
             const cell = worksheet.getCell(row, colIndex);
             if (!cell) continue;
 
             // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
             if (cell.p) {
-                if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) {
-                    continue;
-                }
+                if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) continue;
             }
 
             let measuredWidth = this._getMeasuredWidthByCell(cell, currColWidth);
-
             if (cell.fontRenderExtension) {
                 measuredWidth += ((cell.fontRenderExtension?.leftOffset || 0) + (cell.fontRenderExtension?.rightOffset || 0));
             }
-
             colWidth = Math.max(colWidth, measuredWidth);
 
             // early return, if maxColWidth is larger than MAXIMUM_COL_WIDTH
-            if (colWidth >= MAXIMUM_COL_WIDTH) {
-                return MAXIMUM_COL_WIDTH;
-            }
+            if (colWidth >= MAXIMUM_COL_WIDTH) return MAXIMUM_COL_WIDTH;
         }
-
-        // if there are no content in this column( measure result is 0), return current column width.
-        if (colWidth === 0) {
-            return currColWidth;
-        }
-        return colWidth;
+        if (colWidth === 0) return currColWidth; // if column is empty, do not modify colWidth, like Google sheet.
+        return Math.max(MIN_COL_WIDTH, colWidth); // min col width is 2
     }
 
     /**
@@ -866,11 +854,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeader,
             showGridlines,
         } = this._worksheetData;
+
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
             rowCount,
             rowData,
             defaultRowHeight
         );
+
         const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
             columnCount,
             columnData,
@@ -1000,11 +990,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         columnCount: number
     ): IColumnRange {
         const contentWidth = contentSize?.width ?? 0;
-
         let startColumn = column;
         let endColumn = column;
-
-        // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
@@ -1369,9 +1356,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const style = this._styles.getStyleByCell(cell);
 
-        if (!cell) {
-            return;
-        }
+        if (!cell) return;
 
         let documentModel: Nullable<DocumentDataModel>;
         let fontString = 'document';
@@ -1485,14 +1470,11 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
-
         const cell = this._cellData.getValue(row, column);
-
         const { t: cellValueType = CellValueType.STRING } = cell || {};
-
         let horizontalAlignPos = horizontalAlign;
         /**
-         * https://github.com/dream-num/univer-pro/issues/334
+         * #univer-pro/issues/334
          * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
          */
         if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
@@ -1539,11 +1521,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                         width: cellHeight / Math.tan(Math.abs(vertexAngle)) + cellWidth,
                         height: cellHeight,
                     };
-                    // if (angle > 0) {
-                    //     horizontalAlign = HorizontalAlign.LEFT;
-                    // } else {
-                    //     horizontalAlign = HorizontalAlign.RIGHT;
-                    // }
                 }
             }
 
@@ -1836,10 +1813,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._overflowCache.reset();
     }
 
-    private _makeDocumentSkeletonDirty(row: number, col: number): void {
-        if (this._stylesCache.fontMatrix == null) return;
-        this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
-    }
+    // private _makeDocumentSkeletonDirty(row: number, col: number): void {
+    //     if (this._stylesCache.fontMatrix == null) return;
+    //     this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
+    // }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
         mergeRange?: IRange;
@@ -2043,18 +2020,13 @@ export class SpreadsheetSkeleton extends Skeleton {
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
     private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
-        if (!this.worksheet || !cache.border) {
-            return;
-        }
+        if (!this.worksheet || !cache.border) return;
 
         const borders: Array<{ style: BorderStyleTypes; color: string; r: number; c: number }> = [];
         let isAddBorders = true;
-
         let forStart = mergeRange.startRow;
         let forEnd = mergeRange.endRow;
-
         let row = mergeRange.startRow;
-
         let column = mergeRange.startColumn;
 
         if (type === BORDER_LTRB.TOP) {
@@ -2093,7 +2065,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             const style = this._styles.getStyleByCell(cell);
-
             if (!style) {
                 isAddBorders = false;
                 break;
@@ -2166,23 +2137,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    private _getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
-        if (!format) {
-            return {};
-        }
-        const { ff, fs, it, bl, ul, st, ol, cl } = format;
-        const style: IStyleBase = {};
-        ff && (style.ff = ff);
-        fs && (style.fs = fs);
-        it && (style.it = it);
-        bl && (style.bl = bl);
-        ul && (style.ul = ul);
-        st && (style.st = st);
-        ol && (style.ol = ol);
-        cl && (style.cl = cl);
-        return style;
-    }
-
     /**
      * New version to get merge data.
      * @param row
@@ -2191,55 +2145,5 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     private _getCellMergeInfo(row: number, column: number): ISelectionCell {
         return this.worksheet.getCellInfoInMergeData(row, column);
-    }
-
-    /**
-     * Cache the merged cells on the current screen to improve computational performance.
-     * @param mergeData all marge data
-     * @param range current screen range, include row and column
-     */
-    private _getMergeCells(mergeData: IRange[], range?: IRange): IRange[] {
-        // const rowColumnSegment = this._rowColumnSegment;
-        const endColumnLast = this.columnWidthAccumulation.length - 1;
-        if (!range) {
-            const endRow = this.rowHeightAccumulation.length - 1;
-            range = { startRow: 0, startColumn: 0, endRow, endColumn: endColumnLast };
-        } else {
-            range = {
-                startRow: range.startRow,
-                endRow: range.endRow,
-                endColumn: endColumnLast,
-                startColumn: 0,
-            };
-        }
-        const { startRow, startColumn, endRow, endColumn } = range;
-        const cacheDataMerge: IRange[] = [];
-        for (let i = 0; i < mergeData.length; i++) {
-            const {
-                startRow: mergeStartRow,
-                endRow: mergeEndRow,
-                startColumn: mergeStartColumn,
-                endColumn: mergeEndColumn,
-            } = mergeData[i];
-            for (let r = startRow; r <= endRow; r++) {
-                let isBreak = false;
-                for (let c = startColumn; c <= endColumn; c++) {
-                    if (r >= mergeStartRow && r <= mergeEndRow && c >= mergeStartColumn && c <= mergeEndColumn) {
-                        cacheDataMerge.push({
-                            startRow: mergeStartRow,
-                            endRow: mergeEndRow,
-                            startColumn: mergeStartColumn,
-                            endColumn: mergeEndColumn,
-                        });
-                        isBreak = true;
-                        break;
-                    }
-                }
-                if (isBreak) {
-                    break;
-                }
-            }
-        }
-        return cacheDataMerge;
     }
 }

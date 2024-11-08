@@ -245,6 +245,14 @@ export function shaping(
                     if (char === DataStreamTreeTokenType.TAB) {
                         const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
                         newGlyph = createSkeletonTabGlyph(config, charSpaceApply);
+                    } else if (char === DataStreamTreeTokenType.PARAGRAPH) {
+                        const zeroWidthParagraphBreak = sectionBreakConfig.renderConfig?.zeroWidthParagraphBreak;
+
+                        if (zeroWidthParagraphBreak === BooleanNumber.TRUE) {
+                            newGlyph = createSkeletonLetterGlyph(char, config, 0);
+                        } else {
+                            newGlyph = createSkeletonLetterGlyph(char, config);
+                        }
                     } else {
                         newGlyph = createSkeletonLetterGlyph(char, config);
                     }

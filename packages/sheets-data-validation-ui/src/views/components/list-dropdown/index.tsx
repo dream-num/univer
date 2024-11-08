@@ -23,14 +23,14 @@ import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/c
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
 import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { RectPopup, Scrollbar } from '@univerjs/design';
+import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '@univerjs/sheets-data-validation';
 import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { KeyCode, useObservable } from '@univerjs/ui';
+import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';
@@ -147,7 +147,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
     useObservable(ruleChange$);
     const anchorRect = RectPopup.useContext();
-    const cellWidth = anchorRect.right - anchorRect.left;
+    const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
 
     useEffect(() => {
         const dispose = commandService.onCommandExecuted((command) => {

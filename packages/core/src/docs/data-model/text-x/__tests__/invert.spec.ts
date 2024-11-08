@@ -223,8 +223,6 @@ describe('test TextX static methods invert and makeInvertible', () => {
             len: 2,
             body: {
                 dataStream: 'lo',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [{
                     st: 0,
                     ed: 2,

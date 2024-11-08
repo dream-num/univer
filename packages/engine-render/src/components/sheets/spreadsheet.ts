@@ -360,7 +360,7 @@ export class Spreadsheet extends SheetComponent {
         // The 'leftOrigin' is the offset of the viewport relative to the sheet corner, which is the position of cell(0, 0), and it does not consider scaling.
         // - (leftOrigin - bufferEdgeX)  ----> - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
-        // when extension drawing, sheet content corrdinate was used by sheet extension, not viewport corrdinate, that means ext does not take rowheader into consideration
+        // when extension drawing, sheet content coordinate was used by sheet extension, not viewport coordinate, that means ext does not take rowheader into consideration
         this.draw(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }

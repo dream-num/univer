@@ -196,7 +196,7 @@ export class FormulaEditorController extends RxDisposable {
                 if (visibleState.visible === false) {
                     this._editorBridgeService.changeVisible({
                         visible: true,
-                        eventType: DeviceInputEventType.Dblclick,
+                        eventType: DeviceInputEventType.PointerDown,
                         unitId,
                     });
                     this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

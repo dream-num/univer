@@ -613,6 +613,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         marginRight: ptToPixel(50),
         marginLeft: ptToPixel(50),
         renderConfig: {
+            zeroWidthParagraphBreak: BooleanNumber.TRUE,
             vertexAngle: 0,
             centerAngle: 0,
             background: {

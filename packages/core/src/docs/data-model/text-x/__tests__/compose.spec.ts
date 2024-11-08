@@ -143,8 +143,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }, {
@@ -190,8 +188,6 @@ describe('compose test cases', () => {
             len: 1,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
         }];
 
@@ -235,8 +231,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];
@@ -418,8 +412,6 @@ describe('compose test cases', () => {
                         it: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];
@@ -460,8 +452,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'ab',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 2,
         }];
@@ -489,8 +479,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'c',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];

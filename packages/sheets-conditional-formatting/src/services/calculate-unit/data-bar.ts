@@ -104,7 +104,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                 }
                 if (value > 0) {
                     const v = getSafeValue(Math.min(value / max, 1) * 100);
-                    computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient, isShowValue });
+                    computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor || defaultDataBarPositiveColor, startPoint, value: v, isGradient, isShowValue });
                 } else {
                     const v = getSafeValue(Math.min(Math.abs(value) / Math.abs(min), 1) * 100);
                     computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor || defaultDataBarNativeColor, startPoint, value: -v, isGradient, isShowValue });

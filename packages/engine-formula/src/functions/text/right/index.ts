@@ -16,10 +16,11 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Right extends BaseFunction {
@@ -40,8 +41,8 @@ export class Right extends BaseFunction {
             _numChars.isArray() ? (_numChars as ArrayValueObject).getColumnCount() : 1
         );
 
-        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, NullValueObject.create());
-        const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numChars, NullValueObject.create());
+        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
+        const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numChars, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = textArray.mapValue((textObject, rowIndex, columnIndex) => {
             const numCharsObject = numCharsArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -65,11 +66,7 @@ export class Right extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject, numChars: BaseValueObject): BaseValueObject {
-        let textValue = `${text.getValue()}`;
-
-        if (text.isBoolean()) {
-            textValue = textValue.toLocaleUpperCase();
-        }
+        const textValue = getTextValueOfNumberFormat(text);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(numChars);
 

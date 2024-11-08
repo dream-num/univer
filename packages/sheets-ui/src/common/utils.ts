@@ -95,7 +95,7 @@ export function getClearContentMutationParamForRange(worksheet: Worksheet, range
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && row >= startRow && col >= startColumn) {
-            if (!leftTopCellValue && worksheet.cellHasValue(cellData)) {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && cellData.v !== '') {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);
@@ -148,19 +148,19 @@ export function getViewportByCell(row: number, column: number, scene: Scene, wor
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row > freeze.startRow && column > freeze.startColumn) {
+    if (row >= freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row <= freeze.startRow && column <= freeze.startColumn) {
+    if (row < freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
     }
 
-    if (row <= freeze.startRow && column > freeze.startColumn) {
+    if (row < freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
     }
 
-    if (row > freeze.startRow && column <= freeze.startColumn) {
+    if (row >= freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
     }
 }

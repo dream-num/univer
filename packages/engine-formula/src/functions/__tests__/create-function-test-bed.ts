@@ -17,6 +17,11 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ISheetData } from '../../basics/common';
+
+import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
 import {
     CellValueType,
     ILogService,
@@ -30,8 +35,6 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import type { ISheetData } from '../../basics/common';
 import { Lexer } from '../../engine/analysis/lexer';
 import { LexerTreeBuilder } from '../../engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
@@ -47,7 +50,8 @@ import { UnionNodeFactory } from '../../engine/ast-node/union-node';
 import { ValueNodeFactory } from '../../engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import type { FormulaDataModel } from '../../models/formula-data.model';
+import { stripErrorMargin } from '../../engine/utils/math-kit';
+import { FormulaDataModel } from '../../models/formula-data.model';
 import { CalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
@@ -55,10 +59,6 @@ import { FunctionService, IFunctionService } from '../../services/function.servi
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
-import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
-import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
-import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
-import { stripErrorMargin } from '../../engine/utils/math-kit';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -198,6 +198,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([SuffixNodeFactory]);
             injector.add([UnionNodeFactory]);
             injector.add([ValueNodeFactory]);
+            injector.add([FormulaDataModel]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

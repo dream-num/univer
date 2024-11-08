@@ -16,10 +16,13 @@
 
 import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
 import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, type ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { HyperLinkModel } from '../../models/hyper-link.model';
+import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
+import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;

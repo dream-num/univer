@@ -34,17 +34,20 @@
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
             "./locale/*": {
-                "import": "./lib/locale/*.js",
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -58,7 +61,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsx build.ts"
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -69,7 +72,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.3",
+        "@univerjs/icons": "^0.2.5",
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-react": "4.3.3"
     },
@@ -82,19 +85,22 @@
         "vite": "^5.4.10",
         "vitest": "^2.1.4"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
         "./locale/*": {
-            "import": "./lib/locale/*.js",
+            "import": "./lib/es/locale/*.js",
+            "require": "./lib/cjs/locale/*.js",
             "types": "./lib/types/locale/*.d.ts"
-        }
+        },
+        "./lib/*": "./lib/*"
     }
 }

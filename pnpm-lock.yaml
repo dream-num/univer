@@ -89,6 +89,9 @@ importers:
       serve:
         specifier: ^14.2.4
         version: 14.2.4
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
       turbo:
         specifier: ^2.2.3
         version: 2.2.3
@@ -99,14 +102,17 @@ importers:
   common/shared:
     dependencies:
       '@typescript-eslint/parser':
-        specifier: ^8.12.2
-        version: 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
+        specifier: ^8.13.0
+        version: 8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@vitejs/plugin-react':
         specifier: ^4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitejs/plugin-vue':
+        specifier: ^5.1.4
+        version: 5.1.4(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))
       '@vitest/coverage-istanbul':
         specifier: ^2.1.4
-        version: 2.1.4(vitest@2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 2.1.4(vitest@2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
@@ -118,16 +124,20 @@ importers:
         version: 4.1.1
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vite-plugin-dts:
         specifier: ^4.3.0
-        version: 4.3.0(@types/node@22.8.7)(rollup@4.24.3)(typescript@5.6.3)(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.0(@types/node@22.9.0)(rollup@4.24.3)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       vite-plugin-external:
         specifier: ^4.3.1
         version: 4.3.1
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
 
   common/storybook:
     dependencies:
@@ -253,8 +263,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
@@ -383,7 +393,7 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-mosaic-component:
         specifier: ^6.1.0
-        version: 6.1.0(@types/node@22.8.7)(@types/react@18.3.12)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 6.1.0(@types/node@22.9.0)(@types/react@18.3.12)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -571,8 +581,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -606,10 +616,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/debugger:
     dependencies:
@@ -636,7 +646,7 @@ importers:
         version: link:../../packages/ui
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       react:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1
@@ -650,7 +660,7 @@ importers:
         version: link:../../common/shared
       '@vitejs/plugin-vue':
         specifier: ^5.1.3
-        version: 5.1.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))
+        version: 5.1.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -659,10 +669,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-docs-ui:
     dependencies:
@@ -685,8 +695,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -708,10 +718,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-formula:
     dependencies:
@@ -722,8 +732,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -736,10 +746,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-formula-ui:
     dependencies:
@@ -759,8 +769,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
@@ -800,10 +810,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-sheets-ui:
     dependencies:
@@ -820,8 +830,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs-ui
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -855,10 +865,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-slides-ui:
     dependencies:
@@ -872,8 +882,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../../packages/slides
@@ -910,10 +920,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uniui:
     dependencies:
@@ -939,8 +949,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -980,10 +990,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/core:
     dependencies:
@@ -1041,10 +1051,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/data-validation:
     dependencies:
@@ -1059,7 +1069,7 @@ importers:
         version: link:../sheets
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1072,10 +1082,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/design:
     dependencies:
@@ -1089,8 +1099,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1178,10 +1188,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs:
     dependencies:
@@ -1193,7 +1203,7 @@ importers:
         version: link:../engine-render
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1206,10 +1216,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-drawing:
     dependencies:
@@ -1221,7 +1231,7 @@ importers:
         version: link:../drawing
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1231,10 +1241,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-drawing-ui:
     dependencies:
@@ -1263,8 +1273,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1289,10 +1299,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-hyper-link:
     dependencies:
@@ -1300,11 +1310,11 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1317,10 +1327,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -1343,8 +1353,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1366,10 +1376,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-mention-ui:
     dependencies:
@@ -1415,10 +1425,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1441,8 +1451,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -1470,10 +1480,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-ui:
     dependencies:
@@ -1493,8 +1503,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1522,10 +1532,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/drawing:
     dependencies:
@@ -1533,8 +1543,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -1550,10 +1560,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/drawing-ui:
     dependencies:
@@ -1570,8 +1580,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1596,10 +1606,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-formula:
     dependencies:
@@ -1630,10 +1640,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-numfmt:
     devDependencies:
@@ -1645,10 +1655,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-render:
     dependencies:
@@ -1685,10 +1695,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/facade:
     dependencies:
@@ -1769,7 +1779,7 @@ importers:
         version: link:../watermark
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1791,10 +1801,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/find-replace:
     dependencies:
@@ -1811,14 +1821,14 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1837,10 +1847,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/network:
     dependencies:
@@ -1849,7 +1859,7 @@ importers:
         version: link:../core
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1862,10 +1872,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/rpc:
     dependencies:
@@ -1874,7 +1884,7 @@ importers:
         version: link:../core
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1887,10 +1897,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/rpc-node:
     dependencies:
@@ -1912,10 +1922,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets:
     dependencies:
@@ -1936,7 +1946,7 @@ importers:
         version: link:../rpc
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1949,10 +1959,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -1989,10 +1999,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -2012,8 +2022,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.38
         version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2065,10 +2075,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -2079,8 +2089,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2111,10 +2121,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-data-validation:
     dependencies:
@@ -2131,8 +2141,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.38
         version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2160,10 +2170,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-data-validation-ui:
     dependencies:
@@ -2192,8 +2202,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.38
         version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2239,10 +2249,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-drawing:
     dependencies:
@@ -2254,7 +2264,7 @@ importers:
         version: link:../drawing
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2264,10 +2274,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -2287,8 +2297,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2322,10 +2332,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-filter:
     dependencies:
@@ -2337,7 +2347,7 @@ importers:
         version: link:../sheets
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2350,10 +2360,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -2367,8 +2377,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2411,10 +2421,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-find-replace:
     dependencies:
@@ -2441,7 +2451,7 @@ importers:
         version: link:../sheets-ui
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2454,10 +2464,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-formula:
     dependencies:
@@ -2481,7 +2491,7 @@ importers:
         version: link:../sheets-numfmt
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2494,10 +2504,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2520,8 +2530,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2549,7 +2559,7 @@ importers:
         version: link:../../common/shared
       '@vitejs/plugin-react':
         specifier: ^4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -2564,10 +2574,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-hyper-link:
     dependencies:
@@ -2588,7 +2598,7 @@ importers:
         version: link:../sheets
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2601,10 +2611,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -2627,8 +2637,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2662,10 +2672,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-numfmt:
     dependencies:
@@ -2683,7 +2693,7 @@ importers:
         version: link:../sheets
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2696,10 +2706,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-numfmt-ui:
     dependencies:
@@ -2719,8 +2729,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2735,7 +2745,7 @@ importers:
         version: link:../ui
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@types/react':
         specifier: ^18.3.12
@@ -2757,10 +2767,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-sort:
     dependencies:
@@ -2775,7 +2785,7 @@ importers:
         version: link:../sheets
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2785,10 +2795,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -2805,8 +2815,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2843,10 +2853,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-thread-comment:
     dependencies:
@@ -2864,7 +2874,7 @@ importers:
         version: link:../thread-comment
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2877,10 +2887,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-thread-comment-ui:
     dependencies:
@@ -2900,8 +2910,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2938,10 +2948,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-ui:
     dependencies:
@@ -2967,8 +2977,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.38
         version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -3005,10 +3015,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -3028,8 +3038,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3060,10 +3070,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/slides:
     dependencies:
@@ -3075,7 +3085,7 @@ importers:
         version: link:../engine-render
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3085,10 +3095,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/slides-ui:
     dependencies:
@@ -3111,8 +3121,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../slides
@@ -3143,10 +3153,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/telemetry:
     dependencies:
@@ -3155,7 +3165,7 @@ importers:
         version: link:../core
       '@vitejs/plugin-react':
         specifier: 4.3.3
-        version: 4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3174,10 +3184,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/thread-comment:
     dependencies:
@@ -3202,10 +3212,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/thread-comment-ui:
     dependencies:
@@ -3225,8 +3235,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.38
         version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -3260,10 +3270,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/ui:
     dependencies:
@@ -3280,8 +3290,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3334,10 +3344,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/uniscript:
     dependencies:
@@ -3386,10 +3396,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/watermark:
     dependencies:
@@ -3403,8 +3413,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.3
-        version: 0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -3432,10 +3442,10 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.10
-        version: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.4
-        version: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
 packages:
 
@@ -5179,6 +5189,9 @@ packages:
   '@types/node@22.8.7':
     resolution: {integrity: sha512-LidcG+2UeYIWcMuMUpBKOnryBWG/rnmOHQR5apjn8myTQcx3rinFRn7DcIFhMnS0PPFSC6OafdIKEad0lj6U0Q==}
 
+  '@types/node@22.9.0':
+    resolution: {integrity: sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==}
+
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
@@ -5257,8 +5270,8 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/parser@8.12.2':
-    resolution: {integrity: sha512-MrvlXNfGPLH3Z+r7Tk+Z5moZAc0dzdVjTgUgwsdGweH7lydysQsnSww3nAmsq8blFuRD5VRlAr9YdEFw3e6PBw==}
+  '@typescript-eslint/parser@8.13.0':
+    resolution: {integrity: sha512-w0xp+xGg8u/nONcGw1UXAr6cjCPU1w0XVyBs6Zqaj5eLmxkKQAByTdV/uGgNN5tVvN/kKpoQlP2cL7R+ajZZIQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -5269,6 +5282,10 @@ packages:
 
   '@typescript-eslint/scope-manager@8.12.2':
     resolution: {integrity: sha512-gPLpLtrj9aMHOvxJkSbDBmbRuYdtiEbnvO25bCMza3DhMjTQw0u7Y1M+YR5JPbMsXXnSPuCf5hfq0nEkQDL/JQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/scope-manager@8.13.0':
+    resolution: {integrity: sha512-XsGWww0odcUT0gJoBZ1DeulY1+jkaHUciUq4jKNv4cpInbvvrtDoyBH9rE/n2V29wQJPk8iCH1wipra9BhmiMA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript-eslint/type-utils@8.12.2':
@@ -5284,8 +5301,21 @@ packages:
     resolution: {integrity: sha512-VwDwMF1SZ7wPBUZwmMdnDJ6sIFk4K4s+ALKLP6aIQsISkPv8jhiw65sAK6SuWODN/ix+m+HgbYDkH+zLjrzvOA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@typescript-eslint/types@8.13.0':
+    resolution: {integrity: sha512-4cyFErJetFLckcThRUFdReWJjVsPCqyBlJTi6IDEpc1GWCIIZRFxVppjWLIMcQhNGhdWJJRYFHpHoDWvMlDzng==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   '@typescript-eslint/typescript-estree@8.12.2':
     resolution: {integrity: sha512-mME5MDwGe30Pq9zKPvyduyU86PH7aixwqYR2grTglAdB+AN8xXQ1vFGpYaUSJ5o5P/5znsSBeNcs5g5/2aQwow==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@typescript-eslint/typescript-estree@8.13.0':
+    resolution: {integrity: sha512-v7SCIGmVsRK2Cy/LTLGN22uea6SaUIlpBcO/gnMGT/7zPtxp90bphcGf4fyrCQl3ZtiBKqVTG32hb668oIYy1g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '*'
@@ -5303,14 +5333,18 @@ packages:
     resolution: {integrity: sha512-PChz8UaKQAVNHghsHcPyx1OMHoFRUEA7rJSK/mDhdq85bk+PLsUHUBqTQTFt18VJZbmxBovM65fezlheQRsSDA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@typescript-eslint/visitor-keys@8.13.0':
+    resolution: {integrity: sha512-7N/+lztJqH4Mrf0lb10R/CbI1EaAMMGyF5y0oJvFoAhafwgiRA7TXyd8TFn8FC8k5y2dTsYogg238qavRGNnlw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
   '@univerjs/icons-svg@0.1.78':
     resolution: {integrity: sha512-9T9V6wtDkLJIJVCCKiOTgCyU8d9oQVjlK8saDxzyKEK8bWFVgSWIr7swIww0gHjVp0tJXiBRQNhcXMqJvCt2ZQ==}
 
-  '@univerjs/icons@0.2.3':
-    resolution: {integrity: sha512-R+jpVrAvb4NtC08BcidmFSxbZD+2zYUEGfNiwMuckXYF/Xk7qoSkmUVMrzEbxDkGMxqPYxyS6L4AGryg5nxuWQ==}
+  '@univerjs/icons@0.2.5':
+    resolution: {integrity: sha512-OfkOQoC5JR85T8vnsl/M2MkI5eeC0zUzQPluKT9p3ramJpSDyw0g4TCyzKpNZcCaVTMe90AOefwW3hEOZySFDA==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -5330,6 +5364,13 @@ packages:
 
   '@vitejs/plugin-vue@5.1.3':
     resolution: {integrity: sha512-3xbWsKEKXYlmX82aOHufFQVnkbMC/v8fLpWwh6hWOUrK5fbbtBh9Q/WWse27BFgSy2/e2c0fz5Scgya9h2GLhw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      vite: ^5.0.0
+      vue: ^3.2.25
+
+  '@vitejs/plugin-vue@5.1.4':
+    resolution: {integrity: sha512-N2XSI2n3sQqp5w7Y/AN/L2XDjBIRGqXko+eDp42sydYSBeJuSm5a1sLf8zakmo8u7tA8NmBgoDLA1HeOESjp9A==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0
@@ -10108,6 +10149,11 @@ packages:
   tslib@2.8.0:
     resolution: {integrity: sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==}
 
+  tsx@4.19.2:
+    resolution: {integrity: sha512-pOUl6Vo2LUq/bSa8S5q7b91cgNSjctn9ugq/+Mvow99qW6x/UZYwzxy/3NmqoT66eHYfCVvFvACC58UBPFf28g==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
   turbo-darwin-64@2.2.3:
     resolution: {integrity: sha512-Rcm10CuMKQGcdIBS3R/9PMeuYnv6beYIHqfZFeKWVYEWH69sauj4INs83zKMTUiZJ3/hWGZ4jet9AOwhsssLyg==}
     cpu: [x64]
@@ -10684,8 +10730,8 @@ snapshots:
       '@eslint-community/eslint-plugin-eslint-comments': 4.4.1(eslint@9.13.0(jiti@1.21.6))
       '@eslint/markdown': 6.2.1
       '@stylistic/eslint-plugin': 2.9.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
-      '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
-      '@typescript-eslint/parser': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
+      '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
+      '@typescript-eslint/parser': 8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.13.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.13.0(jiti@1.21.6))
@@ -10702,7 +10748,7 @@ snapshots:
       eslint-plugin-regexp: 2.6.0(eslint@9.13.0(jiti@1.21.6))
       eslint-plugin-toml: 0.11.1(eslint@9.13.0(jiti@1.21.6))
       eslint-plugin-unicorn: 56.0.0(eslint@9.13.0(jiti@1.21.6))
-      eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))
+      eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))
       eslint-plugin-vue: 9.30.0(eslint@9.13.0(jiti@1.21.6))
       eslint-plugin-yml: 1.14.0(eslint@9.13.0(jiti@1.21.6))
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.13.0(jiti@1.21.6))
@@ -11537,23 +11583,23 @@ snapshots:
       '@types/react': 18.3.12
       react: 18.3.1
 
-  '@microsoft/api-extractor-model@7.29.8(@types/node@22.8.7)':
+  '@microsoft/api-extractor-model@7.29.8(@types/node@22.9.0)':
     dependencies:
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.9.0(@types/node@22.8.7)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.9.0)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.47.11(@types/node@22.8.7)':
+  '@microsoft/api-extractor@7.47.11(@types/node@22.9.0)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.29.8(@types/node@22.8.7)
+      '@microsoft/api-extractor-model': 7.29.8(@types/node@22.9.0)
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.9.0(@types/node@22.8.7)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.9.0)
       '@rushstack/rig-package': 0.5.3
-      '@rushstack/terminal': 0.14.2(@types/node@22.8.7)
-      '@rushstack/ts-command-line': 4.23.0(@types/node@22.8.7)
+      '@rushstack/terminal': 0.14.2(@types/node@22.9.0)
+      '@rushstack/ts-command-line': 4.23.0(@types/node@22.9.0)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.8
@@ -11814,7 +11860,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.24.3':
     optional: true
 
-  '@rushstack/node-core-library@5.9.0(@types/node@22.8.7)':
+  '@rushstack/node-core-library@5.9.0(@types/node@22.9.0)':
     dependencies:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -11825,23 +11871,23 @@ snapshots:
       resolve: 1.22.8
       semver: 7.5.4
     optionalDependencies:
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
       resolve: 1.22.8
       strip-json-comments: 3.1.1
 
-  '@rushstack/terminal@0.14.2(@types/node@22.8.7)':
+  '@rushstack/terminal@0.14.2(@types/node@22.9.0)':
     dependencies:
-      '@rushstack/node-core-library': 5.9.0(@types/node@22.8.7)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.9.0)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
 
-  '@rushstack/ts-command-line@4.23.0(@types/node@22.8.7)':
+  '@rushstack/ts-command-line@4.23.0(@types/node@22.9.0)':
     dependencies:
-      '@rushstack/terminal': 0.14.2(@types/node@22.8.7)
+      '@rushstack/terminal': 0.14.2(@types/node@22.9.0)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -12036,7 +12082,7 @@ snapshots:
 
   '@storybook/core-webpack@8.3.6(storybook@8.3.6)':
     dependencies:
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
       storybook: 8.3.6
       ts-dedent: 2.2.0
 
@@ -12422,11 +12468,11 @@ snapshots:
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
@@ -12467,7 +12513,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.5':
     dependencies:
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -12482,7 +12528,7 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 14.18.63
+      '@types/node': 22.8.7
 
   '@types/hast@3.0.4':
     dependencies:
@@ -12496,7 +12542,7 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 14.18.63
+      '@types/node': 22.8.7
 
   '@types/less@3.0.6': {}
 
@@ -12529,6 +12575,10 @@ snapshots:
       undici-types: 6.19.8
 
   '@types/node@22.8.7':
+    dependencies:
+      undici-types: 6.19.8
+
+  '@types/node@22.9.0':
     dependencies:
       undici-types: 6.19.8
 
@@ -12580,12 +12630,12 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
 
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
       '@types/send': 0.17.4
 
   '@types/stylus@0.48.42':
@@ -12598,10 +12648,10 @@ snapshots:
 
   '@types/validator@13.12.0': {}
 
-  '@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)':
+  '@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
-      '@typescript-eslint/parser': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
+      '@typescript-eslint/parser': 8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/scope-manager': 8.12.2
       '@typescript-eslint/type-utils': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/utils': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
@@ -12616,12 +12666,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)':
+  '@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.12.2
-      '@typescript-eslint/types': 8.12.2
-      '@typescript-eslint/typescript-estree': 8.12.2(typescript@5.6.3)
-      '@typescript-eslint/visitor-keys': 8.12.2
+      '@typescript-eslint/scope-manager': 8.13.0
+      '@typescript-eslint/types': 8.13.0
+      '@typescript-eslint/typescript-estree': 8.13.0(typescript@5.6.3)
+      '@typescript-eslint/visitor-keys': 8.13.0
       debug: 4.3.7
       eslint: 9.13.0(jiti@1.21.6)
     optionalDependencies:
@@ -12633,6 +12683,11 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.12.2
       '@typescript-eslint/visitor-keys': 8.12.2
+
+  '@typescript-eslint/scope-manager@8.13.0':
+    dependencies:
+      '@typescript-eslint/types': 8.13.0
+      '@typescript-eslint/visitor-keys': 8.13.0
 
   '@typescript-eslint/type-utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)':
     dependencies:
@@ -12648,10 +12703,27 @@ snapshots:
 
   '@typescript-eslint/types@8.12.2': {}
 
+  '@typescript-eslint/types@8.13.0': {}
+
   '@typescript-eslint/typescript-estree@8.12.2(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/types': 8.12.2
       '@typescript-eslint/visitor-keys': 8.12.2
+      debug: 4.3.7
+      fast-glob: 3.3.2
+      is-glob: 4.0.3
+      minimatch: 9.0.5
+      semver: 7.6.3
+      ts-api-utils: 1.3.0(typescript@5.6.3)
+    optionalDependencies:
+      typescript: 5.6.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/typescript-estree@8.13.0(typescript@5.6.3)':
+    dependencies:
+      '@typescript-eslint/types': 8.13.0
+      '@typescript-eslint/visitor-keys': 8.13.0
       debug: 4.3.7
       fast-glob: 3.3.2
       is-glob: 4.0.3
@@ -12679,11 +12751,16 @@ snapshots:
       '@typescript-eslint/types': 8.12.2
       eslint-visitor-keys: 3.4.3
 
+  '@typescript-eslint/visitor-keys@8.13.0':
+    dependencies:
+      '@typescript-eslint/types': 8.13.0
+      eslint-visitor-keys: 3.4.3
+
   '@ungap/structured-clone@1.2.0': {}
 
   '@univerjs/icons-svg@0.1.78': {}
 
-  '@univerjs/icons@0.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@univerjs/icons@0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -12704,23 +12781,28 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@4.3.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitejs/plugin-react@4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@babel/core': 7.26.0
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.0)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.0)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-vue@5.1.3(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))':
+  '@vitejs/plugin-vue@5.1.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))':
     dependencies:
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vue: 3.4.38(typescript@5.6.3)
 
-  '@vitest/coverage-istanbul@2.1.4(vitest@2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitejs/plugin-vue@5.1.4(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.3))':
+    dependencies:
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vue: 3.4.38(typescript@5.6.3)
+
+  '@vitest/coverage-istanbul@2.1.4(vitest@2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@istanbuljs/schema': 0.1.3
       debug: 4.3.7
@@ -12732,7 +12814,7 @@ snapshots:
       magicast: 0.3.5
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -12767,13 +12849,13 @@ snapshots:
       vite: 5.4.10(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     optional: true
 
-  '@vitest/mocker@2.1.4(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitest/mocker@2.1.4(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@vitest/spy': 2.1.4
       estree-walker: 3.0.3
       magic-string: 0.30.12
     optionalDependencies:
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -14745,11 +14827,11 @@ snapshots:
       semver: 7.6.3
       strip-indent: 3.0.0
 
-  eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6)):
+  eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.12.2(@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6)):
     dependencies:
       eslint: 9.13.0(jiti@1.21.6)
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
+      '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.13.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
 
   eslint-plugin-vue@9.30.0(eslint@9.13.0(jiti@1.21.6)):
     dependencies:
@@ -15811,7 +15893,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.8.4
+      '@types/node': 22.8.7
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -17084,7 +17166,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
       long: 5.2.3
 
   protocols@2.0.1: {}
@@ -17343,26 +17425,26 @@ snapshots:
     dependencies:
       dnd-core: 16.0.1
 
-  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       dnd-core: 16.0.1
       dnd-multi-backend: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
-      react-dnd: 16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1)
-      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1))(react@18.3.1)
+      react-dnd: 16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1)
+      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
-  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1))(react@18.3.1):
+  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
-      react-dnd: 16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1)
+      react-dnd: 16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1)
 
   react-dnd-touch-backend@16.0.1:
     dependencies:
       '@react-dnd/invariant': 4.0.2
       dnd-core: 16.0.1
 
-  react-dnd@16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1):
+  react-dnd@16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1):
     dependencies:
       '@react-dnd/invariant': 4.0.2
       '@react-dnd/shallowequal': 4.0.2
@@ -17371,7 +17453,7 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
     optionalDependencies:
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
       '@types/react': 18.3.12
 
   react-docgen-typescript@2.2.2(typescript@5.6.3):
@@ -17458,7 +17540,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       substyle: 9.4.1(react@18.3.1)
 
-  react-mosaic-component@6.1.0(@types/node@22.8.7)(@types/react@18.3.12)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-mosaic-component@6.1.0(@types/node@22.9.0)(@types/react@18.3.12)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       classnames: 2.5.1
       immutability-helper: 3.1.1
@@ -17466,9 +17548,9 @@ snapshots:
       prop-types: 15.8.1
       rdndmb-html5-to-touch: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
-      react-dnd: 16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1)
+      react-dnd: 16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1)
       react-dnd-html5-backend: 16.0.1
-      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.8.7)(@types/react@18.3.12)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.9.0)(@types/react@18.3.12)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dnd-touch-backend: 16.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -18318,6 +18400,13 @@ snapshots:
 
   tslib@2.8.0: {}
 
+  tsx@4.19.2:
+    dependencies:
+      esbuild: 0.23.1
+      get-tsconfig: 4.8.1
+    optionalDependencies:
+      fsevents: 2.3.3
+
   turbo-darwin-64@2.2.3:
     optional: true
 
@@ -18564,12 +18653,12 @@ snapshots:
       - terser
     optional: true
 
-  vite-node@2.1.4(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+  vite-node@2.1.4(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       cac: 6.7.14
       debug: 4.3.7
       pathe: 1.1.2
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -18581,9 +18670,9 @@ snapshots:
       - supports-color
       - terser
 
-  vite-plugin-dts@4.3.0(@types/node@22.8.7)(rollup@4.24.3)(typescript@5.6.3)(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
+  vite-plugin-dts@4.3.0(@types/node@22.9.0)(rollup@4.24.3)(typescript@5.6.3)(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
     dependencies:
-      '@microsoft/api-extractor': 7.47.11(@types/node@22.8.7)
+      '@microsoft/api-extractor': 7.47.11(@types/node@22.9.0)
       '@rollup/pluginutils': 5.1.3(rollup@4.24.3)
       '@volar/typescript': 2.4.8
       '@vue/language-core': 2.1.6(typescript@5.6.3)
@@ -18594,7 +18683,7 @@ snapshots:
       magic-string: 0.30.12
       typescript: 5.6.3
     optionalDependencies:
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
@@ -18618,13 +18707,13 @@ snapshots:
       sass: 1.77.5
       terser: 5.31.6
 
-  vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+  vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
       rollup: 4.24.3
     optionalDependencies:
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
       fsevents: 2.3.3
       less: 4.2.0
       sass: 1.77.5
@@ -18668,10 +18757,10 @@ snapshots:
       - terser
     optional: true
 
-  vitest@2.1.4(@types/node@22.8.7)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+  vitest@2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       '@vitest/expect': 2.1.4
-      '@vitest/mocker': 2.1.4(vite@5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/mocker': 2.1.4(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@vitest/pretty-format': 2.1.4
       '@vitest/runner': 2.1.4
       '@vitest/snapshot': 2.1.4
@@ -18687,11 +18776,11 @@ snapshots:
       tinyexec: 0.3.1
       tinypool: 1.0.1
       tinyrainbow: 1.2.0
-      vite: 5.4.10(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vite-node: 2.1.4(@types/node@22.8.7)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite-node: 2.1.4(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.8.7
+      '@types/node': 22.9.0
       happy-dom: 15.0.0
       jsdom: 24.1.1
     transitivePeerDependencies:

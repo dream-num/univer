@@ -15,11 +15,13 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable } from '@univerjs/core';
-import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
+import type { IAddHyperLinkMutationParams } from '../mutations/add-hyper-link.mutation';
 import { BuildTextUtils, CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { HyperLinkModel } from '../../models/hyper-link.model';
+import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
+import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
 
 export interface ICancelHyperLinkCommandParams {
     unitId: string;

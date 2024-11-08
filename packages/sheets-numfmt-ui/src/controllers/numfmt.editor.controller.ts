@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDocumentBody, IRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,
@@ -144,9 +144,11 @@ export class NumfmtEditorController extends Disposable {
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT,
                     {
+                        // eslint-disable-next-line complexity
                         handler: (value, context, next) => {
                             // clear the effect
                             this._collectEffectMutation.clean();
+                            const { worksheet, row, col } = context;
                             const currentNumfmtValue = this._numfmtService.getValue(
                                 context.unitId,
                                 context.subUnitId,
@@ -164,19 +166,33 @@ export class NumfmtEditorController extends Disposable {
                                         null
                                     );
                             };
-
-                            // if the value is empty or the current numfmt is text format, return the value directly
-                            if (!value?.v || currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
+                            if (!value?.v && !value?.p) {
                                 return next(value);
                             }
 
-                            const content = String(value.v);
+                            if (currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
+                                return next(value);
+                            }
 
+                            const body = value.p?.body;
+                            const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
                             const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+
+                            if (body) {
+                                if (!canConvertRichTextToNumfmt(body)) {
+                                    return next(value);
+                                } else {
+                                    const { dataStream } = body;
+                                    const dataStreamWithoutEnd = dataStream.replace(/\r\n$/, '');
+                                    const num = Number(dataStreamWithoutEnd);
+                                    if (Number.isNaN(num) && !numfmtInfo) {
+                                        return next(value);
+                                    }
+                                }
+                            }
 
                             if (numfmtInfo) {
                                 if (numfmtInfo.z) {
-                                    const v = Number(numfmtInfo.v);
                                     this._collectEffectMutation.add(
                                         context.unitId,
                                         context.subUnitId,
@@ -186,12 +202,12 @@ export class NumfmtEditorController extends Disposable {
                                             pattern: numfmtInfo.z,
                                         }
                                     );
-                                    return { ...value, v, t: CellValueType.NUMBER };
                                 }
-                            } else if (
-                                ['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) ||
-                                !isNumeric(content)
-                            ) {
+                                const v = Number(numfmtInfo.v);
+                                // The format needs to discard the current style settings
+                                const originStyle = worksheet.getCellStyleOnly(row, col)?.s;
+                                return { ...value, v, p: null, s: originStyle, t: CellValueType.NUMBER };
+                            } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
                                 clean();
                             }
                             return next(value);
@@ -281,4 +297,24 @@ export class NumfmtEditorController extends Disposable {
 
 function isNumeric(str: string) {
     return /^-?\d+(\.\d+)?$/.test(str);
+}
+
+function canConvertRichTextToNumfmt(body: IDocumentBody): boolean {
+    const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
+
+    // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
+    const richTextStyle = ['va'];
+
+    return !(
+        textRuns.some((textRun) => {
+            const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
+                return richTextStyle.includes(property);
+            }));
+            return hasRichTextStyle;
+        }) ||
+        paragraphs.some((paragraph) => paragraph.bullet) ||
+        paragraphs.length >= 2 ||
+        Boolean(customRanges?.length) ||
+        customBlocks.length > 0
+    );
 }

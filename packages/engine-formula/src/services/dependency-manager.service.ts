@@ -54,11 +54,6 @@ export interface IDependencyManagerService {
     getAllTree(): IFormulaDependencyTree[];
 
     buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
-
-    openKdTree(): void;
-
-    closeKdTree(): void;
-
 }
 
 export class DependencyManagerBaseService extends Disposable implements IDependencyManagerService {
@@ -71,14 +66,6 @@ export class DependencyManagerBaseService extends Disposable implements IDepende
     }
 
     getAllTree(): IFormulaDependencyTree[] {
-        throw new Error('Method not implemented.');
-    }
-
-    openKdTree(): void {
-        throw new Error('Method not implemented.');
-    }
-
-    closeKdTree(): void {
         throw new Error('Method not implemented.');
     }
 

@@ -47,7 +47,7 @@ import {
 
 import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
+import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
@@ -939,11 +939,10 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const { startOffset, endOffset, collapsed, segmentId } = activeTextRange;
+    const { segmentId } = activeTextRange;
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
-    const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
-
-    if (textRuns == null) {
+    if (body == null) {
         return {
             ts: {
                 ...defaultTextStyle,
@@ -952,28 +951,11 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    let textRun;
-
-    for (let i = textRuns.length - 1; i >= 0; i--) {
-        const curTextRun = textRuns[i];
-        if (collapsed) {
-            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
-                textRun = curTextRun;
-                break;
-            }
-        } else {
-            if (curTextRun.st <= startOffset && endOffset <= curTextRun.ed) {
-                textRun = curTextRun;
-                break;
-            }
-        }
-    }
+    const curTextStyle = getStyleInTextRange(body, activeTextRange, defaultTextStyle);
 
     return {
-        ...textRun,
         ts: {
-            ...defaultTextStyle,
-            ...textRun?.ts,
+            ...curTextStyle,
             ...cacheStyle,
         },
     };

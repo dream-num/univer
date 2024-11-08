@@ -25,9 +25,11 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BaselineOffset, BooleanNumber, CommandType,
     DOC_RANGE_TYPE,
+    getBodySlice,
     ICommandService, IUniverInstanceService,
     JSONX, MemoryCursor,
     TextX, TextXActionType,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -255,6 +257,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
+            return false;
+        }
+
         const unitId = docDataModel.getUnitId();
 
         let formatValue;
@@ -266,10 +274,16 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             case SetInlineFormatStrikethroughCommand.id: // fallthrough
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
+                const defaultStyle = docMenuStyleService.getDefaultStyle();
+                const curTextStyle = getStyleInTextRange(
+                    body,
+                    activeTextRange,
+                    defaultStyle
+                );
+
                 formatValue = getReverseFormatValueInSelection(
-                    docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.textRuns!,
-                    preCommandId,
-                    activeTextRange
+                    curTextStyle,
+                    preCommandId
                 );
 
                 break;
@@ -423,6 +437,64 @@ function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, 
     }
 }
 
+// eslint-disable-next-line complexity
+export function getStyleInTextRange(
+    body: IDocumentBody,
+    textRange: ITextRangeWithStyle,
+    defaultStyle: ITextStyle
+): ITextStyle {
+    const { startOffset, endOffset, collapsed } = textRange;
+
+    if (collapsed) {
+        const textRuns = body.textRuns ?? [];
+        let textRun: Nullable<ITextRun> = null;
+
+        for (let i = textRuns.length - 1; i >= 0; i--) {
+            const curTextRun = textRuns[i];
+            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
+            }
+        }
+
+        return textRun?.ts ? { ...defaultStyle, ...textRun.ts } : defaultStyle;
+    }
+
+    const { textRuns = [] } = getBodySlice(body, startOffset, endOffset);
+
+    const style = Tools.deepClone(defaultStyle);
+
+    // Get the min font size in range.
+    style.fs = Math.max(style.fs!, ...textRuns.map((t) => t?.ts?.fs ?? style.fs!));
+    style.ff = textRuns.find((t) => t.ts?.ff != null)?.ts?.ff ?? style.ff;
+    style.it = textRuns.length && textRuns.every((t) => t.ts?.it === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    style.bl = textRuns.length && textRuns.every((t) => t.ts?.bl === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    style.ul = textRuns.length && textRuns.every((t) => t.ts?.ul?.s === BooleanNumber.TRUE) ? textRuns[0].ts?.ul : style.ul;
+    style.st = textRuns.length && textRuns.every((t) => t.ts?.st?.s === BooleanNumber.TRUE) ? textRuns[0].ts?.st : style.st;
+    style.bg = textRuns.find((t) => t.ts?.bg != null)?.ts?.bg ?? style.bg;
+    style.cl = textRuns.find((t) => t.ts?.cl != null)?.ts?.cl ?? style.cl;
+
+    const vas = textRuns.filter((t) => t?.ts?.va != null);
+
+    if (vas.length > 0 && vas.length === textRuns.length) {
+        const va = vas[0].ts?.va;
+        let isSame = true;
+
+        for (let i = 1; i < vas.length; i++) {
+            if (vas[i].ts?.va !== va) {
+                isSame = false;
+                break;
+            }
+        }
+
+        if (isSame) {
+            style.va = va;
+        }
+    }
+
+    return style;
+}
+
 /**
  * When clicking on a Bold menu item, you should un-bold if there is bold in the selections,
  * or bold if there is no bold text. This method is used to get the reverse style value calculated
@@ -430,48 +502,12 @@ function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, 
  */
 
 function getReverseFormatValueInSelection(
-    textRuns: ITextRun[],
-    preCommandId: string,
-    activeTextRange: ITextRangeWithStyle
+    textStyle: ITextStyle,
+    preCommandId: string
 ): BooleanNumber | ITextDecoration | BaselineOffset {
     const key: keyof IStyleBase = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
-    const { startOffset, endOffset, collapsed } = activeTextRange;
 
-    let textRun;
+    const reverseValue = getReverseFormatValue(textStyle, key, preCommandId)!;
 
-    for (let i = textRuns.length - 1; i >= 0; i--) {
-        const curTextRun = textRuns[i];
-        if (collapsed) {
-            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
-                textRun = curTextRun;
-                break;
-            }
-        } else {
-            if (curTextRun.st <= startOffset && endOffset <= curTextRun.ed) {
-                textRun = curTextRun;
-                break;
-            }
-        }
-    }
-
-    if (textRun) {
-        const { ts } = textRun;
-        const reverseValue = getReverseFormatValue(ts, key, preCommandId);
-
-        if (reverseValue !== undefined) {
-            return reverseValue;
-        }
-    }
-
-    if (/bl|it/.test(key)) {
-        return BooleanNumber.TRUE;
-    } else if (/ul|st/.test(key)) {
-        return {
-            s: BooleanNumber.TRUE,
-        };
-    } else {
-        return preCommandId === SetInlineFormatSubscriptCommand.id
-            ? BaselineOffset.SUBSCRIPT
-            : BaselineOffset.SUPERSCRIPT;
-    }
+    return reverseValue;
 }

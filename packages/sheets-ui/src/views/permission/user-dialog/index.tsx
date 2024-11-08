@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
-import { Avatar, Button, Input } from '@univerjs/design';
-import clsx from 'clsx';
 import { LocaleService, useDependency } from '@univerjs/core';
-import { IDialogService } from '@univerjs/ui';
-import { type ICollaborator, UnitRole } from '@univerjs/protocol';
+import { Avatar, Button, Input } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
+import { type ICollaborator, UnitRole } from '@univerjs/protocol';
+import { IDialogService } from '@univerjs/ui';
+import clsx from 'clsx';
+import React, { useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
-import styles from './index.module.less';
+import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from './constant';
+import styles from './index.module.less';
 
 export const SheetPermissionUserDialog = () => {
     const [inputValue, setInputValue] = React.useState('');
@@ -52,7 +52,7 @@ export const SheetPermissionUserDialog = () => {
         <div className={styles.sheetPermissionUserDialogWrapper}>
             <div className={styles.sheetPermissionUserDialogSearch}>
                 <Input
-                    placeholder="search"
+                    placeholder={localeService.t('permission.dialog.search')}
                     className={styles.sheetPermissionUserDialogSearchInput}
                     value={inputValue}
                     onChange={(v) => setInputValue(v)}

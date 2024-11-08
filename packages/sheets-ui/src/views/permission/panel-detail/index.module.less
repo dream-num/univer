@@ -1,6 +1,8 @@
 .permission-panel-detail-wrapper {
     margin-top: 16px;
-    height: 100%;
+    height: calc(100% - 16px);
+    display: flex;
+    flex-direction: column;
 }
 
 .radio-group-vertical {
@@ -10,7 +12,7 @@
 }
 
 .sheet-permission-design-person-panel {
-    height: 300px;
+    height: 270px;
     border: 1px solid rgb(var(--grey-200));
     border-radius: var(--border-radius-lg);
     padding: var(--padding-base);
@@ -103,6 +105,19 @@
 
 .sheet-permission-panel-title {
     font-weight: 500;
+}
+
+.sheet-permission-panel-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 20px 0;
+    margin-top: auto;
+
+    button {
+        &:first-child {
+            margin-left: 8px;
+        }
+    }
 }
 
 .permission-range-selector {

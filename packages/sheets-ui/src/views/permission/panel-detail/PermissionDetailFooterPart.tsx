@@ -14,58 +14,97 @@
  * limitations under the License.
  */
 
-import { IAuthzIoService, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import type { IRangeProtectionRule } from '@univerjs/sheets';
+import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
+import { IAuthzIoService, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
-import { AddRangeProtectionCommand } from '@univerjs/sheets';
-import { ISidebarService, useObservable } from '@univerjs/ui';
+import { ObjectScope, UnitAction, UnitRole } from '@univerjs/protocol';
+import { AddRangeProtectionCommand, AddWorksheetProtectionCommand, EditStateEnum, SetProtectionCommand, UnitObject, ViewStateEnum } from '@univerjs/sheets';
+import { ISidebarService } from '@univerjs/ui';
 import React from 'react';
-import { SetProtectionCommand } from '../../../commands/commands/range-protection.command';
-import { AddWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { getUserListEqual } from '../../../common/utils';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
-import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
+import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
+import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
+import { checkRangesIsWholeSheet } from '../util';
 import styles from './index.module.less';
 
-export const SheetPermissionPanelDetailFooter = () => {
+interface IPermissionDetailFooterPartProps {
+    permissionId: string;
+    id: string;
+    ranges: IRange[];
+    rangesErrMsg?: string;
+    desc?: string;
+    editState: EditStateEnum;
+    viewState: ViewStateEnum;
+    oldRule?: IPermissionPanelRule;
+}
+
+export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartProps) => {
+    const { viewState, editState, permissionId, ranges, rangesErrMsg, desc, oldRule, id } = props;
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
-    const activeRule = useObservable(sheetPermissionPanelModel.rule$, sheetPermissionPanelModel.rule);
     const sidebarService = useDependency(ISidebarService);
     const authzIoService = useDependency(IAuthzIoService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
-    const rangeErrMsg = useObservable(sheetPermissionPanelModel.rangeErrorMsg$);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    const worksheet = workbook?.getActiveSheet();
+    if (!workbook || !worksheet) {
+        return null;
+    }
+    const unitId = workbook.getUnitId();
+    const subUnitId = worksheet.getSheetId();
 
     return (
         <div className={styles.sheetPermissionPanelFooter}>
             <Button
                 type="primary"
                 onClick={async () => {
-                    if (rangeErrMsg) return;
+                    if (rangesErrMsg) return;
+
+                    const activeRule: IPermissionPanelRule = {
+                        unitId,
+                        subUnitId,
+                        permissionId,
+                        id,
+                        viewState,
+                        editState,
+                        unitType: UnitObject.SelectRange,
+                        ranges,
+                        description: desc,
+                    };
+
+                    const isSelectWholeSheet = checkRangesIsWholeSheet(ranges, worksheet);
+                    if (isSelectWholeSheet) {
+                        activeRule.unitType = UnitObject.Worksheet;
+                        activeRule.ranges = [];
+                    }
+
                     let collaborators = sheetPermissionUserManagerService.selectUserList;
-                    if (activeRule.editStatus === editState.onlyMe) {
+                    if (activeRule.editState === EditStateEnum.OnlyMe) {
                         collaborators = [];
                         sheetPermissionUserManagerService.setSelectUserList([]);
                     }
                     const scopeObj = {
-                        read: activeRule.viewStatus === viewState.othersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
-                        edit: activeRule.editStatus === editState.designedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,
+                        read: activeRule.viewState === ViewStateEnum.OthersCanView ? ObjectScope.AllCollaborator : ObjectScope.SomeCollaborator,
+                        edit: activeRule.editState === EditStateEnum.DesignedUserCanEdit ? ObjectScope.SomeCollaborator : ObjectScope.OneSelf,
                     };
-                    if (activeRule.editStatus === editState.designedUserCanEdit && collaborators.length === 0) {
+                    if (activeRule.editState === EditStateEnum.DesignedUserCanEdit && collaborators.length === 0) {
                         collaborators = [];
                         scopeObj.edit = ObjectScope.OneSelf;
                     }
 
                     // Editing existing permission rules
                     if (activeRule.permissionId) {
-                        const oldRule = sheetPermissionPanelModel.oldRule;
                         // Collaborators only need to consider people with editing permissions
                         const isSameCollaborators = getUserListEqual(collaborators.filter((user) => user.role === UnitRole.Editor), sheetPermissionUserManagerService.oldCollaboratorList.filter((user) => user.role === UnitRole.Editor));
-                        const isSameReadStatus = oldRule?.viewStatus === activeRule.viewStatus;
-                        const isSameEditStatus = oldRule?.editStatus === activeRule.editStatus;
-                        const ruleConfigIsOrigin = activeRule.unitType === oldRule?.unitType && activeRule.name === oldRule.name && activeRule.description === oldRule.description && activeRule.ranges === oldRule.ranges;
+                        const isSameReadStatus = oldRule?.viewState === activeRule.viewState;
+                        const isSameEditStatus = oldRule?.editState === activeRule.editState;
+                        const ruleConfigIsOrigin = activeRule.unitType === oldRule?.unitType && activeRule.description === oldRule.description && activeRule.ranges === (oldRule as IRangeProtectionRule).ranges;
                         const collaboratorsIsChange = !isSameCollaborators || !isSameReadStatus || !isSameEditStatus;
 
                         if (ruleConfigIsOrigin && collaboratorsIsChange) {
@@ -93,7 +132,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                         worksheetObject: {
                                             collaborators,
                                             unitID: activeRule.unitId,
-                                            name: activeRule.name,
+                                            name: '',
                                             strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
                                             scope: scopeObj,
                                         },
@@ -104,7 +143,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                         selectRangeObject: {
                                             collaborators,
                                             unitID: activeRule.unitId,
-                                            name: activeRule.name,
+                                            name: '',
                                             scope: scopeObj,
                                         },
                                         objectType: UnitObject.SelectRange,
@@ -117,6 +156,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     ...activeRule,
                                     permissionId: newPermissionId,
                                 },
+                                oldRule,
                             });
                         }
                     } else {
@@ -127,7 +167,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                 worksheetObject: {
                                     collaborators,
                                     unitID: activeRule.unitId,
-                                    name: activeRule.name,
+                                    name: '',
                                     strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
                                     scope: scopeObj,
                                 },
@@ -144,7 +184,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                 selectRangeObject: {
                                     collaborators,
                                     unitID: activeRule.unitId,
-                                    name: activeRule.name,
+                                    name: '',
                                     scope: scopeObj,
                                 },
                                 objectType: UnitObject.SelectRange,
@@ -155,8 +195,6 @@ export const SheetPermissionPanelDetailFooter = () => {
                             });
                         }
                     }
-                    sheetPermissionPanelModel.resetRule();
-                    sheetPermissionUserManagerService.reset();
                     const sidebarProps = {
                         header: { title: `${localeService.t('permission.panel.title')}` },
                         children: {
@@ -164,10 +202,6 @@ export const SheetPermissionPanelDetailFooter = () => {
                             showDetail: false,
                         },
                         width: 330,
-                        footer: {
-                            label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
-                            showDetail: false,
-                        },
                     };
                     sidebarService.open(sidebarProps);
                 }}

@@ -145,14 +145,10 @@ export {
 export { InsertRangeMoveDownConfirmCommand } from './commands/commands/insert-range-move-down-confirm.command';
 export { InsertRangeMoveRightConfirmCommand } from './commands/commands/insert-range-move-right-confirm.command';
 export {
-    AddRangeProtectionCommand,
     AddRangeProtectionFromContextMenuCommand,
     AddRangeProtectionFromSheetBarCommand,
     AddRangeProtectionFromToolbarCommand,
     DeleteRangeProtectionFromContextMenuCommand,
-    DeleteRangeSelectionCommand,
-    SetProtectionCommand,
-    SetRangeProtectionCommand,
     SetRangeProtectionFromContextMenuCommand,
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,
@@ -175,11 +171,8 @@ export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEn
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
 export {
-    AddWorksheetProtectionCommand,
     ChangeSheetProtectionFromSheetBarCommand,
-    DeleteWorksheetProtectionCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
-    SetWorksheetProtectionCommand,
 } from './commands/commands/worksheet-protection.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';

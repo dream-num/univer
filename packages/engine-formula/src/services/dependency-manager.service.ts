@@ -424,7 +424,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                 this._otherFormulaDataMainData.delete(formulaId);
             }
 
-            sheetMap.clear(); // 清空该 sheetId 对应的公式依赖数据
+            sheetMap.clear(); // Clear the formula dependent data corresponding to the sheetId
         } else if (unitMap) {
             for (const sheetId of unitMap.keys()) {
                 const sheetMap = unitMap.get(sheetId)!;
@@ -447,7 +447,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                 }
             }
 
-            this._otherFormulaData.delete(unitId); // 删除整个 unitId 对应的数据
+            this._otherFormulaData.delete(unitId); // Delete the data corresponding to the entire unitId
         }
     }
 
@@ -501,7 +501,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                 this._removeAllTreeMap(featureTreeId);
             });
 
-            sheetMap.clear(); // 清空该 sheetId 对应的公式依赖数据
+            sheetMap.clear(); // Clear the formula dependent data corresponding to the sheetId
         } else if (unitMap) {
             unitMap.forEach((sheetMap, sheetId) => {
                 this._removeDependencyRTreeCacheById(unitId, sheetId);
@@ -514,7 +514,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                 });
             });
 
-            this._featureFormulaData.delete(unitId); // 删除整个 unitId 对应的数据
+            this._featureFormulaData.delete(unitId); // Delete the data corresponding to the entire unitId
         }
     }
 
@@ -580,7 +580,7 @@ export class DependencyManagerService extends DependencyManagerBaseService imple
                 });
             });
 
-            this._formulaData.delete(unitId); // 删除整个 unitId 的数据
+            this._formulaData.delete(unitId); // Delete the data of the entire unitId
         }
     }
 

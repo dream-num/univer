@@ -97,6 +97,15 @@ async function buildUMD(sharedConfig: InlineConfig, options: IBuildExecuterOptio
     const { pkg, entry } = options;
 
     return Promise.all(Object.keys(entry).map((key) => {
+        let name = convertLibNameFromPackageName(pkg.name);
+        if (key.includes('facade')) {
+            name = `${name}Facade`;
+        }
+        if (key.includes('locale')) {
+            const localeKey = key.split('/')[1];
+            name = `${name}${convertLibNameFromPackageName(localeKey)}`;
+        }
+
         const config: InlineConfig = mergeConfig(sharedConfig, {
             build: {
                 emptyOutDir: false,
@@ -105,7 +114,7 @@ async function buildUMD(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                     entry: {
                         [key]: entry[key],
                     },
-                    name: convertLibNameFromPackageName(pkg.name),
+                    name,
                     fileName: () => `umd/${key}.js`,
                     formats: ['umd'],
                 },

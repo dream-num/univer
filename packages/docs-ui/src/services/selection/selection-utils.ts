@@ -217,6 +217,7 @@ export function getRangeListFromSelection(
 
                         textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
                     }
+
                     start = tableEnd + 1;
                 }
 

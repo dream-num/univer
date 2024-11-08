@@ -17,7 +17,7 @@
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
 import type { ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../services/runtime.service';
-import { FBase, ICommandService, IConfigService, ILogService, Inject, LifecycleService } from '@univerjs/core';
+import { FBase, ICommandService, Inject, Injector } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '../commands/mutations/set-formula-calculation.mutation';
 
 /**
@@ -25,10 +25,8 @@ import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMu
  */
 export class FFormula extends FBase {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @IConfigService protected readonly _configService: IConfigService,
-        @ILogService protected readonly _logService: ILogService,
-        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }

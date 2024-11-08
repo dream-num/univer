@@ -58,6 +58,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
     }, [sequenceNodes]);
     oldFilterReferenceNodes.current = filterReferenceNodes;
 
+    const scalingOptionRef = useRef<{ result: string; offset: number }>();
+
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
             let isFirst = true;
@@ -130,6 +132,11 @@ export const useSheetSelectionChange = (isNeed: boolean,
             const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections, true);
                 isScalingRef.current = false;
+                if (scalingOptionRef.current) {
+                    const { result, offset } = scalingOptionRef.current;
+                    handleRangeChange(result, offset, true);
+                    scalingOptionRef.current = undefined;
+                }
             });
 
             const d2 = refSelectionsRenderService.selectionMoving$.pipe(throttleTime(50)).subscribe((selections) => {
@@ -182,7 +189,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, offset || -1, false);
+                scalingOptionRef.current = { result, offset: offset || -1 };
+                handleRangeChange(result, -1, false);
             };
             let time = 0 as any;
             const dispose = refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {

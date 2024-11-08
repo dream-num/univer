@@ -15,12 +15,12 @@
  */
 
 import type { INumberUnit, ITable } from '@univerjs/core';
-import { TableAlignmentType } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
-import { createSkeletonCellPage } from '../model/page';
 import type { ILayoutContext } from '../tools';
+import { TableAlignmentType } from '@univerjs/core';
+import { createSkeletonCellPage } from '../model/page';
 
 export function createTableSkeleton(
     ctx: ILayoutContext,

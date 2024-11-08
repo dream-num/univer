@@ -85,6 +85,7 @@ import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetDefaultStyleCommand } from '../commands/commands/set-worksheet-default-style.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
@@ -116,6 +117,7 @@ import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-works
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
+
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
@@ -293,6 +295,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
                 ToggleCellCheckboxCommand,
                 SetWorksheetDefaultStyleMutation,
+                SetWorksheetDefaultStyleCommand,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

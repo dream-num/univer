@@ -817,6 +817,20 @@ export default {
             numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round the number argument.' },
         },
     },
+    ROUNDBANK: {
+        description: 'Rounds a number in banker\'s rounding',
+        abstract: 'Rounds a number in banker\'s rounding',
+        links: [
+            {
+                title: 'Instruction',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'number', detail: 'The number that you want to round in banker\'s rounding.' },
+            numDigits: { name: 'num_digits', detail: 'The number of digits to which you want to round in banker\'s rounding.' },
+        },
+    },
     ROUNDDOWN: {
         description: 'Rounds a number down, toward zero',
         abstract: 'Rounds a number down, toward zero',

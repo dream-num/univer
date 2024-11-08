@@ -816,6 +816,20 @@ export default {
             numDigits: { name: '位数', detail: '要进行四舍五入运算的位数。' },
         },
     },
+    ROUNDBANK: {
+        description: '通过“四舍六入五成双”舍入数字',
+        abstract: '通过“四舍六入五成双”舍入数字',
+        links: [
+            {
+                title: '教学',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数值', detail: '要“四舍六入五成双”的数字。' },
+            numDigits: { name: '位数', detail: '要进行“四舍六入五成双”运算的位数。' },
+        },
+    },
     ROUNDDOWN: {
         description: '向绝对值减小的方向舍入数字',
         abstract: '向绝对值减小的方向舍入数字',

@@ -15,8 +15,8 @@
  */
 
 import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
-import { FFormula } from '@univerjs/engine-formula';
 
+import { FFormula } from '@univerjs/engine-formula';
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 
 interface IFFormulaSheetsMixin {
@@ -30,6 +30,12 @@ interface IFFormulaSheetsMixin {
 
 class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
     override setInitialFormulaComputing(calculationMode: CalculationMode): void {
+        const lifecycleStage = this._lifecycleService.stage;
+
+        if (lifecycleStage > 0) {
+            this._logService.warn('[FFormula]', 'CalculationMode is called after the Starting lifecycle and will take effect the next time the Univer Sheet is constructed. If you want it to take effect when the Univer Sheet is initialized this time, consider calling it before the Ready lifecycle or using configuration.');
+        }
+
         const config = this._configService.getConfig<Partial<IUniverSheetsFormulaBaseConfig>>(PLUGIN_CONFIG_KEY_BASE);
 
         if (!config) {

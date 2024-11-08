@@ -18,7 +18,7 @@ export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunction
 export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
-export { CalculationMode } from './controllers/config.schema';
+export { CalculationMode, type IUniverSheetsFormulaBaseConfig, PLUGIN_CONFIG_KEY_BASE } from './controllers/config.schema';
 
 // #region - all commands
 

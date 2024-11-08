@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     ICommand,
+    ICustomTable,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
@@ -240,6 +241,19 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     },
 };
 
+// TODO: WORKAROUND to fix https://github.com/dream-num/univer-pro/issues/2560.
+function adjustSelectionByTable(selection: ITextRange, tables: ICustomTable[]): ITextRange {
+    const { startOffset, endOffset } = selection;
+    const endsWithTable = tables.some((t) => t.startIndex === endOffset);
+    const newEndOffset = Math.max(startOffset, endsWithTable ? endOffset - 1 : endOffset);
+
+    return {
+        ...selection,
+        endOffset: newEndOffset,
+        collapsed: startOffset === newEndOffset,
+    };
+}
+
 function getCutActionsFromTextRanges(
     selections: ITextRange[],
     docDataModel: DocumentDataModel,
@@ -255,11 +269,13 @@ function getCutActionsFromTextRanges(
         return rawActions;
     }
 
+    const { tables = [] } = originBody;
+
     const memoryCursor = new MemoryCursor();
     memoryCursor.reset();
 
     for (let i = 0; i < selections.length; i++) {
-        const selection = selections[i];
+        const selection = adjustSelectionByTable(selections[i], tables);
         const { startOffset, endOffset, collapsed } = selection;
         const len = startOffset - memoryCursor.cursor;
 
@@ -269,7 +285,7 @@ function getCutActionsFromTextRanges(
                 len,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.delete([selection], originBody, memoryCursor.cursor, null, selections.length === 1));
+            textX.push(...BuildTextUtils.selection.delete([selection], originBody, memoryCursor.cursor, null, false));
         }
 
         memoryCursor.reset();

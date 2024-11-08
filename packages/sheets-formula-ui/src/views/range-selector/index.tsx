@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import { createInternalEditorID, debounce, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { createInternalEditorID, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
@@ -144,13 +144,17 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     if (typeof node === 'string') {
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
+                        // The 'sequenceNodesBuilder' will cache the results.
+                        // You Can't modify the reference here. This will cause a cache error
+                        const cloneNode = { ...node };
                         const unitRange = deserializeRangeWithSheet(node.token);
-                        // unitRange.range = rangePreProcess(unitRange.range);
+                        unitRange.range = rangePreProcess(unitRange.range);
                         if (!isSupportAcrossSheet) {
                             unitRange.sheetName = '';
                             unitRange.unitId = '';
                         }
-                        node.token = unitRangesToText([unitRange], isSupportAcrossSheet)[0];
+                        cloneNode.token = unitRangesToText([unitRange], isSupportAcrossSheet)[0];
+                        return cloneNode;
                     }
                     return node;
                 });
@@ -191,7 +195,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const highlightSheet = useSheetHighlight(unitId);
     const highligh = (text: string, isNeedResetSelection: boolean = true) => {
         if (!editor) {
-            throw new Error('editor is not instance');
+            return;
         }
         const sequenceNodes = getFormulaToken(text);
         const ranges = highlightDoc(editor, sequenceNodes, isNeedResetSelection);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { Editor } from '@univerjs/docs-ui';
 import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { useEffect } from 'react';
-import type { Editor } from '@univerjs/docs-ui';
 
 export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
     const commandService = useDependency(ICommandService);

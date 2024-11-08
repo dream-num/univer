@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { getRangeReferenceObjectFromCache } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -27,8 +28,8 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 // const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(private _operatorString: string) {
-        super(_operatorString);
+    constructor(operatorString: string) {
+        super(operatorString);
     }
 
     override get nodeType() {
@@ -37,15 +38,17 @@ export class UnionNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        const leftNode = children[0].getValue();
-        const rightNode = children[1].getValue();
+        const leftChild = children[0];
+        const rightChild = children[1];
+        const leftNode = leftChild.getValue();
+        const rightNode = rightChild.getValue();
 
         if (leftNode == null || rightNode == null) {
             throw new Error('leftNode and rightNode');
         }
 
         let result: FunctionVariantType;
-        if (this._operatorString === matchToken.COLON) {
+        if (this.getToken() === matchToken.COLON) {
             result = this._unionFunction(leftNode, rightNode) as FunctionVariantType;
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
@@ -66,18 +69,21 @@ export class UnionNode extends BaseAstNode {
 
         variant2 = variant2 as BaseReferenceObject;
 
-        if (variant1.isCell() && variant2.isCell()) {
-            return variant1.unionBy(variant2);
-        }
-        if (variant1.isRow() && variant2.isRow()) {
-            return variant1.unionBy(variant2);
-        }
-        if (variant1.isColumn() && variant2.isColumn()) {
-            return variant1.unionBy(variant2);
-        }
+        return getRangeReferenceObjectFromCache(variant1, variant2);
 
-        // =A1:A gets #NAME?
-        return ErrorValueObject.create(ErrorType.NAME);
+        // if (variant1.isCell() && variant2.isCell()) {
+
+        //     return variant1.unionBy(variant2);
+        // }
+        // if (variant1.isRow() && variant2.isRow()) {
+        //     return variant1.unionBy(variant2);
+        // }
+        // if (variant1.isColumn() && variant2.isColumn()) {
+        //     return variant1.unionBy(variant2);
+        // }
+
+        // // =A1:A gets #NAME?
+        // return ErrorValueObject.create(ErrorType.NAME);
     }
 }
 

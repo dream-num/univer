@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Nullable } from '@univerjs/core';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { Nullable } from '@univerjs/core';
 
-import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     regexTestSingeRange,
@@ -28,12 +26,9 @@ import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
-import { CellReferenceObject } from '../reference-object/cell-reference-object';
-import { ColumnReferenceObject } from '../reference-object/column-reference-object';
-import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { prefixHandler } from '../utils/prefixHandler';
+import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -44,12 +39,13 @@ export class ReferenceNode extends BaseAstNode {
     private _refOffsetY = 0;
 
     constructor(
-        private _accessor: IAccessor,
-        private _operatorString: string,
-        private _referenceObject: BaseReferenceObject,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _runtimeService: IFormulaRuntimeService,
+        operatorString: string,
+        private _referenceObjectType: ReferenceObjectType,
         private _isPrepareMerge: boolean = false
     ) {
-        super(_operatorString);
+        super(operatorString);
     }
 
     override get nodeType() {
@@ -57,35 +53,37 @@ export class ReferenceNode extends BaseAstNode {
     }
 
     override execute() {
-        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
-        const runtimeService = this._accessor.get(IFormulaRuntimeService);
+        const currentConfigService = this._currentConfigService;
+        const runtimeService = this._runtimeService;
 
-        this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
+        const referenceObject = getReferenceObjectFromCache(this.getToken(), this._referenceObjectType);
 
-        this._referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
+        referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
-        this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
+        referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
 
-        this._referenceObject.setUnitData(currentConfigService.getUnitData());
+        referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
 
-        this._referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
+        referenceObject.setUnitData(currentConfigService.getUnitData());
 
-        this._referenceObject.setRuntimeData(runtimeService.getUnitData());
+        referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
 
-        this._referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
+        referenceObject.setRuntimeData(runtimeService.getUnitData());
 
-        this._referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
+        referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
 
-        this._referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());
+        referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());
 
         const { x, y } = this.getRefOffset();
 
-        this._referenceObject.setRefOffset(x, y);
+        referenceObject.setRefOffset(x, y);
 
-        if (!this._isPrepareMerge && this._referenceObject.isExceedRange()) {
+        if (!this._isPrepareMerge && referenceObject.isExceedRange()) {
             this.setValue(ErrorValueObject.create(ErrorType.NAME));
         } else {
-            this.setValue(this._referenceObject);
+            this.setValue(referenceObject);
         }
     }
 
@@ -104,10 +102,9 @@ export class ReferenceNode extends BaseAstNode {
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @ISuperTableService private readonly _superTableService: ISuperTableService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(Injector) private readonly _injector: Injector
+        @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
     }
@@ -140,7 +137,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         //     return true;
         // }
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, this._injector);
+        const currentConfigService = this._currentConfigService;
+        const runtimeService = this._formulaRuntimeService;
+
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, runtimeService);
 
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
             return;
@@ -148,12 +148,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         let node: Nullable<ReferenceNode>;
         if (regexTestSingeRange(tokenTrim)) {
-            node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
+            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.CELL, isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
             if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.ROW, isPrepareMerge);
             } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.COLUMN, isPrepareMerge);
             }
         }
         // else {
@@ -193,3 +193,4 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         return param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON;
     }
 }
+

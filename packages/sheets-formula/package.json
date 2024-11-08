@@ -22,7 +22,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./facade": "./src/facade/index.ts"
+        "./facade": "./src/facade/index.ts",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -41,12 +42,16 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./lib/*": "./lib/*",
             "./facade": {
                 "import": "./lib/es/facade.js",
                 "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./locale/*": {
+                "import": "./lib/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            }
         }
     },
     "directories": {
@@ -92,11 +97,15 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
+        "./lib/*": "./lib/*",
         "./facade": {
             "import": "./lib/es/facade.js",
             "require": "./lib/cjs/facade.js",
             "types": "./lib/types/facade/index.d.ts"
         },
-        "./lib/*": "./lib/*"
+        "./locale/*": {
+            "import": "./lib/locale/*.js",
+            "types": "./lib/types/locale/*.d.ts"
+        }
     }
 }

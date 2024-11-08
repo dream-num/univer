@@ -127,6 +127,8 @@ export class CalculateFormulaService extends Disposable {
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
 
         CELL_INVERTED_INDEX_CACHE.clear();
+
+        this._runtimeService.reset();
     }
 
     private async _execute() {
@@ -226,7 +228,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
-        const treeList = await this._formulaDependencyGenerator.generate();
+        const treeList = (await this._formulaDependencyGenerator.generate()).reverse();
 
         const interpreter = this._interpreter;
 
@@ -247,7 +249,8 @@ export class CalculateFormulaService extends Disposable {
         const config = this._configService.getConfig(PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
 
-        for (let i = 0, len = treeList.length; i < len; i++) {
+        const treeCount = treeList.length;
+        for (let i = 0; i < treeCount; i++) {
             const tree = treeList[i];
             const nodeData = tree.nodeData;
             const getDirtyData = tree.getDirtyData;
@@ -314,7 +317,7 @@ export class CalculateFormulaService extends Disposable {
                 }
 
                 if (tree.formulaId != null) {
-                    this._runtimeService.setRuntimeOtherData(tree.formulaId, value);
+                    this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {
                     this._runtimeService.setRuntimeData(value);
                 }
@@ -325,13 +328,13 @@ export class CalculateFormulaService extends Disposable {
         pendingTasks.forEach((cancel) => cancel());
         pendingTasks = [];
 
-        if (treeList.length > 0) {
+        if (treeCount > 0) {
             this._runtimeService.markedAsSuccessfullyExecuted();
         } else if (!isArrayFormulaState) {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
-        this._runtimeService.clearReferenceAndNumberformatCache();
+        // treeList.length = 0;
 
         return this._runtimeService.getAllRuntimeData();
     }

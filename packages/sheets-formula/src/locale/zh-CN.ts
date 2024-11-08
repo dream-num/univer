@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+const locale = {
+    formula: {
+        progress: {
+            analyzing: '分析中',
+            calculating: '计算中',
+            'array-analysis': '数组分析',
+            'array-calculation': '数组计算',
+            done: '完成',
+        },
+    },
+};
 
-export enum FormulaResultStatus {
-    NOT_REGISTER = 1,
-    SUCCESS,
-    WAIT,
-    ERROR,
-}
-
-export interface IOtherFormulaResult {
-    result?: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>;
-    status: FormulaResultStatus;
-    formulaId: string;
-    callbacks: Set<(value: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>) => void>;
-    extra?: Record<string, any>;
-}
-
-export interface IFormulaInfo {
-    id: string;
-    text: string;
-}
+export default locale;

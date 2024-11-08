@@ -124,7 +124,7 @@ describe('Test pv function', () => {
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pmt, fv, type);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 1918748.3979545343, 0, ErrorType.NA],
+                [ErrorType.VALUE, 1918748.3979545343, -0, ErrorType.NA],
                 [-5, 2000, ErrorType.NAME, ErrorType.NA],
                 [0, 0, 0, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],

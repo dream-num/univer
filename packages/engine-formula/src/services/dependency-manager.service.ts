@@ -15,69 +15,46 @@
  */
 
 import type { IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
-import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
+import type { AstRootNode } from '../engine/ast-node';
+import type { FormulaDependencyTree, IFormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
-
-export interface IOtherFormulaDependencyParam {
-    [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Nullable<number> } }>;
-}
-
-export interface IFeatureFormulaDependencyParam {
-    [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: Nullable<number> } }>;
-}
-
-export interface IFormulaDependencyParam {
-    [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix< number> }>;
-}
 
 export interface IDependencyManagerService {
     dispose(): void;
 
-    getAllTree(): FormulaDependencyTree[];
-
-    buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]): FormulaDependencyTree[];
-
-    clearDependencyForTree(shouldBeClearTree: Nullable<FormulaDependencyTree>): void;
-
     reset(): void;
 
-    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: FormulaDependencyTree): void;
-
+    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: IFormulaDependencyTree): void;
+    addOtherFormulaDependencyMainData(formulaId: string): void;
     removeOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string[]): void;
-
-    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string): Nullable<FormulaDependencyTree>;
+    hasOtherFormulaDataMainData(formulaId: string): boolean;
+    clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
+    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string): Nullable<ObjectMatrix<number>>;
 
     addFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string, dependencyTree: FormulaDependencyTree): void;
-
     removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]): void;
+    getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string): Nullable<number>;
+    clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
 
-    getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string): Nullable<FormulaDependencyTree>;
-
-    addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: FormulaDependencyTree): void;
-
+    addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: IFormulaDependencyTree): void;
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
-
-    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<FormulaDependencyTree>;
-
-    removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
-
+    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<number>;
     clearFormulaDependency(unitId: string, sheetId?: string): void;
 
-    addDependencyRTreeCache(tree: FormulaDependencyTree): void;
+    removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>): void;
 
-    searchDependency(search: IUnitRange[]): Set<number>;
+    addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
+    searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number>;
 
     getLastTreeId(): number;
 
-    clearDependencyAll(): void;
+    getTreeById(treeId: number): Nullable<IFormulaDependencyTree>;
 
-    clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
-    clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
+    getAllTree(): IFormulaDependencyTree[];
 
-    openKdTree(): void;
-    closeKdTree(): void;
+    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees?: IFormulaDependencyTree[]): IFormulaDependencyTree[];
 
-    getTreeById(treeId: number): Nullable<FormulaDependencyTree>;
 }
 
 /**
@@ -87,103 +64,27 @@ export interface IDependencyManagerService {
  * thereby completing the calculation of the entire dependency tree.
  */
 export class DependencyManagerService extends Disposable implements IDependencyManagerService {
-    private _otherFormulaData: IOtherFormulaDependencyParam = {};
+    private _otherFormulaData: Map<string, Map<string, Map<string, ObjectMatrix<number>>>> = new Map(); //  [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Set<number> } }>;
 
-    private _featureFormulaData: IFeatureFormulaDependencyParam = {};
+    private _featureFormulaData: Map<string, Map<string, Map<string, Nullable<number>>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: Nullable<number> } }>;
 
-    private _formulaData: IFormulaDependencyParam = {};
+    private _formulaData: Map<string, Map<string, ObjectMatrix<number>>> = new Map(); // [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<number> }>;
 
-    private _allTreeMap: Map<number, FormulaDependencyTree> = new Map();
+    private _definedNameMap: Map<string, Map<string, Set<number>>> = new Map(); // unitId -> definedName -> treeId
 
-    private _dependencyRTreeCache: RTree = new RTree(true); // true: open kd-tree search state
+    private _allTreeMap: Map<number, IFormulaDependencyTree> = new Map();
+
+    private _otherFormulaDataMainData: Set<string> = new Set();
+
+    private _dependencyRTreeCache: RTree = new RTree();
 
     private _dependencyTreeIdLast: number = 0;
 
     override dispose(): void {
-        this._otherFormulaData = {};
-        this._featureFormulaData = {};
-        this._formulaData = {};
-        this._dependencyRTreeCache.dispose();
-        this._restDependencyTreeId();
-        this._allTreeMap.clear();
+        this.reset();
     }
 
-    /**
-     * Get all FormulaDependencyTree from _otherFormulaData, _featureFormulaData, _formulaData
-     * return FormulaDependencyTree[]
-     */
-    getAllTree() {
-        // const trees: FormulaDependencyTree[] = [];
-
-        // const resetAndPush = (item: FormulaDependencyTree) => {
-        //     if (item) {
-        //         item.resetState();
-        //         trees.push(item);
-        //     }
-        // };
-
-        // // _otherFormulaData
-        // for (const unitKey in this._otherFormulaData) {
-        //     const unit = this._otherFormulaData[unitKey];
-        //     if (!unit) continue;
-
-        //     for (const sheetKey in unit) {
-        //         const sheet = unit[sheetKey];
-        //         for (const formulaKey in sheet) {
-        //             if (sheet[formulaKey] == null) {
-        //                 continue;
-        //             }
-        //             resetAndPush(sheet[formulaKey]);
-        //         }
-        //     }
-        // }
-
-        // // _featureFormulaData
-        // for (const unitKey in this._featureFormulaData) {
-        //     const unit = this._featureFormulaData[unitKey];
-        //     if (!unit) continue;
-
-        //     for (const sheetKey in unit) {
-        //         const sheet = unit[sheetKey];
-        //         for (const featureKey in sheet) {
-        //             if (sheet[featureKey] == null) {
-        //                 continue;
-        //             }
-        //             resetAndPush(sheet[featureKey]);
-        //         }
-        //     }
-        // }
-
-        // // _formulaData
-        // for (const unitKey in this._formulaData) {
-        //     const unit = this._formulaData[unitKey];
-        //     if (!unit) continue;
-
-        //     for (const sheetKey in unit) {
-        //         const sheet = unit[sheetKey];
-        //         sheet.forValue((row, col, item) => {
-        //             if (item == null) {
-        //                 return true;
-        //             }
-        //             resetAndPush(item);
-        //         });
-        //     }
-        // }
-
-        const trees: FormulaDependencyTree[] = [];
-        this._allTreeMap.forEach((tree) => {
-            tree.resetState();
-            trees.push(tree);
-        });
-
-        return trees;
-    }
-
-    getTreeById(treeId: number) {
-        return this._allTreeMap.get(treeId);
-    }
-
-    buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[], dependencyTrees: FormulaDependencyTree[] = []): FormulaDependencyTree[] {
+    buildDependencyTree(shouldBeBuildTrees: IFormulaDependencyTree[], dependencyTrees: IFormulaDependencyTree[] = []): IFormulaDependencyTree[] {
         const allTrees = this.getAllTree();
         if (shouldBeBuildTrees.length === 0) {
             this._buildReverseDependency(allTrees, dependencyTrees);
@@ -195,17 +96,13 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         return allTrees;
     }
 
-    searchDependency(search: IUnitRange[]): Set<number> {
-        return this._dependencyRTreeCache.bulkSearch(search) as Set<number>;
-    }
-
     /**
      * Build the dependency relationship between the trees.
      * @param allTrees  all FormulaDependencyTree
      * @param shouldBeBuildTrees  FormulaDependencyTree[] | FormulaDependencyTreeCache
      */
-    private _buildDependencyTree(allTrees: FormulaDependencyTree[], shouldBeBuildTrees: FormulaDependencyTree[]) {
-        const shouldBeBuildTreeMap = new Map<number, FormulaDependencyTree>();
+    private _buildDependencyTree(allTrees: IFormulaDependencyTree[], shouldBeBuildTrees: IFormulaDependencyTree[]) {
+        const shouldBeBuildTreeMap = new Map<number, IFormulaDependencyTree>();
         for (let i = 0; i < shouldBeBuildTrees.length; i++) {
             const tree = shouldBeBuildTrees[i];
             shouldBeBuildTreeMap.set(tree.treeId, tree);
@@ -215,11 +112,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             const tree = allTrees[i];
             const RTreeItem = tree.toRTreeItem();
 
-            const searchResults = this._dependencyRTreeCache.search(RTreeItem);
+            const searchResults = this._dependencyRTreeCache.bulkSearch(RTreeItem);
 
-            for (let j = 0; j < searchResults.length; j++) {
-                const id = searchResults[j] as number;
-                const shouldBeBuildTree = shouldBeBuildTreeMap.get(id);
+            for (const id of searchResults) {
+                const shouldBeBuildTree = shouldBeBuildTreeMap.get(id as number);
 
                 if (shouldBeBuildTree && tree !== shouldBeBuildTree && !shouldBeBuildTree.hasChildren(tree.treeId)) {
                     shouldBeBuildTree.pushChildren(tree);
@@ -237,8 +133,8 @@ export class DependencyManagerService extends Disposable implements IDependencyM
      * @param allTrees
      * @param dependencyTrees
      */
-    private _buildReverseDependency(allTrees: FormulaDependencyTree[], dependencyTrees: FormulaDependencyTree[]) {
-        const allTreeMap = new Map<number, FormulaDependencyTree>();
+    private _buildReverseDependency(allTrees: IFormulaDependencyTree[], dependencyTrees: IFormulaDependencyTree[]) {
+        const allTreeMap = new Map<number, IFormulaDependencyTree>();
 
         for (let i = 0; i < allTrees.length; i++) {
             const tree = allTrees[i];
@@ -249,11 +145,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             const tree = dependencyTrees[i];
             const RTreeItem = tree.toRTreeItem();
 
-            const searchResults = this._dependencyRTreeCache.search(RTreeItem);
+            const searchResults = this._dependencyRTreeCache.bulkSearch(RTreeItem);
 
-            for (let j = 0; j < searchResults.length; j++) {
-                const id = searchResults[j] as number;
-                const allTree = allTreeMap.get(id);
+            for (const id of searchResults) {
+                const allTree = allTreeMap.get(id as number);
 
                 if (allTree && tree !== allTree && !allTree.hasChildren(tree.treeId)) {
                     allTree.pushChildren(tree);
@@ -264,12 +159,323 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         allTreeMap.clear();
     }
 
+     /**
+      * Get all FormulaDependencyTree from _otherFormulaData, _featureFormulaData, _formulaData
+      * return FormulaDependencyTree[]
+      */
+    getAllTree() {
+        const trees: IFormulaDependencyTree[] = [];
+        this._allTreeMap.forEach((tree) => {
+            tree.resetState();
+            trees.push(tree);
+        });
+
+        return trees;
+    }
+
+    getTreeById(treeId: number) {
+        return this._allTreeMap.get(treeId);
+    }
+
+    searchDependency(search: IUnitRange[], exceptTreeIds?: Set<number>): Set<number> {
+        return this._dependencyRTreeCache.bulkSearch(search, exceptTreeIds) as Set<number>;
+    }
+
+    reset() {
+        this._otherFormulaData.clear();
+        this._featureFormulaData.clear();
+        this._formulaData.clear();
+        this._dependencyRTreeCache.clear();
+        this._allTreeMap.clear();
+        this._restDependencyTreeId();
+
+        this._otherFormulaDataMainData.clear();
+    }
+
+    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: IFormulaDependencyTree) {
+        if (!this._otherFormulaData.has(unitId)) {
+            this._otherFormulaData.set(unitId, new Map<string, Map<string, ObjectMatrix<number>>>());
+        }
+
+        const unitMap = this._otherFormulaData.get(unitId)!;
+
+        if (!unitMap.has(sheetId)) {
+            unitMap.set(sheetId, new Map<string, ObjectMatrix<number>>());
+        }
+
+        const sheetMap = unitMap.get(sheetId)!;
+
+        if (!sheetMap.has(formulaId)) {
+            sheetMap.set(formulaId, new ObjectMatrix<number>());
+        }
+
+        const formulaMatrix = sheetMap.get(formulaId)!;
+
+        formulaMatrix.setValue(dependencyTree.refOffsetX, dependencyTree.refOffsetY, dependencyTree.treeId);
+
+        this._addAllTreeMap(dependencyTree);
+    }
+
+    removeOtherFormulaDependency(unitId: string, sheetId: string, formulaIds: string[]) {
+        const unitMap = this._otherFormulaData.get(unitId);
+        if (unitMap && unitMap.has(sheetId)) {
+            const sheetMap = unitMap.get(sheetId)!;
+
+            formulaIds.forEach((formulaId) => {
+                const treeSet = sheetMap.get(formulaId);
+                if (treeSet == null) {
+                    return;
+                }
+
+                treeSet.forValue((row, column, treeId) => {
+                    this._removeDependencyRTreeCache(treeId);
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
+                    this._removeAllTreeMap(treeId);
+                });
+
+                sheetMap.delete(formulaId);
+                this._otherFormulaDataMainData.delete(formulaId);
+            });
+
+            if (sheetMap.size === 0) {
+                unitMap.delete(sheetId);
+            }
+
+            if (unitMap.size === 0) {
+                this._otherFormulaData.delete(unitId);
+            }
+        }
+    }
+
+    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string) {
+        return this._otherFormulaData.get(unitId)?.get(sheetId)?.get(formulaId);
+    }
+
+    addOtherFormulaDependencyMainData(formulaId: string) {
+        this._otherFormulaDataMainData.add(formulaId);
+    }
+
+    hasOtherFormulaDataMainData(formulaId: string) {
+        return this._otherFormulaDataMainData.has(formulaId);
+    }
+
+    clearOtherFormulaDependency(unitId: string, sheetId?: string) {
+        const unitMap = this._otherFormulaData.get(unitId);
+
+        if (sheetId && unitMap && unitMap.has(sheetId)) {
+            const sheetMap = unitMap.get(sheetId)!;
+
+            this._removeDependencyRTreeCacheById(unitId, sheetId);
+            for (const formulaId of sheetMap.keys()) {
+                const formulaTreeSet = sheetMap.get(formulaId);
+                if (formulaTreeSet == null) {
+                    continue;
+                }
+
+                formulaTreeSet.forValue((row, column, treeId) => {
+                    const tree = this._allTreeMap.get(treeId);
+                    if (tree) {
+                        this.clearDependencyForTree(tree);
+                        this._removeAllTreeMap(treeId);
+                    }
+                });
+
+                this._otherFormulaDataMainData.delete(formulaId);
+            }
+
+            sheetMap.clear(); // 清空该 sheetId 对应的公式依赖数据
+        } else if (unitMap) {
+            for (const sheetId of unitMap.keys()) {
+                const sheetMap = unitMap.get(sheetId)!;
+                this._removeDependencyRTreeCacheById(unitId, sheetId);
+                for (const formulaId of sheetMap.keys()) {
+                    const formulaTreeSet = sheetMap.get(formulaId);
+                    if (formulaTreeSet == null) {
+                        continue;
+                    }
+
+                    formulaTreeSet.forValue((row, column, treeId) => {
+                        const tree = this._allTreeMap.get(treeId);
+                        if (tree) {
+                            this.clearDependencyForTree(tree);
+                            this._removeAllTreeMap(treeId);
+                        }
+                    });
+
+                    this._otherFormulaDataMainData.delete(formulaId);
+                }
+            }
+
+            this._otherFormulaData.delete(unitId); // 删除整个 unitId 对应的数据
+        }
+    }
+
+    addFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string, dependencyTree: FormulaDependencyTree) {
+        if (!this._featureFormulaData.has(unitId)) {
+            this._featureFormulaData.set(unitId, new Map<string, Map<string, number>>());
+        }
+
+        const unitMap = this._featureFormulaData.get(unitId)!;
+
+        if (!unitMap.has(sheetId)) {
+            unitMap.set(sheetId, new Map<string, number>());
+        }
+
+        const sheetMap = unitMap.get(sheetId)!;
+        sheetMap.set(featureId, dependencyTree.treeId);
+        // this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
+        this._addAllTreeMap(dependencyTree);
+    }
+
+    removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]) {
+        const unitMap = this._featureFormulaData.get(unitId);
+        if (unitMap && unitMap.has(sheetId)) {
+            const sheetMap = unitMap.get(sheetId)!;
+            featureIds.forEach((featureId) => {
+                const deleteTreeId = sheetMap.get(featureId);
+                if (deleteTreeId == null) {
+                    return;
+                }
+
+                this._removeDependencyRTreeCache(deleteTreeId);
+
+                sheetMap.delete(featureId);
+                this.clearDependencyForTree(this._allTreeMap.get(deleteTreeId));
+                this._removeAllTreeMap(deleteTreeId);
+            });
+        }
+    }
+
+    clearFeatureFormulaDependency(unitId: string, sheetId?: string) {
+        const unitMap = this._featureFormulaData.get(unitId);
+
+        if (sheetId && unitMap && unitMap.has(sheetId)) {
+            const sheetMap = unitMap.get(sheetId)!;
+            this._removeDependencyRTreeCacheById(unitId, sheetId);
+            sheetMap.forEach((featureTreeId) => {
+                if (featureTreeId == null) {
+                    return;
+                }
+                this.clearDependencyForTree(this._allTreeMap.get(featureTreeId));
+                this._removeAllTreeMap(featureTreeId);
+            });
+
+            sheetMap.clear(); // 清空该 sheetId 对应的公式依赖数据
+        } else if (unitMap) {
+            unitMap.forEach((sheetMap, sheetId) => {
+                this._removeDependencyRTreeCacheById(unitId, sheetId);
+                sheetMap.forEach((featureTreeId) => {
+                    if (featureTreeId == null) {
+                        return;
+                    }
+                    this.clearDependencyForTree(this._allTreeMap.get(featureTreeId));
+                    this._removeAllTreeMap(featureTreeId);
+                });
+            });
+
+            this._featureFormulaData.delete(unitId); // 删除整个 unitId 对应的数据
+        }
+    }
+
+    getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string) {
+        return this._featureFormulaData.get(unitId)?.get(sheetId)?.get(featureId);
+    }
+
+    addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: IFormulaDependencyTree) {
+        if (!this._formulaData.has(unitId)) {
+            this._formulaData.set(unitId, new Map<string, ObjectMatrix<number>>());
+        }
+        const unitMap = this._formulaData.get(unitId)!;
+
+        if (!unitMap.has(sheetId)) {
+            unitMap.set(sheetId, new ObjectMatrix<number>());
+        }
+        const sheetMatrix = unitMap.get(sheetId)!;
+
+        sheetMatrix.setValue(row, column, dependencyTree.treeId);
+        // this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
+        this._addAllTreeMap(dependencyTree);
+    }
+
+    removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
+        const unitMap = this._formulaData.get(unitId);
+        if (unitMap && unitMap.has(sheetId)) {
+            const sheetMatrix = unitMap.get(sheetId)!;
+            const deleteTreeId = sheetMatrix.getValue(row, column);
+            if (deleteTreeId == null) {
+                return;
+            }
+
+            this._removeDependencyRTreeCache(deleteTreeId);
+
+            sheetMatrix.realDeleteValue(row, column);
+            this.clearDependencyForTree(this._allTreeMap.get(deleteTreeId));
+            this._removeAllTreeMap(deleteTreeId);
+        }
+    }
+
+    clearFormulaDependency(unitId: string, sheetId?: string) {
+        const unitMap = this._formulaData.get(unitId);
+
+        if (sheetId && unitMap && unitMap.has(sheetId)) {
+            const sheetMatrix = unitMap.get(sheetId)!;
+            this._removeDependencyRTreeCacheById(unitId, sheetId);
+
+            sheetMatrix.forValue((row, column, treeId) => {
+                if (treeId == null) {
+                    return true;
+                }
+                this.clearDependencyForTree(this._allTreeMap.get(treeId));
+                this._removeAllTreeMap(treeId);
+            });
+
+            sheetMatrix.reset();
+        } else if (unitMap) {
+            unitMap.forEach((sheetMatrix, sheetId) => {
+                this._removeDependencyRTreeCacheById(unitId, sheetId);
+
+                sheetMatrix.forValue((row, column, treeId) => {
+                    if (treeId == null) {
+                        return true;
+                    }
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
+                    this._removeAllTreeMap(treeId);
+                });
+            });
+
+            this._formulaData.delete(unitId); // 删除整个 unitId 的数据
+        }
+    }
+
+    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
+        return this._formulaData.get(unitId)?.get(sheetId)?.getValue(row, column);
+    }
+
+    addDependencyRTreeCache(tree: IFormulaDependencyTree) {
+        const searchRanges: IRTreeItem[] = [];
+        for (let i = 0; i < tree.rangeList.length; i++) {
+            const unitRangeWithNum = tree.rangeList[i];
+            const { unitId, sheetId, range } = unitRangeWithNum;
+
+            searchRanges.push({
+                unitId,
+                sheetId,
+                range,
+                id: tree.treeId,
+            });
+        }
+
+        this._dependencyRTreeCache.bulkInsert(searchRanges);
+
+        this._addAllTreeMap(tree);
+    }
+
     /**
      * Clear the dependency relationship of the tree.
      * establish the relationship between the parent and the child.
      * @param shouldBeClearTree
      */
-    clearDependencyForTree(shouldBeClearTree: Nullable<FormulaDependencyTree>) {
+    clearDependencyForTree(shouldBeClearTree: Nullable<IFormulaDependencyTree>) {
         if (shouldBeClearTree == null) {
             return;
         }
@@ -293,252 +499,6 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         shouldBeClearTree.dispose();
     }
 
-    reset() {
-        this._otherFormulaData = {};
-        this._featureFormulaData = {};
-        this._formulaData = {};
-        this._dependencyRTreeCache.clear();
-        this._allTreeMap.clear();
-        this._restDependencyTreeId();
-    }
-
-    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: FormulaDependencyTree) {
-        if (!this._otherFormulaData[unitId]) {
-            this._otherFormulaData[unitId] = {};
-        }
-        if (!this._otherFormulaData[unitId]![sheetId]) {
-            this._otherFormulaData[unitId]![sheetId] = {};
-        }
-
-        this._otherFormulaData[unitId]![sheetId][formulaId] = dependencyTree.treeId;
-        this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
-    }
-
-    removeOtherFormulaDependency(unitId: string, sheetId: string, formulaIds: string[]) {
-        if (this._otherFormulaData[unitId] && this._otherFormulaData[unitId]![sheetId]) {
-            formulaIds.forEach((formulaId) => {
-                const deleteTreeId = this._otherFormulaData[unitId]![sheetId][formulaId];
-                if (deleteTreeId == null) {
-                    return;
-                }
-                const deleteTree = this._allTreeMap.get(deleteTreeId);
-                this._removeDependencyRTreeCache(deleteTree);
-                this.clearDependencyForTree(deleteTree);
-                delete this._otherFormulaData[unitId]![sheetId][formulaId];
-                this._removeAllTreeMap(deleteTreeId);
-            });
-        }
-    }
-
-    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string) {
-        let treeId = this._otherFormulaData[unitId]?.[sheetId]?.[formulaId];
-        if (treeId == null) {
-            treeId = -1;
-        }
-        return this._allTreeMap.get(treeId);
-    }
-
-    hasOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string) {
-        return this.getOtherFormulaDependency(unitId, sheetId, formulaId) != null;
-    }
-
-    clearOtherFormulaDependency(unitId: string, sheetId?: string) {
-        if (sheetId && this._otherFormulaData[unitId] && this._otherFormulaData[unitId]![sheetId]) {
-            this._removeDependencyRTreeCacheById(unitId, sheetId);
-            Object.values(this._otherFormulaData[unitId]![sheetId]).forEach((formulaTreeId) => {
-                if (formulaTreeId == null) {
-                    return;
-                }
-                const formula = this._allTreeMap.get(formulaTreeId);
-                this.clearDependencyForTree(formula);
-                this._removeAllTreeMap(formulaTreeId);
-            });
-
-            this._otherFormulaData[unitId]![sheetId] = {};
-        } else if (this._otherFormulaData[unitId]) {
-            const unitOtherData = this._otherFormulaData[unitId]!;
-            Object.keys(unitOtherData).forEach((sheetId) => {
-                if (sheetId == null) {
-                    return;
-                }
-                this._removeDependencyRTreeCacheById(unitId, sheetId);
-                Object.values(unitOtherData[sheetId]!).forEach((formulaTreeId) => {
-                    if (formulaTreeId == null) {
-                        return;
-                    }
-                    const formula = this._allTreeMap.get(formulaTreeId);
-                    this.clearDependencyForTree(formula);
-                    this._removeAllTreeMap(formulaTreeId);
-                });
-            });
-
-            this._otherFormulaData[unitId] = null;
-        }
-    }
-
-    addFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string, dependencyTree: FormulaDependencyTree) {
-        if (!this._featureFormulaData[unitId]) {
-            this._featureFormulaData[unitId] = {};
-        }
-        if (!this._featureFormulaData[unitId]![sheetId]) {
-            this._featureFormulaData[unitId]![sheetId] = {};
-        }
-
-        this._featureFormulaData[unitId]![sheetId][featureId] = dependencyTree.treeId;
-        this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
-    }
-
-    removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]) {
-        if (this._featureFormulaData[unitId] && this._featureFormulaData[unitId]![sheetId]) {
-            featureIds.forEach((featureId) => {
-                const deleteTreeId = this._featureFormulaData[unitId]![sheetId][featureId];
-                if (deleteTreeId == null) {
-                    return;
-                }
-                const deleteTree = this._allTreeMap.get(deleteTreeId);
-                this._removeDependencyRTreeCache(deleteTree);
-                this.clearDependencyForTree(deleteTree);
-                delete this._featureFormulaData[unitId]![sheetId][featureId];
-                this._removeAllTreeMap(deleteTreeId);
-            });
-        }
-    }
-
-    clearFeatureFormulaDependency(unitId: string, sheetId?: string) {
-        if (sheetId && this._featureFormulaData[unitId] && this._featureFormulaData[unitId]![sheetId]) {
-            this._removeDependencyRTreeCacheById(unitId, sheetId);
-            Object.values(this._featureFormulaData[unitId]![sheetId]).forEach((featureTreeId) => {
-                if (featureTreeId == null) {
-                    return;
-                }
-                const feature = this._allTreeMap.get(featureTreeId);
-                this._removeDependencyRTreeCache(feature);
-                this.clearDependencyForTree(feature);
-                this._removeAllTreeMap(featureTreeId);
-            });
-
-            this._featureFormulaData[unitId]![sheetId] = {};
-        } else if (this._featureFormulaData[unitId]) {
-            const unitFeatureData = this._featureFormulaData[unitId]!;
-            Object.keys(unitFeatureData).forEach((sheetId) => {
-                if (sheetId == null) {
-                    return;
-                }
-                this._removeDependencyRTreeCacheById(unitId, sheetId);
-                Object.values(unitFeatureData[sheetId]!).forEach((featureTreeId) => {
-                    if (featureTreeId == null) {
-                        return;
-                    }
-                    const feature = this._allTreeMap.get(featureTreeId);
-                    this.clearDependencyForTree(feature);
-                    this._removeAllTreeMap(featureTreeId);
-                });
-            });
-
-            this._featureFormulaData[unitId] = null;
-        }
-    }
-
-    getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string) {
-        const treeId = this._featureFormulaData[unitId]?.[sheetId]?.[featureId];
-        if (treeId == null) {
-            return null;
-        }
-        return this._allTreeMap.get(treeId);
-    }
-
-    addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: FormulaDependencyTree) {
-        if (!this._formulaData[unitId]) {
-            this._formulaData[unitId] = {};
-        }
-        if (!this._formulaData[unitId]![sheetId]) {
-            this._formulaData[unitId]![sheetId] = new ObjectMatrix<number>();
-        }
-        this._formulaData[unitId]![sheetId].setValue(row, column, dependencyTree.treeId);
-        this._allTreeMap.set(dependencyTree.treeId, dependencyTree);
-    }
-
-    removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
-        if (this._formulaData[unitId] && this._formulaData[unitId]![sheetId]) {
-            const deleteTreeId = this._formulaData[unitId]![sheetId].getValue(row, column);
-            if (deleteTreeId == null) {
-                return;
-            }
-            const deleteTree = this._allTreeMap.get(deleteTreeId);
-            this._removeDependencyRTreeCache(deleteTree);
-            this.clearDependencyForTree(deleteTree);
-            this._formulaData[unitId]![sheetId].realDeleteValue(row, column);
-            this._removeAllTreeMap(deleteTreeId);
-        }
-    }
-
-    clearFormulaDependency(unitId: string, sheetId?: string) {
-        if (sheetId && this._formulaData[unitId] && this._formulaData[unitId]![sheetId]) {
-            this._removeDependencyRTreeCacheById(unitId, sheetId);
-            this._formulaData[unitId]![sheetId].forValue((row, column, treeId) => {
-                if (treeId == null) {
-                    return true;
-                }
-                const tree = this._allTreeMap.get(treeId);
-                this.clearDependencyForTree(tree);
-                this._removeAllTreeMap(treeId);
-            });
-
-            this._formulaData[unitId]![sheetId].reset();
-        } else if (this._formulaData[unitId]) {
-            const unitFormulaData = this._formulaData[unitId]!;
-            Object.keys(unitFormulaData).forEach((sheetId) => {
-                if (sheetId == null) {
-                    return;
-                }
-                this._removeDependencyRTreeCacheById(unitId, sheetId);
-                unitFormulaData[sheetId].forValue((row, column, treeId) => {
-                    if (treeId == null) {
-                        return true;
-                    }
-                    const tree = this._allTreeMap.get(treeId);
-                    this.clearDependencyForTree(tree);
-                    this._removeAllTreeMap(treeId);
-                });
-            });
-
-            this._formulaData[unitId] = null;
-        }
-    }
-
-    clearDependencyAll() {
-        this._otherFormulaData = {};
-        this._featureFormulaData = {};
-        this._formulaData = {};
-        this._dependencyRTreeCache.clear();
-        this._restDependencyTreeId();
-    }
-
-    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
-        const treeId = this._formulaData[unitId]?.[sheetId]?.getValue(row, column);
-        if (treeId == null) {
-            return null;
-        }
-        return this._allTreeMap.get(treeId);
-    }
-
-    addDependencyRTreeCache(tree: FormulaDependencyTree) {
-        const searchRanges: IRTreeItem[] = [];
-        for (let i = 0; i < tree.rangeList.length; i++) {
-            const unitRangeWithNum = tree.rangeList[i];
-            const { unitId, sheetId, range } = unitRangeWithNum;
-
-            searchRanges.push({
-                unitId,
-                sheetId,
-                range,
-                id: tree.treeId,
-            });
-        }
-
-        this._dependencyRTreeCache.bulkInsert(searchRanges);
-    }
-
     private _restDependencyTreeId() {
         this._dependencyTreeIdLast = 0;
     }
@@ -553,48 +513,70 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         this._dependencyRTreeCache.removeById(unitId, sheetId);
     }
 
-    private _removeDependencyRTreeCache(tree: Nullable<FormulaDependencyTree>) {
-        if (tree == null) {
+    private _removeDependencyRTreeCache(treeId: Nullable<number>) {
+        if (treeId == null) {
             return;
         }
 
-        const searchRanges: IRTreeItem[] = [];
-        for (let i = 0; i < tree.rangeList.length; i++) {
-            const unitRangeWithNum = tree.rangeList[i];
-            const { unitId, sheetId, range } = unitRangeWithNum;
+        const treeRangeMap = this._allTreeMap.get(treeId);
 
-            searchRanges.push({
-                unitId,
-                sheetId,
-                range,
-                id: tree.treeId,
-            });
+        if (treeRangeMap) {
+            const searchRanges: IRTreeItem[] = [];
+            for (let i = 0; i < treeRangeMap.rangeList.length; i++) {
+                const unitRangeWithNum = treeRangeMap.rangeList[i];
+                const { unitId, sheetId, range } = unitRangeWithNum;
+
+                searchRanges.push({
+                    unitId,
+                    sheetId,
+                    range,
+                    id: treeId,
+                });
+            }
+            this._dependencyRTreeCache.bulkRemove(searchRanges);
+        }
+    }
+
+    private _addDefinedName(unitId: string, definedName: string, treeId: number) {
+        if (!this._definedNameMap.has(unitId)) {
+            this._definedNameMap.set(unitId, new Map<string, Set<number>>());
         }
 
-        this._dependencyRTreeCache.bulkRemove(searchRanges);
+        const unitMap = this._definedNameMap.get(unitId)!;
+
+        if (!unitMap.has(definedName)) {
+            unitMap.set(definedName, new Set<number>());
+        }
+
+        const treeSet = unitMap.get(definedName)!;
+        treeSet.add(treeId);
+    }
+
+    addFormulaDependencyByDefinedName(tree: IFormulaDependencyTree, node: Nullable<AstRootNode>) {
+        const treeId = tree.treeId;
+        // const node = tree.node;
+
+        const definedNames = node?.getDefinedNames() || [];
+
+        for (const definedName of definedNames) {
+            this._addDefinedName(tree.unitId, definedName, treeId);
+        }
     }
 
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string) {
-        if (this._formulaData[unitId]) {
-            Object.values(this._formulaData[unitId]).forEach((sheet) => {
-                sheet.forValue((row, column, treeId) => {
-                    const tree = this._allTreeMap.get(treeId);
-                    if (tree?.nodeData?.node.hasDefinedName(definedName)) {
-                        this._removeDependencyRTreeCache(tree);
-                        this.clearDependencyForTree(tree);
-                        sheet.realDeleteValue(row, column);
-                    }
-                });
-            });
+        const unitMap = this._definedNameMap.get(unitId);
+
+        if (unitMap) {
+            const treeSet = unitMap.get(definedName);
+            if (treeSet) {
+                for (const treeId of treeSet) {
+                    this._removeDependencyRTreeCache(treeId);
+                    this.clearDependencyForTree(this._allTreeMap.get(treeId));
+                    this._removeAllTreeMap(treeId);
+                }
+                treeSet.clear();
+            }
         }
-    }
-
-    openKdTree() {
-        this._dependencyRTreeCache.openKdTree();
-    }
-
-    closeKdTree() {
-        this._dependencyRTreeCache.closeKdTree();
     }
 
     private _removeAllTreeMap(treeId: Nullable<number>) {
@@ -602,6 +584,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             return;
         }
         this._allTreeMap.delete(treeId);
+    }
+
+    private _addAllTreeMap(tree: IFormulaDependencyTree) {
+        this._allTreeMap.set(tree.treeId, tree);
     }
 }
 

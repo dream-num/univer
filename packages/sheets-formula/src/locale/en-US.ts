@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+import type zhCN from './zh-CN';
 
-export enum FormulaResultStatus {
-    NOT_REGISTER = 1,
-    SUCCESS,
-    WAIT,
-    ERROR,
-}
+const locale: typeof zhCN = {
+    formula: {
+        progress: {
+            analyzing: 'Analyzing',
+            calculating: 'Calculating',
+            'array-analysis': 'Array Analysis',
+            'array-calculation': 'Array Calculation',
+            done: 'Done',
+        },
+    },
+};
 
-export interface IOtherFormulaResult {
-    result?: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>;
-    status: FormulaResultStatus;
-    formulaId: string;
-    callbacks: Set<(value: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>) => void>;
-    extra?: Record<string, any>;
-}
-
-export interface IFormulaInfo {
-    id: string;
-    text: string;
-}
+export default locale;

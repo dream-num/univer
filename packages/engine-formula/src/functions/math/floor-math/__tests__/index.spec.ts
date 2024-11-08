@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { FloorMath } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test floor.math function', () => {
     const testFunction = new FloorMath(FUNCTION_NAMES_MATH.FLOOR_MATH);
@@ -132,7 +132,7 @@ describe('Test floor.math function', () => {
             const mode = NumberValueObject.create(-23);
             const result = testFunction.calculate(number, significance, mode);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2, 0, 0, 0, ErrorType.VALUE, 0, -48, 4, ErrorType.NA],
+                [2, 0, -0, 0, ErrorType.VALUE, 0, -48, 4, ErrorType.NA],
             ]);
         });
     });

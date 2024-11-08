@@ -28,11 +28,12 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
-import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 
+import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
+
+import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
-import { objectValueToCellValue } from '../engine/utils/value-object';
+import { clearReferenceObjectCache, objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
@@ -130,7 +131,7 @@ export interface IFormulaRuntimeService {
 
     getFormulaExecuteStage(): FormulaExecuteStageType;
 
-    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType): void;
+    setRuntimeOtherData(formulaId: string, x: number, y: number, functionVariant: FunctionVariantType): void;
 
     getRuntimeOtherData(): IRuntimeOtherUnitDataType;
 
@@ -365,12 +366,15 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._isCycleDependency = false;
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
+
+        this.clearReferenceAndNumberformatCache();
     }
 
     clearReferenceAndNumberformatCache() {
         clearNumberFormatTypeCache();
         clearStringToNumberPatternCache();
         clearReferenceToRangeCache();
+        clearReferenceObjectCache();
     }
 
     setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {
@@ -394,7 +398,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._functionDefinitionPrivacyVar.get(lambdaId);
     }
 
-    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType) {
+    setRuntimeOtherData(formulaId: string, x: number, y: number, functionVariant: FunctionVariantType) {
         const subUnitId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
@@ -404,7 +408,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const unitData = this._runtimeOtherData[unitId]!;
 
-        if (unitData[subUnitId] === undefined) {
+        if (unitData[subUnitId] === undefined || unitData[subUnitId] === null) {
             unitData[subUnitId] = {};
         }
 
@@ -433,7 +437,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             cellDatas = [[objectValueToCellValue(functionVariant as BaseValueObject)!]];
         }
 
-        subComponentData![formulaId] = cellDatas;
+        if (subComponentData[formulaId] === undefined || subComponentData[formulaId] === null) {
+            subComponentData[formulaId] = {};
+        }
+
+        if (subComponentData[formulaId][y] === undefined || subComponentData[formulaId][y] === null) {
+            subComponentData[formulaId][y] = {};
+        }
+
+        // x represents the column offset, y represents the row offset
+        subComponentData[formulaId][y][x] = cellDatas;
     }
 
     // eslint-disable-next-line max-lines-per-function

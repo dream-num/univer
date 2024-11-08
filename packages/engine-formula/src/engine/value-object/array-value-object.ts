@@ -168,13 +168,17 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override dispose(): void {
-        this._values.forEach((cells) => {
-            cells.forEach((cell) => {
-                cell?.dispose();
-            });
-        });
+        // this._values.forEach((cells) => {
+        //     cells.forEach((cell) => {
+        //         cell?.dispose();
+        //     });
+        // });
 
         this._values = [];
+
+        this._defaultValue = null;
+
+        this._flattenPosition = null;
 
         this._clearCache();
     }

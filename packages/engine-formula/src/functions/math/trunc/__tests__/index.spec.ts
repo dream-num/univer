@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Trunc } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test trunc function', () => {
     const testFunction = new Trunc(FUNCTION_NAMES_MATH.TRUNC);
@@ -107,7 +107,7 @@ describe('Test trunc function', () => {
             });
             const result = testFunction.calculate(number, numDigits);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2.1, 2.1, -1.57, 21, 620, 0, 0, ErrorType.NA, ErrorType.NA],
+                [2.1, 2.1, -1.57, 21, 620, 0, -0, ErrorType.NA, ErrorType.NA],
             ]);
         });
     });

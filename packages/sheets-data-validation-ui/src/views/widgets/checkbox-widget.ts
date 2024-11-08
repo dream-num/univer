@@ -88,12 +88,12 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0]?.[0]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[0]?.[0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0]?.[0]) : formula1,
             formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
             isFormulaValid,
         };
@@ -110,7 +110,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         }
 
         const colors = this._themeService.getCurrentTheme();
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId, row, column: col })) {
             return;
         }
 
@@ -185,7 +185,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId, row, column: col })) {
             return;
         }
 

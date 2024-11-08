@@ -15,3 +15,4 @@
  */
 
 import './f-univer';
+import './f-formula';

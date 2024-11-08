@@ -84,7 +84,7 @@ export interface IRuntimeUnitDataPrimitiveType {
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: Nullable<ICellData>[][] }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]> }> }>;
 }
 
 export interface IUnitSheetNameMap {
@@ -126,7 +126,7 @@ export interface IFormulaData {
 }
 
 export interface IOtherFormulaData {
-    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaDataItem }> }>;
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IOtherFormulaDataItem }> }>;
 }
 /**
  * @f  formulaString, the text string of the formula.
@@ -140,6 +140,11 @@ export interface IFormulaDataItem {
     // row: number;
     // column: number;
     // sheetId: string;
+}
+
+export interface IOtherFormulaDataItem {
+    f: string; // formulaString
+    ranges: IRange[];
 }
 
 export interface ISuperTable {

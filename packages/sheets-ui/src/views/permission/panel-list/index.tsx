@@ -23,7 +23,7 @@ import { Avatar, Button, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { baseProtectionActions, DeleteRangeProtectionCommand, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { baseProtectionActions, DeleteRangeProtectionCommand, DeleteWorksheetProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookCreateProtectPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 
@@ -32,6 +32,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { distinctUntilChanged, merge } from 'rxjs';
 import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
+import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';
 
@@ -50,6 +51,7 @@ export const SheetPermissionPanelList = () => {
     const usesManagerService = useDependency(UserManagerService);
     const currentUser = usesManagerService.getCurrentUser();
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
+    const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
 
     const _sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
     const _rangeRuleRefresh = useObservable(rangeProtectionRuleModel.ruleRefresh$, '');
@@ -158,6 +160,10 @@ export const SheetPermissionPanelList = () => {
         }
     };
 
+    useEffect(() => {
+        sheetPermissionUserManagerService.reset();
+    }, []);
+
     useHighlightRange(currentRuleRanges);
 
     const allRuleMap = new Map<string, IRangeProtectionRule | IWorksheetProtectionRule>();
@@ -200,9 +206,7 @@ export const SheetPermissionPanelList = () => {
         setIsCurrentSheet(isCurrentSheet);
     };
 
-    const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;
-    const workbookManagePermission = permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
-    const hasSetProtectPermission = workbookEditPermission && workbookManagePermission;
+    const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value;
 
     return (
         <div className={styles.sheetPermissionListPanelWrapper}>

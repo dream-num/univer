@@ -80,10 +80,13 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             const selectUserList: ICollaborator[] = collaborators.filter((user) => {
                 return user.role === UnitRole.Editor;
             });
+            if (selectUserList.length > 0) {
+                onEditStateChange(EditStateEnum.DesignedUserCanEdit);
+            }
             sheetPermissionUserManagerService.setSelectUserList(selectUserList);
             sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList);
         };
-        if (permissionId && editState === EditStateEnum.DesignedUserCanEdit) {
+        if (permissionId) {
             getSelectUserList();
         } else {
             sheetPermissionUserManagerService.setSelectUserList([]);

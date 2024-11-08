@@ -263,7 +263,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    protected _isCyclicUtil(
+    private _isCyclicUtil(
         treeId: number,
         visited: Set<number>,
         recursionStack: Set<number>
@@ -658,7 +658,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    protected _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
+    private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
         if (unitMatrix == null) {
             unitMatrix = new Map<string, IRange[]>();
@@ -697,7 +697,7 @@ export class FormulaDependencyGenerator extends Disposable {
         // }
     }
 
-    protected _isPreCalculateNode(node: BaseAstNode) {
+    private _isPreCalculateNode(node: BaseAstNode) {
         if (node.nodeType === NodeType.UNION) {
             return true;
         }
@@ -713,7 +713,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    protected _nodeTraversalRef(node: BaseAstNode, result: PreCalculateNodeType[]) {
+    private _nodeTraversalRef(node: BaseAstNode, result: PreCalculateNodeType[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -728,7 +728,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    protected _nodeTraversalReferenceFunction(node: BaseAstNode, result: FunctionNode[]) {
+    private _nodeTraversalReferenceFunction(node: BaseAstNode, result: FunctionNode[]) {
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -741,7 +741,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    protected async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0) {
+    private async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0) {
         let value: BaseReferenceObject;
         const nodeData = {
             node,

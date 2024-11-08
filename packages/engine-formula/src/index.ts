@@ -167,4 +167,4 @@ export { DEFAULT_INTERVAL_COUNT } from './services/calculate-formula.service';
 export { type IUniverEngineFormulaConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 
 export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
-export { type IDependencyManagerBaseService } from './services/dependency-manager.service';
+export { DependencyManagerBaseService } from './services/dependency-manager.service';

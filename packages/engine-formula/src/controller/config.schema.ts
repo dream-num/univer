@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Ctor, DependencyOverride } from '@univerjs/core';
+import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
@@ -30,8 +30,6 @@ export interface IUniverEngineFormulaConfig {
      * The formula calculation quantity interval for waiting for the main thread message in the worker. Each time the formula calculates the `intervalCount` quantity, it will receive a main thread message to support stopping the calculation. Default is 500
      */
     intervalCount?: number;
-
-    overrides?: DependencyOverride;
 
 }
 

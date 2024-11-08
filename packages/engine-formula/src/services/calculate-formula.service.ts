@@ -15,6 +15,7 @@
  */
 
 import type { IUnitRange } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -22,8 +23,8 @@ import type {
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../basics/common';
-import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 
+import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
@@ -56,8 +57,8 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export interface ICalculateFormulaService {
-    executionInProgressListener$: import('rxjs').Observable<IExecutionInProgressParams>;
-    executionCompleteListener$: import('rxjs').Observable<IAllRuntimeData>;
+    executionInProgressListener$: Observable<IExecutionInProgressParams>;
+    executionCompleteListener$: Observable<IAllRuntimeData>;
 
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
 

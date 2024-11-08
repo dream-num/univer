@@ -61,7 +61,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverEngineFormulaConfig> = defaultPluginConfig,
+        protected readonly _config: Partial<IUniverEngineFormulaConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
         @IConfigService private readonly _configService: IConfigService
     ) {
@@ -74,6 +74,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
     override onStarting(): void {
         this._initialize();
+        this._initializeWithOverride();
     }
 
     override onReady(): void {
@@ -121,11 +122,11 @@ export class UniverFormulaEnginePlugin extends Plugin {
             // only worker
             dependencies.push(
                 // Services
-                [ICalculateFormulaService, { useClass: CalculateFormulaService }],
+
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
-                [IDependencyManagerService, { useClass: DependencyManagerService }],
+
                 [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
 
                 //Controller
@@ -135,7 +136,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [SetFeatureCalculationController],
 
                 // Calculation engine
-                [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
 
                 [Interpreter],
                 [AstTreeBuilder],
@@ -155,5 +155,18 @@ export class UniverFormulaEnginePlugin extends Plugin {
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+
+    protected _initializeWithOverride() {
+        if (!this._config?.notExecuteFormula) {
+            // only worker
+            const dependencies: Dependency[] = [
+                [ICalculateFormulaService, { useClass: CalculateFormulaService }],
+                [IDependencyManagerService, { useClass: DependencyManagerService }],
+                [IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }],
+            ];
+
+            dependencies.forEach((dependency) => this._injector.add(dependency));
+        }
     }
 }

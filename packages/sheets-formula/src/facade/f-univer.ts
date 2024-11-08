@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import { debounce, FUniver } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctionService } from '../services/register-function.service';
-import { FSheetsFormula } from './f-sheets-formula';
+import { FSheetsFormula } from './f-formula';
 
 interface IFUniverSheetsFormulaMixin {
     /**

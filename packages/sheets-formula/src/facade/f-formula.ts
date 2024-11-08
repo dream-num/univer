@@ -15,22 +15,21 @@
  */
 
 import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
-import { IConfigService } from '@univerjs/core';
+import { FFormula } from '@univerjs/engine-formula';
+
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 
-export class FSheetsFormula {
-    constructor(
-        @IConfigService private readonly _configService: IConfigService
-    ) {
-        // empty
-    }
-
+interface IFFormulaSheetsMixin {
     /**
      * Update the calculation mode of the formula.
      * @param calculationMode
      * @returns
      */
-    setInitialFormulaComputing(calculationMode: CalculationMode): void {
+    setInitialFormulaComputing(calculationMode: CalculationMode): void;
+}
+
+class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
+    override setInitialFormulaComputing(calculationMode: CalculationMode): void {
         const config = this._configService.getConfig<Partial<IUniverSheetsFormulaBaseConfig>>(PLUGIN_CONFIG_KEY_BASE);
 
         if (!config) {
@@ -39,4 +38,10 @@ export class FSheetsFormula {
 
         config.initialFormulaComputing = calculationMode;
     }
+}
+
+FFormula.extend(FFormulaSheetsMixin);
+declare module '@univerjs/engine-formula' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FFormula extends IFFormulaSheetsMixin {}
 }

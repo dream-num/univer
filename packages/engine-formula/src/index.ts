@@ -156,3 +156,4 @@ export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeServic
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';
 export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';
+export { FFormula } from './facade/f-formula';

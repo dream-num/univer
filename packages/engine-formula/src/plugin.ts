@@ -63,7 +63,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
     constructor(
         protected readonly _config: Partial<IUniverEngineFormulaConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
 

@@ -60,15 +60,15 @@ export interface IFormulaDependencyGenerator {
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
 export class FormulaDependencyGenerator extends Disposable {
-    protected _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     constructor(
         @IFormulaCurrentConfigService protected readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
         @IOtherFormulaManagerService protected readonly _otherFormulaManagerService: IOtherFormulaManagerService,
         @IFeatureCalculationManagerService
-        protected readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
-        @Inject(Interpreter) protected readonly _interpreter: Interpreter,
+        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(Lexer) protected readonly _lexer: Lexer,
         @IDependencyManagerService protected readonly _dependencyManagerService: IDependencyManagerService
@@ -133,7 +133,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return Promise.resolve(finalTreeList);
     }
 
-    protected _dependencyFeatureCalculation(newTreeList: IFormulaDependencyTree[]) {
+    private _dependencyFeatureCalculation(newTreeList: IFormulaDependencyTree[]) {
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
         if (featureMap.size === 0) {
@@ -180,7 +180,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return hasFeatureCalculation;
     }
 
-    protected _clearFeatureCalculationNode(newTreeList: IFormulaDependencyTree[]) {
+    private _clearFeatureCalculationNode(newTreeList: IFormulaDependencyTree[]) {
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
         newTreeList.forEach((tree) => {
@@ -237,7 +237,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return unitRange;
     }
 
-    protected _intersectFeatureCalculation(dirtyRanges: IUnitRange[], newTreeList: IFormulaDependencyTree[], param: IFeatureFormulaParam) {
+    private _intersectFeatureCalculation(dirtyRanges: IUnitRange[], newTreeList: IFormulaDependencyTree[], param: IFeatureFormulaParam) {
         const dependencyTree = [];
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges);
         for (let i = 0, len = newTreeList.length; i < len; i++) {
@@ -253,7 +253,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return dependencyTree;
     }
 
-    protected _getExistTreeList(param: IFeatureFormulaParam, treeList: IFormulaDependencyTree[]) {
+    private _getExistTreeList(param: IFeatureFormulaParam, treeList: IFormulaDependencyTree[]) {
         const { unitId, subUnitId, featureId } = param;
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
@@ -378,7 +378,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return treeList;
     }
 
-    // protected _moveRangeList(tree: FormulaDependencyTree, refOffsetX: number, refOffsetY: number) {
+    // private _moveRangeList(tree: FormulaDependencyTree, refOffsetX: number, refOffsetY: number) {
     //     const rangeList = tree.rangeList;
     //     const newRangeList = [];
     //     for (let i = 0, len = rangeList.length; i < len; i++) {
@@ -853,7 +853,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return newTreeList;
     }
 
-    protected _includeTreeFeature(tree: FormulaDependencyTree) {
+    private _includeTreeFeature(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
         /**
@@ -871,7 +871,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    protected _includeOtherFormula(tree: FormulaDependencyTree) {
+    private _includeOtherFormula(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
         /**
@@ -889,7 +889,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    protected _detectForcedRecalculationNode(tree: IFormulaDependencyTree, node: Nullable<BaseAstNode>) {
+    private _detectForcedRecalculationNode(tree: IFormulaDependencyTree, node: Nullable<BaseAstNode>) {
         if (node == null) {
             return false;
         }
@@ -897,7 +897,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return this._detectForcedRecalculationNodeRecursion(node);
     }
 
-    protected _detectForcedRecalculationNodeRecursion(node: BaseAstNode) {
+    private _detectForcedRecalculationNodeRecursion(node: BaseAstNode) {
         if (node.isForcedCalculateFunction()) {
             return true;
         }

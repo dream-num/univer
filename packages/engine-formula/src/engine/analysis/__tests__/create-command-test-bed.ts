@@ -17,7 +17,6 @@
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISheetData } from '../../../basics/common';
 
-import type { FormulaDataModel } from '../../../models/formula-data.model';
 import {
     CellValueType,
     ILogService,
@@ -31,6 +30,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { FormulaDataModel } from '../../../models/formula-data.model';
 import { CalculateFormulaService } from '../../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
@@ -318,4 +318,5 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([SuffixNodeFactory]);
     injector.add([UnionNodeFactory]);
     injector.add([ValueNodeFactory]);
+    injector.add([FormulaDataModel]);
 }

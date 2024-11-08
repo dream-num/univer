@@ -178,8 +178,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '参照', detail: 'セルまたはセル範囲を参照します。' },
         },
     },
     GETPIVOTDATA: {

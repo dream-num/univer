@@ -31,8 +31,8 @@ import { IFormulaCurrentConfigService } from '../../../../services/current-data.
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { Isformula } from '../index';
+import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
+import { Formulatext } from '../index';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -80,7 +80,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
-describe('Test isformula function', () => {
+describe('Test formulatext function', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -130,7 +130,7 @@ describe('Test isformula function', () => {
         );
 
         functionService.registerExecutors(
-            new Isformula(FUNCTION_NAMES_INFORMATION.ISFORMULA)
+            new Formulatext(FUNCTION_NAMES_LOOKUP.FORMULATEXT)
         );
 
         calculate = (formula: string) => {
@@ -149,30 +149,30 @@ describe('Test isformula function', () => {
         };
     });
 
-    describe('Isformula', () => {
+    describe('Formulatext', () => {
         it('value reference single cell', async () => {
-            const result = await calculate('=ISFORMULA(A1)');
+            const result = await calculate('=FORMULATEXT(A1)');
 
-            expect(result).toBe(false);
+            expect(result).toBe(ErrorType.NA);
         });
 
         it('value reference range', async () => {
-            const result = await calculate('=ISFORMULA(A1:D2)');
+            const result = await calculate('=FORMULATEXT(A1:D2)');
 
             expect(result).toStrictEqual([
-                [false, false, false, false],
-                [false, false, true, false],
+                [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
+                [ErrorType.NA, ErrorType.NA, '=SUM(A1:B1)', ErrorType.NA],
             ]);
         });
 
         it('value is error', async () => {
-            const result = await calculate('=ISFORMULA(#NAME?)');
+            const result = await calculate('=FORMULATEXT(#NAME?)');
 
-            expect(result).toBe(ErrorType.NAME);
+            expect(result).toBe(ErrorType.NA);
         });
 
         it('value is not reference', async () => {
-            const result = await calculate('=ISFORMULA("test")');
+            const result = await calculate('=FORMULATEXT("test")');
 
             expect(result).toBe(ErrorType.NA);
         });

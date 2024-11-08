@@ -78,13 +78,15 @@
         "vitest": "^2.1.4",
         "vue": "^3.5.3"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*"

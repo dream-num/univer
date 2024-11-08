@@ -42,11 +42,12 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
             "./facade": {
                 "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
                 "types": "./lib/types/facade/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -85,19 +86,22 @@
         "vite": "^5.4.10",
         "vitest": "^2.1.4"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
         "./facade": {
             "import": "./lib/es/facade.js",
+            "require": "./lib/cjs/facade.js",
             "types": "./lib/types/facade/index.d.ts"
-        }
+        },
+        "./lib/*": "./lib/*"
     }
 }

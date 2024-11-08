@@ -16,7 +16,7 @@
 
 import type { ThemeService } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
-import type { IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle } from '@univerjs/sheets';
 import { RANGE_TYPE } from '@univerjs/core';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 
@@ -33,17 +33,22 @@ export class MobileSelectionControl extends SelectionControl {
      */
     private _fillControlBottomRight: Rect | null;
 
+    protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
+
     constructor(
         protected override _scene: Scene,
         protected override _zIndex: number,
         protected override readonly _themeService: ThemeService,
-        protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
+        options?: {
+            highlightHeader?: boolean;
+            enableAutoFill?: boolean;
+            rowHeaderWidth: number;
+            columnHeaderHeight: number;
+            rangeType?: RANGE_TYPE;
+        }
     ) {
-        super(_scene, _zIndex, _themeService, {
-            highlightHeader: true,
-            rowHeaderWidth: 0,
-            columnHeaderHeight: 0,
-        });
+        super(_scene, _zIndex, _themeService, options);
+        this._rangeType = options?.rangeType || RANGE_TYPE.NORMAL;
         this.initControlPoints();
     }
 
@@ -135,8 +140,8 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateLayoutOfSelectionControlByStyle(style: IStyleForSelection): void {
-        super._updateLayoutOfSelectionControlByStyle(style);
+    protected override _updateLayoutOfSelectionControl(style: ISelectionStyle): void {
+        super._updateLayoutOfSelectionControl(style);
 
         // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)

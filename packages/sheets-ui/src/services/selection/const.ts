@@ -16,7 +16,7 @@
 
 import type { ThemeService } from '@univerjs/core';
 import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle } from '@univerjs/sheets';
 import { ColorKit, createInterceptorKey } from '@univerjs/core';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
@@ -27,7 +27,7 @@ export enum SELECTION_SHAPE_DEPTH {
     MARK_SELECTION = 10000,
 };
 
-export function genNormalSelectionStyle(themeService: ThemeService): IStyleForSelection {
+export function genNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
     const styleSheet = themeService.getCurrentTheme();
     const fill = new ColorKit(styleSheet.primaryColor).setAlpha(0.07).toRgbString();
     return {

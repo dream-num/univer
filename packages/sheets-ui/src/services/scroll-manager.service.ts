@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Inject } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Inject } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollState {

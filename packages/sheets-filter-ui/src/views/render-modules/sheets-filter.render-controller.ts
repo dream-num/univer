@@ -23,7 +23,7 @@ import { CommandType, fromCallback, ICommandService, Inject, Injector, Intercept
 import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
 
-import { getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { attachSelectionWithCoord, getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
@@ -109,12 +109,6 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {
         const { scene } = this._context;
-        const { rangeWithCoord, style } = this._selectionRenderService.attachSelectionWithCoord({
-            range,
-            primary: null,
-            style: null,
-        });
-
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const filterRangeShape = this._filterRangeShape = new SelectionControl(
             scene, DEFAULT_Z_INDEX, this._themeService, {
@@ -123,12 +117,13 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 enableAutoFill: false,
                 highlightHeader: false,
             });
-
-        filterRangeShape.updateRange(rangeWithCoord);
-        filterRangeShape.updateStyle({
-            fill: 'rgba(0, 0, 0, 0.0)',
-            ...style,
-        });
+        const selectionWithStyle = {
+            range,
+            primary: null,
+            style: { fill: 'rgba(0, 0, 0, 0.0)' },
+        };
+        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        filterRangeShape.updateRangeBySelectionWithCoord(selectionWithCoord);
         filterRangeShape.setEvent(false);
 
         scene.makeDirty(true);

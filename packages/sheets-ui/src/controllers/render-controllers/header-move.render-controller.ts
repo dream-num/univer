@@ -213,7 +213,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             }
             // if matchSelectionData true, then into grab header mode.
 
-            const startScrollXY = scene.getVpScrollXYInfoByViewport(
+            const startScrollXY = scene.getScrollXYInfoByViewport(
                 Vector2.FromArray([this._startOffsetX, this._startOffsetY])
             );
 

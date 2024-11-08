@@ -424,29 +424,29 @@ export class Worksheet {
         const mergeRange = this.getMergedCell(row, column);
         let isMerged = false; // The upper left cell only renders the content
         let isMergedMainCell = false;
-        let newEndRow = row;
-        let newEndColumn = column;
-        let mergeRow = row;
-        let mergeColumn = column;
+        let mergeEndRow = row;
+        let mergeEndColumn = column;
+        let mergeStartRow = row;
+        let mergeStartColumn = column;
         if (mergeRange) {
             const {
-                startRow: startRowMarge,
-                endRow: endRowMarge,
-                startColumn: startColumnMarge,
-                endColumn: endColumnMarge,
+                startRow: startRowMerge,
+                endRow: endRowMerge,
+                startColumn: startColumnMerge,
+                endColumn: endColumnMerge,
             } = mergeRange;
-            if (row === startRowMarge && column === startColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
+            if (row === startRowMerge && column === startColumnMerge) {
+                mergeEndRow = endRowMerge;
+                mergeEndColumn = endColumnMerge;
+                mergeStartRow = startRowMerge;
+                mergeStartColumn = startColumnMerge;
 
                 isMergedMainCell = true;
-            } else if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
+            } else if (row >= startRowMerge && row <= endRowMerge && column >= startColumnMerge && column <= endColumnMerge) {
+                mergeEndRow = endRowMerge;
+                mergeEndColumn = endColumnMerge;
+                mergeStartRow = startRowMerge;
+                mergeStartColumn = startColumnMerge;
 
                 isMerged = true;
             }
@@ -457,10 +457,10 @@ export class Worksheet {
             actualColumn: column,
             isMergedMainCell,
             isMerged,
-            endRow: newEndRow,
-            endColumn: newEndColumn,
-            startRow: mergeRow,
-            startColumn: mergeColumn,
+            endRow: mergeEndRow,
+            endColumn: mergeEndColumn,
+            startRow: mergeStartRow,
+            startColumn: mergeStartColumn,
         };
     }
 

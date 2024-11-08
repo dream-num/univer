@@ -64,6 +64,7 @@ export { SheetSelectionRenderService } from './services/selection/selection-rend
 export { genSelectionByRange, getAllSelection, getTopLeftSelectionOfCurrSheet } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 export { SelectionControl as SelectionShape, SelectionControl } from './services/selection/selection-control';
+export { SelectionShapeExtension } from './services/selection/selection-shape-extension';
 export { genNormalSelectionStyle } from './services/selection/const';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';

@@ -15,11 +15,11 @@
  */
 
 import type { ThemeService } from '@univerjs/core';
-import type { IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle } from '@univerjs/sheets';
 
 export function createCopyPasteSelectionStyle(
     themeService: ThemeService
-): Partial<IStyleForSelection> {
+): Partial<ISelectionStyle> {
     return {
         strokeWidth: 1.5,
         stroke: themeService.getCurrentTheme().primaryColor,

@@ -16,10 +16,11 @@
 
 import type {
     BorderStyleTypes,
-    IActualCellWithCoord,
     IBorderStyleData,
     ICellData,
     ICellDataForSheetInterceptor,
+    ICellInfo,
+    ICellWithCoord,
     IColAutoWidthInfo,
     IColumnData,
     IColumnRange,
@@ -226,7 +227,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
-        backgroundPositions: new ObjectMatrix<IActualCellWithCoord>(),
+        backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
         font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
         fontMatrix: new ObjectMatrix<IFontCacheItem>(),
         border: new ObjectMatrix<BorderCache>(),
@@ -350,7 +351,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         // this._dataMergeCache = [];
         this._stylesCache = {
             background: {},
-            backgroundPositions: new ObjectMatrix<IActualCellWithCoord>(),
+            backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
@@ -940,6 +941,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * expand curr range if it's intersect with merge range.
+     * @param range
+     * @returns {IRange} expanded range because merge info.
+     */
+    expandRangeByMerge(range: IRange): IRange {
+        return this.getMergeBounding(range.startRow, range.startColumn, range.endRow, range.endColumn);
+    }
+
     appendToOverflowCache(row: number, column: number, startColumn: number, endColumn: number): void {
         this._overflowCache.setValue(row, column, {
             startRow: row,
@@ -1052,7 +1062,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleX: number,
         scaleY: number,
         scrollXY: { x: number; y: number }
-    ): Nullable<IActualCellWithCoord> {
+    ): Nullable<ICellWithCoord> {
         return this.getCellWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
     }
 
@@ -1066,7 +1076,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scaleY render scene scale y-axis, scene.getAncestorScale
      * @param scrollXY render viewportScroll {x, y}
      * @param options {IGetRowColByPosOptions}
-     * @returns {IActualCellWithCoord} Selection data with coordinates
+     * @returns {ICellWithCoord} Selection data with coordinates
      */
     getCellWithCoordByOffset(
         offsetX: number,
@@ -1075,7 +1085,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleY: number,
         scrollXY: { x: number; y: number },
         options?: IGetRowColByPosOptions
-    ): IActualCellWithCoord {
+    ): ICellWithCoord {
         const { row, column } = this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
 
         return this.getCellWithCoordByIndex(row, column);
@@ -1124,6 +1134,32 @@ export class SpreadsheetSkeleton extends Skeleton {
             row,
             column,
         };
+    }
+
+    getCellByOffset(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): Nullable<ICellInfo> {
+        const cellIndex = this?.getCellIndexByOffset(
+            offsetX,
+            offsetY,
+            scaleX,
+            scaleY,
+            scrollXY,
+            { firstMatch: true } // for visible
+        );
+        if (!cellIndex) return null;
+
+        const selectionCell = this.worksheet.getCellInfoInMergeData(cellIndex.row, cellIndex.column);
+        return selectionCell;
+    }
+
+    getCellWithMergeInfoByIndex(row: number, column: number): Nullable<ICellInfo> {
+        const selectionCell = this.worksheet.getCellInfoInMergeData(row, column);
+        return selectionCell;
     }
 
     /**
@@ -1241,8 +1277,17 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Same as getCellWithCoordByIndex, but uses a different name to maintain backward compatibility with previous calls.
      * @deprecated Please use `getCellWithCoordByIndex` instead.
      */
-    getCellByIndex(row: number, column: number): IActualCellWithCoord {
+    getCellByIndex(row: number, column: number): ICellWithCoord {
         return this.getCellWithCoordByIndex(row, column);
+    }
+
+    /**
+     * @deprecated Please use `getCellWithCoordByIndex(row, col, false)` instead.
+     * @param row
+     * @param column
+     */
+    getCellByIndexWithNoHeader(row: number, column: number) {
+        return this.getCellWithCoordByIndex(row, column, false);
     }
 
     /**
@@ -1251,7 +1296,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param row Specified Row Coordinate
      * @param column Specified Column Coordinate
      */
-    getCellWithCoordByIndex(row: number, column: number, header: boolean = true): IActualCellWithCoord {
+    getCellWithCoordByIndex(row: number, column: number, header: boolean = true): ICellWithCoord {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
@@ -1259,7 +1304,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeaderHeightAndMarginTop,
         } = this;
 
-        const primary: IActualCellWithCoord = getCellWithCoordByIndexCore(
+        const primary: ICellWithCoord = getCellWithCoordByIndexCore(
             row,
             column,
             rowHeightAccumulation,
@@ -1847,7 +1892,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _resetCache(): void {
         this._stylesCache = {
             background: {},
-            backgroundPositions: new ObjectMatrix<IActualCellWithCoord>(),
+            backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             font: {},
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),

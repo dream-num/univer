@@ -15,32 +15,30 @@
  */
 
 import type {
-    IActualCellWithCoord,
+    ICellInfo,
+    ICellWithCoord,
     IDisposable,
     IFreeze,
     IInterceptor,
     Injector,
     IRange,
     IRangeWithCoord,
-    ISelectionCell,
-    ISelectionWithCoord,
     Nullable,
     ThemeService,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE } from '@univerjs/core';
-import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
+import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
-import { SelectionShapeExtension } from './selection-shape-extension';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 export interface IControlFillConfig {
@@ -49,10 +47,10 @@ export interface IControlFillConfig {
 }
 
 export interface ISheetSelectionRenderService {
-    readonly selectionMoveEnd$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly selectionMoveEnd$: Observable<ISelectionWithCoord[]>;
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
-    readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly selectionMoving$: Observable<ISelectionWithCoord[]>;
+    readonly selectionMoveStart$: Observable<ISelectionWithCoord[]>;
 
     get selectionMoving(): boolean;
 
@@ -72,16 +70,16 @@ export interface ISheetSelectionRenderService {
     // And `attachPrimaryWithCoord` is redundant.
 
     /** @deprecated Use the function `attachSelectionWithCoord` instead. */
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoord;
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: Nullable<Partial<ISelectionCell>>): Nullable<IActualCellWithCoord>;
+    attachPrimaryWithCoord(primary: Nullable<Partial<ICellInfo>>): Nullable<ICellWithCoord>;
 
     /**
      * @deprecated Please use `getCellWithCoordByOffset` instead.
      */
-    getSelectionCellByPosition(x: number, y: number): IActualCellWithCoord;
+    getSelectionCellByPosition(x: number, y: number): ICellWithCoord;
 
-    getCellWithCoordByOffset(x: number, y: number): Nullable<IActualCellWithCoord>; // drawing
+    getCellWithCoordByOffset(x: number, y: number): Nullable<ICellWithCoord>; // drawing
 
     setSingleSelectionEnabled(enabled: boolean): void;
 
@@ -135,13 +133,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _scene!: Scene;
 
     // The type of selector determines the type of data range and the highlighting style of the title bar, now it always true. In future, this could be configurable by user.
-    protected _isHeaderHighlight: boolean = true;
+    protected _highlightHeader: boolean = true;
 
     // protected _shouldDetectMergedCells: boolean = true;
     protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
     // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
-    protected _selectionStyle!: IStyleForSelection;
+    protected _selectionStyle!: ISelectionStyle;
 
     // #region ref range selection
     // we put the properties here for simplicity
@@ -154,15 +152,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * Mainly emit by pointerup (pointerup is handled in _onPointerdown)
      */
-    protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+    protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoord[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
+    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
 
     /**
      * Mainly emit by pointerdown
      */
-    protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
+    protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoord[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _selectionMoving = false;
@@ -205,7 +203,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }));
     }
 
-    protected _setSelectionStyle(style: IStyleForSelection): void {
+    protected _setSelectionStyle(style: ISelectionStyle): void {
         this._selectionStyle = style;
     }
 
@@ -225,43 +223,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._singleSelectionEnabled = enabled;
     }
 
-    /**
-     * Add a selection in spreadsheet, create a new SelectionControl and then update this control by range derives from selection.
-     * @param {ISelectionWithCoordAndStyle} selectionWithCoord
-     */
-    protected _addSelectionControlBySelectionData(selectionWithCoord: ISelectionWithCoordAndStyle): void {
-        const skeleton = this._skeleton;
-        const style = selectionWithCoord.style ?? genNormalSelectionStyle(this._themeService);
-        const scene = this._scene;
-        if (!scene || !skeleton) {
-            return;
-        }
-
-        const { rangeWithCoord, primaryWithCoord } = selectionWithCoord;
-        const { rangeType } = rangeWithCoord;
-        const control = this.newSelectionControl(scene, rangeType || RANGE_TYPE.NORMAL, skeleton);
-
-        // TODO: memory leak? This extension seems never released.
-        // eslint-disable-next-line no-new
-        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector, {
-            selectionMoveEnd: (): void => {
-                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-            },
-        });
-
-        control.updateRange(rangeWithCoord, primaryWithCoord);
-        control.updateStyle(style);
-    }
-
-    newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
+    newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selectionWithCoord: ISelectionWithCoord): SelectionControl {
         const zIndex = this.getSelectionControls().length;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const control = new SelectionControl(scene, zIndex, this._themeService, {
-            highlightHeader: this._isHeaderHighlight,
+            highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
         });
         this._selectionControls.push(control);
+        selectionWithCoord.rangeWithCoord.rangeType = selectionWithCoord.rangeWithCoord.rangeType || RANGE_TYPE.NORMAL;
+        control.updateRangeBySelectionWithCoord(selectionWithCoord);
 
         return control;
     }
@@ -271,31 +243,26 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * selectionData[i] syncs selectionControls[i]
      * @param selectionsWithCoord
      */
-    updateControlForCurrentByRangeData(selectionsWithCoord: ISelectionWithCoordAndStyle[]): void {
-        const selectionControls = this.getSelectionControls();
-        if (!selectionControls) {
-            return;
-        }
-
+    resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
+        const allSelectionControls = this.getSelectionControls();
         const skeleton = this._skeleton;
-
-        if (skeleton == null) {
+        if (!allSelectionControls || !skeleton) {
             return;
         }
 
-        // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
-        // TODO @lumixraku This is awful!
-        // SelectionControls should create & remove base on selections.
-        // If selections is more than selectionControls, create new selectionControl, if selections is less than selectionControls, remove the last one.
-        for (let i = 0, len = selectionsWithCoord.length; i < len; i++) {
-            const { rangeWithCoord, primaryWithCoord } = selectionsWithCoord[i];
-
-            const control = selectionControls[i];
+        for (let i = 0, len = selectionsWithStyleList.length; i < len; i++) {
+            const selectionWithStyle = selectionsWithStyleList[i];
+            const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+            const control = allSelectionControls[i];
             if (control) {
-                control.updateRange(rangeWithCoord, primaryWithCoord);
+                control.updateRangeBySelectionWithCoord(selectionWithCoord);
+            } else {
+                this.newSelectionControl(this._scene!, skeleton, selectionWithCoord);
             }
-            // control && control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        }
+        if (selectionsWithStyleList.length < allSelectionControls.length) {
+            const controlsToDestroy = allSelectionControls.splice(selectionsWithStyleList.length);
+            controlsToDestroy.forEach((control) => control.dispose());
         }
     }
 
@@ -323,9 +290,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     /**
      * Generate selectionData from this._selectionControls.model .
-     * @returns {ISelectionWithCoordAndStyle[]} {range, primary, style}[]
+     * @returns {ISelectionWithCoord[]} {range, primary, style}[]
      */
-    getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
+    getSelectionDataWithStyle(): ISelectionWithCoord[] {
         const selectionControls = this._selectionControls;
         const [unitId, sheetId] = this._skeleton.getLocation();
         return selectionControls.map((control) => {
@@ -341,6 +308,34 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     getSelectionControls(): SelectionControl[] {
         return this._selectionControls;
+    }
+
+    /**
+     * Add a selection in spreadsheet, create a new SelectionControl and then update this control by range derives from selection.
+     * @param {ISelectionWithCoord} selectionWithStyle
+     */
+    protected _addSelectionControlByModelData(selectionWithStyle: ISelectionWithStyle): SelectionControl {
+        const skeleton = this._skeleton;
+        const style = selectionWithStyle.style ?? genNormalSelectionStyle(this._themeService);
+        const scene = this._scene;
+
+        selectionWithStyle.style = style;
+        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        const control = this.newSelectionControl(scene, skeleton, selectionWithCoord);
+
+        // TODO: memory leak? This extension seems never released.
+        control.setControlExtension({
+            skeleton,
+            scene,
+            themeService: this._themeService,
+            injector: this._injector,
+            selectionHooks: {
+                selectionMoveEnd: (): void => {
+                    this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+                },
+            },
+        });
+        return control;
     }
 
     protected _clearAllSelectionControls(): void {
@@ -617,23 +612,23 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /** @deprecated Use the function `attachSelectionWithCoord` instead`. */
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoord {
         return attachSelectionWithCoord(selectionWithStyle, this._skeleton);
     }
 
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: ISelectionCell): IActualCellWithCoord {
-        return attachPrimaryWithCoord(this._skeleton, primary) as unknown as IActualCellWithCoord;
+    attachPrimaryWithCoord(primary: ICellInfo): ICellWithCoord {
+        return attachPrimaryWithCoord(this._skeleton, primary) as unknown as ICellWithCoord;
     }
 
     /**
      * @deprecated Please use `getCellWithCoordByOffset` instead.
      */
-    getSelectionCellByPosition(x: number, y: number): IActualCellWithCoord {
+    getSelectionCellByPosition(x: number, y: number): ICellWithCoord {
         return this.getCellWithCoordByOffset(x, y);
     }
 
-    getCellWithCoordByOffset(x: number, y: number): IActualCellWithCoord {
+    getCellWithCoordByOffset(x: number, y: number): ICellWithCoord {
         const scene = this._scene;
         const skeleton = this._skeleton;
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
@@ -645,7 +640,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+
     protected _movingHandler(
         offsetX: number,
         offsetY: number,
@@ -669,7 +664,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
-        const scrollXY = scene.getVpScrollXYInfoByViewport(
+        const scrollXY = scene.getScrollXYInfoByViewport(
             Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
             targetViewport
         );
@@ -684,44 +679,29 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             offsetY = Number.POSITIVE_INFINITY;
         }
 
-        const cursorCellRangeInfo = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-        if (!cursorCellRangeInfo) {
+        const currCell = this._skeleton.getCellByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+        if (!currCell) {
             return;
         }
 
-        const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
-        const activeCellRange = this._startRangeWhenPointerDown;
-
         let newSelectionRange: IRange = {
-            startRow: Math.min(cursorCellRange.startRow, activeCellRange.startRow),
-            startColumn: Math.min(cursorCellRange.startColumn, activeCellRange.startColumn),
-            endRow: Math.max(cursorCellRange.endRow, activeCellRange.endRow),
-            endColumn: Math.max(cursorCellRange.endColumn, activeCellRange.endColumn),
+            startRow: Math.min(currCell.startRow, this._startRangeWhenPointerDown.startRow),
+            startColumn: Math.min(currCell.startColumn, this._startRangeWhenPointerDown.startColumn),
+            endRow: Math.max(currCell.endRow, this._startRangeWhenPointerDown.endRow),
+            endColumn: Math.max(currCell.endColumn, this._startRangeWhenPointerDown.endColumn),
         };
 
         if (this._shouldDetectMergedCells) {
-            newSelectionRange = skeleton.getMergeBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
+            newSelectionRange = skeleton.expandRangeByMerge(newSelectionRange);
         }
+        const newSelection: ISelectionWithStyle = { range: newSelectionRange, style: null, primary: null };
+        const newSelectionRangeWithCoord = attachSelectionWithCoord(newSelection, skeleton);
+        newSelectionRangeWithCoord.rangeWithCoord.unitId = unitId;
+        newSelectionRangeWithCoord.rangeWithCoord.sheetId = sheetId;
+        newSelectionRangeWithCoord.rangeWithCoord.rangeType = rangeType;
+        // const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
+        // const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
-        if (!newSelectionRange) {
-            return;
-        }
-
-        const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
-        const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
-
-        const newSelectionRangeWithCoord: IRangeWithCoord = {
-            startRow: newSelectionRange.startRow,
-            startColumn: newSelectionRange.startColumn,
-            endRow: newSelectionRange.endRow,
-            endColumn: newSelectionRange.endColumn,
-            unitId,
-            sheetId,
-            startY: startCellXY?.startY || 0,
-            endY: endCellXY?.endY || 0,
-            startX: startCellXY?.startX || 0,
-            endX: endCellXY?.endX || 0,
-        };
         // Only notify when the selection changes
         const rangeChanged =
             currSelectionRange.startRow !== newSelectionRange.startRow ||
@@ -729,7 +709,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             currSelectionRange.endRow !== newSelectionRange.endRow ||
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (activeSelectionControl != null && rangeChanged) {
-            activeSelectionControl.updateRange(newSelectionRangeWithCoord);
+            activeSelectionControl.updateRangeBySelectionWithCoord(newSelectionRangeWithCoord);
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
     }
@@ -826,7 +806,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             endColumn: column,
         };
 
-        const primaryWithCoord: Nullable<IActualCellWithCoord> = {
+        const primaryWithCoord: Nullable<ICellWithCoord> = {
             mergeInfo: rangeWithCoord,
             actualRow: row,
             actualColumn: column,
@@ -858,14 +838,25 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
-    protected _performSelectionByTwoCells(
-        currentCell: IActualCellWithCoord,
+    protected _makeSelectionByTwoCells(
+        currentCell: ICellWithCoord,
         startSelectionRange: IRangeWithCoord,
         skeleton: SpreadsheetSkeleton,
         rangeType: RANGE_TYPE,
         activeControl: SelectionControl
     ): void {
         const { actualRow, actualColumn, mergeInfo: actualMergeInfo } = currentCell;
+        this._startRangeWhenPointerDown = {
+            startColumn: currentCell.mergeInfo.startColumn,
+            startRow: currentCell.mergeInfo.startRow,
+            endColumn: currentCell.mergeInfo.endColumn,
+            endRow: currentCell.mergeInfo.endRow,
+            startY: currentCell.mergeInfo.startY || 0,
+            endY: currentCell.mergeInfo.endY || 0,
+            startX: currentCell.mergeInfo.startX || 0,
+            endX: currentCell.mergeInfo.endX || 0,
+            rangeType,
+        };
 
         // Get the maximum range selected based on the two cells selected with Shift key.
         const newStartRow = Math.min(actualRow, startSelectionRange.startRow, actualMergeInfo.startRow);
@@ -876,55 +867,43 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         /**
          * Calculate whether there are merged cells within the range. If there are, recursively expand the selection again.
          */
-        const bounding = skeleton.getMergeBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
-        const startCell = skeleton.getNoMergeCellPositionByIndex(bounding.startRow, bounding.startColumn);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(bounding.endRow, bounding.endColumn);
-        const newSelectionRange = {
-            startColumn: bounding.startColumn,
-            startRow: bounding.startRow,
-            endColumn: bounding.endColumn,
-            endRow: bounding.endRow,
-
-            startY: startCell.startY,
-            endY: endCell.endY,
-            startX: startCell.startX,
-            endX: endCell.endX,
-
-            rangeType,
+        const range = skeleton.expandRangeByMerge({
+            startRow: newStartRow,
+            startColumn: newStartColumn,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+        });
+        const selectionWithStyle = {
+            range,
+            primary: null,
+            style: null,
         };
+        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        activeControl.updateRangeBySelectionWithCoord(selectionWithCoord);
+        // const startCell = skeleton.getNoMergeCellPositionByIndex(range.startRow, range.startColumn);
+        // const endCell = skeleton.getNoMergeCellPositionByIndex(range.endRow, range.endColumn);
+        // const newSelectionRange = {
+        //     startColumn: range.startColumn,
+        //     startRow: range.startRow,
+        //     endColumn: range.endColumn,
+        //     endRow: range.endRow,
+
+        //     startY: startCell.startY,
+        //     endY: endCell.endY,
+        //     startX: startCell.startX,
+        //     endX: endCell.endX,
+
+        //     rangeType,
+        // };
 
         /**
          * When expanding the selection with the Shift key,
          * the original highlighted cell should remain unchanged.
          * If the highlighted cell is a merged cell, the selection needs to be expanded.
          */
-        const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
+        // const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
 
-        this._startRangeWhenPointerDown = {
-            startColumn: activeCell.mergeInfo.startColumn,
-            startRow: activeCell.mergeInfo.startRow,
-            endColumn: activeCell.mergeInfo.endColumn,
-            endRow: activeCell.mergeInfo.endRow,
-            startY: activeCell.mergeInfo.startY || 0,
-            endY: activeCell.mergeInfo.endY || 0,
-            startX: activeCell.mergeInfo.startX || 0,
-            endX: activeCell.mergeInfo.endX || 0,
-            rangeType,
-        };
-        activeControl.updateRange(newSelectionRange, currentCell);
-    }
-
-    /**
-     * Reset all this.selectionControls by selectionsData.
-     * @param selectionsData
-     */
-    protected _refreshSelectionControl(selectionsData: readonly ISelectionWithStyle[]): void {
-        const selections = selectionsData.map((selectionWithStyle) => {
-            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-            selectionData.style = genNormalSelectionStyle(this._themeService);
-            return selectionData;
-        });
-        this.updateControlForCurrentByRangeData(selections);
+        // activeControl.updateRange(newSelectionRange, currentCell);
     }
 }
 
@@ -951,20 +930,11 @@ export function getTopLeftSelectionOfCurrSheet(skeleton: SpreadsheetSkeleton): I
     });
 }
 
-// same as this._skeleton.getCellWithCoordByIndex(startRow, startColumn);
-// export function getTopLeftAsPrimaryOfCurrRange(skeleton: SpreadsheetSkeleton, range: IRange): ISelectionCell {
-//     const topLeftCell = skeleton.worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);
-//     return {
-//         actualRow: topLeftCell.startRow,
-//         actualColumn: topLeftCell.startColumn,
-//         startRow: topLeftCell.startRow,
-//         startColumn: topLeftCell.startColumn,
-//         endRow: topLeftCell.endRow,
-//         endColumn: topLeftCell.endColumn,
-//         isMerged: topLeftCell.isMerged,
-//         isMergedMainCell: topLeftCell.isMergedMainCell,
-//     };
-// }
+/**
+ * @deprecated use `getTopLeftSelectionOfCurrSheet` instead
+ */
+const getTopLeftSelection = getTopLeftSelectionOfCurrSheet;
+export { getTopLeftSelection };
 
 export function genSelectionByRange(skeleton: SpreadsheetSkeleton, range: IRange): ISelectionWithStyle {
     const topLeftCell = skeleton.worksheet.getCellInfoInMergeData(range.startRow, range.startColumn);

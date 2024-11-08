@@ -15,10 +15,10 @@
  */
 
 import type {
+    ICellWithCoord,
     IRange,
+    IRangeWithCoord,
     ISelection,
-    IActualCellWithCoord,
-    ISelectionWithCoord,
     Nullable,
 } from '@univerjs/core';
 import { getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
@@ -52,7 +52,7 @@ export interface ISelectionWidgetConfig {
 /**
  * https://support.microsoft.com/en-us/office/select-cell-contents-in-excel-23f64223-2b6b-453a-8688-248355f10fa9
  */
-export interface IStyleForSelection {
+export interface ISelectionStyle {
     /**
      * Assign an ID to a selection area.
      * The current scenario is to identify the formula string corresponding to the selection area
@@ -131,22 +131,36 @@ export interface IStyleForSelection {
 }
 
 /**
+ * Selection range Info, contains selection range & primary range
+ * primary range is the range of the highlighted cell.
+ *
+ * rangeWithCoord: IRangeWithCoord;
+ * primaryWithCoord: Nullable<ICellWithCoord>;
+ * style?
+ */
+export interface ISelectionWithCoord {
+    rangeWithCoord: IRangeWithCoord;
+    primaryWithCoord: Nullable<ICellWithCoord>;
+    style?: Nullable<ISelectionStyle>;
+}
+
+/**
  * Extend ISelectionWithCoord with style
  * rangeWithCoord
  * primaryWithCoord
  * style
  */
-export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
-    style: Nullable<IStyleForSelection>;
-}
+// export interface ISelectionWithCoordWithStyle extends ISelectionWithCoord {
+//     style: Nullable<ISelectionStyle>;
+// }
 
 /**
  * range: IRange;
  * primary: Nullable<ISelectionCell>;
- * style: Nullable<IStyleForSelection>;
+ * style: Nullable<ISelectionStyle>;
  */
 export interface ISelectionWithStyle extends ISelection {
-    style: Nullable<Partial<IStyleForSelection>>;
+    style: Nullable<Partial<ISelectionStyle>>;
 }
 
 export interface ISheetRangeLocation {
@@ -164,7 +178,7 @@ export interface ISheetRangeLocation {
  * @returns
  */
 export function convertSelectionDataToRange(
-    selectionWithCoordAndStyle: ISelectionWithCoordAndStyle
+    selectionWithCoordAndStyle: ISelectionWithCoord
 ): ISelectionWithStyle {
     const { rangeWithCoord, primaryWithCoord, style } = selectionWithCoordAndStyle;
     const result: ISelectionWithStyle = {
@@ -186,7 +200,7 @@ export function convertSelectionDataToRange(
     return result;
 }
 
-export function convertPrimaryWithCoordToPrimary(primaryWithCoord: IActualCellWithCoord) {
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ICellWithCoord) {
     const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
     const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
     return {

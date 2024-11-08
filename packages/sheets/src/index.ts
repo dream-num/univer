@@ -33,11 +33,11 @@ export {
 export {
     convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
-    type IStyleForSelection,
     type ISelectionWidgetConfig,
-    type ISelectionWithCoordAndStyle,
+    type ISelectionWithCoord,
     type ISelectionWithStyle,
     type ISheetRangeLocation,
+    type ISelectionStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from './basics/selection';

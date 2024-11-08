@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IActualCellWithCoord, IRangeWithCoord, ISelectionWithCoord, Nullable } from '@univerjs/core';
+import type { ICellWithCoord, IRangeWithCoord, Nullable } from '@univerjs/core';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
 import { convertCellToRange, RANGE_TYPE } from '@univerjs/core';
 
 /**
@@ -34,7 +35,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
     /**
      * The highlight cell of a selection. aka: current cell
      */
-    private _primary: Nullable<IActualCellWithCoord>;
+    private _primary: Nullable<ICellWithCoord>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
     constructor() {
@@ -133,7 +134,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         };
     }
 
-    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<IActualCellWithCoord>) {
+    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ICellWithCoord>) {
         const {
             startColumn,
             startRow,
@@ -171,7 +172,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
      * highlight is best. primary sometimes means the actual cell(actual means ignore merge)
      * @param currentCell
      */
-    setCurrentCell(currentCell: Nullable<IActualCellWithCoord>) {
+    setCurrentCell(currentCell: Nullable<ICellWithCoord>) {
         if (currentCell) {
             this._primary = currentCell;
         }

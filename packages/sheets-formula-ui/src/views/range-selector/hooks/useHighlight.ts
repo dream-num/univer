@@ -16,19 +16,16 @@
 
 import type { ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-import type { IRange, ITextRun, Nullable, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useMemo } from 'react';
-import { attachPrimaryWithCoord, attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useEffect, useMemo, useState } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -62,9 +59,10 @@ export function useSheetHighlight(unitId: string) {
             return;
         }
         const currentSheetId = worksheet.getSheetId();
-        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
-                
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
+
+        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+        if (!skeleton) return;
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
@@ -83,23 +81,18 @@ export function useSheetHighlight(unitId: string) {
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-            const selectWithStyle = genSelectionByRange(skeleton, range);
-            selectWithStyle.style = genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString());
-            selectionWithStyles.push(selectWithStyle);
+            selectionWithStyle.push({
+                range,
+                primary: null,
+                style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
+            });
         }
-        const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
 
-        if (skeleton) {
-            const allControls = refSelectionsRenderService?.getSelectionControls() || [];
-            if (allControls.length === selectionWithStyle.length) {
-                allControls.forEach((control, index) => {
-                    const selection = selectionWithStyle[index];
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
-                    control.updateStyle(selection.style!);
-                });
-            } else {
-                refSelectionsService.setSelections(selectionWithStyle);
-            }
+        const allControls = refSelectionsRenderService?.getSelectionControls() || [];
+        if (allControls.length === selectionWithStyle.length) {
+            refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
+        } else {
+            refSelectionsService.setSelections(selectionWithStyle);
         }
     };
     return highlightSheet;

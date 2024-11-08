@@ -26,6 +26,11 @@ import { SelectionMoveType } from './type';
  * NOT Same as @univerjs/sheets-ui.SelectionRenderModel, that's data for SelectionControl in rendering.
  */
 export class WorkbookSelectionDataModel extends Disposable {
+    /**
+     * Selection data model for each worksheet.
+     */
+    private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
+
     private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
@@ -63,14 +68,13 @@ export class WorkbookSelectionDataModel extends Disposable {
     }
 
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
-        const selections = this._ensureSheetSelection(sheetId);
+        const selections = this.getSelectionsOfWorksheet(sheetId);
         selections.push(...selectionDatas);
         this._emitOnEnd(selections);
     }
 
     /**
      * Set selectionDatas to _worksheetSelections, and emit selectionDatas by type.
-     * If type is not specified, this method would clear all existing selections.
      * @param sheetId
      * @param selectionDatas
      * @param type
@@ -79,8 +83,8 @@ export class WorkbookSelectionDataModel extends Disposable {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909
-        this._ensureSheetSelection(sheetId).length = 0;
-        this._ensureSheetSelection(sheetId).push(...selectionDatas);
+        this.deleteSheetSelection(sheetId);
+        this.getSelectionsOfWorksheet(sheetId).push(...selectionDatas);
 
         switch (type) {
             case SelectionMoveType.MOVE_START:
@@ -106,7 +110,7 @@ export class WorkbookSelectionDataModel extends Disposable {
         return this._getCurrentSelections();
     }
 
-    getSelectionOfWorksheet(sheetId: string): ISelectionWithStyle[] {
+    getSelectionsOfWorksheet(sheetId: string): ISelectionWithStyle[] {
         if (!this._worksheetSelections.has(sheetId)) {
             this._worksheetSelections.set(sheetId, []);
         }
@@ -115,7 +119,7 @@ export class WorkbookSelectionDataModel extends Disposable {
     }
 
     private _getCurrentSelections(): ISelectionWithStyle[] {
-        return this.getSelectionOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
+        return this.getSelectionsOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
     }
 
     getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
@@ -123,21 +127,21 @@ export class WorkbookSelectionDataModel extends Disposable {
         return selectionData[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
 
-    private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
-
     /**
-     * Same as _getCurrentSelections(which return this._worksheetSelections), but this method would set [] if no selection.
+     * Same method as getSelectionsOfWorksheet.
      * @param sheetId
      * @returns this._worksheetSelections
      */
     private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
-        let worksheetSelection = this._worksheetSelections.get(sheetId);
-        if (!worksheetSelection) {
-            worksheetSelection = [];
-            this._worksheetSelections.set(sheetId, worksheetSelection);
+        if (!this._worksheetSelections.get(sheetId)) {
+            this._worksheetSelections.set(sheetId, []);
         }
 
-        return worksheetSelection;
+        return this._worksheetSelections.get(sheetId)!;
+    }
+
+    deleteSheetSelection(sheetId: string) {
+        this._worksheetSelections.set(sheetId, []);
     }
 
     private _emitOnEnd(selections: ISelectionWithStyle[]): void {

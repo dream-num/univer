@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale, IActualCellWithCoord, ObjectMatrix } from '@univerjs/core';
+import type { ICellWithCoord, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -36,14 +36,14 @@ const PRINTING_Z_INDEX = 21;
 interface IRenderBGContext {
     ctx: UniverRenderingContext;
     spreadsheetSkeleton: SpreadsheetSkeleton;
-    backgroundPositions: ObjectMatrix<IActualCellWithCoord>;
+    backgroundPositions: ObjectMatrix<ICellWithCoord>;
     checkOutOfViewBound: boolean;
     backgroundPaths: Path2D;
     scaleX: number;
     scaleY: number;
     viewRanges: IRange[];
     diffRanges: IRange[];
-    cellInfo: IActualCellWithCoord;
+    cellInfo: ICellWithCoord;
 }
 
 export class Background extends SheetExtension {

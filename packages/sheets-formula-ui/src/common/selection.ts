@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle } from '@univerjs/sheets';
 import { ColorKit, type ThemeService } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 
-export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): IStyleForSelection {
+export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
     const style = themeService.getCurrentTheme();
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {

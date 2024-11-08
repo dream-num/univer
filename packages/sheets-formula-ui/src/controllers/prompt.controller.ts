@@ -1536,6 +1536,7 @@ export class PromptController extends Disposable {
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionControl) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
+        if (!skeleton) return;
         // const { unitId, sheetId } = toRange;
         this._formulaPromptService.enableLockedSelectionChange();
 

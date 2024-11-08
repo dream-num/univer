@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import type { IActualCellWithCoord, IRangeWithCoord, ISelectionWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
-import type { ISelectionWidgetConfig, ISelectionWithCoordAndStyle, ISelectionWithStyle, IStyleForSelection } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
+import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import {
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
+import { SelectionShapeExtension } from './selection-shape-extension';
 
 export enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -93,7 +95,7 @@ export class SelectionControl extends Disposable {
      */
     protected _highlightHeader: boolean = true;
 
-    protected _selectionModel!: SelectionRenderModel;
+    protected _selectionRenderModel!: SelectionRenderModel;
 
     private _leftBorder!: Rect;
     private _rightBorder!: Rect;
@@ -124,13 +126,15 @@ export class SelectionControl extends Disposable {
     private _bottomRightWidget!: Rect;
 
     // why three style prop? what's diff between _selectionStyle & _currentStyle?
-    // protected _selectionStyle: Nullable<IStyleForSelection>;
-    private _defaultStyle!: IStyleForSelection;
-    private _currentStyle: IStyleForSelection;
+    // protected _selectionStyle: Nullable<ISelectionStyle>;
+    private _defaultStyle!: ISelectionStyle;
+    private _currentStyle: ISelectionStyle;
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
 
     protected _widgetRects: Rect[] = [];
+
+    protected _controlExtension: Nullable<SelectionShapeExtension>;
 
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
@@ -157,6 +161,7 @@ export class SelectionControl extends Disposable {
             enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
+            rangeType?: RANGE_TYPE;
         }
     ) {
         super();
@@ -173,7 +178,7 @@ export class SelectionControl extends Disposable {
         this._defaultStyle = genNormalSelectionStyle(this._themeService);
         this._currentStyle = genNormalSelectionStyle(this._themeService);
 
-        this._selectionModel = new SelectionRenderModel();
+        this._selectionRenderModel = new SelectionRenderModel();
         const zIndex = this._zIndex;
         this._leftBorder = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             zIndex,
@@ -249,7 +254,7 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
+                    this._updateLayoutOfSelectionControl(this._currentStyle);
                     this._updateControlCoord();
                 })
             )
@@ -404,8 +409,9 @@ export class SelectionControl extends Disposable {
         return this._selectionShapeGroup;
     }
 
+    // That's so bad! _selectionModel is protected! But I don't want to expose it to the outside world
     get model(): SelectionRenderModel {
-        return this._selectionModel;
+        return this._selectionRenderModel;
     }
 
     get topLeftWidget(): Rect {
@@ -445,26 +451,26 @@ export class SelectionControl extends Disposable {
     }
 
     get selectionModel(): SelectionRenderModel {
-        return this._selectionModel;
+        return this._selectionRenderModel;
     }
 
     set selectionModel(model: SelectionRenderModel) {
-        this._selectionModel = model;
+        this._selectionRenderModel = model;
     }
 
-    // get defaultStyle(): IStyleForSelection {
+    // get defaultStyle(): ISelectionStyle {
     //     return this._defaultStyle;
     // }
 
-    // set defaultStyle(style: IStyleForSelection) {
+    // set defaultStyle(style: ISelectionStyle) {
     //     this._defaultStyle = style;
     // }
 
-    get currentStyle(): IStyleForSelection {
+    get currentStyle(): ISelectionStyle {
         return this._currentStyle;
     }
 
-    set currentStyle(style: IStyleForSelection) {
+    set currentStyle(style: ISelectionStyle) {
         this._currentStyle = style;
     }
 
@@ -492,6 +498,10 @@ export class SelectionControl extends Disposable {
         this._columnHeaderHeight = height;
     }
 
+    setControlExtension(options: ISelectionShapeExtensionOption) {
+        this._controlExtension = new SelectionShapeExtension(this, options);
+    }
+
     setEvent(state: boolean): void {
         this.leftControl.evented = state;
         this.rightControl.evented = state;
@@ -503,18 +513,16 @@ export class SelectionControl extends Disposable {
         this._selectionFilled$.next(val);
     }
 
-    private _updateLayoutOfSelectionControl(): void {
-        this._updateLayoutOfSelectionControlByStyle(this.currentStyle);
-    }
-
     /**
      * Update Control Style And Position of SelectionControl
      * @param selectionStyle
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateLayoutOfSelectionControlByStyle(selectionStyle: Partial<IStyleForSelection>): void {
-        this.currentStyle = Object.assign({}, this._defaultStyle, selectionStyle);
-        const currentStyle = this.currentStyle as Required<IStyleForSelection>;
+    protected _updateLayoutOfSelectionControl(selectionStyle?: Nullable<Partial<ISelectionStyle>>): void {
+        if (selectionStyle) {
+            this.currentStyle = Object.assign({}, this._defaultStyle, selectionStyle);
+        }
+        const currentStyle = this.currentStyle as Required<ISelectionStyle>;
 
         const {
             stroke,
@@ -536,7 +544,7 @@ export class SelectionControl extends Disposable {
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
         // startX startY shares same coordinate with viewport.(include row & col header)
-        const { startX, startY, endX, endY } = this._selectionModel;
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
         this.leftControl.transformByState({
             height: endY - startY,
             left: -leftAdjustWidth + fixOnePixelBlurOffset,
@@ -644,14 +652,14 @@ export class SelectionControl extends Disposable {
      * update selection control coordination by curr selection model
      */
     protected _updateControlCoord(): void {
-        const { startX, startY } = this._selectionModel;
+        const { startX, startY } = this._selectionRenderModel;
         this.selectionShapeGroup.show();
         this.selectionShapeGroup.translate(startX, startY);
         this.selectionShapeGroup.makeDirtyNoDebounce(true);
     }
 
-    updateStyle(style: Partial<IStyleForSelection>): void {
-        this._updateLayoutOfSelectionControlByStyle(style);
+    updateStyle(style: Partial<ISelectionStyle>): void {
+        this._updateLayoutOfSelectionControl(style);
         this._updateControlCoord();
     }
 
@@ -660,17 +668,17 @@ export class SelectionControl extends Disposable {
      * @param range
      * @param primaryCell
      */
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<IActualCellWithCoord>): void {
-        this._selectionModel.setValue(range, primaryCell);
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ICellWithCoord>): void {
+        this._selectionRenderModel.setValue(range, primaryCell);
         this._showAutoFill = primaryCell !== null;
-        this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
+        this._updateLayoutOfSelectionControl();
         this._updateControlCoord();
     }
 
-    updateBySelectionWithCoord(selection: ISelectionWithCoord) {
-        this._selectionModel.setValue(selection.rangeWithCoord, selection.primaryWithCoord);
+    updateRangeBySelectionWithCoord(selection: ISelectionWithCoord) {
+        this._selectionRenderModel.setValue(selection.rangeWithCoord, selection.primaryWithCoord);
         this._showAutoFill = selection.primaryWithCoord !== null;
-        this._updateLayoutOfSelectionControl();
+        this._updateLayoutOfSelectionControl(selection.style);
         this._updateControlCoord();
     }
 
@@ -687,12 +695,16 @@ export class SelectionControl extends Disposable {
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
-        style?: Nullable<IStyleForSelection>,
-        primaryCell?: Nullable<IActualCellWithCoord>
+        style?: Nullable<ISelectionStyle>,
+        primaryCell?: Nullable<ICellWithCoord>
     ): void {
         this._rowHeaderWidth = rowHeaderWidth;
         this._columnHeaderHeight = columnHeaderHeight;
-        this.updateRange(newSelectionRange, primaryCell);
+        this.updateRangeBySelectionWithCoord({
+            rangeWithCoord: newSelectionRange,
+            primaryWithCoord: primaryCell,
+            style,
+        });
         if (style) {
             this.updateStyle(style);
         }
@@ -702,17 +714,17 @@ export class SelectionControl extends Disposable {
      * update primary range
      * @param primaryCell model.current (aka: highlight)
      */
-    updateCurrCell(primaryCell: Nullable<IActualCellWithCoord>): void {
+    updateCurrCell(primaryCell: Nullable<ICellWithCoord>): void {
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = primaryCell !== null;
-        this._selectionModel.setCurrentCell(primaryCell);
+        this._selectionRenderModel.setCurrentCell(primaryCell);
     }
 
     clearHighlight(): void {
         // in multiple selection shape, only shape with highlight has auto fill.
         this._showAutoFill = false;
-        this._selectionModel.clearCurrentCell();
-        this._updateLayoutOfSelectionControlByStyle(this._currentStyle);
+        this._selectionRenderModel.clearCurrentCell();
+        this._updateLayoutOfSelectionControl(this._currentStyle);
     }
 
     getScene(): Scene {
@@ -748,6 +760,8 @@ export class SelectionControl extends Disposable {
         this._bottomLeftWidget?.dispose();
         this._bottomCenterWidget?.dispose();
         this._bottomRightWidget?.dispose();
+
+        this._controlExtension?.dispose();
 
         super.dispose();
 
@@ -795,15 +809,15 @@ export class SelectionControl extends Disposable {
         }
     }
 
-    getValue(): ISelectionWithCoordAndStyle {
+    getValue(): ISelectionWithCoord {
         return {
-            ...this._selectionModel.getValue(),
+            ...this._selectionRenderModel.getValue(),
             style: this._currentStyle,
         };
     }
 
     getRange(): IRangeWithCoord {
-        return this._selectionModel.getValue().rangeWithCoord;
+        return this._selectionRenderModel.getValue().rangeWithCoord;
     }
 
     enableHelperSelection(): void {
@@ -814,8 +828,8 @@ export class SelectionControl extends Disposable {
         this._isHelperSelection = false;
     }
 
-    private _updateHeaderBackground(style: IStyleForSelection): void {
-        const { startX, startY, endX, endY, rangeType } = this._selectionModel;
+    private _updateHeaderBackground(style: ISelectionStyle): void {
+        const { startX, startY, endX, endY, rangeType } = this._selectionRenderModel;
         const defaultStyle = this._currentStyle;
         const scale = this._getScale();
 
@@ -890,14 +904,14 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    private _updateBackgroundControl(style: IStyleForSelection): void {
-        const { startX, startY, endX, endY } = this._selectionModel;
+    private _updateBackgroundControl(style: ISelectionStyle): void {
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
 
         const scale = this._getScale();
         const { fill = style.fill! } = style;
         let { strokeWidth } = style;
         strokeWidth /= scale;
-        const highlightSelection = this._selectionModel.highlightToSelection();
+        const highlightSelection = this._selectionRenderModel.highlightToSelection();
 
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
@@ -965,8 +979,8 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    private _updateWidgets(style: Required<IStyleForSelection>): void {
-        const { startX, startY, endX, endY } = this._selectionModel;
+    private _updateWidgets(style: Required<ISelectionStyle>): void {
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
 
         const { stroke = style.stroke!, widgets = style.widgets!, widgetStroke = style.widgetStroke! } = style;
         const scale = this._getScale();
@@ -1065,7 +1079,6 @@ export class SelectionControl extends Disposable {
     }
 
     private _antLineOffset = 0;
-
     private _antRequestNewFrame: number = -1;
 
     private _stopAntLineAnimation(): void {

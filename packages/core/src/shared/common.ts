@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IActualCellWithCoord, ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
+import type { ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
@@ -32,11 +32,11 @@ import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 
 /**
- * Data type convert, convert IActualCellWithCoord to IRaneWithCoord
+ * Data type convert, convert ICellWithCoord to IRangeWithCoord
  * @param cellInfo
  * @returns IRangeWithCoord
  */
-export function convertCellToRange(cellInfo: IActualCellWithCoord): IRangeWithCoord {
+export function convertCellToRange(cellInfo: ICellWithCoord): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;
@@ -85,6 +85,12 @@ export function convertCellToRange(cellInfo: IActualCellWithCoord): IRangeWithCo
         endX,
     };
 }
+
+/**
+ * @deprecated use `convertCellToRange` instead
+ */
+const makeCellToSelection = convertCellToRange;
+export { makeCellToSelection };
 
 export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nullable<IRange> {
     if (!cellInfo) {

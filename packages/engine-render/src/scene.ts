@@ -677,12 +677,21 @@ export class Scene extends ThinScene {
     }
 
     /**
+     * @deprecated use `getScrollXYInfoByViewport` instead.
+     * @param pos
+     * @param viewPort
+     */
+    getVpScrollXYInfoByPosToVp(pos: Vector2, viewPort?: Viewport) {
+        return this.getScrollXYInfoByViewport(pos, viewPort);
+    }
+
+    /**
      * getViewportScrollXYInfo by viewport under cursor position
      * prev getScrollXYByRelativeCoords
      * @param pos
      * @param viewPort
      */
-    getVpScrollXYInfoByViewport(pos: Vector2, viewPort?: Viewport) {
+    getScrollXYInfoByViewport(pos: Vector2, viewPort?: Viewport) {
         if (!viewPort) {
             viewPort = this.findViewportByPosToViewport(pos) || this.getDefaultViewport();
         }
@@ -709,11 +718,23 @@ export class Scene extends ThinScene {
     }
 
     /**
+     * @deprecated use `getCoordRelativeToViewport` instead
+     * @param coord
+     * @returns
+     */
+    getRelativeToViewportCoord(coord: Vector2) {
+        return this.getCoordRelativeToViewport(coord);
+    }
+
+    /**
+     * Get coord to active viewport.
      * In a nested scene scenario, it is necessary to obtain the relative offsets layer by layer.
+     *
+     * origin name: getRelativeToViewportCoord
      * @param coord Coordinates to be converted.
      * @returns
      */
-    getCoordRelativeToViewport(coord: Vector2) {
+    getCoordRelativeToViewport(coord: Vector2): Vector2 {
         let parent: any = this.getParent();
 
         const parentList: any[] = [];

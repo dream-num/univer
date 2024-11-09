@@ -15,10 +15,9 @@
  */
 
 import type { DataValidationStatus, Nullable } from '@univerjs/core';
-import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '../commands/commands/data-validation.command';
+import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
 import { FRange } from '@univerjs/sheets/facade';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand } from '../commands/commands/data-validation.command';
-import { SheetsDataValidationValidatorService } from '../services/dv-validator-service';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 
 interface IFRangeDataValidationMixin {

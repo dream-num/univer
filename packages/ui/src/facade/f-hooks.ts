@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { FHooks, ICommandService } from '@univerjs/core';
-import { CopyCommand, PasteCommand } from '../services/clipboard/clipboard.command';
+import { CopyCommand, PasteCommand } from '@univerjs/ui';
 
 interface IFHooksSheetsUIMixin {
     /**

@@ -1,9 +1,13 @@
 {
-    "name": "univer-examples-node",
+    "name": "examples-node",
     "private": true,
     "description": "Examples run on Node.js",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
     "scripts": {
         "build:demo": "node ./esbuild.config.mjs",
         "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"

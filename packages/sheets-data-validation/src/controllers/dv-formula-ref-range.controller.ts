@@ -16,18 +16,20 @@
 
 import type { IDisposable, IMutationInfo, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { Disposable, generateRandomId, Inject, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, generateRandomId, Inject, isFormulaString, toDisposable } from '@univerjs/core';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
+import { makeFormulaAbsolute } from '../commands/commands/util';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import { isCustomFormulaType } from '../utils/formula';
 
 export class DataValidationFormulaRefRangeController extends Disposable {
     private _disposableMap: Map<string, IDisposable> = new Map();
 
     constructor(
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
+        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
         this._initRefRange();
@@ -38,9 +40,12 @@ export class DataValidationFormulaRefRangeController extends Disposable {
     }
 
     registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
-        if (isCustomFormulaType(rule.type)) {
-            this.register(unitId, subUnitId, rule);
+        // handle list type formula, there maybe some relative formula in old version.
+        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
+            rule.formula1 = isFormulaString(rule.formula1) ? makeFormulaAbsolute(this._lexerTreeBuilder, rule.formula1!) : rule.formula1;
         }
+
+        this.register(unitId, subUnitId, rule);
     };
 
     // eslint-disable-next-line max-lines-per-function

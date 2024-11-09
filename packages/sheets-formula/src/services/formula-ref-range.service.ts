@@ -32,6 +32,44 @@ export type RangeFormulaChangeCallback = (infos: { formulas: string[]; ranges: I
     undos: IMutationInfo[];
 };
 
+function getFormulaKeyOffset(lexerTreeBuilder: LexerTreeBuilder, formulaString: string, refOffsetX: number, refOffsetY: number) {
+    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+
+    if (sequenceNodes == null) {
+        return formulaString;
+    }
+
+    const newSequenceNodes: Array<{ unitId: string; sheetName: string; range: IRange }> = [];
+
+    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+        const node = sequenceNodes[i];
+        if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+            continue;
+        }
+
+        const { token } = node;
+
+        const sequenceGrid = deserializeRangeWithSheetWithCache(token);
+
+        const { sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+        let newRange: IRange = sequenceGrid.range;
+        if (newRange.startAbsoluteRefType === AbsoluteRefType.ALL && newRange.endAbsoluteRefType === AbsoluteRefType.ALL) {
+            continue;
+        } else {
+            newRange = moveRangeByOffset(newRange, refOffsetX, refOffsetY);
+        }
+
+        newSequenceNodes.push({
+            unitId: sequenceUnitId,
+            sheetName,
+            range: newRange,
+        });
+    }
+
+    return newSequenceNodes.map((item) => `${item.unitId}!${item.sheetName}!${item.range.startRow}:${item.range.endRow}|${item.range.startColumn}:${item.range.endColumn}`).join('$');
+}
+
 export class FormulaRefRangeService extends Disposable {
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
@@ -214,7 +252,6 @@ export class FormulaRefRangeService extends Disposable {
         const disposableCollection = new DisposableCollection();
         const formulaDeps = formulas.map((formula) => this._getFormulaDependcy(unitId, subUnitId, formula, oldRanges));
 
-        // WTF!
         // eslint-disable-next-line max-lines-per-function
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const orginStartRow = oldRanges[0].startRow;
@@ -223,6 +260,7 @@ export class FormulaRefRangeService extends Disposable {
             const matchedEffectedRanges: IRange[][] = [];
             const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
 
+            // 1. calculate effected ranges
             for (const { unitId: depUnitId, subUnitId: depSubUnitId, ranges } of deps) {
                 if (depUnitId === effectedRanges.unitId && depSubUnitId === effectedRanges.subUnitId) {
                     const intersectedRanges: IRange[] = [];
@@ -252,11 +290,13 @@ export class FormulaRefRangeService extends Disposable {
             }
 
             if (matchedEffectedRanges.length > 0) {
+                // 2. split effected ranges to enusre there is no overlap
                 const ranges = Rectangle.splitIntoGrid([...matchedEffectedRanges.flat()]);
                 const noEffectRanges = Rectangle.subtractMulti(oldRanges, ranges);
                 noEffectRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
-                const keyMap = new Map<string, { formulas: { newFormula: string }[]; ranges: IRange[] }[]>();
 
+                // 3. calculate every effected range to get new range and new formula
+                const keyMap = new Map<string, { formulas: { newFormula: string }[]; ranges: IRange[] }[]>();
                 for (let i = 0; i < ranges.length; i++) {
                     const range = ranges[i];
                     const currentRow = range.startRow;
@@ -276,9 +316,12 @@ export class FormulaRefRangeService extends Disposable {
                     for (let j = 0; j < formulas.length; j++) {
                         const formula = formulas[j];
                         const isFormulaFormulaString = isFormulaString(formula);
+                        // 3.1 move formula ref offset to get formula string for this range before this command
                         const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula!, offsetColumn, offsetRow) : formula!;
+                        // 3.2 transform formula by effect command
                         const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString, commandInfo) : formulaString;
-                        const orginFormula = this._lexerTreeBuilder.getFormulaKeyOffset(newFormula, -transformedOffsetColumn, -transformedOffsetRow);
+                        // 3.3 get formula key offset for this range after this command
+                        const orginFormula = getFormulaKeyOffset(this._lexerTreeBuilder, newFormula, -transformedOffsetColumn, -transformedOffsetRow);
                         transformedFormulas.push({
                             newFormula,
                             orginFormula,
@@ -298,7 +341,8 @@ export class FormulaRefRangeService extends Disposable {
                     }
                 }
 
-                const originKey = formulas.map((item) => this._lexerTreeBuilder.getFormulaKeyOffset(item, 0, 0)).join('_');
+                // 4. handle no effected ranges
+                const originKey = formulas.map((item) => getFormulaKeyOffset(this._lexerTreeBuilder, item, 0, 0)).join('_');
                 if (noEffectRanges.length > 0) {
                     const currentRow = noEffectRanges[0].startRow;
                     const currentColumn = noEffectRanges[0].startColumn;
@@ -324,6 +368,8 @@ export class FormulaRefRangeService extends Disposable {
                     }
                 }
 
+                // 5. merge effected ranges and get new formula,
+                //    if origin formula was same, means these ranges can use same formula
                 const res = [];
                 const keys = Array.from(keyMap.keys());
                 for (let i = keys.length - 1; i >= 0; i--) {

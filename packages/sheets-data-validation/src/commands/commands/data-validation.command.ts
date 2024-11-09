@@ -310,7 +310,7 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             subUnitId,
             rule: {
                 ...rule,
-                ...validator!.normalizeFormula(rule, unitId, subUnitId),
+                ...validator?.normalizeFormula(rule, unitId, subUnitId),
             },
         };
 

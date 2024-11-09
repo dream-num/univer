@@ -1588,7 +1588,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 column,
                                 result,
                                 batchOperatorType,
-                                r,
+                                r - startRow,
                                 unitId,
                                 sheetId,
                                 startRow,

@@ -105,6 +105,10 @@ export class InvertedIndexCache {
     }
 
     shouldContinueBuildingCache(unitId: string, sheetId: string, column: number, row: number) {
+        if (column === -1 || row === -1) {
+            return false;
+        }
+
         const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
 
         if (!columnMap) {

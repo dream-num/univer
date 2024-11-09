@@ -67,7 +67,7 @@ function getFormulaKeyOffset(lexerTreeBuilder: LexerTreeBuilder, formulaString: 
         });
     }
 
-    return newSequenceNodes.map((item) => `${item.unitId}!${item.sheetName}!${item.range.startRow}:${item.range.endRow}|${item.range.startColumn}:${item.range.endColumn}`).join('$');
+    return newSequenceNodes.map((item) => `${item.unitId}!${item.sheetName}!${item.range.startRow}!${item.range.endRow}!${item.range.startColumn}!${item.range.endColumn}`).join('|');
 }
 
 export class FormulaRefRangeService extends Disposable {

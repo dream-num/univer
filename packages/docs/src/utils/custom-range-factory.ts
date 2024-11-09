@@ -15,9 +15,10 @@
  */
 
 import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 
 interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
     unitId: string;

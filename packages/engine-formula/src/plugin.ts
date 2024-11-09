@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
@@ -78,22 +78,28 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(FormulaController);
-        this._injector.get(SetDefinedNameController);
-        this._injector.get(SetSuperTableController);
+        touchDependencies(this._injector, [
+            [FormulaController],
+            [SetDefinedNameController],
+            [SetSuperTableController],
+        ]);
 
         if (!this._config?.notExecuteFormula) {
-            this._injector.get(SetOtherFormulaController);
-            this._injector.get(SetFeatureCalculationController);
-            this._injector.get(SetDependencyController);
-            this._injector.get(CalculateController);
+            touchDependencies(this._injector, [
+                [SetOtherFormulaController],
+                [SetFeatureCalculationController],
+                [SetDependencyController],
+                [CalculateController],
+            ]);
         }
     }
 
     override onRendered(): void {
         if (!this._config?.notExecuteFormula) {
-            this._injector.get(ICalculateFormulaService);
-            this._injector.get(IFormulaDependencyGenerator);
+            touchDependencies(this._injector, [
+                [ICalculateFormulaService],
+                [IFormulaDependencyGenerator],
+            ]);
         }
     }
 

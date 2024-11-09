@@ -19,7 +19,7 @@ import type {
     IUniverSheetsFormulaBaseConfig,
     IUniverSheetsFormulaRemoteConfig,
 } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -117,14 +117,19 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(FormulaController);
-        this._injector.get(ActiveDirtyController);
-        this._injector.get(ArrayFormulaCellInterceptorController);
-        this._injector.get(UpdateFormulaController);
-        this._injector.get(UpdateDefinedNameController);
+        touchDependencies(this._injector, [
+            [FormulaController],
+            [ActiveDirtyController],
+            [ArrayFormulaCellInterceptorController],
+            [UpdateFormulaController],
+            [UpdateDefinedNameController],
+            [TriggerCalculationController],
+        ]);
     }
 
     override onRendered(): void {
-        this._injector.get(DefinedNameController);
+        touchDependencies(this._injector, [
+            [DefinedNameController],
+        ]);
     }
 }

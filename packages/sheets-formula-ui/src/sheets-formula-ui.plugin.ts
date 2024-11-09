@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -86,9 +86,11 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
         });
 
-        this._injector.get(FormulaUIController); // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
-        this._injector.get(FormulaClipboardController);
-        this._injector.get(FormulaRenderManagerController);
+        touchDependencies(this._injector, [
+            [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
+            [FormulaClipboardController],
+            [FormulaRenderManagerController],
+        ]);
 
         const componentManager = this._injector.get(ComponentManager);
 

@@ -78,6 +78,7 @@ const ColorSelect = (props: IColorSelectProps) => {
             open={open}
             onDropdownVisibleChange={setOpen}
             dropdownStyle={{ width: 112 }}
+            style={{ width: 96, cursor: 'pointer' }}
             className={styles.dataValidationFormulaColorSelect}
             value={value}
             onChange={onChange}
@@ -128,7 +129,6 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
                 onChange={(color) => {
                     onItemChange(item.id, item.label, color);
                 }}
-
             />
             <Input
                 disabled={item.isRef}

@@ -26,7 +26,7 @@ import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeR
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, throttleTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
@@ -43,7 +43,7 @@ export const useSheetSelectionChange = (
     sequenceNodes: INode[],
     isSupportAcrossSheet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number) => void) = noop) => {
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
 
@@ -61,6 +61,8 @@ export const useSheetSelectionChange = (
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     const isScalingRef = useRef(false);
+
+    const scalingOptionRef = useRef<{ result: string; offset: number }>();
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
@@ -97,7 +99,7 @@ export const useSheetSelectionChange = (
                         sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                         const result = sequenceNodeToText(newSequenceNodes);
-                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes));
+                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), true);
                     } else {
                         const range = selections[selections.length - 1];
                         const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
@@ -110,7 +112,7 @@ export const useSheetSelectionChange = (
                         const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                         sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const result = sequenceNodeToText(sequenceNodes);
-                        handleRangeChange(result, refRanges[0].length);
+                        handleRangeChange(result, refRanges[0].length, true);
                     }
                 } else {
                     // 更新全部的 ref Selection
@@ -163,12 +165,17 @@ export const useSheetSelectionChange = (
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
                     const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
                     const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, result.length);
+                    handleRangeChange(result, result.length, true);
                 }
             };
             const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections);
                 isScalingRef.current = false;
+                if (scalingOptionRef.current) {
+                    const { result, offset } = scalingOptionRef.current;
+                    handleRangeChange(result, offset || -1, true);
+                    scalingOptionRef.current = undefined;
+                }
             });
 
             // const d2 = refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
@@ -242,14 +249,14 @@ export const useSheetSelectionChange = (
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, offset || -1);
+                handleRangeChange(result, -1, false);
+                scalingOptionRef.current = { result, offset };
             };
             const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
                 controls.forEach((control, index) => {
                     disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
-                        throttleTime(30),
                         map((e) => {
                             return serializeRange(e);
                         }),

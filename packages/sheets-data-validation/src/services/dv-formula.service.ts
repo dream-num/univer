@@ -16,9 +16,10 @@
 
 import type { ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
-import { DataValidationType, Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { isCustomFormulaType } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 type RuleId = string;
@@ -86,7 +87,7 @@ export class DataValidationFormulaService extends Disposable {
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (rule.type === DataValidationType.CHECKBOX || rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
+        if (!isCustomFormulaType(rule.type)) {
             const { formula1, formula2, uid: ruleId } = rule;
             const isFormula1Legal = isFormulaString(formula1);
             const isFormula2Legal = isFormulaString(formula2);

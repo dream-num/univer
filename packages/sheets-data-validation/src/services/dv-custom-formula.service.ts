@@ -18,7 +18,7 @@ import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { getFormulaCellData } from '../utils/formula';
+import { getFormulaCellData, isCustomFormulaType } from '../utils/formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IFormulaData {
@@ -156,8 +156,10 @@ export class DataValidationCustomFormulaService extends Disposable {
     }
 
     addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        const { ranges, formula1, formula2, uid: ruleId } = rule;
-        this._addFormulaByRange(unitId, subUnitId, ruleId, formula1, formula2, ranges);
+        if (isCustomFormulaType(rule.type)) {
+            const { ranges, formula1, formula2, uid: ruleId } = rule;
+            this._addFormulaByRange(unitId, subUnitId, ruleId, formula1, formula2, ranges);
+        }
     }
 
     async getCellFormulaValue(unitId: string, subUnitId: string, ruleId: string, row: number, column: number) {

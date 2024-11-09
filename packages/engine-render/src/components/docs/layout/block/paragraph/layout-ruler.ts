@@ -547,7 +547,7 @@ function _lineOperator(
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, lastPage, section, skeTablesInParagraph);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -681,11 +681,43 @@ function __updateAndPositionDrawings(
     );
 }
 
+function __getWrapTablePosition(
+    table: IDocumentSkeletonTable,
+    column: IDocumentSkeletonColumn,
+    lineTop: number,
+    lineHeight: number,
+    drawingAnchorTop?: number
+) {
+    const page = column.parent?.parent;
+    let left = 0;
+    let top = 0;
+    if (page == null) {
+        return {
+            left,
+            top,
+        };
+    }
+
+    const isPageBreak = __checkPageBreak(column);
+    const { tableSource, width, height } = table;
+    const { positionH, positionV } = tableSource.position;
+
+    left = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
+    top = getPositionVertical(
+        positionV, page, lineTop, lineHeight, height, drawingAnchorTop, isPageBreak
+    ) ?? 0;
+
+    return { left, top };
+}
+
 function _updateAndPositionTable(
     lineTop: number,
+    lineHeight: number,
     page: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
     section: IDocumentSkeletonSection,
-    skeTablesInParagraph: IParagraphTableCache[]
+    skeTablesInParagraph: IParagraphTableCache[],
+    drawingAnchorTop?: number
 ): boolean {
     if (skeTablesInParagraph.length === 0) {
         return false;
@@ -707,7 +739,10 @@ function _updateAndPositionTable(
             break;
         }
         case TableTextWrapType.WRAP: {
-            // TODO: @JOCS, handle text wrap position.
+            const { left, top } = __getWrapTablePosition(table, column, lineTop, lineHeight, drawingAnchorTop);
+
+            table.top = top;
+            table.left = left;
             break;
         }
         default: {

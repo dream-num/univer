@@ -156,7 +156,15 @@ export function lineBreaking(
         paragraphStyle: Tools.deepClone(paragraphStyle),
         paragraphAffectSkeDrawings,
         paragraphInlineSkeDrawings,
-        skeTablesInParagraph: tableSkeleton ? [{ tableId: tableSkeleton.tableId, table: tableSkeleton, hasPositioned: false }] : undefined,
+        skeTablesInParagraph: tableSkeleton
+            ? [
+                {
+                    tableId: tableSkeleton.tableId,
+                    table: tableSkeleton,
+                    hasPositioned: false,
+                },
+            ]
+            : undefined,
         skeHeaders,
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,

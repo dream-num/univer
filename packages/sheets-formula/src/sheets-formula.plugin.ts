@@ -119,11 +119,11 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
+            [TriggerCalculationController],
             [ActiveDirtyController],
             [ArrayFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
-            [TriggerCalculationController],
         ]);
     }
 

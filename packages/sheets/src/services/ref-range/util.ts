@@ -911,7 +911,7 @@ export const handleInsertRowCommon = (info: ICommandInfo<IInsertRowCommandParams
     // expand
     if (
         (direction === Direction.UP && insertRow === targetRange.startRow) ||
-        (direction === Direction.DOWN && insertRow === targetRange.endRow - 1)
+        (direction === Direction.DOWN && insertRow - 1 === targetRange.endRow)
     ) {
         return [
             {
@@ -950,7 +950,7 @@ export const handleInsertColCommon = (info: ICommandInfo<IInsertColCommandParams
     // expand
     if (
         (direction === Direction.LEFT && insertColumn === targetRange.startColumn) ||
-        (direction === Direction.RIGHT && insertColumn === targetRange.endColumn - 1)
+        (direction === Direction.RIGHT && insertColumn - 1 === targetRange.endColumn)
     ) {
         return [
             {
@@ -1477,6 +1477,13 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                 unitId: params.unitId,
                 subUnitId: params.subUnitId,
                 ranges: [
+                    ...range.startRow > 0
+                        ? [{
+                            ...range,
+                            startRow: range.startRow - 1,
+                            endRow: range.endRow - 1,
+                        }]
+                        : [],
                     {
                         ...range,
                         startRow: range.startRow,
@@ -1492,6 +1499,13 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                 unitId: params.unitId,
                 subUnitId: params.subUnitId,
                 ranges: [
+                    ...range.startColumn > 0
+                        ? [{
+                            ...range,
+                            startColumn: range.startColumn - 1,
+                            endColumn: range.endColumn - 1,
+                        }]
+                        : [],
                     {
                         ...range,
                         startColumn: range.startColumn,

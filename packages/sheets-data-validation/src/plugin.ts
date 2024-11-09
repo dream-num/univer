@@ -37,6 +37,7 @@ import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DataValidationController } from './controllers/dv.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
 import { SheetDataValidationModel } from './models/sheet-data-validation-model';
@@ -74,6 +75,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationRefRangeController],
             [DataValidationFormulaController],
             [SheetDataValidationSheetController],
+            [DataValidationFormulaRefRangeController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -93,6 +95,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         this._injector.get(DataValidationCacheService);
         this._injector.get(SheetsDataValidationValidatorService);
         this._injector.get(DataValidationRefRangeController);
+        this._injector.get(DataValidationFormulaRefRangeController);
     }
 
     override onReady(): void {

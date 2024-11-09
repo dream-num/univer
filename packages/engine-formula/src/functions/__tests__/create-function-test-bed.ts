@@ -22,6 +22,7 @@ import type { ISheetData } from '../../basics/common';
 import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
+
 import {
     CellValueType,
     ILogService,
@@ -48,11 +49,11 @@ import { ReferenceNodeFactory } from '../../engine/ast-node/reference-node';
 import { SuffixNodeFactory } from '../../engine/ast-node/suffix-node';
 import { UnionNodeFactory } from '../../engine/ast-node/union-node';
 import { ValueNodeFactory } from '../../engine/ast-node/value-node';
-import { FormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
+import { FormulaDependencyGenerator, IFormulaDependencyGenerator } from '../../engine/dependency/formula-dependency';
 import { Interpreter } from '../../engine/interpreter/interpreter';
 import { stripErrorMargin } from '../../engine/utils/math-kit';
 import { FormulaDataModel } from '../../models/formula-data.model';
-import { CalculateFormulaService } from '../../services/calculate-formula.service';
+import { CalculateFormulaService, ICalculateFormulaService } from '../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { FunctionService, IFunctionService } from '../../services/function.service';
@@ -173,7 +174,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
         override onStarting(): void {
             const injector = this._injector;
-            injector.add([CalculateFormulaService]);
+            injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([Lexer]);
             injector.add([LexerTreeBuilder]);
 
@@ -184,7 +185,7 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([ISuperTableService, { useClass: SuperTableService }]);
 
-            injector.add([FormulaDependencyGenerator]);
+            injector.add([IFormulaDependencyGenerator, { useClass: FormulaDependencyGenerator }]);
             injector.add([Interpreter]);
             injector.add([AstTreeBuilder]);
 

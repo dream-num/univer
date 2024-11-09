@@ -166,6 +166,10 @@ export class SheetDataValidationModel extends Disposable {
             this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
         } else if (payload.type === UpdateRuleType.SETTING) {
             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
+        } else if (payload.type === UpdateRuleType.ALL) {
+            ruleMatrix.updateRange(ruleId, payload.payload.ranges);
+            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload.ranges, oldRule.ranges);
+            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
         }
 
         this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);

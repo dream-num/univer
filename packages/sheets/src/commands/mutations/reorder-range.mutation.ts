@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, ObjectMatrix, Range, Tools } from '@univerjs/core';
 import type { ICellData, IMutation, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import { CommandType, IUniverInstanceService, ObjectMatrix, Range, Tools } from '@univerjs/core';
 
 export interface IReorderRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;

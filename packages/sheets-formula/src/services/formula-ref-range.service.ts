@@ -223,20 +223,20 @@ export class FormulaRefRangeService extends Disposable {
             const matchedEffectedRanges: IRange[][] = [];
             const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
 
-            deps.forEach(({ unitId, subUnitId, ranges }) => {
-                if (unitId === effectedRanges.unitId && subUnitId === effectedRanges.subUnitId) {
+            for (const { unitId: depUnitId, subUnitId: depSubUnitId, ranges } of deps) {
+                if (depUnitId === effectedRanges.unitId && depSubUnitId === effectedRanges.subUnitId) {
                     const intersectedRanges: IRange[] = [];
                     const currentStartRow = ranges[0].startRow;
                     const currentStartColumn = ranges[0].startColumn;
                     const offsetRow = currentStartRow - orginStartRow;
                     const offsetColumn = currentStartColumn - orginStartColumn;
 
-                    effectedRanges.ranges.forEach((range) => {
+                    for (const range of effectedRanges.ranges) {
                         const intersectedRange = ranges.map((r) => getIntersectRange(range, r)).filter(Boolean) as IRange[];
                         if (intersectedRange.length > 0) {
                             intersectedRanges.push(...intersectedRange);
                         }
-                    });
+                    }
 
                     if (intersectedRanges.length > 0) {
                         matchedEffectedRanges.push(
@@ -249,38 +249,42 @@ export class FormulaRefRangeService extends Disposable {
                         );
                     }
                 }
-            });
+            }
 
             if (matchedEffectedRanges.length > 0) {
                 const ranges = Rectangle.splitIntoGrid([...matchedEffectedRanges.flat()]);
                 const noEffectRanges = Rectangle.subtractMulti(oldRanges, ranges);
                 noEffectRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
                 const keyMap = new Map<string, { formulas: { newFormula: string }[]; ranges: IRange[] }[]>();
-                ranges.forEach((range) => {
+
+                for (let i = 0; i < ranges.length; i++) {
+                    const range = ranges[i];
                     const currentRow = range.startRow;
                     const currentColumn = range.startColumn;
                     const offsetRow = currentRow - orginStartRow;
                     const offsetColumn = currentColumn - orginStartColumn;
                     const transformedRange = handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo).sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
                     if (!transformedRange.length) {
-                        return;
+                        continue;
                     }
                     const transformedRow = transformedRange[0].startRow;
                     const transformedColumn = transformedRange[0].startColumn;
                     const transformedOffsetRow = transformedRow - orginStartRow;
                     const transformedOffsetColumn = transformedColumn - orginStartColumn;
 
-                    const transformedFormulas = formulas.map((formula) => {
+                    const transformedFormulas = [];
+                    for (let j = 0; j < formulas.length; j++) {
+                        const formula = formulas[j];
                         const isFormulaFormulaString = isFormulaString(formula);
                         const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula!, offsetColumn, offsetRow) : formula!;
                         const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString, commandInfo) : formulaString;
                         const orginFormula = this._lexerTreeBuilder.getFormulaKeyOffset(newFormula, -transformedOffsetColumn, -transformedOffsetRow);
 
-                        return {
+                        transformedFormulas.push({
                             newFormula,
                             orginFormula,
-                        };
-                    });
+                        });
+                    }
 
                     const item = {
                         formulas: transformedFormulas,
@@ -293,17 +297,23 @@ export class FormulaRefRangeService extends Disposable {
                     } else {
                         keyMap.set(item.key, [item]);
                     }
-                });
+                }
 
                 const originKey = formulas.map((item) => this._lexerTreeBuilder.getFormulaKeyOffset(item, 0, 0)).join('_');
                 if (noEffectRanges.length > 0) {
                     const currentRow = noEffectRanges[0].startRow;
                     const currentColumn = noEffectRanges[0].startColumn;
-                    const item = {
-                        formulas: formulas.map((formula) => ({
+                    const noEffectFormulas = [];
+                    for (let i = 0; i < formulas.length; i++) {
+                        const formula = formulas[i];
+                        noEffectFormulas.push({
                             newFormula: this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - orginStartColumn, currentRow - orginStartRow),
                             orginFormula: formula,
-                        })),
+                        });
+                    }
+
+                    const item = {
+                        formulas: noEffectFormulas,
                         ranges: noEffectRanges,
                         key: originKey,
                     };
@@ -315,17 +325,23 @@ export class FormulaRefRangeService extends Disposable {
                     }
                 }
 
-                const res = Array.from(keyMap.keys()).map((key) => {
+                const res = [];
+                const keys = Array.from(keyMap.keys());
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];
                     const ranges = keyMap.get(key)!.sort((a, b) => a.ranges[0].startRow - b.ranges[0].startRow || a.ranges[0].startColumn - b.ranges[0].startColumn);
-                    const formulas = ranges[0].formulas.map((item) => item.newFormula);
+                    const formulas = [];
+                    for (let j = 0; j < ranges[0].formulas.length; j++) {
+                        formulas.push(ranges[0].formulas[j].newFormula);
+                    }
                     const newRanges = Rectangle.mergeRanges(ranges.map((item) => item.ranges).flat());
                     newRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
 
-                    return {
+                    res.push({
                         formulas,
                         ranges: newRanges,
-                    };
-                });
+                    });
+                }
 
                 return callback(res);
             }

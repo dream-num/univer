@@ -33,6 +33,7 @@ import { RefSelectionsRenderService } from '../../services/render-services/ref-s
 
 import { useEditorInput } from './hooks/useEditorInput';
 import { useEmitChange } from './hooks/useEmitChange';
+import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
 import { useFocus } from './hooks/useFocus';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
@@ -184,6 +185,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         } else {
             resetSelection();
             isFocusSet(_isFocus);
+            editor?.blur();
         }
     }, [_isFocus, focus]);
 
@@ -239,7 +241,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useRefocus();
 
-    useSwitchSheet(isNeed, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
+    useSwitchSheet(isNeed, unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => {
+        if (isNeed) {
+            highligh(rangeString);
+        }
+    });
 
     useEffect(() => {
         if (editor) {
@@ -290,18 +296,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         };
     }, []);
 
-    useEffect(() => {
-        if (editor) {
-            const sequenceNodes = getFormulaToken(rangeString);
-            const ranges = highlightDoc(editor, sequenceNodes);
-            if (isNeed) {
-                highlightSheet(ranges);
-                return () => {
-                    highlightSheet([]);
-                };
-            }
-        }
-    }, [editor, isNeed]);
+    useFirstHighlightDoc(rangeString, '', isFocus, highlightDoc, highlightSheet, editor);
 
     const handleClick = () => {
         // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
@@ -479,7 +474,7 @@ function RangeSelectorDialog(props: {
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
     useRefactorEffect(focusIndex >= 0, unitId);
     useOnlyOneRange(unitId, isOnlyOneRange);
-    useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, noop);
+    useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, () => highlightSheet(refSelections));
 
     useEffect(() => {
         highlightSheet(refSelections);

@@ -62,6 +62,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                 paramIndexSet(-1);
             });
             const d2 = editor.selectionChange$.pipe(
+                filter((e) => e.isEditing),
                 filter((e) => e.textRanges.length === 1),
                 map((e) => e.textRanges[0].startOffset),
                 distinctUntilChanged()

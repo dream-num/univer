@@ -166,9 +166,6 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         }
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
-                        if (!isFinish) {
-                            offset += node.token.length;
-                        }
                         const unitRange = deserializeRangeWithSheet(token);
                         unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
                         unitRange.sheetName = unitRange.sheetName === '' ? currentSheetName : unitRange.sheetName;
@@ -181,15 +178,19 @@ export const useSheetSelectionChange = (isNeed: boolean,
                                 cloneNode.token = serializeRange(unitRange.range);
                             }
                             currentIndex++;
+                            offset += cloneNode.token.length;
                             return cloneNode;
                         }
                         currentIndex++;
+                        if (!isFinish) {
+                            offset += node.token.length;
+                        }
                         return node;
                     }
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
-                scalingOptionRef.current = { result, offset: offset || -1 };
+                scalingOptionRef.current = { result, offset };
                 handleRangeChange(result, -1, false);
             };
             let time = 0 as any;

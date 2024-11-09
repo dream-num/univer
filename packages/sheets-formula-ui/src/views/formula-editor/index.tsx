@@ -18,14 +18,16 @@ import type { IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEmitChange } from '../range-selector/hooks/useEmitChange';
+import { useFirstHighlightDoc } from '../range-selector/hooks/useFirstHighlightDoc';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
+import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighlight';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
 import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useRefocus } from '../range-selector/hooks/useRefocus';
@@ -35,7 +37,6 @@ import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
-import { useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
 import styles from './index.module.less';
@@ -105,7 +106,18 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onChange(`=${text}`);
     }, editor);
 
-    const refSelections = useDocHight(editorId, sequenceNodes);
+    const highlightDoc = useDocHight('=');
+    const highlightSheet = useSheetHighlight(unitId);
+    const highligh = (text: string, isNeedResetSelection: boolean = true) => {
+        if (!editor) {
+            return;
+        }
+        const sequenceNodes = getFormulaToken(text);
+        const ranges = highlightDoc(editor, sequenceNodes, isNeedResetSelection);
+        highlightSheet(ranges);
+    };
+
+    // const refSelections = useDocHight(editorId, sequenceNodes);
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
@@ -129,22 +141,31 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     }, [_isFocus, focus]);
 
-    const handleSelectionChange = (refString: string, offset: number) => {
+    const { checkScrollBar } = useResize(editor);
+    useRefactorEffect(isFocus, unitId);
+    useLeftAndRightArrow(isFocus, editor);
+
+    const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {
         const result = `=${refString}`;
         needEmit();
         formulaTextSet(result);
-        if (offset > -1) {
-            setTimeout(() => {
-                editor?.setSelectionRanges([{ startOffset: offset + 1, endOffset: offset + 1 }]);
-            }, 30);
+        highligh(refString);
+        if (isEnd) {
+            focus();
+            if (offset !== -1) {
+                // 在渲染结束之后再设置选区
+                setTimeout(() => {
+                    const range = { startOffset: offset + 1, endOffset: offset + 1 };
+                    editor?.setSelectionRanges([range]);
+                    const docBackScrollRenderController = editor?.render.with(DocBackScrollRenderController);
+                    docBackScrollRenderController?.scrollToRange({ ...range, collapsed: true });
+                }, 50);
+            }
+            checkScrollBar();
         }
     };
-
-    useSheetHighlight(isFocus, unitId, subUnitId, refSelections);
-    useResize(editor);
-    useRefactorEffect(isFocus, unitId);
-    useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
+
     useRefocus();
     useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
@@ -157,12 +178,15 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
                 needEmit();
                 formulaTextSet(text);
+                highligh(getFormulaText(text), false);
             });
             return () => {
                 d.unsubscribe();
             };
         }
     }, [editor]);
+
+    useFirstHighlightDoc(formulaWithoutEqualSymbol, '=', isFocus, highlightDoc, highlightSheet, editor);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
@@ -202,6 +226,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             }
             resetFormulaSearch();
             focus();
+            highligh(res.text);
         }
     };
 

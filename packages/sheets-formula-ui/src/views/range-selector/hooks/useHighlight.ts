@@ -102,9 +102,10 @@ export function useSheetHighlight(unitId: string) {
     return highlightSheet;
 }
 
-export function useDocHight() {
+export function useDocHight(_leadingCharacter: string = '') {
     const descriptionService = useDependency(IDescriptionService);
     const colorMap = useColor();
+    const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
     const highlightDoc = (editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
         const data = editor.getDocumentData();
@@ -118,13 +119,17 @@ export function useDocHight() {
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             cloneBody.textRuns = [];
-            cloneBody.dataStream = '\r\n';
             const cloneData = { ...data, body: cloneBody };
-            const selections = editor.getSelectionRanges();
-            editor.setDocumentData(cloneData, selections);
+            editor.setDocumentData(cloneData);
             return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
+            if (leadingCharacterLength) {
+                textRuns.forEach((e) => {
+                    e.ed = e.ed + leadingCharacterLength;
+                    e.st = e.st + leadingCharacterLength;
+                });
+            }
             cloneBody.textRuns = textRuns;
             const text = sequenceNodes.reduce((pre, cur) => {
                 if (typeof cur === 'string') {
@@ -132,13 +137,13 @@ export function useDocHight() {
                 }
                 return `${pre}${cur.token}`;
             }, '');
-            cloneBody.dataStream = `${text}\r\n`;
+            cloneBody.dataStream = `${_leadingCharacter}${text}\r\n`;
             let selections;
             if (isNeedResetSelection) {
                 // Switching between uppercase and lowercase will trigger a reflow, causing the cursor to be misplaced. Let's refresh the cursor position here.
                 selections = editor.getSelectionRanges();
                 // After 'buildTextRuns' , the content changes, most of it is deleted, and the cursor position needs to be corrected
-                const maxOffset = cloneBody.dataStream.length - 2;
+                const maxOffset = cloneBody.dataStream.length - 2 + leadingCharacterLength;
                 selections.forEach((selection) => {
                     selection.startOffset = Math.max(0, Math.min(selection.startOffset, maxOffset));
                     selection.endOffset = Math.max(0, Math.min(selection.endOffset, maxOffset));

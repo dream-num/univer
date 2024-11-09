@@ -46,6 +46,7 @@ const exampleTables = [
     ['Academic Senate Meeting', 'May 25, 2205', 'Building 99 Room 1'],
     ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
+    ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
 ];
 
 const title = 'Examples of Accessible Data Tables\r';
@@ -218,7 +219,7 @@ const table: ITable = {
     dist: {
         distB: 5,
         distL: 5,
-        distR: 5,
+        distR: 10,
         distT: 5,
     },
     cellMargin: {

@@ -1046,7 +1046,7 @@ export class DocumentSkeleton extends Skeleton {
                 '': null, // '' is the main document.
             },
             isDirty: false,
-            drawingsCache: new Map(),
+            floatObjectsCache: new Map(),
             paragraphConfigCache: new Map(),
             sectionBreakConfigCache: new Map(),
             paragraphsOpenNewPage: new Set(),

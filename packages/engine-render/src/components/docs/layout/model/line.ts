@@ -26,6 +26,7 @@ import type {
     IDocumentSkeletonTable,
     LineType,
 } from '../../../../basics/i-document-skeleton-cached';
+import type { IFloatObject } from '../tools';
 import { PositionedObjectLayoutType, TableTextWrapType, WrapTextType } from '@univerjs/core';
 import { Path2 } from '../../../../basics/path2';
 import { Transform } from '../../../../basics/transform';
@@ -311,23 +312,15 @@ export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: n
 }
 
 export function collisionDetection(
-    drawing: IDocumentSkeletonDrawing,
+    floatObject: IFloatObject,
     lineHeight: number,
     lineTop: number,
     columnLeft: number,
     columnWidth: number
 ) {
-    const { aTop, height: oHeight, aLeft, width: oWidth, angle = 0, drawingOrigin } = drawing;
-    const { layoutType } = drawingOrigin;
+    const { top: oTop, height: oHeight, left: oLeft, width: oWidth, angle = 0 } = floatObject;
 
-    if (
-        layoutType === PositionedObjectLayoutType.WRAP_NONE ||
-        layoutType === PositionedObjectLayoutType.INLINE // drawing will never be inline here, just double check here.
-    ) {
-        return false;
-    }
-
-    const { top = 0, left = 0, width = 0, height = 0 } = getBoundingBox(angle, aLeft, oWidth, aTop, oHeight);
+    const { top = 0, left = 0, width = 0, height = 0 } = getBoundingBox(angle, oLeft, oWidth, oTop, oHeight);
 
     if (top + height < lineTop || top > lineHeight + lineTop) {
         return false;

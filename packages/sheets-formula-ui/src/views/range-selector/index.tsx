@@ -136,7 +136,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const resetSelection = useResetSelection(!rangeDialogVisible && isFocus);
 
-    const handleInputDebounce = useMemo(() => (text: string) => {
+    const handleInput = useMemo(() => (text: string) => {
         const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
         if (nodes) {
             const verify = verifyRange(nodes);
@@ -204,7 +204,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         highlightSheet(ranges);
     };
 
-    const needEmit = useEmitChange(sequenceNodes, handleInputDebounce, editor);
+    const needEmit = useEmitChange(sequenceNodes, handleInput, editor);
 
     const handleSheetSelectionChange = useMemo(() => {
         return (text: string, offset: number, isEnd: boolean) => {
@@ -325,6 +325,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const handleClose = () => {
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);
+        setTimeout(focus, 30);
     };
 
     const handleOpenModal = () => {

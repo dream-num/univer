@@ -15,28 +15,11 @@
  */
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams } from '../commands/commands/set-col-data.command';
-import type { ISetRowDataCommandParams } from '../commands/commands/set-row-data.command';
-import type { IToggleGridlinesCommandParams } from '../commands/commands/toggle-gridlines.command';
-import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
+import type { ISetColDataCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
-import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
-import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
-import { SetColDataCommand } from '../commands/commands/set-col-data.command';
-import { SetColHiddenCommand, SetSpecificColsVisibleCommand } from '../commands/commands/set-col-visible.command';
-import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
-import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
-import { SetRowHiddenCommand, SetSpecificRowsVisibleCommand } from '../commands/commands/set-row-visible.command';
-import { SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
-import { SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
-import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
-import { copyRangeStyles } from '../commands/commands/utils/selection-utils';
-import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutation';
-import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
+import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';

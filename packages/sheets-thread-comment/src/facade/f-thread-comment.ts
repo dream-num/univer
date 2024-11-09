@@ -19,8 +19,8 @@ import type { IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandP
 import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { FRange } from '@univerjs/sheets/facade';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
 export class FThreadComment {
     constructor(

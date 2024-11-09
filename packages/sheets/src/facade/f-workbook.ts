@@ -15,16 +15,9 @@
  */
 
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
-import type { ISheetCommandSharedParams } from '../commands/utils/interface';
+import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
-import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
-import { getPrimaryForRange } from '../commands/commands/utils/selection-utils';
-import { SetSelectionsOperation } from '../commands/operations/selection.operation';
-import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
-import { WorkbookEditablePermission } from '../services/permission/permission-point';
-import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
+import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
@@ -68,7 +61,7 @@ export class FWorkbook extends FBase {
      * @memberof FWorkbook
      */
     getSnapshot(): IWorkbookData {
-        this._logService.warn(`use 'save' instead of 'getSnapshot'`);
+        this._logService.warn('use \'save\' instead of \'getSnapshot\'');
         return this.save();
     }
 
@@ -140,7 +133,7 @@ export class FWorkbook extends FBase {
 
     /**
      * Get a worksheet by sheet name.
-     * @param name 	The name of the sheet to get.
+     * @param name The name of the sheet to get.
      * @returns The worksheet with given sheet name
      */
     getSheetByName(name: string): FWorksheet | null {

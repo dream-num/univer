@@ -19,11 +19,9 @@ import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, type IDisposable, type ISelectionCellWithMergeInfo, type Nullable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FRange } from '@univerjs/sheets/facade';
+import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
-import { type ICanvasPopup, SheetCanvasPopManagerService } from '../services/canvas-pop-manager.service';
-import { CellAlertManagerService, type ICellAlert } from '../services/cell-alert-manager.service';
-import { ISheetClipboardService } from '../services/clipboard/clipboard.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface IFComponentKey {
     /**

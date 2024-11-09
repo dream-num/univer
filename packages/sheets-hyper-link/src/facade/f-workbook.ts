@@ -15,9 +15,9 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import type { ISheetHyperLinkInfo } from '../services/parser.service';
+import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { SheetsHyperLinkParserService } from '../services/parser.service';
+import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 
 interface IFWorkbookHyperlinkMixin {
     /**

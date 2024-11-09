@@ -24,9 +24,8 @@ import { DOC_RANGE_TYPE, ICommandService,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { InsertCommand } from '../commands/commands/core-editing.command';
-import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 
 export class FDocument {
     readonly id: string;

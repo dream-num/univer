@@ -16,7 +16,7 @@
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, DisposableCollection, getIntersectRange, Inject, Injector, isFormulaString, IUniverInstanceService, moveRangeByOffset, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { getSeparateEffectedRangesOnCommand, handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
@@ -27,7 +27,7 @@ export type FormulaChangeCallback = (formulaString: string) => {
     undos: IMutationInfo[];
 };
 
-export type RangeFormulaChangeCallback = (infos: { formulas: string[]; originFormulas: string[]; ranges: IRange[] }[]) => {
+export type RangeFormulaChangeCallback = (infos: { formulas: string[]; ranges: IRange[] }[]) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
@@ -175,6 +175,10 @@ export class FormulaRefRangeService extends Disposable {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
+                // ignore all absolute reference
+                if (range.startAbsoluteRefType === AbsoluteRefType.ALL && range.endAbsoluteRefType === AbsoluteRefType.ALL) {
+                    return;
+                }
                 const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
                 const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
@@ -250,29 +254,37 @@ export class FormulaRefRangeService extends Disposable {
             if (matchedEffectedRanges.length > 0) {
                 const ranges = Rectangle.splitIntoGrid([...matchedEffectedRanges.flat()]);
                 const noEffectRanges = Rectangle.subtractMulti(oldRanges, ranges);
-
-                const keyMap = new Map<string, { formulas: { newFormula: string; orginFormula: string }[]; range: IRange }[]>();
+                noEffectRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+                const keyMap = new Map<string, { formulas: { newFormula: string }[]; ranges: IRange[] }[]>();
                 ranges.forEach((range) => {
                     const currentRow = range.startRow;
                     const currentColumn = range.startColumn;
                     const offsetRow = currentRow - orginStartRow;
                     const offsetColumn = currentColumn - orginStartColumn;
+                    const transformedRange = handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo).sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+                    if (!transformedRange.length) {
+                        return;
+                    }
+                    const transformedRow = transformedRange[0].startRow;
+                    const transformedColumn = transformedRange[0].startColumn;
+                    const transformedOffsetRow = transformedRow - orginStartRow;
+                    const transformedOffsetColumn = transformedColumn - orginStartColumn;
 
-                    const transformedFormulas = formulas.map((formula1) => {
-                        const isFormula1FormulaString = isFormulaString(formula1);
-                        const formula1String = isFormula1FormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula1!, offsetColumn, offsetRow) : formula1!;
-                        const newFormula1 = isFormula1FormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formula1String, commandInfo) : formula1String;
-                        const orginFormula1 = newFormula1 === formula1String ? formula1 : this._lexerTreeBuilder.moveFormulaRefOffset(newFormula1, -offsetColumn, -offsetRow);
+                    const transformedFormulas = formulas.map((formula) => {
+                        const isFormulaFormulaString = isFormulaString(formula);
+                        const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula!, offsetColumn, offsetRow) : formula!;
+                        const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString, commandInfo) : formulaString;
+                        const orginFormula = this._lexerTreeBuilder.getFormulaKeyOffset(newFormula, -transformedOffsetColumn, -transformedOffsetRow);
 
                         return {
-                            newFormula: newFormula1,
-                            orginFormula: orginFormula1,
+                            newFormula,
+                            orginFormula,
                         };
                     });
 
                     const item = {
                         formulas: transformedFormulas,
-                        range,
+                        ranges: transformedRange,
                         key: transformedFormulas.map((item) => item.orginFormula).join('_'),
                     };
 
@@ -283,36 +295,35 @@ export class FormulaRefRangeService extends Disposable {
                     }
                 });
 
-                const originKey = formulas.map((item) => item).join('_');
+                const originKey = formulas.map((item) => this._lexerTreeBuilder.getFormulaKeyOffset(item, 0, 0)).join('_');
                 if (noEffectRanges.length > 0) {
-                    const items = noEffectRanges.map((range) => ({
+                    const currentRow = noEffectRanges[0].startRow;
+                    const currentColumn = noEffectRanges[0].startColumn;
+                    const item = {
                         formulas: formulas.map((formula) => ({
-                            newFormula: this._lexerTreeBuilder.moveFormulaRefOffset(formula, range.startColumn - orginStartColumn, range.startRow - orginStartRow),
+                            newFormula: this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - orginStartColumn, currentRow - orginStartRow),
                             orginFormula: formula,
                         })),
-                        range,
+                        ranges: noEffectRanges,
                         key: originKey,
-                    }));
+                    };
 
-                    items.forEach((item) => {
-                        if (keyMap.has(item.key)) {
-                            keyMap.get(item.key)!.push(item);
-                        } else {
-                            keyMap.set(item.key, [item]);
-                        }
-                    });
+                    if (keyMap.has(item.key)) {
+                        keyMap.get(item.key)!.push(item);
+                    } else {
+                        keyMap.set(item.key, [item]);
+                    }
                 }
 
                 const res = Array.from(keyMap.keys()).map((key) => {
-                    const ranges = keyMap.get(key)!.sort((a, b) => a.range.startRow - b.range.startRow || a.range.startColumn - b.range.startColumn);
+                    const ranges = keyMap.get(key)!.sort((a, b) => a.ranges[0].startRow - b.ranges[0].startRow || a.ranges[0].startColumn - b.ranges[0].startColumn);
                     const formulas = ranges[0].formulas.map((item) => item.newFormula);
-                    const newRanges = Rectangle.mergeRanges(ranges.map((item) => handleCommonDefaultRangeChangeWithEffectRefCommands(item.range, commandInfo)).filter((range) => !!range).flat());
+                    const newRanges = Rectangle.mergeRanges(ranges.map((item) => item.ranges).flat());
                     newRanges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
 
                     return {
                         formulas,
                         ranges: newRanges,
-                        originFormulas: ranges[0].formulas.map((item) => item.orginFormula),
                     };
                 });
 

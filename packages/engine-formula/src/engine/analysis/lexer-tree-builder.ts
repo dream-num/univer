@@ -378,6 +378,44 @@ export class LexerTreeBuilder extends Disposable {
         return `=${generateStringWithSequence(newSequenceNodes)}`;
     }
 
+    getFormulaKeyOffset(formulaString: string, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false) {
+        const sequenceNodes = this.sequenceNodesBuilder(formulaString);
+
+        if (sequenceNodes == null) {
+            return formulaString;
+        }
+
+        const newSequenceNodes: Array<{ unitId: string; sheetName: string; range: IRange }> = [];
+
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+                continue;
+            }
+
+            const { token } = node;
+
+            const sequenceGrid = deserializeRangeWithSheetWithCache(token);
+
+            const { sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+            let newRange: IRange = sequenceGrid.range;
+            if (!ignoreAbsolute && newRange.startAbsoluteRefType === AbsoluteRefType.ALL && newRange.endAbsoluteRefType === AbsoluteRefType.ALL) {
+                continue;
+            } else {
+                newRange = moveRangeByOffset(newRange, refOffsetX, refOffsetY, ignoreAbsolute);
+            }
+
+            newSequenceNodes.push({
+                unitId: sequenceUnitId,
+                sheetName,
+                range: newRange,
+            });
+        }
+
+        return newSequenceNodes.map((item) => `${item.unitId}!${item.sheetName}!${item.range.startRow}:${item.range.endRow},${item.range.startColumn}:${item.range.endColumn}`).join('$');
+    }
+
     /**
      * univer-pro/issues/1684
      * =sum({}{})

@@ -279,7 +279,6 @@ export class FormulaRefRangeService extends Disposable {
                         const formulaString = isFormulaFormulaString ? this._lexerTreeBuilder.moveFormulaRefOffset(formula!, offsetColumn, offsetRow) : formula!;
                         const newFormula = isFormulaFormulaString ? this.transformFormulaByEffectCommand(unitId, subUnitId, formulaString, commandInfo) : formulaString;
                         const orginFormula = this._lexerTreeBuilder.getFormulaKeyOffset(newFormula, -transformedOffsetColumn, -transformedOffsetRow);
-
                         transformedFormulas.push({
                             newFormula,
                             orginFormula,
@@ -307,7 +306,7 @@ export class FormulaRefRangeService extends Disposable {
                     for (let i = 0; i < formulas.length; i++) {
                         const formula = formulas[i];
                         noEffectFormulas.push({
-                            newFormula: this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - orginStartColumn, currentRow - orginStartRow),
+                            newFormula: isFormulaString(formula) ? this._lexerTreeBuilder.moveFormulaRefOffset(formula, currentColumn - orginStartColumn, currentRow - orginStartRow) : formula,
                             orginFormula: formula,
                         });
                     }

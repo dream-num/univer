@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISetNumfmtCommandParams } from '@univerjs/numfmt';
-import { SetNumfmtCommand } from '@univerjs/numfmt';
+import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { FRange } from '@univerjs/sheets/facade';
+import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two

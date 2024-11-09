@@ -19,7 +19,7 @@ import type {
     IUniverSheetsFormulaBaseConfig,
     IUniverSheetsFormulaRemoteConfig,
 } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -119,12 +119,18 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
-            [TriggerCalculationController],
             [ActiveDirtyController],
             [ArrayFormulaCellInterceptorController],
             [UpdateFormulaController],
             [UpdateDefinedNameController],
         ]);
+
+        // The nodejs environment needs to be initialized, otherwise it has been initialized in FormulaUIController
+        if (isNodeEnv()) {
+            touchDependencies(this._injector, [
+                [TriggerCalculationController],
+            ]);
+        }
     }
 
     override onRendered(): void {

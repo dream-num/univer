@@ -326,7 +326,7 @@ export class FormulaRefRangeService extends Disposable {
 
                 const res = [];
                 const keys = Array.from(keyMap.keys());
-                for (let i = 0; i < keys.length; i++) {
+                for (let i = keys.length - 1; i >= 0; i--) {
                     const key = keys[i];
                     const ranges = keyMap.get(key)!.sort((a, b) => a.ranges[0].startRow - b.ranges[0].startRow || a.ranges[0].startColumn - b.ranges[0].startColumn);
                     const formulas = [];

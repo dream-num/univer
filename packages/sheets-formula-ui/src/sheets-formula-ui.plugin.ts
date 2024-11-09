@@ -78,10 +78,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         dependencies.forEach((dependency) => j.add(dependency));
     }
 
-    override onReady(): void {
-        this._injector.get(FormulaUIController);
-    }
-
     override onRendered(): void {
         ([
             [RefSelectionsRenderService],
@@ -90,6 +86,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
         });
 
+        this._injector.get(FormulaUIController); // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
         this._injector.get(FormulaClipboardController);
         this._injector.get(FormulaRenderManagerController);
 

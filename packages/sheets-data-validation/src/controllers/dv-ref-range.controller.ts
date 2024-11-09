@@ -19,11 +19,12 @@ import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutation
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, toDisposable } from '@univerjs/core';
 import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
+import { makeFormulaAbsolute } from '../commands/commands/util';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { isCustomFormulaType } from '../utils/formula';
 
@@ -34,9 +35,9 @@ export class DataValidationRefRangeController extends Disposable {
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private _injector: Injector,
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
-        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
+        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
         this._initRefRange();
@@ -54,11 +55,15 @@ export class DataValidationRefRangeController extends Disposable {
         this.registerFormula(unitId, subUnitId, rule);
     };
 
-    // eslint-disable-next-line max-lines-per-function
     registerFormula(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
+        if (rule.type !== DataValidationType.LIST && rule.type !== DataValidationType.LIST_MULTIPLE) {
+            return;
+        }
+
         const ruleId = rule.uid;
         const id = this._getIdWithUnitId(unitId, subUnitId, ruleId);
         const disposeSet = this._disposableMap.get(id) ?? new Set();
+
         const handleFormulaChange = (type: 'formula1' | 'formula2', formulaString: string) => {
             const oldRule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
             if (!oldRule) {
@@ -68,6 +73,7 @@ export class DataValidationRefRangeController extends Disposable {
             if (!oldFormula || oldFormula === formulaString) {
                 return { redos: [], undos: [] };
             }
+
             const redoParams: IUpdateDataValidationMutationParams = {
                 unitId,
                 subUnitId,
@@ -110,41 +116,18 @@ export class DataValidationRefRangeController extends Disposable {
             return { redos, undos };
         };
 
-        if (rule.type === DataValidationType.CUSTOM) {
-            const currentFormula = this._dataValidationCustomFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
-            if (currentFormula) {
+        const currentFormula = this._dataValidationFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
+
+        if (currentFormula) {
+            const [formula1] = currentFormula;
+            if (formula1) {
                 const disposable = this._formulaRefRangeService.registerFormula(
                     unitId,
                     subUnitId,
-                    currentFormula.formula,
+                    makeFormulaAbsolute(this._lexerTreeBuilder, formula1.text),
                     (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                 );
                 disposeSet.add(() => disposable.dispose());
-            }
-        } else {
-            const currentFormula = this._dataValidationFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
-
-            if (currentFormula) {
-                const [formula1, formula2] = currentFormula;
-                if (formula1) {
-                    const disposable = this._formulaRefRangeService.registerFormula(
-                        unitId,
-                        subUnitId,
-                        formula1.text,
-                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
-                    );
-                    disposeSet.add(() => disposable.dispose());
-                }
-
-                if (formula2) {
-                    const disposable = this._formulaRefRangeService.registerFormula(
-                        unitId,
-                        subUnitId,
-                        formula2.text,
-                        (newFormulaString) => handleFormulaChange('formula2', newFormulaString)
-                    );
-                    disposeSet.add(() => disposable.dispose());
-                }
             }
         }
     }

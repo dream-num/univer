@@ -303,11 +303,15 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
         const matrix = sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
         matrix.addRule(rule);
         const diffs = matrix.diff(sheetDataValidationModel.getRules(unitId, subUnitId));
+        const validator = sheetDataValidationModel.getValidator(rule.type);
 
         const mutationParams: IAddDataValidationMutationParams = {
             unitId,
             subUnitId,
-            rule,
+            rule: {
+                ...rule,
+                ...validator!.normalizeFormula(rule, unitId, subUnitId),
+            },
         };
 
         const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, accessor);

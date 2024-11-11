@@ -19,6 +19,7 @@ export * from './cell-data';
 export * from './const';
 export * from './document-node-tools';
 export * from './draw';
+export * from './event-tools';
 export * from './group-transform';
 export * from './i-document-skeleton-cached';
 export * from './i-events';

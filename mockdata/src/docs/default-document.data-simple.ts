@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools, VerticalAlignmentType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 const TABLE_START = '\x1A'; // 表格开始
@@ -43,7 +43,7 @@ function createTableDataStream(tables: string[][]) {
 
 const exampleTables = [
     ['Description', 'Date', 'Location'],
-    ['Academic Senate Meeting', 'May 25, 2205', 'Building 99 Room 1'],
+    ['Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting', 'May 25, 2205', 'Building 99 Room 1'],
     ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
     ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
@@ -159,6 +159,7 @@ const { paragraphs, sectionBreaks } = createParagraphAndSectionBreaks(dataStream
 const tableCell: ITableCell = {
     rowSpan: 1,
     columnSpan: 1,
+    vAlign: VerticalAlignmentType.CENTER,
     margin: {
         start: {
             v: 10,
@@ -178,8 +179,8 @@ const tableCell: ITableCell = {
 const tableRow: ITableRow = {
     tableCells: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableCell))],
     trHeight: {
-        val: { v: 30 },
-        hRule: TableCellHeightRule.AUTO,
+        val: { v: 120 },
+        hRule: TableRowHeightRule.EXACT,
     },
 };
 
@@ -212,8 +213,8 @@ const table: ITable = {
             posOffset: 100,
         },
         positionV: {
-            relativeFrom: ObjectRelativeFromV.PAGE,
-            posOffset: 200,
+            relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+            posOffset: 0,
         },
     },
     dist: {
@@ -276,8 +277,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
         marginRight: ptToPixel(50),
         marginLeft: ptToPixel(50),
         autoHyphenation: BooleanNumber.TRUE,
-        consecutiveHyphenLimit: 2,
-        hyphenationZone: 10,
+        consecutiveHyphenLimit: 3,
         doNotHyphenateCaps: BooleanNumber.TRUE,
         renderConfig: {
             vertexAngle: 0,

@@ -788,26 +788,29 @@ function _updateAndPositionTable(
 
     const { tableId, table } = lastTable;
     const { tableSource } = table;
+    const isOriginTable = tableId.indexOf('#-#') === -1;
 
-    switch (tableSource.textWrap) {
-        case TableTextWrapType.NONE: {
-            table.top = lineTop;
-            break;
-        }
-        case TableTextWrapType.WRAP: {
-            __updateWrapTablePosition(
-                ctx,
-                table,
-                lineTop,
-                lineHeight,
-                column,
-                paragraphIndex,
-                drawingAnchorTop
-            );
-            break;
-        }
-        default: {
-            throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+    if (isOriginTable) {
+        switch (tableSource.textWrap) {
+            case TableTextWrapType.NONE: {
+                table.top = lineTop;
+                break;
+            }
+            case TableTextWrapType.WRAP: {
+                __updateWrapTablePosition(
+                    ctx,
+                    table,
+                    lineTop,
+                    lineHeight,
+                    column,
+                    paragraphIndex,
+                    drawingAnchorTop
+                );
+                break;
+            }
+            default: {
+                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+            }
         }
     }
 

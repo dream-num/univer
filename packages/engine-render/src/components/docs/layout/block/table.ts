@@ -19,7 +19,7 @@ import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTabl
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { TableAlignmentType } from '@univerjs/core';
+import { TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
 import { createSkeletonCellPage } from '../model/page';
 
 export function createTableSkeleton(
@@ -43,6 +43,10 @@ export function createTableSkeleton(
         const { children: cellNodes, startIndex, endIndex } = rowNode;
         const row = rowNodes.indexOf(rowNode);
         const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, tableSkeleton);
+        const rowDataModel = table.tableRows[row];
+        const { trHeight } = rowDataModel;
+        const { hRule, val } = trHeight;
+
         tableSkeleton.rows.push(rowSkeleton);
         let left = 0;
         let rowHeight = 0;
@@ -68,9 +72,47 @@ export function createTableSkeleton(
             rowHeight = Math.max(rowHeight, pageHeight);
         }
 
+        if (hRule === TableRowHeightRule.AT_LEAST) {
+            rowHeight = Math.max(rowHeight, val.v);
+        } else if (hRule === TableRowHeightRule.EXACT) {
+            rowHeight = val.v;
+        }
+
         // Set row height to cell page height.
         for (const cellPageSkeleton of rowSkeleton.cells) {
             cellPageSkeleton.pageHeight = rowHeight;
+        }
+
+        // Handle vertical alignment in cell.
+        const rowConfig = table.tableRows[row];
+        for (let i = 0; i < rowConfig.tableCells.length; i++) {
+            const cellConfig = rowConfig.tableCells[i];
+            const cellPageSkeleton = rowSkeleton.cells[i];
+            const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
+            const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+
+            let marginTop = originMarginTop;
+
+            switch (vAlign) {
+                case VerticalAlignmentType.TOP: {
+                    marginTop = originMarginTop;
+                    break;
+                }
+                case VerticalAlignmentType.CENTER: {
+                    marginTop = (pageHeight - height) / 2;
+                    break;
+                }
+                case VerticalAlignmentType.BOTTOM: {
+                    marginTop = pageHeight - height - originMarginBottom;
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            marginTop = Math.max(originMarginTop, marginTop);
+
+            cellPageSkeleton.marginTop = marginTop;
         }
 
         rowSkeleton.height = rowHeight;

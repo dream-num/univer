@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { ICellCustomRender, IDisposable, Nullable } from '@univerjs/core';
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
-import { Inject, Injector, toDisposable } from '@univerjs/core';
+import { Inject, Injector, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
+import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 
 export class FSheetHooks {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
-        @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService
+        @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         // empty
     }
@@ -62,5 +64,28 @@ export class FSheetHooks {
      */
     onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void): IDisposable {
         return toDisposable(this._dragManagerService.endCell$.subscribe(callback));
+    }
+
+    /**
+     * The onCellRender event is fired when a cell is rendered.
+     * @param customRender
+     * @param effect
+     * @param priority
+     * @returns
+     */
+    onCellRender(customRender: Nullable<ICellCustomRender[]>, effect: InterceptorEffectEnum = InterceptorEffectEnum.Style, priority: number = InterceptCellContentPriority.DATA_VALIDATION): IDisposable {
+        return this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            effect,
+            handler: (cell, pos, next) => {
+                return next({
+                    ...cell,
+                    customRender: [
+                        ...(cell?.customRender || []),
+                        ...(customRender || []),
+                    ],
+                });
+            },
+            priority,
+        });
     }
 }

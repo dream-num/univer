@@ -38,6 +38,7 @@ export interface IUIPartsService {
 
     registerComponent(part: ComponentPartKey, componentFactory: () => ComponentType): IDisposable;
     getComponents(part: ComponentPartKey): Set<ComponentRenderer>;
+    replaceComponent(part: ComponentPartKey, componentFactory: () => ComponentType): void;
 }
 
 export const IUIPartsService = createIdentifier<IUIPartsService>('ui.parts.service');
@@ -70,6 +71,15 @@ export class UIPartsService extends Disposable implements IUIPartsService {
             }
             this._componentRegistered$.next(part);
         });
+    }
+
+    replaceComponent(part: ComponentPartKey, componentFactory: () => React.ComponentType) {
+        const componentType = componentFactory();
+        const components = this._componentsByPart.get(part);
+        if (components?.size) {
+            components.clear();
+        }
+        this._componentsByPart.set(part, new Set([componentType]));
     }
 
     getComponents(part: ComponentPartKey): Set<ComponentType> {

@@ -43,6 +43,13 @@ function createTableDataStream(tables: string[][]) {
 
 const exampleTables = [
     ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
+    ['Description', 'Date', 'Location'],
     ['Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting Academic Senate Meeting', 'May 25, 2205', 'Building 99 Room 1'],
     ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
@@ -159,7 +166,7 @@ const { paragraphs, sectionBreaks } = createParagraphAndSectionBreaks(dataStream
 const tableCell: ITableCell = {
     rowSpan: 1,
     columnSpan: 1,
-    vAlign: VerticalAlignmentType.CENTER,
+    vAlign: VerticalAlignmentType.TOP,
     margin: {
         start: {
             v: 10,
@@ -180,7 +187,7 @@ const tableRow: ITableRow = {
     tableCells: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableCell))],
     trHeight: {
         val: { v: 120 },
-        hRule: TableRowHeightRule.EXACT,
+        hRule: TableRowHeightRule.AUTO,
     },
 };
 
@@ -213,8 +220,8 @@ const table: ITable = {
             posOffset: 100,
         },
         positionV: {
-            relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-            posOffset: 0,
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: 600,
         },
     },
     dist: {

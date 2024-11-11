@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable } from '@univerjs/core';
+import type { INumberUnit, ITable, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -130,6 +130,67 @@ export function createTableSkeleton(
     tableSkeleton.left = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
 
     return tableSkeleton;
+}
+
+// When a table spreads pages, you need to split the table into two tables and place them on different pages,
+// and if you allow the spread to break the rows, you also need to split the rows.
+export function splitTable(
+    tableSke: IDocumentSkeletonTable,
+    availableHeight: number
+): [
+        Nullable<IDocumentSkeletonTable>,
+        Nullable<IDocumentSkeletonTable>
+    ] {
+    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
+    if (tableSke.rows[0].height > availableHeight) {
+        return [null, tableSke];
+    }
+
+    const { tableId: tableSliceId, tableSource } = tableSke;
+    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
+    const newTable = getNullTableSkeleton(0, 0, tableSource);
+
+    // Reset table id;
+    newTable.tableId = getTableSliceId(tableId, sliceIndex);
+    newTable.left = tableSke.left;
+    newTable.width = tableSke.width;
+    newTable.height = 0;
+    newTable.top = tableSke.top;
+    tableSke.top = 0;
+
+    let remainHeight = availableHeight;
+
+    while (tableSke.rows.length && remainHeight >= tableSke.rows[0].height) {
+        const row = tableSke.rows.shift()!;
+
+        newTable.rows.push(row);
+
+        tableSke.height -= row.height;
+        newTable.height += row.height;
+
+        // Reset row's parent index.
+        row.parent = newTable;
+
+        remainHeight -= row.height;
+    }
+
+    tableSke.tableId = getTableSliceId(tableId, sliceIndex + 1);
+
+    // Reset st and ed.
+    newTable.st = newTable.rows[0].st - 1;
+    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
+
+    if (tableSke.rows.length > 0) {
+        tableSke.st = tableSke.rows[0].st - 1;
+        tableSke.ed = tableSke.rows[tableSke.rows.length - 1].ed + 1;
+
+        // Reset row top.
+        for (const row of tableSke.rows) {
+            row.top -= newTable.height;
+        }
+    }
+
+    return [newTable, tableSke.rows.length > 0 ? tableSke : null];
 }
 
 function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {

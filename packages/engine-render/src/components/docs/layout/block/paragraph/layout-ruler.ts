@@ -61,7 +61,7 @@ import {
     lineIterator,
     mergeByV,
 } from '../../tools';
-import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
+import { splitTable } from '../table';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -820,7 +820,7 @@ function _updateAndPositionTable(
         // Need split table.
         skeTablesInParagraph.pop();
         const availableHeight = section.height - top;
-        const [newTable, remainTable] = _splitTable(table, availableHeight);
+        const [newTable, remainTable] = splitTable(table, availableHeight);
 
         if (newTable != null) {
             page.skeTables.set(newTable.tableId, newTable);
@@ -847,67 +847,6 @@ function _updateAndPositionTable(
 
         return false;
     }
-}
-
-// FIXME: @JOCS 重新创建两个 table skeleton 比复用之前 table 更好？
-function _splitTable(
-    table: IDocumentSkeletonTable,
-    availableHeight: number
-): [
-        Nullable<IDocumentSkeletonTable>,
-        Nullable<IDocumentSkeletonTable>
-    ] {
-    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
-    if (table.rows[0].height > availableHeight) {
-        return [null, table];
-    }
-
-    const { tableId: tableSliceId, tableSource } = table;
-    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
-    const newTable = getNullTableSkeleton(0, 0, tableSource);
-
-    // Reset table id;
-    newTable.tableId = getTableSliceId(tableId, sliceIndex);
-    newTable.left = table.left;
-    newTable.width = table.width;
-    newTable.height = 0;
-    newTable.top = table.top;
-    table.top = 0;
-
-    let remainHeight = availableHeight;
-
-    while (table.rows.length && remainHeight >= table.rows[0].height) {
-        const row = table.rows.shift()!;
-
-        newTable.rows.push(row);
-
-        table.height -= row.height;
-        newTable.height += row.height;
-
-        // Reset row's parent index.
-        row.parent = newTable;
-
-        remainHeight -= row.height;
-    }
-
-    table.tableId = getTableSliceId(tableId, sliceIndex + 1);
-
-    // Reset st and ed.
-
-    newTable.st = newTable.rows[0].st - 1;
-    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
-
-    if (table.rows.length > 0) {
-        table.st = table.rows[0].st - 1;
-        table.ed = table.rows[table.rows.length - 1].ed + 1;
-
-        // Reset row top.
-        for (const row of table.rows) {
-            row.top -= newTable.height;
-        }
-    }
-
-    return [newTable, table.rows.length > 0 ? table : null];
 }
 
 function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {

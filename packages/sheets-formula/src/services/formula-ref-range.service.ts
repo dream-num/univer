@@ -117,7 +117,7 @@ export class FormulaRefRangeService extends Disposable {
                         newToken = serializeRange(finalRange);
                     }
                 } else {
-                    newToken = ErrorType.ERROR;
+                    newToken = ErrorType.REF;
                 }
 
                 return {
@@ -259,7 +259,6 @@ export class FormulaRefRangeService extends Disposable {
             const deps = [{ unitId, subUnitId, ranges: oldRanges }, ...formulaDeps.flat()];
             const matchedEffectedRanges: IRange[][] = [];
             const effectedRanges = getSeparateEffectedRangesOnCommand(this._injector, commandInfo);
-
             // 1. calculate effected ranges
             for (const { unitId: depUnitId, subUnitId: depSubUnitId, ranges } of deps) {
                 if (depUnitId === effectedRanges.unitId && depSubUnitId === effectedRanges.subUnitId) {

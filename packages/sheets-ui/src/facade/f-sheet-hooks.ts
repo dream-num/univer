@@ -15,10 +15,10 @@
  */
 
 import type { ICellCustomRender, IDisposable, Nullable } from '@univerjs/core';
-import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
-import { Inject, Injector, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
+import type { IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverCellPosition } from '@univerjs/sheets-ui';
+import { ICommandService, Inject, Injector, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
 export class FSheetHooks {
     constructor(
@@ -86,6 +86,34 @@ export class FSheetHooks {
                 });
             },
             priority,
+        });
+    }
+
+    /**
+     * The onBeforeCellEdit event is fired before a cell is edited.
+     * @param callback
+     * @returns
+     */
+    onBeforeCellEdit(callback: (params: IEditorBridgeServiceVisibleParam) => void): IDisposable {
+        return this._injector.get(ICommandService).beforeCommandExecuted((command) => {
+            const params = command.params as IEditorBridgeServiceVisibleParam;
+            if (command.id === SetCellEditVisibleOperation.id && params.visible) {
+                callback(params);
+            }
+        });
+    }
+
+    /**
+     * The onAfterCellEdit event is fired after a cell is edited.
+     * @param callback
+     * @returns
+     */
+    onAfterCellEdit(callback: (params: IEditorBridgeServiceVisibleParam) => void): IDisposable {
+        return this._injector.get(ICommandService).onCommandExecuted((command) => {
+            const params = command.params as IEditorBridgeServiceVisibleParam;
+            if (command.id === SetCellEditVisibleOperation.id && !params.visible) {
+                callback(params);
+            }
         });
     }
 }

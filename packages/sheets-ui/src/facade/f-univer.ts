@@ -27,6 +27,7 @@ import type {
 import { FUniver, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { FSheetHooks } from './f-sheet-hooks';
 import '@univerjs/sheets/facade';
 
 interface IFUniverSheetsUIMixin {
@@ -76,6 +77,13 @@ interface IFUniverSheetsUIMixin {
      * @returns {IDisposable} The disposable instance.
      */
     registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+
+    /**
+     * Get sheet hooks.
+     *
+     * @returns {FSheetHooks} FSheetHooks instance
+     */
+    getSheetHooks(): FSheetHooks;
 }
 
 export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
@@ -155,6 +163,15 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         }
 
         return renderComponent;
+    }
+
+    /**
+     * Get sheet hooks.
+     *
+     * @returns {FSheetHooks} FSheetHooks instance
+     */
+    override getSheetHooks(): FSheetHooks {
+        return this._injector.createInstance(FSheetHooks);
     }
 }
 

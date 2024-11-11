@@ -16,7 +16,7 @@
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, IConfigService, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -91,7 +91,6 @@ describe('Test EndEditController', () => {
     let contextService: IContextService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
-    let resourceLoaderService: IResourceLoaderService;
     let configService: IConfigService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
     let normalizeStringByLexer: (str: string) => string;
@@ -108,7 +107,6 @@ describe('Test EndEditController', () => {
         localeService = get(LocaleService);
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
-        resourceLoaderService = get(IResourceLoaderService);
         configService = get(IConfigService);
 
         const worksheet = workbook.getActiveSheet()!;
@@ -459,6 +457,149 @@ describe('Test EndEditController', () => {
 
             const isRichTextWithCellBody2 = isRichText(cellBody2);
             expect(isRichTextWithCellBody2).toBe(false);
+        });
+
+        describe('normalizeStringByLexer', () => {
+            it('should convert leading . to 0.', () => {
+                expect(normalizeStringByLexer('=.07/0.1')).toBe('=0.07/0.1');
+            });
+
+            it('should remove unnecessary trailing zeros', () => {
+                expect(normalizeStringByLexer('=1.0+2.00')).toBe('=1+2');
+            });
+
+            it('should not modify normal cell references', () => {
+                expect(normalizeStringByLexer('=A1+B2')).toBe('=A1+B2');
+                expect(normalizeStringByLexer('=Sheet1!A1')).toBe('=Sheet1!A1');
+            });
+
+            it('should not modify function names', () => {
+                expect(normalizeStringByLexer('=SUM(A1:A10)')).toBe('=SUM(A1:A10)');
+                expect(normalizeStringByLexer('=IF(A1>0, "Yes", "No")')).toBe('=IF(A1>0, "Yes", "No")');
+            });
+
+            it('should handle negative numbers', () => {
+                expect(normalizeStringByLexer('=-.5*-2.00')).toBe('=-0.5*-2');
+            });
+
+            it('should handle numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=001.00+000.20')).toBe('=1+0.2');
+            });
+
+            it('should handle percentages', () => {
+                expect(normalizeStringByLexer('=50% + .5')).toBe('=50% + 0.5');
+            });
+
+            it('should handle scientific notation', () => {
+                expect(normalizeStringByLexer('=1.00E+03')).toBe('=1000');
+                expect(normalizeStringByLexer('=1e3 + 2E-2')).toBe('=1000 + 0.02');
+
+                expect(normalizeStringByLexer('=1e20 + 2E-2')).toBe('=100000000000000000000 + 0.02');
+                // Excel =1.1E+21 + 0.02, numfmt =1.1e+21 + 0.02
+                expect(normalizeStringByLexer('=11e20 + 2E-2')).toBe('=1.1e+21 + 0.02');
+                // Excel =1E+21 + 0.02, numfmt =1e+21 + 0.02
+                expect(normalizeStringByLexer('=1e21 + 2E-2')).toBe('=1e+21 + 0.02');
+
+                expect(normalizeStringByLexer('=2e-6')).toBe('=0.000002');
+                // Excel =0.0000002, numfmt =2e-7
+                expect(normalizeStringByLexer('=2e-7')).toBe('=2e-7');
+                // Excel =1E+21 + 0.0000000000000000002, numfmt =1e+21 + 2e-19
+                expect(normalizeStringByLexer('=1E+21 + 2E-19')).toBe('=1e+21 + 2e-19');
+                // Excel =1E+21 + 2E-20, numfmt =1e+21 + 2e-20
+                expect(normalizeStringByLexer('=1E+21 + 0.2E-19')).toBe('=1e+21 + 2e-20');
+                // Excel =1E+21 + 2E-20, numfmt =1e+21 + 2e-20
+                expect(normalizeStringByLexer('=1E+21 + 2E-20')).toBe('=1e+21 + 2e-20');
+            });
+
+            it('should handle dates', () => {
+                expect(normalizeStringByLexer('="2023-01-01"')).toBe('="2023-01-01"');
+            });
+
+            it('should handle complex expressions', () => {
+                expect(normalizeStringByLexer('=SUM(A1:A10)/.5 - 2.00')).toBe('=SUM(A1:A10)/0.5 - 2');
+            });
+
+            it('should not modify logical operators', () => {
+                expect(normalizeStringByLexer('=A1>=B2')).toBe('=A1>=B2');
+            });
+
+            it('should handle names with numbers', () => {
+                expect(normalizeStringByLexer('=Rate1 + Rate2')).toBe('=Rate1 + Rate2');
+            });
+
+            it('should handle underscores in names', () => {
+                expect(normalizeStringByLexer('=_myVar + another_var')).toBe('=_myVar + another_var');
+            });
+
+            it('should handle numbers adjacent to letters', () => {
+                expect(normalizeStringByLexer('=A1*B2')).toBe('=A1*B2');
+                expect(normalizeStringByLexer('=C3/2.0')).toBe('=C3/2');
+            });
+
+            it('should handle decimal numbers without leading zero', () => {
+                expect(normalizeStringByLexer('=.123')).toBe('=0.123');
+            });
+
+            it('should handle multiple numbers in expression', () => {
+                expect(normalizeStringByLexer('=.1 + .2 + .3')).toBe('=0.1 + 0.2 + 0.3');
+            });
+
+            it('should not modify cell ranges', () => {
+                expect(normalizeStringByLexer('=SUM(A1:B2)')).toBe('=SUM(A1:B2)');
+            });
+
+            it('should handle complex numbers', () => {
+                expect(normalizeStringByLexer('=COMPLEX(0, .5)')).toBe('=COMPLEX(0, 0.5)');
+            });
+
+            it('should handle percentage calculations', () => {
+                expect(normalizeStringByLexer('=.5*50%')).toBe('=0.5*50%');
+            });
+
+            it('should handle brackets', () => {
+                expect(normalizeStringByLexer('=(.5 + .25)/(.1)')).toBe('=(0.5 + 0.25)/(0.1)');
+            });
+
+            it('should not modify text outside of formulas', () => {
+                expect(normalizeStringByLexer('Just some text.')).toBe('Just some text.');
+            });
+
+            it('should handle formulas starting with + or -', () => {
+                expect(normalizeStringByLexer('=+1.0+-2.00')).toBe('=+1+-2'); // Follows Google Sheets' behavior
+            });
+
+            it('should handle numbers in logical expressions', () => {
+                expect(normalizeStringByLexer('=IF(A1>.5, TRUE, FALSE)')).toBe('=IF(A1>0.5, TRUE, FALSE)');
+                expect(normalizeStringByLexer('=IF("A1>.5", TRUE, FALSE)')).toBe('=IF("A1>.5", TRUE, FALSE)');
+            });
+
+            it('should handle exponents', () => {
+                expect(normalizeStringByLexer('=2^0.0')).toBe('=2^0');
+            });
+
+            it('should not modify quoted numbers', () => {
+                expect(normalizeStringByLexer('="The value is .5"')).toBe('="The value is .5"');
+            });
+
+            it('should handle numbers with only zeros', () => {
+                expect(normalizeStringByLexer('=0.0 + 0.00')).toBe('=0 + 0');
+            });
+
+            it('should handle zero with decimal point', () => {
+                expect(normalizeStringByLexer('=0. + .0')).toBe('=0 + 0');
+            });
+
+            it('should handle negative numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=-0002.00')).toBe('=-2');
+            });
+
+            it('should handle positive numbers with leading zeros', () => {
+                expect(normalizeStringByLexer('=+0002.50')).toBe('=+2.5'); // Follows Google Sheets' behavior
+            });
+
+            it('should handle escaped quotes in strings', () => {
+                expect(normalizeStringByLexer('="He said, ""Hello, .5!"""')).toBe('="He said, ""Hello, .5!"""');
+            });
         });
     });
 });

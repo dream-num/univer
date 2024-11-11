@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
-import type { ICancelHyperLinkCommandParams } from '../commands/commands/remove-hyper-link.command';
-import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
+import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
 import { FRange } from '@univerjs/sheets/facade';
-import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
-import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
+import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 
 export interface ICellHyperLink {
     id: string;

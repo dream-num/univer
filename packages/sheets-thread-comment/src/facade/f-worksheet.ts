@@ -15,7 +15,7 @@
  */
 
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
 interface IFWorksheetCommentMixin {

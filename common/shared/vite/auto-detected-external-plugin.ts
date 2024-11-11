@@ -23,11 +23,11 @@ const peerDepsMap = {
         name: 'react',
         version: '^16.9.0 || ^17.0.0 || ^18.0.0',
     },
-    'react/jsx-runtime': {
-        global: 'react/jsx-runtime',
-        name: 'react',
-        version: 'react',
-    },
+    // 'react/jsx-runtime': {
+    //     global: 'react/jsx-runtime',
+    //     name: 'react',
+    //     version: 'react',
+    // },
     'react-dom': {
         global: 'ReactDOM',
         name: 'react-dom',

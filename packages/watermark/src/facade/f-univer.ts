@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig } from '../common/type';
+import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
 import { FUniver } from '@univerjs/core';
-import { WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../common/const';
-import { IWatermarkTypeEnum } from '../common/type';
-import { WatermarkService } from '../services/watermark.service';
+import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
 interface IFUniverWatermarkMixin {
     /**

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISetCrosshairHighlightColorOperationParams } from '../commands/operations/operation';
+import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import { FUniver } from '@univerjs/core';
-import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '../commands/operations/operation';
+import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 
 interface IFUniverCrosshairHighlightMixin {
     /**

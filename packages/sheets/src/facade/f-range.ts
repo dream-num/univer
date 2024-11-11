@@ -15,15 +15,11 @@
  */
 
 import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '../commands/commands/set-style.command';
+import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { addMergeCellsUtil } from '../commands/commands/add-worksheet-merge.command';
-import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
-import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
-import { SetHorizontalTextAlignCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '../commands/commands/set-style.command';
-import { getAddMergeMutationRangeByType } from '../controllers/merge-cell.controller';
+import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';

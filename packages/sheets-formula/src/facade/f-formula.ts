@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
+import type { CalculationMode, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 
 import { IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { FFormula } from '@univerjs/engine-formula';
-import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 
 interface IFFormulaSheetsMixin {
     /**

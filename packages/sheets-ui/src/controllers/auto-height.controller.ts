@@ -17,6 +17,7 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
+    IMoveRangeCommandParams,
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -25,6 +26,7 @@ import type {
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    MoveRangeAfterCommandId,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -93,15 +95,21 @@ export class AutoHeightController extends Disposable {
             this;
         // for intercept'SetRangeValuesCommand' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
-                if (command.id !== SetRangeValuesCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
+            getMutations: (command) => {
+                if (command.id === SetRangeValuesCommand.id) {
+                    const params = command.params as ISetRangeValuesRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight(params.range);
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
+                if (command.id === MoveRangeAfterCommandId) {
+                    const params = command.params as IMoveRangeCommandParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
+                }
+
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
         // for intercept 'sheet.command.set-row-is-auto-height' command.

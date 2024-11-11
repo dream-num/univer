@@ -33,8 +33,8 @@ export class SheetCellImageHoverController extends Disposable {
         @Inject(DrawingRenderService) private _drawingRenderService: DrawingRenderService
     ) {
         super();
-        this._initHover();
-        this._initImageClick();
+        // this._initHover();
+        // this._initImageClick();
     }
 
     private _initHover() {

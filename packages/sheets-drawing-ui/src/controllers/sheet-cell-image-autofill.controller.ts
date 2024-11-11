@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
-export class SheetCellImageAutofillController {
+import { Disposable, Inject, Injector, ObjectMatrix } from '@univerjs/core';
+import { IAutoFillService } from '@univerjs/sheets-ui';
+import { resizeImageByCell } from './sheet-cell-image.controller';
 
+export class SheetCellImageAutofillController extends Disposable {
+    constructor(
+        @Inject(IAutoFillService) private readonly _autoFillService: IAutoFillService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
+
+        this._initAutoFillHooks();
+    }
+
+    private _initAutoFillHooks(): void {
+        this.disposeWithMe(
+            this._autoFillService.addHook({
+                id: 'sheet-cell-image-autofill',
+                onBeforeSubmit: (location, direction, applyType, cellValue) => {
+                    new ObjectMatrix(cellValue).forValue((row, col, cell) => {
+                        resizeImageByCell(this._injector, { unitId: location.unitId, subUnitId: location.subUnitId, row, col }, cell);
+                    });
+                },
+            })
+        );
+    }
 }

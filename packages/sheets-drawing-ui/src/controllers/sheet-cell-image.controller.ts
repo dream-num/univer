@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, Nullable } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, Nullable } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
@@ -26,6 +26,37 @@ import { AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeServ
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
+
+export function resizeImageByCell(injector: Injector, location: ISheetLocationBase, cell: Nullable<ICellData>) {
+    if (cell?.p?.body?.dataStream.length === 3 && cell.p?.drawingsOrder?.length === 1) {
+        const image = cell.p.drawings![cell.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
+        const imageSize = getDrawingSizeByCell(
+            injector,
+            {
+                unitId: location.unitId,
+                subUnitId: location.subUnitId,
+                row: location.row,
+                col: location.col,
+            },
+            image.transform!.width!,
+            image.transform!.height!
+        );
+
+        if (imageSize) {
+            image.transform!.width = imageSize.width;
+            image.transform!.height = imageSize.height;
+            image.docTransform!.size.width = imageSize.width;
+            image.docTransform!.size.height = imageSize.height;
+            image.transform!.left = 0;
+            image.transform!.top = 0;
+            image.docTransform!.positionH.posOffset = 0;
+            image.docTransform!.positionV.posOffset = 0;
+            return true;
+        }
+    }
+
+    return false;
+}
 
 export class SheetCellImageController extends Disposable {
     constructor(
@@ -104,6 +135,8 @@ export class SheetCellImageController extends Disposable {
 
             if (sheetTarget && (rows.size || cols.size)) {
                 const cellMatrix = sheetTarget.worksheet.getCellMatrix();
+                const newCellMatrix = new ObjectMatrix<Nullable<ICellData>>();
+                let modified = false;
                 cellMatrix.forValue((row, col, cellData) => {
                     if (rows.has(row) || cols.has(col)) {
                         const imageCache = this._sheetCellCacheManagerService.getImageCache(sheetTarget.unitId, sheetTarget.subUnitId, row, +col);
@@ -122,7 +155,9 @@ export class SheetCellImageController extends Disposable {
                                 image.transform!.height!
                             );
 
-                            if (imageSize) {
+                            if (imageSize && image.transform!.width !== imageSize.width && image.transform!.height !== imageSize.height) {
+                                newCellMatrix.setValue(row, col, cellData);
+                                modified = true;
                                 image.transform!.width = imageSize.width;
                                 image.transform!.height = imageSize.height;
                                 image.docTransform!.size.width = imageSize.width;
@@ -174,31 +209,7 @@ export class SheetCellImageController extends Disposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(AFTER_CELL_EDIT, {
             priority: 9999,
             handler: (cell, context, next) => {
-                if (cell?.p?.body?.dataStream.length === 3 && cell.p?.drawingsOrder?.length === 1) {
-                    const image = cell.p.drawings![cell.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
-                    const imageSize = getDrawingSizeByCell(
-                        this._injector,
-                        {
-                            unitId: context.unitId,
-                            subUnitId: context.subUnitId,
-                            row: context.row,
-                            col: context.col,
-                        },
-                        image.transform!.width!,
-                        image.transform!.height!
-                    );
-
-                    if (imageSize) {
-                        image.transform!.width = imageSize.width;
-                        image.transform!.height = imageSize.height;
-                        image.docTransform!.size.width = imageSize.width;
-                        image.docTransform!.size.height = imageSize.height;
-                        image.transform!.left = 0;
-                        image.transform!.top = 0;
-                        image.docTransform!.positionH.posOffset = 0;
-                        image.docTransform!.positionV.posOffset = 0;
-                    }
-                }
+                resizeImageByCell(this._injector, { unitId: context.unitId, subUnitId: context.subUnitId, row: context.row, col: context.col }, cell);
                 return next(cell);
             },
         }));

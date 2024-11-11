@@ -43,9 +43,12 @@ export interface IMoveRangeCommandParams {
     fromRange: IRange;
 }
 export const MoveRangeCommandId = 'sheet.command.move-range';
+export const MoveRangeAfterCommandId = 'sheet.command.move-range-after';
+
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: MoveRangeCommandId,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -109,11 +112,19 @@ export const MoveRangeCommand: ICommand = {
         ];
 
         const result = sequenceExecute(redos, commandService).result;
+
+        const afterInterceptors = sheetInterceptorService.onCommandExecute({
+            id: MoveRangeAfterCommandId,
+            params: { ...params },
+        });
+
+        sequenceExecute(afterInterceptors.redos, commandService);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
+                undoMutations: [...undos, ...afterInterceptors.undos],
+                redoMutations: [...redos, ...afterInterceptors.redos],
             });
             return true;
         }

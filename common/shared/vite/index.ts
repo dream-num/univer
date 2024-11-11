@@ -62,6 +62,26 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                         outDir: 'lib/types',
                         clearPureImport: false,
                         rollupTypes: isPro,
+                        afterBuild() {
+                            const buildLocaleDTS = () => {
+                                viteBuild({
+                                    build: {
+                                        lib: { entry: 'package.json', formats: ['es'] },
+                                        emptyOutDir: false,
+                                    },
+                                    plugins: [
+                                        dts({
+                                            entryRoot: 'src',
+                                            outDir: 'lib/types',
+                                            include: 'src/locale/*.ts',
+                                        }),
+                                    ],
+                                });
+                            };
+                            if (isPro) {
+                                buildLocaleDTS();
+                            }
+                        },
                     })
                     : null,
             ],

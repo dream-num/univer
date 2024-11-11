@@ -1433,10 +1433,11 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                 subUnitId: target.subUnitId,
                 ranges: [
                     params.fromRange,
+
                     {
                         ...params.toRange,
                         startColumn: params.fromRange.startColumn < params.toRange.startColumn ? params.fromRange.endColumn + 1 : params.toRange.startColumn,
-                        endColumn: params.fromRange.startColumn < params.toRange.startColumn ? params.toRange.endColumn : params.fromRange.startColumn - 1,
+                        endColumn: params.fromRange.startColumn < params.toRange.startColumn ? params.toRange.endColumn - 1 : params.fromRange.startColumn - 1,
                     },
                 ],
             };
@@ -1455,7 +1456,7 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     {
                         ...params.toRange,
                         startRow: params.fromRange.startRow < params.toRange.startRow ? params.fromRange.endRow + 1 : params.toRange.startRow,
-                        endRow: params.fromRange.startRow < params.toRange.startRow ? params.toRange.endRow : params.fromRange.startRow - 1,
+                        endRow: params.fromRange.startRow < params.toRange.startRow ? params.toRange.endRow - 1 : params.fromRange.startRow - 1,
                     },
                 ],
             };

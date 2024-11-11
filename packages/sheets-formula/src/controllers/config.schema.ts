@@ -24,10 +24,32 @@ export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula.base.config';
 
 export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 
+export enum CalculationMode {
+    /**
+     * Force calculation of all formulas
+     */
+    FORCED,
+
+    /**
+     * Partial calculation, only cells with formulas but no v values are calculated
+     */
+    WHEN_EMPTY,
+
+    /**
+     * All formulas are not calculated
+     */
+    NO_CALCULATION,
+}
+
 export interface IUniverSheetsFormulaBaseConfig {
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+
+    /**
+     * Define the calculation mode during initialization, default is `WHEN_EMPTY`
+     */
+    initialFormulaComputing?: CalculationMode;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};

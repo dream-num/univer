@@ -154,7 +154,7 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                     setIsAddSelection(false);
                     return;
                 }
-                const nextNode = sequenceNodes[index + 1];
+                const nextNode = sequenceNodes[index + 1] || '';
                 const nextContent = getContent(nextNode) as any;
                 const content = getContent(currentNode) as any;
                 if (currentNodeAddToken.includes(content) && (!nextNode || nextNodeAddToken.includes(nextContent))) {

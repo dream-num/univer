@@ -28,7 +28,7 @@ import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
 import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import { extractNodeStyle } from './parse-node-style';
-import parseToDom, { generateParagraphs } from './utils';
+import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -107,7 +107,7 @@ export class HtmlToUSMService {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
@@ -205,20 +205,13 @@ export class HtmlToUSMService {
                     customRanges,
                 };
 
-                const dataStreamLength = dataStream.length;
-                const textRunsLength = textRuns?.length ?? 0;
-                if (!customRanges?.length && (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength))) {
-                    valueMatrix.setValue(0, 0, {
-                        v: dataStream,
-                    });
+                if (!customRanges?.length) {
+                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream }, dataStream, textRuns));
                 } else {
                     const p = this._generateDocumentDataModelSnapshot({
                         body: singleDocBody,
                     });
-                    valueMatrix.setValue(0, 0, {
-                        v: dataStream,
-                        p,
-                    });
+                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream, p }, dataStream, textRuns));
                 }
 
                 rowProperties.push({}); // TODO@yuhongz

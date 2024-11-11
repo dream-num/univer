@@ -191,3 +191,4 @@ export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleI
 export { type IRTreeItem, RTree } from './shared/r-tree';
 
 export { type IUniverConfig, Univer } from './univer';
+export { isNodeEnv } from './shared/tools';

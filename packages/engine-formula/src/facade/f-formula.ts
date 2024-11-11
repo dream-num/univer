@@ -15,19 +15,19 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../services/runtime.service';
-import { ICommandService } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FBase, ICommandService, Inject, Injector } from '@univerjs/core';
+import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
  */
-export class FFormula {
+export class FFormula extends FBase {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
-        // empty
+        super();
     }
 
     /**

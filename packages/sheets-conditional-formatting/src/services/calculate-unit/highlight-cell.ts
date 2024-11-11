@@ -16,11 +16,11 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { CellValue, IObjectMatrixPrimitiveType, IStyleBase, Nullable } from '@univerjs/core';
+import type { IStyleBase } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
-import type { ICalculateUnit, IContext } from './type';
-import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
-import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import type { ICalculateUnit } from './type';
+import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 import dayjs from 'dayjs';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
@@ -32,14 +32,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
     handle: async (rule: IConditionFormattingRule, context) => {
         const ruleConfig = rule.rule as IHighlightCell;
 
-        if (ruleConfig.subType === CFSubRuleType.formula) {
-            return handleFormula(rule, context);
-        }
-
-        const { worksheet } = context;
+        const { worksheet, unitId, subUnitId } = context;
         const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
 
-        // eslint-disable-next-line complexity
         const getCache = () => {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.average: {
@@ -99,17 +94,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                 }
                 case CFSubRuleType.formula: {
-                    const subRuleConfig = ruleConfig as IFormulaHighlightCell;
-                    const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
-                    const formulaString = subRuleConfig.value;
-                    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
-                    if (!sequenceNodes) {
-                        return {
-                            sequenceNodes: null,
-                        };
-                    } else {
-                        return { sequenceNodes };
-                    }
+                    const _ruleConfig = ruleConfig as IFormulaHighlightCell;
+                    const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
+                    conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, rule.cfId, _ruleConfig.value, rule.ranges);
+                    break;
                 }
                 case CFSubRuleType.timePeriod: {
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
@@ -331,49 +319,26 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     return uniqueCache.get(value) !== 1;
                 }
                 case CFSubRuleType.formula: {
-                    if (!cache?.sequenceNodes) {
-                        return false;
-                    }
-                    const { unitId, subUnitId } = context;
+                    const _ruleConfig = ruleConfig as IFormulaHighlightCell;
                     const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-
-                    const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
-                    const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
-                    const sequenceNodes = Tools.deepClone(cache.sequenceNodes);
-                    const transformSequenceNodes = Array.isArray(sequenceNodes)
-                        ? sequenceNodes.map((node) => {
-                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                                const gridRangeName = deserializeRangeWithSheet(node.token);
-                                const relativeRange = Rectangle.getRelativeRange(gridRangeName.range, originRange);
-                                const newRange = Rectangle.getPositionRange(relativeRange, getRangeFromCell(row, col), gridRangeName.range);
-                                const newToken = serializeRange(newRange);
-                                return {
-                                    ...node, token: newToken,
-                                };
-                            }
-                            return node;
-                        })
-                        : sequenceNodes;
-                    let formulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
-                    if (formulaString) {
-                        formulaString = `=${formulaString}`;
-                        conditionalFormattingFormulaService.registerFormula(unitId, subUnitId, rule.cfId, formulaString);
-                        const formulaItem = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
-                        if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
-                            return formulaItem.result === true;
-                        } else {
-                            // If the formula triggers the calculation, wait for the result,
-                            // and use the previous style cache until the result comes out
-                            const cache = conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId);
-                            const style = cache?.getValue(row, col);
-                            return style && style !== EMPTY_STYLE;
-                        }
+                    const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, rule.cfId, _ruleConfig.value, row, col);
+                    if (result && result.status === FormulaResultStatus.SUCCESS) {
+                        return result.result === true;
                     }
                     return false;
                 }
             }
         };
         const computeResult = new ObjectMatrix<IStyleBase>();
+        if (ruleConfig.subType === CFSubRuleType.formula) {
+            const _ruleConfig = ruleConfig as IFormulaHighlightCell;
+            const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
+            const aliasItemMap = conditionalFormattingFormulaService.getSubUnitFormulaMap(unitId, subUnitId);
+            const item = aliasItemMap?.getValue(conditionalFormattingFormulaService.createCFormulaId(rule.cfId, _ruleConfig.value), ['id']);
+            if (!item || (item.status !== FormulaResultStatus.SUCCESS)) {
+                return conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId) || computeResult;
+            }
+        }
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {
@@ -387,70 +352,4 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
         return computeResult;
     },
 };
-
-/**
- * Handle formula type
- * @param rule
- * @param context
- * @returns
- */
-function handleFormula(rule: IConditionFormattingRule, context: IContext): ObjectMatrix<IStyleBase> {
-    const subRuleConfig = rule.rule as IFormulaHighlightCell;
-
-    // get current formula
-    const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
-    const formulaString = subRuleConfig.value;
-    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
-
-    // get current range list
-    const { worksheet, unitId, subUnitId } = context;
-    const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
-
-    const computeResult = new ObjectMatrix<IStyleBase>();
-
-    if (!sequenceNodes) {
-        ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                // Returns an empty property indicating that it has been processed.
-                computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
-            });
-        });
-
-        return computeResult;
-    }
-
-    const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-
-    conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, rule.cfId, formulaString, ranges);
-
-    ranges.forEach((range) => {
-        Range.foreach(range, (row, col) => {
-            const formulaItem = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
-
-            let result = false;
-            if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
-                const itemResult = formulaItem.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>;
-
-                if (Tools.isObject(itemResult)) {
-                    result = itemResult[row]?.[col] === true;
-                }
-            } else {
-                // If the formula triggers the calculation, wait for the result,
-                // and use the previous style cache until the result comes out
-                const cache = conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId);
-                const style = cache?.getValue(row, col);
-                result = style !== EMPTY_STYLE;
-            }
-
-            if (result) {
-                computeResult.setValue(row, col, subRuleConfig.style);
-            } else {
-                // Returns an empty property indicating that it has been processed.
-                computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
-            }
-        });
-    });
-
-    return computeResult;
-}
 

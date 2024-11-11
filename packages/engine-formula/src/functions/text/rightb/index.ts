@@ -16,11 +16,12 @@
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { getCharLenByteInText } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Rightb extends BaseFunction {
@@ -41,8 +42,8 @@ export class Rightb extends BaseFunction {
             _numBytes.isArray() ? (_numBytes as ArrayValueObject).getColumnCount() : 1
         );
 
-        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, NullValueObject.create());
-        const numBytesArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numBytes, NullValueObject.create());
+        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
+        const numBytesArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numBytes, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = textArray.mapValue((textObject, rowIndex, columnIndex) => {
             const numBytesObject = numBytesArray.get(rowIndex, columnIndex) as BaseValueObject;
@@ -66,11 +67,7 @@ export class Rightb extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject, numBytes: BaseValueObject): BaseValueObject {
-        let textValue = `${text.getValue()}`;
-
-        if (text.isBoolean()) {
-            textValue = textValue.toLocaleUpperCase();
-        }
+        const textValue = getTextValueOfNumberFormat(text);
 
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(numBytes);
 

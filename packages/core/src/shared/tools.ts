@@ -732,3 +732,8 @@ export function composeStyles(...styles: Nullable<IStyleData>[]): IStyleData {
     }
     return result;
 }
+
+export const isNodeEnv = () => {
+    // eslint-disable-next-line node/prefer-global/process
+    return typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+};

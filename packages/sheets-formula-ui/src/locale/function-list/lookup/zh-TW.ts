@@ -179,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '單元格或儲存格範圍的參照。' },
         },
     },
     GETPIVOTDATA: {

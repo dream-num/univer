@@ -17,7 +17,7 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { Disposable, ICommandService, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, ObjectMatrix, Tools } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
@@ -161,8 +161,23 @@ export class RegisterOtherFormulaService extends Disposable {
                         for (const formulaId in subUnitData) {
                             const current = subUnitData[formulaId];
                             if (cacheMap.has(formulaId)) {
-                                const item = cacheMap.get(formulaId)!;
-                                item.result = current;
+                                const item = cacheMap.get(formulaId);
+
+                                if (!item) {
+                                    continue;
+                                }
+
+                                if (!item?.result) {
+                                    item.result = {};
+                                }
+
+                                const resultMatrix = new ObjectMatrix(current);
+                                const resultObject = new ObjectMatrix(item?.result);
+
+                                resultMatrix.forValue((row, col, value) => {
+                                    resultObject.setValue(row, col, value);
+                                });
+
                                 item.status = FormulaResultStatus.SUCCESS;
                                 item.callbacks.forEach((callback) => {
                                     callback(current);
@@ -206,7 +221,7 @@ export class RegisterOtherFormulaService extends Disposable {
         return formulaId;
     }
 
-    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[], extra?: Record<string, any>) {
+    registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {
         const formulaId = this._createFormulaId(unitId, subUnitId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 

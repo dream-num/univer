@@ -95,7 +95,7 @@ export function getClearContentMutationParamForRange(worksheet: Worksheet, range
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && row >= startRow && col >= startColumn) {
-            if (!leftTopCellValue && worksheet.cellHasValue(cellData)) {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && cellData.v !== '') {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);

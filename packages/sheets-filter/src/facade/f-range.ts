@@ -15,11 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { ISetSheetFilterRangeCommandParams } from '../commands/commands/sheets-filter.command';
-import type { FilterModel } from '../models/filter-model';
+import type { FilterModel, ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter';
 import { FRange } from '@univerjs/sheets/facade';
-import { SetSheetFilterRangeCommand } from '../commands/commands/sheets-filter.command';
-import { SheetsFilterService } from '../services/sheet-filter.service';
+import { SetSheetFilterRangeCommand, SheetsFilterService } from '@univerjs/sheets-filter';
 import { FFilter } from './f-filter';
 
 interface IFRangeFilter {

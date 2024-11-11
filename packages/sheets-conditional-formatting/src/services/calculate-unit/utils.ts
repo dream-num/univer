@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
 import type { IContext } from './type';
 import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
@@ -158,8 +158,8 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
             const { accessor, unitId, subUnitId, cfId } = context;
             const formulaText = String(value.value);
             const conditionalFormattingFormulaService = accessor.get(ConditionalFormattingFormulaService);
-            conditionalFormattingFormulaService.registerFormula(unitId, subUnitId, cfId, formulaText);
-            const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaText);
+            conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, cfId, formulaText);
+            const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, cfId, formulaText);
             return result;
         }
         case CFValueType.num: {
@@ -301,3 +301,11 @@ export const filterRange = (ranges: IRange[], maxRow: number, maxCol: number): I
         return _range;
     }).filter((range) => !!range);
 };
+
+export function getMaxInFormulaResult(result: IObjectMatrixPrimitiveType<Nullable<CellValue>>) {
+    let max = 0;
+    new ObjectMatrix(result).forValue((row, col, value) => {
+        max = Math.max(Number.isNaN(max) ? 0 : max, Number(value));
+    });
+    return max;
+}

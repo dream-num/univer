@@ -185,9 +185,7 @@ export function getMoveRangeMutations(
                 .map((mergeRange) => Rectangle.getRelativeRange(mergeRange, fromRange))
                 .map((relativeRange) => Rectangle.getPositionRange(relativeRange, toRange));
 
-            const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges).filter(
-                (range) => !toMergeData.some((mergeRange) => Rectangle.equals(range, mergeRange))
-            );
+            const addMergeCellRanges = getAddMergeMutationRangeByType(willMoveToMergeRanges);
 
             const mergeRedos: Array<{
                 id: string;
@@ -619,6 +617,9 @@ export function generateBody(text: string): IDocumentBody {
 
         return {
             dataStream: `${urlText}\r\n`,
+            paragraphs: [{
+                startIndex: urlText.length,
+            }],
             customRanges: [range],
         };
     }

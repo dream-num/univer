@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IColorScale, IConditionFormattingRule } from '../../models/type';
+import type { ICalculateUnit } from './type';
 import { CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { isObject } from '@univerjs/engine-render';
 import { CFRuleType } from '../../base/const';
-import type { IColorScale, IConditionFormattingRule } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
-import type { ICalculateUnit } from './type';
 
 const emptyStyle = '';
 export const colorScaleCellCalculateUnit: ICalculateUnit = {

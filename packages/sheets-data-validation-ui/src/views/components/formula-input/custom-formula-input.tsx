@@ -35,11 +35,15 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
             unitId={unitId}
             subUnitId={subUnitId}
             isFocus={isFocusFormulaEditor}
-            onChange={(v = '') => {
-                const formula = v || '';
+            onChange={(newValue) => {
+                const newFormula = (newValue ?? '').trim();
+                if (newFormula === value?.formula1) {
+                    return;
+                }
+
                 onChange?.({
                     ...value,
-                    formula1: (formula).trim(),
+                    formula1: newFormula,
                 });
             }}
             errorText={formula1Res}

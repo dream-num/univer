@@ -114,7 +114,7 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
             const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
                 subUnitId,
                 unitId,
-                cellValue: redoFormulaMatrix.clone(),
+                cellValue: redoFormulaMatrix.getMatrix(),
             };
 
             const redoMutation = {
@@ -127,7 +127,7 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
             const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
                 subUnitId,
                 unitId,
-                cellValue: undoFormulaMatrix.clone(),
+                cellValue: undoFormulaMatrix.getMatrix(),
             };
 
             const undoMutation = {
@@ -478,7 +478,7 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         }
     });
 
-    return redoFormulaData.clone();
+    return redoFormulaData.getMatrix();
 }
 
 /**
@@ -507,7 +507,7 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
     });
 
-    return undoFormulaData.clone();
+    return undoFormulaData.getMatrix();
 }
 
 /**
@@ -572,10 +572,16 @@ export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IF
 
     formulaDataMatrix.forValue((r, c, formulaDataItem) => {
         const cellDataItem = formulaDataItemToCellData(formulaDataItem);
+
+        // Originally matrix clone would filter out undefined, but after changing to getMatrix, you need to filter manually here
+        if (!cellDataItem) {
+            return;
+        }
+
         cellData.setValue(r, c, cellDataItem);
     });
 
-    return cellData.clone();
+    return cellData.getMatrix();
 }
 
 export function isFormulaDataItem(cell: IFormulaDataItem) {

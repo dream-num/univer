@@ -16,9 +16,9 @@
 
 import type { Nullable } from '@univerjs/core';
 import { FWorksheet } from '@univerjs/sheets/facade';
+import { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { ComponentManager } from '@univerjs/ui';
-import { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from '../services/canvas-float-dom-manager.service';
 
 interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 

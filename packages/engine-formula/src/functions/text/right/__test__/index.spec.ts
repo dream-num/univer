@@ -61,7 +61,7 @@ describe('Test right function', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', '中文测试', true, false, null],
-                    [0, '100', '2.34', '2-way street', -3, ErrorType.NAME],
+                    [0, '2012-2-2', '2.34', '2-way street', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -74,7 +74,7 @@ describe('Test right function', () => {
             const result = testFunction.calculate(text, numChars);
             expect(getObjectValue(result)).toStrictEqual([
                 ['1', ' ', '测试', 'UE', 'SE', ''],
-                ['0', '00', '34', 'et', '-3', ErrorType.NAME],
+                ['0', '-2', '34', 'et', '-3', ErrorType.NAME],
             ]);
         });
 
@@ -90,6 +90,11 @@ describe('Test right function', () => {
             expect(getObjectValue(result2)).toStrictEqual([
                 ['rld', '😊rld', 'Wo😊rld', '😊Wo😊rld', 'llo中文o😊Wo😊rld'],
             ]);
+
+            const text3 = NumberValueObject.create(0.01, '0%');
+            const numChars3 = NumberValueObject.create(2);
+            const result3 = testFunction.calculate(text3, numChars3);
+            expect(getObjectValue(result3)).toStrictEqual('1%');
         });
     });
 });

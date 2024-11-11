@@ -14,40 +14,24 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
-import { UnitObject } from '@univerjs/protocol';
-import { BehaviorSubject } from 'rxjs';
+import type { IRange } from '@univerjs/core';
+import { EditStateEnum, type IRangeProtectionRule, type IWorksheetProtectionRule, UnitObject, ViewStateEnum } from '@univerjs/sheets';
 
-const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
-    name: '',
+export const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
     unitId: '',
     subUnitId: '',
     permissionId: '',
-    unitType: UnitObject.Unkonwn,
+    unitType: UnitObject.SelectRange,
     id: '',
     ranges: [],
+    viewState: ViewStateEnum.OthersCanView,
+    editState: EditStateEnum.OnlyMe,
 };
 
-export enum viewState {
-    othersCanView = 'othersCanView',
-    noOneElseCanView = 'noOneElseCanView',
-}
-
-export enum editState {
-    designedUserCanEdit = 'designedUserCanEdit',
-    onlyMe = 'onlyMe',
-}
-
-type IPermissionPanelBaseRule = IRangeProtectionRule | IWorksheetProtectionRule;
-
-export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; editStatus?: editState; ranges: IRange[] };
+export type IPermissionPanelRule = (IRangeProtectionRule | IWorksheetProtectionRule) & { ranges: IRange[]; id: string };
 
 export class SheetPermissionPanelModel {
     private _rule: IPermissionPanelRule = DEFAULT_RANGE_RULE;
-    private _rule$ = new BehaviorSubject(this._rule);
-    private _oldRule: Nullable<IPermissionPanelRule>;
-    private _rangeErrorMsg$ = new BehaviorSubject<string | undefined>(undefined);
 
     private _visible = false;
 
@@ -59,40 +43,7 @@ export class SheetPermissionPanelModel {
         return this._visible;
     }
 
-    rangeErrorMsg$ = this._rangeErrorMsg$.asObservable();
-
-    setRangeErrorMsg(msg: string | undefined) {
-        this._rangeErrorMsg$.next(msg);
-    }
-
-    rule$ = this._rule$.asObservable();
-
-    get rule() {
-        return this._rule;
-    }
-
-    setRule(ruleObj: Partial<IPermissionPanelRule>) {
-        this._rule = { ...this._rule, ...ruleObj };
-        this._rule$.next(this._rule);
-    }
-
-    resetRule() {
-        this._rule = DEFAULT_RANGE_RULE;
-        this._rule$.next(this._rule);
-    }
-
     reset() {
         this.setVisible(false);
-        this.resetRule();
-        this.setRangeErrorMsg('');
-        this.setOldRule(null);
-    }
-
-    get oldRule() {
-        return this._oldRule;
-    }
-
-    setOldRule(ruleObj: Nullable<IPermissionPanelRule>) {
-        this._oldRule = ruleObj;
     }
 }

@@ -14,102 +14,87 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NullValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { getTextValueOfNumberFormat } from '../../../basics/format';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Mid extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
 
-    override calculate(withinText: BaseValueObject, startNum: BaseValueObject, numChars: BaseValueObject) {
-        if (withinText.isError()) {
-            return withinText;
-        }
-
-        if (startNum.isError()) {
-            return startNum;
-        }
-
-        if (numChars.isError()) {
-            return numChars;
-        }
-
-        // get max row length
+    override calculate(text: BaseValueObject, startNum: BaseValueObject, numChars: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(
-            withinText.isArray() ? (withinText as ArrayValueObject).getRowCount() : 1,
+            text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
             startNum.isArray() ? (startNum as ArrayValueObject).getRowCount() : 1,
             numChars.isArray() ? (numChars as ArrayValueObject).getRowCount() : 1
         );
 
-        // get max column length
         const maxColumnLength = Math.max(
-            withinText.isArray() ? (withinText as ArrayValueObject).getColumnCount() : 1,
+            text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
             startNum.isArray() ? (startNum as ArrayValueObject).getColumnCount() : 1,
             numChars.isArray() ? (numChars as ArrayValueObject).getColumnCount() : 1
         );
 
-        const withinTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, withinText);
-        const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, startNum);
-        const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, numChars);
+        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
+        const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, startNum, ErrorValueObject.create(ErrorType.NA));
+        const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, numChars, ErrorValueObject.create(ErrorType.NA));
 
-        return withinTextArray.map((withinTextValue, rowIndex, columnIndex) => {
-            return this._handleSingleText(withinTextValue, rowIndex, columnIndex, startNumArray, numCharsArray);
+        const resultArray = textArray.mapValue((textObject, rowIndex, columnIndex) => {
+            const startNumObject = startNumArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const numCharsObject = numCharsArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (textObject.isError()) {
+                return textObject;
+            }
+
+            if (startNumObject.isError()) {
+                return startNumObject;
+            }
+
+            if (numCharsObject.isError()) {
+                return numCharsObject;
+            }
+
+            return this._handleSingleObject(textObject, startNumObject, numCharsObject);
         });
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 
-    private _handleSingleText(withinTextValue: BaseValueObject, rowIndex: number, columnIndex: number, startNumArray: ArrayValueObject, numCharsArray: ArrayValueObject) {
-        let startNumValue = startNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
-        let numCharsValue = numCharsArray.get(rowIndex, columnIndex) || NullValueObject.create();
+    private _handleSingleObject(text: BaseValueObject, startNum: BaseValueObject, numChars: BaseValueObject): BaseValueObject {
+        const textValue = getTextValueOfNumberFormat(text);
 
-        if (startNumValue.isError()) {
-            return startNumValue;
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(startNum, numChars);
+
+        if (isError) {
+            return errorObject as BaseValueObject;
         }
 
-        if (numCharsValue.isError()) {
-            return numCharsValue;
-        }
+        const [startNumObject, numCharsObject] = variants as BaseValueObject[];
 
-        let withinTextValueString = withinTextValue.getValue();
+        const startNumValue = Math.floor(+startNumObject.getValue());
+        const numCharsValue = Math.floor(+numCharsObject.getValue());
 
-        if (withinTextValue.isNull()) {
-            withinTextValueString = '';
-        }
-
-        if (withinTextValue.isBoolean()) {
-            withinTextValueString = withinTextValueString ? 'TRUE' : 'FALSE';
-        }
-
-        withinTextValueString = `${withinTextValueString}`;
-
-        if (startNumValue.isString() || startNumValue.isBoolean() || startNumValue.isNull()) {
-            startNumValue = startNumValue.convertToNumberObjectValue();
-        }
-
-        if (startNumValue.isError()) {
-            return startNumValue;
-        }
-
-        if (numCharsValue.isString() || numCharsValue.isBoolean() || numCharsValue.isNull()) {
-            numCharsValue = numCharsValue.convertToNumberObjectValue();
-        }
-
-        if (numCharsValue.isError()) {
-            return numCharsValue;
-        }
-
-        const startNumValueNumber = Math.floor(+startNumValue.getValue()) - 1;
-        const numCharsValueNumber = numCharsValue.getValue() as number;
-
-        if (startNumValueNumber < 0 || numCharsValueNumber < 0) {
+        if (startNumValue <= 0 || numCharsValue < 0) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return StringValueObject.create(withinTextValueString.substring(startNumValueNumber, startNumValueNumber + numCharsValueNumber));
+        if (text.isNull() || startNumValue > textValue.length || numCharsValue === 0) {
+            return StringValueObject.create('');
+        }
+
+        const result = textValue.substring(startNumValue - 1, startNumValue - 1 + numCharsValue);
+
+        return StringValueObject.create(result);
     }
 }
-

@@ -15,10 +15,11 @@
  */
 
 import type { DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { BuildTextUtils, IUniverInstanceService, JSONX } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 import { getRichTextEditPath } from './custom-range-factory';
 
 export interface IReplaceSelectionFactoryParams {

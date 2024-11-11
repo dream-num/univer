@@ -24,18 +24,6 @@ export function charLenByte(text: string): number {
     let byteCount = 0;
 
     for (let i = 0; i < text.length; i++) {
-        // const charCode = text.charCodeAt(i);
-
-        // if (
-        //     (charCode >= 0x3040 && charCode <= 0x30FF) || // Japanese hiragana and katakana
-        //     (charCode >= 0x4E00 && charCode <= 0x9FFF) || // Chinese (simplified and traditional)
-        //     (charCode >= 0xAC00 && charCode <= 0xD7AF) // Korean language
-        // ) {
-        //     byteCount += 2;
-        // } else {
-        //     byteCount += 1;
-        // }
-
         byteCount += getCharLenByteInText(text, i);
     }
 

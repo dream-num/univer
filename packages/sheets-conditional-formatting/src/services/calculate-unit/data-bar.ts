@@ -62,7 +62,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         if (_min.status === FormulaResultStatus.WAIT) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) || computeResult;
         } else if (_min.status === FormulaResultStatus.SUCCESS) {
-            const v = Number(_min.result);
+            const v = Number(_min.result); // Get the minimum value
             min = Number.isNaN(v) ? 0 : v;
         } else {
             return computeResult;
@@ -70,7 +70,8 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         if (_max.status === FormulaResultStatus.WAIT) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) || computeResult;
         } else if (_max.status === FormulaResultStatus.SUCCESS) {
-            const v = Number.isNaN(Number(_max.result)) ? 0 : Number(_max.result);
+            const maxResult = Number(_max.result); // Get the maximum value
+            const v = Number.isNaN(maxResult) ? 0 : maxResult;
             max = Math.max(v, min);
             min = Math.min(v, min);
         } else {

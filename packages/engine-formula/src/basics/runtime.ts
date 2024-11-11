@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-
+import type { ICellData, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 import type { IArrayFormulaUnitCellType, IRuntimeUnitDataPrimitiveType, IRuntimeUnitDataType } from './common';
+
+import { ObjectMatrix } from '@univerjs/core';
 
 export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
     const arrayFormulaCellData: IRuntimeUnitDataType = {};
@@ -43,23 +44,32 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
 
 export function convertRuntimeToUnitData(unitData: IRuntimeUnitDataType) {
     const unitPrimitiveData: IRuntimeUnitDataPrimitiveType = {};
-    Object.keys(unitData).forEach((unitId) => {
-        const sheetData = unitData[unitId];
 
+    for (const unitId in unitData) {
+        const sheetData = unitData[unitId];
         if (sheetData == null) {
-            return true;
+            continue;
         }
 
         if (unitPrimitiveData[unitId] == null) {
             unitPrimitiveData[unitId] = {};
         }
 
-        Object.keys(sheetData).forEach((sheetId) => {
+        for (const sheetId in sheetData) {
             const cellData = sheetData[sheetId];
+            const primitiveData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
 
-            unitPrimitiveData[unitId]![sheetId] = cellData.getData();
-        });
-    });
+            cellData.forValue((row, column, value) => {
+                if (primitiveData[row] === undefined) {
+                    primitiveData[row] = {};
+                }
+
+                primitiveData[row][column] = value;
+            });
+
+            unitPrimitiveData[unitId][sheetId] = primitiveData;
+        }
+    }
 
     return unitPrimitiveData;
 }

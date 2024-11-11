@@ -17,7 +17,7 @@
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { FWorkbookHyperLinkMixin } from '@univerjs/sheets-hyper-link/facade';
-import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 
 interface IFWorkbookHyperlinkUIMixin {
     /**

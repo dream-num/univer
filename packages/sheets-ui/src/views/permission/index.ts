@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export { SheetPermissionPanelFooter } from './footer';
-export { SheetPermissionPanelAddFooter } from './footer/permission-list-footer';
 export { SheetPermissionPanel } from './panel';
 export { SheetPermissionPanelList } from './panel-list';
 export { SheetPermissionDialog } from './permission-dialog';

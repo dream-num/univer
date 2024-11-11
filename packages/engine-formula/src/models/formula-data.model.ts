@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -28,7 +28,7 @@ import type {
 
 import type { IFormulaIdMap } from './utils/formula-data-util';
 
-import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -237,8 +237,12 @@ export class FormulaDataModel extends Disposable {
                     return;
                 }
 
+                if (!this._formulaData[unitId]?.[sheetId]) {
+                    this._formulaData[unitId]![sheetId] = {};
+                }
+
                 const sheetFormula = new ObjectMatrix(currentSheetData);
-                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId] || {});
+                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]![sheetId]);
 
                 sheetFormula.forValue((r, c, v) => {
                     if (v == null) {
@@ -247,8 +251,6 @@ export class FormulaDataModel extends Disposable {
                         formulaMatrix.setValue(r, c, v);
                     }
                 });
-
-                this._formulaData[unitId]![sheetId] = formulaMatrix.clone();
             });
         });
     }
@@ -409,7 +411,7 @@ export class FormulaDataModel extends Disposable {
             }
         });
 
-        return newSheetFormulaDataMatrix.clone();
+        return newSheetFormulaDataMatrix.getMatrix();
     }
 
     updateArrayFormulaRange(
@@ -563,6 +565,88 @@ export class FormulaDataModel extends Disposable {
 
         return null;
     }
+
+    /**
+     * Function to get all formula ranges
+     * @returns
+     */
+    getFormulaDirtyRanges(): IUnitRange[] {
+        const formulaData = this._formulaData;
+
+        const dirtyRanges: IUnitRange[] = [];
+
+        for (const unitId in formulaData) {
+            const workbook = formulaData[unitId];
+
+            if (!workbook) continue;
+
+            const workbookInstance = this._univerInstanceService.getUnit<Workbook>(unitId);
+
+            if (!workbookInstance) continue;
+
+            for (const sheetId in workbook) {
+                const sheet = workbook[sheetId];
+
+                if (!sheet) continue;
+
+                const sheetInstance = workbookInstance.getSheetBySheetId(sheetId);
+
+                if (!sheetInstance) continue;
+
+                // Object to store continuous cell ranges by column
+                const columnRanges: { [column: number]: { startRow: number; endRow: number }[] } = {};
+
+                for (const rowStr of Object.keys(sheet)) {
+                    const row = Number(rowStr);
+
+                    for (const columnStr in sheet[row]) {
+                        const column = Number(columnStr);
+
+                        const currentCell = sheetInstance.getCellRaw(row, column);
+
+                        // Calculation is only required when there is only a formula and no value
+                        const isFormula = isFormulaString(currentCell?.f) || isFormulaId(currentCell?.si);
+                        const noValue = currentCell?.v === undefined;
+
+                        if (!(isFormula && noValue)) continue;
+
+                        if (!columnRanges[column]) columnRanges[column] = [];
+
+                        const lastRange = columnRanges[column].slice(-1)[0];
+
+                        // If the current row is continuous with the last range, extend endRow
+                        if (lastRange && lastRange.endRow === row - 1) {
+                            lastRange.endRow = row;
+                        } else {
+                            // Otherwise, start a new range
+                            columnRanges[column].push({ startRow: row, endRow: row });
+                        }
+                    }
+                }
+
+                // Convert collected column ranges to IUnitRange format
+                for (const column in columnRanges) {
+                    const currentColumnRanges = columnRanges[column];
+                    for (let i = 0; i < currentColumnRanges.length; i++) {
+                        const range = currentColumnRanges[i];
+                        dirtyRanges.push({
+                            unitId,
+                            sheetId,
+                            range: {
+                                rangeType: RANGE_TYPE.NORMAL,
+                                startRow: range.startRow,
+                                endRow: range.endRow, // Use endRow as the inclusive end row
+                                startColumn: Number(column),
+                                endColumn: Number(column),
+                            },
+                        });
+                    }
+                }
+            }
+        }
+
+        return dirtyRanges;
+    }
 }
 
 export function initSheetFormulaData(
@@ -571,8 +655,17 @@ export function initSheetFormulaData(
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
 ): IFormulaData {
+    if (!formulaData[unitId]) {
+        formulaData[unitId] = {};
+    }
+
+    if (!formulaData[unitId][sheetId]) {
+        formulaData[unitId][sheetId] = {};
+    }
+
     const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
-    const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
+    const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(formulaData[unitId][sheetId]);
+
     cellMatrix.forValue((r, c, cell) => {
         const formulaString = cell?.f || '';
         const formulaId = cell?.si || '';
@@ -618,13 +711,7 @@ export function initSheetFormulaData(
         }
     });
 
-    if (!formulaData[unitId]) {
-        formulaData[unitId] = {};
-    }
-
-    const newSheetFormulaData = sheetFormulaDataMatrix.clone();
-
-    formulaData[unitId]![sheetId] = newSheetFormulaData;
+    const newSheetFormulaData = sheetFormulaDataMatrix.getMatrix(); // Don't use clone, otherwise it will cause performance problems
 
     return {
         [unitId]: {

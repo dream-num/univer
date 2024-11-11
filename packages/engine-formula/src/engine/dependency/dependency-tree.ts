@@ -23,9 +23,7 @@ import type {
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
-import type { AstRootNode } from '../ast-node/ast-root-node';
-import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
-
+import type { AstRootNode } from '../ast-node';
 import { type IRange, type IUnitRange, moveRangeByOffset, type Nullable } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -67,6 +65,25 @@ class FormulaDependencyTreeCalculator {
     isSkip() {
         return this._state === FDtreeStateType.SKIP;
     }
+
+    treeId: number;
+
+    children: Set<number> = new Set();
+
+    parents: Set<number> = new Set();
+
+    pushChildren(tree: FormulaDependencyTreeCalculator) {
+        this.children.add(tree.treeId);
+        tree._pushParent(this);
+    }
+
+    hasChildren(treeId: number) {
+        return this.children.has(treeId);
+    }
+
+    private _pushParent(tree: FormulaDependencyTreeCalculator) {
+        this.parents.add(tree.treeId);
+    }
 }
 
 type GetDirtyDataType = Nullable<
@@ -78,13 +95,11 @@ type GetDirtyDataType = Nullable<
 export type IFormulaDependencyTree = FormulaDependencyTree | FormulaDependencyTreeVirtual;
 
 export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculator {
-    treeId: number;
     refTree: Nullable<FormulaDependencyTree>;
-    refOffsetX: number = 0;
-    refOffsetY: number = 0;
+    refOffsetX: number = -1;
+    refOffsetY: number = -1;
     isCache: boolean = false;
-
-    node: Nullable<AstRootNode>;
+    isDirty: boolean = false;
 
     get isVirtual() {
         return true;
@@ -132,6 +147,22 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
         return this.refTree.subUnitId;
     }
 
+    get formula() {
+        return this.refTree?.formula ?? '';
+    }
+
+    get nodeData() {
+        return {
+            node: this.node,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
+    get node() {
+        return this.refTree?.node;
+    }
+
     dispose() {
         this.refTree = null;
     }
@@ -150,21 +181,6 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
             });
         }
         return unitRangeList;
-    }
-
-    get nodeData() {
-        if (this.refTree == null) {
-            return {
-                node: null,
-                refOffsetX: -1,
-                refOffsetY: -1,
-            };
-        }
-        return {
-            node: this.refTree.node,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
-        };
     }
 
     toRTreeItem(): IUnitRange[] {
@@ -265,8 +281,6 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
  * is used to determine the order of formula calculations.
  */
 export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
-    treeId: number = -1;
-
     isCache: boolean = false;
 
     featureId: Nullable<string>;
@@ -283,7 +297,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     unitId: string = '';
 
-    node: Nullable<AstRootNode>;
     rangeList: IUnitRange[] = [];
 
     formula: string = '';
@@ -296,6 +309,10 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
 
     columnCount: number = Number.NEGATIVE_INFINITY;
 
+    isDirty: boolean = false;
+
+    node: Nullable<AstRootNode>;
+
     constructor(treeId: number) {
         super();
         this.treeId = treeId;
@@ -305,11 +322,11 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         return false;
     }
 
-    get nodeData(): IExecuteAstNodeData {
+    get nodeData() {
         return {
             node: this.node,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
+            refOffsetX: 0,
+            refOffsetY: 0,
         };
     }
 
@@ -329,8 +346,6 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         this.rangeList = [];
 
         // this.nodeData?.node.dispose();
-
-        this.node = null;
 
         this.getDirtyData = null;
     }

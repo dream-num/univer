@@ -15,12 +15,9 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IDialogPartMethodOptions } from '../views/components/dialog-part/interface';
-import type { ISidebarMethodOptions } from '../views/components/sidebar/interface';
+import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import { FUniver } from '@univerjs/core';
-import { CopyCommand, PasteCommand } from '../services/clipboard/clipboard.command';
-import { IDialogService } from '../services/dialog/dialog.service';
-import { ISidebarService } from '../services/sidebar/sidebar.service';
+import { CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
 
 interface IFUniverUIMixin {
     copy(): Promise<boolean>;

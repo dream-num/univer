@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "0.4.2",
+    "version": "0.5.0-alpha.0",
     "private": false,
     "description": "Data validation library for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -33,10 +33,12 @@
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
@@ -53,7 +55,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "build": "tsc && vite build"
+        "build": "tsx build.ts"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"
@@ -72,13 +74,15 @@
         "vite": "^5.4.10",
         "vitest": "^2.1.4"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*"

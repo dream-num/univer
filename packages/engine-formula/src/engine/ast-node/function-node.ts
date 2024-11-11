@@ -28,6 +28,7 @@ import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
+import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
@@ -45,7 +46,8 @@ export class FunctionNode extends BaseAstNode {
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService
+        private _definedNamesService: IDefinedNamesService,
+        private _formulaDataModel: FormulaDataModel
     ) {
         super('');
 
@@ -63,6 +65,10 @@ export class FunctionNode extends BaseAstNode {
 
         if (this._functionExecutor.needsSheetsInfo) {
             this._setSheetsInfo();
+        }
+
+        if (this._functionExecutor.needsFormulaDataModel) {
+            this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
         }
     }
 
@@ -323,7 +329,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
     }
@@ -339,7 +346,14 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
+        return new FunctionNode(
+            token,
+            functionExecutor,
+            this._currentConfigService,
+            this._runtimeService,
+            this._definedNamesService,
+            this._formulaDataModel
+        );
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

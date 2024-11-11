@@ -16,11 +16,11 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRule, IDataValidationRuleOptions, IRange } from '@univerjs/core';
 import type { FWorksheet } from '@univerjs/sheets/facade';
-import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '../commands/commands/data-validation.command';
+import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
 import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
 import { FRange } from '@univerjs/sheets/facade';
-import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '../commands/commands/data-validation.command';
+import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
 export class FDataValidation {

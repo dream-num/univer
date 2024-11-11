@@ -15,8 +15,10 @@
  */
 
 import type { IAccessor, IRange } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { IPermissionService, Rectangle } from '@univerjs/core';
+import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+import { WorkbookEditablePermission, WorksheetEditPermission } from '../../services/permission/permission-point';
+import { RangeProtectionPermissionEditPoint } from '../../services/permission/permission-point/range/edit';
 
 export const checkRangesEditablePermission = (accessor: IAccessor, unitId: string, subUnitId: string, ranges: IRange[]) => {
     const permissionService = accessor.get(IPermissionService);

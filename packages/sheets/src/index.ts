@@ -150,7 +150,7 @@ export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection
 export { type ICellPermission, RangeProtectionRenderModel } from './model/range-protection-render.model';
-export { type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel } from './model/range-protection-rule.model';
+export { EditStateEnum, type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel, ViewStateEnum } from './model/range-protection-rule.model';
 export { RangeProtectionCache } from './model/range-protection.cache';
 export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
 
@@ -183,6 +183,9 @@ export { MoveRangeAfterCommandId } from './commands/commands/move-range.command'
 // #region - all commands
 
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
+export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
+export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet-protection.command';
+export { DeleteWorksheetProtectionCommand } from './commands/commands/delete-worksheet-protection.command';
 export {
     addMergeCellsUtil,
     AddWorksheetMergeAllCommand,
@@ -253,7 +256,6 @@ export { SetDefinedNameCommand } from './commands/commands/set-defined-name.comm
 export { type ICancelFrozenCommandParams, type ISetFrozenCommandParams } from './commands/commands/set-frozen.command';
 export { CancelFrozenCommand, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
-export { type ISetRangeProtectionCommandParams, SetRangeProtectionCommand } from './commands/commands/set-range-protection.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
     type ISetSpecificRowsVisibleCommandParams,
@@ -317,6 +319,7 @@ export {
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
+export { SetProtectionCommand } from './commands/commands/set-protection.command';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
 export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteRangeProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';

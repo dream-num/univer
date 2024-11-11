@@ -15,10 +15,10 @@
  */
 
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IDataValidationResCache } from '../services/dv-cache.service';
+import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { SheetsDataValidationValidatorService } from '../services/dv-validator-service';
+import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 
 interface IFWorksheetDataValidationMixin {

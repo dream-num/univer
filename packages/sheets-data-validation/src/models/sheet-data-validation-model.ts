@@ -173,7 +173,7 @@ export class SheetDataValidationModel extends Disposable {
         }
 
         this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);
-        this._dataValidationCacheService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, newRule);
         this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
         this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, newRule);
     }

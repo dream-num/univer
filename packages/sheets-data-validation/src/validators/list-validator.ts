@@ -19,7 +19,6 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
-import { makeFormulaAbsolute } from '../commands/commands/util';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -145,15 +144,6 @@ export class ListValidator extends BaseDataValidator {
     parseCellValue(cellValue: CellValue) {
         const cellString = cellValue.toString();
         return deserializeListOptions(cellString);
-    }
-
-    override normalizeFormula(rule: IDataValidationRule, _unitId: string, _subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
-        const { formula1, formula2 } = rule;
-
-        return {
-            formula1: isFormulaString(formula1) ? makeFormulaAbsolute(this._lexer, formula1!) : formula1,
-            formula2,
-        };
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {

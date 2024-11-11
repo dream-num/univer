@@ -198,6 +198,7 @@ export class NodePositionConvertToRectRange {
             this._liquid.translate(0, table.top);
 
             const { x, y } = this._liquid;
+            const { left: tableLeft } = table;
 
             for (const row of table.rows) {
                 if (row.index >= startRow && row.index <= endRow) {
@@ -205,9 +206,9 @@ export class NodePositionConvertToRectRange {
                     const rowEndCell = row.cells[endColumn];
 
                     const position = {
-                        startX: x + rowStartCell.left,
+                        startX: x + rowStartCell.left + tableLeft,
                         startY: y + row.top,
-                        endX: x + rowEndCell.left + rowEndCell.pageWidth,
+                        endX: x + rowEndCell.left + rowEndCell.pageWidth + tableLeft,
                         endY: y + row.top + row.height,
                     };
 

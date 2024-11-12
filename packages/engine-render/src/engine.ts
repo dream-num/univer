@@ -571,13 +571,11 @@ export class Engine extends ThinEngine<Scene> {
                 }
                 if (!document.pointerLockElement) {
                     this._remainCapture = this._mouseId;
-                    this.getCanvasElement().setPointerCapture(this._mouseId);
                 }
             } else {
                 // Touch; Since touches are dynamically assigned, only set capture if we have an id
                 if (evt.pointerId && !document.pointerLockElement) {
                     this._remainCapture = evt.pointerId;
-                    this.getCanvasElement().setPointerCapture(evt.pointerId);
                 }
             }
 

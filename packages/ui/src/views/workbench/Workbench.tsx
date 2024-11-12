@@ -168,6 +168,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             >
                                 <ComponentContainer key="content" components={contentComponents} />
                             </section>
+                            <ZenZone />
                         </section>
 
                         <aside className={styles.workbenchContainerSidebar}>
@@ -181,7 +182,6 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             <ComponentContainer key="footer" components={footerComponents} sharedProps={{ contextMenu }} />
                         </footer>
                     )}
-                    <ZenZone />
                 </section>
             </div>
             <ComponentContainer key="global" components={globalComponents} />

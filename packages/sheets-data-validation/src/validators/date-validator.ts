@@ -25,10 +25,8 @@ import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } 
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { isLegalFormulaResult } from '../utils/formula';
+import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
-
-const FORMULA1 = '{FORMULA1}';
-const FORMULA2 = '{FORMULA2}';
 
 const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {

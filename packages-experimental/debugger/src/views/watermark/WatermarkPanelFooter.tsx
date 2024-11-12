@@ -17,10 +17,8 @@
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IClipboardInterfaceService, ISidebarService } from '@univerjs/ui';
+import { IWatermarkTypeEnum, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React from 'react';
-import { WatermarkTextBaseConfig } from '../../common/const';
-import { IWatermarkTypeEnum } from '../../common/type';
-import { WatermarkService } from '../../services/watermark.service';
 import styles from './index.module.less';
 
 export const WatermarkPanelFooter: React.FC = () => {

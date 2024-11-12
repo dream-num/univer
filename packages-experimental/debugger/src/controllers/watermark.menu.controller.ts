@@ -17,10 +17,13 @@
 import { Disposable, Inject } from '@univerjs/core';
 import { WatermarkSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
-import { UNIVER_WATERMARK_MENU, WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../common/const';
-import { WatermarkPanel } from '../views/components/WatermarkPanel';
-import { WatermarkPanelFooter } from '../views/components/WatermarkPanelFooter';
-import { menuSchema } from './menu.schema';
+import { WatermarkPanel } from '../views/watermark/WatermarkPanel';
+import { WatermarkPanelFooter } from '../views/watermark/WatermarkPanelFooter';
+
+export const UNIVER_WATERMARK_MENU = 'UNIVER_WATERMARK_MENU';
+export const WATERMARK_PANEL = 'WATERMARK_PANEL';
+
+export const WATERMARK_PANEL_FOOTER = 'WATERMARK_PANEL_FOOTER';
 
 export class UniverWatermarkMenuController extends Disposable {
     constructor(
@@ -28,7 +31,6 @@ export class UniverWatermarkMenuController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
-        this._initMenu();
         this._initComponents();
     }
 
@@ -40,9 +42,5 @@ export class UniverWatermarkMenuController extends Disposable {
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(key, component));
         });
-    }
-
-    private _initMenu() {
-        this._menuManagerService.mergeMenu(menuSchema);
     }
 }

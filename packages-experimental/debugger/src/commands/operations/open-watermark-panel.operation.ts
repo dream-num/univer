@@ -17,7 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../../common/const';
+import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../../controllers/watermark.menu.controller';
 
 export const OpenWatermarkPanelOperation: ICommand = {
     type: CommandType.OPERATION,

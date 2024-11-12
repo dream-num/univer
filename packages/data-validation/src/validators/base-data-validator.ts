@@ -99,7 +99,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${this.titleStr} ${ruleName}`;
     }
 
-    generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+    generateRuleErrorMessage(rule: IDataValidationRuleBase, position: any) {
         if (!rule.operator) {
             return this.titleStr;
         }
@@ -110,12 +110,12 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }, row: number, column: number): Nullable<IStyleData> {}
 
-    getRuleFinalError(rule: IDataValidationRule) {
+    getRuleFinalError(rule: IDataValidationRule, position: any) {
         if (rule.showErrorMessage && rule.error) {
             return rule.error;
         }
 
-        return this.generateRuleErrorMessage(rule);
+        return this.generateRuleErrorMessage(rule, position);
     }
 
     isEmptyCellValue(cellValue: Nullable<CellValue>): cellValue is null | undefined | void {

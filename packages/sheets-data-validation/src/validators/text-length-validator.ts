@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator, TextLengthErrorTitleMap } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { isLegalFormulaResult } from '../utils/formula';
+import { getTransformedFormula } from './util';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -28,6 +31,7 @@ const FORMULA2 = '{FORMULA2}';
 export class TextLengthValidator extends BaseDataValidator<number> {
     id: string = DataValidationType.TEXT_LENGTH;
     title: string = 'dataValidation.textLength.title';
+    private _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -195,12 +199,13 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue <= formula1;
     }
 
-    override generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase, pos: ISheetLocationBase) {
         if (!rule.operator) {
             return this.titleStr;
         }
 
-        const errorMsg = this.localeService.t(TextLengthErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, pos);
+        const errorMsg = this.localeService.t(TextLengthErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
         return `${errorMsg}`;
     }
 }

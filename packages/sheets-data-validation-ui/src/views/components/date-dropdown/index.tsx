@@ -126,7 +126,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 },
             });
         } else {
-            rejectInputController.showReject(validator.getRuleFinalError(rule));
+            rejectInputController.showReject(validator.getRuleFinalError(rule, { row, column: col, unitId, subUnitId }));
         }
     };
 

@@ -430,7 +430,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     private _scrollUpdateListener() {
-
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) {
             return;

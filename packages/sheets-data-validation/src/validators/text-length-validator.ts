@@ -18,9 +18,9 @@ import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable 
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator, TextLengthErrorTitleMap } from '@univerjs/data-validation';
-import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
+import { isLegalFormulaResult } from '../utils/formula';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -42,7 +42,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
 
     scopes: string | string[] = ['sheet'];
 
-    private _formulaService = this.injector.get(DataValidationFormulaService);
+    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
     private _isFormulaOrInt(formula: string) {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));
@@ -85,17 +85,16 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return !Number.isNaN(formula);
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<any>> {
-        const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<any>> {
+        const formulaResult1 = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, rule.uid, row, column);
+        const formulaResult2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
         const { formula1, formula2 } = rule;
 
-        const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result?.[0][0]);
-        const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: this._parseNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
-            formula2: this._parseNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
+            formula1: this._parseNumber(isFormulaString(formula1) ? formulaResult1?.v : formula1),
+            formula2: this._parseNumber(isFormulaString(formula2) ? formulaResult2?.v : formula2),
             isFormulaValid,
         };
     }

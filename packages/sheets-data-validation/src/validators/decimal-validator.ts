@@ -91,8 +91,7 @@ export class DecimalValidator extends BaseDataValidator<number> {
         const formulaResult2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
         const { formula1, formula2 } = rule;
 
-        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
-
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1?.v)) && isLegalFormulaResult(String(formulaResult2?.v));
         const info = {
             formula1: this._parseNumber(isFormulaString(formula1) ? formulaResult1?.v : formula1),
             formula2: this._parseNumber(isFormulaString(formula2) ? formulaResult2?.v : formula2),

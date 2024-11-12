@@ -165,7 +165,7 @@ export class FormulaRefRangeService extends Disposable {
                             newToken = serializeRange(finalRange);
                         }
                     } else {
-                        newToken = ErrorType.ERROR;
+                        newToken = ErrorType.REF;
                     }
 
                     return {

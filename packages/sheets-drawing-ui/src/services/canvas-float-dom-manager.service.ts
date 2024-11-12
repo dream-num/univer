@@ -24,7 +24,7 @@ import type { IInsertDrawingCommandParams } from '../commands/commands/interface
 import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
-import { copyPointEvent, DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
@@ -373,16 +373,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         id: drawingId,
                         componentKey: floatDomParam.componentKey,
                         onPointerDown: (evt) => {
-                            const e = this._createNewEvent(evt as PointerEvent);
-                            canvas.dispatchEvent(new PointerEvent(e.type, e));
+                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                         },
                         onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                            const e = this._createNewEvent(evt as PointerEvent);
-                            canvas.dispatchEvent(e);
+                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                         },
                         onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                            const e = this._createNewEvent(evt as PointerEvent);
-                            canvas.dispatchEvent(e);
+                            canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                         },
                         onWheel: (evt: WheelEvent) => {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
@@ -430,11 +427,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             })
         );
-    }
-
-    private _createNewEvent(evt: PointerEvent) {
-        const eventInit = copyPointEvent(evt);
-        return new PointerEvent(evt.type, eventInit);
     }
 
     private _scrollUpdateListener() {

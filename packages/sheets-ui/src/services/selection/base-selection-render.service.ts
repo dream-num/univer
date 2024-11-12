@@ -534,6 +534,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         scene.getTransformer()?.clearSelectedObjects();
 
+        scene.getEngine()?.setRemainCapture();
+
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
             if (rangeType === RANGE_TYPE.ROW) {
                 viewportPosX = 0;

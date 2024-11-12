@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { ICommand, IDataValidationRule } from '@univerjs/core';
-import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
 import type { DataValidationChangeSource } from '../../models/data-validation-model';
+import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
+import { CommandType } from '@univerjs/core';
 import { DataValidationModel } from '../../models/data-validation-model';
 
 export interface IAddDataValidationMutationParams {

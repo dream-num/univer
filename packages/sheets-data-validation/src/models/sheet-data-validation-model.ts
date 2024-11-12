@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationType, ISheetDataValidationRule } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload } from '@univerjs/data-validation';
 import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { DataValidationStatus, DataValidationType, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { RemoveSheetMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -142,10 +142,8 @@ export class SheetDataValidationModel extends Disposable {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(unitId, subUnitId, rule);
-        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2, rule.ranges);
-        if (rule.type === DataValidationType.CUSTOM) {
-            this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
-        }
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
     }
 
     private _addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule | ISheetDataValidationRule[]): void {
@@ -158,41 +156,33 @@ export class SheetDataValidationModel extends Disposable {
 
     private _updateRule(unitId: string, subUnitId: string, ruleId: string, oldRule: ISheetDataValidationRule, payload: IUpdateRulePayload) {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
+        const newRule = {
+            ...oldRule,
+            ...payload.payload,
+        };
+
         if (payload.type === UpdateRuleType.RANGE) {
             ruleMatrix.updateRange(ruleId, payload.payload);
             this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
-            if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
-                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
-                    ...oldRule,
-                    ranges: payload.payload,
-                });
-            }
         } else if (payload.type === UpdateRuleType.SETTING) {
             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
-            this._dataValidationFormulaService.updateRuleFormulaText(unitId, subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2, oldRule.ranges);
-            if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
-                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
-                    ...oldRule,
-                    ...payload.payload,
-                });
-            } else if (payload.payload.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
-                    ...oldRule,
-                    ...payload.payload,
-                });
-            }
+        } else if (payload.type === UpdateRuleType.ALL) {
+            ruleMatrix.updateRange(ruleId, payload.payload.ranges);
+            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload.ranges, oldRule.ranges);
+            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
         }
+
+        this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, newRule);
     }
 
     private _removeRule(unitId: string, subUnitId: string, oldRule: ISheetDataValidationRule): void {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.removeRule(oldRule);
         this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
-        if (oldRule.type === DataValidationType.CUSTOM) {
-            this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
-        }
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
     }
 
     getValidator(type: DataValidationType) {

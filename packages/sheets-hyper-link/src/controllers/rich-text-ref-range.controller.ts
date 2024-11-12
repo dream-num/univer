@@ -84,11 +84,13 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
 
         if (p.body?.customRanges?.some((customRange) => customRange.rangeType === CustomRangeType.HYPERLINK && this._isLegalRangeUrl(unitId, customRange.properties?.url))) {
             const disposableCollection = new DisposableCollection();
+            let hasWatch = false;
             p.body?.customRanges?.forEach((customRange) => {
                 if (customRange.rangeType === CustomRangeType.HYPERLINK) {
                     const payload = customRange.properties?.url;
                     const range = this._isLegalRangeUrl(unitId, payload);
                     if (range) {
+                        hasWatch = true;
                         disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, range, (before, after) => {
                             customRange.properties!.url = `#gid=${subUnitId}&range=${after ? serializeRange(after) : ERROR_RANGE}`;
                         }));
@@ -96,7 +98,9 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                 }
             });
 
-            map.setValue(row, col, disposableCollection);
+            if (hasWatch) {
+                map.setValue(row, col, disposableCollection);
+            }
         }
     }
 

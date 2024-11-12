@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
+import { DataValidationType, type ICellData, type Nullable } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 
 export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
@@ -27,4 +27,11 @@ export function getFormulaCellData(result: Nullable<Nullable<ICellData>[][]>) {
 
 export function isLegalFormulaResult(res: string) {
     return !(ERROR_TYPE_SET as Set<string>).has(res);
+}
+
+/**
+ * Judge if the data-validation's formula need to be offseted by ranges
+ */
+export function isCustomFormulaType(type: DataValidationType) {
+    return type !== DataValidationType.LIST && type !== DataValidationType.LIST_MULTIPLE && type !== DataValidationType.CHECKBOX && type !== DataValidationType.ANY;
 }

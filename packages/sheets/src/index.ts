@@ -67,6 +67,7 @@ export type { EffectRefRangeParams, IOperator } from './services/ref-range/type'
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export {
+    getSeparateEffectedRangesOnCommand,
     handleBaseInsertRange,
     handleBaseMoveRowsCols,
     handleBaseRemoveRange,

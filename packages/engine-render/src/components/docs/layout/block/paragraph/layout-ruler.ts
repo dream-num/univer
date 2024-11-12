@@ -464,7 +464,7 @@ function _lineOperator(
 
     const {
         paragraphStyle = {},
-        paragraphAffectSkeDrawings,
+        paragraphNonInlineSkeDrawings,
         skeTablesInParagraph,
         skeHeaders,
         skeFooters,
@@ -530,7 +530,7 @@ function _lineOperator(
     if (preLine) {
         const drawingsInLine = _getCustomBlockIdsInLine(preLine);
         if (drawingsInLine.length > 0) {
-            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphNonInlineSkeDrawings;
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
                 .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE)
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
@@ -541,8 +541,8 @@ function _lineOperator(
         }
     }
 
-    if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
-        const targetDrawings = [...paragraphAffectSkeDrawings.values()]
+    if (paragraphNonInlineSkeDrawings != null && paragraphNonInlineSkeDrawings.size > 0) {
+        const targetDrawings = [...paragraphNonInlineSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, pDrawingAnchor?.get(paragraphIndex)?.top);
@@ -564,18 +564,19 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx,
+        _columnOperator(
+            ctx,
             glyphGroup,
             pages,
             sectionBreakConfig,
             paragraphConfig,
             isParagraphFirstShapedText,
-
             breakPointType,
-            defaultGlyphLineHeight);
+            defaultGlyphLineHeight
+        );
 
-        if (isParagraphFirstShapedText && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
-            for (const drawing of paragraphAffectSkeDrawings.values()) {
+        if (isParagraphFirstShapedText && paragraphNonInlineSkeDrawings && paragraphNonInlineSkeDrawings.size > 0) {
+            for (const drawing of paragraphNonInlineSkeDrawings.values()) {
                 if (lastPage.skeDrawings.has(drawing.drawingId)) {
                     lastPage.skeDrawings.delete(drawing.drawingId);
                 }
@@ -637,7 +638,8 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
-    _divideOperator(ctx,
+    _divideOperator(
+        ctx,
         glyphGroup,
         pages,
         sectionBreakConfig,
@@ -645,7 +647,8 @@ function _lineOperator(
         isParagraphFirstShapedText,
 
         breakPointType,
-        defaultGlyphLineHeight);
+        defaultGlyphLineHeight
+    );
 }
 
 function __updateAndPositionDrawings(
@@ -1297,7 +1300,7 @@ function __getDrawingPosition(
     return drawings;
 }
 
-// 更新 paragraphAffectSkeDrawings 的绝对位置，相对于段落的第一行布局
+// 更新 paragraphNonInlineSkeDrawings 的绝对位置，相对于段落的第一行布局
 function __updateDrawingPosition(
     column: IDocumentSkeletonColumn,
     drawings?: Map<string, IDocumentSkeletonDrawing>

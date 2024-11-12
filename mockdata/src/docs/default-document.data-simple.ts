@@ -189,6 +189,7 @@ const tableRow: ITableRow = {
         val: { v: 120 },
         hRule: TableRowHeightRule.AUTO,
     },
+    cantSplit: BooleanNumber.TRUE,
 };
 
 const tableColumn: ITableColumn = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable, Nullable } from '@univerjs/core';
+import type { INumberUnit, ITable, ITableRow, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -42,9 +42,9 @@ export function createTableSkeleton(
     for (const rowNode of rowNodes) {
         const { children: cellNodes, startIndex, endIndex } = rowNode;
         const row = rowNodes.indexOf(rowNode);
-        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, tableSkeleton);
-        const rowDataModel = table.tableRows[row];
-        const { trHeight } = rowDataModel;
+        const rowSource = table.tableRows[row];
+        const { trHeight } = rowSource;
+        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, tableSkeleton);
         const { hRule, val } = trHeight;
 
         tableSkeleton.rows.push(rowSkeleton);
@@ -229,6 +229,7 @@ function _getNullTableRowSkeleton(
     st: number,
     ed: number,
     index: number,
+    rowSource: ITableRow,
     parent: IDocumentSkeletonTable
 ): IDocumentSkeletonRow {
     return {
@@ -239,6 +240,7 @@ function _getNullTableRowSkeleton(
         st,
         ed,
         parent,
+        rowSource,
     };
 }
 

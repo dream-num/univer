@@ -23,6 +23,7 @@ import type {
     INestingLevel,
     IParagraphProperties,
     ITable,
+    ITableRow,
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
@@ -135,6 +136,7 @@ export interface IDocumentSkeletonRow {
     top: number; // top 相对于表格上沿
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
+    rowSource: ITableRow;
     parent?: IDocumentSkeletonTable;
 }
 

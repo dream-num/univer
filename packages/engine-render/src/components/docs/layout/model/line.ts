@@ -240,7 +240,7 @@ function _calculateDividesByDrawings(
     page: IDocumentSkeletonPage,
     headerPage: Nullable<IDocumentSkeletonPage>,
     footerPage: Nullable<IDocumentSkeletonPage>,
-    paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
+    paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     wrapTypeTables?: Map<string, IDocumentSkeletonTable>
@@ -280,7 +280,7 @@ function _calculateDividesByDrawings(
         });
     }
 
-    paragraphAffectSkeDrawings?.forEach((drawing) => {
+    paragraphNonInlineSkeDrawings?.forEach((drawing) => {
         const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
 
         if (split) {

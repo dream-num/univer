@@ -140,7 +140,7 @@ export function lineBreaking(
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
-    const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
     let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
@@ -154,7 +154,7 @@ export function lineBreaking(
         paragraphIndex: endIndex,
         // TODO optimize this deepClone
         paragraphStyle: Tools.deepClone(paragraphStyle),
-        paragraphAffectSkeDrawings,
+        paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
         skeTablesInParagraph: tableSkeleton
             ? [
@@ -200,7 +200,7 @@ export function lineBreaking(
         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
             paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         } else {
-            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+            paragraphNonInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 
@@ -236,7 +236,7 @@ export function lineBreaking(
                     BreakType.PAGE
                 )
             );
-            paragraphAffectSkeDrawings.clear();
+            paragraphNonInlineSkeDrawings.clear();
             paragraphInlineSkeDrawings.clear();
             continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {

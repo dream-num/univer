@@ -16,7 +16,7 @@
 
 import type { ITestBed } from './util';
 import { ICommandService, type IRange } from '@univerjs/core';
-import { MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
+import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 import { createCommandTestBed } from './util';
@@ -242,6 +242,57 @@ describe('FormulaRefRangeService', () => {
             [
                 { formulas: ['=A1'], ranges: [{ startColumn: 5, endColumn: 8, startRow: 5, endRow: 10 }] },
                 { formulas: ['=#REF!'], ranges: [{ startColumn: 3, endColumn: 4, startRow: 5, endRow: 10 }] },
+            ]
+        );
+    });
+
+    it('transform range formula string with insert col', async () => {
+        const formulaRefRangeService = testBed.get(FormulaRefRangeService);
+
+        let newFormulas: {
+            formulas: string[];
+            ranges: IRange[];
+        }[] = [];
+
+        formulaRefRangeService.registerRangeFormula(
+            'test',
+            'sheet1',
+            [{
+                startRow: 5,
+                endRow: 10,
+                startColumn: 5,
+                endColumn: 10,
+            }],
+            ['=A1'],
+            (res) => {
+                newFormulas = res;
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            }
+        );
+
+        await testBed.get(ICommandService).executeCommand(
+            InsertColCommand.id,
+            {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startColumn: 0,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 9999,
+                },
+            }
+        );
+
+        expect(newFormulas).toEqual(
+            [
+                {
+                    formulas: ['=C1'],
+                    ranges: [{ startColumn: 7, endColumn: 12, startRow: 5, endRow: 10 }],
+                },
             ]
         );
     });

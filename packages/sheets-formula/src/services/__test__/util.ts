@@ -18,7 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { DefinedNameDataController, IRefSelectionsService, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { DefinedNameDataController, InsertColCommand, IRefSelectionsService, MoveColsCommand, MoveRangeCommand, RangeProtectionRuleModel, RefRangeService, RemoveColCommand, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '../formula-ref-range.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -106,6 +106,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             [
                 MoveRangeCommand,
                 RemoveColCommand,
+                InsertColCommand,
+                MoveColsCommand,
             ].forEach((command) => {
                 this._injector.get(ICommandService).registerCommand(command);
             });

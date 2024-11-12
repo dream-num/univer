@@ -23,7 +23,6 @@ export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverWatermarkConfig {
     menu?: MenuConfig;
-    showMenu?: boolean;
     userWatermarkSettings?: Partial<IUserInfoWatermarkConfig>;
     textWatermarkSettings?: Partial<ITextWatermarkConfig>;
     imageWatermarkSettings?: Partial<IImageWatermarkConfig>;

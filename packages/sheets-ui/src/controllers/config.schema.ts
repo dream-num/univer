@@ -25,6 +25,7 @@ export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
     override?: DependencyOverride;
+    customComponents?: Set<string>;
 
     /**
      * Whether to show the formula bar.

@@ -25,15 +25,16 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
 import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
+
 import { ImageDemo } from '../components/Image';
 
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
-
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
 import { TestEditorContainer } from '../views/test-editor/TestTextEditor';
 import { RecordController } from './local-save/record.controller';
@@ -68,6 +69,7 @@ export class DebuggerController extends Disposable {
             CreateFloatDomCommand,
             ChangeUserCommand,
             ShowCellContentOperation,
+            OpenWatermarkPanelOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([RecordController]);

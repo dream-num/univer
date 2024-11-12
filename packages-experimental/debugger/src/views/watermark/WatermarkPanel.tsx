@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { IWatermarkConfig, IWatermarkConfigWithType } from '../../common/type';
+import type { IWatermarkConfig, IWatermarkConfigWithType } from '@univerjs/watermark';
 import { ILocalStorageService, LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { Select } from '@univerjs/design';
+import { IWatermarkTypeEnum, UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import React, { useCallback, useEffect, useState } from 'react';
-import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../../common/const';
-import { IWatermarkTypeEnum } from '../../common/type';
-import { WatermarkService } from '../../services/watermark.service';
 import styles from './index.module.less';
 import { WatermarkImageSetting } from './WatermarkImageSetting';
 import { WatermarkTextSetting } from './WatermarkTextSetting';

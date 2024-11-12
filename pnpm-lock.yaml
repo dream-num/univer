@@ -632,6 +632,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
+      '@univerjs/icons':
+        specifier: ^0.2.5
+        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../../mockdata
@@ -644,9 +647,15 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../../packages/watermark
       '@vitejs/plugin-react':
         specifier: 4.3.3
         version: 4.3.3(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1

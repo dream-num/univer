@@ -14,71 +14,71 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig } from '../../common/type';
+import type { ITextWatermarkConfig } from '@univerjs/watermark';
 import { LocaleService, useDependency } from '@univerjs/core';
-import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { ILocalFileService } from '@univerjs/ui';
+import { Checkbox, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
+import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
+import clsx from 'clsx';
 import React from 'react';
-import { WATERMARK_IMAGE_ALLOW_IMAGE_LIST } from '../../common/const';
 import styles from './index.module.less';
 
-interface IWatermarkImageSettingProps {
-    config?: IImageWatermarkConfig;
-    onChange: (config: IImageWatermarkConfig) => void;
+interface IWatermarkTextSettingProps {
+    config?: ITextWatermarkConfig;
+    onChange: (config: ITextWatermarkConfig) => void;
 }
 
-export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ config, onChange }) => {
-    const fileOpenService = useDependency(ILocalFileService);
+export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props) => {
+    const { config, onChange } = props;
     const localeService = useDependency(LocaleService);
 
     if (!config) return null;
 
-    const handleUpdateImageUrl = async () => {
-        const files = await fileOpenService.openFile({
-            multiple: false,
-            accept: WATERMARK_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
-        });
-
-        const fileLength = files.length;
-        if (fileLength === 0) {
-            return false;
-        }
-
-        const file = files[0];
-
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            if (event.target?.result) {
-                const base64String = event.target.result;
-
-                const img = new Image();
-                img.onload = function () {
-                    onChange({ ...config, url: base64String as string, width: Math.max(20, img.width), height: Math.max(img.height, 20), originRatio: img.width / img.height });
-                };
-
-                img.src = base64String as string;
-            }
-        };
-
-        reader.readAsDataURL(file);
-    };
-
     return (
-        <div className={styles.watermarkImageSetting}>
+        <div className={styles.watermarkTextSetting}>
+            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.style')}</div>
 
-            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.image')}</div>
-
-            <div className={styles.watermarkTextSettingLayout}>
-                <span>{localeService.t('univer-watermark.image')}</span>
-                <Button
-                    onClick={handleUpdateImageUrl}
-                    style={{ marginLeft: 8 }}
+            <div className={styles.watermarkTextSettingFontContent}>
+                <div>{localeService.t('univer-watermark.content')}</div>
+                <Input
+                    value={config.content}
+                    onChange={(val) => onChange({ ...config, content: val })}
+                    className={styles.watermarkInputContent}
+                    placeholder={localeService.t('univer-watermark.textPlaceholder')}
                 >
-                    {config.url ? localeService.t('univer-watermark.replaceImage') : localeService.t('univer-watermark.uploadImage')}
-                </Button>
+                </Input>
+            </div>
+
+            <div className={styles.watermarkTextSettingFontStyle}>
                 <div className={styles.watermarkTextSettingFontStylePart}>
-                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
+                    <div>
+                        <div>{localeService.t('univer-watermark.fontSize')}</div>
+                        <InputNumber
+                            value={config.fontSize}
+                            onChange={(val) => {
+                                if (val != null) {
+                                    onChange({ ...config, fontSize: Number.parseInt(val.toString()) });
+                                }
+                            }}
+                            max={72}
+                            min={12}
+                            className={styles.watermarkInput}
+                        />
+                    </div>
+
+                    <div style={{ margin: '0 8px' }}>
+                        <div>{localeService.t('univer-watermark.direction')}</div>
+                        <Select
+                            value={config.direction}
+                            onChange={(v) => onChange({ ...config, direction: v as 'ltr' | 'rtl' })}
+                            options={[
+                                { label: localeService.t('univer-watermark.ltr'), value: 'ltr' },
+                                { label: localeService.t('univer-watermark.rtl'), value: 'rtl' },
+                            ]}
+                        >
+                        </Select>
+                    </div>
+
+                    <div>
                         <div>{localeService.t('univer-watermark.opacity')}</div>
                         <InputNumber
                             value={config.opacity}
@@ -93,63 +93,25 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                             className={styles.watermarkInput}
                         />
                     </div>
-
-                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>{localeService.t('univer-watermark.keepRatio')}</div>
-                        <Checkbox
-                            checked={config.maintainAspectRatio}
-                            onChange={(val) => {
-                                if (val === true) {
-                                    onChange({ ...config, maintainAspectRatio: val as boolean, height: Math.round(config.width / config.originRatio) });
-                                } else {
-                                    onChange({ ...config, maintainAspectRatio: val as boolean });
-                                }
-                            }}
-                        >
-
-                        </Checkbox>
-                    </div>
                 </div>
-            </div>
 
-            <div className={styles.watermarkTextSettingLayout}>
                 <div className={styles.watermarkTextSettingFontStylePart}>
-                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>{localeService.t('univer-watermark.width')}</div>
-                        <InputNumber
-                            value={config.width}
-                            onChange={(val) => {
-                                if (val != null) {
-                                    const newWidth = Math.max(20, Number.parseInt(val.toString()));
-                                    if (config.maintainAspectRatio) {
-                                        onChange({ ...config, width: newWidth, height: Math.round(newWidth / config.originRatio) });
-                                    } else {
-                                        onChange({ ...config, width: newWidth });
-                                    }
-                                }
-                            }}
-                            min={20}
-                            className={styles.watermarkInput}
-                        />
+                    <div className={styles.watermarkIconWrapper}>
+                        <Dropdown
+                            overlay={(
+                                <div className={styles.watermarkColorPickerWrapper}>
+                                    <ColorPicker color={config.color} onChange={(val) => onChange({ ...config, color: val })} />
+                                </div>
+                            )}
+                        >
+                            <FontColor className={styles.watermarkIcon} extend={{ colorChannel1: config.color ?? 'rgb(var(--primary-color))' }} />
+                        </Dropdown>
                     </div>
-
-                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>{localeService.t('univer-watermark.height')}</div>
-                        <InputNumber
-                            value={config.height}
-                            onChange={(val) => {
-                                if (val != null) {
-                                    const newHeight = Math.max(20, Number.parseInt(val.toString()));
-                                    if (config.maintainAspectRatio) {
-                                        onChange({ ...config, height: newHeight, width: Math.round(newHeight * config.originRatio) });
-                                    } else {
-                                        onChange({ ...config, height: Number.parseInt(val.toString()) });
-                                    }
-                                }
-                            }}
-                            min={20}
-                            className={styles.watermarkInput}
-                        />
+                    <div className={clsx(styles.watermarkIconWrapper, { [styles.watermarkIconWrapperSelect]: config.bold })} onClick={() => { onChange({ ...config, bold: !config.bold }); }}>
+                        <BoldSingle className={styles.watermarkIcon} />
+                    </div>
+                    <div className={clsx(styles.watermarkIconWrapper, { [styles.watermarkIconWrapperSelect]: config.italic })} onClick={() => { onChange({ ...config, italic: !config.italic }); }}>
+                        <ItalicSingle className={styles.watermarkIcon} />
                     </div>
                 </div>
             </div>

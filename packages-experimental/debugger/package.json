@@ -60,11 +60,14 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons": "^0.2.5",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@vitejs/plugin-react": "4.3.3"
+        "@univerjs/watermark": "workspace:*",
+        "@vitejs/plugin-react": "4.3.3",
+        "clsx": "^2.1.1"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"

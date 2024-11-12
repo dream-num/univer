@@ -461,25 +461,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             });
         };
 
-        // this.disposeWithMe(
-        //     this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-        //         .pipe(
-        //             filter((sheet) => !!sheet),
-        //             map((sheet) => {
-        //                 const render = this._renderManagerService.getRenderById(sheet.getUnitId());
-        //                 return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getActiveSheet().getSheetId() } : null;
-        //             }),
-        //             filter((render) => !!render),
-        //             switchMap((render) =>
-        //                 fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
-        //                     .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
-        //             )
-        //         )
-        //         .subscribe(({ unitId, subUnitId }) => {
-        //             updateSheet(unitId, subUnitId);
-        //         })
-        // );
-
         this.disposeWithMe(
             workbook.activeSheet$.pipe(
                 filter((sheet) => !!sheet),

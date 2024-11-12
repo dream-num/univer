@@ -34,8 +34,6 @@ export class FontAndBaseLine extends docExtension {
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
-    private _preFontString = '';
-
     private _preFontColor = '';
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
@@ -57,8 +55,8 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (this._preFontString !== fontStyle?.fontString) {
-            ctx.font = this._preFontString = fontStyle?.fontString || '';
+        if (ctx.font !== fontStyle?.fontString) {
+            ctx.font = fontStyle?.fontString || '';
         }
 
         const { cl: colorStyle, va: baselineOffset } = textStyle;
@@ -126,7 +124,6 @@ export class FontAndBaseLine extends docExtension {
     }
 
     override clearCache() {
-        this._preFontString = '';
         this._preFontColor = '';
     }
 }

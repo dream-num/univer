@@ -844,7 +844,7 @@ export interface IDistFromText {
 }
 
 export interface ITableAnchor {
-    positionH: IObjectPositionH; // horzAnchor (Table Horizontal Anchor)
+    positionH: IObjectPositionH; // horizontal Anchor (Table Horizontal Anchor)
     positionV: IObjectPositionV;
 }
 
@@ -910,7 +910,7 @@ export interface ITable {
 // the value the h attribute.
 //  If the value of hRule is exact, then the table row's height should be exactly the
 // value of the h attribute.
-export enum TableCellHeightRule {
+export enum TableRowHeightRule {
     AUTO,
     AT_LEAST,
     EXACT,
@@ -922,7 +922,7 @@ export interface ITableColumn { // 合并拆分列，HTML 合并单元格
 
 export interface ITableRowSize {
     val: INumberUnit;
-    hRule: TableCellHeightRule;
+    hRule: TableRowHeightRule;
 }
 
 /**

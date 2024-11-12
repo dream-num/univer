@@ -27,6 +27,7 @@ import type {
 } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type {
+    IFloatObject,
     ILayoutContext,
 } from '../../tools';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
@@ -44,6 +45,7 @@ import {
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import {
+    FloatObjectType,
     getCharSpaceApply,
     getCharSpaceConfig,
     getLastLineByColumn,
@@ -59,7 +61,7 @@ import {
     lineIterator,
     mergeByV,
 } from '../../tools';
-import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
+import { splitTable } from '../table';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -462,7 +464,7 @@ function _lineOperator(
 
     const {
         paragraphStyle = {},
-        paragraphAffectSkeDrawings,
+        paragraphNonInlineSkeDrawings,
         skeTablesInParagraph,
         skeHeaders,
         skeFooters,
@@ -528,7 +530,7 @@ function _lineOperator(
     if (preLine) {
         const drawingsInLine = _getCustomBlockIdsInLine(preLine);
         if (drawingsInLine.length > 0) {
-            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const affectDrawings = ctx.paragraphConfigCache.get(segmentId)?.get(preLine.paragraphIndex)?.paragraphNonInlineSkeDrawings;
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
                 .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE)
                 .filter((drawing) => drawingsInLine.includes(drawing.drawingId));
@@ -539,15 +541,15 @@ function _lineOperator(
         }
     }
 
-    if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
-        const targetDrawings = [...paragraphAffectSkeDrawings.values()]
+    if (paragraphNonInlineSkeDrawings != null && paragraphNonInlineSkeDrawings.size > 0) {
+        const targetDrawings = [...paragraphNonInlineSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
 
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, isParagraphFirstShapedText, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(lineTop, lastPage, section, skeTablesInParagraph);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -562,24 +564,25 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx,
+        _columnOperator(
+            ctx,
             glyphGroup,
             pages,
             sectionBreakConfig,
             paragraphConfig,
             isParagraphFirstShapedText,
-
             breakPointType,
-            defaultGlyphLineHeight);
+            defaultGlyphLineHeight
+        );
 
-        if (isParagraphFirstShapedText && paragraphAffectSkeDrawings && paragraphAffectSkeDrawings.size > 0) {
-            for (const drawing of paragraphAffectSkeDrawings.values()) {
+        if (isParagraphFirstShapedText && paragraphNonInlineSkeDrawings && paragraphNonInlineSkeDrawings.size > 0) {
+            for (const drawing of paragraphNonInlineSkeDrawings.values()) {
                 if (lastPage.skeDrawings.has(drawing.drawingId)) {
                     lastPage.skeDrawings.delete(drawing.drawingId);
                 }
 
-                if (ctx.drawingsCache.has(drawing.drawingId)) {
-                    ctx.drawingsCache.delete(drawing.drawingId);
+                if (ctx.floatObjectsCache.has(drawing.drawingId)) {
+                    ctx.floatObjectsCache.delete(drawing.drawingId);
                     ctx.isDirty = false;
                     ctx.layoutStartPointer[segmentId] = null;
                 }
@@ -635,7 +638,8 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, pDrawingAnchor);
-    _divideOperator(ctx,
+    _divideOperator(
+        ctx,
         glyphGroup,
         pages,
         sectionBreakConfig,
@@ -643,7 +647,8 @@ function _lineOperator(
         isParagraphFirstShapedText,
 
         breakPointType,
-        defaultGlyphLineHeight);
+        defaultGlyphLineHeight
+    );
 }
 
 function __updateAndPositionDrawings(
@@ -673,7 +678,29 @@ function __updateAndPositionDrawings(
         return;
     }
 
-    _reLayoutCheck(ctx, drawings, column, paragraphIndex);
+    const floatObjects: IFloatObject[] = [...drawings.values()]
+        .filter((drawing) => {
+            const layoutType = drawing.drawingOrigin.layoutType;
+
+            return layoutType !== PositionedObjectLayoutType.INLINE && layoutType !== PositionedObjectLayoutType.WRAP_NONE;
+        })
+        .map((drawing) => {
+            const { drawingOrigin, drawingId: id, aTop: top, aLeft: left, width, height, angle } = drawing;
+            const positionV = drawingOrigin.docTransform.positionV;
+
+            return {
+                id,
+                top,
+                left,
+                width,
+                height,
+                angle,
+                type: FloatObjectType.IMAGE,
+                positionV,
+            };
+        });
+
+    _reLayoutCheck(ctx, floatObjects, column, paragraphIndex);
 
     __updateDrawingPosition(
         column,
@@ -681,11 +708,75 @@ function __updateAndPositionDrawings(
     );
 }
 
-function _updateAndPositionTable(
+function __updateWrapTablePosition(
+    ctx: ILayoutContext,
+    table: IDocumentSkeletonTable,
     lineTop: number,
+    lineHeight: number,
+    column: IDocumentSkeletonColumn,
+    paragraphIndex: number,
+    drawingAnchorTop?: number
+) {
+    const wrapTablePosition = __getWrapTablePosition(table, column, lineTop, lineHeight, drawingAnchorTop);
+
+    if (wrapTablePosition == null) {
+        return;
+    }
+
+    const { tableId: id, width, height, tableSource } = table;
+    const { left, top } = wrapTablePosition;
+
+    const floatObject: IFloatObject = {
+        id,
+        top,
+        left,
+        width,
+        height,
+        angle: 0,
+        type: FloatObjectType.TABLE,
+        positionV: tableSource.position.positionV,
+    };
+
+    _reLayoutCheck(ctx, [floatObject], column, paragraphIndex);
+
+    table.top = top;
+    table.left = left;
+}
+
+function __getWrapTablePosition(
+    table: IDocumentSkeletonTable,
+    column: IDocumentSkeletonColumn,
+    lineTop: number,
+    lineHeight: number,
+    drawingAnchorTop?: number
+) {
+    const page = column.parent?.parent;
+    if (page == null) {
+        return;
+    }
+
+    const isPageBreak = __checkPageBreak(column);
+    const { tableSource, width, height } = table;
+    const { positionH, positionV } = tableSource.position;
+
+    const left = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
+    const top = getPositionVertical(
+        positionV, page, lineTop, lineHeight, height, drawingAnchorTop, isPageBreak
+    ) ?? 0;
+
+    return { left, top };
+}
+
+function _updateAndPositionTable(
+    ctx: ILayoutContext,
+    lineTop: number,
+    lineHeight: number,
     page: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
     section: IDocumentSkeletonSection,
-    skeTablesInParagraph: IParagraphTableCache[]
+    skeTablesInParagraph: IParagraphTableCache[],
+    paragraphIndex: number,
+    drawingAnchorTop?: number
 ): boolean {
     if (skeTablesInParagraph.length === 0) {
         return false;
@@ -700,18 +791,29 @@ function _updateAndPositionTable(
 
     const { tableId, table } = lastTable;
     const { tableSource } = table;
+    const isOriginTable = tableId.indexOf('#-#') === -1;
 
-    switch (tableSource.textWrap) {
-        case TableTextWrapType.NONE: {
-            table.top = lineTop;
-            break;
-        }
-        case TableTextWrapType.WRAP: {
-            // TODO: @JOCS, handle text wrap position.
-            break;
-        }
-        default: {
-            throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+    if (isOriginTable) {
+        switch (tableSource.textWrap) {
+            case TableTextWrapType.NONE: {
+                table.top = lineTop;
+                break;
+            }
+            case TableTextWrapType.WRAP: {
+                __updateWrapTablePosition(
+                    ctx,
+                    table,
+                    lineTop,
+                    lineHeight,
+                    column,
+                    paragraphIndex,
+                    drawingAnchorTop
+                );
+                break;
+            }
+            default: {
+                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
+            }
         }
     }
 
@@ -721,7 +823,7 @@ function _updateAndPositionTable(
         // Need split table.
         skeTablesInParagraph.pop();
         const availableHeight = section.height - top;
-        const [newTable, remainTable] = _splitTable(table, availableHeight);
+        const [newTable, remainTable] = splitTable(table, availableHeight);
 
         if (newTable != null) {
             page.skeTables.set(newTable.tableId, newTable);
@@ -750,67 +852,6 @@ function _updateAndPositionTable(
     }
 }
 
-// FIXME: @JOCS 重新创建两个 table skeleton 比复用之前 table 更好？
-function _splitTable(
-    table: IDocumentSkeletonTable,
-    availableHeight: number
-): [
-        Nullable<IDocumentSkeletonTable>,
-        Nullable<IDocumentSkeletonTable>
-    ] {
-    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
-    if (table.rows[0].height > availableHeight) {
-        return [null, table];
-    }
-
-    const { tableId: tableSliceId, tableSource } = table;
-    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
-    const newTable = getNullTableSkeleton(0, 0, tableSource);
-
-    // Reset table id;
-    newTable.tableId = getTableSliceId(tableId, sliceIndex);
-    newTable.left = table.left;
-    newTable.width = table.width;
-    newTable.height = 0;
-    newTable.top = table.top;
-    table.top = 0;
-
-    let remainHeight = availableHeight;
-
-    while (table.rows.length && remainHeight >= table.rows[0].height) {
-        const row = table.rows.shift()!;
-
-        newTable.rows.push(row);
-
-        table.height -= row.height;
-        newTable.height += row.height;
-
-        // Reset row's parent index.
-        row.parent = newTable;
-
-        remainHeight -= row.height;
-    }
-
-    table.tableId = getTableSliceId(tableId, sliceIndex + 1);
-
-    // Reset st and ed.
-
-    newTable.st = newTable.rows[0].st - 1;
-    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
-
-    if (table.rows.length > 0) {
-        table.st = table.rows[0].st - 1;
-        table.ed = table.rows[table.rows.length - 1].ed + 1;
-
-        // Reset row top.
-        for (const row of table.rows) {
-            row.top -= newTable.height;
-        }
-    }
-
-    return [newTable, table.rows.length > 0 ? table : null];
-}
-
 function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
     const customBlockIds: string[] = [];
 
@@ -827,35 +868,33 @@ function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
 
 function _reLayoutCheck(
     ctx: ILayoutContext,
-    drawings: Map<string, IDocumentSkeletonDrawing>,
+    floatObjects: IFloatObject[],
     column: IDocumentSkeletonColumn,
     paragraphIndex: number
 ) {
     const page = column.parent?.parent;
-    const needUpdatedDrawings = new Map([...drawings]);
 
-    if (drawings.size === 0 || page == null) {
-        return drawings;
+    if (floatObjects.length === 0 || page == null) {
+        return;
     }
 
     let needBreakLineIterator = false;
 
     // Handle situations where an image anchor paragraph is squeezed to the next page.
-    for (const drawing of drawings.values()) {
-        const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
-        if (drawingCache == null || drawingCache.page.segmentId !== page.segmentId) {
+    for (const floatObject of floatObjects) {
+        const floatObjectCache = ctx.floatObjectsCache.get(floatObject.id);
+        if (floatObjectCache == null || floatObjectCache.page.segmentId !== page.segmentId) {
             continue;
         }
         // TODO: 如何判断 drawing 是否在同一页？？？
-        const cachePageStartParagraphIndex = drawingCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
+        const cachePageStartParagraphIndex = floatObjectCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
-        if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
-            drawingCache.page.skeDrawings.delete(drawing.drawingId);
-            ctx.drawingsCache.delete(drawing.drawingId);
-            // console.log(paragraphIndex);
-            // console.log('cache page: ', cachePageStartParagraphIndex, 'page', startIndex);
 
-            lineIterator([drawingCache.page], (line) => {
+        if (floatObjectCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
+            floatObjectCache.page.skeDrawings.delete(floatObject.id);
+            ctx.floatObjectsCache.delete(floatObject.id);
+
+            lineIterator([floatObjectCache.page], (line) => {
                 const { lineHeight, top } = line;
                 const column = line.parent;
 
@@ -864,12 +903,12 @@ function _reLayoutCheck(
                 }
 
                 const { width: columnWidth, left: columnLeft } = column;
-                const collision = collisionDetection(drawingCache.drawing, lineHeight, top, columnLeft, columnWidth);
+                const collision = collisionDetection(floatObjectCache.floatObject, lineHeight, top, columnLeft, columnWidth);
                 if (collision) {
                     // No need to loop next line.
                     needBreakLineIterator = true;
                     ctx.isDirty = true;
-                    ctx.layoutStartPointer[drawingCache.page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[drawingCache.page.segmentId] ?? Number.POSITIVE_INFINITY);
+                    ctx.layoutStartPointer[floatObjectCache.page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[floatObjectCache.page.segmentId] ?? Number.POSITIVE_INFINITY);
                     ctx.paragraphsOpenNewPage.add(paragraphIndex);
                 }
             });
@@ -886,25 +925,25 @@ function _reLayoutCheck(
             return;
         }
 
-        for (const drawing of drawings.values()) {
-            let targetDrawing = drawing;
+        for (const floatObject of floatObjects.values()) {
+            let targetObject = floatObject;
 
-            if (ctx.drawingsCache.has(drawing.drawingId)) {
-                const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
-                const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
+            if (ctx.floatObjectsCache.has(floatObject.id)) {
+                const drawingCache = ctx.floatObjectsCache.get(floatObject.id);
+                const needRePosition = checkRelativeDrawingNeedRePosition(ctx, floatObject);
 
                 if (drawingCache?.page.segmentId !== page.segmentId) {
                     continue;
                 }
 
                 if (needRePosition) {
-                    targetDrawing = drawingCache?.drawing ?? drawing;
+                    targetObject = drawingCache?.floatObject ?? floatObject;
                 } else {
                     continue;
                 }
             }
 
-            const collision = collisionDetection(targetDrawing, lineHeight, top, columnLeft, columnWidth);
+            const collision = collisionDetection(targetObject, lineHeight, top, columnLeft, columnWidth);
             if (collision) {
                 // console.log(page, line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
                 // console.log('drawing: ', targetDrawing, 'lineHeight: ', lineHeight, 'top: ', top, 'width: ', width);
@@ -914,41 +953,39 @@ function _reLayoutCheck(
                 ctx.isDirty = true;
                 ctx.layoutStartPointer[page.segmentId] = Math.min(line.paragraphIndex, ctx.layoutStartPointer[page.segmentId] ?? Number.POSITIVE_INFINITY);
 
-                let drawingCache = ctx.drawingsCache.get(drawing.drawingId);
+                let drawingCache = ctx.floatObjectsCache.get(floatObject.id);
                 if (drawingCache == null) {
                     drawingCache = {
                         count: 0,
-                        drawing,
+                        floatObject,
                         page,
                     };
 
-                    ctx.drawingsCache.set(drawing.drawingId, drawingCache);
+                    ctx.floatObjectsCache.set(floatObject.id, drawingCache);
                 }
 
                 drawingCache.count++;
-                drawingCache.drawing = drawing;
+                drawingCache.floatObject = floatObject;
                 drawingCache.page = page;
             }
         }
     });
-
-    return needUpdatedDrawings;
 }
 
 // Detect the relative positioning of the image, whether the position needs to be repositioned.
-function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
-    const { relativeFrom } = drawing.drawingOrigin.docTransform.positionV;
-    const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
+function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, floatObject: IFloatObject) {
+    const { relativeFrom } = floatObject.positionV;
+    const drawingCache = ctx.floatObjectsCache.get(floatObject.id);
 
     if (drawingCache == null) {
         return false;
     }
 
     if (relativeFrom === ObjectRelativeFromV.PARAGRAPH || relativeFrom === ObjectRelativeFromV.LINE) {
-        const { count, drawing: prevDrawing } = drawingCache;
+        const { count, floatObject: prevObject } = drawingCache;
         // Floating elements can be positioned no more than 5 times,
         // and when the error is within 5 pixels, there is no need to re-layout
-        if (count < 5 && Math.abs(drawing.aTop - prevDrawing.aTop) > 5) {
+        if (count < 5 && Math.abs(floatObject.top - prevObject.top) > 5) {
             return true;
         }
     }
@@ -1263,7 +1300,7 @@ function __getDrawingPosition(
     return drawings;
 }
 
-// 更新 paragraphAffectSkeDrawings 的绝对位置，相对于段落的第一行布局
+// 更新 paragraphNonInlineSkeDrawings 的绝对位置，相对于段落的第一行布局
 function __updateDrawingPosition(
     column: IDocumentSkeletonColumn,
     drawings?: Map<string, IDocumentSkeletonDrawing>

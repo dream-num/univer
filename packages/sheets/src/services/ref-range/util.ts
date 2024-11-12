@@ -1526,8 +1526,8 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     range,
                     {
                         ...range,
-                        startColumn: range.endColumn + 1,
-                        endColumn: Number.MAX_SAFE_INTEGER,
+                        startRow: range.endRow + 1,
+                        endRow: Number.MAX_SAFE_INTEGER,
                     },
                 ],
             };
@@ -1544,8 +1544,8 @@ export function getSeparateEffectedRangesOnCommand(accessor: IAccessor, command:
                     range,
                     {
                         ...range,
-                        startRow: range.endRow + 1,
-                        endRow: Number.MAX_SAFE_INTEGER,
+                        startColumn: range.endColumn + 1,
+                        endColumn: Number.MAX_SAFE_INTEGER,
                     },
                 ],
             };

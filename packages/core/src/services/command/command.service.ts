@@ -36,14 +36,14 @@ export enum CommandType {
      */
     COMMAND = 0,
     /**
-     * MUTATION is the change made to the data saved to snapshot, such as inserting rows and columns,
-     * modifying cell content, modifying filter ranges, etc. If you want to add collaborative editing capabilities to
-     * Univer, it is the smallest unit of conflict resolution.
+     * OPERATION is the change made to data that is not saved to snapshot, without conflict resolution,
+     * such as modifying scroll position, modifying sidebar state, etc.
      */
     OPERATION = 1,
     /**
-     * OPERATION is the change made to data that is not saved to snapshot, without conflict resolution,
-     * such as modifying scroll position, modifying sidebar state, etc.
+     * MUTATION is the change made to the data saved to snapshot, such as inserting rows and columns,
+     * modifying cell content, modifying filter ranges, etc. If you want to add collaborative editing capabilities to
+     * Univer, it is the smallest unit of conflict resolution.
      */
     MUTATION = 2,
 }

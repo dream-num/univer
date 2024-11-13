@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
+import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CustomDecorationType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 interface IAddCustomDecorationParam {
@@ -37,39 +37,13 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
             unitId,
             actions: [],
             textRanges: undefined,
+            noHistory: true,
+            segmentId,
         },
     };
 
-    const textX = new TextX();
     const jsonX = JSONX.getInstance();
-    let cursor = 0;
-
-    for (let i = 0; i < ranges.length; i++) {
-        const range = ranges[i];
-        const { startOffset: start, endOffset: end } = range;
-        if (start > 0) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: start - cursor,
-            });
-        }
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            body: {
-                dataStream: '',
-                customDecorations: [{
-                    id,
-                    type,
-                    startIndex: 0,
-                    endIndex: end - start - 1,
-                }],
-            },
-            len: end - start,
-        });
-
-        cursor = end;
-    }
+    const textX = BuildTextUtils.customDecoration.add({ ranges, id, type });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
@@ -125,13 +99,7 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-    const body = documentDataModel?.getBody();
-    if (!documentDataModel || !body) {
-        return false;
-    }
-
-    const decoration = documentDataModel.getBody()?.customDecorations?.find((d) => d.id === id);
-    if (!decoration) {
+    if (!documentDataModel) {
         return false;
     }
 
@@ -141,34 +109,16 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
             unitId,
             actions: [],
             textRanges: undefined,
+            noHistory: true,
+            segmentId,
         },
     };
 
-    const textX = new TextX();
+    const textX = BuildTextUtils.customDecoration.delete({ id, segmentId, documentDataModel });
+    if (!textX) {
+        return false;
+    }
     const jsonX = JSONX.getInstance();
-    const { startIndex, endIndex } = decoration;
-    const len = endIndex - startIndex + 1;
-
-    textX.push({
-        t: TextXActionType.RETAIN,
-        len: startIndex,
-    });
-
-    textX.push({
-        t: TextXActionType.RETAIN,
-        len,
-        body: {
-            dataStream: '',
-            customDecorations: [
-                {
-                    startIndex: 0,
-                    endIndex: len - 1,
-                    id,
-                    type: CustomDecorationType.DELETED,
-                },
-            ],
-        },
-    });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;

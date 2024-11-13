@@ -224,6 +224,9 @@ export class ThreadCommentModel extends Disposable {
             ...rest,
             parentId: parentId === origin.id ? undefined : parentId,
         };
+        if (!comment.threadId) {
+            comment.threadId = comment.parentId || comment.id;
+        }
 
         const addCommentItem = (item: IThreadComment) => {
             commentMap.set(item.id, item);

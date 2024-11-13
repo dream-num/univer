@@ -356,6 +356,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             errorText={(formula1Res || localError) || undefined}
                             onFocus={() => isFocusFormulaEditorSet(true)}
                             actions={formulaEditorActionsRef.current}
+                            isSupportAcrossSheet
                         />
                         <div ref={containerRef} style={{ marginTop: '12px' }}>
                             {refFinalList.map((item) => {

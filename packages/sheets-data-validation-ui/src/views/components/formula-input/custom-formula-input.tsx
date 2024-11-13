@@ -49,6 +49,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
             errorText={formula1Res}
             onFocus={() => isFocusFormulaEditorSet(true)}
             actions={formulaEditorActionsRef.current}
+            isSupportAcrossSheet
         />
     );
 }

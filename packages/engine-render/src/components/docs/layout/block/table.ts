@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable, ITableRow, Nullable } from '@univerjs/core';
+import type { INumberUnit, ITable, ITableRow } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
-import { createSkeletonCellPage } from '../model/page';
+import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import { createSkeletonCellPages } from '../model/page';
 
 export function createTableSkeleton(
     ctx: ILayoutContext,
@@ -53,7 +53,7 @@ export function createTableSkeleton(
 
         for (const cellNode of cellNodes) {
             const col = cellNodes.indexOf(cellNode);
-            const cellPageSkeleton = createSkeletonCellPage(
+            const cellPageSkeleton = createSkeletonCellPages(
                 ctx,
                 viewModel,
                 cellNode,
@@ -61,7 +61,7 @@ export function createTableSkeleton(
                 table,
                 row,
                 col
-            );
+            )[0];
 
             const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
             const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
@@ -146,9 +146,10 @@ export function createTableSkeletons(
     sectionBreakConfig: ISectionBreakConfig,
     availableHeight: number
 ): ISlicedTableSkeletonParams {
-    let fromCurrentPage = true;
+    const fromCurrentPage = true;
     const skeTables: IDocumentSkeletonTable[] = [];
     const { pageWidth, marginLeft = 0, marginRight = 0, marginTop, marginBottom, pageHeight } = curPage;
+    const pageContentHeight = pageHeight - marginTop - marginBottom;
 
     const { startIndex, endIndex, children: rowNodes } = tableNode;
     const table = viewModel.getTable(startIndex);
@@ -167,96 +168,144 @@ export function createTableSkeletons(
         const { children: cellNodes, startIndex, endIndex } = rowNode;
         const row = rowNodes.indexOf(rowNode);
         const rowSource = table.tableRows[row];
-        const { trHeight } = rowSource;
+        const { trHeight, cantSplit } = rowSource;
+        const rowSkeletons: IDocumentSkeletonRow[] = [];
         const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
         const { hRule, val } = trHeight;
+        const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
+
+        rowSkeletons.push(rowSkeleton);
 
         let left = 0;
-        let rowHeight = 0;
+        const rowHeights = [0];
 
         for (const cellNode of cellNodes) {
             const col = cellNodes.indexOf(cellNode);
-            const cellPageSkeleton = createSkeletonCellPage(
+            const cellPageSkeletons = createSkeletonCellPages(
                 ctx,
                 viewModel,
                 cellNode,
                 sectionBreakConfig,
                 table,
                 row,
-                col
+                col,
+                canRowSplit ? remainHeight : Number.POSITIVE_INFINITY,
+                canRowSplit ? pageContentHeight : Number.POSITIVE_INFINITY
             );
 
-            const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
-            const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
-            cellPageSkeleton.left = left;
-            left += cellPageSkeleton.pageWidth;
-            cellPageSkeleton.parent = rowSkeleton;
-            rowSkeleton.cells.push(cellPageSkeleton);
-            rowHeight = Math.max(rowHeight, pageHeight);
+            while (rowSkeletons.length < cellPageSkeletons.length) {
+                const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
+
+                rowSkeletons.push(rowSkeleton);
+            }
+
+            while (rowHeights.length < cellPageSkeletons.length) {
+                rowHeights.push(0);
+            }
+
+            for (const cellPageSkeleton of cellPageSkeletons) {
+                const { marginTop: cellMarginTop = 0, marginBottom: cellMarginBottom = 0 } = cellPageSkeleton;
+                const cellPageHeight = cellPageSkeleton.height + cellMarginTop + cellMarginBottom;
+                const pageIndex = cellPageSkeletons.indexOf(cellPageSkeleton);
+                const rowSke = rowSkeletons[pageIndex];
+                cellPageSkeleton.left = left;
+
+                cellPageSkeleton.parent = rowSke;
+                rowSke.cells[col] = cellPageSkeleton;
+                rowHeights[pageIndex] = Math.max(rowHeights[pageIndex], cellPageHeight);
+            }
+
+            left += cellPageSkeletons[0].pageWidth;
         }
 
-        if (hRule === TableRowHeightRule.AT_LEAST) {
-            rowHeight = Math.max(rowHeight, val.v);
-        } else if (hRule === TableRowHeightRule.EXACT) {
-            rowHeight = val.v;
-        }
+        for (const rowSke of rowSkeletons) {
+            const rowIndex = rowSkeletons.indexOf(rowSke);
 
-        // Set row height to cell page height.
-        for (const cellPageSkeleton of rowSkeleton.cells) {
-            cellPageSkeleton.pageHeight = rowHeight;
+            if (hRule === TableRowHeightRule.AT_LEAST) {
+                rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
+            } else if (hRule === TableRowHeightRule.EXACT) {
+                rowHeights[rowIndex] = val.v;
+            }
+
+            // Set row height to cell page height.
+            for (const cellPageSkeleton of rowSke.cells) {
+                cellPageSkeleton.pageHeight = rowHeights[rowIndex];
+            }
         }
 
         // Handle vertical alignment in cell.
         for (let i = 0; i < rowSource.tableCells.length; i++) {
             const cellConfig = rowSource.tableCells[i];
-            const cellPageSkeleton = rowSkeleton.cells[i];
-            const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
-            const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
 
-            let marginTop = originMarginTop;
+            for (const rowSkeleton of rowSkeletons) {
+                const cellPageSkeleton = rowSkeleton.cells[i];
 
-            switch (vAlign) {
-                case VerticalAlignmentType.TOP: {
-                    marginTop = originMarginTop;
-                    break;
+                if (cellPageSkeleton == null) {
+                    continue;
                 }
-                case VerticalAlignmentType.CENTER: {
-                    marginTop = (pageHeight - height) / 2;
-                    break;
+
+                const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
+                const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+
+                let marginTop = originMarginTop;
+
+                switch (vAlign) {
+                    case VerticalAlignmentType.TOP: {
+                        marginTop = originMarginTop;
+                        break;
+                    }
+                    case VerticalAlignmentType.CENTER: {
+                        marginTop = (pageHeight - height) / 2;
+                        break;
+                    }
+                    case VerticalAlignmentType.BOTTOM: {
+                        marginTop = pageHeight - height - originMarginBottom;
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                case VerticalAlignmentType.BOTTOM: {
-                    marginTop = pageHeight - height - originMarginBottom;
-                    break;
-                }
-                default:
-                    break;
+
+                marginTop = Math.max(originMarginTop, marginTop);
+
+                cellPageSkeleton.marginTop = marginTop;
             }
-
-            marginTop = Math.max(originMarginTop, marginTop);
-
-            cellPageSkeleton.marginTop = marginTop;
         }
 
-        if (remainHeight < rowHeight) {
-            if (skeTables.length === 1 && curTableSkeleton.rows.length === 0) {
-                fromCurrentPage = false;
-            } else {
-                curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
-                skeTables.push(curTableSkeleton);
+        if (rowSkeletons.length > 1) {
+            for (let i = 0; i < rowSkeletons.length; i++) {
+                if (i !== 0) {
+                    curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+                    skeTables.push(curTableSkeleton);
+                }
+
+                const rowSkeleton = rowSkeletons[i];
+                const rowHeight = rowHeights[i];
+
+                rowSkeleton.height = rowHeight;
+                rowSkeleton.top = i === 0 ? rowTop : 0;
+
+                curTableSkeleton.height += rowHeight;
+
+                curTableSkeleton.rows.push(rowSkeleton);
+                rowSkeleton.parent = curTableSkeleton;
+                remainHeight = pageContentHeight - rowHeight;
+
+                rowTop = rowHeight;
             }
+        } else {
+            const rowSkeleton = rowSkeletons[0];
+            const rowHeight = rowHeights[0];
 
-            remainHeight = pageHeight - marginTop - marginBottom;
-            rowTop = 0;
+            rowSkeleton.height = rowHeight;
+            rowSkeleton.top = rowTop;
+            rowTop += rowHeight;
+
+            curTableSkeleton.rows.push(rowSkeleton);
+            rowSkeleton.parent = curTableSkeleton;
+            remainHeight -= rowHeight;
+            curTableSkeleton.height = rowTop;
         }
-
-        rowSkeleton.height = rowHeight;
-        rowSkeleton.top = rowTop;
-        rowTop += rowHeight;
-
-        curTableSkeleton.rows.push(rowSkeleton);
-        rowSkeleton.parent = curTableSkeleton;
-        remainHeight -= rowHeight;
-        curTableSkeleton.height = rowTop;
 
         tableWidth = Math.max(tableWidth, left);
     }
@@ -283,63 +332,6 @@ export function createTableSkeletons(
         skeTables,
         fromCurrentPage,
     };
-}
-
-// When a table spreads pages, you need to split the table into tables and place them on different pages,
-// and if you allow the spread to break the rows, you also need to split the rows.
-function splitTable(
-    tableSke: IDocumentSkeletonTable,
-    availableHeight: number
-): Nullable<IDocumentSkeletonTable>[] {
-    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
-    if (tableSke.rows[0].height > availableHeight) {
-        return [null, tableSke];
-    }
-
-    const { tableId: tableSliceId, tableSource } = tableSke;
-    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
-    const newTable = getNullTableSkeleton(0, 0, tableSource);
-
-    // Reset table id;
-    newTable.tableId = getTableSliceId(tableId, sliceIndex);
-    newTable.left = tableSke.left;
-    newTable.width = tableSke.width;
-    newTable.height = 0;
-    newTable.top = tableSke.top;
-    tableSke.top = 0;
-
-    let remainHeight = availableHeight;
-
-    while (tableSke.rows.length && remainHeight >= tableSke.rows[0].height) {
-        const row = tableSke.rows.shift()!;
-
-        newTable.rows.push(row);
-
-        tableSke.height -= row.height;
-        newTable.height += row.height;
-
-        // Reset row's parent index.
-        row.parent = newTable;
-        remainHeight -= row.height;
-    }
-
-    // Reset st and ed.
-    newTable.st = newTable.rows[0].st - 1;
-    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
-
-    tableSke.tableId = getTableSliceId(tableId, sliceIndex + 1);
-
-    if (tableSke.rows.length > 0) {
-        tableSke.st = tableSke.rows[0].st - 1;
-        tableSke.ed = tableSke.rows[tableSke.rows.length - 1].ed + 1;
-
-        // Reset row top.
-        for (const row of tableSke.rows) {
-            row.top -= newTable.height;
-        }
-    }
-
-    return [newTable, tableSke.rows.length > 0 ? tableSke : null];
 }
 
 function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {

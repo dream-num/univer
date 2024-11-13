@@ -279,14 +279,16 @@ function _createSkeletonHeaderFooter(
     return page;
 }
 
-export function createSkeletonCellPage(
+export function createSkeletonCellPages(
     ctx: ILayoutContext,
     viewModel: DocumentViewModel,
     cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableConfig: ITable,
     row: number,
-    col: number
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
 ) {
     const { lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
     const { skeletonResourceReference } = ctx;
@@ -301,7 +303,7 @@ export function createSkeletonCellPage(
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
     const pageWidth = tableColumns[col].size.width.v;
-    const pageHeight = Number.POSITIVE_INFINITY;
+    const pageHeight = maxCellPageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
         lists,
@@ -319,21 +321,31 @@ export function createSkeletonCellPage(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, cellSectionBreakConfig, skeletonResourceReference);
+    const areaPage = createSkeletonPage(
+        ctx,
+        // Set first page height to availableHeight.
+        Object.assign({}, cellSectionBreakConfig, {
+            pageSize: {
+                width: pageWidth,
+                height: Number.isFinite(availableHeight) ? availableHeight : pageHeight,
+            },
+        }),
+        skeletonResourceReference
+    );
     areaPage.type = DocumentSkeletonPageType.CELL;
     areaPage.segmentId = tableId;
 
-    const page = dealWithSection(
+    const { pages } = dealWithSection(
         ctx,
         viewModel,
         sectionNode,
         areaPage,
         cellSectionBreakConfig
-    ).pages[0];
+    );
 
-    updateBlockIndex([page], cellNode.startIndex);
+    updateBlockIndex(pages, cellNode.startIndex);
 
-    return page;
+    return pages;
 }
 
 function _getVerticalMargin(

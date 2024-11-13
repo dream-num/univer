@@ -600,6 +600,10 @@ describe('Test EndEditController', () => {
             it('should handle escaped quotes in strings', () => {
                 expect(normalizeStringByLexer('="He said, ""Hello, .5!"""')).toBe('="He said, ""Hello, .5!"""');
             });
+            it('Illegal strings should not be modified', () => {
+                expect(normalizeStringByLexer('=SUM(11, 2 2, 33)')).toBe('=SUM(11, 2 2, 33)');
+                expect(normalizeStringByLexer('=SUM(11, 123 123, 33)')).toBe('=SUM(11, 123 123, 33)');
+            });
         });
     });
 });

@@ -29,7 +29,7 @@ import { getTransformedFormula } from './util';
 export class TextLengthValidator extends BaseDataValidator<number> {
     id: string = DataValidationType.TEXT_LENGTH;
     title: string = 'dataValidation.textLength.title';
-    private _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -44,7 +44,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
 
     scopes: string | string[] = ['sheet'];
 
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
     private _isFormulaOrInt(formula: string) {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));

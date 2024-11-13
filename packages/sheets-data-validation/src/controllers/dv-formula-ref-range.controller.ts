@@ -18,7 +18,6 @@ import type { IDisposable, IMutationInfo, ISheetDataValidationRule } from '@univ
 import type { IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { Disposable, generateRandomId, Inject, toDisposable } from '@univerjs/core';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { isCustomFormulaType } from '../utils/formula';
@@ -28,8 +27,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
 
     constructor(
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
-        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
     ) {
         super();
         this._initRefRange();

@@ -29,8 +29,8 @@ import { getCellValueNumber } from './decimal-validator';
 import { getTransformedFormula } from './util';
 
 export class WholeValidator extends BaseDataValidator<number> {
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
-    private _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     id: string = DataValidationType.WHOLE;
     title: string = 'dataValidation.whole.title';

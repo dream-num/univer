@@ -27,7 +27,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
 
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = isFormulaString(rule.formula1);

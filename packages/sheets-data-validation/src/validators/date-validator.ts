@@ -62,8 +62,8 @@ export class DateValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
-    private _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>> {
         const formulaResult1 = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, rule.uid, row, column);

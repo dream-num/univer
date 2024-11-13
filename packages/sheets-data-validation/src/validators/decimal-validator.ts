@@ -41,9 +41,9 @@ export function getCellValueNumber(cellValue: CellValue) {
 }
 
 export class DecimalValidator extends BaseDataValidator<number> {
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
     id: string = DataValidationType.DECIMAL;
-    private _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
     title: string = 'dataValidation.decimal.title';
 
     operators: DataValidationOperator[] = [

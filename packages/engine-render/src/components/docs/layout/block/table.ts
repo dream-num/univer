@@ -132,15 +132,164 @@ export function createTableSkeleton(
     return tableSkeleton;
 }
 
-// When a table spreads pages, you need to split the table into two tables and place them on different pages,
+export interface ISlicedTableSkeletonParams {
+    skeTables: IDocumentSkeletonTable[];
+    fromCurrentPage: boolean;
+}
+
+// Create skeletons of a table, which may be divided into different pages according to the available height of the page.
+export function createTableSkeletons(
+    ctx: ILayoutContext,
+    curPage: IDocumentSkeletonPage,
+    viewModel: DocumentViewModel,
+    tableNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    availableHeight: number
+): ISlicedTableSkeletonParams {
+    let fromCurrentPage = true;
+    const skeTables: IDocumentSkeletonTable[] = [];
+    const { pageWidth, marginLeft = 0, marginRight = 0, marginTop, marginBottom, pageHeight } = curPage;
+
+    const { startIndex, endIndex, children: rowNodes } = tableNode;
+    const table = viewModel.getTable(startIndex);
+    if (table == null) {
+        throw new Error('Table not found when creating table skeletons');
+    }
+
+    let curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+    let rowTop = 0;
+    let tableWidth = 0;
+    let remainHeight = availableHeight;
+
+    skeTables.push(curTableSkeleton);
+
+    for (const rowNode of rowNodes) {
+        const { children: cellNodes, startIndex, endIndex } = rowNode;
+        const row = rowNodes.indexOf(rowNode);
+        const rowSource = table.tableRows[row];
+        const { trHeight } = rowSource;
+        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, curTableSkeleton);
+        const { hRule, val } = trHeight;
+
+        let left = 0;
+        let rowHeight = 0;
+
+        for (const cellNode of cellNodes) {
+            const col = cellNodes.indexOf(cellNode);
+            const cellPageSkeleton = createSkeletonCellPage(
+                ctx,
+                viewModel,
+                cellNode,
+                sectionBreakConfig,
+                table,
+                row,
+                col
+            );
+
+            const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
+            const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
+            cellPageSkeleton.left = left;
+            left += cellPageSkeleton.pageWidth;
+            cellPageSkeleton.parent = rowSkeleton;
+            rowSkeleton.cells.push(cellPageSkeleton);
+            rowHeight = Math.max(rowHeight, pageHeight);
+        }
+
+        if (hRule === TableRowHeightRule.AT_LEAST) {
+            rowHeight = Math.max(rowHeight, val.v);
+        } else if (hRule === TableRowHeightRule.EXACT) {
+            rowHeight = val.v;
+        }
+
+        // Set row height to cell page height.
+        for (const cellPageSkeleton of rowSkeleton.cells) {
+            cellPageSkeleton.pageHeight = rowHeight;
+        }
+
+        // Handle vertical alignment in cell.
+        for (let i = 0; i < rowSource.tableCells.length; i++) {
+            const cellConfig = rowSource.tableCells[i];
+            const cellPageSkeleton = rowSkeleton.cells[i];
+            const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
+            const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+
+            let marginTop = originMarginTop;
+
+            switch (vAlign) {
+                case VerticalAlignmentType.TOP: {
+                    marginTop = originMarginTop;
+                    break;
+                }
+                case VerticalAlignmentType.CENTER: {
+                    marginTop = (pageHeight - height) / 2;
+                    break;
+                }
+                case VerticalAlignmentType.BOTTOM: {
+                    marginTop = pageHeight - height - originMarginBottom;
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            marginTop = Math.max(originMarginTop, marginTop);
+
+            cellPageSkeleton.marginTop = marginTop;
+        }
+
+        if (remainHeight < rowHeight) {
+            if (skeTables.length === 1 && curTableSkeleton.rows.length === 0) {
+                fromCurrentPage = false;
+            } else {
+                curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+                skeTables.push(curTableSkeleton);
+            }
+
+            remainHeight = pageHeight - marginTop - marginBottom;
+            rowTop = 0;
+        }
+
+        rowSkeleton.height = rowHeight;
+        rowSkeleton.top = rowTop;
+        rowTop += rowHeight;
+
+        curTableSkeleton.rows.push(rowSkeleton);
+        remainHeight -= rowHeight;
+        curTableSkeleton.height = rowTop;
+
+        tableWidth = Math.max(tableWidth, left);
+    }
+
+    const tableLeft = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
+
+    let tableIndex = 0;
+    for (const tableSkeleton of skeTables) {
+        tableSkeleton.width = tableWidth;
+        tableSkeleton.left = tableLeft;
+
+        // Reset table st and ed.
+        tableSkeleton.st = tableSkeleton.rows[0].st - 1;
+        tableSkeleton.ed = tableSkeleton.rows[tableSkeleton.rows.length - 1].ed + 1;
+
+        // Reset table id.
+        if (skeTables.length > 1) {
+            tableSkeleton.tableId = getTableSliceId(table.tableId, tableIndex);
+            tableIndex++;
+        }
+    }
+
+    return {
+        skeTables,
+        fromCurrentPage,
+    };
+}
+
+// When a table spreads pages, you need to split the table into tables and place them on different pages,
 // and if you allow the spread to break the rows, you also need to split the rows.
-export function splitTable(
+function splitTable(
     tableSke: IDocumentSkeletonTable,
     availableHeight: number
-): [
-        Nullable<IDocumentSkeletonTable>,
-        Nullable<IDocumentSkeletonTable>
-    ] {
+): Nullable<IDocumentSkeletonTable>[] {
     // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
     if (tableSke.rows[0].height > availableHeight) {
         return [null, tableSke];
@@ -170,15 +319,14 @@ export function splitTable(
 
         // Reset row's parent index.
         row.parent = newTable;
-
         remainHeight -= row.height;
     }
-
-    tableSke.tableId = getTableSliceId(tableId, sliceIndex + 1);
 
     // Reset st and ed.
     newTable.st = newTable.rows[0].st - 1;
     newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
+
+    tableSke.tableId = getTableSliceId(tableId, sliceIndex + 1);
 
     if (tableSke.rows.length > 0) {
         tableSke.st = tableSke.rows[0].st - 1;

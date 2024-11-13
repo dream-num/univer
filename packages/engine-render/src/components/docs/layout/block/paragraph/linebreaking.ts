@@ -131,10 +131,10 @@ export function lineBreaking(
         localeService,
     } = sectionBreakConfig;
 
-    const { endIndex, blocks = [] } = paragraphNode;
+    const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
 
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex, true) || { startIndex: 0 };
 
     const { paragraphStyle = {}, bullet } = paragraph;
 
@@ -162,6 +162,8 @@ export function lineBreaking(
                     tableId: tableSkeleton.tableId,
                     table: tableSkeleton,
                     hasPositioned: false,
+                    isSlideTable: false,
+                    tableNode: children[0],
                 },
             ]
             : undefined,

@@ -412,6 +412,7 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
+    // TODO: @jocs, Use hash map to instead of array.
     getParagraph(index: number, fromStart = false) {
         const paragraphs = this.getBody()!.paragraphs;
         if (paragraphs == null) {

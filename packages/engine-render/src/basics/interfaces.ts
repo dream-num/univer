@@ -30,6 +30,7 @@ import type {
     LocaleService,
 } from '@univerjs/core';
 
+import type { DataStreamTreeNode } from '../components/docs/view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {
     DocumentSkeletonPageType,
@@ -111,6 +112,8 @@ export interface IParagraphTableCache {
     tableId: string;
     table: IDocumentSkeletonTable;
     hasPositioned: boolean;
+    isSlideTable: boolean;
+    tableNode: DataStreamTreeNode;
 }
 
 export interface IParagraphConfig {

@@ -18,8 +18,6 @@ import process from 'node:process';
 import { awaitTime, FUniver } from '@univerjs/core';
 import { createUniverOnNode } from '../sdk';
 
-import '../sdk/facade';
-
 // From now on, Univer is a full-stack SDK.
 
 async function run(): Promise<void> {

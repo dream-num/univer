@@ -32,12 +32,23 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 
-export function createUniverOnNode(): Univer {
+import './facade';
+
+export interface ICreateUniverOnNodeOptions {
+    useComputingWorker?: boolean;
+}
+
+export function createUniverOnNode(options: ICreateUniverOnNodeOptions = {}): Univer {
+    const { useComputingWorker = false } = options;
+
     const univer = new Univer();
 
-    registerBasicPlugins(univer);
+    registerBasicPlugins(univer, useComputingWorker);
     registerSharedPlugins(univer);
-    registerRPCPlugin(univer);
+
+    if (useComputingWorker) {
+        registerRPCPlugin(univer);
+    }
 
     registerDocPlugins(univer);
     registerSheetPlugins(univer);
@@ -45,8 +56,8 @@ export function createUniverOnNode(): Univer {
     return univer;
 }
 
-function registerBasicPlugins(univer: Univer): void {
-    univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
+function registerBasicPlugins(univer: Univer, useComputingWorker: boolean): void {
+    univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: useComputingWorker });
 }
 
 function registerSharedPlugins(univer: Univer): void {

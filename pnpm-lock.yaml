@@ -3456,6 +3456,55 @@ importers:
         specifier: ^2.1.4
         version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
+  tests/formula-integration:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../../packages/data-validation
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../../packages/docs
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../../packages/engine-formula
+      '@univerjs/mockdata':
+        specifier: workspace:*
+        version: link:../../mockdata
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../../packages/sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../../packages/sheets-data-validation
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../../packages/sheets-formula
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../../packages/sheets-numfmt
+      examples-node:
+        specifier: workspace:*
+        version: link:../../examples-node
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: ^2.1.4
+        version: 2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
 packages:
 
   '@adobe/css-tools@4.4.0':

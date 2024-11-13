@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRange } from '@univerjs/core';
-import { CustomDecorationType, TextX, TextXActionType } from '@univerjs/core';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { DocumentDataModel } from '../../document-data-model';
+import { CustomDecorationType } from '../../../../types/interfaces';
+import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 interface IAddCustomDecorationParam {
     ranges: ITextRange[];

@@ -14,27 +14,188 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import { CellValueType, LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { Lexer } from '../../../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../../../engine/analysis/parser';
+import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
+import { IFunctionService } from '../../../../services/function.service';
+import { IFormulaRuntimeService } from '../../../../services/runtime.service';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Sequence } from '../index';
 
+const getTestWorkbookData = (): IWorkbookData => {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        2: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        3: {
+                            v: 'test',
+                            t: CellValueType.STRING,
+                        },
+                        4: {
+                            v: null,
+                        },
+                        5: {
+                            v: ErrorType.NAME,
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: ' ',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 1.23,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        4: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        5: {
+                            v: null,
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: '100',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: '2.34',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'test',
+                            t: CellValueType.STRING,
+                        },
+                        4: {
+                            v: -3,
+                            t: CellValueType.NUMBER,
+                        },
+                        5: {
+                            v: ErrorType.NAME,
+                            t: CellValueType.STRING,
+                        },
+                    },
+                },
+                rowCount: 1000,
+                columnCount: 20,
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+};
+
 describe('Test sequence function', () => {
-    const testFunction = new Sequence(FUNCTION_NAMES_MATH.SEQUENCE);
+    let get: Injector['get'];
+    let lexer: Lexer;
+    let astTreeBuilder: AstTreeBuilder;
+    let interpreter: Interpreter;
+    let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
+
+    beforeEach(() => {
+        const testBed = createFunctionTestBed(getTestWorkbookData());
+
+        get = testBed.get;
+
+        lexer = get(Lexer);
+        astTreeBuilder = get(AstTreeBuilder);
+        interpreter = get(Interpreter);
+
+        const functionService = get(IFunctionService);
+
+        const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+
+        const formulaRuntimeService = get(IFormulaRuntimeService);
+
+        formulaCurrentConfigService.load({
+            formulaData: {},
+            arrayFormulaCellData: {},
+            arrayFormulaRange: {},
+            forceCalculate: false,
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+            excludedCell: {},
+            allUnitData: {
+                [testBed.unitId]: testBed.sheetData,
+            },
+        });
+
+        const sheetItem = testBed.sheetData[testBed.sheetId];
+
+        formulaRuntimeService.setCurrent(
+            0,
+            0,
+            sheetItem.rowCount,
+            sheetItem.columnCount,
+            testBed.sheetId,
+            testBed.unitId
+        );
+
+        functionService.registerExecutors(
+            new Sequence(FUNCTION_NAMES_MATH.SEQUENCE)
+        );
+
+        calculate = (formula: string) => {
+            const lexerNode = lexer.treeBuilder(formula);
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
+
+            return getObjectValue(result);
+        };
+    });
 
     describe('Sequence', () => {
-        it('Value is normal number', () => {
-            const rows = NumberValueObject.create(4);
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual([
+        it('Value is normal', async () => {
+            const result = await calculate('=SEQUENCE(4,5,2,2)');
+            expect(result).toStrictEqual([
                 [2, 4, 6, 8, 10],
                 [12, 14, 16, 18, 20],
                 [22, 24, 26, 28, 30],
@@ -42,116 +203,67 @@ describe('Test sequence function', () => {
             ]);
         });
 
-        it('Value is number negative', () => {
-            const rows = NumberValueObject.create(-1);
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        it('rows and columns is exceed', async () => {
+            const result = await calculate('=SEQUENCE(10000,10000)');
+            expect(result).toBe(ErrorType.VALUE);
+
+            const result2 = await calculate('=SEQUENCE(2000,3)');
+            expect(result2).toBe(ErrorType.REF);
         });
 
-        it('Value is number string', () => {
-            const rows = StringValueObject.create('1.5');
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual([
+        it('Value is number negative', async () => {
+            const result = await calculate('=SEQUENCE(-1,5,2,2)');
+            expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('Value is number string', async () => {
+            const result = await calculate('=SEQUENCE("1.5",5,2,2)');
+            expect(result).toStrictEqual([
                 [2, 4, 6, 8, 10],
             ]);
         });
 
-        it('Value is normal string', () => {
-            const rows = StringValueObject.create('test');
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        it('Value is normal string', async () => {
+            const result = await calculate('=SEQUENCE("test",5,2,2)');
+            expect(result).toBe(ErrorType.VALUE);
         });
 
-        it('Value is boolean', () => {
-            const rows = BooleanValueObject.create(true);
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual([
+        it('Value is boolean', async () => {
+            const result = await calculate('=SEQUENCE(B1,5,2,2)');
+            expect(result).toStrictEqual([
                 [2, 4, 6, 8, 10],
             ]);
         });
 
-        it('Value is blank cell', () => {
-            const rows = NumberValueObject.create(4);
-            const columns = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [null],
-                ]),
-                rowCount: 1,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.CALC);
+        it('Value is blank cell', async () => {
+            const result = await calculate('=SEQUENCE(4,E1,2,2)');
+            expect(result).toBe(ErrorType.CALC);
         });
 
-        it('Value is null', () => {
-            const rows = NullValueObject.create();
-            const columns = NullValueObject.create();
-            const start = NullValueObject.create();
-            const step = NullValueObject.create();
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual([
+        it('Value is null', async () => {
+            const result = await calculate('=SEQUENCE(,)');
+            expect(result).toStrictEqual([
                 [1],
             ]);
         });
 
-        it('Value is error', () => {
-            const rows = ErrorValueObject.create(ErrorType.NAME);
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+        it('Value is error', async () => {
+            const result = await calculate('=SEQUENCE(F1,5,2,2)');
+            expect(result).toBe(ErrorType.NAME);
 
-            const rows2 = NumberValueObject.create(4);
-            const columns2 = ErrorValueObject.create(ErrorType.NAME);
-            const result2 = testFunction.calculate(rows2, columns2, start, step);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            const result2 = await calculate('=SEQUENCE(4,F1,2,2)');
+            expect(result2).toBe(ErrorType.NAME);
 
-            const start2 = ErrorValueObject.create(ErrorType.NAME);
-            const result3 = testFunction.calculate(rows2, columns, start2, step);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NAME);
+            const result3 = await calculate('=SEQUENCE(4,5,F1,2)');
+            expect(result3).toBe(ErrorType.NAME);
 
-            const step2 = ErrorValueObject.create(ErrorType.NAME);
-            const result4 = testFunction.calculate(rows2, columns, start, step2);
-            expect(getObjectValue(result4)).toStrictEqual(ErrorType.NAME);
+            const result4 = await calculate('=SEQUENCE(4,5,2,F1)');
+            expect(result4).toBe(ErrorType.NAME);
         });
 
-        it('Value is array', () => {
-            const rows = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
-                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
-                ]),
-                rowCount: 2,
-                columnCount: 6,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const columns = NumberValueObject.create(5);
-            const start = NumberValueObject.create(2);
-            const step = NumberValueObject.create(2);
-            const result = testFunction.calculate(rows, columns, start, step);
-            expect(getObjectValue(result)).toStrictEqual([
+        it('Value is array', async () => {
+            const result = await calculate('=SEQUENCE(A2:F3,5,2,2)');
+            expect(result).toStrictEqual([
                 [2, ErrorType.VALUE, 2, 2, ErrorType.CALC, ErrorType.CALC],
                 [ErrorType.CALC, 2, 2, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
             ]);

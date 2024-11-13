@@ -18,9 +18,10 @@ import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContex
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { Disposable, DisposableCollection, Inject, IPermissionService, sortRules } from '@univerjs/core';
+import { Disposable, DisposableCollection, fromEventSubject, Inject, IPermissionService, sortRules } from '@univerjs/core';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { UnitAction, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { throttleTime } from 'rxjs';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export class CellCustomRenderController extends Disposable implements IRenderModule {
@@ -162,7 +163,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     }
                 });
 
-                const moveDisposable = spreadsheet.onPointerMove$.subscribeEvent((evt) => {
+                const moveDisposable = fromEventSubject(spreadsheet.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;
@@ -181,6 +182,11 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                                 cellContext,
                             };
                             activeRender.onPointerEnter?.(cellContext, evt);
+                        }
+                    } else {
+                        if (this._enterActiveRender) {
+                            this._enterActiveRender.render.onPointerLeave?.(this._enterActiveRender.cellContext, evt);
+                            this._enterActiveRender = null;
                         }
                     }
                 });

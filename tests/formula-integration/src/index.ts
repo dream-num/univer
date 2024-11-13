@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { expectCalculationResultMatchesSnapshot, getCurrentTestName } from './__testing__/util';
+export { expectCalculationResultMatchesSnapshot } from './__testing__/util';

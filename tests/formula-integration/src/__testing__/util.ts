@@ -31,7 +31,7 @@ function getTestName(): string {
 
 export function getTestFilePath() {
     const name = getTestName();
-    return name.replaceAll(/[ >]/g, '-').toLowerCase();
+    return name.replace(/[ >]/g, '-').toLowerCase();
 }
 
 /**

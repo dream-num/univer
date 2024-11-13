@@ -51,8 +51,8 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(IUniFormulaService);
         touchDependencies(this._injector, [
+            [IUniFormulaService],
             [TriggerCalculationController],
         ]);
     }

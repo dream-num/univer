@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
@@ -27,6 +28,11 @@ export class BuildTextUtils {
         copyCustomRange,
         getCustomRangesInterestsWithSelection,
         isIntersecting,
+    };
+
+    static customDecoration = {
+        add: addCustomDecorationTextX,
+        delete: deleteCustomDecorationTextX,
     };
 
     static selection = {

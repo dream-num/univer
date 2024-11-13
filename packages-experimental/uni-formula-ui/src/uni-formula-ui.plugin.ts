@@ -58,8 +58,10 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     }
 
     override onSteady(): void {
-        this._injector.get(UniFormulaUniController);
-        this._injector.get(DocUniFormulaInputController);
-        this._injector.get(SlideUniFormulaInputController);
+        touchDependencies(this._injector, [
+            [UniFormulaUniController],
+            [DocUniFormulaInputController],
+            [SlideUniFormulaInputController],
+        ]);
     }
 }

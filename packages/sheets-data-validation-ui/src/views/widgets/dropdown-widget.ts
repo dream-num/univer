@@ -19,8 +19,8 @@ import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
-import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
+import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CURSOR_TYPE, Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
@@ -167,14 +167,13 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
     ) {
         // super
     }
 
     zIndex?: number | undefined;
-    onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;
-    onPointerLeave?: ((info: ICellRenderContext) => void) | undefined;
 
     private _ensureMap(subUnitId: string) {
         let map = this._dropdownInfoMap.get(subUnitId);
@@ -506,4 +505,12 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
         this._commandService.executeCommand(ShowDataValidationDropdown.id, params);
     };
+
+    onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+    }
+
+    onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+    }
 }

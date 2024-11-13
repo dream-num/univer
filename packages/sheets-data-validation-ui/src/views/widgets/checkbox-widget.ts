@@ -19,8 +19,8 @@ import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } fro
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
-import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
-import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
+import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 
@@ -70,9 +70,9 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
     ) {
-        // super
     }
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
@@ -208,4 +208,12 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             params
         );
     };
+
+    onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+    }
+
+    onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+    }
 }

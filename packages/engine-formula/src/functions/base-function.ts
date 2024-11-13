@@ -45,6 +45,8 @@ export class BaseFunction {
     private _sheetOrder: string[];
     private _sheetNameMap: { [sheetId: string]: string };
     protected _formulaDataModel: Nullable<FormulaDataModel>;
+    protected _rowCount: number = -1;
+    protected _columnCount: number = -1;
 
     /**
      * Whether the function needs to expand the parameters
@@ -70,6 +72,11 @@ export class BaseFunction {
      * Whether the function needs function methods in FormulaDataModel
      */
     needsFormulaDataModel: boolean = false;
+
+    /**
+     * Whether the function needs the number of rows and columns in the sheet
+     */
+    needsSheetRowColumnCount: boolean = false;
 
     /**
      * Minimum number of parameters
@@ -157,6 +164,11 @@ export class BaseFunction {
 
     setFormulaDataModel(_formulaDataModel: FormulaDataModel) {
         this._formulaDataModel = _formulaDataModel;
+    }
+
+    setSheetRowColumnCount(rowCount: number, columnCount: number) {
+        this._rowCount = rowCount;
+        this._columnCount = columnCount;
     }
 
     isAsync() {

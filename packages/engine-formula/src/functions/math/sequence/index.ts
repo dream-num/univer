@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
@@ -21,12 +22,13 @@ import { ArrayValueObject } from '../../../engine/value-object/array-value-objec
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Sequence extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 4;
+
+    override needsSheetRowColumnCount = true;
 
     override calculate(rows: BaseValueObject, columns?: BaseValueObject, start?: BaseValueObject, step?: BaseValueObject): BaseValueObject {
         let _rows = rows;
@@ -121,12 +123,20 @@ export class Sequence extends BaseFunction {
         const startValue = +_startObject.getValue();
         const stepValue = +_stepObject.getValue();
 
-        if (rowsValue < 0 || columnsValue < 0) {
+        // max count of cells is 10^7
+        if (rowsValue < 0 || columnsValue < 0 || rowsValue * columnsValue > 10 ** 7) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (rowsValue === 0 || columnsValue === 0) {
             return ErrorValueObject.create(ErrorType.CALC);
+        }
+
+        const maxRows = this._rowCount - this.row;
+        const maxColumns = this._columnCount - this.column;
+
+        if (rowsValue > maxRows || columnsValue > maxColumns) {
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const result: number[][] = [];

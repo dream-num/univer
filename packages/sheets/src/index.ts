@@ -33,11 +33,11 @@ export {
 export {
     convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
+    type ISelectionStyle,
     type ISelectionWidgetConfig,
     type ISelectionWithCoord,
     type ISelectionWithStyle,
     type ISheetRangeLocation,
-    type ISelectionStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from './basics/selection';
@@ -54,7 +54,7 @@ export {
     RefSelectionsService,
     SelectionMoveType,
     SheetsSelectionsService,
-    WorkbookSelectionDataModel,
+    WorkbookSelectionModel,
 } from './services/selections';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';

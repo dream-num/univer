@@ -26,7 +26,7 @@ import type {
     Workbook,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionDataModel } from '@univerjs/sheets';
+import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import {
     ICommandService,
@@ -46,7 +46,7 @@ import { getCoordByOffset, getSheetObject } from '../../controllers/utils/compon
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelectionOfCurrSheet } from './base-selection-render.service';
+import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
 import { attachSelectionWithCoord } from './util';
 
@@ -59,7 +59,7 @@ enum ExpandingControl {
     BOTTOM = 'bottom',
 }
 export class MobileSheetsSelectionRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelectionDataModel;
+    private readonly _workbookSelections: WorkbookSelectionModel;
     private _renderDisposable: Nullable<IDisposable> = null;
 
     _expandingSelection: boolean = false;
@@ -128,12 +128,13 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     private _initSelectionChangeListener() {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((ISelectionWithStyleList) => {
-            this._reset();
-            for (const selectionWithStyle of ISelectionWithStyleList) {
-                this._addSelectionControlByModelData(selectionWithStyle);
-            }
-        }));
+        // only ref selection need this. now mobile only has normal selection.
+        // this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((ISelectionWithStyleList) => {
+        //     this._reset();
+        //     for (const selectionWithStyle of ISelectionWithStyleList) {
+        //         this._addSelectionControlByModelData(selectionWithStyle);
+        //     }
+        // }));
     }
 
     private _initEventListeners(sheetObject: ISheetObjectParam): void {
@@ -177,7 +178,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             this._reset(); // remove all other selections
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
-            const selectionWithStyle = getAllSelection(skeleton);
+            const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             // pointerup --> create selection
             this.refreshSelectionMoveStart();
@@ -342,14 +343,13 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
                 selectCell.endColumn = this._skeleton.getColumnCount() - 1;
         }
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
+        selectionWithStyle.range.rangeType = rangeType;
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-        selectionCellWithCoord.rangeWithCoord.rangeType = rangeType;
-        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
-        selectionCellWithCoord.rangeWithCoord.rangeType = rangeType;
+        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
 
         let activeSelectionControl = this.getActiveSelectionControl<MobileSelectionControl>();
 
-        const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
+        const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord };
         for (const control of this.getSelectionControls()) {
             // Click to an existing selection
             if (control.model.isEqual(cursorRangeWidthCoord)) {
@@ -361,7 +361,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // TODO merge to _checkClearPreviousControls
         if (activeSelectionControl?.model.rangeType !== rangeType) {
             this._clearAllSelectionControls();
-            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionCellWithCoord);
+            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         } else {
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);
         }
@@ -378,16 +378,17 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * @param scene
      * @param rangeType
      */
-    override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selectionWithCoord: ISelectionWithCoord): MobileSelectionControl {
+    override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const rangeType = selectionWithCoord.rangeWithCoord.rangeType;
+        const rangeType = selection.range.rangeType;
         const control = new MobileSelectionControl(scene, selectionControls.length, this._themeService, {
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
             rangeType,
         });
+        const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
         control.updateRangeBySelectionWithCoord(selectionWithCoord);
         this._selectionControls.push(control);
 

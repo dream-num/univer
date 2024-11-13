@@ -23,8 +23,8 @@ export enum SelectionMoveType {
     MOVE_START,
     MOVING,
     MOVE_END,
-  /**
-   * Events are not triggered by the API
-   */
+    /**
+     * Events are not triggered by cursor movement
+     */
     ONLY_SET,
 }

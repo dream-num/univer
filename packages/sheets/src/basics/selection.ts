@@ -19,6 +19,7 @@ import type {
     IRange,
     IRangeWithCoord,
     ISelection,
+    ISelectionCell,
     Nullable,
 } from '@univerjs/core';
 import { getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
@@ -145,21 +146,17 @@ export interface ISelectionWithCoord {
 }
 
 /**
- * Extend ISelectionWithCoord with style
- * rangeWithCoord
- * primaryWithCoord
- * style
- */
-// export interface ISelectionWithCoordWithStyle extends ISelectionWithCoord {
-//     style: Nullable<ISelectionStyle>;
-// }
-
-/**
  * range: IRange;
  * primary: Nullable<ISelectionCell>;
  * style: Nullable<ISelectionStyle>;
  */
 export interface ISelectionWithStyle extends ISelection {
+    range: IRange;
+    /**
+     * if primary is null, means clear primary cell.
+     * if primary is not defined, means not keep current primary cell.
+     */
+    primary: Nullable<ISelectionCell>;
     style: Nullable<Partial<ISelectionStyle>>;
 }
 

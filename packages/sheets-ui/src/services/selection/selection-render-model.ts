@@ -20,7 +20,7 @@ import { convertCellToRange, RANGE_TYPE } from '@univerjs/core';
 
 /**
  * Data model for SelectionControl.model
- * NOT Same as @univerjs/sheet.WorkbookSelectionDataModel, that's data model for Workbook
+ * NOT Same as @univerjs/sheet.WorkbookSelectionModel, that's data model for Workbook
  */
 export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;

@@ -15,6 +15,6 @@
  */
 
 export { IRefSelectionsService, RefSelectionsService } from './ref-selections.service';
-export { WorkbookSelectionDataModel } from './selection-data-model';
+export { WorkbookSelectionModel } from './selection-data-model';
 export { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from './selection-manager.service';
 export { type ISelectionManagerSearchParam, SelectionMoveType } from './type';

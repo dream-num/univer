@@ -675,10 +675,15 @@ export class SelectionControl extends Disposable {
         this._updateControlCoord();
     }
 
-    updateRangeBySelectionWithCoord(selection: ISelectionWithCoord) {
-        this._selectionRenderModel.setValue(selection.rangeWithCoord, selection.primaryWithCoord);
-        this._showAutoFill = selection.primaryWithCoord !== null;
-        this._updateLayoutOfSelectionControl(selection.style);
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord) {
+        this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
+        // if undefined, then keeps the previous value
+        if (selectionWthCoord.primaryWithCoord === null) {
+            this._showAutoFill = false;
+        } else {
+            this._showAutoFill = true;
+        }
+        this._updateLayoutOfSelectionControl(selectionWthCoord.style);
         this._updateControlCoord();
     }
 

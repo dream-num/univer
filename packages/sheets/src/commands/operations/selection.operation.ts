@@ -31,7 +31,7 @@ export interface ISetSelectionsOperationParams {
 }
 
 /**
- * Set selections to SelectionModel(WorkbookSelectionDataModel) by selectionManagerService.
+ * Set selections to SelectionModel(WorkbookSelectionModel) by selectionManagerService.
  */
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
     id: 'sheet.operation.set-selections',

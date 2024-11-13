@@ -16,13 +16,12 @@
 
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionDataModel } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelectionModel } from '@univerjs/sheets';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, genNormalSelectionStyle, getAllSelection, getCoordByOffset, getSheetObject, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
-import { merge } from 'rxjs';
 
 /**
  * This service extends the existing `SelectionRenderService` to provide the rendering of prompt selections
@@ -35,7 +34,7 @@ import { merge } from 'rxjs';
  *
  */
 export class RefSelectionsRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelectionDataModel;
+    private readonly _workbookSelections: WorkbookSelectionModel;
 
     private _eventDisposables: Nullable<IDisposable>;
 
@@ -175,21 +174,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         const scene = this._scene;
 
         selectionWithStyle.style = style;
-        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
-        const control = this.newSelectionControl(scene, skeleton, selectionWithCoord);
-        // TODO: memory leak? This extension seems never released.
-
-        control.setControlExtension({
-            skeleton,
-            scene,
-            themeService: this._themeService,
-            injector: this._injector,
-            selectionHooks: {
-                selectionMoveEnd: (): void => {
-                    this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
-                },
-            },
-        });
+        const control = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         return control;
     }
 
@@ -225,7 +210,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
 
         // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
-        this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionsWithStyles) => {
+        this.disposeWithMe(this._workbookSelections.selectionSet$.subscribe((selectionsWithStyles) => {
             this._reset();
             const skeleton = this._skeleton;
             if (!skeleton) return;
@@ -334,11 +319,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         }
 
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
-
+        selectionWithStyle.range.rangeType = rangeType;
         // const selectionCellWithCoord = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-        selectionCellWithCoord.rangeWithCoord.rangeType = rangeType;
-        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
+        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
 
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
 
@@ -384,7 +368,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);
         } else {
             // In normal situation, pointerdown ---> Create new SelectionControl,
-            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionCellWithCoord);
+            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
         }
         // clear highlight except last one.
         for (let i = 0; i < this.getSelectionControls().length - 1; i++) {
@@ -432,9 +416,9 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param scene
      * @param skeleton
      * @param selectionWithCoord
-     * @returns
+     * @returns {SelectionControl} selectionControl just created
      */
-    override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selectionWithCoord: ISelectionWithCoord): SelectionControl {
+    override newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): SelectionControl {
         const zIndex = this.getSelectionControls().length;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         const control = new SelectionControl(scene, zIndex, this._themeService, {
@@ -443,8 +427,21 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             rowHeaderWidth,
             columnHeaderHeight,
         });
+        const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
         control.updateRangeBySelectionWithCoord(selectionWithCoord);
         this._selectionControls.push(control);
+
+        control.setControlExtension({
+            skeleton,
+            scene,
+            themeService: this._themeService,
+            injector: this._injector,
+            selectionHooks: {
+                selectionMoveEnd: (): void => {
+                    this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+                },
+            },
+        });
         return control;
     }
 }

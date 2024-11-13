@@ -21,7 +21,7 @@ import type { ISelectionManagerSearchParam } from './type';
 
 import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { of, shareReplay, switchMap, takeUntil } from 'rxjs';
-import { WorkbookSelectionDataModel } from './selection-data-model';
+import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
 
 export class SheetsSelectionsService extends RxDisposable {
@@ -95,7 +95,7 @@ export class SheetsSelectionsService extends RxDisposable {
     }
 
     /**
-     * Set selection data to WorkbookSelectionDataModel.
+     * Set selection data to WorkbookSelectionModel.
      * If type is not specified, this method would clear all existing selections.
      * @param unitIdOrSelections
      * @param worksheetIdOrType
@@ -110,8 +110,8 @@ export class SheetsSelectionsService extends RxDisposable {
         selectionDatas?: ISelectionWithStyle[],
         type?: SelectionMoveType
     ): void {
-        if (typeof unitIdOrSelections === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType as string, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
+        if (typeof unitIdOrSelections === 'string' && typeof worksheetIdOrType === 'string') {
+            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
             return;
         }
 
@@ -121,7 +121,11 @@ export class SheetsSelectionsService extends RxDisposable {
         }
 
         const { unitId, sheetId } = current;
-        this._ensureWorkbookSelection(unitId).setSelections(sheetId, unitIdOrSelections ?? selectionDatas, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
+        if (typeof unitIdOrSelections === 'object') {
+            const selectionData = unitIdOrSelections ?? selectionDatas;
+            const type = worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.ONLY_SET;
+            this._ensureWorkbookSelection(unitId).setSelections(sheetId, selectionData, type);
+        }
     }
 
     clearCurrentSelections(): void {
@@ -165,12 +169,12 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._ensureWorkbookSelection(unitId).getSelectionsOfWorksheet(sheetId);
     }
 
-    getWorkbookSelections(unitId: string): WorkbookSelectionDataModel {
+    getWorkbookSelections(unitId: string): WorkbookSelectionModel {
         return this._ensureWorkbookSelection(unitId);
     }
 
-    protected _workbookSelections = new Map<string, WorkbookSelectionDataModel>();
-    protected _ensureWorkbookSelection(unitId: string): WorkbookSelectionDataModel {
+    protected _workbookSelections = new Map<string, WorkbookSelectionModel>();
+    protected _ensureWorkbookSelection(unitId: string): WorkbookSelectionModel {
         let wbSelection = this._workbookSelections.get(unitId);
         if (!wbSelection) {
             const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
@@ -178,7 +182,7 @@ export class SheetsSelectionsService extends RxDisposable {
                 throw new Error(`[SheetsSelectionsService]: cannot resolve unit with id "${unitId}"!`);
             }
 
-            wbSelection = new WorkbookSelectionDataModel(workbook);
+            wbSelection = new WorkbookSelectionModel(workbook);
             this._workbookSelections.set(unitId, wbSelection);
         }
 

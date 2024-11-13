@@ -16,19 +16,19 @@
 
 import type { IDisposable, IRangeWithCoord, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionDataModel } from '@univerjs/sheets';
+import type { ISelectionWithCoord, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import type { SelectionControl } from './selection-control';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, merge, startWith } from 'rxjs';
+import { distinctUntilChanged, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelectionOfCurrSheet } from './base-selection-render.service';
+import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
 import { attachSelectionWithCoord } from './util';
 
 /**
@@ -36,7 +36,7 @@ import { attachSelectionWithCoord } from './util';
  * The normal selections would also be used by Auto Fill and Copy features.
  */
 export class SheetSelectionRenderService extends BaseSelectionRenderService implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelectionDataModel;
+    private readonly _workbookSelections: WorkbookSelectionModel;
 
     private _renderDisposable: Nullable<IDisposable> = null;
 
@@ -121,7 +121,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             this._reset(); // remove all other selections
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
-            const selectionWithStyle = getAllSelection(skeleton);
+            const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             this.refreshSelectionMoveEnd();
 
@@ -145,13 +145,13 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     private _initSelectionChangeListener(): void {
-        // When selection completes, we need to update the selections' rendering and clear event handlers.
-        this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionWithStyleList) => {
-            this._reset();
-            for (const selectionWithStyle of selectionWithStyleList) {
-                this._addSelectionControlByModelData(selectionWithStyle);
-            }
-        }));
+        // only ref selection need this,
+        // this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionWithStyleList) => {
+        //     // this._reset();
+        //     // for (const selectionWithStyle of selectionWithStyleList) {
+        //     //     this._addSelectionControlByModelData(selectionWithStyle);
+        //     // }
+        // }));
     }
 
     private _initUserActionSyncListener(): void {
@@ -308,9 +308,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                 selectCell.endColumn = this._skeleton.getColumnCount() - 1;
         }
         const selectionWithStyle: ISelectionWithStyle = { range: selectCell, primary: selectCell, style: null };
+        selectionWithStyle.range.rangeType = rangeType;
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-        selectionCellWithCoord.rangeWithCoord.rangeType = rangeType;
-        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
+        this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
         // const selectionCellWithCoord: Nullable<ISelectionWithCoord> = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
         // if (!selectionCellWithCoord) return;
         // const { rangeWithCoord: cursorCellRange, primaryWithCoord: _primaryCursorCellRange } = selectionCellWithCoord;
@@ -358,7 +358,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);// (cursorRangeWidthCoord, primaryCursorCellRange);
         } else {
             // In normal situation, pointerdown ---> Create new SelectionControl,
-            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionCellWithCoord);
+            activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
 
             // activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord); //(cursorRangeWidthCoord, primaryCursorCellRange);
         }

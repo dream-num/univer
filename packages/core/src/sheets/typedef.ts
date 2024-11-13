@@ -646,7 +646,6 @@ export interface ICellWithCoord extends IPosition, ISingleCell {
 }
 
 /**
- * @deprecated  use ICellInfo instead.
  * Range & SingleCell & isMerged.
  * startRow: number;
  * startColumn: number;
@@ -658,9 +657,11 @@ export interface ICellWithCoord extends IPosition, ISingleCell {
  * isMerged: boolean;
  * isMergedMainCell: boolean;
  */
-// Bad name!! selection is a concept in sheet-ui !!
 export interface ISelectionCell extends IRange, ISingleCell { }
 
+/**
+ * ICellInfo has the same properties as ISelectionCell, but the name ICellInfo might be more semantically appropriate in some contexts.
+ */
 export interface ICellInfo extends ISelectionCell {}
 
 export interface ISelection {

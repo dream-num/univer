@@ -61,7 +61,7 @@ export {
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
-export { genSelectionByRange, getAllSelection, getTopLeftSelectionOfCurrSheet } from './services/selection/base-selection-render.service';
+export { genSelectionByRange, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll as getAllSelection } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 export { SelectionControl as SelectionShape, SelectionControl } from './services/selection/selection-control';
 export { SelectionShapeExtension } from './services/selection/selection-shape-extension';

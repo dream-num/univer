@@ -25,7 +25,7 @@ import { SelectionMoveType } from './type';
  * Origin name: WorkbookSelections
  * NOT Same as @univerjs/sheets-ui.SelectionRenderModel, that's data for SelectionControl in rendering.
  */
-export class WorkbookSelectionDataModel extends Disposable {
+export class WorkbookSelectionModel extends Disposable {
     /**
      * Selection data model for each worksheet.
      */
@@ -59,6 +59,7 @@ export class WorkbookSelectionDataModel extends Disposable {
         this._selectionMoveEnd$.complete();
         this._selectionMoving$.complete();
         this._selectionMoveStart$.complete();
+        this._selectionSet$.complete();
     }
 
     /** Clear all selections in this workbook. */
@@ -94,7 +95,9 @@ export class WorkbookSelectionDataModel extends Disposable {
                 this._selectionMoving$.next(selectionDatas);
                 break;
             case SelectionMoveType.MOVE_END:
-                this._emitOnEnd(selectionDatas);
+                this._beforeSelectionMoveEnd$.next(selectionDatas);
+                this._selectionMoveEnd$.next(selectionDatas);
+                // this._emitOnEnd(selectionDatas);
                 break;
             case SelectionMoveType.ONLY_SET: {
                 this._selectionSet$.next(selectionDatas);
@@ -145,7 +148,6 @@ export class WorkbookSelectionDataModel extends Disposable {
     }
 
     private _emitOnEnd(selections: ISelectionWithStyle[]): void {
-        this._beforeSelectionMoveEnd$.next(selections);
-        this._selectionMoveEnd$.next(selections);
+        this._selectionSet$.next(selections);
     }
 }

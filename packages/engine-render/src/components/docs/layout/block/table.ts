@@ -168,7 +168,7 @@ export function createTableSkeletons(
         const row = rowNodes.indexOf(rowNode);
         const rowSource = table.tableRows[row];
         const { trHeight } = rowSource;
-        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, curTableSkeleton);
+        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
         const { hRule, val } = trHeight;
 
         let left = 0;
@@ -254,6 +254,7 @@ export function createTableSkeletons(
         rowTop += rowHeight;
 
         curTableSkeleton.rows.push(rowSkeleton);
+        rowSkeleton.parent = curTableSkeleton;
         remainHeight -= rowHeight;
         curTableSkeleton.height = rowTop;
 
@@ -378,7 +379,7 @@ function _getNullTableRowSkeleton(
     ed: number,
     index: number,
     rowSource: ITableRow,
-    parent: IDocumentSkeletonTable
+    parent?: IDocumentSkeletonTable
 ): IDocumentSkeletonRow {
     return {
         cells: [],

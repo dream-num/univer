@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IMenuItem } from '@univerjs/ui';
+import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
-import React, { useEffect, useImperativeHandle } from 'react';
 import { IUniverInstanceService, type Nullable, useDependency, useObservable } from '@univerjs/core';
 import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart } from '@univerjs/ui';
-import type { IUnitRendererProps } from '../workbench/UniWorkbench';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
 
@@ -41,18 +42,26 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
 
 export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps> }>(({ node }, ref) => {
     const menuManagerService = useDependency(IMenuManagerService);
+    const isMenuChange = useObservable(menuManagerService.menuChanged$);
+    const [uniVisibleItems, setUniVisibleItems] = useState<IMenuItem[]>([]);
 
     const { x, y, refs, strategy, update } = useFloating({
         placement: 'top',
         middleware: [offset(10), flip(), shift({ padding: 5 })],
     });
 
-    const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
-    const uniVisibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => menus.find((item) => item.key === id)?.item).filter((item) => !!item);
-
     const { setReference, setFloating } = refs;
 
     const toolbarNameComponents = useComponentsOfPart(UniFloatToolbarUIPart.NAME);
+
+    // Function to update the visible items
+    const updateVisibleItems = () => {
+        const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
+        if (menus) {
+            const visibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => menus.find((item) => item.key === id)?.item).filter((item) => !!item);
+            setUniVisibleItems(visibleItems);
+        }
+    };
 
     useImperativeHandle(ref, () => ({
         update: () => update(),
@@ -64,6 +73,11 @@ export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: 
             setReference(ref);
         }
     }, [node, setReference]);
+
+    // Listen for menu changes and update visible items
+    useEffect(() => {
+        updateVisibleItems();
+    }, [isMenuChange]);
 
     if (!node || !refs.reference.current) {
         return null;

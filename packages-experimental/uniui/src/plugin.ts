@@ -137,11 +137,10 @@ export class UniverUniUIPlugin extends Plugin {
             [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(IUIController);
     }
 
     override onReady(): void {
+        this._injector.get(IUIController); // Do not move it to onStarting, otherwise the univer instance may not be mounted.
         this._injector.get(UniuiFlowController);
         this._injector.get(UniuiLeftSidebarController);
         this._injector.get(UniuiToolbarController);

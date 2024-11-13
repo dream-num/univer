@@ -5,3 +5,4 @@ packages:
     - mockdata
     - packages-experimental/*
     - packages/*
+    - tests/*

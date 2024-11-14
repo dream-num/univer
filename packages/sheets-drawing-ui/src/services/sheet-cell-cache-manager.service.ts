@@ -153,7 +153,6 @@ export class SheetCellCacheManagerService extends Disposable {
      */
     private _initSheetChange() {
         const map = new Map<string, IDisposable>();
-
         const hanldeUnit = (unit: UnitModel<object, number>) => {
             if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                 const workbook = unit as Workbook;
@@ -169,13 +168,21 @@ export class SheetCellCacheManagerService extends Disposable {
                 );
             }
         };
+
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach(hanldeUnit);
         this.disposeWithMe(this._univerInstanceService.unitAdded$.subscribe(hanldeUnit));
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+            if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                map.get(unit.getUnitId())?.dispose();
+                map.delete(unit.getUnitId());
+            }
+        }));
 
         this.disposeWithMe(() => {
             map.forEach((disposable) => {
                 disposable.dispose();
             });
+            map.clear();
         });
     }
 

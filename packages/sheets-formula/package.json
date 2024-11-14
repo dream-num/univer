@@ -49,8 +49,8 @@
                 "types": "./lib/types/facade/index.d.ts"
             },
             "./locale/*": {
-                "import": "./lib/locale/es/*.js",
-                "require": "./lib/locale/cjs/*.js",
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
             }
         }
@@ -105,8 +105,8 @@
             "types": "./lib/types/facade/index.d.ts"
         },
         "./locale/*": {
-            "import": "./lib/locale/es/*.js",
-            "require": "./lib/locale/cjs/*.js",
+            "import": "./lib/es/locale/*.js",
+            "require": "./lib/cjs/locale/*.js",
             "types": "./lib/types/locale/*.d.ts"
         }
     }

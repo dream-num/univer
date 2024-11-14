@@ -16,45 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { ContextMenuPosition, RibbonPosition } from './types';
 
 export type OneOrMany<T> = T | T[];
-
-/** @deprecated */
-export enum MenuPosition {
-    VOID = 'void',
-    // TOOLBAR_START = 'uiToolbar.start',
-    // TOOLBAR_INSERT = 'uiToolbar.insert',
-    // TOOLBAR_FORMULAS = 'uiToolbar.formulas',
-    // TOOLBAR_DATA = 'uiToolbar.data',
-    // TOOLBAR_VIEW = 'uiToolbar.view',
-    // TOOLBAR_OTHERS = 'uiToolbar.others',
-    // CONTEXT_MENU = 'contextMenu',
-    TOOLBAR_START = RibbonPosition.START,
-    TOOLBAR_INSERT = RibbonPosition.INSERT,
-    TOOLBAR_FORMULAS = RibbonPosition.FORMULAS,
-    TOOLBAR_DATA = RibbonPosition.DATA,
-    TOOLBAR_VIEW = RibbonPosition.VIEW,
-    TOOLBAR_OTHERS = RibbonPosition.OTHERS,
-    CONTEXT_MENU = ContextMenuPosition.MAIN_AREA,
-    FOOTER = 'footer',
-}
-
-/** @deprecated */
-export enum MenuGroup {
-    TOOLBAR_HISTORY,
-    TOOLBAR_FORMAT,
-    TOOLBAR_LAYOUT,
-    TOOLBAR_FORMULAS_INSERT,
-    TOOLBAR_FORMULAS_VIEW,
-    TOOLBAR_FILE,
-    TOOLBAR_OTHERS,
-
-    CONTEXT_MENU_FORMAT,
-    CONTEXT_MENU_LAYOUT,
-    CONTEXT_MENU_DATA,
-    CONTEXT_MENU_OTHERS,
-}
 
 export enum MenuItemType {
     /** Button style menu item. */
@@ -82,14 +45,6 @@ interface IMenuItemBase<V> {
     description?: string;
     icon?: string | Observable<string>;
     tooltip?: string;
-
-    /** The group that the item belongs to. */
-    /** @deprecated group will be removed in the future. */
-    group?: MenuGroup;
-
-    /** In what menu should the item display. */
-    /** @deprecated positions will be removed in the future. */
-    positions?: OneOrMany<MenuPosition | string>;
 
     type: MenuItemType;
 
@@ -173,7 +128,6 @@ export type IDisplayMenuItem<T extends IMenuItem> = T & {
 };
 
 export type MenuItemConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
-    // defaultValue?: T;
     hidden?: boolean;
     disabled?: boolean;
     activated?: boolean;

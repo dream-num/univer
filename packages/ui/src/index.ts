@@ -74,12 +74,9 @@ export {
     type IMenuSelectorItem,
     type IValueOption,
     type MenuConfig,
-    MenuGroup,
     type MenuItemDefaultValueType,
     MenuItemType,
-    MenuPosition,
 } from './services/menu/menu';
-export { IMenuService, MenuService } from './services/menu/menu.service';
 export { IMenuManagerService, MenuManagerService, type MenuSchemaType } from './services/menu/menu-manager.service';
 export { type IMenuSchema } from './services/menu/menu-manager.service';
 export {
@@ -128,7 +125,7 @@ export { FloatDom } from './views/components/dom/FloatDom';
 export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
-export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus } from './views/components/ribbon/hook';
+export { useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
 export { type ISidebarMethodOptions } from './views/components/sidebar/interface';

@@ -41,7 +41,6 @@ import { DesktopLayoutService, ILayoutService } from './services/layout/layout.s
 import { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
 import { ILocalFileService } from './services/local-file/local-file.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { IMenuService, MenuService } from './services/menu/menu.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
@@ -96,7 +95,6 @@ export class UniverUIPlugin extends Plugin {
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],

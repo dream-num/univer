@@ -272,6 +272,7 @@ export class UpdateFormulaController extends Disposable {
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
     }
 
+    // TODO: spell
     private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 

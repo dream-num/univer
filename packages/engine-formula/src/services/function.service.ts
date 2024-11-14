@@ -15,17 +15,28 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
+import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 
+// TODO: make this dependency not abstract.
+
+/**
+ * This service is for registering and obtaining function executors and descriptions.
+ * @deprecated This dependency is not necessary to be abstract.
+ */
+export const IFunctionService = createIdentifier<FunctionService>('engine-formula.formula-function.service');
+/**
+ * This service is for registering and obtaining function executors and descriptions.
+ * @deprecated This dependency is not necessary to be abstract.
+ */
 export interface IFunctionService {
-    /**
-     * Use register to register a function, new CustomFunction(inject, name)
-     */
+    /* Register function executors. */
     registerExecutors(...functions: BaseFunction[]): void;
+    // TODO: This method maybe not useful because it is unlikely that users will unregister functions.
+    unregisterExecutors(...functionTokens: IFunctionNames[]): void;
 
+    /** @deprecated This function is not used and we shall not expose internal properties. */
     getExecutors(): Map<IFunctionNames, BaseFunction>;
 
     /**
@@ -35,26 +46,19 @@ export interface IFunctionService {
      * You can obtain the calculation result by using
      * const sum = formulaService.getExecutor(FUNCTION_NAMES_MATH.SUM);
      * sum.calculate(new RangeReferenceObject(range, sheetId, unitId), ref2, re3).
-     * @param functionName Function name, which can be obtained through the FUNCTION_NAMES enumeration.
+     * @param functionToken Function name, which can be obtained through the FUNCTION_NAMES enumeration.
      * @returns
      */
     getExecutor(functionToken: IFunctionNames): Nullable<BaseFunction>;
-
     hasExecutor(functionToken: IFunctionNames): boolean;
 
-    unregisterExecutors(...functionTokens: IFunctionNames[]): void;
-
     registerDescriptions(...functions: IFunctionInfo[]): IDisposable;
-
-    getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
-
-    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
-
-    hasDescription(functionToken: IFunctionNames): boolean;
-
+    // TODO: This method maybe not useful because it is unlikely that users will unregister functions.
     unregisterDescriptions(...functionTokens: IFunctionNames[]): void;
+    getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
+    getDescription(functionToken: IFunctionNames): Nullable<IFunctionInfo>;
+    hasDescription(functionToken: IFunctionNames): boolean;
 }
-export const IFunctionService = createIdentifier<FunctionService>('univer.formula-function.service');
 
 export class FunctionService extends Disposable implements IFunctionService {
     private _functionExecutors: Map<IFunctionNames, BaseFunction> = new Map();

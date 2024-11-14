@@ -119,6 +119,7 @@ export interface IFeatureDirtyRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IRange[] }>;
 }
 
+/** @deprecated This interface extends nothing and should be removed to improve simplicity. */
 export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType {}
 
 export interface IFormulaData {
@@ -132,14 +133,10 @@ export interface IOtherFormulaData {
  * @f  formulaString, the text string of the formula.
  * @si The formula ID can be utilized in scenarios such as copy-pasting and drag-filling to convert formulas into references, eliminating the need for recreating the formulaString.
  */
-export interface IFormulaDataItem {
-    f: string; // formulaString
+export interface IFormulaDataItem extends Pick<ICellData, 'f' | 'si'> {
+    f: string; // Required
     x?: number; // Offset from x direction
     y?: number; // Offset from y direction
-    si?: string; // formulaId,
-    // row: number;
-    // column: number;
-    // sheetId: string;
 }
 
 export interface IOtherFormulaDataItem {

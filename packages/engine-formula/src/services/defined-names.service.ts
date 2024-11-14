@@ -20,6 +20,7 @@ import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/
 import { Subject } from 'rxjs';
 import { handleRefStringInfo, serializeRange } from '../engine/utils/reference';
 
+// TODO: This deserve a better name, e.g. IDefinedNameItem.
 export interface IDefinedNamesServiceParam {
     id: string;
     name: string;
@@ -27,9 +28,11 @@ export interface IDefinedNamesServiceParam {
     comment?: string;
     localSheetId?: string;
     hidden?: boolean;
-
 }
 
+/**
+ * @deprecated This interface should not co-exist with {@link IDefinedNamesServiceParam}.
+ */
 export interface IDefinedNamesServiceFocusParam extends IDefinedNamesServiceParam {
     unitId: string;
 }
@@ -42,39 +45,52 @@ export interface IDefinedNameMapItem {
     [id: string]: IDefinedNamesServiceParam;
 }
 
+/**
+ * This service is for registering and obtaining defined names.
+ * @deprecated This dependency is not necessary to be abstract.
+ */
+export const IDefinedNamesService = createIdentifier<DefinedNamesService>('engine-formula.defined-names.service');
+/**
+ * This service is for registering and obtaining defined names.
+ * @deprecated This dependency is not necessary to be abstract.
+ */
 export interface IDefinedNamesService {
+    /** @deprecated This method should not co-exist with {@link registerDefinedNames} */
     registerDefinedName(unitId: string, param: IDefinedNamesServiceParam): void;
-
     registerDefinedNames(unitId: string, params: IDefinedNameMapItem): void;
 
     getDefinedNameMap(unitId: string): Nullable<IDefinedNameMapItem>;
 
     getValueByName(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
-
     getValueById(unitId: string, id: string): Nullable<IDefinedNamesServiceParam>;
 
+    /** @deprecated This method should not co-exist with {@link removeUnitDefinedName}. */
     removeDefinedName(unitId: string, name: string): void;
-
     removeUnitDefinedName(unitId: string): void;
 
     hasDefinedName(unitId: string): boolean;
 
     setCurrentRange(range: IUnitRange): void;
 
+    /** @deprecated This method is not used and can be used. */
     getCurrentRange(): IUnitRange;
-
+    /** @deprecated This method is not necessary because the caller can directly subscribe currentRange$. */
     getCurrentRangeForString(): string;
 
     currentRange$: Observable<IUnitRange>;
 
+    /** @deprecated Defined names map should be observable instead of using a signal. */
     update$: Observable<unknown>;
 
+    /**
+     * @deprecated This is redundant if we focus a range by using an operation. And this is not a property that lives in
+     * the engine-formula package but the sheet package.
+     */
     focusRange$: Observable<IDefinedNamesServiceFocusParam>;
-
+    /** @deprecated */
     focusRange(unitId: string, id: string): void;
 
     getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
-
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -85,7 +101,9 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     readonly update$ = this._update$.asObservable();
 
     private _currentRange: IUnitRange = {
-        unitId: '', sheetId: '', range: {
+        unitId: '',
+        sheetId: '',
+        range: {
             startRow: 0,
             endRow: 0,
             startColumn: 0,
@@ -113,6 +131,8 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         return this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(sheetName);
     }
 
+    // TODO: this focus behavior should be extracted to an operation. The current approach violates our architecture.
+    /** @deprecated */
     focusRange(unitId: string, id: string) {
         const item = this.getValueById(unitId, id);
         if (item == null) {
@@ -192,4 +212,3 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 }
 
-export const IDefinedNamesService = createIdentifier<DefinedNamesService>('univer.formula.defined-names.service');

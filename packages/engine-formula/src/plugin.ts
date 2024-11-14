@@ -24,7 +24,6 @@ import { SetDefinedNameController } from './controller/set-defined-name.controll
 import { SetDependencyController } from './controller/set-dependency.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
-import { SetSuperTableController } from './controller/set-super-table.controller';
 import { Lexer } from './engine/analysis/lexer';
 import { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
 import { AstTreeBuilder } from './engine/analysis/parser';
@@ -53,7 +52,6 @@ import {
 import { FunctionService, IFunctionService } from './services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
-import { ISuperTableService, SuperTableService } from './services/super-table.service';
 
 const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
 
@@ -81,17 +79,11 @@ export class UniverFormulaEnginePlugin extends Plugin {
         touchDependencies(this._injector, [
             [FormulaController],
             [SetDefinedNameController],
-            [SetSuperTableController],
+            [SetOtherFormulaController],
+            [SetFeatureCalculationController],
+            [SetDependencyController],
+            [CalculateController],
         ]);
-
-        if (!this._config?.notExecuteFormula) {
-            touchDependencies(this._injector, [
-                [SetOtherFormulaController],
-                [SetFeatureCalculationController],
-                [SetDependencyController],
-                [CalculateController],
-            ]);
-        }
     }
 
     override onRendered(): void {
@@ -106,22 +98,15 @@ export class UniverFormulaEnginePlugin extends Plugin {
     private _initialize() {
         // worker and main thread
         const dependencies: Dependency[] = [
-            // Services
             [IFunctionService, { useClass: FunctionService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-            [ISuperTableService, { useClass: SuperTableService }],
 
-            // Models
             [FormulaDataModel],
-
-            // Engine
             [LexerTreeBuilder],
 
-            //Controllers
             [FormulaController],
             [SetDefinedNameController],
-            [SetSuperTableController],
         ];
 
         if (!this._config?.notExecuteFormula) {

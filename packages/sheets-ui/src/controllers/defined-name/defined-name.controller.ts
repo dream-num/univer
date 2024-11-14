@@ -65,6 +65,7 @@ export class SheetsDefinedNameController extends Disposable {
 
             this._selectionManagerService.setSelections(selections);
 
+            // TODO: we should directly call the operation to update selection to avoid code duplications.
             this._cmdSrv.executeCommand(ScrollToCellOperation.id, selections[0].range);
         }));
     }

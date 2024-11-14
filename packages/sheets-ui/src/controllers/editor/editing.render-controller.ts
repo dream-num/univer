@@ -716,8 +716,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            resetBodyStyle(snapshot.body!, removeStyle);
-
+            emptyBody(snapshot.body!, removeStyle);
+            snapshot.drawings = {};
+            snapshot.drawingsOrder = [];
             documentDataModel.reset(snapshot);
             documentViewModel.reset(documentDataModel);
         };
@@ -867,7 +868,7 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
     return null;
 }
 
-function resetBodyStyle(body: IDocumentBody, removeStyle = false) {
+function emptyBody(body: IDocumentBody, removeStyle = false) {
     body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
     if (body.textRuns != null) {

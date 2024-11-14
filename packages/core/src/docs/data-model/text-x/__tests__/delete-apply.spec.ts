@@ -18,13 +18,66 @@ import { describe, expect, it } from 'vitest';
 import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces';
 import { deleteCustomRanges } from '../apply-utils/common';
 
+function getBodyWithCustomRanges() {
+    const body: IDocumentBody = {
+        dataStream: '人之初\r\n',
+        customRanges: [{
+            startIndex: 1,
+            endIndex: 2,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }],
+    };
+
+    return body;
+}
+
 describe('delete apply consistency', () => {
-    it('should pass the test case when delete between custom range', () => {
+    it('should pass the test case when delete start part custom range', () => {
+        const body = getBodyWithCustomRanges();
+
+        deleteCustomRanges(body, 2, 0);
+
+        expect(body.customRanges).toEqual([{
+            startIndex: 0,
+            endIndex: 0,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }]);
+    });
+
+    it('should pass the test case when delete end part custom range', () => {
+        const body = getBodyWithCustomRanges();
+        deleteCustomRanges(body, 2, 2);
+        expect(body.customRanges).toEqual([{
+            startIndex: 1,
+            endIndex: 1,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }]);
+    });
+
+    it('should pass the test case when delete all custom range', () => {
+        const body = getBodyWithCustomRanges();
+        deleteCustomRanges(body, 2, 1);
+        expect(body.customRanges).toEqual([]);
+    });
+
+    it('should pass the test case when delete middle part custom range', () => {
         const body: IDocumentBody = {
-            dataStream: '人之初\r\n',
+            dataStream: '人之初，性本善\r\n',
             customRanges: [{
                 startIndex: 1,
-                endIndex: 2,
+                endIndex: 6,
                 rangeId: 'rangeId',
                 rangeType: CustomRangeType.HYPERLINK,
                 properties: {
@@ -32,12 +85,42 @@ describe('delete apply consistency', () => {
                 },
             }],
         };
+        deleteCustomRanges(body, 3, 2);
+        expect(body.customRanges).toEqual([{
+            startIndex: 1,
+            endIndex: 3,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }]);
+    });
 
-        deleteCustomRanges(body, 2, 0);
+    it('should pass the test case when delete before custom range', () => {
+        const body = getBodyWithCustomRanges();
+
+        deleteCustomRanges(body, 1, 0);
 
         expect(body.customRanges).toEqual([{
             startIndex: 0,
-            endIndex: 0,
+            endIndex: 1,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }]);
+    });
+
+    it('should pass the test case when delete after custom range', () => {
+        const body = getBodyWithCustomRanges();
+
+        deleteCustomRanges(body, 1, 3);
+
+        expect(body.customRanges).toEqual([{
+            startIndex: 1,
+            endIndex: 2,
             rangeId: 'rangeId',
             rangeType: CustomRangeType.HYPERLINK,
             properties: {

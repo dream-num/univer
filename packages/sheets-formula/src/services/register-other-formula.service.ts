@@ -26,15 +26,6 @@ import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common'
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
 
-    /**
-     * @deprecated Use _formulaChangeWithRange$ instead
-     */
-    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
-    /**
-     * @deprecated Use formulaChangeWithRange$ instead
-     */
-    public formulaChange$ = this._formulaChange$.asObservable();
-
     private _formulaChangeWithRange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string; ranges: IRange[] }>();
     public formulaChangeWithRange$ = this._formulaChangeWithRange$.asObservable();
 
@@ -56,7 +47,6 @@ export class RegisterOtherFormulaService extends Disposable {
     override dispose(): void {
         super.dispose();
 
-        this._formulaChange$.complete();
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
     }
@@ -187,34 +177,6 @@ export class RegisterOtherFormulaService extends Disposable {
                 this._formulaResult$.next(results);
             }
         }));
-    }
-
-    /**
-     * @deprecated Use registerFormulaWithRange instead
-     * @param unitId
-     * @param subUnitId
-     * @param formulaText
-     * @param extra
-     * @returns
-     */
-    registerFormula(unitId: string, subUnitId: string, formulaText: string, extra?: Record<string, any>) {
-        const formulaId = this._createFormulaId(unitId, subUnitId);
-        const cacheMap = this._ensureCacheMap(unitId, subUnitId);
-
-        cacheMap.set(formulaId, {
-            result: undefined,
-            status: FormulaResultStatus.WAIT,
-            formulaId,
-            callbacks: new Set(),
-            extra,
-        });
-        this._formulaChange$.next({
-            unitId,
-            subUnitId,
-            formulaText,
-            formulaId,
-        });
-        return formulaId;
     }
 
     registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {

@@ -36,7 +36,7 @@ export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { DocEventManagerService } from './services/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
-export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 export { DocsRenderService } from './services/docs-render.service';
 export { Editor } from './services/editor/editor';

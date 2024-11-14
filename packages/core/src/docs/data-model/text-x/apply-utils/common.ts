@@ -824,6 +824,10 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 table.startIndex = segments[0];
                 table.endIndex = segments[1];
 
@@ -848,6 +852,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
 
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength - 1;
+    // TODO: @JOCS, removeCustomRanges is not used, should we remove it?
     const removeCustomRanges: ICustomRange[] = [];
 
     if (customRanges) {
@@ -861,6 +866,11 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
                 continue;
             } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];
             } else if (endIndex < st) {
@@ -872,6 +882,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
 
         body.customRanges = mergeContinuousRanges(newCustomRanges);
     }
+
     return removeCustomRanges;
 }
 
@@ -894,6 +905,11 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
                 // substr decoration
             } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customDecoration.startIndex = segments[0];
                 customDecoration.endIndex = segments[1];
             } else if (endIndex < st) {

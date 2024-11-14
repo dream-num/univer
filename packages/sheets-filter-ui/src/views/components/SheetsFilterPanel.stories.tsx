@@ -21,7 +21,7 @@ import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, L
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
+import { IShortcutService, ShortcutService } from '@univerjs/ui';
 import React, { useState } from 'react';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -61,7 +61,6 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
-            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterPanelService]);

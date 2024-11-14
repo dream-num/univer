@@ -9,8 +9,9 @@
         "./*": "./src/*"
     },
     "scripts": {
+        "prepare": "node ./scripts/generate-locales.mjs",
         "build:demo": "node ./esbuild.config.mjs",
-        "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"
+        "lint:types": "tsc --noEmit"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",

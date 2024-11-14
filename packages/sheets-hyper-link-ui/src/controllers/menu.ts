@@ -22,7 +22,7 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { combineLatest, distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
@@ -112,7 +112,6 @@ const getLinkDisable$ = (accessor: IAccessor) => {
 const linkMenu = {
     commandId: InsertHyperLinkOperation.id,
     type: MenuItemType.BUTTON,
-    positions: [MenuPosition.CONTEXT_MENU],
     title: 'hyperLink.menu.add',
     icon: 'LinkSingle',
 };
@@ -140,8 +139,6 @@ export const zenEditorInsertLinkMenuFactory = (accessor: IAccessor) => {
 
 const linkToolbarMenu = {
     tooltip: 'hyperLink.form.addTitle',
-    positions: MenuPosition.TOOLBAR_START,
-    group: MenuGroup.TOOLBAR_OTHERS,
     commandId: InsertHyperLinkToolbarOperation.id,
     type: MenuItemType.BUTTON,
     icon: 'LinkSingle',

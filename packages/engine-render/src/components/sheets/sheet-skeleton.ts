@@ -67,8 +67,9 @@ import {
     ObjectMatrix,
     searchArray,
     Tools,
-    WrapStrategy } from '@univerjs/core';
-import { distinctUntilChanged, startWith } from 'rxjs';
+    WrapStrategy,
+} from '@univerjs/core';
+import { distinctUntilChanged, startWith, Subject } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -209,6 +210,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _columnTotalWidth = 0;
     private _rowHeaderWidth = 0;
     private _columnHeaderHeight = 0;
+
+    private _resetCache$ = new Subject();
+    resetCache$ = this._resetCache$.asObservable();
 
     /**
      * Range viewBounds. only update by viewBounds.
@@ -1908,6 +1912,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._handleBgMatrix.reset();
         this._handleBorderMatrix.reset();
         this._overflowCache.reset();
+        this._resetCache$.next(Math.random());
     }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {

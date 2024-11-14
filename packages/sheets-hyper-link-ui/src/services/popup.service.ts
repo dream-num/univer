@@ -15,12 +15,12 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { calcDocRangePositions, DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { type IBoundRectNoAngle, IRenderManagerService } from '@univerjs/engine-render';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -287,17 +287,26 @@ export class SheetsHyperLinkPopupService extends Disposable {
         } else if (type === HyperLinkEditSourceType.EDITING) {
             const range = this._getEditingRange();
 
-            if (range) {
-                this._textSelectionManagerService.replaceTextRanges([{ ...range }]);
+            if (!range) {
+                return;
             }
 
-            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToCell(
-                link.row,
-                link.col,
+            this._textSelectionManagerService.replaceDocRanges([{ ...range }], { unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
+            const currentRender = this._injector.get(IRenderManagerService).getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            if (!currentRender) {
+                return;
+            }
+            const rects = calcDocRangePositions(range, currentRender);
+            if (!rects?.length) {
+                return;
+            }
+            this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
+                rects.pop()!,
                 this._editPopup,
                 unitId,
                 subUnitId
             );
+
             this._currentEditing$.next({
                 ...link,
                 label: range?.label ?? '',

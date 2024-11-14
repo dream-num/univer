@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useObservable } from '@univerjs/ui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useActiveWorkbook } from '../../components/hook';
 import { CountBar } from '../count-bar/CountBar';
@@ -81,10 +81,7 @@ export function RenderSheetContent() {
 
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
-    return useMemo(
-        () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [univerInstanceService, workbook]
-    );
+    // Make sure the component refreshes when the current workbook changes.
+    useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    return univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0;
 }

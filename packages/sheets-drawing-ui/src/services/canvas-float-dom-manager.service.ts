@@ -430,10 +430,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     private _scrollUpdateListener() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (!workbook) {
-            return;
-        }
         const updateSheet = (unitId: string, subUnitId: string) => {
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
             const map = this._ensureMap(unitId, subUnitId);
@@ -453,21 +449,22 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
 
         this.disposeWithMe(
-            workbook.activeSheet$.pipe(
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                filter((workbook) => !!workbook),
+                switchMap((workbook) => workbook.activeSheet$),
                 filter((sheet) => !!sheet),
                 map((sheet) => {
                     const render = this._renderManagerService.getRenderById(sheet.getUnitId());
-                    return render ? { render, unitId: workbook.getUnitId(), subUnitId: sheet.getSheetId() } : null;
+                    return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getSheetId() } : null;
                 }),
                 filter((render) => !!render),
                 switchMap((render) =>
                     fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
                         .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
                 )
-            )
-                .subscribe(({ unitId, subUnitId }) => {
-                    updateSheet(unitId, subUnitId);
-                })
+            ).subscribe(({ unitId, subUnitId }) => {
+                updateSheet(unitId, subUnitId);
+            })
         );
 
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {

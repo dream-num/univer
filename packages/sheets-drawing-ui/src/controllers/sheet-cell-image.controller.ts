@@ -174,29 +174,6 @@ export class SheetCellImageController extends Disposable {
     }
 
     private _handleInitEditor() {
-        // this.disposeWithMe(
-        //     this._univerInstanceService.unitAdded$.subscribe((unit) => {
-        //         if (unit.type === UniverInstanceType.UNIVER_DOC && unit.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-        //             const unitId = unit.getUnitId();
-        //             this._drawingManagerService.removeDrawingDataForUnit(unitId);
-        //             this._docDrawingController.loadDrawingDataForUnit(unitId);
-        //             this._drawingManagerService.initializeNotification(unitId);
-        //         }
-        //     })
-        // );
-
-        // this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-        //     if (commandInfo.id === ReplaceSnapshotCommand.id) {
-        //         const params = commandInfo.params;
-        //         const { unitId } = params as { unitId: string };
-        //         if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-        //             this._drawingManagerService.removeDrawingDataForUnit(unitId);
-        //             this._docDrawingController.loadDrawingDataForUnit(unitId);
-        //             this._drawingManagerService.initializeNotification(unitId);
-        //         }
-        //     }
-        // }));
-
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe((param) => {
             if (!param.visible) {
                 this._drawingManagerService.removeDrawingDataForUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);

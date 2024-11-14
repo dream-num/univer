@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import './f-univer';
-import './f-workbook';
-import './f-worksheet';
-import './f-permission';
-import './f-sheet-hooks';
+import { FBase } from '@univerjs/core';
 
-export { type IFComponentKey, transformComponentKey } from './f-range';
+export class FSheetHooks extends FBase {}

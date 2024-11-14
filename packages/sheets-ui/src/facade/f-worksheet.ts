@@ -30,8 +30,21 @@ class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonM
     override refreshCanvas(): void {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
-        renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
-        renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+        const render = renderManagerService.getRenderById(unitId);
+
+        if (!render) {
+            throw new Error('Render not found');
+        }
+
+        render.with(SheetSkeletonManagerService).reCalculate();
+
+        const mainComponent = render.mainComponent;
+
+        if (!mainComponent) {
+            throw new Error('Main component not found');
+        }
+
+        mainComponent.makeDirty();
     }
 }
 

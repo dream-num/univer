@@ -109,7 +109,7 @@ export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/sel
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
 export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/isEmbeddingFormulaEditor';
-
+export { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';
 

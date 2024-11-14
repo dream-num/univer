@@ -57,7 +57,7 @@ import {
 } from '@univerjs/engine-render';
 
 import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -293,7 +293,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
         */
     private _commandExecutedListener(d: DisposableCollection) {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
+        const updateCommandList = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (updateCommandList.includes(command.id)) {

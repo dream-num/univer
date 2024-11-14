@@ -24136,6 +24136,24 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         'UPBpL-A3RvKoOqPdd8VIq',
                     ],
                 },
+                'dv-test': {
+                    data: {
+                        'UPBpL-test': {
+                            unitId: 'workbook-01',
+                            subUnitId: 'dv-test',
+                            drawingId: 'UPBpL-test',
+                            drawingType: 8,
+                            componentKey: 'ImageDemo',
+                            sheetTransform: {
+                                from: { column: 2, columnOffset: 8, row: 9, rowOffset: 9 },
+                                to: { column: 4, columnOffset: 62, row: 23, rowOffset: 0 },
+                            },
+                            transform: { flipY: false, flipX: false, angle: 0, skewX: 0, skewY: 0, left: 200, top: 200, width: 200, height: 200 },
+                            data: { aa: '128' },
+                        },
+                    },
+                    order: ['UPBpL-test'],
+                },
             }),
         },
         {

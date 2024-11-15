@@ -60,7 +60,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.38",
+        "@univerjs/protocol": "0.1.39-alpha.45",
         "dayjs": "^1.11.13"
     },
     "devDependencies": {

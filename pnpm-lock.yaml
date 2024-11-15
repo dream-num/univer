@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 3.8.0
-        version: 3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@commitlint/cli':
         specifier: ^19.5.0
         version: 19.5.0(@types/node@22.8.4)(typescript@5.6.3)
@@ -998,8 +998,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
@@ -1062,8 +1062,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1903,8 +1903,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-numfmt
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1937,8 +1937,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1986,8 +1986,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2105,8 +2105,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2166,8 +2166,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2396,8 +2396,8 @@ importers:
         specifier: workspace:*
         version: link:../find-replace
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2534,8 +2534,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2905,8 +2905,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3099,8 +3099,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -3142,8 +3142,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -3259,8 +3259,8 @@ importers:
         specifier: workspace:*
         version: link:../facade
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.38
-        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.45
+        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -4527,46 +4527,55 @@ packages:
     resolution: {integrity: sha512-KRSFHyE/RdxQ1CSeOIBVIAxStFC/hnBgVcaiCkQaVC+EYDtTe4X7z5tBkFyRoBgUGtB6Xg6t9t2kulnX6wJc6A==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.24.3':
     resolution: {integrity: sha512-h6Q8MT+e05zP5BxEKz0vi0DhthLdrNEnspdLzkoFqGwnmOzakEHSlXfVyA4HJ322QtFy7biUAVFPvIDEDQa6rw==}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.24.3':
     resolution: {integrity: sha512-fKElSyXhXIJ9pqiYRqisfirIo2Z5pTTve5K438URf08fsypXrEkVmShkSfM8GJ1aUyvjakT+fn2W7Czlpd/0FQ==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.24.3':
     resolution: {integrity: sha512-YlddZSUk8G0px9/+V9PVilVDC6ydMz7WquxozToozSnfFK6wa6ne1ATUjUvjin09jp34p84milxlY5ikueoenw==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-powerpc64le-gnu@4.24.3':
     resolution: {integrity: sha512-yNaWw+GAO8JjVx3s3cMeG5Esz1cKVzz8PkTJSfYzE5u7A+NvGmbVFEHP+BikTIyYWuz0+DX9kaA3pH9Sqxp69g==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-gnu@4.24.3':
     resolution: {integrity: sha512-lWKNQfsbpv14ZCtM/HkjCTm4oWTKTfxPmr7iPfp3AHSqyoTz5AgLemYkWLwOBWc+XxBbrU9SCokZP0WlBZM9lA==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-s390x-gnu@4.24.3':
     resolution: {integrity: sha512-HoojGXTC2CgCcq0Woc/dn12wQUlkNyfH0I1ABK4Ni9YXyFQa86Fkt2Q0nqgLfbhkyfQ6003i3qQk9pLh/SpAYw==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.24.3':
     resolution: {integrity: sha512-mnEOh4iE4USSccBOtcrjF5nj+5/zm6NcNhbSEfR3Ot0pxBwvEn5QVUXcuOwwPkapDtGZ6pT02xLoPaNv06w7KQ==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.24.3':
     resolution: {integrity: sha512-rMTzawBPimBQkG9NKpNHvquIUTQPzrnPxPbCY1Xt+mFkW7pshvyIS5kYgcf74goxXOQk0CP3EoOC1zcEezKXhw==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-win32-arm64-msvc@4.24.3':
     resolution: {integrity: sha512-2lg1CE305xNvnH3SyiKwPVsTVLCg4TmNCF1z7PSHX2uZY2VbUpdkgAllVoISD7JO7zu+YynpWNSKAtOrX3AiuA==}
@@ -4910,24 +4919,28 @@ packages:
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@swc/core-linux-arm64-musl@1.7.5':
     resolution: {integrity: sha512-5ArGdqvFMszNHdi4a67vopeYq8d1K+FuTWDrblHrAvZFhAyv+GQz2PnKqYOgl0sWmQxsNPfNwBFtxACpUO3Jzg==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@swc/core-linux-x64-gnu@1.7.5':
     resolution: {integrity: sha512-mSVVV/PFzCGtI1nVQQyx34NwCMgSurF6ZX/me8pUAX054vsE/pSFL66xN+kQOe/1Z/LOd4UmXFkZ/EzOSnYcSg==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@swc/core-linux-x64-musl@1.7.5':
     resolution: {integrity: sha512-09hY3ZKMUORXVunESKS9yuP78+gQbr759GKHo8wyCdtAx8lCZdEjfI5NtC7/1VqwfeE32/U6u+5MBTVhZTt0AA==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@swc/core-win32-arm64-msvc@1.7.5':
     resolution: {integrity: sha512-B/UDtPI3RlYRFW42xQxOpl6kI/9LtkD7No+XeRIKQTPe15EP2o+rUlv7CmKljVBXgJ8KmaQbZlaEh1YP+QZEEQ==}
@@ -5294,8 +5307,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.39-alpha.38':
-    resolution: {integrity: sha512-+Ug7UGAryCWkySw+par8BVUNl7gTGaG6ZLs1CXhnnVeW4T4AvA8uW8X7VLmraaRPuAZdXZgOgW4c0aE9RUvf3Q==}
+  '@univerjs/protocol@0.1.39-alpha.45':
+    resolution: {integrity: sha512-Qzvv9oSojsCRNoEEF00tQqls4HanycqLmYsr+Hj+Kpr7z0aPdzNYD2aya3cYcfs5P8qHl/0EK2V0QP6AC3Cb9Q==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': 1.9.14
@@ -10657,7 +10670,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
-  '@antfu/eslint-config@3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@antfu/eslint-config@3.8.0(@eslint-react/eslint-plugin@1.15.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.13.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.14(eslint@9.13.0(jiti@1.21.6)))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -10666,7 +10679,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.9.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.14.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/parser': 8.14.0(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
-      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.13.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.13.0(jiti@1.21.6))
       eslint-flat-config-utils: 0.4.0
@@ -12701,7 +12714,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
@@ -12749,13 +12762,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitest/eslint-plugin@1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@typescript-eslint/utils': 8.12.2(eslint@9.13.0(jiti@1.21.6))(typescript@5.6.3)
       eslint: 9.13.0(jiti@1.21.6)
     optionalDependencies:
       typescript: 5.6.3
-      vitest: 2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest: 2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   '@vitest/expect@2.0.5':
     dependencies:
@@ -18650,7 +18663,7 @@ snapshots:
       sass: 1.77.5
       terser: 5.31.6
 
-  vitest@2.1.5(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+  vitest@2.1.5(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       '@vitest/expect': 2.1.5
       '@vitest/mocker': 2.1.5(vite@5.4.11(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
@@ -18674,8 +18687,6 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.8.4
-      happy-dom: 15.0.0
-      jsdom: 24.1.1
     transitivePeerDependencies:
       - less
       - lightningcss

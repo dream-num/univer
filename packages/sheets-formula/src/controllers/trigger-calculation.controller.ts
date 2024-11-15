@@ -41,6 +41,7 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
+import { RegisterOtherFormulaService } from '../services/register-other-formula.service';
 import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
 /**
@@ -140,7 +141,8 @@ export class TriggerCalculationController extends Disposable {
         @ILogService private readonly _logService: ILogService,
         @IConfigService private readonly _configService: IConfigService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(RegisterOtherFormulaService) private readonly _registerOtherFormulaService: RegisterOtherFormulaService
     ) {
         super();
 
@@ -510,6 +512,8 @@ export class TriggerCalculationController extends Disposable {
     private _initialExecuteFormula() {
         const params = this._getDiryDataByCalculationMode(this._calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
+
+        this._registerOtherFormulaService.calculateStarted$.next(true);
     }
 
     private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {

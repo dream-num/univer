@@ -130,12 +130,11 @@ export class SheetCellImageController extends Disposable {
             }
 
             if (sheetTarget && (ranges.length)) {
-                const cellMatrix = sheetTarget.worksheet.getCellMatrix();
                 ranges.forEach((range) => {
                     const normalizedRange = Range.transformRange(range, sheetTarget.worksheet);
                     for (let row = normalizedRange.startRow; row <= normalizedRange.endRow; row++) {
                         for (let col = normalizedRange.startColumn; col <= normalizedRange.endColumn; col++) {
-                            resizeImageByCell(this._injector, { unitId: sheetTarget.unitId, subUnitId: sheetTarget.subUnitId, row, col }, cellMatrix.getValue(row, col));
+                            resizeImageByCell(this._injector, { unitId: sheetTarget.unitId, subUnitId: sheetTarget.subUnitId, row, col }, sheetTarget.worksheet.getCellRaw(row, col));
                         }
                     }
                 });

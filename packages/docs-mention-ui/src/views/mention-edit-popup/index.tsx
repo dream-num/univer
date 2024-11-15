@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IMention } from '../../types/interfaces/i-mention';
 import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -22,7 +23,6 @@ import { AddDocMentionCommand } from '../../commands/commands/doc-mention.comman
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionType } from '../../types/enums/mention-type';
 import { MentionList } from '../mention-list';
-import type { IMention } from '../../types/interfaces/i-mention';
 
 export const MentionEditPopup = () => {
     const popupService = useDependency(DocMentionPopupService);
@@ -35,7 +35,7 @@ export const MentionEditPopup = () => {
         objectId: user.userID,
         label: user.name,
         objectType: MentionType.PERSON,
-        extra: {
+        metadata: {
             icon: user.avatar,
         },
     }));

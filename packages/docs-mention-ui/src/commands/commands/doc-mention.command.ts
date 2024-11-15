@@ -41,7 +41,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
             return false;
         }
 
-        const { extra, ...mentionConfig } = mention;
+        const { metadata, ...mentionConfig } = mention;
         const dataStream = ` @${mention.label} `;
         const body: IDocumentBody = {
             dataStream,
@@ -53,7 +53,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
                 wholeEntity: true,
                 properties: {
                     ...mentionConfig,
-                    ...extra,
+                    ...metadata,
                 },
             }],
         };

@@ -25,5 +25,5 @@ export interface IMention {
     objectType: MentionType;
     objectId: string;
     label: string;
-    extra?: Record<string, any>;
+    metadata?: Record<string, any>;
 }

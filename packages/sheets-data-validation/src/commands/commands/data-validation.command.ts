@@ -158,6 +158,34 @@ export function getDataValidationDiffMutations(
                                 },
                             } as IUpdateDataValidationMutationParams,
                         });
+                    } else {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.newRanges,
+                                },
+                                source,
+                            } as IUpdateDataValidationMutationParams,
+                        });
+
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.oldRanges,
+                                },
+                                source,
+                            } as IUpdateDataValidationMutationParams,
+                        });
                     }
                 } else {
                     redoMutations.push({

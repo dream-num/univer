@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocDrawingBase, Nullable } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, IRange, Nullable } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, Range } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
@@ -96,76 +96,46 @@ export class SheetCellImageController extends Disposable {
 
     private _initHandleResize() {
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            const rows = new Set<number>();
-            const cols = new Set<number>();
             let sheetTarget: Nullable<ReturnType<typeof getSheetCommandTarget>>;
-
+            let ranges: IRange[] = [];
             if (commandInfo.id === SetWorksheetRowHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
-                params.ranges.forEach((range) => {
-                    for (let row = range.startRow; row <= range.endRow; row++) {
-                        rows.add(row);
-                    }
-                });
+                ranges = params.ranges;
                 sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
             } else if (commandInfo.id === SetWorksheetColWidthMutation.id) {
                 const params = commandInfo.params as ISetWorksheetColWidthMutationParams;
-                params.ranges.forEach((range) => {
-                    for (let col = range.startColumn; col <= range.endColumn; col++) {
-                        cols.add(col);
-                    }
-                });
+                ranges = params.ranges;
                 sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
             } else if (commandInfo.id === SetWorksheetRowIsAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowIsAutoHeightMutationParams;
-                params.ranges.forEach((range) => {
-                    for (let row = range.startRow; row <= range.endRow; row++) {
-                        rows.add(row);
-                    }
-                });
+                ranges = params.ranges;
                 sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
             } else if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
                 sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
-                params.rowsAutoHeightInfo.forEach((info) => {
-                    rows.add(info.row);
-                });
+                ranges = params.rowsAutoHeightInfo.map((info) => ({
+                    startRow: info.row,
+                    endRow: info.row,
+                    startColumn: 0,
+                    endColumn: 9999,
+                }));
+            } else if (commandInfo.id === AddWorksheetMergeMutation.id) {
+                const params = commandInfo.params as IAddWorksheetMergeMutationParams;
+                ranges = params.ranges;
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+            } else if (commandInfo.id === RemoveWorksheetMergeMutation.id) {
+                const params = commandInfo.params as IRemoveWorksheetMergeMutationParams;
+                ranges = params.ranges;
+                sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
             }
 
-            if (sheetTarget && (rows.size || cols.size)) {
+            if (sheetTarget && (ranges.length)) {
                 const cellMatrix = sheetTarget.worksheet.getCellMatrix();
-                const newCellMatrix = new ObjectMatrix<Nullable<ICellData>>();
-                let modified = false;
-                cellMatrix.forValue((row, col, cellData) => {
-                    if (rows.has(row) || cols.has(col)) {
-                        const imageCache = this._sheetCellCacheManagerService.getImageCache(sheetTarget.unitId, sheetTarget.subUnitId, row, +col);
-                        // single image need to reisze by cell
-                        if (cellData?.p && cellData.p.drawingsOrder?.length === 1 && cellData.p.body?.dataStream.length === 3) {
-                            const image = cellData.p.drawings![cellData.p.drawingsOrder[0]]! as IImageData & IDocDrawingBase;
-                            const imageSize = getDrawingSizeByCell(
-                                this._injector,
-                                {
-                                    unitId: sheetTarget.unitId,
-                                    subUnitId: sheetTarget.subUnitId,
-                                    row,
-                                    col: +col,
-                                },
-                                image.transform!.width!,
-                                image.transform!.height!
-                            );
-
-                            if (imageSize && image.transform!.width !== imageSize.width && image.transform!.height !== imageSize.height) {
-                                newCellMatrix.setValue(row, col, cellData);
-                                modified = true;
-                                image.transform!.width = imageSize.width;
-                                image.transform!.height = imageSize.height;
-                                image.docTransform!.size.width = imageSize.width;
-                                image.docTransform!.size.height = imageSize.height;
-                                if (imageCache) {
-                                    imageCache[cellData.p.drawingsOrder[0]].image.width = imageSize.width;
-                                    imageCache[cellData.p.drawingsOrder[0]].image.height = imageSize.height;
-                                }
-                            }
+                ranges.forEach((range) => {
+                    const normalizedRange = Range.transformRange(range, sheetTarget.worksheet);
+                    for (let row = normalizedRange.startRow; row <= normalizedRange.endRow; row++) {
+                        for (let col = normalizedRange.startColumn; col <= normalizedRange.endColumn; col++) {
+                            resizeImageByCell(this._injector, { unitId: sheetTarget.unitId, subUnitId: sheetTarget.subUnitId, row, col }, cellMatrix.getValue(row, col));
                         }
                     }
                 });

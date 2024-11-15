@@ -51,6 +51,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
+        this.calculateStarted$.complete();
     }
 
     private _ensureCacheMap(unitId: string, subUnitId: string) {

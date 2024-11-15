@@ -20,7 +20,6 @@ import type { IRichTextEditingMutationParams } from '../commands/mutations/core-
 import { BuildTextUtils, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
-import { getRichTextEditPath } from './custom-range-factory';
 
 export interface IReplaceSelectionFactoryParams {
     unitId: string;
@@ -89,7 +88,6 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
     };
 
     const jsonX = JSONX.getInstance();
-    const path = getRichTextEditPath(docDataModel, segmentId);
-    doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+    doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
 }

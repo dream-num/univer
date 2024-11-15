@@ -40,6 +40,8 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         if (!activeRange) {
             return false;
         }
+
+        const { extra, ...mentionConfig } = mention;
         const dataStream = ` @${mention.label} `;
         const body: IDocumentBody = {
             dataStream,
@@ -50,7 +52,8 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
                 rangeType: CustomRangeType.MENTION,
                 wholeEntity: true,
                 properties: {
-                    mention,
+                    ...mentionConfig,
+                    ...extra,
                 },
             }],
         };
@@ -69,7 +72,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         );
 
         if (doMutation) {
-            return commandService.executeCommand(doMutation.id, doMutation.params);
+            return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
         }
 
         return false;

@@ -31,7 +31,7 @@ import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-f
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { EditorBridgeService, SelectionControl } from '@univerjs/sheets-ui';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { AbsoluteRefType,
     Direction,
@@ -103,7 +103,7 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
-import { getFormulaRefSelectionStyle } from '../common/selection';
+import { genFormulaRefSelectionStyle } from '../common/selection';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
 
@@ -1066,7 +1066,7 @@ export class PromptController extends Disposable {
             selectionWithStyle.push({
                 range,
                 primary,
-                style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+                style: genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
             });
         }
 
@@ -1129,7 +1129,7 @@ export class PromptController extends Disposable {
         return {
             range,
             primary,
-            style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+            style: genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
         };
     }
 
@@ -1473,7 +1473,7 @@ export class PromptController extends Disposable {
         const controls = refSelectionRenderService.getSelectionControls();
         const [unitId, sheetId] = refSelectionRenderService.getLocation();
 
-        const matchedControls = new Set<SelectionShape>();
+        const matchedControls = new Set<SelectionControl>();
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
             const { refIndex, themeColor, token } = refSelection;
@@ -1525,16 +1525,18 @@ export class PromptController extends Disposable {
             });
 
             if (control) {
-                const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
+                const style = genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
                 control.updateStyle(style);
                 matchedControls.add(control);
             }
         }
     }
 
-    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
+    // eslint-disable-next-line max-lines-per-function
+    private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionControl) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
+        if (!skeleton) return;
         // const { unitId, sheetId } = toRange;
         this._formulaPromptService.enableLockedSelectionChange();
 
@@ -1544,7 +1546,6 @@ export class PromptController extends Disposable {
         }
 
         let { startRow, endRow, startColumn, endColumn } = toRange;
-        // const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
         const primary = skeleton
             ? skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn)
             : {
@@ -1621,7 +1622,7 @@ export class PromptController extends Disposable {
         }
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
-        selectionControl.update(toRange, undefined, undefined, undefined, this._selectionRenderService.attachPrimaryWithCoord(primary));
+        selectionControl.updateRange(toRange, this._selectionRenderService.attachPrimaryWithCoord(primary));
     }
 
     private _refreshFormulaAndCellEditor(unitIds: string[]) {

@@ -19,7 +19,7 @@ import { ColorKit, type ThemeService } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 
-export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
+export function genFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
     const style = themeService.getCurrentTheme();
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
     return {
@@ -31,8 +31,5 @@ export function getFormulaRefSelectionStyle(themeService: ThemeService, refColor
         widgetSize: 6,
         widgetStrokeWidth: 1,
         widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
     };
 }

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { ThemeService } from '@univerjs/core';
-import type { ISelectionStyle } from '@univerjs/sheets';
+export interface ISelectionManagerSearchParam {
+    unitId: string;
+    sheetId: string;
+}
 
-export function createCopyPasteSelectionStyle(
-    themeService: ThemeService
-): Partial<ISelectionStyle> {
-    return {
-        strokeWidth: 1.5,
-        stroke: themeService.getCurrentTheme().primaryColor,
-        fill: 'rgba(178, 178, 178, 0.10)',
-        widgets: {},
-        strokeDash: 8,
-    };
+export enum SelectionMoveType {
+    MOVE_START,
+    MOVING,
+    MOVE_END,
+    /**
+     * Events are not triggered by cursor movement
+     */
+    ONLY_SET,
 }

@@ -257,9 +257,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     // prev scrolling state from rawScrollInfo$
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = rawScrollInfo;
 
-                    const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                    const { startX, startY } = skeleton.getCellWithCoordByIndex(
                         sheetViewStartRow,
-                        sheetViewStartColumn
+                        sheetViewStartColumn,
+                        false
                     );
 
                     const viewportScrollX = startX + offsetX;

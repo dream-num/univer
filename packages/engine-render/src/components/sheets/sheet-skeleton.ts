@@ -19,6 +19,8 @@ import type {
     IBorderStyleData,
     ICellData,
     ICellDataForSheetInterceptor,
+    ICellInfo,
+    ICellWithCoord,
     IColAutoWidthInfo,
     IColumnData,
     IColumnRange,
@@ -32,25 +34,22 @@ import type {
     IRowData,
     IRowRange,
     ISelectionCell,
-    ISelectionCellWithMergeInfo,
     ISize,
     IStyleData,
     ITextRotation,
     IWorksheetData,
     Nullable,
     Styles,
-    TextDirection,
     VerticalAlign,
     Worksheet,
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import {
+    addLinkToDocumentModel,
     BooleanNumber,
-    BuildTextUtils,
     CellValueType,
     composeStyles,
-    CustomRangeType,
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
@@ -66,7 +65,6 @@ import {
     LocaleService,
     ObjectMatrix,
     searchArray,
-    TextX,
     Tools,
     WrapStrategy,
 } from '@univerjs/core';
@@ -76,11 +74,10 @@ import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
     degToRad,
-    getCellByIndexWithMergeInfo,
     getCellPositionByIndex,
+    getCellWithCoordByIndexCore,
     getFontStyleString,
     isRectIntersect,
-    mergeInfoOffset,
 } from '../../basics/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
@@ -89,33 +86,6 @@ import { Skeleton } from '../skeleton';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
-
-function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
-    const body = documentModel.getBody()!;
-    if (body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
-        return;
-    }
-
-    const textX = BuildTextUtils.customRange.add({
-        range: {
-            startOffset: 0,
-            endOffset: body.dataStream.length - 1,
-            collapsed: false,
-        },
-        rangeId: linkId,
-        rangeType: CustomRangeType.HYPERLINK,
-        body,
-        properties: {
-            url: linkUrl,
-            refId: linkId,
-        },
-    });
-    if (!textX) {
-        return;
-    }
-
-    TextX.apply(body, textX.serialize());
-}
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -172,16 +142,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
     };
 }
 
-interface ICellOtherConfig {
-    textRotation?: ITextRotation;
-    textDirection?: Nullable<TextDirection>;
-    horizontalAlign?: HorizontalAlign;
-    verticalAlign?: VerticalAlign;
-    wrapStrategy?: WrapStrategy;
-    paddingData?: IPaddingData;
-    cellValueType?: CellValueType;
-}
-
 interface ICellDocumentModelOption {
     isDeepClone?: boolean;
     displayRawFormula?: boolean;
@@ -222,7 +182,23 @@ export interface ICacheItem {
 
 export interface IGetRowColByPosOptions {
     closeFirst?: boolean;
-    visibleOnly?: boolean;
+
+    /**
+     * For searchArray(rowHeightAccumulation) & searchArray(colWidthAccumulation)
+     * true means return first matched index in matched sequence.
+     * default return last index in matched sequence.
+     */
+    firstMatch?: boolean;
+}
+
+export interface IGetPosByRowColOptions {
+    closeFirst?: boolean;
+
+    /**
+     * for searchArray(rowHeightAccumulation) & searchArray(colWidthAccumulation)
+     * true means return first matched index in array
+     */
+    firstMatch?: boolean;
 }
 
 export class SpreadsheetSkeleton extends Skeleton {
@@ -251,7 +227,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
-        backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
+        backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
         font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
         fontMatrix: new ObjectMatrix<IFontCacheItem>(),
         border: new ObjectMatrix<BorderCache>(),
@@ -291,7 +267,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._updateLayout();
         this._initContextListener();
-        // this.updateDataMerge();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
@@ -376,7 +351,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         // this._dataMergeCache = [];
         this._stylesCache = {
             background: {},
-            backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
+            backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             font: {} as Record<string, ObjectMatrix<IFontCacheItem>>,
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
@@ -529,7 +504,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         for (let i = startColumn; i <= endColumn; i++) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowIndex, i);
+            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(rowIndex, i);
 
             if (!isMerged && !isMergedMainCell) {
                 return true;
@@ -593,7 +568,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowNum, i);
+            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(rowNum, i);
 
             if (isMerged || isMergedMainCell) {
                 continue;
@@ -693,6 +668,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param colIndex
      * @returns {number} width
      */
+
     private _calculateColWidth(colIndex: number): number {
         const worksheet = this.worksheet;
 
@@ -965,6 +941,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * expand curr range if it's intersect with merge range.
+     * @param range
+     * @returns {IRange} expanded range because merge info.
+     */
+    expandRangeByMerge(range: IRange): IRange {
+        return this.getMergeBounding(range.startRow, range.startColumn, range.endRow, range.endColumn);
+    }
+
     appendToOverflowCache(row: number, column: number, startColumn: number, endColumn: number): void {
         this._overflowCache.setValue(row, column, {
             startRow: row,
@@ -1068,15 +1053,49 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
+     * Get cell by pos(offsetX, offsetY).
+     * @deprecated Please use `getCellWithCoordByOffset` instead.
+     */
+    calculateCellIndexByPosition(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): Nullable<ICellWithCoord> {
+        return this.getCellWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+    }
+
+    /**
+     * Get cell by pos(offsetX, offsetY).
      *
-     * @param offsetX HTML coordinate system, mouse position x.
-     * @param offsetY HTML coordinate system, mouse position y.
+     * options.matchFirst true means get cell would skip all invisible cells.
+     * @param offsetX position X in viewport.
+     * @param offsetY position Y in viewport.
      * @param scaleX render scene scale x-axis, scene.getAncestorScale
      * @param scaleY render scene scale y-axis, scene.getAncestorScale
-     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
-     * @param scrollXY.x
-     * @param scrollXY.y
-     * @returns Hit cell coordinates
+     * @param scrollXY render viewportScroll {x, y}
+     * @param options {IGetRowColByPosOptions}
+     * @returns {ICellWithCoord} Selection data with coordinates
+     */
+    getCellWithCoordByOffset(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number },
+        options?: IGetRowColByPosOptions
+    ): ICellWithCoord {
+        const { row, column } = this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
+
+        return this.getCellWithCoordByIndex(row, column);
+    }
+
+    /**
+     * This method has the same implementation as `getCellIndexByOffset`,
+     * but uses a different name to maintain backward compatibility with previous calls.
+     *
+     * @deprecated Please use `getCellIndexByOffset` method instead.
      */
     getCellPositionByOffset(
         offsetX: number,
@@ -1086,8 +1105,30 @@ export class SpreadsheetSkeleton extends Skeleton {
         scrollXY: { x: number; y: number },
         options?: IGetRowColByPosOptions
     ): { row: number; column: number } {
-        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, options);
-        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, options);
+        return this.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY, options);
+    }
+
+    /**
+     * Get cell index by offset(o)
+     * @param offsetX position X in viewport.
+     * @param offsetY position Y in viewport.
+     * @param scaleX render scene scale x-axis, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, scene.getAncestorScale
+     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @param scrollXY.x
+     * @param scrollXY.y
+     * @returns cell index
+     */
+    getCellIndexByOffset(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number },
+        options?: IGetRowColByPosOptions
+    ): { row: number; column: number } {
+        const row = this.getRowIndexByOffsetY(offsetY, scaleY, scrollXY, options);
+        const column = this.getColumnIndexByOffsetX(offsetX, scaleX, scrollXY, options);
 
         return {
             row,
@@ -1095,16 +1136,51 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    getCellByOffset(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): Nullable<ICellInfo> {
+        const cellIndex = this?.getCellIndexByOffset(
+            offsetX,
+            offsetY,
+            scaleX,
+            scaleY,
+            scrollXY,
+            { firstMatch: true } // for visible
+        );
+        if (!cellIndex) return null;
+
+        const selectionCell = this.worksheet.getCellInfoInMergeData(cellIndex.row, cellIndex.column);
+        return selectionCell;
+    }
+
+    getCellWithMergeInfoByIndex(row: number, column: number): Nullable<ICellInfo> {
+        const selectionCell = this.worksheet.getCellInfoInMergeData(row, column);
+        return selectionCell;
+    }
+
     /**
-     * Get column index by offsetX
-     * @param offsetX no scaled offset x
-     * @param scaleX scale x
-     * @param scrollXY
+     * Same as getColumnIndexByOffsetX
+     * @deprecated Please use `getColumnIndexByOffsetX` method instead.
      */
     getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
-        offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
+        return this.getColumnIndexByOffsetX(offsetX, scaleX, scrollXY, options);
+    }
+
+    /**
+     * Get column index by offset x.
+     * @param offsetX scaled offset x
+     * @param scaleX scale x
+     * @param scrollXY scrollXY
+     * @returns column index
+     */
+    getColumnIndexByOffsetX(evtOffsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
+        const offsetX = this.getTransformOffsetX(evtOffsetX, scaleX, scrollXY);
         const { columnWidthAccumulation } = this;
-        let column = searchArray(columnWidthAccumulation, offsetX);
+        let column = searchArray(columnWidthAccumulation, offsetX, options?.firstMatch);
 
         if (options?.closeFirst) {
             // check if upper column was closer than current
@@ -1117,21 +1193,29 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Get row index by offsetY
+     * Same as getRowIndexByOffsetY
+     * @deprecated Please use `getRowIndexByOffsetY` method instead.
+     */
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
+        return this.getRowIndexByOffsetY(offsetY, scaleY, scrollXY, options);
+    }
+
+    /**
+     *
      * @param offsetY scaled offset y
      * @param scaleY scale y
      * @param scrollXY
      * @param scrollXY.x
      * @param scrollXY.y
      */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
+    getRowIndexByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
         const { rowHeightAccumulation } = this;
         offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
 
-        let row = searchArray(rowHeightAccumulation, offsetY, options?.visibleOnly);
+        let row = searchArray(rowHeightAccumulation, offsetY, options?.firstMatch);
 
         if (options?.closeFirst) {
-            // check if next row was closer than current
+            // check if upper row was closer than current
             if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
                 row = row + 1;
             }
@@ -1144,9 +1228,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { x: scrollX } = scrollXY;
 
         // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
+        const afterOffsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
 
-        return offsetX;
+        return afterOffsetX;
     }
 
     getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
@@ -1190,11 +1274,29 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
+     * Same as getCellWithCoordByIndex, but uses a different name to maintain backward compatibility with previous calls.
+     * @deprecated Please use `getCellWithCoordByIndex` instead.
+     */
+    getCellByIndex(row: number, column: number): ICellWithCoord {
+        return this.getCellWithCoordByIndex(row, column);
+    }
+
+    /**
+     * @deprecated Please use `getCellWithCoordByIndex(row, col, false)` instead.
+     * @param row
+     * @param column
+     */
+    getCellByIndexWithNoHeader(row: number, column: number) {
+        return this.getCellWithCoordByIndex(row, column, false);
+    }
+
+    /**
      * Return cell information corresponding to the current coordinates, including the merged cell object.
+     *
      * @param row Specified Row Coordinate
      * @param column Specified Column Coordinate
      */
-    getCellByIndex(row: number, column: number): ISelectionCellWithMergeInfo {
+    getCellWithCoordByIndex(row: number, column: number, header: boolean = true): ICellWithCoord {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
@@ -1202,30 +1304,42 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeaderHeightAndMarginTop,
         } = this;
 
-        const primary = getCellByIndexWithMergeInfo(
+        const primary: ICellWithCoord = getCellWithCoordByIndexCore(
             row,
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._getCellMergeInfo(row, column)
+            this.worksheet.getCellInfoInMergeData(row, column)
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY += columnHeaderHeightAndMarginTop;
-        endY += columnHeaderHeightAndMarginTop;
-        startX += rowHeaderWidthAndMarginLeft;
-        endX += rowHeaderWidthAndMarginLeft;
+        let offsetX = rowHeaderWidthAndMarginLeft;
+        let offsetY = columnHeaderHeightAndMarginTop;
+        if (header === false) {
+            offsetX = 0;
+            offsetY = 0;
+        }
 
-        mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
+        startY += offsetY;
+        endY += offsetY;
+        startX += offsetX;
+        endX += offsetX;
+
+        mergeInfo.startY += offsetY;
+        mergeInfo.endY += offsetY;
+        mergeInfo.startX += offsetX;
+        mergeInfo.endX += offsetX;
+
+        // mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop);
 
         return {
             actualRow: row,
             actualColumn: column,
-            startY,
-            endY,
             startX,
+            startY,
             endX,
+            endY,
             isMerged,
             isMergedMainCell,
             mergeInfo,
@@ -1233,63 +1347,32 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * New merge info, but position without header.
-     * @param row
-     * @param column
-     * @returns {ISelectionCellWithMergeInfo} cellInfo with merge info
+     * convert canvas content position to physical position in screen
+     * @param offsetX
+     * @param scaleX
+     * @param scrollXY
      */
-    getCellByIndexWithNoHeader(row: number, column: number): ISelectionCellWithMergeInfo {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this;
-
-        const primary = getCellByIndexWithMergeInfo(
-            row,
-            column,
-            rowHeightAccumulation,
-            columnWidthAccumulation,
-            this._getCellMergeInfo(row, column)
-        );
-
-        const { isMerged, isMergedMainCell } = primary;
-        const { startY, endY, startX, endX, mergeInfo } = primary;
-
-        const newMergeInfo = mergeInfoOffset(mergeInfo, 0, 0);
-
-        return {
-            actualRow: row,
-            actualColumn: column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo: newMergeInfo,
-        };
-    }
-
-    // convert canvas content position to physical position in screen
     convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }): number {
         const { x: scrollX } = scrollXY;
-
-        offsetX = (offsetX - scrollX) * scaleX;
-
-        return offsetX;
+        return (offsetX - scrollX) * scaleX;
     }
 
-    // convert canvas content position to physical position in screen
+    /**
+     * convert canvas content position to physical position in screen
+     * @param offsetY
+     * @param scaleY
+     * @param scrollXY
+     */
     convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }): number {
         const { y: scrollY } = scrollXY;
-
-        offsetY = (offsetY - scrollY) * scaleY;
-
-        return offsetY;
+        return (offsetY - scrollY) * scaleY;
     }
 
-    getSelectionMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
-        return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
-    }
-
-    // Only used for cell edit, and no need to rotate text when edit cell content!
+    /**
+     * Only used for cell edit, and no need to rotate text when edit cell content!
+     * @deprecated use same method in worksheet.
+     * @param cell
+     */
     getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
         const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
 
@@ -1328,7 +1411,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    // Only used for cell edit, and no need to rotate text when edit cell content!
+    /**
+     * Only used for cell edit, and no need to rotate text when edit cell content!
+     * @deprecated use same method in worksheet.
+     * @param cell
+     */
     getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
         return this._getCellDocumentModel(cell, {
             isDeepClone: true,
@@ -1340,11 +1427,13 @@ export class SpreadsheetSkeleton extends Skeleton {
     /**
      * This method generates a document model based on the cell's properties and handles the associated styles and configurations.
      * If the cell does not exist, it will return null.
+     *
+     * @deprecated use same method in worksheet.
      * PS: This method has significant impact on performance.
      * @param cell
      * @param options
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _getCellDocumentModel(
         cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
@@ -1466,7 +1555,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
@@ -1506,12 +1595,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             if (vertexAngle !== 0) {
-                const { startY, endY, startX, endX } = getCellByIndexWithMergeInfo(
+                const { startY, endY, startX, endX } = getCellWithCoordByIndexCore(
                     row,
                     column,
                     this.rowHeightAccumulation,
                     this.columnWidthAccumulation,
-                    this._getCellMergeInfo(row, column)
+                    this.worksheet.getCellInfoInMergeData(row, column)
                 );
                 const cellWidth = endX - startX;
                 const cellHeight = endY - startY;
@@ -1539,12 +1628,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return true;
             }
 
-            const { startY, endY } = getCellByIndexWithMergeInfo(
+            const { startY, endY } = getCellWithCoordByIndexCore(
                 row,
                 column,
                 this.rowHeightAccumulation,
                 this.columnWidthAccumulation,
-                this._getCellMergeInfo(row, column)
+                this.worksheet.getCellInfoInMergeData(row, column)
             );
 
             const cellHeight = endY - startY;
@@ -1644,7 +1733,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             rowTotalHeight += rowHeight;
 
-            rowHeightAccumulation.push(rowTotalHeight); // 行的临时长度分布
+            rowHeightAccumulation.push(rowTotalHeight);
         }
 
         return {
@@ -1688,7 +1777,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             columnTotalWidth += columnWidth;
-            columnWidthAccumulation.push(columnTotalWidth); // 列的临时长度分布
+            columnWidthAccumulation.push(columnTotalWidth);
         }
 
         return {
@@ -1803,7 +1892,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _resetCache(): void {
         this._stylesCache = {
             background: {},
-            backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
+            backgroundPositions: new ObjectMatrix<ICellWithCoord>(),
             font: {},
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
@@ -1812,11 +1901,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._handleBorderMatrix.reset();
         this._overflowCache.reset();
     }
-
-    // private _makeDocumentSkeletonDirty(row: number, col: number): void {
-    //     if (this._stylesCache.fontMatrix == null) return;
-    //     this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
-    // }
 
     _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
         mergeRange?: IRange;
@@ -1871,7 +1955,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const bgCache = this._stylesCache.background![rgb];
             bgCache.setValue(row, col, rgb);
-            const cellInfo = this.getCellByIndexWithNoHeader(row, col);
+            const cellInfo = this.getCellWithCoordByIndex(row, col, false);
             this._stylesCache.backgroundPositions?.setValue(row, col, cellInfo);
         }
     }
@@ -1891,13 +1975,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
 
-        // if (!this._stylesCache.font![fontString]) {
-        //     this._stylesCache.font![fontString] = new ObjectMatrix();
-        // }
-
-        // const fontFamilyMatrix: ObjectMatrix<IFontCacheItem> = this._stylesCache.font![fontString];
-        // if (fontFamilyMatrix.getValue(row, col)) return;
-
         const documentViewModel = new DocumentViewModel(documentModel);
         if (documentViewModel) {
             const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
@@ -1913,7 +1990,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 wrapStrategy,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
-            // fontFamilyMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
         }
     }
@@ -1941,7 +2017,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             options = { cacheItem: { bg: true, border: true } };
         }
 
-        const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this._getCellMergeInfo(row, col);
+        const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this.worksheet.getCellInfoInMergeData(row, col);
         options.mergeRange = { startRow, startColumn, endRow, endColumn };
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;

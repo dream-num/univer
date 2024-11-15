@@ -672,8 +672,17 @@ export class Scene extends ThinScene {
         //     }
         //     parent = parent?.getParent && parent?.getParent();
         // }
-        coord = this.getRelativeToViewportCoord(coord);
+        coord = this.getCoordRelativeToViewport(coord);
         return this.findViewportByPosToViewport(coord);
+    }
+
+    /**
+     * @deprecated use `getScrollXYInfoByViewport` instead.
+     * @param pos
+     * @param viewPort
+     */
+    getVpScrollXYInfoByPosToVp(pos: Vector2, viewPort?: Viewport) {
+        return this.getScrollXYInfoByViewport(pos, viewPort);
     }
 
     /**
@@ -682,17 +691,15 @@ export class Scene extends ThinScene {
      * @param pos
      * @param viewPort
      */
-    getVpScrollXYInfoByPosToVp(pos: Vector2, viewPort?: Viewport) {
+    getScrollXYInfoByViewport(pos: Vector2, viewPort?: Viewport) {
         if (!viewPort) {
-            viewPort = this.findViewportByPosToViewport(pos);
-        }
-        if (!viewPort) {
-            return {
-                x: 0,
-                y: 0,
-            };
+            viewPort = this.findViewportByPosToViewport(pos) || this.getDefaultViewport();
         }
         return this.getViewportScrollXY(viewPort);
+    }
+
+    getDefaultViewport() {
+        return this.getViewport('viewMain')!;
     }
 
     getViewportScrollXY(viewPort: Viewport) {
@@ -711,11 +718,23 @@ export class Scene extends ThinScene {
     }
 
     /**
-     * In a nested scene scenario, it is necessary to obtain the relative offsets layer by layer.
-     * @param coord Coordinates to be converted.
+     * @deprecated use `getCoordRelativeToViewport` instead
+     * @param coord
      * @returns
      */
     getRelativeToViewportCoord(coord: Vector2) {
+        return this.getCoordRelativeToViewport(coord);
+    }
+
+    /**
+     * Get coord to active viewport.
+     * In a nested scene scenario, it is necessary to obtain the relative offsets layer by layer.
+     *
+     * origin name: getRelativeToViewportCoord
+     * @param coord Coordinates to be converted.
+     * @returns
+     */
+    getCoordRelativeToViewport(coord: Vector2): Vector2 {
         let parent: any = this.getParent();
 
         const parentList: any[] = [];

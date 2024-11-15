@@ -164,7 +164,7 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
-export { isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 
 // #endregion

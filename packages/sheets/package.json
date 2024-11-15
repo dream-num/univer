@@ -67,7 +67,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsx build.ts"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"
@@ -77,15 +77,14 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/protocol": "0.1.39-alpha.38",
-        "@univerjs/rpc": "workspace:*",
-        "@vitejs/plugin-react": "4.3.3"
+        "@univerjs/rpc": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.10",
-        "vitest": "^2.1.4"
+        "vite": "^5.4.11",
+        "vitest": "^2.1.5"
     },
     "space": {
         ".": {

@@ -27,7 +27,7 @@ import type { SelectionControl } from './selection-control';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import { attachSelectionWithCoord } from './util';
+import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -67,6 +67,9 @@ export class SelectionShapeExtension {
 
     private _scenePointerUpSub: Nullable<Subscription>;
 
+    /**
+     * The shadow selection under cursor when move whole selection control(for moving normal selection)
+     */
     private _helperSelection: Nullable<Rect>;
 
     private _scrollTimer!: ScrollTimer;
@@ -240,33 +243,23 @@ export class SelectionShapeExtension {
             style: null,
         };
         const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
-        // const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        // const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
-        // const startY = startCell?.startY || 0;
-        // const endY = endCell?.endY || 0;
-        // const startX = startCell?.startX || 0;
-        // const endX = endCell?.endX || 0;
+        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+        const startY = startCell?.startY || 0;
+        const endY = endCell?.endY || 0;
+        const startX = startCell?.startX || 0;
+        const endX = endCell?.endX || 0;
 
-        // this._helperSelection?.transformByState({
-        //     left: startX,
-        //     top: startY,
-        //     width: endX - startX,
-        //     height: endY - startY,
-        // });
+        this._helperSelection?.transformByState({
+            left: startX,
+            top: startY,
+            width: endX - startX,
+            height: endY - startY,
+        });
 
-        // this._targetSelection = {
-        //     startY,
-        //     endY,
-        //     startX,
-        //     endX,
-        //     startRow,
-        //     endRow,
-        //     startColumn,
-        //     endColumn,
-        // };
-        // const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(this._skeleton, primaryCell);
-        // this._control.updateRange(this._targetSelection, primaryWithCoordAndMergeInfo);
-        this._control.updateRangeBySelectionWithCoord(selectionWithCoord);
+        this._targetSelection = { ...selectionWithCoord.rangeWithCoord };
+        const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(this._skeleton, primaryCell);
+        this._control.updateCurrCell(primaryWithCoordAndMergeInfo);
         this._control.selectionMoving$.next(selectionWithCoord.rangeWithCoord);
     }
 
@@ -583,7 +576,7 @@ export class SelectionShapeExtension {
         const primaryCell = this._skeleton.getCellWithMergeInfoByIndex(startRow, startColumn);
         const selectionWithStyle: ISelectionWithStyle = { range, primary: primaryCell, style: null };
         const selectionRangeWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
-        this._targetSelection = selectionRangeWithCoord.rangeWithCoord;
+        this._targetSelection = { ...selectionRangeWithCoord.rangeWithCoord };
         // const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
         // const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 

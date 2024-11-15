@@ -156,7 +156,7 @@ export class SheetCellImageController extends Disposable {
     }
 
     private _handleWriteCell() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(AFTER_CELL_EDIT, {
+        this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
             priority: 9999,
             handler: (cell, context, next) => {
                 resizeImageByCell(this._injector, { unitId: context.unitId, subUnitId: context.subUnitId, row: context.row, col: context.col }, cell);

@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import type {
+    ICellData, IDisposable,
+    IMutationInfo,
+    IRange,
+    Nullable, Workbook, Worksheet,
+} from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    IPasteTarget,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+    IUniverSheetCopyDataModel,
+} from './type';
 import {
     createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
     ILogService,
@@ -29,6 +45,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     getPrimaryForRange,
     SetSelectionsOperation,
@@ -36,36 +53,19 @@ import {
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import type {
-    ICellData, IDisposable,
-    IMutationInfo,
-    IRange,
-    Nullable, Workbook, Worksheet,
-} from '@univerjs/core';
-
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
+
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
-
 import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
 import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    IPasteTarget,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-    IUniverSheetCopyDataModel,
-} from './type';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',

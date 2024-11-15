@@ -33,7 +33,8 @@ import type {
 } from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionControl } from '@univerjs/sheets-ui';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
-import { AbsoluteRefType,
+import {
+    AbsoluteRefType,
     Direction,
     Disposable,
     DisposableCollection,
@@ -94,9 +95,10 @@ import {
     isRangeSelector,
     JumpOver,
     MoveSelectionCommand,
+    SheetCellEditorResizeService,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
+import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged, filter, merge } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -191,6 +193,7 @@ export class PromptController extends Disposable {
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IEditorService private readonly _editorService: IEditorService,
         @ILayoutService private readonly _layoutService: ILayoutService
+
     ) {
         super();
 
@@ -1337,13 +1340,25 @@ export class PromptController extends Disposable {
     private _fitEditorSize() {
         const currentDocumentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const editorUnitId = currentDocumentDataModel!.getUnitId();
+
         if (this._editorService.isEditor(editorUnitId) && !this._editorService.isSheetEditor(editorUnitId)) {
             return;
         }
+        this._editorBridgeService.changeEditorDirty(true);
+        if (!this._editorBridgeService.isVisible().visible) {
+            return;
+        }
 
-        this._commandService.executeCommand(SetEditorResizeOperation.id, {
-            unitId: editorUnitId,
-        });
+        if (editorUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
+            const workbookUnitId = workbook?.getUnitId() ?? '';
+            const render = this._renderManagerService.getRenderById(workbookUnitId);
+            if (!render) {
+                return;
+            }
+            const sheetCellEditorResizeService = render.with(SheetCellEditorResizeService);
+            sheetCellEditorResizeService.fitTextSize();
+        }
     }
 
     /**

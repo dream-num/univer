@@ -23,7 +23,6 @@ import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NO
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { SetEditorResizeOperation } from '@univerjs/ui';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { FormulaEditorController } from './formula-editor.controller';
 
@@ -100,7 +99,7 @@ export class EditorDataSyncController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === RichTextEditingMutation.id || command.id === SetEditorResizeOperation.id) {
+                if (command.id === RichTextEditingMutation.id) {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId } = params;
                     if (params.isSync) {

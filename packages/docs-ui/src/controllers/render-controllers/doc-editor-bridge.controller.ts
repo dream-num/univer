@@ -20,7 +20,6 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { SetEditorResizeOperation } from '@univerjs/ui';
 import { fromEvent } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { CoverContentCommand } from '../../commands/commands/replace-content.command';
@@ -289,7 +288,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
      * Listen to document edits to refresh the size of the formula editor.
      */
     private _commandExecutedListener() {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
+        const updateCommandList = [RichTextEditingMutation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

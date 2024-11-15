@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { COPY_TYPE, IAutoFillLocation, IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { DataValidationType, Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { APPLY_TYPE, getAutoFillRepeatRange, getRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 // TODO: adjust imports
 

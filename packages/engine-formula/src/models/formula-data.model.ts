@@ -37,11 +37,13 @@ export interface IRangeChange {
     newCell: IRange | null;
 }
 
+// TODO: drop `Data`, rename it to `FormulaModel`.
+/** `FormulaModel` managers formulas and array formulas. */
 export class FormulaDataModel extends Disposable {
-    private _formulaData: IFormulaData = {};
+    private _formulaData: IFormulaData = {}; // TODO: why values are not cached here but formula strings?
+    // Can we just get values from `Workbook`?
 
     private _arrayFormulaRange: IArrayFormulaRangeType = {};
-
     private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
 
     constructor(
@@ -161,6 +163,7 @@ export class FormulaDataModel extends Disposable {
         return this._formulaData;
     }
 
+    // TODO: Remove this because this is not used in the codebase.
     setFormulaData(value: IFormulaData) {
         this._formulaData = value;
     }
@@ -270,9 +273,9 @@ export class FormulaDataModel extends Disposable {
         }
     }
 
+    // TODO: Why is this method public and called again in unit tests? This should not be public.
     /**
      * Cache all formulas on the snapshot to the formula model
-     * @returns
      */
     initFormulaData() {
         // TODO@Dushusir: load doc/slide formula data
@@ -292,6 +295,8 @@ export class FormulaDataModel extends Disposable {
             const cellMatrix = worksheet.getCellMatrix();
             const sheetId = worksheet.getSheetId();
 
+            // TODO: Other workbook's formula data are handled in packages/sheets-formula/src/controllers/update-formula.controller.ts
+            // Why are they not handled here?
             initSheetFormulaData(this._formulaData, unitId, sheetId, cellMatrix);
         });
     }
@@ -649,6 +654,8 @@ export class FormulaDataModel extends Disposable {
     }
 }
 
+// TODO: this may duplicate with `mergeFormulaData` in `FormulaDataModel`, because we have two different
+// functions to dump data into the model.
 export function initSheetFormulaData(
     formulaData: IFormulaData,
     unitId: string,

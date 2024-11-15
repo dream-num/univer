@@ -31,6 +31,7 @@ export function checkFormulaDataNull(formulaData: IFormulaData, unitId: string, 
     return false;
 }
 
+// TODO: this is pretty verbose to remove formula data, we can simplify do a RPC calling.
 export function removeFormulaData(formulaData: IFormulaData | IArrayFormulaRangeType | IArrayFormulaUnitCellType, unitId: string, sheetId?: string) {
     if (sheetId) {
         if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {

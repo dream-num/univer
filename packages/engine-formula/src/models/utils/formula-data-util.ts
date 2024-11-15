@@ -24,7 +24,6 @@ export interface IFormulaIdMap {
     c: number;
 }
 
-// eslint-disable-next-line complexity
 export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newSheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem | null>, formulaIdMap: Map<string, IFormulaIdMap>, deleteFormulaIdMap: Map<string, string | IFormulaIdMap>, r: number, c: number, cell: Nullable<ICellData>) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';

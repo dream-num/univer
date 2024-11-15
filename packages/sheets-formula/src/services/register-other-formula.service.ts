@@ -17,7 +17,7 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { Disposable, ICommandService, Inject, LifecycleService, LifecycleStages, ObjectMatrix, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, isNodeEnv, LifecycleService, LifecycleStages, ObjectMatrix, Tools } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
@@ -113,18 +113,34 @@ export class RegisterOtherFormulaService extends Disposable {
             });
         };
 
-        // Wait until the stage is steady, then register the formula that needs to be marked dirty with formula and range list
-        this.disposeWithMe(
-            this._formulaChangeWithRange$
-                .pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady))))
-                .subscribe((options) => options.forEach(handleRegister))
-        );
+        if (isNodeEnv()) {
+            this.disposeWithMe(
+                this._formulaChangeWithRange$
+                    .pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Ready))))
+                    .subscribe((options) => {
+                        setTimeout(() => options.forEach(handleRegister), 0);
+                    })
+            );
 
-        this.disposeWithMe(
-            this._formulaChangeWithRange$
-                .pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Steady))
-                .subscribe(handleRegister)
-        );
+            this.disposeWithMe(
+                this._formulaChangeWithRange$
+                    .pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Ready))
+                    .subscribe(handleRegister)
+            );
+        } else {
+            // Wait until the stage is steady, then register the formula that needs to be marked dirty with formula and range list
+            this.disposeWithMe(
+                this._formulaChangeWithRange$
+                    .pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady))))
+                    .subscribe((options) => options.forEach(handleRegister))
+            );
+
+            this.disposeWithMe(
+                this._formulaChangeWithRange$
+                    .pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Steady))
+                    .subscribe(handleRegister)
+            );
+        }
     }
 
     private _initFormulaCalculationResultChange() {
@@ -153,12 +169,12 @@ export class RegisterOtherFormulaService extends Disposable {
                                     continue;
                                 }
 
-                                if (!item?.result) {
+                                if (!item.result) {
                                     item.result = {};
                                 }
 
                                 const resultMatrix = new ObjectMatrix(current);
-                                const resultObject = new ObjectMatrix(item?.result);
+                                const resultObject = new ObjectMatrix(item.result);
 
                                 resultMatrix.forValue((row, col, value) => {
                                     resultObject.setValue(row, col, value);

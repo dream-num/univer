@@ -53,7 +53,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsx build.ts"
+        "build": "univer-cli build"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -64,8 +64,8 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "typescript": "^5.6.3",
-        "vite": "^5.4.10",
-        "vitest": "^2.1.4"
+        "vite": "^5.4.11",
+        "vitest": "^2.1.5"
     },
     "space": {
         ".": {

@@ -61,7 +61,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "build": "tsx build.ts",
+        "build": "univer-cli build",
         "lint:types": "tsc --noEmit"
     },
     "peerDependencies": {
@@ -83,8 +83,8 @@
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.10",
-        "vitest": "^2.1.4"
+        "vite": "^5.4.11",
+        "vitest": "^2.1.5"
     },
     "space": {
         ".": {

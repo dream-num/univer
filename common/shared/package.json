@@ -17,18 +17,22 @@
         "./vite": "./vite/index.ts",
         "./vitest": "./vitest/index.js"
     },
+    "main": "bin/index.js",
+    "bin": {
+        "univer-cli": "bin/index.ts"
+    },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.13.0",
+        "@typescript-eslint/parser": "^8.14.0",
         "@vitejs/plugin-react": "^4.3.3",
-        "@vitejs/plugin-vue": "^5.1.4",
-        "@vitest/coverage-istanbul": "^2.1.4",
+        "@vitejs/plugin-vue": "^5.2.0",
+        "@vitest/coverage-istanbul": "^2.1.5",
         "fs-extra": "^11.2.0",
         "happy-dom": "15.0.0",
         "javascript-obfuscator": "^4.1.1",
-        "vite": "^5.4.10",
+        "vite": "^5.4.11",
         "vite-plugin-dts": "^4.3.0",
         "vite-plugin-external": "^4.3.1",
-        "vitest": "^2.1.4"
+        "vitest": "^2.1.5"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4"

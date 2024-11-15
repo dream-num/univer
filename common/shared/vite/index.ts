@@ -124,7 +124,7 @@ async function buildUMD(sharedConfig: InlineConfig, options: IBuildExecuterOptio
     }));
 }
 
-interface IBuildOptions {
+export interface IBuildOptions {
     /**
      * Skip UMD build
      * @default false

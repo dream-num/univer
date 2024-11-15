@@ -75,8 +75,7 @@
         "@univerjs/icons": "^0.2.5",
         "@univerjs/protocol": "0.1.39-alpha.45",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
-        "dayjs": "^1.11.13"
+        "@univerjs/sheets-formula": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

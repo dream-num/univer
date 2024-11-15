@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-import type { Meta } from '@storybook/react';
-import { dayjs } from '@univerjs/core';
+import dayjs from 'dayjs';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import localeData from 'dayjs/plugin/localeData';
+import utc from 'dayjs/plugin/utc';
+import weekday from 'dayjs/plugin/weekday';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import weekYear from 'dayjs/plugin/weekYear';
 
-import React, { useState } from 'react';
-import { DatePicker } from './DatePicker';
+dayjs.extend(customParseFormat);
+dayjs.extend(advancedFormat);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
+dayjs.extend(weekYear);
+dayjs.extend(utc);
 
-const meta: Meta<typeof DatePicker> = {
-    title: 'Components / DatePicker',
-    component: DatePicker,
-    parameters: {
-        layout: 'centered',
-    },
-    tags: ['autodocs'],
-};
-
-export default meta;
-
-export const DatePickerBasic = {
-    render() {
-        const [value, setValue] = useState<dayjs.Dayjs>(dayjs());
-
-        return (
-            <DatePicker value={value} onChange={setValue} />
-        );
-    },
-};
+export { dayjs };

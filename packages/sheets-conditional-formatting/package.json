@@ -66,8 +66,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/protocol": "0.1.39-alpha.45",
-        "@univerjs/sheets": "workspace:*",
-        "dayjs": "^1.11.13"
+        "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

@@ -85,8 +85,7 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1",
-        "dayjs": "^1.11.13"
+        "clsx": "^2.1.1"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

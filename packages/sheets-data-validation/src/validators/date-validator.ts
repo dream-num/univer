@@ -17,10 +17,9 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import type { ISheetLocationBase } from '@univerjs/sheets';
-import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, dayjs, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import dayjs from 'dayjs';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';

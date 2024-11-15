@@ -17,9 +17,8 @@
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
 import type { IContext } from './type';
-import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
-import dayjs from 'dayjs';
 import { CFNumberOperator, CFValueType } from '../../base/const';
 import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';

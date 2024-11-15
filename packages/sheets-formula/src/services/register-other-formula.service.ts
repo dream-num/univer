@@ -17,9 +17,9 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { Disposable, ICommandService, Inject, LifecycleService, LifecycleStages, ObjectMatrix, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleService, ObjectMatrix, Tools } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
-import { bufferWhen, filter, Subject } from 'rxjs';
+import { BehaviorSubject, bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common';
 
@@ -33,6 +33,8 @@ export class RegisterOtherFormulaService extends Disposable {
 
     private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
+
+    public calculateStarted$ = new BehaviorSubject(false);
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -49,6 +51,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
+        this.calculateStarted$.complete();
     }
 
     private _ensureCacheMap(unitId: string, subUnitId: string) {
@@ -113,16 +116,15 @@ export class RegisterOtherFormulaService extends Disposable {
             });
         };
 
-        // Wait until the stage is steady, then register the formula that needs to be marked dirty with formula and range list
         this.disposeWithMe(
             this._formulaChangeWithRange$
-                .pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady))))
+                .pipe(bufferWhen(() => this.calculateStarted$.pipe(filter((calculateStarted) => calculateStarted))))
                 .subscribe((options) => options.forEach(handleRegister))
         );
 
         this.disposeWithMe(
             this._formulaChangeWithRange$
-                .pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Steady))
+                .pipe(filter(() => this.calculateStarted$.getValue()))
                 .subscribe(handleRegister)
         );
     }
@@ -153,12 +155,12 @@ export class RegisterOtherFormulaService extends Disposable {
                                     continue;
                                 }
 
-                                if (!item?.result) {
+                                if (!item.result) {
                                     item.result = {};
                                 }
 
                                 const resultMatrix = new ObjectMatrix(current);
-                                const resultObject = new ObjectMatrix(item?.result);
+                                const resultObject = new ObjectMatrix(item.result);
 
                                 resultMatrix.forValue((row, col, value) => {
                                     resultObject.setValue(row, col, value);

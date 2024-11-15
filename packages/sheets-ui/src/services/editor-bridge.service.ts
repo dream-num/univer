@@ -21,6 +21,7 @@ import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import {
     CellValueType,
+    convertCellToRange,
     createIdentifier,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -30,7 +31,6 @@ import {
     IContextService,
     Inject,
     IUniverInstanceService,
-    makeCellToSelection,
     ThemeService,
     toDisposable,
     UniverInstanceType,
@@ -194,12 +194,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!this._currentEditCellState) return;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
-        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
+        const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         if (primaryWithCoord == null) {
             return;
         }
 
-        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;
@@ -309,12 +309,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
+        const primaryWithCoord = attachPrimaryWithCoord(skeleton, primary);
         if (primaryWithCoord == null) {
             return;
         }
 
-        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        const actualRangeWithCoord = convertCellToRange(primaryWithCoord);
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;

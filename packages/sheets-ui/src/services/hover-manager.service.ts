@@ -158,7 +158,7 @@ export class HoverManagerService extends Disposable {
             paragraph: IParagraph;
         }> = null;
 
-        const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
+        const cell = skeleton.getCellWithCoordByIndex(overflowLocation.row, overflowLocation.col);
         const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
         const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
 

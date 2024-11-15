@@ -19,10 +19,9 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';
-// import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SelectionControl } from '../selection/selection-control';
+import { attachSelectionWithCoord } from '../selection/util';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
@@ -46,7 +45,9 @@ const DEFAULT_Z_INDEX = SELECTION_SHAPE_DEPTH.MARK_SELECTION; ;
 export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('univer.mark-selection-service');
 
 /**
- * For condition format selection.
+ * For copy and cut selection.
+ * also for selection when hover on conditional format items in the cf panel on the right.
+ * but hover on panel if data validation, uses another method to draw selection.
  */
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
     private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();
@@ -64,14 +65,16 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         const subUnitId = workbook.getActiveSheet()?.getSheetId();
         if (!subUnitId) return null;
         const id = Tools.generateRandomId();
-        this._shapeMap.set(id, {
+
+        const markSelectionInfo: IMarkSelectionInfo = {
             selection,
             subUnitId,
             unitId: workbook.getUnitId(),
             zIndex,
             control: null,
             exits,
-        });
+        };
+        this._shapeMap.set(id, markSelectionInfo);
 
         this.refreshShapes();
         return id;
@@ -99,13 +102,14 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionControl(scene, zIndex, this._themeService, false, { rowHeaderWidth, columnHeaderHeight });
-            const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
-            control.updateRange(rangeWithCoord, primaryWithCoord);
-            const { style } = selection;
-            if (style) {
-                control.updateStyle(style);
-            }
+            const control = new SelectionControl(scene, zIndex, this._themeService, {
+                enableAutoFill: false,
+                highlightHeader: false,
+                rowHeaderWidth,
+                columnHeaderHeight,
+            });
+            const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
+            control.updateRangeBySelectionWithCoord(selectionWithCoord);
             shape.control = control;
         });
     }

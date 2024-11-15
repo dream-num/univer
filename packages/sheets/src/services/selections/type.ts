@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+export interface ISelectionManagerSearchParam {
+    unitId: string;
+    sheetId: string;
+}
 
-export const SetEditorResizeOperation: IOperation = {
-    id: 'sheet.operation.set-editor-resize',
-    type: CommandType.OPERATION,
-    handler: (accessor, params) => true,
-};
+export enum SelectionMoveType {
+    MOVE_START,
+    MOVING,
+    MOVE_END,
+    /**
+     * Events are not triggered by cursor movement
+     */
+    ONLY_SET,
+}

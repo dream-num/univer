@@ -134,7 +134,6 @@ export { Sidebar } from './views/components/sidebar/Sidebar';
 
 // #region - all commands
 
-export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
 export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 
 // #endregion

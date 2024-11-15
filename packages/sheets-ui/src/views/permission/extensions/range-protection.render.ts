@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Range } from '@univerjs/core';
-import { SheetExtension } from '@univerjs/engine-render';
-import { UnitAction } from '@univerjs/protocol';
 import type { ICellDataForSheetInterceptor, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
+import { Range } from '@univerjs/core';
+import { SheetExtension } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { base64 } from './protect-background-img';
 
 export const RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY = 'RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY';
@@ -85,8 +85,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
                     }
                     this.renderCache.add(config.ruleId);
                     config.ranges!.forEach((range) => {
-                        const start = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
-                        const end = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.endRow, range.endColumn);
+                        const start = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
+                        const end = spreadsheetSkeleton.getCellWithCoordByIndex(range.endRow, range.endColumn, false);
                         ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
                     });
                 }

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Range } from '@univerjs/core';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
+import { Range } from '@univerjs/core';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 export const defaultDataBarPositiveColor = '#ffbe38';
@@ -55,7 +55,7 @@ export class DataBar extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

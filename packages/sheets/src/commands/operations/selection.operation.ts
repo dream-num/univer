@@ -16,7 +16,7 @@
 
 import type { IOperation } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../basics/selection';
-import type { SelectionMoveType } from '../../services/selections/selection-manager.service';
+import type { SelectionMoveType } from '../../services/selections/type';
 import { CommandType } from '@univerjs/core';
 import { getSelectionsService } from '../utils/selection-command-util';
 
@@ -30,6 +30,9 @@ export interface ISetSelectionsOperationParams {
     reveal?: boolean;
 }
 
+/**
+ * Set selections to SelectionModel(WorkbookSelectionModel) by selectionManagerService.
+ */
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
     id: 'sheet.operation.set-selections',
     type: CommandType.OPERATION,

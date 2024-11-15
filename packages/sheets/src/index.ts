@@ -33,15 +33,13 @@ export {
 export {
     convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
-    getNormalSelectionStyle,
     type ISelectionStyle,
     type ISelectionWidgetConfig,
-    type ISelectionWithCoordAndStyle,
+    type ISelectionWithCoord,
     type ISelectionWithStyle,
     type ISheetRangeLocation,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-    transformCellDataToSelectionData,
 } from './basics/selection';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
 export { type IUniverSheetsConfig } from './controllers/config.schema';
@@ -52,12 +50,12 @@ export { WorksheetPermissionService } from './services/permission/worksheet-perm
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
     DISABLE_NORMAL_SELECTIONS,
+    IRefSelectionsService,
+    RefSelectionsService,
     SelectionMoveType,
     SheetsSelectionsService,
-    WorkbookSelections,
-} from './services/selections/selection-manager.service';
-export { IRefSelectionsService, RefSelectionsService } from './services/selections/ref-selections.service';
-
+    WorkbookSelectionModel,
+} from './services/selections';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';

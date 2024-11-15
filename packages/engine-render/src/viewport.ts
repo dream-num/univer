@@ -545,7 +545,7 @@ export class Viewport {
     // 4. changing the viewport size (also include change window size)
     // 5. changing the scroll bar position(click at certain pos of scrolltrack)
     // Debug
-    // window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
+    // scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
         return this._scrollToBarPosCore(pos);
     }

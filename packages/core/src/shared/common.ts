@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../sheets/typedef';
-import { RANGE_TYPE } from '../sheets/typedef';
+import type { ICellData, ICellDataForSheetInterceptor, ICellWithCoord, IRange, IRangeWithCoord, ISelectionCell } from '../sheets/typedef';
 import type { Worksheet } from '../sheets/worksheet';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
+import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
+import type { Nullable } from './types';
+import { RANGE_TYPE } from '../sheets/typedef';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -25,13 +28,15 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
-import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRangeWithCoord {
+/**
+ * Data type convert, convert ICellWithCoord to IRangeWithCoord
+ * @param cellInfo
+ * @returns IRangeWithCoord
+ */
+export function convertCellToRange(cellInfo: ICellWithCoord): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;
@@ -65,9 +70,7 @@ export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRan
         endY = mergeInfo.endY;
         startX = mergeInfo.startX;
         endX = mergeInfo.endX;
-
         endRow = mergeInfo.endRow;
-
         endColumn = mergeInfo.endColumn;
     }
 
@@ -82,6 +85,12 @@ export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRan
         endX,
     };
 }
+
+/**
+ * @deprecated use `convertCellToRange` instead
+ */
+const makeCellToSelection = convertCellToRange;
+export { makeCellToSelection };
 
 export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nullable<IRange> {
     if (!cellInfo) {

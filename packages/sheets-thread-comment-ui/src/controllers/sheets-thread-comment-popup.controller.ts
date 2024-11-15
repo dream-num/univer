@@ -71,7 +71,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
         if (!range) {
             return;
         }
-        const actualCell = skeleton.getCellByIndex(range.startRow, range.startColumn);
+        const actualCell = skeleton.getCellWithCoordByIndex(range.startRow, range.startColumn);
 
         const rangeType = range.rangeType ?? RANGE_TYPE.NORMAL;
         if ((rangeType !== RANGE_TYPE.NORMAL || range.endColumn - range.startColumn > 0 || range.endRow - range.startRow > 0) && !((actualCell.isMerged || actualCell.isMergedMainCell) && Rectangle.equals(actualCell.mergeInfo, range))) {
@@ -250,7 +250,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 {
                     range: mergeInfo,
                     style: {
-                        hasAutoFill: false,
+                        // hasAutoFill: false,
                         fill: 'rgb(255, 189, 55, 0.35)',
                         strokeWidth: 1,
                         stroke: '#FFBD37',

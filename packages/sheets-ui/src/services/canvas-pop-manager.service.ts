@@ -473,7 +473,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     ): IBoundRectNoAngle {
         const { scene, engine } = currentRender;
 
-        const primaryWithCoord = skeleton.getCellByIndex(row, col);
+        const primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();

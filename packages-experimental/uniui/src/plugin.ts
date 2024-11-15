@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -85,7 +85,8 @@ export class UniverUniUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 

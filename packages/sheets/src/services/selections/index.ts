@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-import type { ThemeService } from '@univerjs/core';
-import type { ISelectionStyle } from '@univerjs/sheets';
-
-export function createCopyPasteSelectionStyle(
-    themeService: ThemeService
-): Partial<ISelectionStyle> {
-    return {
-        strokeWidth: 1.5,
-        stroke: themeService.getCurrentTheme().primaryColor,
-        fill: 'rgba(178, 178, 178, 0.10)',
-        widgets: {},
-        strokeDash: 8,
-    };
-}
+export { IRefSelectionsService, RefSelectionsService } from './ref-selections.service';
+export { WorkbookSelectionModel } from './selection-data-model';
+export { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from './selection-manager.service';
+export { type ISelectionManagerSearchParam, SelectionMoveType } from './type';

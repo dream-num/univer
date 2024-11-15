@@ -17,23 +17,14 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { Disposable, ICommandService, ObjectMatrix, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleService, LifecycleStages, ObjectMatrix, Tools } from '@univerjs/core';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
-import { Subject } from 'rxjs';
+import { bufferWhen, filter, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common';
 
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
-
-    /**
-     * @deprecated Use _formulaChangeWithRange$ instead
-     */
-    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
-    /**
-     * @deprecated Use formulaChangeWithRange$ instead
-     */
-    public formulaChange$ = this._formulaChange$.asObservable();
 
     private _formulaChangeWithRange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string; ranges: IRange[] }>();
     public formulaChangeWithRange$ = this._formulaChangeWithRange$.asObservable();
@@ -45,7 +36,8 @@ export class RegisterOtherFormulaService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         super();
         this._initFormulaRegister();
@@ -55,7 +47,6 @@ export class RegisterOtherFormulaService extends Disposable {
     override dispose(): void {
         super.dispose();
 
-        this._formulaChange$.complete();
         this._formulaChangeWithRange$.complete();
         this._formulaResult$.complete();
     }
@@ -83,7 +74,8 @@ export class RegisterOtherFormulaService extends Disposable {
     }
 
     private _initFormulaRegister() {
-        this._activeDirtyManagerService.register(OtherFormulaMarkDirty.id,
+        this._activeDirtyManagerService.register(
+            OtherFormulaMarkDirty.id,
             {
                 commandId: OtherFormulaMarkDirty.id,
                 getDirtyData(commandInfo) {
@@ -92,36 +84,16 @@ export class RegisterOtherFormulaService extends Disposable {
                         dirtyUnitOtherFormulaMap: params,
                     };
                 },
-            });
+            }
+        );
 
-        // this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
-        //     return list.reduce((result, cur) => {
-        //         const { unitId, subUnitId, formulaId, formulaText } = cur;
-        //         if (!result[unitId]) {
-        //             result[unitId] = {};
-        //         }
-        //         if (!result[unitId][subUnitId]) {
-        //             result[unitId][subUnitId] = {};
-        //         }
-        //         result[unitId][subUnitId][formulaId] = { f: formulaText };
-        //         return result;
-        //     }, {} as { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: { f: string } } } });
-        // })).subscribe((result) => {
-        //     for (const unitId in result) {
-        //         for (const subUnitId in result[unitId]) {
-        //             const value = result[unitId][subUnitId];
-        //             const config: ISetOtherFormulaMutationParams = { unitId, subUnitId, formulaMap: value };
-        //             this._commandService.executeCommand(SetOtherFormulaMutation.id, config).then(() => {
-        //                 this._commandService.executeCommand(OtherFormulaMarkDirty.id,
-        //                     { [unitId]: { [subUnitId]: value } } as unknown as IOtherFormulaMarkDirtyParams);
-        //             });
-        //         }
-        //     }
-        // });
-
-        // Register formula that need to be marked dirty with formula and range list
-        this._formulaChangeWithRange$.subscribe((option) => {
+        const handleRegister = (option: { unitId: string; subUnitId: string; formulaText: string; formulaId: string; ranges: IRange[] }) => {
             const { unitId, subUnitId, formulaText, formulaId, ranges } = option;
+            const cacheMap = this._ensureCacheMap(unitId, subUnitId);
+            // formula already deleted
+            if (!cacheMap.has(formulaId)) {
+                return;
+            }
 
             const params: ISetOtherFormulaMutationParams = {
                 unitId,
@@ -135,10 +107,24 @@ export class RegisterOtherFormulaService extends Disposable {
             };
 
             this._commandService.executeCommand(SetOtherFormulaMutation.id, params).then(() => {
-                this._commandService.executeCommand(OtherFormulaMarkDirty.id,
+                this._commandService.executeCommand(
+                    OtherFormulaMarkDirty.id,
                     { [unitId]: { [subUnitId]: { [formulaId]: true } } });
             });
-        });
+        };
+
+        // Wait until the stage is steady, then register the formula that needs to be marked dirty with formula and range list
+        this.disposeWithMe(
+            this._formulaChangeWithRange$
+                .pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Steady))))
+                .subscribe((options) => options.forEach(handleRegister))
+        );
+
+        this.disposeWithMe(
+            this._formulaChangeWithRange$
+                .pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Steady))
+                .subscribe(handleRegister)
+        );
     }
 
     private _initFormulaCalculationResultChange() {
@@ -193,34 +179,6 @@ export class RegisterOtherFormulaService extends Disposable {
         }));
     }
 
-    /**
-     * @deprecated Use registerFormulaWithRange instead
-     * @param unitId
-     * @param subUnitId
-     * @param formulaText
-     * @param extra
-     * @returns
-     */
-    registerFormula(unitId: string, subUnitId: string, formulaText: string, extra?: Record<string, any>) {
-        const formulaId = this._createFormulaId(unitId, subUnitId);
-        const cacheMap = this._ensureCacheMap(unitId, subUnitId);
-
-        cacheMap.set(formulaId, {
-            result: undefined,
-            status: FormulaResultStatus.WAIT,
-            formulaId,
-            callbacks: new Set(),
-            extra,
-        });
-        this._formulaChange$.next({
-            unitId,
-            subUnitId,
-            formulaText,
-            formulaId,
-        });
-        return formulaId;
-    }
-
     registerFormulaWithRange(unitId: string, subUnitId: string, formulaText: string, ranges: IRange[] = [{ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 }], extra?: Record<string, any>) {
         const formulaId = this._createFormulaId(unitId, subUnitId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
@@ -232,6 +190,7 @@ export class RegisterOtherFormulaService extends Disposable {
             callbacks: new Set(),
             extra,
         });
+
         this._formulaChangeWithRange$.next({
             unitId,
             subUnitId,

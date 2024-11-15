@@ -18,7 +18,7 @@ import type { CellValue, Nullable } from '@univerjs/core';
 import type { DateValidator } from '@univerjs/sheets-data-validation';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
-import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, dayjs, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -26,13 +26,9 @@ import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import React, { useState } from 'react';
 import { DataValidationRejectInputController } from '../../../controllers/dv-reject-input.controller';
 import styles from './index.module.less';
-
-dayjs.extend(utc);
 
 const transformDate = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {

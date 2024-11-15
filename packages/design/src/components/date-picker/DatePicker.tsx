@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import React, { useContext } from 'react';
+import type { dayjs } from '@univerjs/core';
 import type { PickerProps } from 'rc-picker';
+import { CalendarSingle } from '@univerjs/icons';
 import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import { CalendarSingle } from '@univerjs/icons';
-import type { Dayjs } from 'dayjs';
+import React, { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export interface IDatePickerProps extends Omit<PickerProps<Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
+export interface IDatePickerProps extends Omit<PickerProps<dayjs.Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**
      * The value of the date picker.
      */
-    value: Dayjs;
+    value: dayjs.Dayjs;
 
     /**
      * Callback when the value of the date picker changes.
      */
-    onChange: (date: Dayjs, dateString: string) => void;
+    onChange: (date: dayjs.Dayjs, dateString: string) => void;
 }
 
 export function DatePicker(props: IDatePickerProps) {
@@ -40,14 +40,14 @@ export function DatePicker(props: IDatePickerProps) {
 
     const { locale } = useContext(ConfigContext);
 
-    function handleChange(date: Dayjs | Dayjs[], dateString: string | string[]) {
+    function handleChange(date: dayjs.Dayjs | dayjs.Dayjs[], dateString: string | string[]) {
         if (!Array.isArray(date) && !Array.isArray(dateString)) {
             onChange(date, dateString);
         }
     }
 
     return (
-        <RcPicker<Dayjs>
+        <RcPicker<dayjs.Dayjs>
             {...ext}
             value={value}
             prefixCls={styles.datePicker}

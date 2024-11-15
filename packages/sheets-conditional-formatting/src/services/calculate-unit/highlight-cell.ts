@@ -19,9 +19,8 @@
 import type { IStyleBase } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import type { ICalculateUnit } from './type';
-import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { CellValueType, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
-import dayjs from 'dayjs';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { EMPTY_STYLE } from './type';

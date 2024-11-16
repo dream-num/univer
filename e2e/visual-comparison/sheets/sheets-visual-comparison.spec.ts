@@ -211,7 +211,7 @@ test('diff facade sheet hooks', async () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.univerAPI.getSheetHooks().onCellRender([{
-        drawWith: (ctx, info, skeleton, spreadsheets) => {
+        drawWith: (ctx, info) => {
             const { row, col } = info;
             // Update to any cell location you want
             if (row === 1 && col === 2) {

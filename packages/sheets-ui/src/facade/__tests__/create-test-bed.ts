@@ -22,7 +22,6 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    LocaleService,
     LocaleType,
     LogLevel,
     Plugin,
@@ -34,8 +33,6 @@ import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService }
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
-import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 
 import '../f-sheet-hooks';
 
@@ -130,9 +127,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             this._injector.get(SheetInterceptorService);
         }
     }
-
-    // load i18n
-    injector.get(LocaleService).load({ zhCN, enUS });
 
     // load theme service
     const themeService = injector.get(ThemeService);

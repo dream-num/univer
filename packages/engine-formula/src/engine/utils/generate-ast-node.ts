@@ -46,6 +46,9 @@ export function generateAstNode(unitId: string, formulaString: string, lexer: Le
     }
 
     // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
+    // TODO: why would be parse the formula string twice? First as lexer node and then as ast node?
+    // It may cause performance issues.
+    // And the names are inaccurate.
 
     astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 

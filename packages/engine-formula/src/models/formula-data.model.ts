@@ -38,7 +38,9 @@ export interface IRangeChange {
 }
 
 // TODO: drop `Data`, rename it to `FormulaModel`.
-/** `FormulaModel` managers formulas and array formulas. */
+/**
+ * `FormulaModel` managers formulas and array formulas.
+ */
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {}; // TODO: why values are not cached here but formula strings?
     // Can we just get values from `Workbook`?

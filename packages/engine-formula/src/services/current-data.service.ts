@@ -45,6 +45,9 @@ export interface IFormulaDirtyData {
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
 }
 
+/**
+ * This service is used to store the current state of the formula engine.
+ */
 export interface IFormulaCurrentConfigService {
     load(config: IFormulaDatasetConfig): void;
 
@@ -107,6 +110,8 @@ export interface IFormulaCurrentConfigService {
     getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
 }
 
+// TODO: this service deserves a better name.
+
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
     private _unitData: IUnitData = {};
 
@@ -149,6 +154,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     override dispose(): void {
+        // TODO: this is not necessary since `FormulaCurrentConfigService` will be garbage collected.
         this._unitData = {};
         this._unitStylesData = {};
         this._formulaData = {};

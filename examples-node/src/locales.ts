@@ -22,6 +22,12 @@ import sheetsruRU from '@univerjs/sheets/locale/ru-RU';
 import sheetsviVN from '@univerjs/sheets/locale/vi-VN';
 import sheetszhCN from '@univerjs/sheets/locale/zh-CN';
 import sheetszhTW from '@univerjs/sheets/locale/zh-TW';
+import sheetsformulaenUS from '@univerjs/sheets-formula/locale/en-US';
+import sheetsformulafaIR from '@univerjs/sheets-formula/locale/fa-IR';
+import sheetsformularuRU from '@univerjs/sheets-formula/locale/ru-RU';
+import sheetsformulaviVN from '@univerjs/sheets-formula/locale/vi-VN';
+import sheetsformulazhCN from '@univerjs/sheets-formula/locale/zh-CN';
+import sheetsformulazhTW from '@univerjs/sheets-formula/locale/zh-TW';
 import sheetssortenUS from '@univerjs/sheets-sort/locale/en-US';
 import sheetssortfaIR from '@univerjs/sheets-sort/locale/fa-IR';
 import sheetssortruRU from '@univerjs/sheets-sort/locale/ru-RU';
@@ -32,30 +38,36 @@ import sheetssortzhTW from '@univerjs/sheets-sort/locale/zh-TW';
 export const enUS = Tools.deepMerge(
     {},
     sheetsenUS,
+    sheetsformulaenUS,
     sheetssortenUS
 );
 export const ruRU = Tools.deepMerge(
     {},
     sheetsruRU,
+    sheetsformularuRU,
     sheetssortruRU
 );
 export const zhCN = Tools.deepMerge(
     {},
     sheetszhCN,
+    sheetsformulazhCN,
     sheetssortzhCN
 );
 export const zhTW = Tools.deepMerge(
     {},
     sheetszhTW,
+    sheetsformulazhTW,
     sheetssortzhTW
 );
 export const viVN = Tools.deepMerge(
     {},
     sheetsviVN,
+    sheetsformulaviVN,
     sheetssortviVN
 );
 export const faIR = Tools.deepMerge(
     {},
     sheetsfaIR,
+    sheetsformulafaIR,
     sheetssortfaIR
 );

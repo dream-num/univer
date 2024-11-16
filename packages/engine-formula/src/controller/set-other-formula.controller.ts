@@ -20,7 +20,6 @@ import type { IOtherFormulaData } from '../basics/common';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import { IDependencyManagerService } from '../services/dependency-manager.service';
 import {
     IOtherFormulaManagerService,
 } from '../services/other-formula-manager.service';
@@ -28,8 +27,7 @@ import {
 export class SetOtherFormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService,
-        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
+        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService
     ) {
         super();
 

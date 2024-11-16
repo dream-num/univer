@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IDirtyUnitOtherFormulaMap, IOtherFormulaData, IOtherFormulaDataItem } from '../basics/common';
 
 import { createIdentifier, Disposable } from '@univerjs/core';
@@ -29,19 +29,29 @@ export interface IOtherFormulaManagerInsertParam extends IOtherFormulaManagerSea
     item: IOtherFormulaDataItem;
 }
 
-export interface IOtherFormulaManagerService {
-    dispose(): void;
+// TODO: there is a great change that this service and `IFeatureFormulaManagerService` is redundant and can be merged
+// into `FormulaModel`.
 
+/**
+ * This service is for registering and obtaining other formulas. Other formulas are formulas that are used
+ * by features like data validation and conditional formatting. Actually they are no different than normal formulas.
+ */
+export const IOtherFormulaManagerService = createIdentifier<OtherFormulaManagerService>(
+    'univer.formula.other-formula-manager.service'
+);
+export interface IOtherFormulaManagerService extends IDisposable {
     remove(searchParam: IOtherFormulaManagerSearchParam): void;
 
     get(searchParam: IOtherFormulaManagerSearchParam): Nullable<IOtherFormulaDataItem>;
 
+    // TODO: this method is not used and can be removed
     has(searchParam: IOtherFormulaManagerSearchParam): boolean;
 
     register(insertParam: IOtherFormulaManagerInsertParam): void;
 
     getOtherFormulaData(): IOtherFormulaData;
 
+    // TODO: why this method and `register` takes different type of parameter?
     batchRegister(formulaData: IOtherFormulaData): void;
 
     batchRemove(formulaData: IDirtyUnitOtherFormulaMap): void;
@@ -143,6 +153,3 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     }
 }
 
-export const IOtherFormulaManagerService = createIdentifier<OtherFormulaManagerService>(
-    'univer.formula.other-formula-manager.service'
-);

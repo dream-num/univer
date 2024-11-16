@@ -6,6 +6,7 @@
 - [ ] Using mutations as remote calling is an anti-pattern and may cause performance issues. We should migrate to a direct way.
 - [ ] Some dependencies are not necessary to be abstract, e.g. `IFormulaService`. Refactoring this can make the code easier to read.
 - [ ] There is no retry or fallback mechanism for web worker failure.
+- [ ] It would be less performant to parse a formula twice.
 
 ## Interface should exposed by the engine
 

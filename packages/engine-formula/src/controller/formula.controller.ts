@@ -60,6 +60,9 @@ import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
 import { PLUGIN_CONFIG_KEY } from './config.schema';
 
+/**
+ * Formula controller register commands and builtin functions to the engine.
+ */
 export class FormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -78,6 +81,10 @@ export class FormulaController extends Disposable {
     }
 
     private _registerCommands(): void {
+        // TODO: these commands will be removed in hte future because it is an anti-pattern
+        // to use mutations to sync between the main thread and worker thread, or as events.
+
+        // The following actions should be dispatched in a new `IFormulaAPIService` service.
         [
             SetFormulaDataMutation,
             SetArrayFormulaDataMutation,

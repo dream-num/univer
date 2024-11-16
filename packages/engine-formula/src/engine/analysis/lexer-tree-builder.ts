@@ -56,6 +56,9 @@ export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_
 
 export const FormulaSequenceNodeCache = new FormulaAstLRU<Array<string | ISequenceNode>>(FORMULA_CACHE_LRU_COUNT);
 
+/**
+ * This class is used to transform a formula string into a lexer tree.
+ */
 export class LexerTreeBuilder extends Disposable {
     private _currentLexerNode: LexerNode = new LexerNode();
 

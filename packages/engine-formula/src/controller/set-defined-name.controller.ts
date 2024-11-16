@@ -24,6 +24,11 @@ import { Disposable, ICommandService } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import { IDefinedNamesService } from '../services/defined-names.service';
 
+/**
+ * `SetDefinedNameController` is responsible for listening to the `SetDefinedNameMutation` and `RemoveDefinedNameMutation`
+ * commands to register or remove defined names in both main thread and web worker.
+ * @deprecated Anti-pattern: Do not use command system as rpc calling method.
+ */
 export class SetDefinedNameController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

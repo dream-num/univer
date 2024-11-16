@@ -590,6 +590,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     if (treeId != null) {
                         FDtree.treeId = treeId;
                     } else {
+                        // TODO: `addFormulaDependencyByDefinedName` should be merged into `addFormulaDependency`.
                         this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
                         this._dependencyManagerService.addFormulaDependencyByDefinedName(FDtree);
                     }
@@ -809,6 +810,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
         return rangeList;
     }
+
+    // TODO: this should be merged with `_generateTreeList`.
 
     /**
      * Build a formula dependency tree based on the dependency relationships.

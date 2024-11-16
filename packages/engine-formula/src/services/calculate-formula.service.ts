@@ -25,7 +25,6 @@ import type {
 } from '../basics/common';
 
 import type { IUniverEngineFormulaConfig } from '../controller/config.schema';
-import type { LexerNode } from '../engine/analysis/lexer-node';
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
     createIdentifier,
@@ -36,12 +35,10 @@ import {
     requestImmediateMacroTask,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
-import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { IFormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
@@ -67,8 +64,6 @@ export interface ICalculateFormulaService {
     execute(formulaDatasetConfig: IFormulaDatasetConfig): Promise<void>;
 
     stopFormulaExecution(): void;
-
-    calculate(formulaString: string, transformSuffix?: boolean): void;
 }
 
 export const ICalculateFormulaService = createIdentifier<ICalculateFormulaService>('engine-formula.calculate-formula.service');
@@ -356,44 +351,5 @@ export class CalculateFormulaService extends Disposable {
         // treeList.length = 0;
 
         return this._runtimeService.getAllRuntimeData();
-    }
-
-    calculate(formulaString: string, transformSuffix: boolean = true) {
-        // TODO how to observe @alex
-        // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this._lexer.treeBuilder(formulaString, transformSuffix);
-
-        if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
-            return ErrorNode.create(lexerNode as ErrorType);
-        }
-
-        // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-
-        // console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
-
-        // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
-
-        // const astTreeBuilder = new AstTreeBuilder();
-
-        const astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
-
-        // console.log('astNode', astNode?.serialize());
-        astNode?.serialize();
-
-        // const interpreter = Interpreter.create();
-
-        // if (astNode == null) {
-        //     return;
-        // }
-
-        // if (interpreter.checkAsyncNode(astNode)) {
-        //     const resultPromise = interpreter.executeAsync(astNode);
-
-        //     resultPromise.then((value) => {
-        //         console.log('formulaResult', value);
-        //     });
-        // } else {
-        //     console.log(interpreter.execute(astNode));
-        // }
     }
 }

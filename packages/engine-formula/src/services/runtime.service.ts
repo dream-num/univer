@@ -89,6 +89,13 @@ export interface IExecutionInProgressParams {
     stage: FormulaExecuteStageType;
 }
 
+// TODO: the module expose two much properties, which means it has a great chance to be coupled with another module.
+// It turns out to be `CalculateFormulaService`.
+
+/**
+ * This service is used to calculate parsed formulas.
+ * @deprecated This service is too coupled with `CalculateFormulaService` and should be removed to improve simplicity.
+ */
 export interface IFormulaRuntimeService {
     currentRow: number;
 

@@ -36,7 +36,6 @@ import { IFeatureCalculationManagerService } from '../services/feature-calculati
 export class SetDependencyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IFeatureCalculationManagerService
         @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
         @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService) {
         super();

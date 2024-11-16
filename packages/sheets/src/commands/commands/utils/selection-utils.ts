@@ -264,6 +264,19 @@ export function copyRangeStyles(
             if (!cellValue[row]) {
                 cellValue[row] = {};
             }
+
+            // univer-pro/issues/3016  insert row/column should not reuse border style
+            if (typeof cell.s === 'string') {
+                const styleData = worksheet.getStyleDataByHash(cell.s);
+                if (styleData) {
+                    delete styleData.bd;
+                    cell.s = worksheet.setStyleData(styleData);
+                }
+            } else {
+                const styleData = { ...cell.s };
+                delete styleData.bd;
+                cell.s = worksheet.setStyleData(styleData);
+            }
             cellValue[row][column] = { s: cell.s };
         }
     }

@@ -20,7 +20,7 @@ import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node'
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
 import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
-import { createSkeletonCellPages } from '../model/page';
+import { createNullCellPage, createSkeletonCellPages } from '../model/page';
 
 export function createTableSkeleton(
     ctx: ILayoutContext,
@@ -170,13 +170,9 @@ export function createTableSkeletons(
         const rowSource = table.tableRows[row];
         const { trHeight, cantSplit } = rowSource;
         const rowSkeletons: IDocumentSkeletonRow[] = [];
-        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
         const { hRule, val } = trHeight;
         const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
 
-        rowSkeletons.push(rowSkeleton);
-
-        let left = 0;
         const rowHeights = [0];
 
         for (const cellNode of cellNodes) {
@@ -195,6 +191,22 @@ export function createTableSkeletons(
 
             while (rowSkeletons.length < cellPageSkeletons.length) {
                 const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
+                const colCount = cellNodes.length;
+
+                // Fill the row with null cell pages.
+                rowSkeleton.cells = [...new Array(colCount)].map((_, i) => {
+                    const cellSkeleton = createNullCellPage(
+                        ctx,
+                        sectionBreakConfig,
+                        table,
+                        row,
+                        i
+                    ).page;
+
+                    cellSkeleton.parent = rowSkeleton;
+
+                    return cellSkeleton;
+                });
 
                 rowSkeletons.push(rowSkeleton);
             }
@@ -208,14 +220,11 @@ export function createTableSkeletons(
                 const cellPageHeight = cellPageSkeleton.height + cellMarginTop + cellMarginBottom;
                 const pageIndex = cellPageSkeletons.indexOf(cellPageSkeleton);
                 const rowSke = rowSkeletons[pageIndex];
-                cellPageSkeleton.left = left;
 
                 cellPageSkeleton.parent = rowSke;
                 rowSke.cells[col] = cellPageSkeleton;
                 rowHeights[pageIndex] = Math.max(rowHeights[pageIndex], cellPageHeight);
             }
-
-            left += cellPageSkeletons[0].pageWidth;
         }
 
         for (const rowSke of rowSkeletons) {
@@ -227,9 +236,15 @@ export function createTableSkeletons(
                 rowHeights[rowIndex] = val.v;
             }
 
+            let left = 0;
             // Set row height to cell page height.
             for (const cellPageSkeleton of rowSke.cells) {
+                cellPageSkeleton.left = left;
                 cellPageSkeleton.pageHeight = rowHeights[rowIndex];
+
+                left += cellPageSkeleton.pageWidth;
+
+                tableWidth = Math.max(tableWidth, left);
             }
         }
 
@@ -306,8 +321,6 @@ export function createTableSkeletons(
             remainHeight -= rowHeight;
             curTableSkeleton.height = rowTop;
         }
-
-        tableWidth = Math.max(tableWidth, left);
     }
 
     const tableLeft = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);

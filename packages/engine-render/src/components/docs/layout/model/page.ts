@@ -279,10 +279,8 @@ function _createSkeletonHeaderFooter(
     return page;
 }
 
-export function createSkeletonCellPages(
+export function createNullCellPage(
     ctx: ILayoutContext,
-    viewModel: DocumentViewModel,
-    cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableConfig: ITable,
     row: number,
@@ -294,8 +292,7 @@ export function createSkeletonCellPages(
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
-    // Table cell only has one section.
-    const sectionNode = cellNode.children[0];
+
     const {
         start = { v: 10 },
         end = { v: 10 },
@@ -334,6 +331,36 @@ export function createSkeletonCellPages(
     );
     areaPage.type = DocumentSkeletonPageType.CELL;
     areaPage.segmentId = tableId;
+
+    return {
+        page: areaPage,
+        sectionBreakConfig: cellSectionBreakConfig,
+    };
+}
+
+export function createSkeletonCellPages(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+) {
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
+
+    const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+        ctx,
+        sectionBreakConfig,
+        tableConfig,
+        row,
+        col,
+        availableHeight,
+        maxCellPageHeight
+    );
 
     const { pages } = dealWithSection(
         ctx,

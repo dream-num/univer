@@ -173,7 +173,7 @@ To ensure the quality of the code and move with confidence, we require that all 
 pnpm test
 ```
 
-Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the codelens.
+Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. In addition, if you add a new plugin, you should update `vitest.workspace.js` to include the new plugin.
 
 ![vitest](./docs/img/vitest.png)
 

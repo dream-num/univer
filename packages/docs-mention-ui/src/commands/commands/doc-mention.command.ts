@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody } from '@univerjs/core';
-import type { IDocMention } from '../../types/interfaces/i-mention';
+import type { ICommand, IDocMention, IDocumentBody } from '@univerjs/core';
 import { CommandType, CustomRangeType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory, DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import cs from 'clsx';
+import type { IMention } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
-import type { IMention } from '../../types/interfaces/i-mention';
+import cs from 'clsx';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IMentionListProps {
@@ -62,7 +62,7 @@ export const MentionList = (props: IMentionListProps) => {
                     className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
                     onClick={() => handleSelect(mention)}
                 >
-                    <img className={styles.docMentionIcon} src={mention.extra?.icon} />
+                    <img className={styles.docMentionIcon} src={mention.metadata?.icon as string} />
                     <div className={styles.docMentionLabel}>{mention.label}</div>
                 </div>
             ))}

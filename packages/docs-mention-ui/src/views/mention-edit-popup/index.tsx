@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMention } from '../../types/interfaces/i-mention';
-import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
+import type { IMention } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, MentionType, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import React, { useEffect } from 'react';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
-import { MentionType } from '../../types/enums/mention-type';
 import { MentionList } from '../mention-list';
 
 export const MentionEditPopup = () => {

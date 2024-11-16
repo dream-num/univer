@@ -17,6 +17,7 @@
 import type { IAbsoluteTransform, ISize } from '../../shared/shape';
 import type { Nullable } from '../../shared/types';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type { IMention } from './i-mention';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
 // Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
@@ -359,6 +360,8 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 }
 
 export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
+
+export type IMentionCustomRange = ICustomRange<IMention>;
 
 export enum CustomRangeType {
     HYPERLINK,

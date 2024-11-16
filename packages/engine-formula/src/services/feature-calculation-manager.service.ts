@@ -15,14 +15,14 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
-
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
-import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
+import type { IAllRuntimeData } from './runtime.service';
+import { createIdentifier, Disposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export interface IFeatureCalculationManagerParam {
     unitId: string;
@@ -51,10 +51,7 @@ export interface IFeatureCalculationManagerService {
 }
 
 /**
- * Passively marked as dirty, register the reference and execution actions of the feature plugin.
- * After execution, a dirty area and calculated data will be returned,
- * causing the formula to be marked dirty again,
- * thereby completing the calculation of the entire dependency tree.
+ *
  */
 export class FeatureCalculationManagerService extends Disposable implements IFeatureCalculationManagerService {
     private _referenceExecutorMap: Map<string, Map<string, Map<string, IFeatureCalculationManagerParam>>> = new Map(); // unitId -> subUnitId -> featureId -> IFeatureCalculationManagerParam

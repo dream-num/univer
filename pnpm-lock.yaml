@@ -98,6 +98,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
+      vitest:
+        specifier: ^2.1.4
+        version: 2.1.4(@types/node@22.8.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   common/shared:
     dependencies:
@@ -12905,7 +12908,6 @@ snapshots:
       magic-string: 0.30.12
     optionalDependencies:
       vite: 5.4.10(@types/node@22.8.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-    optional: true
 
   '@vitest/mocker@2.1.4(vite@5.4.10(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
@@ -18709,7 +18711,6 @@ snapshots:
       - sugarss
       - supports-color
       - terser
-    optional: true
 
   vite-node@2.1.4(@types/node@22.9.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
@@ -18813,7 +18814,6 @@ snapshots:
       - sugarss
       - supports-color
       - terser
-    optional: true
 
   vitest@2.1.4(@types/node@22.9.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:

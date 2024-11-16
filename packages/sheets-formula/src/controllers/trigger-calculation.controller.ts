@@ -508,11 +508,11 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        const params = this._getDiryDataByCalculationMode(this._calculationMode);
+        const params = this._getDirtyDataByCalculationMode(this._calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
     }
 
-    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+    private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data

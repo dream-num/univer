@@ -1,5 +1,7 @@
 
 
+# [0.5.0-beta.1](https://github.com/dream-num/univer/compare/v0.5.0-beta.0...v0.5.0-beta.1) (2024-11-16)
+
 # [0.5.0-beta.0](https://github.com/dream-num/univer/compare/v0.5.0-alpha.0...v0.5.0-beta.0) (2024-11-16)
 
 

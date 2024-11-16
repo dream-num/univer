@@ -15,19 +15,26 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
-import type { IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverCellPosition } from '@univerjs/sheets-ui';
+import type { IDragCellPosition } from '../../services/drag-manager.service';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IHoverCellPosition } from '../../services/hover-manager.service';
+
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IRefSelectionsService, RefSelectionsService, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { DragManagerService, EditorBridgeService, HoverManagerService, IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { FSheetHooks, IRefSelectionsService, RefSelectionsService, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import { FSheetHooks } from '../../everything';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { DragManagerService } from '../../services/drag-manager.service';
+import { EditorBridgeService, IEditorBridgeService } from '../../services/editor-bridge.service';
+import { HoverManagerService } from '../../services/hover-manager.service';
+import { createFacadeTestBed } from './create-test-bed';
+
+import '../f-sheet-hooks';
 
 class MockDataTransfer implements DataTransfer {
     effectAllowed: 'none' | 'copy' | 'link' | 'move' | 'all' | 'copyLink' | 'copyMove' | 'linkMove' | 'uninitialized';

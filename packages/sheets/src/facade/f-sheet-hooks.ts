@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-import { FBase } from '@univerjs/core';
+import { FBase, Inject, Injector } from '@univerjs/core';
 
-export class FSheetHooks extends FBase {}
+export class FSheetHooks extends FBase {
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector
+    ) {
+        super();
+    }
+}

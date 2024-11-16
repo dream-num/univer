@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
 import {
+    FUniver,
     ILogService,
     Inject,
     Injector,
@@ -29,38 +28,16 @@ import {
     Plugin,
     ThemeService,
     Univer,
-    UniverInstanceType,
-} from '@univerjs/core';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+    UniverInstanceType } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
-    RangeProtectionRuleModel,
-    RefRangeService,
     SheetInterceptorService,
-    SheetsSelectionsService,
-    WorkbookPermissionService,
-    WorksheetPermissionService,
-    WorksheetProtectionPointModel,
-    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
-
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import {
-    DescriptionService,
-    IDescriptionService,
-    IRegisterFunctionService,
-    RegisterFunctionService,
-    RegisterOtherFormulaService,
-} from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
-import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { FUniver } from '../../everything';
+
+import '../f-sheet-hooks';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {
@@ -72,23 +49,25 @@ function getTestWorkbookDataDemo(): IWorkbookData {
                 name: 'sheet1',
                 cellData: {
                     0: {
-                        0: {
-                            v: 1,
+                        3: {
+                            f: '=SUM(A1)',
+                            si: '3e4r5t',
                         },
                     },
                     1: {
-                        0: {
-                            v: 2,
+                        3: {
+                            f: '=SUM(A2)',
+                            si: 'OSPtzm',
                         },
                     },
                     2: {
-                        0: {
-                            v: 3,
+                        3: {
+                            si: 'OSPtzm',
                         },
                     },
                     3: {
-                        0: {
-                            v: 4,
+                        3: {
+                            si: 'OSPtzm',
                         },
                     },
                 },
@@ -124,7 +103,7 @@ class RenderManagerServiceTestBed extends RenderManagerService {
     }
 }
 
-export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -141,65 +120,14 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
 
         override onStarting(): void {
             const injector = this._injector;
-            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
-            injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            injector.add([
-                IDescriptionService,
-                {
-                    useFactory: () => this._injector.createInstance(DescriptionService),
-                },
-            ]);
-
-            injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
-            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
-            injector.add([SheetsRenderService]);
-            injector.add([IShortcutService, { useClass: ShortcutService }]);
-            injector.add([IPlatformService, { useClass: PlatformService }]);
-            injector.add([SheetSkeletonManagerService]);
-            injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
-            injector.add([RefRangeService]);
-            injector.add([WorksheetPermissionService]);
-            injector.add([WorkbookPermissionService]);
-            injector.add([WorksheetProtectionPointModel]);
-            injector.add([RangeProtectionRuleModel]);
-            injector.add([WorksheetProtectionRuleModel]);
-
-            const renderManagerService = injector.get(IRenderManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
-
-            // register feature modules
-            ([
-                // conditional formatting
-                [ConditionalFormattingService],
-                [ConditionalFormattingFormulaService],
-                [ConditionalFormattingRuleModel],
-                [ConditionalFormattingViewModel],
-
-                // data validation
-                [DataValidationCacheService],
-                [DataValidationFormulaService],
-                [DataValidationCustomFormulaService],
-                [RegisterOtherFormulaService],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-                [SheetsDataValidationValidatorService],
-                [SheetDataValidationModel],
-
-                // sheets filter
-            ] as Dependency[]).forEach((d) => {
-                injector.add(d);
-            });
 
             dependencies?.forEach((d) => injector.add(d));
-        }
 
-        override onReady(): void {
-            this._injector.get(SheetsRenderService);
+            this._injector.get(SheetInterceptorService);
         }
     }
 
@@ -213,8 +141,6 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
     // register builtin plugins
     // note that UI plugins are not registered here, because the unit test environment does not have a UI
     univer.registerPlugin(TestPlugin);
-    univer.registerPlugin(UniverSheetsFilterPlugin);
-    univer.registerPlugin(UniverDataValidationPlugin);
 
     const sheet = univer.createUnit<IWorkbookData, UnitModel<IWorkbookData>>(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
     const univerInstanceService = injector.get(IUniverInstanceService);
@@ -224,6 +150,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
     const logService = injector.get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // NOTE: change this to `LogLevel.VERBOSE` to debug tests via logs
 
+    // init data validation
     const univerAPI = FUniver.newAPI(injector);
 
     return {

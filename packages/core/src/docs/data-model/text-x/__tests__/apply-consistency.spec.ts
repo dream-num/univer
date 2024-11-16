@@ -41,12 +41,75 @@ function getDefaultDocWithCustomRange() {
                 startIndex: 9,
             },
         ],
+        customDecorations: [],
     };
 
     return doc;
 }
 
 describe('apply consistency', () => {
+    it('should get the same result when compose delete action with body', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 2,
+            },
+        ];
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 4,
+            },
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+                body: {
+                    dataStream: '\r',
+                    paragraphs: [{
+                        startIndex: 0,
+                    }],
+                    customRanges: [],
+                },
+            },
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+            },
+            {
+                t: TextXActionType.DELETE,
+                len: 1,
+            },
+        ];
+
+        const doc1 = getDefaultDocWithCustomRange();
+        const doc2 = getDefaultDocWithCustomRange();
+        const doc3 = getDefaultDocWithCustomRange();
+        const doc4 = getDefaultDocWithCustomRange();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'right'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'left'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'right'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'left'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+
+        const undoActions = TextX.invert(TextX.makeInvertible(composedAction1, getDefaultDocWithCustomRange()));
+        const undoDoc = TextX.apply(resultA, undoActions);
+
+        // console.log(JSON.stringify(composedAction1, null, 2));
+        // console.log(JSON.stringify(undoActions, null, 2));
+        // console.log(JSON.stringify(undoDoc, null, 2));
+
+        expect(undoDoc).toEqual(getDefaultDocWithCustomRange());
+    });
+
     it('should get the same result when apply delete and cancel link', () => {
         const actionsA: TextXAction[] = [
             {

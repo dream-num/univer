@@ -925,12 +925,13 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const docMenuStyleService = accessor.get(DocMenuStyleService);
 
     const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const activeTextRange = textSelectionService.getActiveTextRange();
+    const docRanges = textSelectionService.getDocRanges();
+    const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
     const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
 
-    if (docDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeRange == null) {
         return {
             ts: {
                 ...defaultTextStyle,
@@ -939,7 +940,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const { segmentId } = activeTextRange;
+    const { segmentId } = activeRange;
     const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
     if (body == null) {
@@ -951,7 +952,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const curTextStyle = getStyleInTextRange(body, activeTextRange, defaultTextStyle);
+    const curTextStyle = getStyleInTextRange(body, activeRange, defaultTextStyle);
 
     return {
         ts: {

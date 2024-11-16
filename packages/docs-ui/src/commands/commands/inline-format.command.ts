@@ -244,9 +244,9 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const docRanges = docSelectionManagerService.getDocRanges();
-        const activeTextRange = docSelectionManagerService.getActiveTextRange();
+        const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
-        if (docRanges.length === 0 || activeTextRange == null) {
+        if (docRanges.length === 0) {
             return false;
         }
 
@@ -277,7 +277,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 const defaultStyle = docMenuStyleService.getDefaultStyle();
                 const curTextStyle = getStyleInTextRange(
                     body,
-                    activeTextRange,
+                    activeRange,
                     defaultStyle
                 );
 

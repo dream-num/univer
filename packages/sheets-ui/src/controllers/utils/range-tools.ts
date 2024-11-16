@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export interface IDiscreteRange {
     rows: number[];
@@ -68,8 +68,9 @@ export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
     const totalRanges: IRange[] = [];
 
     ranges.forEach((r) => {
-        totalRows.push(...r.rows);
-        totalCols.push(...r.cols);
+        // Do not use destructuring, otherwise Maximum call stack size exceeded will occur
+        totalRows = totalRows.concat(r.rows);
+        totalCols = totalCols.concat(r.cols);
     });
 
     totalRows = Array.from(new Set(totalRows)).sort((a, b) => a - b);

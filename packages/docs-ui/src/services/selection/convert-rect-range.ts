@@ -104,7 +104,12 @@ export function compareNodePositionInTable(a: INodePosition, b: INodePosition): 
 }
 
 function firstGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {
-    return cellPage.sections[0].columns[0].lines[0].divides[0].glyphGroup[0];
+    const lines = cellPage.sections[0].columns[0].lines;
+    if (lines.length === 0) {
+        return;
+    }
+
+    return lines[0].divides[0].glyphGroup[0];
 }
 
 function lastGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {
@@ -112,10 +117,57 @@ function lastGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumen
     const lastSection = sections[sections.length - 1];
     const lastColumn = lastSection.columns[lastSection.columns.length - 1];
     const lastLine = lastColumn.lines[lastColumn.lines.length - 1];
+
+    if (lastLine == null) {
+        return;
+    }
+
     const lastDivide = lastLine.divides[lastLine.divides.length - 1];
     const lastGlyphGroup = lastDivide.glyphGroup;
 
     return lastGlyphGroup[lastGlyphGroup.length - 2];
+}
+
+function isEmptyCellPage(cell: IDocumentSkeletonPage) {
+    return cell.sections[0].columns[0].lines.length === 0;
+}
+
+function findNonEmptyCellPages(
+    cells: IDocumentSkeletonPage[],
+    startCol: number,
+    endCol: number
+): Nullable<IDocumentSkeletonPage[]> {
+    let s = startCol;
+    let e = endCol;
+    let startCell = cells[s];
+    let endCell = cells[e];
+
+    while (s < e && (isEmptyCellPage(startCell) || isEmptyCellPage(endCell))) {
+        if (isEmptyCellPage(startCell)) {
+            s++;
+            startCell = cells[s];
+        } else if (isEmptyCellPage(endCell)) {
+            e--;
+            endCell = cells[e];
+        }
+    }
+
+    if (!isEmptyCellPage(startCell) && !isEmptyCellPage(endCell)) {
+        return [startCell, endCell];
+    }
+}
+
+function isAllSpanRows(positions: IRectRangeNodePositions[], cols: number) {
+    return positions.every((position) => {
+        const { anchor, focus } = position;
+        const { path: anchorPath } = anchor;
+        const { path: focusPath } = focus;
+
+        const anchorCol = anchorPath[anchorPath.length - 1] as number;
+        const focusCol = focusPath[focusPath.length - 1] as number;
+
+        return Math.abs(anchorCol - focusCol) === cols - 1;
+    });
 }
 
 interface IRectRangeNodePositions {
@@ -236,13 +288,17 @@ export class NodePositionConvertToRectRange {
         focusNodePosition: INodePosition
     ): Nullable<IRectRangeNodePositions[]> {
         const nodePositionGroup: IRectRangeNodePositions[] = [];
-        const compare = compareNodePositionInTable(anchorNodePosition, focusNodePosition);
-        const startNodePosition = compare ? anchorNodePosition : focusNodePosition;
-        const endNodePosition = compare ? focusNodePosition : anchorNodePosition;
+        const anchorIndex = this._docSkeleton.findCharIndexByPosition(anchorNodePosition);
+        const focusIndex = this._docSkeleton.findCharIndexByPosition(focusNodePosition);
+
+        if (anchorIndex == null || focusIndex == null) {
+            return;
+        }
+
+        const compare = anchorIndex < focusIndex;
 
         // Start segmentPage will equal to end segmentPage.
-        const { segmentPage } = startNodePosition;
-        const rectInfo = this._getTableRectRangeInfo(startNodePosition, endNodePosition);
+        const rectInfo = this._getTableRectRangeInfo(anchorNodePosition, focusNodePosition);
 
         if (rectInfo == null) {
             return;
@@ -268,13 +324,13 @@ export class NodePositionConvertToRectRange {
         }
 
         for (const table of tables) {
-            this._collectPositionGroup(table, nodePositionGroup, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, segmentPage, compare);
+            this._collectPositionGroup(table, nodePositionGroup, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, anchorNodePosition, focusNodePosition, compare);
         }
 
         const totalColumns = tables[0].rows[0].cells.length;
 
         // Span entires row.
-        if (startColumnIndex === 0 && endColumnIndex === totalColumns - 1) {
+        if (isAllSpanRows(nodePositionGroup, totalColumns)) {
             const firstPosition = nodePositionGroup[0];
             const lastPosition = nodePositionGroup[nodePositionGroup.length - 1];
 
@@ -296,7 +352,8 @@ export class NodePositionConvertToRectRange {
         endRowIndex: number,
         startColumnIndex: number,
         endColumnIndex: number,
-        segmentPage: number,
+        anchorPosition: INodePosition,
+        focusPosition: INodePosition,
         compare: boolean
     ) {
         // Not span entires row.
@@ -311,18 +368,25 @@ export class NodePositionConvertToRectRange {
                 break;
             }
 
-            const startCellInRow = row.cells[startColumnIndex];
-            const endCellInRow = row.cells[endColumnIndex];
+            const cells = findNonEmptyCellPages(row.cells, startColumnIndex, endColumnIndex);
 
-            const startCellGlyph = firstGlyphInCellPage(startCellInRow);
-            const endCellGlyph = lastGlyphInCellPage(endCellInRow);
+            if (cells == null) {
+                continue;
+            }
+            const [startCell, endCell] = cells;
+
+            const startCellGlyph = firstGlyphInCellPage(startCell);
+            const endCellGlyph = lastGlyphInCellPage(endCell);
 
             if (startCellGlyph == null || endCellGlyph == null) {
                 continue;
             }
 
-            const startPosition = this._docSkeleton.findPositionByGlyph(startCellGlyph, segmentPage);
-            const endPosition = this._docSkeleton.findPositionByGlyph(endCellGlyph, segmentPage);
+            const startSegmentPage = compare ? anchorPosition.segmentPage : focusPosition.segmentPage;
+            const endSegmentPage = compare ? focusPosition.segmentPage : anchorPosition.segmentPage;
+
+            const startPosition = this._docSkeleton.findPositionByGlyph(startCellGlyph, startSegmentPage);
+            const endPosition = this._docSkeleton.findPositionByGlyph(endCellGlyph, endSegmentPage);
 
             if (startPosition == null || endPosition == null) {
                 continue;
@@ -344,7 +408,7 @@ export class NodePositionConvertToRectRange {
         }
     }
 
-    private _getTableRectRangeInfo(startNodePosition: INodePosition, endNodePosition: INodePosition) {
+    private _getTableRectRangeInfo(anchorPosition: INodePosition, focusPosition: INodePosition) {
         const docSkeleton = this._docSkeleton;
         const skeletonData = docSkeleton.getSkeletonData();
 
@@ -354,31 +418,35 @@ export class NodePositionConvertToRectRange {
 
         const { pages } = skeletonData;
 
-        const { path: startPath } = startNodePosition;
-        const { path: endPath } = endNodePosition;
-        const startCell = getPageFromPath(skeletonData, startPath);
-        const endCell = getPageFromPath(skeletonData, endPath);
+        const { path: anchorPath } = anchorPosition;
+        const { path: focusPath } = focusPosition;
+        const anchorCell = getPageFromPath(skeletonData, anchorPath);
+        const focusCell = getPageFromPath(skeletonData, focusPath);
 
-        if (startCell == null || endCell == null) {
+        if (anchorCell == null || focusCell == null) {
             return;
         }
 
-        const tableId = startCell.segmentId;
-        const startRow = (startCell.parent as IDocumentSkeletonRow).index;
-        const startColumn = (startCell.parent as IDocumentSkeletonRow).cells.indexOf(startCell);
+        const tableId = anchorCell.segmentId;
+        const anchorRow = (anchorCell.parent as IDocumentSkeletonRow).index;
+        const anchorColumn = (anchorCell.parent as IDocumentSkeletonRow).cells.indexOf(anchorCell);
 
-        const endRow = (endCell?.parent as IDocumentSkeletonRow).index;
-        const endColumn = (endCell?.parent as IDocumentSkeletonRow).cells.indexOf(endCell);
+        const focusRow = (focusCell?.parent as IDocumentSkeletonRow).index;
+        const focusColumn = (focusCell?.parent as IDocumentSkeletonRow).cells.indexOf(focusCell);
+
+        const startRowIndex = Math.min(anchorRow, focusRow);
+        const endRowIndex = Math.max(anchorRow, focusRow);
+
+        const startColumnIndex = Math.min(anchorColumn, focusColumn);
+        const endColumnIndex = Math.max(anchorColumn, focusColumn);
 
         return {
             pages,
             tableId,
-            startCell,
-            endCell,
-            startRowIndex: startRow,
-            startColumnIndex: startColumn,
-            endRowIndex: endRow,
-            endColumnIndex: endColumn,
+            startRowIndex,
+            startColumnIndex,
+            endRowIndex,
+            endColumnIndex,
         };
     }
 }

@@ -370,6 +370,11 @@ export function createSkeletonCellPages(
         cellSectionBreakConfig
     );
 
+    for (const p of pages) {
+        p.type = DocumentSkeletonPageType.CELL;
+        p.segmentId = tableConfig.tableId;
+    }
+
     updateBlockIndex(pages, cellNode.startIndex);
 
     return pages;

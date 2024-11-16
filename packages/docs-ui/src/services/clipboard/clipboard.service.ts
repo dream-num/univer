@@ -100,9 +100,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async copy(sliceType: SliceBodyType = SliceBodyType.copy): Promise<boolean> {
-        const { bodyList = [], needCache = false, snapshot } = this._getDocumentBodyInRanges(sliceType) ?? {};
+        const { newSnapshotList = [], needCache = false, snapshot } = this._getDocumentBodyInRanges(sliceType) ?? {};
 
-        if (bodyList.length === 0 || snapshot == null) {
+        if (newSnapshotList.length === 0 || snapshot == null) {
             return false;
         }
 
@@ -110,7 +110,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             const activeRange = this._docSelectionManagerService.getActiveTextRange();
             const isCopyInHeaderFooter = !!activeRange?.segmentId;
 
-            this._setClipboardData(bodyList, snapshot, !isCopyInHeaderFooter && needCache);
+            this._setClipboardData(newSnapshotList, !isCopyInHeaderFooter && needCache);
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -130,9 +130,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
-        const partDocData = this._genDocDataFromHtmlAndText(html, text);
+        const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+        const docUnitId = currentDocInstance?.getUnitId() || '';
+        const partDocData = this._genDocDataFromHtmlAndText(html, text, docUnitId);
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
-        if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+        if (docUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             if (text) {
                 const textDocData = BuildTextUtils.transform.fromPlainText(text);
                 return this._paste({ body: textDocData });
@@ -271,12 +273,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _setClipboardData(documentBodyList: IDocumentBody[], snapshot: IDocumentData, needCache = true): Promise<void> {
+    private async _setClipboardData(documentList: IDocumentData[], needCache = true): Promise<void> {
         const copyId = genId();
         const text =
-            (documentBodyList.length > 1
-                ? documentBodyList.map((body) => body.dataStream).join('\n')
-                : documentBodyList[0].dataStream)
+            (documentList.length > 1
+                ? documentList.map((doc) => doc.body?.dataStream || '').join('\n')
+                : documentList[0].body?.dataStream || '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
@@ -286,20 +288,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 // Replace `\r\n` in table cell to white space.
                 .replaceAll('\r\n', ' ');
 
-        let html = this._umdToHtml.convert(documentBodyList);
+        let html = this._umdToHtml.convert(documentList);
 
         // Only cache copy content when the range is 1.
-        if (documentBodyList.length === 1 && needCache) {
+        if (documentList.length === 1 && needCache) {
             html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
-            const body = documentBodyList[0];
-            const cache: Partial<IDocumentData> = { body };
+            const doc = documentList[0];
+            const cache: Partial<IDocumentData> = { body: doc.body };
 
-            if (body.customBlocks?.length) {
+            if (doc.body?.customBlocks?.length) {
                 cache.drawings = {};
 
-                for (const block of body.customBlocks) {
+                for (const block of doc.body.customBlocks) {
                     const { blockId } = block;
-                    const drawing = snapshot.drawings?.[blockId];
+                    const drawing = doc.drawings?.[blockId];
 
                     if (drawing) {
                         const id = Tools.generateRandomId(6);
@@ -333,14 +335,14 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private _getDocumentBodyInRanges(sliceType: SliceBodyType): Nullable<{
-        bodyList: IDocumentBody[];
+        newSnapshotList: IDocumentData[];
         needCache: boolean;
         snapshot: IDocumentData;
     }> {
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const allRanges = this._docSelectionManagerService.getDocRanges();
 
-        const results: IDocumentBody[] = [];
+        const results: IDocumentData['body'][] = [];
         let needCache = true;
 
         if (docDataModel == null || allRanges.length === 0) {
@@ -391,7 +393,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             results.push(docBody);
         }
         return {
-            bodyList: results,
+            newSnapshotList: results.map((e) => ({ ...snapshot, body: e })),
             needCache,
             snapshot,
         };
@@ -420,7 +422,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private _genDocDataFromHtmlAndText(html?: string, text?: string): Partial<IDocumentData> {
+    private _genDocDataFromHtmlAndText(html?: string, text?: string, _unitId?: string): Partial<IDocumentData> {
         if (!html) {
             if (text) {
                 const body = BuildTextUtils.transform.fromPlainText(text);
@@ -439,8 +441,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         }
 
-        const doc = this._htmlToUDM.convert(html);
+        if (!_unitId) {
+            const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            const docUnitId = currentDocInstance?.getUnitId() || '';
+            _unitId = docUnitId;
+        }
 
+        const doc = this._htmlToUDM.convert(html, { unitId: _unitId });
+
+        if (copyId) {
+            copyContentCache.set(copyId, doc);
+        }
         return doc;
     }
 }

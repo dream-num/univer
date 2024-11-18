@@ -469,7 +469,7 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             // deviceEvent.previousState = 0;
-            deviceEvent.currentState = 1;
+            // deviceEvent.currentState = 1;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -479,7 +479,7 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
             // deviceEvent.previousState = 1;
-            deviceEvent.currentState = 0;
+            // deviceEvent.currentState = 0;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -719,20 +719,21 @@ export class Engine extends ThinEngine<Scene> {
                 // deviceEvent.inputIndex = PointerInput.MouseWheelX;
                 // deviceEvent.previousState = previousWheelScrollX;
                 deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelX];
-                this.onInputChanged$.emitEvent(deviceEvent);
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
             if (this._pointerPosRecord[PointerInput.MouseWheelY] !== 0) {
                 // deviceEvent.inputIndex = PointerInput.MouseWheelY;
                 // deviceEvent.previousState = previousWheelScrollY;
                 deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelY];
-                this.onInputChanged$.emitEvent(deviceEvent);
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
             if (this._pointerPosRecord[PointerInput.MouseWheelZ] !== 0) {
                 // deviceEvent.inputIndex = PointerInput.MouseWheelZ;
                 // deviceEvent.previousState = previousWheelScrollZ;
                 deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelZ];
-                this.onInputChanged$.emitEvent(deviceEvent);
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
+            this.onInputChanged$.emitEvent(deviceEvent);
         };
 
         const canvasEle = this.getCanvasElement();

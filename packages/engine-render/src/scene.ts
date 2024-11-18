@@ -37,6 +37,16 @@ import { InputManager } from './scene.input-manager';
 import { Transformer } from './scene.transformer';
 import { ThinScene } from './thin-scene';
 
+export const MAIN_VIEW_PORT_KEY = 'viewMain';
+
+export interface ISceneInputControlOptions {
+    enableDown: boolean;
+    enableUp: boolean ;
+    enableMove: boolean ;
+    enableWheel: boolean ;
+    enableEnter: boolean ;
+    enableLeave: boolean ;
+}
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];
 
@@ -139,13 +149,14 @@ export class Scene extends ThinScene {
         this.setCursor(val);
     }
 
-    attachControl(hasDown: boolean = true, hasUp: boolean = true, hasMove: boolean = true, hasWheel: boolean = true) {
+    attachControl(options?: ISceneInputControlOptions) {
+        // const hasDown: boolean = true; const hasUp: boolean = true; const hasMove: boolean = true; const hasWheel: boolean = true;
         if (!(this._parent.classType === RENDER_CLASS_TYPE.ENGINE)) {
             // 只绑定直接与 engine 挂载的 scene 来统一管理事件
             return;
         }
 
-        this._inputManager?.attachControl(hasDown, hasUp, hasMove, hasWheel);
+        this._inputManager?.attachControl(options);
         return this;
     }
 
@@ -586,6 +597,10 @@ export class Scene extends ThinScene {
 
     override getViewports() {
         return this._viewports;
+    }
+
+    getMainViewport(): Viewport {
+        return this.getViewport(MAIN_VIEW_PORT_KEY)!;
     }
 
     getViewport(key: string): Viewport | undefined {

@@ -40,6 +40,7 @@ import { getSheetObject } from '../utils/component-tools';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
+const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 /**
  * This controller handles scroll logic in sheet interaction.
  */
@@ -163,7 +164,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (!viewMain) return;
 
         this.disposeWithMe(
-            // eslint-disable-next-line complexity
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
@@ -171,63 +171,34 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 let offsetX = 0;
                 let offsetY = 0;
-                const scrollNum = 0;
                 const isLimitedStore = viewMain.limitedScroll();
 
                 // what????
-                // scrollNum = Math.abs(evt.deltaX);
-                // show more content on the right，evt.deltaX > 0, more content on the left, evt.deltaX < 0
-                // offsetX = evt.deltaX; > 0 ? scrollNum : -scrollNum;
+                // const scrollNum = Math.abs(evt.deltaX);
+                // offsetX = evt.deltaX > 0 ? scrollNum : -scrollNum;
                 offsetX = evt.deltaX;
-
-                // this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    if (!isLimitedStore?.isLimitedX) {
-                        state.stopPropagation();
-                    }
-                } else if (viewMain.isWheelPreventDefaultX) {
-                    evt.preventDefault();
-                } else if (!isLimitedStore?.isLimitedX) {
-                    evt.preventDefault();
-                }
-
-                // scrollNum = Math.abs(evt.deltaY);
 
                 // with shift, scrollY will be scrollX
                 if (evt.shiftKey) {
-                    offsetX = evt.deltaY * 3;
-                    // if (evt.deltaY > 0) {
-                    //     offsetX = scrollNum;
-                    // } else {
-                    //     offsetX = -scrollNum;
-                    // }
-
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedX) {
-                            state.stopPropagation();
-                        }
-                    } else if (viewMain.isWheelPreventDefaultX) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedX) {
-                        evt.preventDefault();
-                    }
+                    offsetX = evt.deltaY * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
                 } else {
                     offsetY = evt.deltaY;
-
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedY) {
-                            state.stopPropagation();
-                        }
-                    } else if (viewMain.isWheelPreventDefaultY) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedY) {
-                        evt.preventDefault();
-                    }
                 }
                 this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
-
                 this._context.scene.makeDirty(true);
+
+                // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
+                // if scrolling is reaching limit, let scrolling event do the default behavior.
+                if (isLimitedStore && !isLimitedStore.isLimitedX && !isLimitedStore.isLimitedY) {
+                    evt.preventDefault();
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        state.stopPropagation();
+                    }
+                }
+
+                if (viewMain.isWheelPreventDefaultX && viewMain.isWheelPreventDefaultY) {
+                    evt.preventDefault();
+                }
             })
         );
     }

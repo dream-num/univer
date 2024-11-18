@@ -19,20 +19,12 @@ import type { PointerEvent } from 'react';
 import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { ISceneInputControlOptions, Scene } from './scene';
 import type { ThinScene } from './thin-scene';
 import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
-
-interface ISceneInputControlOptions {
-    enableDown: boolean;
-    enableUp: boolean ;
-    enableMove: boolean ;
-    enableWheel: boolean ;
-    enableEnter: boolean ;
-    enableLeave: boolean ;
-}
 
 export class InputManager extends Disposable {
     /** The distance in pixel that you have to move to prevent some events */
@@ -135,7 +127,7 @@ export class InputManager extends Disposable {
     }
 
     // Handle events such as triggering dragleave and dragenter.
-    dragLeaveEnterHandler(evt: IMouseEvent) {
+    dragLeaveEnterHandler(evt: IDragEvent) {
         const o = this._currentObject;
         if (o === null || o === undefined) {
             this._currentMouseEnterPicked?.triggerDragLeave(evt);
@@ -245,6 +237,10 @@ export class InputManager extends Disposable {
         const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
         const isStop = currentObject?.triggerMouseWheel(evt);
 
+        // for doc
+        const viewportMain = (this._scene as Scene).getMainViewport();
+        viewportMain.onMouseWheel$.emitEvent(evt);
+
         if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
             this._scene.onMouseWheel$.emitEvent(evt);
         }
@@ -293,7 +289,7 @@ export class InputManager extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    attachControl(options: ISceneInputControlOptions) {
+    attachControl(options?: ISceneInputControlOptions) {
         const enableDown: boolean = options?.enableDown ?? true;
         const enableUp: boolean = options?.enableUp ?? true;
         const enableMove: boolean = options?.enableMove ?? true;
@@ -307,48 +303,19 @@ export class InputManager extends Disposable {
         this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
             if (eventData.deviceType === DeviceType.Keyboard) {
-                if (eventData.currentState === 1) {
-                    this._onKeyDown(evt as IKeyboardEvent);
-                }
-
-                if (eventData.currentState === 0) {
-                    this._onKeyUp(evt as IKeyboardEvent);
-                }
-            }
-
-            // Drag Events
-            if ((eventData as IDragEvent).dataTransfer) {
-                switch (evt.type) {
-                    case 'dragenter':
-                        if (enableEnter) {
-                            this._onDragEnter(evt as IDragEvent);
-                        }
+                switch (eventData.type) {
+                    case 'keydown':
+                        this._onKeyDown(evt as IKeyboardEvent);
                         break;
-                    case 'dragover': {
-                        const validIndex = eventData.inputIndex === PointerInput.Horizontal ||
-                        eventData.inputIndex === PointerInput.Vertical ||
-                        eventData.inputIndex === PointerInput.DeltaHorizontal ||
-                        eventData.inputIndex === PointerInput.DeltaVertical;
-                        if (enableMove && validIndex) {
-                            this._onDragOver(evt as IDragEvent);
-                        }
-                        break;
-                    }
-                    case 'dragleave':
-                        if (enableLeave) {
-                            this._onDragLeave(evt as IDragEvent);
-                        }
-                        break;
-                    case 'drop':
-                        this._onDrop(evt as IDragEvent);
+                    case 'keyup':
+                        this._onKeyUp(evt as IKeyboardEvent);
                         break;
                 }
-                return;
             }
 
             // Pointer Events
             if (eventData.deviceType === DeviceType.Mouse || eventData.deviceType === DeviceType.Touch) {
-                switch (evt.type) {
+                switch (eventData.type) {
                     case 'wheel':
                     case 'DOMMouseScroll':
                     case 'mousewheel':
@@ -386,13 +353,38 @@ export class InputManager extends Disposable {
                         break;
                 }
             }
+
+            // Drag Events, For 3rd users. Univer itself doesn't use drag events.
+            if ((eventData as IDragEvent).dataTransfer) {
+                switch (eventData.type) {
+                    case 'dragenter':
+                        if (enableEnter) {
+                            this._onDragEnter(evt as IDragEvent);
+                        }
+                        break;
+                    case 'dragover': {
+                        const validIndex = eventData.inputIndex === PointerInput.Horizontal ||
+                        eventData.inputIndex === PointerInput.Vertical ||
+                        eventData.inputIndex === PointerInput.DeltaHorizontal ||
+                        eventData.inputIndex === PointerInput.DeltaVertical;
+                        if (enableMove && validIndex) {
+                            this._onDragOver(evt as IDragEvent);
+                        }
+                        break;
+                    }
+                    case 'dragleave':
+                        if (enableLeave) {
+                            this._onDragLeave(evt as IDragEvent);
+                        }
+                        break;
+                    case 'drop':
+                        this._onDrop(evt as IDragEvent);
+                        break;
+                }
+            }
         });
 
-        this.disposeWithMe(
-            toDisposable(
-                this._onInput$
-            )
-        );
+        this.disposeWithMe(toDisposable(this._onInput$));
         this._alreadyAttached = true;
     }
 

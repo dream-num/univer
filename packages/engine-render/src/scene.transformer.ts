@@ -207,7 +207,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         super();
         this._initialProps(config);
     }
-    
+
     updateZeroPoint(left: number, top: number) {
         this.zeroLeft = left;
         this.zeroTop = top;

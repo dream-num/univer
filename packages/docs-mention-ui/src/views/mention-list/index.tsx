@@ -16,7 +16,7 @@
 
 import type { IMention, ITypeMentionList } from '@univerjs/core';
 import cs from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IMentionListProps {
@@ -34,9 +34,9 @@ export const MentionList = (props: IMentionListProps) => {
         onSelect?.(item);
     };
 
-    useEffect(() => {
-        ref.current?.focus();
-    }, []);
+    // useEffect(() => {
+    //     ref.current?.focus();
+    // }, []);
 
     return (
         <div ref={ref} tabIndex={0} className={styles.docMentionPanel} onClick={onClick}>

@@ -17,8 +17,6 @@
 import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
 import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import React, { useEffect, useMemo, useState } from 'react';
 import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
@@ -50,17 +48,6 @@ export const MentionEditPopup = () => {
             }
         })();
     }, [mentionIOService, editPopup, search]);
-
-    const renderManagerService = useDependency(IRenderManagerService);
-
-    const docSelectionRenderService = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
-
-    useEffect(() => {
-        docSelectionRenderService?.blur();
-        return () => {
-            docSelectionRenderService?.focus();
-        };
-    }, [docSelectionRenderService]);
 
     if (!editPopup) {
         return null;

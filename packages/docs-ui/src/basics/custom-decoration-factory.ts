@@ -37,7 +37,7 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
             unitId,
             actions: [],
             textRanges: undefined,
-            noHistory: true,
+            // noHistory: true,
             segmentId,
         },
     };
@@ -109,7 +109,7 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
             unitId,
             actions: [],
             textRanges: undefined,
-            noHistory: true,
+            // noHistory: true,
             segmentId,
         },
     };

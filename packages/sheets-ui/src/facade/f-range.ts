@@ -147,8 +147,11 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         const markSelectionService = this._injector.get(IMarkSelectionService);
         const id = markSelectionService.addShape({ range: this._range, style, primary });
 
+        if (!id) {
+            throw new Error('Failed to highlight current range');
+        }
         return toDisposable(() => {
-            id && markSelectionService.removeShape(id);
+            markSelectionService.removeShape(id);
         });
     }
 }

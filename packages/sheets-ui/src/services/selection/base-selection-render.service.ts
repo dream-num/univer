@@ -130,6 +130,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     private _cancelUpSubscription: Nullable<Subscription>;
 
     protected _skeleton!: SpreadsheetSkeleton;
+
+    /**
+     * From renderContext.
+     */
     protected _scene!: Scene;
 
     // The type of selector determines the type of data range and the highlighting style of the title bar, now it always true. In future, this could be configurable by user.
@@ -657,6 +661,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             unitId,
             sheetId,
         };
+        this._scene.getEngine()?.setRemainCapture();
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
 

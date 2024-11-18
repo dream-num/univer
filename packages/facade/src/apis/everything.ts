@@ -29,7 +29,7 @@ import '@univerjs/sheets-thread-comment/facade';
 
 export { FHooks, FUniver } from '@univerjs/core';
 export { FFormula } from '@univerjs/engine-formula/facade';
-export { FSheetHooks } from '@univerjs/sheets';
+export { FSheetHooks } from '@univerjs/sheets/facade';
 export { FPermission, FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
 export { FFilter } from '@univerjs/sheets-filter/facade';

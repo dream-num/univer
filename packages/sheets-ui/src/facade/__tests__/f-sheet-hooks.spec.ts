@@ -24,7 +24,8 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { FSheetHooks, IRefSelectionsService, RefSelectionsService, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { IRefSelectionsService, RefSelectionsService, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { FSheetHooks } from '@univerjs/sheets/facade';
 import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -32,8 +33,8 @@ import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit
 import { DragManagerService } from '../../services/drag-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from '../../services/editor-bridge.service';
 import { HoverManagerService } from '../../services/hover-manager.service';
-import { createFacadeTestBed } from './create-test-bed';
 
+import { createFacadeTestBed } from './create-test-bed';
 import '../f-sheet-hooks';
 
 class MockDataTransfer implements DataTransfer {

@@ -20,5 +20,6 @@ export { FPermission } from './f-permission';
 export { FRange } from './f-range';
 export type { FontLine, FontStyle, FontWeight } from './f-range';
 export { FSelection } from './f-selection';
+export { FSheetHooks } from './f-sheet-hooks';
 export { FWorkbook } from './f-workbook';
 export { FWorksheet } from './f-worksheet';

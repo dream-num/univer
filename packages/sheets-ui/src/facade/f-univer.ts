@@ -152,7 +152,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
         if (!render) {
-            throw new Error('Render not found');
+            throw new Error(`Render Unit with unitId ${unitId} not found`);
         }
 
         const { components } = render;

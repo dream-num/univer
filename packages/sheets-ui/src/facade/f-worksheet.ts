@@ -33,7 +33,7 @@ class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonM
         const render = renderManagerService.getRenderById(unitId);
 
         if (!render) {
-            throw new Error('Render not found');
+            throw new Error(`Render Unit with unitId ${unitId} not found`);
         }
 
         render.with(SheetSkeletonManagerService).reCalculate();

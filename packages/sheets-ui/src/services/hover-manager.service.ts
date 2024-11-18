@@ -16,7 +16,7 @@
 
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
 import type { IBoundRectNoAngle, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
@@ -33,7 +33,22 @@ export interface IHoverCellPosition {
     location: ISheetLocation;
 }
 
-export interface IHoverRichTextPosition extends IHoverCellPosition {
+export interface IHoverRichTextInfo extends IHoverCellPosition {
+    /**
+     * active custom range in cell, if cell is rich-text
+     */
+    customRange?: Nullable<ICustomRange>;
+    /**
+     * active bullet in cell, if cell is rich-text
+     */
+    bullet?: Nullable<IParagraph>;
+    /**
+     * rect of custom-range or bullet
+     */
+    rect?: Nullable<IBoundRectNoAngle>;
+}
+
+export interface IHoverRichTextPosition extends ISheetLocationBase {
     /**
      * active custom range in cell, if cell is rich-text
      */
@@ -50,8 +65,8 @@ export interface IHoverRichTextPosition extends IHoverCellPosition {
 
 export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
-    private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextPosition>>(null);
-    private _currentClickedCell$ = new Subject<IHoverRichTextPosition>();
+    private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextInfo>>(null);
+    private _currentClickedCell$ = new Subject<IHoverRichTextInfo>();
 
     // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(
@@ -88,7 +103,7 @@ export class HoverManagerService extends Disposable {
             customRange: cell.customRange,
             bullet: cell.bullet,
             rect: cell.rect,
-        })
+        } as IHoverRichTextPosition)
     );
 
     // Notify when mouse position changes

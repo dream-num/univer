@@ -42,4 +42,4 @@ export interface IMentionIOService {
     list (params: IListMentionParam): Promise<IListMentionResponse>;
 }
 
-export const IMentionIOService = createIdentifier('univer.service.mention-io');
+export const IMentionIOService = createIdentifier<IMentionIOService>('univer.service.mention-io');

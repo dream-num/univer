@@ -40,6 +40,8 @@ import { LifecycleStages } from './services/lifecycle/lifecycle';
 import { LifecycleService } from './services/lifecycle/lifecycle.service';
 import { LocaleService } from './services/locale/locale.service';
 import { DesktopLogService, ILogService } from './services/log/log.service';
+import { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
+import { IMentionIOService } from './services/mention-io/type';
 import { PermissionService } from './services/permission/permission.service';
 import { IPermissionService } from './services/permission/type';
 import { PluginService } from './services/plugin/plugin.service';
@@ -194,6 +196,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
         [IAuthzIoService, { useClass: AuthzIoLocalService, lazy: true }],
+        [IMentionIOService, { useClass: MentionIOLocalService, lazy: true }],
     ], override);
 
     const injector = parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);

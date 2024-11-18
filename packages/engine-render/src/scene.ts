@@ -653,6 +653,10 @@ export class Scene extends ThinScene {
         return this._transformer;
     }
 
+    updateTransformerZero(left: number, top: number) {
+        this._transformer?.updateZeroPoint(left, top);
+    }
+
     /**
      * prev getActiveViewportByRelativeCoord
      * @param coord

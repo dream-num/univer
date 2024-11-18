@@ -396,6 +396,8 @@ export class Spreadsheet extends SheetComponent {
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
+        this.getScene()?.updateTransformerZero(spreadsheetSkeleton.rowHeaderWidth, spreadsheetSkeleton.columnHeaderHeight);
+
         const { viewportKey } = viewportInfo;
         // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
         // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;

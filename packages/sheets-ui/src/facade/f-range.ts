@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, IDisposable, Nullable } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
+import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
-import { DisposableCollection, generateRandomId } from '@univerjs/core';
+import { DisposableCollection, generateRandomId, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FRange } from '@univerjs/sheets/facade';
-import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -69,6 +69,10 @@ interface IFRangeSheetsUIMixin {
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
 
+    /**
+     * Highlight this range.
+     */
+    highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
 }
 
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
@@ -137,6 +141,15 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
                 cellAlertService.removeAlert(alert.key);
             },
         };
+    }
+
+    override highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable {
+        const markSelectionService = this._injector.get(IMarkSelectionService);
+        const id = markSelectionService.addShape({ range: this._range, style, primary });
+
+        return toDisposable(() => {
+            id && markSelectionService.removeShape(id);
+        });
     }
 }
 

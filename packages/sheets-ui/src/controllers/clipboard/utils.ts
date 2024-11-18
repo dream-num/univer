@@ -268,7 +268,7 @@ export function getMoveRangeMutations(
                     id: SetSelectionsOperation.id,
                     params: {
                         unitId,
-                        sheetId: fromSubUnitId,
+                        subUnitId: fromSubUnitId,
 
                         selections: [{ range: fromRange }],
                     },

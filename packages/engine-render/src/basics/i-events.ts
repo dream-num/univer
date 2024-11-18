@@ -113,7 +113,7 @@ export interface IEvent extends Event {
      */
     inputIndex: number;
     /**
-     * Previous state of given input
+     * Previous state of given input, for what???, nobody read this value.
      */
     previousState: Nullable<number>;
     /**

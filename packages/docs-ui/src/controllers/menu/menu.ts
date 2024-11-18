@@ -47,7 +47,7 @@ import {
 
 import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
+import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
@@ -925,12 +925,13 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const docMenuStyleService = accessor.get(DocMenuStyleService);
 
     const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    const activeTextRange = textSelectionService.getActiveTextRange();
+    const docRanges = textSelectionService.getDocRanges();
+    const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
     const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
 
-    if (docDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeRange == null) {
         return {
             ts: {
                 ...defaultTextStyle,
@@ -939,11 +940,10 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    const { startOffset, segmentId } = activeTextRange;
+    const { segmentId } = activeRange;
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
-    const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
-
-    if (textRuns == null) {
+    if (body == null) {
         return {
             ts: {
                 ...defaultTextStyle,
@@ -952,22 +952,11 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         };
     }
 
-    let textRun;
-
-    for (let i = textRuns.length - 1; i >= 0; i--) {
-        const curTextRun = textRuns[i];
-
-        if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
-            textRun = curTextRun;
-            break;
-        }
-    }
+    const curTextStyle = getStyleInTextRange(body, activeRange, defaultTextStyle);
 
     return {
-        ...textRun,
         ts: {
-            ...defaultTextStyle,
-            ...textRun?.ts,
+            ...curTextStyle,
             ...cacheStyle,
         },
     };

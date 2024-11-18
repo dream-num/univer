@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { InputNumberProps } from 'rc-input-number';
 import RcInputNumber from 'rc-input-number';
 import React, { forwardRef } from 'react';
-import type { InputNumberProps } from 'rc-input-number';
 
 import styles from './index.module.less';
 
@@ -71,9 +71,15 @@ export interface IInputNumberProps {
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
 
     /**
-   * Callback when user blur
-   * @param e
-   */
+     * Callback when user focus
+     * @param e
+     */
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+
+    /**
+     * Callback when user blur
+     * @param e
+     */
     onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 
     /**
@@ -110,6 +116,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
         onChange,
         onPressEnter,
         onBlur,
+        onFocus,
     } = props;
 
     function handleChange(value: number | null) {
@@ -134,6 +141,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
             onKeyDown={onKeyDown}
             onChange={handleChange}
             onPressEnter={onPressEnter}
+            onFocus={onFocus}
             onBlur={onBlur}
         />
     );

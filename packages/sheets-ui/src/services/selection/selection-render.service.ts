@@ -145,13 +145,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     private _initSelectionChangeListener(): void {
-        // only ref selection need this,
-        // this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionWithStyleList) => {
-        //     // this._reset();
-        //     // for (const selectionWithStyle of selectionWithStyleList) {
-        //     //     this._addSelectionControlByModelData(selectionWithStyle);
-        //     // }
-        // }));
+        // normal selection: after dragging selection(move end)
+        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionWithStyleList) => {
+            this.resetSelectionsByModelData(selectionWithStyleList);
+        }));
     }
 
     private _initUserActionSyncListener(): void {

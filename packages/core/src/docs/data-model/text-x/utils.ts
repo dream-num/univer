@@ -18,6 +18,7 @@ import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBody, IPar
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
+import { normalizeTextRuns } from './apply-utils/common';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 export enum SliceBodyType {
@@ -65,14 +66,16 @@ export function getBodySlice(
             }
         }
 
-        docBody.textRuns = newTextRuns.map((tr) => {
-            const { st, ed } = tr;
-            return {
-                ...tr,
-                st: st - startOffset,
-                ed: ed - startOffset,
-            };
-        });
+        docBody.textRuns = normalizeTextRuns(
+            newTextRuns.map((tr) => {
+                const { st, ed } = tr;
+                return {
+                    ...tr,
+                    st: st - startOffset,
+                    ed: ed - startOffset,
+                };
+            })
+        );
     } else if (returnEmptyArray) {
         // In the case of no style before, add the style, removeTextRuns will be empty,
         // in this case, you need to add an empty textRun for undo.

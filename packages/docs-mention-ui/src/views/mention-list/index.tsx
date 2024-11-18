@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMention } from '@univerjs/core';
-import { KeyCode } from '@univerjs/ui';
+import type { IMention, ITypeMentionList } from '@univerjs/core';
 import cs from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IMentionListProps {
-    mentions: IMention[];
+    mentions: ITypeMentionList[];
     active?: string;
     onSelect?: (item: IMention) => void;
     onClick?: () => void;
@@ -30,7 +29,7 @@ export interface IMentionListProps {
 export const MentionList = (props: IMentionListProps) => {
     const { mentions, active, onSelect, onClick } = props;
     const ref = useRef<HTMLDivElement>(null);
-    const [activeId, setActiveId] = useState(active ?? mentions[0]?.objectId);
+    const [activeId, setActiveId] = useState(active ?? mentions[0]?.mentions[0]?.objectId);
     const handleSelect = (item: IMention) => {
         onSelect?.(item);
     };
@@ -39,31 +38,22 @@ export const MentionList = (props: IMentionListProps) => {
         ref.current?.focus();
     }, []);
 
-    const handleKeyDown = (evt: React.KeyboardEvent<HTMLDivElement>) => {
-        const index = mentions.findIndex((i) => i.objectId === activeId);
-        if (evt.keyCode === KeyCode.ARROW_UP) {
-            setActiveId(mentions[index - 1]?.objectId);
-        }
-
-        if (evt.keyCode === KeyCode.ARROW_DOWN) {
-            setActiveId(mentions[index + 1]?.objectId);
-        }
-
-        if (evt.keyCode === KeyCode.ENTER && mentions[index]) {
-            handleSelect(mentions[index]);
-        }
-    };
-
     return (
-        <div ref={ref} tabIndex={0} className={styles.docMentionPanel} onKeyDown={handleKeyDown} onClick={onClick}>
-            {mentions.map((mention) => (
-                <div
-                    key={mention.objectId}
-                    className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
-                    onClick={() => handleSelect(mention)}
-                >
-                    <img className={styles.docMentionIcon} src={mention.metadata?.icon as string} />
-                    <div className={styles.docMentionLabel}>{mention.label}</div>
+        <div ref={ref} tabIndex={0} className={styles.docMentionPanel} onClick={onClick}>
+            {mentions.map((typeMentions) => (
+                <div key={typeMentions.type}>
+                    <div className={styles.docMentionType}>{typeMentions.title}</div>
+                    {typeMentions.mentions.map((mention) => (
+                        <div
+                            key={mention.objectId}
+                            className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
+                            onClick={() => handleSelect(mention)}
+                            onMouseEnter={() => setActiveId(mention.objectId)}
+                        >
+                            <img className={styles.docMentionIcon} src={mention.metadata?.icon as string} />
+                            <div className={styles.docMentionLabel}>{mention.label}</div>
+                        </div>
+                    ))}
                 </div>
             ))}
         </div>

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMention } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, MentionType, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
+import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
+import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionList } from '../mention-list';
@@ -28,16 +30,26 @@ export const MentionEditPopup = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const editPopup = useObservable(popupService.editPopup$);
-    const userService = useDependency(UserManagerService);
+    const mentionIOService = useDependency(IMentionIOService);
+    const documentDataModel = editPopup ? univerInstanceService.getUnit<DocumentDataModel>(editPopup.unitId) : null;
+    const textSelectionService = useDependency(DocSelectionManagerService);
+    const [mentions, setMentions] = useState<ITypeMentionList[]>([]);
+    const textSelection$ = useMemo(() =>
+        textSelectionService.textSelection$.pipe(
+            filter((selection) => selection.unitId === editPopup?.unitId)
+        ), [textSelectionService.textSelection$, editPopup]);
 
-    const mentions: IMention[] = userService.list().map((user) => ({
-        objectId: user.userID,
-        label: user.name,
-        objectType: MentionType.PERSON,
-        metadata: {
-            icon: user.avatar,
-        },
-    }));
+    const textSelection = useObservable(textSelection$);
+    const search = editPopup ? documentDataModel?.getBody()?.dataStream.slice(editPopup.anchor, textSelection?.textRanges[0].startOffset) : '';
+
+    useEffect(() => {
+        (async () => {
+            if (editPopup) {
+                const res = await mentionIOService.list({ unitId: editPopup.unitId, search });
+                setMentions(res.list);
+            }
+        })();
+    }, [mentionIOService, editPopup, search]);
 
     const renderManagerService = useDependency(IRenderManagerService);
 

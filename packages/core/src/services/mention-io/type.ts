@@ -26,13 +26,15 @@ export interface IListMentionParam {
     unitId?: string;
 }
 
+export interface ITypeMentionList {
+    mentions: IMention[];
+    type: MentionType;
+    metadata: Record<string, string>;
+    title: string;
+}
+
 export interface IListMentionResponse {
-    list: {
-        mentions: IMention[];
-        type: MentionType;
-        metadata: Record<string, string>;
-        title: string;
-    }[];
+    list: ITypeMentionList[];
     page?: number;
     size?: number;
     total?: number;

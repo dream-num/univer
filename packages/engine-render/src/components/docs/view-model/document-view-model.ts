@@ -485,7 +485,7 @@ export class DocumentViewModel implements IDisposable {
     /**
      * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
      */
-    getTextRun(index: number) {
+    getTextRun(index: number): Nullable<ITextRun> {
         const textRuns = this.getBody()?.textRuns;
         if (textRuns == null) {
             return;
@@ -499,7 +499,9 @@ export class DocumentViewModel implements IDisposable {
             }
 
             if (index < curTextRun.st) {
-                return;
+                // If the index is less than the current textRun, reset the current index to 0, and re-search from the beginning.
+                this._textRunCurrentIndex = 0;
+                return this.getTextRun(index);
             }
         }
 

@@ -139,7 +139,7 @@ function createTextRuns() {
             cl: {
                 rgb: '#54585a',
             },
-            bl: BooleanNumber.FALSE,
+            bl: BooleanNumber.TRUE,
         },
     });
 

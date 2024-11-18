@@ -41,7 +41,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         }
 
         const { metadata, ...mentionConfig } = mention;
-        const dataStream = ` @${mention.label} `;
+        const dataStream = `@${mention.label}`;
         const body: IDocumentBody = {
             dataStream,
             customRanges: [{

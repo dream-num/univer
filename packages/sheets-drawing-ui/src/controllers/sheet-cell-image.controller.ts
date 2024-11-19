@@ -17,11 +17,11 @@
 import type { ICellData, IDocDrawingBase, IRange, Nullable } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, IUniverInstanceService, Range } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum, IUniverInstanceService, Range } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, INTERCEPTOR_POINT, RefRangeService, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RefRangeService, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
@@ -77,6 +77,7 @@ export class SheetCellImageController extends Disposable {
         this._initHandleResize();
         this._handleInitEditor();
         this._handleWriteCell();
+        this._initCellContentInterceptor();
     }
 
     private _initInterceptor() {
@@ -162,5 +163,28 @@ export class SheetCellImageController extends Disposable {
                 return next(cell);
             },
         }));
+    }
+
+    private _initCellContentInterceptor() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(
+                INTERCEPTOR_POINT.CELL_CONTENT,
+                {
+                    effect: InterceptorEffectEnum.Style,
+                    priority: InterceptCellContentPriority.CELL_IMAGE,
+                    handler: (cell, pos, next) => {
+                        if (cell?.p && cell.p.drawingsOrder?.length) {
+                            if (!cell.interceptorStyle) {
+                                cell.interceptorStyle = {};
+                            }
+
+                            cell.interceptorStyle.tr = { a: 0 };
+                        }
+
+                        return next(cell);
+                    },
+                }
+            )
+        );
     }
 }

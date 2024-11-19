@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import './f-univer';
+import { FBase, Inject, Injector } from '@univerjs/core';
 
-export { FPermission } from './f-permission';
-export { FRange } from './f-range';
-export type { FontLine, FontStyle, FontWeight } from './f-range';
-export { FSelection } from './f-selection';
-export { FSheetHooks } from './f-sheet-hooks';
-export { FWorkbook } from './f-workbook';
-export { FWorksheet } from './f-worksheet';
+export class FSheetHooks extends FBase {
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector
+    ) {
+        super();
+    }
+}

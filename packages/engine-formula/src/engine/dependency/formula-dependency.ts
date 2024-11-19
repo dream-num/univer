@@ -66,8 +66,7 @@ export class FormulaDependencyGenerator extends Disposable {
         @IFormulaCurrentConfigService protected readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
         @IOtherFormulaManagerService protected readonly _otherFormulaManagerService: IOtherFormulaManagerService,
-        @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) protected readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(Lexer) protected readonly _lexer: Lexer,

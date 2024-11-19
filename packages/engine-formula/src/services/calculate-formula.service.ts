@@ -142,9 +142,10 @@ export class CalculateFormulaService extends Disposable {
 
         CELL_INVERTED_INDEX_CACHE.clear();
 
-        this._runtimeService.reset();
+        this._runtimeService.reset(); // Why we reset again?
     }
 
+    // TODO: We can rename this to `_executeOnce`.
     private async _execute() {
         const executeState = await this._apply();
 
@@ -165,7 +166,8 @@ export class CalculateFormulaService extends Disposable {
 
         this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
 
-        await this._apply(true);
+        await this._apply(true); // This looks weird as _apply has been called before in L150.
+        // Better to write two different functions.
 
         return true;
     }

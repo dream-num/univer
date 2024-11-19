@@ -127,6 +127,22 @@ export class FUniver extends FBase {
     }
 
     /**
+     * Sync execute command
+     *
+     * @param {string} id Command ID
+     * @param {object} params Command parameters
+     * @param {IExecutionOptions} options Command execution options
+     * @returns {R} Command execution result
+     */
+    syncExecuteCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): R {
+        return this._commandService.syncExecuteCommand(id, params, options);
+    }
+
+    /**
      * Get hooks.
      *
      * @returns {FHooks} FHooks instance

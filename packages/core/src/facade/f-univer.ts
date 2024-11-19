@@ -111,12 +111,11 @@ export class FUniver extends FBase {
     }
 
     /**
-     * Execute command
-     *
-     * @param {string} id Command ID
-     * @param {object} params Command parameters
-     * @param {IExecutionOptions} options Command execution options
-     * @returns {Promise<R>} Command execution result
+     * Execute a command with the given id and parameters.
+     * @param id Identifier of the command.
+     * @param params Parameters of this execution.
+     * @param options Options of this execution.
+     * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
      */
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -127,12 +126,11 @@ export class FUniver extends FBase {
     }
 
     /**
-     * Sync execute command
-     *
-     * @param {string} id Command ID
-     * @param {object} params Command parameters
-     * @param {IExecutionOptions} options Command execution options
-     * @returns {R} Command execution result
+     * Execute a command with the given id and parameters synchronously.
+     * @param id Identifier of the command.
+     * @param params Parameters of this execution.
+     * @param options Options of this execution.
+     * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
      */
     syncExecuteCommand<P extends object = object, R = boolean>(
         id: string,

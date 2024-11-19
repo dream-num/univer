@@ -135,7 +135,7 @@ function registerSheetPlugins(univer: Univer) {
     });
     univer.registerPlugin(UniverSheetsNumfmtPlugin);
     univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
-    univer.registerPlugin(UniverSheetsFormulaPlugin);
+    univer.registerPlugin(UniverSheetsFormulaPlugin, { initTriggerController: true });
     univer.registerPlugin(UniverSheetsFormulaUIPlugin);
     univer.registerPlugin(UniverSheetsFindReplacePlugin);
     univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);

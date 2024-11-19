@@ -50,6 +50,11 @@ export interface IUniverSheetsFormulaBaseConfig {
      * Define the calculation mode during initialization, default is `WHEN_EMPTY`
      */
     initialFormulaComputing?: CalculationMode;
+
+    /**
+     * Whether to initialize the trigger controller
+     */
+    initTriggerController?: boolean;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};

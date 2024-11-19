@@ -126,7 +126,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         ]);
 
         // The nodejs environment needs to be initialized, otherwise it has been initialized in FormulaUIController
-        if (isNodeEnv()) {
+        if (isNodeEnv() || this._config.initTriggerController) {
             touchDependencies(this._injector, [
                 [TriggerCalculationController],
             ]);

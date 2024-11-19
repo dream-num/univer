@@ -21,6 +21,7 @@ import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/fo
 import {
     Disposable,
     ICommandService,
+    ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -46,6 +47,7 @@ export class FormatPainterController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @ILogService private readonly _logService: ILogService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -59,7 +61,12 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISheetSelectionRenderService);
+        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.with(ISheetSelectionRenderService);
+
+        if (!selectionRenderService) {
+            this._logService.error('[FormatPainterController]', 'SelectionRenderService is not available');
+            return;
+        }
 
         this.disposeWithMe(
             selectionRenderService.selectionMoveEnd$.subscribe((selections) => {

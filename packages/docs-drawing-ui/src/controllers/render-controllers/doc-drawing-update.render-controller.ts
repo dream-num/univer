@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IImageIoServiceParam } from '@univerjs/drawing';
+import type { IDrawingParam, IImageIoServiceParam } from '@univerjs/drawing';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
@@ -28,6 +28,7 @@ import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
+import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
@@ -55,7 +56,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
-
+        this._transformDrawingListener();
         this._editAreaChangeListener();
     }
 
@@ -250,6 +251,35 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         return { scene, transformer, docsLeft, docsTop };
     }
 
+    private _transformDrawingListener() {
+        const res = this._getCurrentSceneAndTransformer();
+        if (res && res.transformer) {
+            this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe((params) => {
+                const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
+                if (activeTextRange) {
+                    const { startOffset, endOffset } = activeTextRange;
+                    if (startOffset + 1 !== endOffset) {
+                        return;
+                    }
+                    const customBlocks = this._context.unit.getBody()?.customBlocks ?? [];
+                    const block = customBlocks.find((b) => b.startIndex === startOffset);
+                    if (block) {
+                        this._setDrawingSelections([{
+                            drawingId: block.blockId,
+                            drawingType: 5,
+                            unitId: this._context.unit.getUnitId(),
+                            subUnitId: this._context.unit.getUnitId(),
+                        }]);
+                    }
+                }
+
+                // this._setDrawingSelections(params);
+            }));
+        } else {
+            throw new Error('transformer is not init');
+        }
+    }
+
     private _focusDrawingListener() {
         this.disposeWithMe(
             this._drawingManagerService.focus$.subscribe((params) => {
@@ -267,19 +297,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
-                    const { unit } = this._context;
-                    const customBlocks = unit.getSnapshot().body?.customBlocks ?? [];
-                    const ranges = params.map((item) => {
-                        const id = item.drawingId;
-                        const block = customBlocks.find((b) => b.blockId === id);
-                        if (block) {
-                            return block.startIndex;
-                        }
-                        return null;
-                    }).filter((e) => e !== null).map((offset) => ({ startOffset: offset, endOffset: offset + 1 }));
-
-                    this._docSelectionManagerService.replaceTextRanges(ranges);
-
+                    this._setDrawingSelections(params);
                     const prevSegmentId = this._docSelectionRenderService.getSegment();
                     const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);
 
@@ -402,5 +420,19 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 }
             })
         );
+    }
+
+    private _setDrawingSelections(params: IDrawingParam[]) {
+        const { unit } = this._context;
+        const customBlocks = unit.getSnapshot().body?.customBlocks ?? [];
+        const ranges = params.map((item) => {
+            const id = item.drawingId;
+            const block = customBlocks.find((b) => b.blockId === id);
+            if (block) {
+                return block.startIndex;
+            }
+            return null;
+        }).filter((e) => e !== null).map((offset) => ({ startOffset: offset, endOffset: offset + 1 }));
+        this._docSelectionManagerService.replaceDocRanges(ranges);
     }
 }

@@ -27,8 +27,8 @@ import type {
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    MoveRangeAfterCommandId,
-    ReoderRangeAfterCommandId,
+    MoveRangeCommand,
+    ReorderRangeCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -92,6 +92,7 @@ export class AutoHeightController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
@@ -103,22 +104,13 @@ export class AutoHeightController extends Disposable {
                     return this.getUndoRedoParamsOfAutoHeight(params.range);
                 }
 
-                if (command.id === MoveRangeAfterCommandId) {
-                    const params = command.params as IMoveRangeCommandParams;
-                    return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
-                }
-
-                if (command.id === ReoderRangeAfterCommandId) {
-                    const params = command.params as IReorderRangeMutationParams;
-                    return this.getUndoRedoParamsOfAutoHeight([params.range]);
-                }
-
                 return {
                     redos: [],
                     undos: [],
                 };
             },
         }));
+
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
@@ -163,6 +155,25 @@ export class AutoHeightController extends Disposable {
                 }
 
                 return this.getUndoRedoParamsOfAutoHeight(selections);
+            },
+        }));
+
+        this.disposeWithMe(sheetInterceptorService.interceptAfterCommand({
+            getMutations: (command) => {
+                if (command.id === MoveRangeCommand.id) {
+                    const params = command.params as IMoveRangeCommandParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
+                }
+
+                if (command.id === ReorderRangeCommand.id) {
+                    const params = command.params as IReorderRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.range]);
+                }
+
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
     }

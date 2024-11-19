@@ -27,7 +27,6 @@ export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
 }
 
 export const ReorderRangeCommandId = 'sheet.command.reorder-range' as const;
-export const ReoderRangeAfterCommandId = 'sheet.command.reoder-range-after' as const;
 
 export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
     id: ReorderRangeCommandId,
@@ -66,7 +65,7 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
         ];
         const result = sequenceExecute(redos, commandService);
 
-        const reoderAfterIntercepted = sheetInterceptorService.onCommandExecute({ id: ReoderRangeAfterCommandId, params });
+        const reoderAfterIntercepted = sheetInterceptorService.afterCommandExecute({ id: ReorderRangeCommand.id, params });
 
         if (result.result) {
             sequenceExecute(reoderAfterIntercepted.redos, commandService);

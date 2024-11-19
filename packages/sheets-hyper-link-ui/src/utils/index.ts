@@ -93,6 +93,11 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
+    const customBlock = body.customBlocks?.find((block) => block.startIndex >= activeRange.startOffset! && block.startIndex < activeRange.endOffset!);
+    if (customBlock) {
+        return true;
+    }
+
     const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(activeRange as ITextRange, body.customRanges ?? []);
     // can't insert hyperlink in range contains other custom ranges
     return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);

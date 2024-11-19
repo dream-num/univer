@@ -22,8 +22,8 @@ import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.servic
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getDocRanges();
-    if (!textRanges.length) {
+    const textRanges = textSelectionService.getTextRanges();
+    if (!textRanges?.length) {
         return true;
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import dayjs from 'dayjs';
+import { dayjs } from '@univerjs/core';
 
 export function getDT() {
     return dayjs().format('YYYY/MM/DD HH:mm');

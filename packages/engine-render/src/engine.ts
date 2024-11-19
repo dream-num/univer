@@ -123,7 +123,7 @@ export class Engine extends ThinEngine<Scene> {
     private _remainCapture: number = -1;
 
     /** previous pointer position */
-    private _pointer: { [deviceSlot: number]: number } = {};
+    private _pointerPosRecord: { [deviceSlot: number]: number } = {};
 
     private _mouseId = -1;
 
@@ -468,8 +468,8 @@ export class Engine extends ThinEngine<Scene> {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            deviceEvent.previousState = 0;
-            deviceEvent.currentState = 1;
+            // deviceEvent.previousState = 0;
+            // deviceEvent.currentState = 1;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -478,8 +478,8 @@ export class Engine extends ThinEngine<Scene> {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            deviceEvent.previousState = 1;
-            deviceEvent.currentState = 0;
+            // deviceEvent.previousState = 1;
+            // deviceEvent.currentState = 0;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -501,51 +501,27 @@ export class Engine extends ThinEngine<Scene> {
             // const previousVertical = this.pointer[PointerInput.Vertical];
             // const previousDeltaHorizontal = this.pointer[PointerInput.DeltaHorizontal];
             // const previousDeltaVertical = this.pointer[PointerInput.DeltaVertical];
-            this._pointer[PointerInput.Horizontal] = evt.clientX;
-            this._pointer[PointerInput.Vertical] = evt.clientY;
-            this._pointer[PointerInput.DeltaHorizontal] = evt.movementX;
-            this._pointer[PointerInput.DeltaVertical] = evt.movementY;
+            this._pointerPosRecord[PointerInput.Horizontal] = evt.clientX;
+            this._pointerPosRecord[PointerInput.Vertical] = evt.clientY;
+            this._pointerPosRecord[PointerInput.DeltaHorizontal] = evt.movementX;
+            this._pointerPosRecord[PointerInput.DeltaVertical] = evt.movementY;
             const deviceEvent = evt as unknown as IPointerEvent;
             deviceEvent.deviceType = deviceType;
             deviceEvent.inputIndex = PointerInput.Horizontal;// horizon 0 vertical 1
             this.onInputChanged$.emitEvent(deviceEvent);
 
-            // TODO @lumixraku
-            //if (previousHorizontal !== evt.clientX) {
-            //    deviceEvent.inputIndex = PointerInput.Horizontal;
-            //    deviceEvent.previousState = previousHorizontal;
-            //    deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
-
-            //    this.onInputChanged$.emitEvent(deviceEvent);
-            //}
-            //if (previousVertical !== evt.clientY) {
-            //    deviceEvent.inputIndex = PointerInput.Vertical;
-            //    deviceEvent.previousState = previousVertical;
-            //    deviceEvent.currentState = this.pointer[PointerInput.Vertical];
-
-            //    this.onInputChanged$.emitEvent(deviceEvent);
-            //}
-            //if (this.pointer[PointerInput.DeltaHorizontal] !== 0) {
-            //    deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
-            //    deviceEvent.previousState = previousDeltaHorizontal;
-            //    deviceEvent.currentState = this.pointer[PointerInput.DeltaHorizontal];
-
-            //    this.onInputChanged$.emitEvent(deviceEvent);
-            //}
-            //if (this.pointer[PointerInput.DeltaVertical] !== 0) {
-            //    deviceEvent.inputIndex = PointerInput.DeltaVertical;
-            //    deviceEvent.previousState = previousDeltaVertical;
-            //    deviceEvent.currentState = this.pointer[PointerInput.DeltaVertical];
-
-            //    this.onInputChanged$.emitEvent(deviceEvent);
-            //}
-
             // Lets Propagate the event for move with same position.
-            if (!this._usingSafari && evt.button !== -1) {
+            // evt.button is readonly and value is 0 1 2 3 4, it never be -1.
+            //if (!this._usingSafari && evt.button !== -1) {
+
+            if (!this._usingSafari) {
                 deviceEvent.inputIndex = evt.button + 2;
-                deviceEvent.previousState = this._pointer[evt.button + 2];
-                this._pointer[evt.button + 2] = this._pointer[evt.button + 2] ? 0 : 1; // Reverse state of button if evt.button has value
-                deviceEvent.currentState = this._pointer[evt.button + 2];
+                // deviceEvent.previousState = this._pointerPosRecord[evt.button + 2];
+
+                // Reverse state of button if evt.button has value // WHY?
+                // this._pointerPosRecord[evt.button + 2] = this._pointerPosRecord[evt.button + 2] ? 0 : 1;
+
+                // deviceEvent.currentState = this._pointerPosRecord[evt.button + 2];
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
         };
@@ -555,9 +531,11 @@ export class Engine extends ThinEngine<Scene> {
             // TODO: maybe we should wrap the native event to an CustomEvent
 
             const deviceType = this._getPointerType(evt);
-            const previousHorizontal = this._pointer[PointerInput.Horizontal];
-            const previousVertical = this._pointer[PointerInput.Vertical];
-            const previousButton = this._pointer[evt.button + 2];
+            const previousHorizontal = this._pointerPosRecord[PointerInput.Horizontal];
+            const previousVertical = this._pointerPosRecord[PointerInput.Vertical];
+
+            // why ???
+            // const previousButton = this._pointerPosRecord[evt.button + 2];
 
             if (deviceType === DeviceType.Mouse) {
                 // Mouse; Among supported browsers, value is either 1 or 0 for mouse
@@ -571,42 +549,41 @@ export class Engine extends ThinEngine<Scene> {
                 }
                 if (!document.pointerLockElement) {
                     this._remainCapture = this._mouseId;
-                    this.getCanvasElement().setPointerCapture(this._mouseId);
                 }
             } else {
                 // Touch; Since touches are dynamically assigned, only set capture if we have an id
                 if (evt.pointerId && !document.pointerLockElement) {
                     this._remainCapture = evt.pointerId;
-                    this.getCanvasElement().setPointerCapture(evt.pointerId);
                 }
             }
 
-            this._pointer[PointerInput.Horizontal] = evt.clientX;
-            this._pointer[PointerInput.Vertical] = evt.clientY;
-            this._pointer[evt.button + 2] = 1;
+            this._pointerPosRecord[PointerInput.Horizontal] = evt.clientX;
+            this._pointerPosRecord[PointerInput.Vertical] = evt.clientY;
+            // why??
+            // this._pointerPosRecord[evt.button + 2] = 1;
 
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
-                deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this._pointer[PointerInput.Horizontal];
+                // deviceEvent.previousState = previousHorizontal;
+                // deviceEvent.currentState = this._pointerPosRecord[PointerInput.Horizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
-                deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this._pointer[PointerInput.Vertical];
+                // deviceEvent.previousState = previousVertical;
+                // deviceEvent.currentState = this._pointerPosRecord[PointerInput.Vertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
 
             // evt.button + 2  ---> leftClick: 2, middleClick: 3, rightClick:4
             deviceEvent.inputIndex = evt.button + 2;
-            deviceEvent.previousState = previousButton;
-            deviceEvent.currentState = this._pointer[evt.button + 2];
+            // deviceEvent.previousState = previousButton;
+            // deviceEvent.currentState = this._pointerPosRecord[evt.button + 2];
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
@@ -614,35 +591,39 @@ export class Engine extends ThinEngine<Scene> {
             const evt = _evt as PointerEvent | MouseEvent;
 
             const deviceType = this._getPointerType(evt);
-            const previousHorizontal = this._pointer[PointerInput.Horizontal];
-            const previousVertical = this._pointer[PointerInput.Vertical];
-            const previousButton = this._pointer[evt.button + 2];
+            const previousHorizontal = this._pointerPosRecord[PointerInput.Horizontal];
+            const previousVertical = this._pointerPosRecord[PointerInput.Vertical];
 
-            this._pointer[PointerInput.Horizontal] = evt.clientX;
-            this._pointer[PointerInput.Vertical] = evt.clientY;
-            this._pointer[evt.button + 2] = 0;
+            // why?
+            // const previousButton = this._pointerPosRecord[evt.button + 2];
+
+            this._pointerPosRecord[PointerInput.Horizontal] = evt.clientX;
+            this._pointerPosRecord[PointerInput.Vertical] = evt.clientY;
+
+            // why??
+            // this._pointerPosRecord[evt.button + 2] = 0;
 
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
-                deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this._pointer[PointerInput.Horizontal];
+                // deviceEvent.previousState = previousHorizontal;
+                // deviceEvent.currentState = this._pointerPosRecord[PointerInput.Horizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
-                deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this._pointer[PointerInput.Vertical];
+                // deviceEvent.previousState = previousVertical;
+                // deviceEvent.currentState = this._pointerPosRecord[PointerInput.Vertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
 
             deviceEvent.inputIndex = evt.button + 2;
-            deviceEvent.previousState = previousButton;
-            deviceEvent.currentState = this._pointer[evt.button + 2];
+            // deviceEvent.previousState = previousButton;
+            // deviceEvent.currentState = this._pointerPosRecord[evt.button + 2];
 
             const canvasEle = this.getCanvasElement();
             if (
@@ -661,7 +642,7 @@ export class Engine extends ThinEngine<Scene> {
 
             // We don't want to unregister the mouse because we may miss input data when a mouse is moving after a click
             if (deviceType !== DeviceType.Mouse) {
-                this._pointer = {};
+                this._pointerPosRecord = {};
             }
         };
 
@@ -671,7 +652,7 @@ export class Engine extends ThinEngine<Scene> {
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
-            deviceEvent.currentState = 2;
+            // deviceEvent.currentState = 2;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -682,7 +663,7 @@ export class Engine extends ThinEngine<Scene> {
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
-            deviceEvent.currentState = 3;
+            // deviceEvent.currentState = 3;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -692,7 +673,7 @@ export class Engine extends ThinEngine<Scene> {
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
-            deviceEvent.currentState = 3;
+            // deviceEvent.currentState = 3;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -703,7 +684,7 @@ export class Engine extends ThinEngine<Scene> {
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
-            deviceEvent.currentState = 3;
+            // deviceEvent.currentState = 3;
 
             this.onInputChanged$.emitEvent(deviceEvent);
         };
@@ -717,41 +698,42 @@ export class Engine extends ThinEngine<Scene> {
                 // this._mouseId = -1;
             }
 
-            this._pointer = {};
+            this._pointerPosRecord = {};
         };
 
         this._pointerWheelEvent = (evt: any) => {
             const deviceType = DeviceType.Mouse;
             // Store previous values for event
-            const previousWheelScrollX = this._pointer[PointerInput.MouseWheelX];
-            const previousWheelScrollY = this._pointer[PointerInput.MouseWheelY];
-            const previousWheelScrollZ = this._pointer[PointerInput.MouseWheelZ];
+            // const previousWheelScrollX = this._pointerPosRecord[PointerInput.MouseWheelX];
+            // const previousWheelScrollY = this._pointerPosRecord[PointerInput.MouseWheelY];
+            // const previousWheelScrollZ = this._pointerPosRecord[PointerInput.MouseWheelZ];
 
-            this._pointer[PointerInput.MouseWheelX] = evt.deltaX || 0;
-            this._pointer[PointerInput.MouseWheelY] = evt.deltaY || evt.wheelDelta || 0;
-            this._pointer[PointerInput.MouseWheelZ] = evt.deltaZ || 0;
+            this._pointerPosRecord[PointerInput.MouseWheelX] = evt.deltaX || 0;
+            this._pointerPosRecord[PointerInput.MouseWheelY] = evt.deltaY || evt.wheelDelta || 0;
+            this._pointerPosRecord[PointerInput.MouseWheelZ] = evt.deltaZ || 0;
 
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
-            if (this._pointer[PointerInput.MouseWheelX] !== 0) {
-                deviceEvent.inputIndex = PointerInput.MouseWheelX;
-                deviceEvent.previousState = previousWheelScrollX;
-                deviceEvent.currentState = this._pointer[PointerInput.MouseWheelX];
-                this.onInputChanged$.emitEvent(deviceEvent);
+            if (this._pointerPosRecord[PointerInput.MouseWheelX] !== 0) {
+                // deviceEvent.inputIndex = PointerInput.MouseWheelX;
+                // deviceEvent.previousState = previousWheelScrollX;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelX];
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
-            if (this._pointer[PointerInput.MouseWheelY] !== 0) {
-                deviceEvent.inputIndex = PointerInput.MouseWheelY;
-                deviceEvent.previousState = previousWheelScrollY;
-                deviceEvent.currentState = this._pointer[PointerInput.MouseWheelY];
-                this.onInputChanged$.emitEvent(deviceEvent);
+            if (this._pointerPosRecord[PointerInput.MouseWheelY] !== 0) {
+                // deviceEvent.inputIndex = PointerInput.MouseWheelY;
+                // deviceEvent.previousState = previousWheelScrollY;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelY];
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
-            if (this._pointer[PointerInput.MouseWheelZ] !== 0) {
-                deviceEvent.inputIndex = PointerInput.MouseWheelZ;
-                deviceEvent.previousState = previousWheelScrollZ;
-                deviceEvent.currentState = this._pointer[PointerInput.MouseWheelZ];
-                this.onInputChanged$.emitEvent(deviceEvent);
+            if (this._pointerPosRecord[PointerInput.MouseWheelZ] !== 0) {
+                // deviceEvent.inputIndex = PointerInput.MouseWheelZ;
+                // deviceEvent.previousState = previousWheelScrollZ;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.MouseWheelZ];
+                // this.onInputChanged$.emitEvent(deviceEvent);
             }
+            this.onInputChanged$.emitEvent(deviceEvent);
         };
 
         const canvasEle = this.getCanvasElement();
@@ -800,53 +782,58 @@ export class Engine extends ThinEngine<Scene> {
 
             const deviceType = this._getPointerType(evt);
             // Store previous values for event
-            const previousHorizontal = this._pointer[PointerInput.Horizontal];
-            const previousVertical = this._pointer[PointerInput.Vertical];
-            const previousDeltaHorizontal = this._pointer[PointerInput.DeltaHorizontal];
-            const previousDeltaVertical = this._pointer[PointerInput.DeltaVertical];
+            const previousHorizontal = this._pointerPosRecord[PointerInput.Horizontal];
+            const previousVertical = this._pointerPosRecord[PointerInput.Vertical];
+            // const previousDeltaHorizontal = this._pointerPosRecord[PointerInput.DeltaHorizontal];
+            // const previousDeltaVertical = this._pointerPosRecord[PointerInput.DeltaVertical];
 
-            this._pointer[PointerInput.Horizontal] = evt.clientX;
-            this._pointer[PointerInput.Vertical] = evt.clientY;
-            this._pointer[PointerInput.DeltaHorizontal] = evt.movementX;
-            this._pointer[PointerInput.DeltaVertical] = evt.movementY;
+            this._pointerPosRecord[PointerInput.Horizontal] = evt.clientX;
+            this._pointerPosRecord[PointerInput.Vertical] = evt.clientY;
+            this._pointerPosRecord[PointerInput.DeltaHorizontal] = evt.movementX;
+            this._pointerPosRecord[PointerInput.DeltaVertical] = evt.movementY;
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 
             if (previousHorizontal !== evt.clientX) {
                 deviceEvent.inputIndex = PointerInput.Horizontal;
-                deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this._pointer[PointerInput.Horizontal];
+                // deviceEvent.previousState = previousHorizontal;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.Horizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
             if (previousVertical !== evt.clientY) {
                 deviceEvent.inputIndex = PointerInput.Vertical;
-                deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this._pointer[PointerInput.Vertical];
+                // deviceEvent.previousState = previousVertical;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.Vertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
-            if (this._pointer[PointerInput.DeltaHorizontal] !== 0) {
+            if (this._pointerPosRecord[PointerInput.DeltaHorizontal] !== 0) {
                 deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
-                deviceEvent.previousState = previousDeltaHorizontal;
-                deviceEvent.currentState = this._pointer[PointerInput.DeltaHorizontal];
+                // deviceEvent.previousState = previousDeltaHorizontal;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.DeltaHorizontal];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
-            if (this._pointer[PointerInput.DeltaVertical] !== 0) {
+            if (this._pointerPosRecord[PointerInput.DeltaVertical] !== 0) {
                 deviceEvent.inputIndex = PointerInput.DeltaVertical;
-                deviceEvent.previousState = previousDeltaVertical;
-                deviceEvent.currentState = this._pointer[PointerInput.DeltaVertical];
+                // deviceEvent.previousState = previousDeltaVertical;
+                deviceEvent.currentState = this._pointerPosRecord[PointerInput.DeltaVertical];
 
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
 
             // Lets Propagate the event for move with same position.
-            if (!this._usingSafari && evt.button !== -1) {
+            // -1 ??? evt.button varies from 0 to 4
+            // if (!this._usingSafari && evt.button !== -1) {
+
+            if (!this._usingSafari) {
                 deviceEvent.inputIndex = evt.button + 2;
-                deviceEvent.previousState = this._pointer[evt.button + 2];
-                this._pointer[evt.button + 2] = this._pointer[evt.button + 2] ? 0 : 1; // Reverse state of button if evt.button has value
-                deviceEvent.currentState = this._pointer[evt.button + 2];
+                // deviceEvent.previousState = this._pointerPosRecord[evt.button + 2];
+
+                // Reverse state of button if evt.button has value.  // WHY ?? why reverse value?
+                // this._pointerPosRecord[evt.button + 2] = this._pointerPosRecord[evt.button + 2] ? 0 : 1;
+                deviceEvent.currentState = this._pointerPosRecord[evt.button + 2];
                 this.onInputChanged$.emitEvent(deviceEvent);
             }
         };

@@ -17,15 +17,16 @@
 import type { ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useMemo } from 'react';
+import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 interface IRefSelection {
@@ -57,8 +58,11 @@ export function useSheetHighlight(unitId: string) {
             refSelectionsService.setSelections(selectionWithStyle);
             return;
         }
-        const currentSheetId = worksheet?.getSheetId();
+        const currentSheetId = worksheet.getSheetId();
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
+
+        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+        if (!skeleton) return;
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
@@ -77,26 +81,18 @@ export function useSheetHighlight(unitId: string) {
             }
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-
             selectionWithStyle.push({
                 range,
                 primary: null,
-                style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
+                style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }
-        const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
 
-        if (skeleton) {
-            const allControls = refSelectionsRenderService?.getSelectionControls() || [];
-            if (allControls.length === selectionWithStyle.length) {
-                allControls.forEach((control, index) => {
-                    const selection = selectionWithStyle[index];
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
-                    control.updateStyle(selection.style!);
-                });
-            } else {
-                refSelectionsService.setSelections(selectionWithStyle);
-            }
+        const allControls = refSelectionsRenderService?.getSelectionControls() || [];
+        if (allControls.length === selectionWithStyle.length) {
+            refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
+        } else {
+            refSelectionsService.setSelections(selectionWithStyle);
         }
     };
     return highlightSheet;
@@ -249,20 +245,3 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
 
     return { textRuns, refSelections };
 };
-function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
-    const style = themeService.getCurrentTheme();
-    const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();
-    return {
-        id,
-        strokeWidth: 1,
-        stroke: refColor,
-        fill,
-        widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
-        widgetSize: 6,
-        widgetStrokeWidth: 1,
-        widgetStroke: style.colorWhite,
-        hasAutoFill: false,
-        hasRowHeader: false,
-        hasColumnHeader: false,
-    };
-}

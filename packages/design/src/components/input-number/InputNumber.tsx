@@ -71,6 +71,12 @@ export interface IInputNumberProps {
     onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
 
     /**
+     * Callback when user focus
+     * @param e
+     */
+    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+
+    /**
      * Callback when user blur
      * @param e
      */
@@ -110,6 +116,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
         onChange,
         onPressEnter,
         onBlur,
+        onFocus,
     } = props;
 
     function handleChange(value: number | null) {
@@ -134,6 +141,7 @@ export const InputNumber = forwardRef<HTMLInputElement, IInputNumberProps>((prop
             onKeyDown={onKeyDown}
             onChange={handleChange}
             onPressEnter={onPressEnter}
+            onFocus={onFocus}
             onBlur={onBlur}
         />
     );

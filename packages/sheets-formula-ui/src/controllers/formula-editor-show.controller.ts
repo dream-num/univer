@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit, Disposable,
     ICommandService,
@@ -35,14 +35,17 @@ import {
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import {
-    ISheetSelectionRenderService,
+    attachSelectionWithCoord,
     SELECTION_SHAPE_DEPTH,
-    SelectionShape,
+    SelectionControl,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 
+/**
+ * For Array formula in cell editing
+ */
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
-    private _previousShape: Nullable<SelectionShape>;
+    private _previousShape: Nullable<SelectionControl>;
     private _skeleton: SpreadsheetSkeleton;
 
     constructor(
@@ -215,35 +218,32 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string): void {
-        const styleSheet = this._themeService.getCurrentTheme();
-        const fill = new ColorKit(styleSheet.colorWhite).setAlpha(0).toString();
-        const style = {
-            strokeWidth: 1,
-            stroke: styleSheet.hyacinth700,
-            fill,
-            widgets: {},
-
-            hasAutoFill: false,
-
-            hasRowHeader: false,
-
-            hasColumnHeader: false,
-        };
-
         const renderUnit = this._renderManagerService.getRenderById(unitId);
-        if (!renderUnit) return;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
+        if (!renderUnit || !skeleton) return;
 
         const { scene } = renderUnit;
-        const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord({
+        if (!scene) return;
+
+        const styleSheet = this._themeService.getCurrentTheme();
+        const selectionWithStyle: ISelectionWithStyle = {
             range: arrayRange,
             primary: null,
-            style,
-        });
-        const skeleton = this._sheetSkeletonManagerService.getCurrentSkeleton();
-        if (!scene || !skeleton) return;
+            style: {
+                strokeWidth: 1,
+                stroke: styleSheet.hyacinth700,
+                fill: new ColorKit(styleSheet.colorWhite).setAlpha(0).toString(),
+                widgets: {},
+            },
+        };
+        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionShape(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, false);
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+        const control = new SelectionControl(scene, SELECTION_SHAPE_DEPTH.FORMULA_EDITOR_SHOW, this._themeService, {
+            highlightHeader: false,
+            rowHeaderWidth,
+            columnHeaderHeight,
+        });
+        control.updateRangeBySelectionWithCoord(selectionWithCoord);
         control.setEvent(false);
         this._previousShape = control;
     }

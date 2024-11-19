@@ -277,23 +277,6 @@ export class SheetDataValidationModel extends Disposable {
         }
     }
 
-    getRuleErrorMsg(unitId: string, subUnitId: string, ruleId: string) {
-        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        if (!rule) {
-            return '';
-        }
-        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-        if (rule.error) {
-            return rule.error;
-        }
-
-        if (validator) {
-            return validator.getRuleFinalError(rule);
-        }
-
-        return '';
-    }
-
     getRuleObjectMatrix(unitId: string, subUnitId: string) {
         return this._ensureRuleMatrix(unitId, subUnitId);
     }

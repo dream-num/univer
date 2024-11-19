@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
+import { OperatorErrorTitleMap } from '../types';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { isLegalFormulaResult } from '../utils/formula';
+import { FORMULA1, FORMULA2 } from './const';
+import { getTransformedFormula } from './util';
 
 export function getCellValueNumber(cellValue: CellValue) {
     let str = cellValue;
@@ -36,8 +41,9 @@ export function getCellValueNumber(cellValue: CellValue) {
 }
 
 export class DecimalValidator extends BaseDataValidator<number> {
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
     id: string = DataValidationType.DECIMAL;
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
     title: string = 'dataValidation.decimal.title';
 
     operators: DataValidationOperator[] = [
@@ -85,8 +91,7 @@ export class DecimalValidator extends BaseDataValidator<number> {
         const formulaResult2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
         const { formula1, formula2 } = rule;
 
-        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
-
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1?.v)) && isLegalFormulaResult(String(formulaResult2?.v));
         const info = {
             formula1: this._parseNumber(isFormulaString(formula1) ? formulaResult1?.v : formula1),
             formula2: this._parseNumber(isFormulaString(formula2) ? formulaResult2?.v : formula2),
@@ -192,5 +197,15 @@ export class DecimalValidator extends BaseDataValidator<number> {
         }
 
         return cellInfo.value <= formula1;
+    }
+
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
+        if (!rule.operator) {
+            return this.titleStr;
+        }
+
+        const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, position);
+        const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
+        return `${errorMsg}`;
     }
 }

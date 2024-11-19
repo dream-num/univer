@@ -16,6 +16,7 @@
 
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { CellValueType } from '@univerjs/protocol';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IBaseDataValidationWidget } from './base-widget';
 import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
@@ -99,7 +100,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${this.titleStr} ${ruleName}`;
     }
 
-    generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+    generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
         if (!rule.operator) {
             return this.titleStr;
         }
@@ -110,12 +111,12 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }, row: number, column: number): Nullable<IStyleData> {}
 
-    getRuleFinalError(rule: IDataValidationRule) {
+    getRuleFinalError(rule: IDataValidationRule, position: ISheetLocationBase) {
         if (rule.showErrorMessage && rule.error) {
             return rule.error;
         }
 
-        return this.generateRuleErrorMessage(rule);
+        return this.generateRuleErrorMessage(rule, position);
     }
 
     isEmptyCellValue(cellValue: Nullable<CellValue>): cellValue is null | undefined | void {

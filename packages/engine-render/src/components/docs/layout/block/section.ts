@@ -80,8 +80,6 @@ export function dealWithSection(
                 currentPageCache,
                 sectionBreakConfig
             );
-        } else if (paragraphNode.nodeType === DataStreamTreeNodeType.TABLE) {
-            // Table 表格
         }
 
         if (skeletonPages.length === 0) {

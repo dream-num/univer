@@ -271,6 +271,12 @@ export class FunctionNode extends BaseAstNode {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
 
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn);
+
+        if (this._functionExecutor.needsSheetRowColumnCount) {
+            const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);
+
+            this._functionExecutor.setSheetRowColumnCount(rowCount, columnCount);
+        }
     }
 
     private _setRefData(variant: FunctionVariantType) {

@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Workbook } from '@univerjs/core';
-import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
 import type { INode } from '../utils/filterReferenceNode';
 
 import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
@@ -63,7 +63,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
             let isFirst = true;
-            const handleSelectionsChange = (selections: ISelectionWithCoordAndStyle[], isEnd: boolean) => {
+            const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst || isScalingRef.current) {
                     isFirst = false;
                     return;

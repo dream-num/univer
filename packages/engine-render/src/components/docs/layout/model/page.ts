@@ -15,19 +15,19 @@
  */
 
 import type { ITable, Nullable } from '@univerjs/core';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
-import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { dealWithSection } from '../block/section';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
+import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
+import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex } from '../tools';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -302,6 +302,7 @@ export function createSkeletonCellPage(
     } = cellConfig.margin ?? cellMargin ?? {};
     const pageWidth = tableColumns[col].size.width.v;
     const pageHeight = Number.POSITIVE_INFINITY;
+
     const cellSectionBreakConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,

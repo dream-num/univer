@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { SheetExtension } from '@univerjs/engine-render';
-import { UnitAction } from '@univerjs/protocol';
 import type { IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import { SheetExtension } from '@univerjs/engine-render';
+import { UnitAction } from '@univerjs/protocol';
 import { base64 } from './protect-background-img';
 
 export const worksheetProtectionKey = 'worksheet-protection';
@@ -54,8 +54,8 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
         const { startRow, startColumn, endRow, endColumn } = spreadsheetSkeleton.rowColumnSegment;
-        const start = spreadsheetSkeleton.getCellByIndexWithNoHeader(startRow, startColumn);
-        const end = spreadsheetSkeleton.getCellByIndexWithNoHeader(endRow, endColumn);
+        const start = spreadsheetSkeleton.getCellWithCoordByIndex(startRow, startColumn, false);
+        const end = spreadsheetSkeleton.getCellWithCoordByIndex(endRow, endColumn, false);
 
         const { hasWorksheetRule = false, selectionProtection = [] } = worksheet.getCell(startRow, startColumn) as IWorksheetProtectionRenderCellData || {};
         if (!this._pattern) {

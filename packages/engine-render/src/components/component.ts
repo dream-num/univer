@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
-import { BaseObject } from '../base-object';
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { ComponentExtension } from './extension';
+import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
+import { BaseObject } from '../base-object';
 
 export class RenderComponent<T, U, V> extends BaseObject {
     private _extensions = new Map<string, ComponentExtension<T, U, V>>();

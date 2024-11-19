@@ -16,9 +16,10 @@
 
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetWorksheetActiveOperation, ToggleGridlinesCommand, ToggleGridlinesMutation } from '@univerjs/sheets';
+import { SetWorksheetActiveOperation, ToggleGridlinesCommand, ToggleGridlinesMutation, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
+import { getCurrentRangeDisable$ } from './menu-util';
 
 export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -49,6 +50,7 @@ export function ToggleGridlinesMenuFactory(accessor: IAccessor): IMenuButtonItem
             observer.next(getValue());
             return () => disposable.dispose();
         }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
     };
 }
 

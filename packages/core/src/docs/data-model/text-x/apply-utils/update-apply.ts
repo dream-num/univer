@@ -449,7 +449,7 @@ function updateCustomRanges(
     updateBody: IDocumentBody,
     textLength: number,
     currentIndex: number,
-    coverType: UpdateDocsAttributeType
+    _coverType: UpdateDocsAttributeType
 ) {
     if (!body.customRanges) {
         body.customRanges = [];

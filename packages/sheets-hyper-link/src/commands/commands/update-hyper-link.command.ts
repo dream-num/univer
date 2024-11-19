@@ -45,7 +45,11 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const hyperLinkModel = accessor.get(HyperLinkModel);
         const interceptorService = accessor.get(SheetInterceptorService);
 
-        const target = getSheetCommandTarget(instanceSrv);
+        const target = getSheetCommandTarget(instanceSrv, {
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+        });
+
         if (!target) return false;
 
         const { payload: link, row, column, id } = params;

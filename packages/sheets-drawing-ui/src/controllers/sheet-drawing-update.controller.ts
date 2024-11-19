@@ -16,7 +16,7 @@
 
 import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
-import type { ISheetLocationBase, WorkbookSelections } from '@univerjs/sheets';
+import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
@@ -67,7 +67,7 @@ export function getDrawingSizeByCell(
 }
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionModel;
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService,
@@ -363,7 +363,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         }
 
         if (isChangeStart) {
-            const newCoord = this._selectionRenderService.getSelectionCellByPosition(startX, startY);
+            const newCoord = this._selectionRenderService.getCellWithCoordByOffset(startX, startY);
             if (newCoord == null) {
                 return;
             }
@@ -380,7 +380,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             rowOffset: 0,
         };
 
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth, startY + imageHeight);
+        const endSelectionCell = this._selectionRenderService.getCellWithCoordByOffset(startX + imageWidth, startY + imageHeight);
 
         if (endSelectionCell == null) {
             return;
@@ -400,7 +400,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     private _updateOrderListener() {
-        this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
+        this.disposeWithMe(this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
             const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
             this._commandService.executeCommand(SetDrawingArrangeCommand.id, {
@@ -409,11 +409,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 drawingIds,
                 arrangeType,
             } as ISetDrawingArrangeCommandParams);
-        });
+        }));
     }
 
     private _updateImageListener() {
-        this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
+        this.disposeWithMe(this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<ISheetDrawing>[] = [];
 
             if (params.length === 0) {
@@ -459,19 +459,19 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                     drawings,
                 } as ISetDrawingCommandParams);
             }
-        });
+        }));
     }
 
     private _groupDrawingListener() {
-        this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
+        this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
             const { unitId, subUnitId, drawingId } = params[0].parent;
             this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
-        });
+        }));
 
-        this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
+        this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
-        });
+        }));
     }
 
     private _focusDrawingListener() {

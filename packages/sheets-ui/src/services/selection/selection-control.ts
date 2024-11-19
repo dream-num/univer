@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
+import type { ICellWithCoord, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoord } from '@univerjs/sheets';
+import type { ISelectionShapeExtensionOption } from './selection-shape-extension';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import {
-    getNormalSelectionStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { genNormalSelectionStyle } from './const';
 import { SelectionRenderModel } from './selection-render-model';
+import { SelectionShapeExtension } from './selection-shape-extension';
 
 export enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -76,28 +78,42 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
+    private _isHelperSelection: boolean = true;
+
+    /**
+     * For ref selections, there is no auto fill.
+     */
+    protected _enableAutoFill: boolean = true;
+    /**
+     * Only normal selections with primary cell has auto fill.
+     * This works for multiple normal selections. Only last selection has primary cell and auto fill.
+     */
+    private _showAutoFill: boolean = false;
+
+    /**
+     * If rowHeader & col Header would be highlighted with selection.
+     */
+    protected _highlightHeader: boolean = true;
+
+    protected _selectionRenderModel!: SelectionRenderModel;
+
     private _leftBorder!: Rect;
     private _rightBorder!: Rect;
     private _topBorder!: Rect;
     private _bottomBorder!: Rect;
-
     private _backgroundControlTop!: Rect;
     private _backgroundControlBottom!: Rect;
     private _backgroundControlMiddleLeft!: Rect;
     private _backgroundControlMiddleRight!: Rect;
-
-    private _fillControl: Rect;
-
+    private _autoFillControl: Rect;
     private _selectionShapeGroup!: Group;
-
     private _rowHeaderBackground!: Rect;
     private _rowHeaderBorder!: Rect;
     private _rowHeaderGroup!: Group;
-    // private _rowHeaderHighlight!: Rect;
     private _columnHeaderBackground!: Rect;
     private _columnHeaderBorder!: Rect;
     private _columnHeaderGroup!: Group;
-    // private _columnHeaderHighlight!: Rect;
+    private _dashedRect!: Rect;
 
     // for ref selection
     private _topLeftWidget!: Rect;
@@ -109,19 +125,16 @@ export class SelectionControl extends Disposable {
     private _bottomCenterWidget!: Rect;
     private _bottomRightWidget!: Rect;
 
-    private _dashedRect!: Rect;
-
-    protected _selectionModel!: SelectionRenderModel;
-
     // why three style prop? what's diff between _selectionStyle & _currentStyle?
     // protected _selectionStyle: Nullable<ISelectionStyle>;
     private _defaultStyle!: ISelectionStyle;
     private _currentStyle: ISelectionStyle;
-
     protected _rowHeaderWidth: number = 0;
     protected _columnHeaderHeight: number = 0;
 
     protected _widgetRects: Rect[] = [];
+
+    protected _controlExtension: Nullable<SelectionShapeExtension>;
 
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
@@ -137,485 +150,35 @@ export class SelectionControl extends Disposable {
     readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
 
     private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
-
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
-
-    private _isHelperSelection: boolean = true;
 
     constructor(
         protected _scene: Scene,
         protected _zIndex: number,
         protected readonly _themeService: ThemeService,
-        protected _highlightHeader: boolean = true,
         options?: {
+            highlightHeader?: boolean;
+            enableAutoFill?: boolean;
             rowHeaderWidth: number;
             columnHeaderHeight: number;
+            rangeType?: RANGE_TYPE;
         }
     ) {
         super();
-        this._rowHeaderWidth = (options?.rowHeaderWidth) || 0;
-        this._columnHeaderHeight = (options?.columnHeaderHeight) || 0;
-        this._initialize();
-    }
-
-    get zIndex(): number {
-        return this._zIndex;
-    }
-
-    get leftControl(): Rect {
-        return this._leftBorder;
-    }
-
-    get rightControl(): Rect {
-        return this._rightBorder;
-    }
-
-    get topControl(): Rect {
-        return this._topBorder;
-    }
-
-    get bottomControl(): Rect {
-        return this._bottomBorder;
-    }
-
-    get fillControl(): Rect {
-        return this._fillControl;
-    }
-
-    get backgroundControlTop(): Rect {
-        return this._backgroundControlTop;
-    }
-
-    get backgroundControlBottom(): Rect {
-        return this._backgroundControlBottom;
-    }
-
-    get backgroundControlMiddleLeft(): Rect {
-        return this._backgroundControlMiddleLeft;
-    }
-
-    get backgroundControlMiddleRight(): Rect {
-        return this._backgroundControlMiddleRight;
-    }
-
-    get selectionShape(): Group {
-        return this._selectionShapeGroup;
-    }
-
-    get columnHeaderGroup(): Group {
-        return this._columnHeaderGroup;
-    }
-
-    get rowHeaderGroup(): Group {
-        return this._rowHeaderGroup;
-    }
-
-    get selectionShapeGroup(): Group {
-        return this._selectionShapeGroup;
-    }
-
-    get model(): SelectionRenderModel {
-        return this._selectionModel;
-    }
-
-    get topLeftWidget(): Rect {
-        return this._topLeftWidget;
-    }
-
-    get topCenterWidget(): Rect {
-        return this._topCenterWidget;
-    }
-
-    get topRightWidget(): Rect {
-        return this._topRightWidget;
-    }
-
-    get middleLeftWidget(): Rect {
-        return this._middleLeftWidget;
-    }
-
-    get middleRightWidget(): Rect {
-        return this._middleRightWidget;
-    }
-
-    get bottomLeftWidget(): Rect {
-        return this._bottomLeftWidget;
-    }
-
-    get bottomCenterWidget(): Rect {
-        return this._bottomCenterWidget;
-    }
-
-    get bottomRightWidget(): Rect {
-        return this._bottomRightWidget;
-    }
-
-    get themeService(): ThemeService {
-        return this._themeService;
-    }
-
-    get selectionModel(): SelectionRenderModel {
-        return this._selectionModel;
-    }
-
-    set selectionModel(model: SelectionRenderModel) {
-        this._selectionModel = model;
-    }
-
-    get defaultStyle(): ISelectionStyle {
-        return this._defaultStyle;
-    }
-
-    set defaultStyle(style: ISelectionStyle) {
-        this._defaultStyle = style;
-    }
-
-    get dashedRect(): Rect {
-        return this._dashedRect;
-    }
-
-    get currentStyle(): Nullable<ISelectionStyle> {
-        return this._currentStyle;
-    }
-
-    set currentStyle(style: Nullable<ISelectionStyle>) {
-        if (style) {
-            this._currentStyle = style;
-        }
-    }
-
-    get isHelperSelection(): boolean {
-        return this._isHelperSelection;
-    }
-
-    get rowHeaderWidth(): number {
-        return this._rowHeaderWidth;
-    }
-
-    set rowHeaderWidth(width: number) {
-        this._rowHeaderWidth = width;
-    }
-
-    get columnHeaderHeight(): number {
-        return this._columnHeaderHeight;
-    }
-
-    set columnHeaderHeight(height: number) {
-        this._columnHeaderHeight = height;
-    }
-
-    setEvent(state: boolean): void {
-        this.leftControl.evented = state;
-        this.rightControl.evented = state;
-        this.topControl.evented = state;
-        this.bottomControl.evented = state;
-    }
-
-    refreshSelectionFilled(val: IRangeWithCoord): void {
-        this._selectionFilled$.next(val);
-    }
-
-    /**
-     * Update Control Style And Position of SelectionControl
-     * @param selectionStyle
-     */
-    // eslint-disable-next-line max-lines-per-function
-    protected _setSizeAndStyleForSelectionControl(selectionStyle: ISelectionStyle): void {
-        this.currentStyle = selectionStyle;
-        const defaultStyle = this._defaultStyle;
-        const currentStyle = this.currentStyle;
-
-        const {
-            stroke = defaultStyle.stroke!,
-            widgets = defaultStyle.widgets!,
-            hasAutoFill = defaultStyle.hasAutoFill!,
-            AutofillStroke = defaultStyle.AutofillStroke!,
-            strokeDash,
-            isAnimationDash,
-        } = currentStyle;
-
-        let {
-            strokeWidth = defaultStyle.strokeWidth!,
-            AutofillSize = defaultStyle.AutofillSize!,
-            AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
-        } = currentStyle;
-        const scale = this._getScale();
-        const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
-        strokeWidth /= scale;
-        AutofillSize /= scale;
-        AutofillStrokeWidth /= scale < 1 ? 1 : scale;
-        // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
-        const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
-        const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
-
-        // startX startY shares same coordinate with viewport.(include row & colheader)
-        const { startX, startY, endX, endY } = this._selectionModel;
-        this.leftControl.transformByState({
-            height: endY - startY,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            width: strokeWidth,
-            strokeWidth: borderBuffer,
-            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
-        });
-
-        this.leftControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.rightControl.transformByState({
-            height: endY - startY,
-            left: endX - startX - leftAdjustWidth + fixOnePixelBlurOffset,
-            width: strokeWidth,
-            strokeWidth: borderBuffer,
-            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
-        });
-
-        this.rightControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.topControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: -leftAdjustWidth + fixOnePixelBlurOffset,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            height: strokeWidth,
-            strokeWidth: borderBuffer,
-        });
-
-        this.topControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        this.bottomControl.transformByState({
-            width: endX - startX + strokeWidth,
-            top: endY - startY - leftAdjustWidth + fixOnePixelBlurOffset,
-            height: strokeWidth,
-            left: -leftAdjustWidth + fixOnePixelBlurOffset,
-            strokeWidth: borderBuffer,
-        });
-
-        this.bottomControl.setProps({
-            fill: stroke,
-            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
-        });
-
-        if (strokeDash === null || strokeDash === undefined) {
-            this.dashedRect.hide();
-            this._stopAntLineAnimation();
-        } else {
-            const dashRectBorderWidth = currentStyle.strokeWidth * 2 / scale;
-            this.dashedRect.transformByState({
-                height: endY - startY,
-                width: endX - startX,
-                strokeWidth: dashRectBorderWidth,
-                left: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
-                top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
-            });
-
-            this.dashedRect.setProps({
-                strokeDashArray: [0, strokeDash / scale],
-            });
-
-            this._stopAntLineAnimation();
-
-            if (isAnimationDash !== false) {
-                this._startAntLineAnimation();
-            }
-
-            this.dashedRect.show();
-        }
-
-        if (hasAutoFill === true && !this._hasWidgets(widgets)) {
-            const fillProps: IRectProps = {
-                fill: stroke,
-                stroke: AutofillStroke,
-                strokeScaleEnabled: false,
-            };
-            const sizeState: IObjectFullState = {
-                width: AutofillSize - AutofillStrokeWidth,
-                height: AutofillSize - AutofillStrokeWidth,
-                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
-                strokeWidth: AutofillStrokeWidth,
-            };
-            this.fillControl.setProps(fillProps);
-            this.fillControl.transformByState(sizeState);
-            this.fillControl.show();
-        } else {
-            this.fillControl.hide();
-        }
-
-        this._updateBackgroundControl(selectionStyle);
-        this._updateHeaderBackground(selectionStyle);
-        this._updateWidgets(selectionStyle);
-    }
-
-    /**
-     * update selection control position by curr selection model
-     */
-    protected _refreshControlPosition(): void {
-        const { startX, startY } = this._selectionModel;
-        this.selectionShapeGroup.show();
-        this.selectionShapeGroup.translate(startX, startY);
-        this.selectionShapeGroup.makeDirtyNoDebounce(true);
-    }
-
-    updateStyle(style: ISelectionStyle): void {
-        this._setSizeAndStyleForSelectionControl(style);
-        this._refreshControlPosition();
-    }
-
-    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>): void {
-        this._selectionModel.setValue(range, primaryCell);
-        this._setSizeAndStyleForSelectionControl(this._currentStyle);
-        this._refreshControlPosition();
-    }
-
-    /**
-     * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
-     *
-     * @param newSelectionRange
-     * @param rowHeaderWidth
-     * @param columnHeaderHeight
-     * @param style
-     * @param primaryCell primary cell
-     */
-    update(
-        newSelectionRange: IRangeWithCoord,
-        rowHeaderWidth: number = 0,
-        columnHeaderHeight: number = 0,
-        style?: Nullable<ISelectionStyle>,
-        primaryCell?: Nullable<ISelectionCellWithMergeInfo>
-    ): void {
-        this._selectionModel.setValue(newSelectionRange, primaryCell);
-        this._rowHeaderWidth = rowHeaderWidth;
-        this._columnHeaderHeight = columnHeaderHeight;
-
-        this._setSizeAndStyleForSelectionControl(style || this._currentStyle);
-        this._refreshControlPosition();
-    }
-
-    /**
-     * update primary range
-     * @param primaryCell model.current (aka: highlight)
-     */
-    updateCurrCell(primaryCell?: Nullable<ISelectionCellWithMergeInfo>): void {
-        this._selectionModel.setCurrentCell(primaryCell);
-    }
-
-    clearHighlight(): void {
-        this._selectionModel.clearCurrentCell();
-        this._setSizeAndStyleForSelectionControl(this._currentStyle);
-    }
-
-    getScene(): Scene {
-        return this._scene;
-    }
-
-    // eslint-disable-next-line complexity
-    override dispose(): void {
-        this._leftBorder?.dispose();
-        this._rightBorder?.dispose();
-        this._topBorder?.dispose();
-        this._bottomBorder?.dispose();
-        this._backgroundControlTop?.dispose();
-        this._backgroundControlMiddleLeft?.dispose();
-        this._backgroundControlMiddleRight?.dispose();
-        this._backgroundControlBottom?.dispose();
-        this._fillControl.dispose();
-        this._selectionShapeGroup?.dispose();
-
-        this._rowHeaderBackground?.dispose();
-        this._rowHeaderBorder?.dispose();
-        this._rowHeaderGroup?.dispose();
-        this._rowHeaderBackground?.dispose();
-        this._columnHeaderBackground?.dispose();
-        this._columnHeaderBorder?.dispose();
-        this._columnHeaderGroup?.dispose();
-
-        this._topLeftWidget?.dispose();
-        this._topCenterWidget?.dispose();
-        this._topRightWidget?.dispose();
-        this._middleLeftWidget?.dispose();
-        this._middleRightWidget?.dispose();
-        this._bottomLeftWidget?.dispose();
-        this._bottomCenterWidget?.dispose();
-        this._bottomRightWidget?.dispose();
-
-        super.dispose();
-
-        this._dispose$.next(this);
-        this._dispose$.complete();
-    }
-
-    /**
-     * Get the cell information of the current selection, considering the case of merging cells
-     */
-    getCurrentCellInfo(): Nullable<IRangeWithCoord> {
-        const currentCell = this.model.currentCell;
-
-        if (currentCell) {
-            let currentRangeData: IRangeWithCoord;
-
-            if (currentCell.isMerged) {
-                const mergeInfo = currentCell.mergeInfo;
-
-                currentRangeData = {
-                    startRow: mergeInfo.startRow,
-                    endRow: mergeInfo.endRow,
-                    startColumn: mergeInfo.startColumn,
-                    endColumn: mergeInfo.endColumn,
-                    startX: mergeInfo.startX,
-                    endX: mergeInfo.endX,
-                    startY: mergeInfo.startY,
-                    endY: mergeInfo.endY,
-                };
-            } else {
-                const { actualRow, actualColumn, startX, endX, startY, endY } = currentCell;
-                currentRangeData = {
-                    startRow: actualRow,
-                    endRow: actualRow,
-                    startColumn: actualColumn,
-                    endColumn: actualColumn,
-                    startX,
-                    endX,
-                    startY,
-                    endY,
-                };
-            }
-
-            return currentRangeData;
-        }
-    }
-
-    getValue(): ISelectionWithCoordAndStyle {
-        return {
-            ...this._selectionModel.getValue(),
-            style: this._currentStyle,
-        };
-    }
-
-    getRange(): IRangeWithCoord {
-        return this._selectionModel.getValue().rangeWithCoord;
-    }
-
-    enableHelperSelection(): void {
-        this._isHelperSelection = true;
-    }
-
-    disableHelperSelection(): void {
-        this._isHelperSelection = false;
+        this._enableAutoFill = options?.enableAutoFill ?? true;
+        this._highlightHeader = options?.highlightHeader ?? true;
+        this._rowHeaderWidth = options?.rowHeaderWidth ?? 0;
+        this._columnHeaderHeight = options?.columnHeaderHeight ?? 0;
+        this._initializeSheetBody();
+        this._initialHeader();
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _initialize(): void {
-        this._defaultStyle = getNormalSelectionStyle(this._themeService);
-        this._currentStyle = getNormalSelectionStyle(this._themeService);
+    private _initializeSheetBody(): void {
+        this._defaultStyle = genNormalSelectionStyle(this._themeService);
+        this._currentStyle = genNormalSelectionStyle(this._themeService);
 
-        this._selectionModel = new SelectionRenderModel();
+        this._selectionRenderModel = new SelectionRenderModel();
         const zIndex = this._zIndex;
         this._leftBorder = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             zIndex,
@@ -654,11 +217,12 @@ export class SelectionControl extends Disposable {
 
         // size of fillControl is set in _updateControlStyleAndLayout(), because control size(visual size) stays same when zoom change.
         // The size of control is not a const value, so it was handled by _updateWidgets() & _updateControlStyleAndLayout()
-        this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
+        this._autoFillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
             zIndex: zIndex + 1,
         });
+        this._autoFillControl.hide();
 
-        // That weird, new Dashedrect should called when strokeDash. not every selectionControl need dashedRect.
+        // That weird, new Dashed rect should called when strokeDash. not every selectionControl need dashedRect.
         // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
         this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
@@ -667,7 +231,7 @@ export class SelectionControl extends Disposable {
         });
 
         const shapes = [
-            this._fillControl,
+            this._autoFillControl,
             this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
             this._backgroundControlTop, this._backgroundControlMiddleLeft,
             this._backgroundControlMiddleRight, this._backgroundControlBottom,
@@ -690,13 +254,11 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._setSizeAndStyleForSelectionControl(this._currentStyle);
-                    this._refreshControlPosition();
+                    this._updateLayoutOfSelectionControl(this._currentStyle);
+                    this._updateControlCoord();
                 })
             )
         );
-
-        this._initialHeader();
     }
 
     private _initialHeader(): void {
@@ -791,19 +353,494 @@ export class SelectionControl extends Disposable {
         ];
     }
 
-    private _updateHeaderBackground(style: Nullable<ISelectionStyle>): void {
-        const { startX, startY, endX, endY, rangeType } = this._selectionModel;
-        const defaultStyle = this._defaultStyle;
+    get zIndex(): number {
+        return this._zIndex;
+    }
 
-        if (style == null) {
-            style = defaultStyle;
+    get leftControl(): Rect {
+        return this._leftBorder;
+    }
+
+    get rightControl(): Rect {
+        return this._rightBorder;
+    }
+
+    get topControl(): Rect {
+        return this._topBorder;
+    }
+
+    get bottomControl(): Rect {
+        return this._bottomBorder;
+    }
+
+    get fillControl(): Rect {
+        return this._autoFillControl;
+    }
+
+    get backgroundControlTop(): Rect {
+        return this._backgroundControlTop;
+    }
+
+    get backgroundControlBottom(): Rect {
+        return this._backgroundControlBottom;
+    }
+
+    get backgroundControlMiddleLeft(): Rect {
+        return this._backgroundControlMiddleLeft;
+    }
+
+    get backgroundControlMiddleRight(): Rect {
+        return this._backgroundControlMiddleRight;
+    }
+
+    get selectionShape(): Group {
+        return this._selectionShapeGroup;
+    }
+
+    get columnHeaderGroup(): Group {
+        return this._columnHeaderGroup;
+    }
+
+    get rowHeaderGroup(): Group {
+        return this._rowHeaderGroup;
+    }
+
+    get selectionShapeGroup(): Group {
+        return this._selectionShapeGroup;
+    }
+
+    // That's so bad! _selectionModel is protected! But I don't want to expose it to the outside world
+    get model(): SelectionRenderModel {
+        return this._selectionRenderModel;
+    }
+
+    get topLeftWidget(): Rect {
+        return this._topLeftWidget;
+    }
+
+    get topCenterWidget(): Rect {
+        return this._topCenterWidget;
+    }
+
+    get topRightWidget(): Rect {
+        return this._topRightWidget;
+    }
+
+    get middleLeftWidget(): Rect {
+        return this._middleLeftWidget;
+    }
+
+    get middleRightWidget(): Rect {
+        return this._middleRightWidget;
+    }
+
+    get bottomLeftWidget(): Rect {
+        return this._bottomLeftWidget;
+    }
+
+    get bottomCenterWidget(): Rect {
+        return this._bottomCenterWidget;
+    }
+
+    get bottomRightWidget(): Rect {
+        return this._bottomRightWidget;
+    }
+
+    get themeService(): ThemeService {
+        return this._themeService;
+    }
+
+    get selectionModel(): SelectionRenderModel {
+        return this._selectionRenderModel;
+    }
+
+    set selectionModel(model: SelectionRenderModel) {
+        this._selectionRenderModel = model;
+    }
+
+    // get defaultStyle(): ISelectionStyle {
+    //     return this._defaultStyle;
+    // }
+
+    // set defaultStyle(style: ISelectionStyle) {
+    //     this._defaultStyle = style;
+    // }
+
+    get currentStyle(): ISelectionStyle {
+        return this._currentStyle;
+    }
+
+    set currentStyle(style: ISelectionStyle) {
+        this._currentStyle = style;
+    }
+
+    get dashedRect(): Rect {
+        return this._dashedRect;
+    }
+
+    get isHelperSelection(): boolean {
+        return this._isHelperSelection;
+    }
+
+    get rowHeaderWidth(): number {
+        return this._rowHeaderWidth;
+    }
+
+    set rowHeaderWidth(width: number) {
+        this._rowHeaderWidth = width;
+    }
+
+    get columnHeaderHeight(): number {
+        return this._columnHeaderHeight;
+    }
+
+    set columnHeaderHeight(height: number) {
+        this._columnHeaderHeight = height;
+    }
+
+    setControlExtension(options: ISelectionShapeExtensionOption) {
+        this._controlExtension = new SelectionShapeExtension(this, options);
+    }
+
+    setEvent(state: boolean): void {
+        this.leftControl.evented = state;
+        this.rightControl.evented = state;
+        this.topControl.evented = state;
+        this.bottomControl.evented = state;
+    }
+
+    refreshSelectionFilled(val: IRangeWithCoord): void {
+        this._selectionFilled$.next(val);
+    }
+
+    /**
+     * Update Control Style And Position of SelectionControl
+     * @param selectionStyle
+     */
+    // eslint-disable-next-line max-lines-per-function
+    protected _updateLayoutOfSelectionControl(selectionStyle?: Nullable<Partial<ISelectionStyle>>): void {
+        if (selectionStyle) {
+            this.currentStyle = Object.assign({}, this._defaultStyle, selectionStyle);
+        }
+        const currentStyle = this.currentStyle as Required<ISelectionStyle>;
+
+        const {
+            stroke,
+            widgets,
+            autofillStroke: AutofillStroke,
+            strokeDash,
+            isAnimationDash,
+        } = currentStyle;
+        let autofillSize = currentStyle.autofillSize;
+        let strokeWidth = currentStyle.strokeWidth;
+        let autofillStrokeWidth = currentStyle.autofillStrokeWidth;
+        const scale = this._getScale();
+        const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
+        strokeWidth /= scale;
+        autofillSize /= scale;
+        autofillStrokeWidth /= scale < 1 ? 1 : scale;
+        // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
+        const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
+        const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
+
+        // startX startY shares same coordinate with viewport.(include row & col header)
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
+        this.leftControl.transformByState({
+            height: endY - startY,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            width: strokeWidth,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
+        });
+
+        this.leftControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.rightControl.transformByState({
+            height: endY - startY,
+            left: endX - startX - leftAdjustWidth + fixOnePixelBlurOffset,
+            width: strokeWidth,
+            strokeWidth: borderBuffer,
+            top: -borderBuffer / 2 + fixOnePixelBlurOffset,
+        });
+
+        this.rightControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.topControl.transformByState({
+            width: endX - startX + strokeWidth,
+            top: -leftAdjustWidth + fixOnePixelBlurOffset,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            height: strokeWidth,
+            strokeWidth: borderBuffer,
+        });
+
+        this.topControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.bottomControl.transformByState({
+            width: endX - startX + strokeWidth,
+            top: endY - startY - leftAdjustWidth + fixOnePixelBlurOffset,
+            height: strokeWidth,
+            left: -leftAdjustWidth + fixOnePixelBlurOffset,
+            strokeWidth: borderBuffer,
+        });
+
+        this.bottomControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        if (strokeDash === null || strokeDash === undefined) {
+            this.dashedRect.hide();
+            this._stopAntLineAnimation();
+        } else {
+            const dashRectBorderWidth = currentStyle.strokeWidth * 2 / scale;
+            this.dashedRect.transformByState({
+                height: endY - startY,
+                width: endX - startX,
+                strokeWidth: dashRectBorderWidth,
+                left: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
+                top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
+            });
+
+            this.dashedRect.setProps({
+                strokeDashArray: [0, strokeDash / scale],
+            });
+
+            this._stopAntLineAnimation();
+
+            if (isAnimationDash !== false) {
+                this._startAntLineAnimation();
+            }
+
+            this.dashedRect.show();
+        }
+        this._showAutoFill = this._showAutoFill && this._enableAutoFill;
+        if (this._showAutoFill && !this._hasWidgets(widgets)) {
+            const fillProps: IRectProps = {
+                fill: stroke,
+                stroke: AutofillStroke,
+                strokeScaleEnabled: false,
+            };
+            const sizeState: IObjectFullState = {
+                width: autofillSize - autofillStrokeWidth,
+                height: autofillSize - autofillStrokeWidth,
+                left: endX - startX - autofillSize / 2 + autofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                top: endY - startY - autofillSize / 2 + autofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                strokeWidth: autofillStrokeWidth,
+            };
+            this._autoFillControl.setProps(fillProps);
+            this._autoFillControl.transformByState(sizeState);
+            this._autoFillControl.show();
+        } else {
+            this._autoFillControl.hide();
         }
 
+        this._updateBackgroundControl(currentStyle);
+        this._updateHeaderBackground(currentStyle);
+        this._updateWidgets(currentStyle);
+    }
+
+    /**
+     * update selection control coordination by curr selection model
+     */
+    protected _updateControlCoord(): void {
+        const { startX, startY } = this._selectionRenderModel;
+        this.selectionShapeGroup.show();
+        this.selectionShapeGroup.translate(startX, startY);
+        this.selectionShapeGroup.makeDirtyNoDebounce(true);
+    }
+
+    updateStyle(style: Partial<ISelectionStyle>): void {
+        this._updateLayoutOfSelectionControl(style);
+        this._updateControlCoord();
+    }
+
+    /**
+     * Update range, primary may be null, especially for moving handler.
+     * @param range
+     * @param primaryCell
+     */
+    updateRange(range: IRangeWithCoord, primaryCell: Nullable<ICellWithCoord>): void {
+        this._selectionRenderModel.setValue(range, primaryCell);
+        this._showAutoFill = primaryCell !== null;
+        this._updateLayoutOfSelectionControl();
+        this._updateControlCoord();
+    }
+
+    updateRangeBySelectionWithCoord(selectionWthCoord: ISelectionWithCoord) {
+        this._selectionRenderModel.setValue(selectionWthCoord.rangeWithCoord, selectionWthCoord.primaryWithCoord);
+        // if undefined, then keeps the previous value
+        if (selectionWthCoord.primaryWithCoord === null) {
+            this._showAutoFill = false;
+        } else {
+            this._showAutoFill = true;
+        }
+        this._updateLayoutOfSelectionControl(selectionWthCoord.style);
+        this._updateControlCoord();
+    }
+
+    /**
+     * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
+     *
+     * @param newSelectionRange
+     * @param rowHeaderWidth
+     * @param columnHeaderHeight
+     * @param style
+     * @param primaryCell primary cell
+     */
+    update(
+        newSelectionRange: IRangeWithCoord,
+        rowHeaderWidth: number = 0,
+        columnHeaderHeight: number = 0,
+        style?: Nullable<ISelectionStyle>,
+        primaryCell?: Nullable<ICellWithCoord>
+    ): void {
+        this._rowHeaderWidth = rowHeaderWidth;
+        this._columnHeaderHeight = columnHeaderHeight;
+        this.updateRangeBySelectionWithCoord({
+            rangeWithCoord: newSelectionRange,
+            primaryWithCoord: primaryCell,
+            style,
+        });
+        if (style) {
+            this.updateStyle(style);
+        }
+    }
+
+    /**
+     * update primary range
+     * @param primaryCell model.current (aka: highlight)
+     */
+    updateCurrCell(primaryCell: Nullable<ICellWithCoord>): void {
+        // in multiple selection shape, only shape with highlight has auto fill.
+        this._showAutoFill = primaryCell !== null;
+        this._selectionRenderModel.setCurrentCell(primaryCell);
+    }
+
+    clearHighlight(): void {
+        // in multiple selection shape, only shape with highlight has auto fill.
+        this._showAutoFill = false;
+        this._selectionRenderModel.clearCurrentCell();
+        this._updateLayoutOfSelectionControl(this._currentStyle);
+    }
+
+    getScene(): Scene {
+        return this._scene;
+    }
+
+    // eslint-disable-next-line complexity
+    override dispose(): void {
+        this._leftBorder?.dispose();
+        this._rightBorder?.dispose();
+        this._topBorder?.dispose();
+        this._bottomBorder?.dispose();
+        this._backgroundControlTop?.dispose();
+        this._backgroundControlMiddleLeft?.dispose();
+        this._backgroundControlMiddleRight?.dispose();
+        this._backgroundControlBottom?.dispose();
+        this._autoFillControl.dispose();
+        this._selectionShapeGroup?.dispose();
+
+        this._rowHeaderBackground?.dispose();
+        this._rowHeaderBorder?.dispose();
+        this._rowHeaderGroup?.dispose();
+        this._rowHeaderBackground?.dispose();
+        this._columnHeaderBackground?.dispose();
+        this._columnHeaderBorder?.dispose();
+        this._columnHeaderGroup?.dispose();
+
+        this._topLeftWidget?.dispose();
+        this._topCenterWidget?.dispose();
+        this._topRightWidget?.dispose();
+        this._middleLeftWidget?.dispose();
+        this._middleRightWidget?.dispose();
+        this._bottomLeftWidget?.dispose();
+        this._bottomCenterWidget?.dispose();
+        this._bottomRightWidget?.dispose();
+
+        this._controlExtension?.dispose();
+
+        super.dispose();
+
+        this._dispose$.next(this);
+        this._dispose$.complete();
+    }
+
+    /**
+     * Get the cell information of the current selection, considering the case of merging cells
+     */
+    getCurrentCellInfo(): Nullable<IRangeWithCoord> {
+        const currentCell = this.model.currentCell;
+
+        if (currentCell) {
+            let currentRangeData: IRangeWithCoord;
+
+            if (currentCell.isMerged) {
+                const mergeInfo = currentCell.mergeInfo;
+
+                currentRangeData = {
+                    startRow: mergeInfo.startRow,
+                    endRow: mergeInfo.endRow,
+                    startColumn: mergeInfo.startColumn,
+                    endColumn: mergeInfo.endColumn,
+                    startX: mergeInfo.startX,
+                    endX: mergeInfo.endX,
+                    startY: mergeInfo.startY,
+                    endY: mergeInfo.endY,
+                };
+            } else {
+                const { actualRow, actualColumn, startX, endX, startY, endY } = currentCell;
+                currentRangeData = {
+                    startRow: actualRow,
+                    endRow: actualRow,
+                    startColumn: actualColumn,
+                    endColumn: actualColumn,
+                    startX,
+                    endX,
+                    startY,
+                    endY,
+                };
+            }
+
+            return currentRangeData;
+        }
+    }
+
+    getValue(): ISelectionWithCoord {
+        return {
+            ...this._selectionRenderModel.getValue(),
+            style: this._currentStyle,
+        };
+    }
+
+    getRange(): IRangeWithCoord {
+        return this._selectionRenderModel.getValue().rangeWithCoord;
+    }
+
+    enableHelperSelection(): void {
+        this._isHelperSelection = true;
+    }
+
+    disableHelperSelection(): void {
+        this._isHelperSelection = false;
+    }
+
+    private _updateHeaderBackground(style: ISelectionStyle): void {
+        const { startX, startY, endX, endY, rangeType } = this._selectionRenderModel;
+        const defaultStyle = this._currentStyle;
         const scale = this._getScale();
 
         const {
-            stroke, hasRowHeader, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
-            hasColumnHeader, columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
+            stroke, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
+            columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
         } = style;
 
         let {
@@ -817,9 +854,9 @@ export class SelectionControl extends Disposable {
         const rowHeaderWidth = this._rowHeaderWidth;
         const columnHeaderHeight = this._columnHeaderHeight;
 
-        if (hasColumnHeader === true) {
+        if (this._highlightHeader && columnHeaderHeight > 0) {
             let highlightTitleColor = columnHeaderFill;
-            if (this._highlightHeader && rangeType === RANGE_TYPE.COLUMN) {
+            if (rangeType === RANGE_TYPE.COLUMN) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
@@ -844,9 +881,9 @@ export class SelectionControl extends Disposable {
 
         this._columnHeaderGroup.makeDirty(true);
 
-        if (hasRowHeader === true) {
+        if (this._highlightHeader && rowHeaderWidth > 0) {
             let highlightTitleColor = rowHeaderFill;
-            if (this._highlightHeader && rangeType === RANGE_TYPE.ROW) {
+            if (rangeType === RANGE_TYPE.ROW) {
                 highlightTitleColor = new ColorKit(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({
@@ -872,20 +909,14 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    private _updateBackgroundControl(style: Nullable<ISelectionStyle>): void {
-        const { startX, startY, endX, endY } = this._selectionModel;
-
-        const defaultStyle = this._defaultStyle;
-
-        if (style == null) {
-            style = defaultStyle;
-        }
+    private _updateBackgroundControl(style: ISelectionStyle): void {
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
 
         const scale = this._getScale();
-        const { fill = defaultStyle.fill! } = style;
-        let { strokeWidth = defaultStyle.strokeWidth! } = style;
+        const { fill = style.fill! } = style;
+        let { strokeWidth } = style;
         strokeWidth /= scale;
-        const highlightSelection = this._selectionModel.highlightToSelection();
+        const highlightSelection = this._selectionRenderModel.highlightToSelection();
 
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
@@ -953,17 +984,12 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    private _updateWidgets(style: Nullable<ISelectionStyle>): void {
-        const { startX, startY, endX, endY } = this._selectionModel;
-        const defaultStyle = this._defaultStyle;
+    private _updateWidgets(style: Required<ISelectionStyle>): void {
+        const { startX, startY, endX, endY } = this._selectionRenderModel;
 
-        if (style == null) {
-            style = defaultStyle;
-        }
-
-        const { stroke = defaultStyle.stroke!, widgets = defaultStyle.widgets!, widgetStroke = defaultStyle.widgetStroke! } = style;
+        const { stroke = style.stroke!, widgets = style.widgets!, widgetStroke = style.widgetStroke! } = style;
         const scale = this._getScale();
-        let { widgetSize = defaultStyle.widgetSize!, widgetStrokeWidth = defaultStyle.widgetStrokeWidth! } = style;
+        let { widgetSize, widgetStrokeWidth } = style;
 
         widgetSize /= scale;
         widgetStrokeWidth /= scale;
@@ -1049,7 +1075,7 @@ export class SelectionControl extends Disposable {
             }
         }
 
-        return true;
+        return false;
     }
 
     private _getScale(): number {
@@ -1058,7 +1084,6 @@ export class SelectionControl extends Disposable {
     }
 
     private _antLineOffset = 0;
-
     private _antRequestNewFrame: number = -1;
 
     private _stopAntLineAnimation(): void {

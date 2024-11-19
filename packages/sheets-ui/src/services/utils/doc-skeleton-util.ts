@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, Injector, IParagraph, ISelectionCellWithMergeInfo, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { ICellWithCoord, ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IFontCacheItem } from '@univerjs/engine-render';
 import { CustomRangeType, HorizontalAlign, IUniverInstanceService, PresetListType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
@@ -155,7 +155,7 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     };
 };
 
-export function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
+export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
     const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
     const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
@@ -224,7 +224,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
 
     const PADDING = DOC_VERTICAL_PADDING;
 
-    const cellIndex = skeleton.getCellByIndex(row, col);
+    const cellIndex = skeleton.getCellWithCoordByIndex(row, col);
     let { actualColumn, actualRow } = cellIndex;
 
     skeleton.overflowCache.forValue((r, c, range) => {
@@ -234,7 +234,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualColumn);
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
     const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
     const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
     const { paddingLeft, paddingTop } = calcPadding(actualCell, font);

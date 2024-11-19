@@ -24114,7 +24114,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             }),
         },
         {
-            name: 'SHEET_THREAD_COMMENT_PLUGIN',
+            name: 'SHEET_UNIVER_THREAD_COMMENT_PLUGIN',
             data: JSON.stringify({
                 'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
                 'dv-test': [
@@ -24227,6 +24227,24 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         'sF2ogx',
                         'UPBpL-A3RvKoOqPdd8VIq',
                     ],
+                },
+                'dv-test': {
+                    data: {
+                        'UPBpL-test': {
+                            unitId: 'workbook-01',
+                            subUnitId: 'dv-test',
+                            drawingId: 'UPBpL-test',
+                            drawingType: 8,
+                            componentKey: 'ImageDemo',
+                            sheetTransform: {
+                                from: { column: 2, columnOffset: 8, row: 9, rowOffset: 9 },
+                                to: { column: 4, columnOffset: 62, row: 23, rowOffset: 0 },
+                            },
+                            transform: { flipY: false, flipX: false, angle: 0, skewX: 0, skewY: 0, left: 200, top: 200, width: 200, height: 200 },
+                            data: { aa: '128' },
+                        },
+                    },
+                    order: ['UPBpL-test'],
                 },
             }),
         },

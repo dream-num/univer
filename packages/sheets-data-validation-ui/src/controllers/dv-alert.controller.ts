@@ -69,7 +69,7 @@ export class DataValidationAlertController extends Disposable {
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('dataValidation.error.title'),
-                        message: validator?.getRuleFinalError(rule),
+                        message: validator?.getRuleFinalError(rule, cellPos.location),
                         location: cellPos.location,
                         width: 200,
                         height: 74,

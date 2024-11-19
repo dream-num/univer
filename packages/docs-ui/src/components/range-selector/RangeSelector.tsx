@@ -312,7 +312,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div
-                className={sClassName}
+                className={clsx(sClassName, className)}
                 ref={selectorRef}
                 style={{ width, height, cursor: dialogOnly ? 'pointer' : undefined }}
                 onClickCapture={(event) => {
@@ -323,7 +323,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     }
                 }}
             >
-                <TextEditor style={dialogOnly ? dialogOnlyInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor style={dialogOnly ? dialogOnlyInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button type="button" className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />

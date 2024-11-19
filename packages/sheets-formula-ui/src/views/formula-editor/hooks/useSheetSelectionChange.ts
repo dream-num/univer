@@ -19,7 +19,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 
-import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { DisposableCollection, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -68,7 +68,7 @@ export const useSheetSelectionChange = (
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
             // eslint-disable-next-line complexity
-            const handleSelectionsChange = (selections: ISelectionWithCoordAndStyle[]) => {
+            const handleSelectionsChange = (selections: ISelectionWithCoord[]) => {
                 if (isFirst || isScalingRef.current) {
                     isFirst = false;
                     return;

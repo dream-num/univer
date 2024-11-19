@@ -367,6 +367,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         unitId,
                         subUnitId,
                     };
+
                     this._canvasFloatDomService.addFloatDom({
                         position$,
                         id: drawingId,
@@ -448,23 +449,24 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
 
         this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
-                .pipe(
-                    filter((sheet) => !!sheet),
-                    map((sheet) => {
-                        const render = this._renderManagerService.getRenderById(sheet.getUnitId());
-                        return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getActiveSheet().getSheetId() } : null;
-                    }),
-                    filter((render) => !!render),
-                    switchMap((render) =>
-                        fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
-                            .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
-                    )
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+                filter((workbook) => !!workbook),
+                switchMap((workbook) => workbook.activeSheet$),
+                filter((sheet) => !!sheet),
+                map((sheet) => {
+                    const render = this._renderManagerService.getRenderById(sheet.getUnitId());
+                    return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getSheetId() } : null;
+                }),
+                filter((render) => !!render),
+                switchMap((render) =>
+                    fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
+                        .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
                 )
-                .subscribe(({ unitId, subUnitId }) => {
-                    updateSheet(unitId, subUnitId);
-                })
+            ).subscribe(({ unitId, subUnitId }) => {
+                updateSheet(unitId, subUnitId);
+            })
         );
+
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetZoomRatioOperation.id) {
                 const params = (commandInfo.params) as any;
@@ -486,7 +488,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (selectionRenderService == null) {
             return;
         }
-        const start = selectionRenderService.getSelectionCellByPosition(startX, startY);
+        const start = selectionRenderService.getCellWithCoordByOffset(startX, startY);
         if (start == null) {
             return;
         }
@@ -498,7 +500,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             rowOffset: startY - start.startY,
         };
 
-        const end = selectionRenderService.getSelectionCellByPosition(endX, endY);
+        const end = selectionRenderService.getCellWithCoordByOffset(endX, endY);
 
         if (end == null) {
             return;

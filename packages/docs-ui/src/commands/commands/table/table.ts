@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
 import type { DataStreamTreeNode, DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
 
 export enum INSERT_ROW_POSITION {
     ABOVE,
@@ -90,7 +90,7 @@ export function getEmptyTableRow(col: number) {
         tableCells: [...new Array(col).fill(null).map(() => Tools.deepClone(tableCell))],
         trHeight: {
             val: { v: 30 },
-            hRule: TableCellHeightRule.AUTO,
+            hRule: TableRowHeightRule.AUTO,
         },
     };
 

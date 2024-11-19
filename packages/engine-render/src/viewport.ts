@@ -24,7 +24,6 @@ import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
 import { EventSubject, Tools } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { PointerInput } from './basics/i-events';
 import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
@@ -545,7 +544,7 @@ export class Viewport {
     // 4. changing the viewport size (also include change window size)
     // 5. changing the scroll bar position(click at certain pos of scrolltrack)
     // Debug
-    // window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
+    // scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
         return this._scrollToBarPosCore(pos);
     }
@@ -968,95 +967,45 @@ export class Viewport {
 
     /**
      * At f7140a7c11, only doc need this method.
-     * In sheet, wheel event is handled by scroll-manager.service@setScrollInfo
+     * In sheet, wheel event is handled by scroll.render-controller@scene.onMouseWheel$
      * @param evt
      * @param state
      */
-    // eslint-disable-next-line complexity, max-lines-per-function
+
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {
             return;
         }
-        let isLimitedStore;
-        if (evt.inputIndex === PointerInput.MouseWheelX) {
-            const deltaFactor = Math.abs(evt.deltaX);
-            const allWidth = this._scene.width;
-            const viewWidth = this.width || 1;
-            const scrollNum = (viewWidth / allWidth) * deltaFactor;
-            if (evt.deltaX > 0) {
-                isLimitedStore = this.scrollByBarDeltaValue({
-                    x: scrollNum,
-                });
-            } else {
-                isLimitedStore = this.scrollByBarDeltaValue({
-                    x: -scrollNum,
-                });
-            }
+        let offsetX = 0;
+        let offsetY = 0;
+        const allWidth = this._scene.width;
+        const viewWidth = this.width || 1;
+        offsetX = (viewWidth / allWidth) * evt.deltaX;
 
-            // 临界点时执行浏览器行为
+        const allHeight = this._scene.height;
+        const viewHeight = this.height || 1;
+        if (evt.shiftKey) {
+            offsetX = (viewHeight / allHeight) * evt.deltaY * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
+        } else {
+            offsetY = (viewHeight / allHeight) * evt.deltaY;
+        }
+
+        const isLimitedStore = this.scrollByBarDeltaValue({
+            x: offsetX,
+            y: offsetY,
+        });
+
+        if (isLimitedStore && !isLimitedStore.isLimitedX && !isLimitedStore.isLimitedY) {
+            // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
+            // if scrolling is reaching limit, let scrolling event do the default behavior.
+            evt.preventDefault();
             if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                if (!isLimitedStore?.isLimitedX) {
-                    state.stopPropagation();
-                }
-            } else if (this._isWheelPreventDefaultX) {
-                evt.preventDefault();
-            } else if (!isLimitedStore?.isLimitedX) {
-                evt.preventDefault();
+                state.stopPropagation();
             }
         }
-        if (evt.inputIndex === PointerInput.MouseWheelY) {
-            const deltaFactor = Math.abs(evt.deltaY);
-            const allHeight = this._scene.height;
-            const viewHeight = this.height || 1;
-            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-            let scrollNum = (viewHeight / allHeight) * deltaFactor;
-            if (evt.shiftKey) {
-                scrollNum *= MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
-                if (evt.deltaY > 0) {
-                    isLimitedStore = this.scrollByBarDeltaValue({
-                        x: scrollNum,
-                    });
-                } else {
-                    isLimitedStore = this.scrollByBarDeltaValue({
-                        x: -scrollNum,
-                    });
-                }
 
-                // 临界点时执行浏览器行为
-                if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    if (!isLimitedStore?.isLimitedX) {
-                        state.stopPropagation();
-                    }
-                } else if (this._isWheelPreventDefaultX) {
-                    evt.preventDefault();
-                } else if (!isLimitedStore?.isLimitedX) {
-                    evt.preventDefault();
-                }
-            } else {
-                if (evt.deltaY > 0) {
-                    isLimitedStore = this.scrollByBarDeltaValue({
-                        y: scrollNum,
-                    });
-                } else {
-                    isLimitedStore = this.scrollByBarDeltaValue({
-                        y: -scrollNum,
-                    });
-                }
-
-                // 临界点时执行浏览器行为
-                if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    if (!isLimitedStore?.isLimitedY) {
-                        state.stopPropagation();
-                    }
-                } else if (this._isWheelPreventDefaultY) {
-                    evt.preventDefault();
-                } else if (!isLimitedStore?.isLimitedY) {
-                    evt.preventDefault();
-                }
-            }
-        }
-        if (evt.inputIndex === PointerInput.MouseWheelZ) {
-            // TODO
+        if (this._isWheelPreventDefaultX && this._isWheelPreventDefaultY) {
+            evt.preventDefault();
         }
 
         this._scene.makeDirty(true);

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
-import { Range, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, ISheetDataValidationRule, IUnitRangeName, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import type { LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import { isFormulaString, Range, UniverInstanceType } from '@univerjs/core';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
@@ -62,4 +64,20 @@ export function getDataValidationCellValue(cellData: Nullable<ICellData>) {
     }
 
     return cellValue.toString();
+}
+
+export function getTransformedFormula(lexerTreeBuilder: LexerTreeBuilder, rule: ISheetDataValidationRule, position: ISheetLocationBase) {
+    const { formula1, formula2 } = rule;
+    const originStartRow = rule.ranges[0].startRow;
+    const originStartColumn = rule.ranges[0].startColumn;
+    const offsetRow = position.row - originStartRow;
+    const offsetColumn = position.col - originStartColumn;
+
+    const transformedFormula1 = isFormulaString(formula1) ? lexerTreeBuilder.moveFormulaRefOffset(formula1!, offsetColumn, offsetRow, true) : formula1;
+    const transformedFormula2 = isFormulaString(formula2) ? lexerTreeBuilder.moveFormulaRefOffset(formula2!, offsetColumn, offsetRow, true) : formula2;
+
+    return {
+        transformedFormula1,
+        transformedFormula2,
+    };
 }

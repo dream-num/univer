@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
+import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
-import { DisposableCollection, generateRandomId, type IDisposable, type ISelectionCellWithMergeInfo, type Nullable } from '@univerjs/core';
+import { DisposableCollection, generateRandomId, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FRange } from '@univerjs/sheets/facade';
-import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
 
@@ -43,7 +44,7 @@ interface IFRangeSheetsUIMixin {
      * Return this cell information, including whether it is merged and cell coordinates
      * @returns The cell information
      */
-    getCell(): ISelectionCellWithMergeInfo;
+    getCell(): ICellWithCoord;
     /**
      * Returns the coordinates of this cell,does not include units
      * @returns coordinates of the cell， top, right, bottom, left
@@ -68,17 +69,21 @@ interface IFRangeSheetsUIMixin {
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
 
+    /**
+     * Highlight this range.
+     */
+    highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
 }
 
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
-    override getCell(): ISelectionCellWithMergeInfo {
+    override getCell(): ICellWithCoord {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = renderManagerService.getRenderById(unitId)!
             .with(SheetSkeletonManagerService)
             .getWorksheetSkeleton(subUnitId)!.skeleton;
-        return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
+        return skeleton.getCellWithCoordByIndex(this._range.startRow, this._range.startColumn);
     }
 
     override getCellRect(): DOMRect {
@@ -136,6 +141,18 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
                 cellAlertService.removeAlert(alert.key);
             },
         };
+    }
+
+    override highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable {
+        const markSelectionService = this._injector.get(IMarkSelectionService);
+        const id = markSelectionService.addShape({ range: this._range, style, primary });
+
+        if (!id) {
+            throw new Error('Failed to highlight current range');
+        }
+        return toDisposable(() => {
+            markSelectionService.removeShape(id);
+        });
     }
 }
 

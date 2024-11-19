@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { useEffect } from 'react';
 import type { IRange } from '@univerjs/core';
 import { useDependency } from '@univerjs/core';
+import { useEffect } from 'react';
 import { IMarkSelectionService } from '../services/mark-selection/mark-selection.service';
 
 export const useHighlightRange = (ranges: IRange[] = []) => {
@@ -25,7 +25,6 @@ export const useHighlightRange = (ranges: IRange[] = []) => {
         const ids = ranges.map((range) => markSelectionService.addShape({
             range,
             style: {
-                hasAutoFill: false,
                 fill: 'rgba(73, 184, 17, 0.05)',
                 strokeWidth: 1,
                 stroke: '#49B811',

@@ -103,6 +103,8 @@ export interface IFormulaCurrentConfigService {
         sheetOrder: string[];
         sheetNameMap: { [sheetId: string]: string };
     };
+
+    getSheetRowColumnCount(unitId: string, sheetId: string): { rowCount: number; columnCount: number };
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -254,6 +256,20 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             sheetOrder,
             sheetNameMap: this._sheetIdToNameMap[id] as { [sheetId: string]: string },
         };
+    }
+
+    getSheetRowColumnCount(unitId: string, sheetId: string) {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        const snapshot = worksheet?.getSnapshot();
+
+        if (!snapshot) {
+            return { rowCount: 0, columnCount: 0 };
+        }
+
+        const { rowCount, columnCount } = snapshot;
+
+        return { rowCount, columnCount };
     }
 
     load(config: IFormulaDatasetConfig) {

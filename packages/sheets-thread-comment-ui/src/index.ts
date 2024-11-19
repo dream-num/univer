@@ -20,10 +20,8 @@ export { SheetsThreadCommentPopupService } from './services/sheets-thread-commen
 export { SHEETS_THREAD_COMMENT } from './types/const';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 
 // #region - all commands
-
 export {
     AddCommentCommand,
     DeleteCommentCommand,

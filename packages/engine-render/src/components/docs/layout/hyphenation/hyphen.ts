@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IHyphenPattern, RawHyphenPattern } from './tools';
 import { Lang } from './lang';
 import { EnUs } from './patterns/en-us';
-import type { IHyphenPattern, RawHyphenPattern } from './tools';
 import { createCharIterator, createStringSlicer, parsePattern, snackToPascal } from './tools';
 
 export class Hyphen implements IDisposable {
@@ -70,7 +70,12 @@ export class Hyphen implements IDisposable {
 
     async loadPattern(lang: Lang) {
         let pattern = await import(`./patterns/${lang}.ts`);
-        pattern = pattern[snackToPascal(lang)];
+
+        pattern = pattern?.[snackToPascal(lang)];
+
+        if (pattern == null) {
+            return;
+        }
 
         this._patterns.set(lang, parsePattern(pattern));
         this._loadExceptionsToCache(lang, pattern);

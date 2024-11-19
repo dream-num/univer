@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "0.5.0-alpha.0",
+    "version": "0.5.0-beta.1",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -51,21 +51,20 @@
     ],
     "scripts": {
         "lint:types": "tsc --noEmit",
-        "build": "tsx build.ts"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@vitejs/plugin-react": "4.3.3"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.10",
-        "vitest": "^2.1.4"
+        "vite": "^5.4.11",
+        "vitest": "^2.1.5"
     },
     "space": {
         ".": {

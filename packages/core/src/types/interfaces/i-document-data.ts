@@ -17,6 +17,7 @@
 import type { IAbsoluteTransform, ISize } from '../../shared/shape';
 import type { Nullable } from '../../shared/types';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type { IMention } from './i-mention';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
 // Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
@@ -359,6 +360,8 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 }
 
 export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
+
+export type IMentionCustomRange = ICustomRange<IMention>;
 
 export enum CustomRangeType {
     HYPERLINK,
@@ -844,7 +847,7 @@ export interface IDistFromText {
 }
 
 export interface ITableAnchor {
-    positionH: IObjectPositionH; // horzAnchor (Table Horizontal Anchor)
+    positionH: IObjectPositionH; // horizontal Anchor (Table Horizontal Anchor)
     positionV: IObjectPositionV;
 }
 
@@ -910,7 +913,7 @@ export interface ITable {
 // the value the h attribute.
 //  If the value of hRule is exact, then the table row's height should be exactly the
 // value of the h attribute.
-export enum TableCellHeightRule {
+export enum TableRowHeightRule {
     AUTO,
     AT_LEAST,
     EXACT,
@@ -922,7 +925,7 @@ export interface ITableColumn { // 合并拆分列，HTML 合并单元格
 
 export interface ITableRowSize {
     val: INumberUnit;
-    hRule: TableCellHeightRule;
+    hRule: TableRowHeightRule;
 }
 
 /**

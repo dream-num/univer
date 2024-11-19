@@ -561,7 +561,16 @@ export class Documents extends DocComponent {
         this._drawTableCellBorders(ctx, page, cell);
         const { sections, marginLeft, marginTop } = cell;
 
+        // eslint-disable-next-line no-param-reassign
         alignOffsetNoAngle = Vector2.create(alignOffsetNoAngle.x + marginLeft, alignOffsetNoAngle.y + marginTop);
+
+        ctx.save();
+        const { x, y } = this._drawLiquid;
+        const { pageWidth, pageHeight } = cell;
+        ctx.beginPath();
+        ctx.rectByPrecision(x + page.marginLeft, y + page.marginTop, pageWidth, pageHeight);
+        ctx.closePath();
+        ctx.clip();
 
         for (const section of sections) {
             const { columns } = section;
@@ -703,6 +712,8 @@ export class Documents extends DocComponent {
 
             this._drawLiquid.translateRestore();
         }
+
+        ctx.restore();
     }
 
     private _drawTableCellBorders(

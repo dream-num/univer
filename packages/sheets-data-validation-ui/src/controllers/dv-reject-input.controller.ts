@@ -78,7 +78,7 @@ export class DataValidationRejectInputController extends Disposable {
                         },
                         id: 'reject-input-dialog',
                         children: {
-                            title: validator.getRuleFinalError(rule),
+                            title: validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }),
                         },
                         footer: {
                             title: React.createElement(

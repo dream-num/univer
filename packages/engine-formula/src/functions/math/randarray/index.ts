@@ -15,16 +15,18 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { BaseFunction } from '../../base-function';
 
 export class Randarray extends BaseFunction {
     override minParams = 0;
 
     override maxParams = 5;
+
+    override needsSheetRowColumnCount = true;
 
     override calculate(rows?: BaseValueObject, columns?: BaseValueObject, min?: BaseValueObject, max?: BaseValueObject, wholeNumber?: BaseValueObject) {
         if (rows?.isError()) {
@@ -261,9 +263,20 @@ export class Randarray extends BaseFunction {
             };
         }
 
-        if (rowsValue < 0 || columnsValue < 0) {
+        const maxRows = this._rowCount - this.row;
+        const maxColumns = this._columnCount - this.column;
+
+        // max count of cells is 10^7
+        if (rowsValue < 0 || columnsValue < 0 || rowsValue * columnsValue > 10 ** 7) {
             return {
                 errorObject: ErrorValueObject.create(ErrorType.VALUE),
+            };
+        }
+
+        // Cannot exceed the current number of available rows and columns in the table
+        if (rowsValue > maxRows || columnsValue > maxColumns) {
+            return {
+                errorObject: ErrorValueObject.create(ErrorType.REF),
             };
         }
 

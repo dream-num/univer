@@ -31,7 +31,6 @@ import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -905,6 +904,22 @@ export function setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentS
     }
 }
 
+export enum FloatObjectType {
+    IMAGE = 'IMAGE',
+    TABLE = 'TABLE',
+}
+
+export interface IFloatObject {
+    id: string;
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    angle: number;
+    type: FloatObjectType;
+    positionV: IObjectPositionV;
+}
+
 // The context state of the layout process, which is used to store some cache and intermediate states in the typesetting process,
 // as well as identifying information such as the pointer of the layout.
 export interface ILayoutContext {
@@ -929,10 +944,10 @@ export interface ILayoutContext {
     // Used to store the resource of document and resource cache.
     skeletonResourceReference: ISkeletonResourceReference;
     // Positioned float objects cache.
-    drawingsCache: Map<string, {
+    floatObjectsCache: Map<string, {
         count: number;
         page: IDocumentSkeletonPage;
-        drawing: IDocumentSkeletonDrawing;
+        floatObject: IFloatObject;
     }>;
     paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;

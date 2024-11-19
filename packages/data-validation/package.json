@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "0.5.0-alpha.0",
+    "version": "0.5.0-beta.1",
     "private": false,
     "description": "Data validation library for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -55,24 +55,23 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "build": "tsx build.ts"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.38",
-        "@univerjs/sheets": "workspace:*",
-        "@vitejs/plugin-react": "4.3.3"
+        "@univerjs/protocol": "0.1.39-alpha.45",
+        "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.10",
-        "vitest": "^2.1.4"
+        "vite": "^5.4.11",
+        "vitest": "^2.1.5"
     },
     "space": {
         ".": {

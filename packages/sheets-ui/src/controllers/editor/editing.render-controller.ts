@@ -19,7 +19,7 @@
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
+import type { WorkbookSelectionModel } from '@univerjs/sheets';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
@@ -57,7 +57,7 @@ import {
 } from '@univerjs/engine-render';
 
 import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -88,7 +88,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
-    private _workbookSelections: WorkbookSelections;
+    private _workbookSelections: WorkbookSelectionModel;
 
     private _d: Nullable<IDisposable>;
     _cursorTimeout: NodeJS.Timeout;
@@ -293,7 +293,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
         */
     private _commandExecutedListener(d: DisposableCollection) {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
+        const updateCommandList = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (updateCommandList.includes(command.id)) {

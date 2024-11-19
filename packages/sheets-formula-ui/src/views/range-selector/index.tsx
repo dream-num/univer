@@ -318,14 +318,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);
         setTimeout(() => {
+            isFocusSet(true);
             editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
+            focus();
         }, 30);
     };
 
     const handleClose = () => {
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);
-        setTimeout(focus, 30);
+        setTimeout(() => {
+            isFocusSet(true);
+            focus();
+        }, 30);
     };
 
     const handleOpenModal = () => {
@@ -335,6 +340,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             setTimeout(() => {
                 rangeDialogVisibleSet(true);
                 onRangeSelectorDialogVisibleChange(true);
+                isFocusSet(false);
             }, 30);
         }
     };

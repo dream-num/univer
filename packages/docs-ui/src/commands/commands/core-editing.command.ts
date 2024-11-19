@@ -152,7 +152,15 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         }
 
         const { startOffset } = range;
-        const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
+        let start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
+        let end = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset + len - 1;
+
+        const customRange = body.customRanges?.find((customRange) => customRange.startIndex <= start && customRange.endIndex >= end);
+
+        if (customRange?.wholeEntity) {
+            start = customRange.startIndex;
+            end = Math.max(end, customRange.endIndex);
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -179,7 +187,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         textX.push({
             t: TextXActionType.DELETE,
-            len,
+            len: end - start + 1,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

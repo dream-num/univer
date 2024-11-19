@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody } from '@univerjs/core';
-import type { IDocMention } from '../../types/interfaces/i-mention';
+import type { ICommand, IDocMention, IDocumentBody } from '@univerjs/core';
 import { CommandType, CustomRangeType, ICommandService } from '@univerjs/core';
 import { deleteCustomRangeFactory, DocSelectionManagerService, replaceSelectionFactory } from '@univerjs/docs';
 
@@ -40,7 +39,9 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         if (!activeRange) {
             return false;
         }
-        const dataStream = ` @${mention.label} `;
+
+        const { metadata, ...mentionConfig } = mention;
+        const dataStream = `@${mention.label}`;
         const body: IDocumentBody = {
             dataStream,
             customRanges: [{
@@ -50,7 +51,8 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
                 rangeType: CustomRangeType.MENTION,
                 wholeEntity: true,
                 properties: {
-                    mention,
+                    ...mentionConfig,
+                    ...metadata,
                 },
             }],
         };
@@ -69,7 +71,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         );
 
         if (doMutation) {
-            return commandService.executeCommand(doMutation.id, doMutation.params);
+            return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
         }
 
         return false;

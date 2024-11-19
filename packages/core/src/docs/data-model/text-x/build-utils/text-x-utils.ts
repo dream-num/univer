@@ -79,7 +79,7 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
 }
 
 export interface IAddCustomRangeTextXParam {
-    range: ITextRange;
+    ranges: ITextRange[];
     segmentId?: string;
     rangeId: string;
     rangeType: CustomRangeType;
@@ -89,62 +89,72 @@ export interface IAddCustomRangeTextXParam {
 }
 
 export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
-    const { range, rangeId, rangeType, wholeEntity, properties, body } = param;
-    const actualRange = getSelectionForAddCustomRange(range, body);
-    if (!actualRange) {
-        return false;
-    }
-
-    if (!body) {
-        return false;
-    }
-
-    const { startOffset, endOffset } = actualRange;
-
-    const customRanges = body.customRanges ?? [];
+    const { ranges, rangeId, rangeType, wholeEntity, properties, body } = param;
     let cursor = 0;
     const textX: TextX & { selections?: ITextRange[] } = new TextX();
 
-    const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
-        const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
-        const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
-        const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
+    let changed = false;
+    ranges.forEach((range) => {
+        const actualRange = getSelectionForAddCustomRange(range, body);
+        if (!actualRange) {
+            return false;
+        }
 
-        const customRange = {
-            rangeId: index ? `${rangeId}-${index}` : rangeId,
-            rangeType,
-            startIndex: 0,
-            endIndex: rangeEndIndex - rangeStartIndex,
-            wholeEntity,
-            properties: {
-                ...properties,
-            },
+        if (!body) {
+            return false;
+        }
+
+        const { startOffset, endOffset } = actualRange;
+
+        const customRanges = body.customRanges ?? [];
+
+        const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
+            const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
+            const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
+            const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
+
+            const customRange = {
+                rangeId: index ? `${rangeId}-${index}` : rangeId,
+                rangeType,
+                startIndex: 0,
+                endIndex: rangeEndIndex - rangeStartIndex,
+                wholeEntity,
+                properties: {
+                    ...properties,
+                },
+            };
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: rangeStartIndex - cursor,
+            });
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: rangeEndIndex - rangeStartIndex + 1,
+                body: {
+                    dataStream: '',
+                    customRanges: [customRange],
+                },
+                coverType: UpdateDocsAttributeType.COVER,
+            });
+            cursor = rangeEndIndex + 1;
         };
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: rangeStartIndex - cursor,
-        });
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: rangeEndIndex - rangeStartIndex + 1,
-            body: {
-                dataStream: '',
-                customRanges: [customRange],
-            },
-            coverType: UpdateDocsAttributeType.COVER,
-        });
-        cursor = rangeEndIndex + 1;
-    };
-    const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
-    const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
-    newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
 
-    textX.selections = [{
-        startOffset: actualRange.endOffset,
-        endOffset: actualRange.endOffset,
-        collapsed: true,
-    }];
-    return textX;
+        const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
+        const customBlocks = (body.customBlocks ?? []).filter((block) => block.startIndex < endOffset && block.startIndex > startOffset);
+        const newRanges = excludePointsFromRange([startOffset, endOffset - 1], [...relativeParagraphs.map((p) => p.startIndex), ...customBlocks.map((b) => b.startIndex)]);
+        newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
+
+        changed = true;
+        textX.selections = [{
+            startOffset: actualRange.endOffset,
+            endOffset: actualRange.endOffset,
+            collapsed: true,
+        }];
+    });
+
+    return changed ? textX : false;
 }
 
 // If the selection contains line breaks,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRange, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
@@ -80,16 +80,16 @@ interface IAddCustomRangeFactoryParam {
     wholeEntity?: boolean;
     properties?: Record<string, any>;
     unitId: string;
-    selection?: ITextRangeParam;
+    selections?: ITextRangeParam[];
 }
 
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { rangeId, rangeType, wholeEntity, properties, unitId, selection: propSelection } = param;
+    const { rangeId, rangeType, wholeEntity, properties, unitId, selections: propSelection } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selection = propSelection ?? docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId })?.[0];
-    const segmentId = selection?.segmentId;
-    if (!selection) {
+    const selections = propSelection ?? docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId });
+    const segmentId = selections?.[0]?.segmentId;
+    if (!selections?.length) {
         return false;
     }
 
@@ -97,14 +97,13 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!documentDataModel) {
         return false;
     }
-    const body = documentDataModel.getSelfOrHeaderFooterModel(selection.segmentId).getBody();
+    const body = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
     if (!body) {
         return false;
     }
-    const { startOffset, endOffset } = BuildTextUtils.selection.normalizeSelection(selection);
 
     const textX = BuildTextUtils.customRange.add({
-        range: { startOffset, endOffset, collapsed: startOffset === endOffset },
+        ranges: selections as ITextRange[],
         rangeId,
         rangeType,
         segmentId,
@@ -123,6 +122,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
             unitId,
             actions: [],
             textRanges: textX.selections,
+            segmentId,
         },
         textX,
     };

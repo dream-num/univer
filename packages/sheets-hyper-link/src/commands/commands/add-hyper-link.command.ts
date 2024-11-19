@@ -85,7 +85,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         } else {
             textX = BuildTextUtils.customRange.add({
                 body,
-                range: { startOffset: 0, endOffset: body.dataStream.length - 2, collapsed: false },
+                ranges: [{ startOffset: 0, endOffset: body.dataStream.length - 2, collapsed: false }],
                 rangeId: id,
                 rangeType: CustomRangeType.HYPERLINK,
                 properties: {

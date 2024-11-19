@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
-import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecute } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -27,6 +27,7 @@ export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
 }
 
 export const ReorderRangeCommandId = 'sheet.command.reorder-range' as const;
+export const ReoderRangeAfterCommandId = 'sheet.command.reoder-range-after' as const;
 
 export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
     id: ReorderRangeCommandId,
@@ -64,12 +65,17 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             ...interceptorCommands.undos,
         ];
         const result = sequenceExecute(redos, commandService);
+
+        const reoderAfterIntercepted = sheetInterceptorService.onCommandExecute({ id: ReoderRangeAfterCommandId, params });
+
         if (result.result) {
+            sequenceExecute(reoderAfterIntercepted.redos, commandService);
+
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
+                undoMutations: [...undos, ...reoderAfterIntercepted.undos],
+                redoMutations: [...redos, ...reoderAfterIntercepted.redos],
             });
             return true;
         }

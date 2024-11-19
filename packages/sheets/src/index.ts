@@ -178,7 +178,7 @@ export { handleInsertRangeMutation } from './commands/utils/handle-range-mutatio
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { copyRangeStyles } from './commands/commands/utils/selection-utils';
 export { MoveRangeAfterCommandId } from './commands/commands/move-range.command';
-
+export { ReoderRangeAfterCommandId } from './commands/commands/reorder-range.command';
 // #region - all commands
 
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';

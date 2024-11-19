@@ -16,11 +16,11 @@
 
 import type { ICellData, IDisposable, IDocDrawingBase, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IReorderRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, Range, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { RefRangeService, ReorderRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 
 interface IImageCache {
     image: HTMLImageElement;
@@ -133,17 +133,36 @@ export class SheetCellCacheManagerService extends Disposable {
                     return;
                 }
 
-                const cellMatrux = new ObjectMatrix(cellValue);
+                const cellMatrix = new ObjectMatrix(cellValue);
                 const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                 const worksheet = workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
                     return;
                 }
-                cellMatrux.forValue((row, col) => {
+                cellMatrix.forValue((row, col) => {
                     const value = worksheet.getCellRaw(row, col);
-                    cellMatrux.setValue(row, col, value);
+                    cellMatrix.setValue(row, col, value);
                 });
-                this._handleMatrix(unitId, subUnitId, cellMatrux);
+                this._handleMatrix(unitId, subUnitId, cellMatrix);
+            }
+
+            if (commandInfo.id === ReorderRangeMutation.id) {
+                const params = commandInfo.params as IReorderRangeMutationParams;
+                const { unitId, subUnitId, range } = params;
+
+                const cellMatrix = new ObjectMatrix<Nullable<ICellData>>();
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
+                    return;
+                }
+
+                Range.foreach(range, (row, col) => {
+                    const value = worksheet.getCellRaw(row, col);
+                    cellMatrix.setValue(row, col, value);
+                });
+
+                this._handleMatrix(unitId, subUnitId, cellMatrix);
             }
         }));
     }

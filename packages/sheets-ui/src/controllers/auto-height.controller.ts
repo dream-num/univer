@@ -18,6 +18,7 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
     IMoveRangeCommandParams,
+    IReorderRangeMutationParams,
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -27,6 +28,7 @@ import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     MoveRangeAfterCommandId,
+    ReoderRangeAfterCommandId,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -104,6 +106,11 @@ export class AutoHeightController extends Disposable {
                 if (command.id === MoveRangeAfterCommandId) {
                     const params = command.params as IMoveRangeCommandParams;
                     return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
+                }
+
+                if (command.id === ReoderRangeAfterCommandId) {
+                    const params = command.params as IReorderRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.range]);
                 }
 
                 return {

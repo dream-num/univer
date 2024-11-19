@@ -99,6 +99,7 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
 
     getParent() {}
 
+    // TODO @lumixraku, it seems delete scene with key.
     remainScene(key: string) {
         const scenes = this.getScenes();
         if (scenes[key]) {

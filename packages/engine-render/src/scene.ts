@@ -24,7 +24,6 @@ import type { Canvas } from './canvas';
 import type { UniverRenderingContext } from './context';
 import type { Engine } from './engine';
 import type { SceneViewer } from './scene-viewer';
-import type { ThinEngine } from './thin-engine';
 import type { Viewport } from './viewport';
 import { Disposable, EventSubject, sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
@@ -100,7 +99,7 @@ export class Scene extends Disposable {
 
     constructor(
         sceneKey: string,
-        private _parent: ThinEngine<Scene> | SceneViewer,
+        private _parent: Engine | SceneViewer,
         state?: ISceneTransformState
     ) {
         super();
@@ -110,7 +109,7 @@ export class Scene extends Disposable {
         }
 
         if (this._parent.classType === RENDER_CLASS_TYPE.ENGINE) {
-            const parent = this._parent as ThinEngine<Scene>;
+            const parent = this._parent as Engine;
             parent.addScene(this);
             if (!parent.hasActiveScene()) {
                 parent.setActiveScene(sceneKey);
@@ -418,7 +417,7 @@ export class Scene extends Disposable {
         });
     }
 
-    getParent(): ThinEngine<Scene> | SceneViewer {
+    getParent(): Engine | SceneViewer {
         return this._parent;
     }
 

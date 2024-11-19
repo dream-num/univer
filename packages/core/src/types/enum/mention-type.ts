@@ -16,4 +16,8 @@
 
 export enum MentionType {
     PERSON,
+    FILE,
+    DATE,
+    LOCATION,
+    EVENT,
 }

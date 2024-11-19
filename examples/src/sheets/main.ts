@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -39,7 +39,7 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { IThreadCommentMentionDataService, type IThreadCommentMentionDataSource, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
@@ -69,28 +69,6 @@ export const mockUser = {
     canBindAnonymous: false,
 };
 
-class CustomMentionDataService implements IThreadCommentMentionDataService {
-    dataSource: Nullable<IThreadCommentMentionDataSource>;
-    trigger: string = '@';
-
-    async getMentions() {
-        return [
-            {
-                id: mockUser.userID,
-                label: mockUser.name,
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-            {
-                id: '2',
-                label: 'User2',
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-        ];
-    }
-}
-
 // univer
 const univer = new Univer({
     theme: defaultTheme,
@@ -114,6 +92,7 @@ univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
 univer.registerPlugin(UniverDocsUIPlugin);
+univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsUIPlugin);
@@ -128,9 +107,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsSortPlugin);
 univer.registerPlugin(UniverSheetsHyperLinkPlugin);
-univer.registerPlugin(UniverThreadCommentUIPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
+univer.registerPlugin(UniverThreadCommentUIPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 

@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import type { MentionType } from '../enums/mention-type';
+import type { MentionType } from '../enum/mention-type';
 
 export interface IDocMention extends IMention {
     id: string;
 }
 
 export interface IMention {
-    // mention payload
     objectType: MentionType;
     objectId: string;
     label: string;
-    extra?: Record<string, any>;
+    metadata?: Record<string, string | number | boolean | undefined>;
 }

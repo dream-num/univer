@@ -57,9 +57,7 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
     }
 }
 
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
-    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
-});
+univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 ```
 
 ### API

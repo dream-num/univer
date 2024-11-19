@@ -72,6 +72,8 @@ export { getCustomDecorationSlice, getCustomRangeSlice, normalizeBody } from './
 export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
+export { MentionIOLocalService } from './services/mention-io/mention-io-local.service';
+export { type IListMentionParam, type IListMentionResponse, IMentionIOService, type ITypeMentionList } from './services/mention-io/type';
 export {
     type CommandListener,
     CommandService,

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { type IDisposable, ILogService } from '@univerjs/core';
+import type { IHoverRichTextInfo, IHoverRichTextPosition } from '../services/hover-manager.service';
+import { type IDisposable, ILogService, toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
+import { HoverManagerService } from '@univerjs/sheets-ui';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService } from '@univerjs/ui';
+import { filter } from 'rxjs';
 
 interface IFWorkbookSheetsUIMixin {
     /**
@@ -38,6 +41,22 @@ interface IFWorkbookSheetsUIMixin {
      * @returns the disposable object
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
+
+    /**
+     * Subscribe to cell click events
+     *
+     * @param callback - The callback function to be called when a cell is clicked
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellClick(callback: (cell: IHoverRichTextInfo) => void): IDisposable;
+
+    /**
+     * Subscribe cell hover events
+     *
+     * @param callback - The callback function to be called when a cell is hovered
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
 }
 
 class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -66,6 +85,24 @@ class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMix
         const logService = this._injector.get(ILogService);
 
         logService.warn('[FWorkbook]', `${name} is deprecated. Please use the function of the same name on "FUniver".`);
+    }
+
+    override onCellClick(callback: (cell: IHoverRichTextInfo) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentClickedCell$
+                .pipe(filter((cell) => !!cell))
+                .subscribe(callback)
+        );
+    }
+
+    override onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentRichText$
+                .pipe(filter((cell) => !!cell))
+                .subscribe(callback)
+        );
     }
 }
 

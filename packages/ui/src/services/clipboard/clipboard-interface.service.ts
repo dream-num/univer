@@ -21,6 +21,7 @@ import { supportClipboardAPI } from './clipboard-utils';
 
 export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
 export const HTML_CLIPBOARD_MIME_TYPE = 'text/html';
+export const FILES_CLIPBOARD_MIME_TYPE = 'file';
 
 /**
  * This interface provides an interface to access system's clipboard.
@@ -162,7 +163,7 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
             select(container);
             document.execCommand('copy');
         } finally {
-        // reset previous elements focus state
+            // reset previous elements focus state
             if (activeElement instanceof HTMLElement) {
                 activeElement.focus();
             }

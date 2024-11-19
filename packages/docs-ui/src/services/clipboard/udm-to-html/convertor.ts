@@ -22,7 +22,7 @@ import { DrawingTypeEnum } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 function covertImageToHtml(item: IDocImage) {
-    return `<img data-doc-transform-height="${item.docTransform.size.height}" data-doc-transform-width="${item.docTransform.size.width}" data-width="${item.transform?.width}" data-height="${item.transform?.height}" data-image-source-type="${item.imageSourceType}" src=""></img>`;
+    return `<img data-doc-transform-height="${item.docTransform.size.height}" data-doc-transform-width="${item.docTransform.size.width}" data-width="${item.transform?.width}" data-height="${item.transform?.height}" data-image-source-type="${item.imageSourceType}" src="${item.source}"></img>`;
 }
 
 export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
@@ -129,14 +129,14 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
     const drawings = doc.drawings || {};
     const { customRanges = [], customBlocks = [] } = body || {};
     const cloneCustomBlocks = [...customBlocks];
-    const customRangesInRange = customRanges.filter((range) => range.startIndex > startIndex && range.endIndex <= endIndex);
+    const customRangesInRange = customRanges.filter((range) => range.startIndex >= startIndex && range.endIndex <= endIndex);
     let cursorIndex = startIndex;
     let html = '';
     const handleCustomBlock = (startIndex: number, endIndex: number) => {
         let sliceHtml = '';
         let customBlockLength = 0;
         let handleCustomBlockCursorIndex = startIndex;
-        let blockItemIndex = cloneCustomBlocks.findIndex((block) => startIndex < block.startIndex && endIndex >= block.startIndex);
+        let blockItemIndex = cloneCustomBlocks.findIndex((block) => startIndex <= block.startIndex && endIndex >= block.startIndex);
 
         if (blockItemIndex === -1) {
             sliceHtml = getBodyInlineSlice(body, startIndex, endIndex);
@@ -146,7 +146,7 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
         while (blockItemIndex !== -1) {
             const blockItem = cloneCustomBlocks[blockItemIndex];
             cloneCustomBlocks.splice(blockItemIndex, 1);
-            sliceHtml = getBodyInlineSlice(body, handleCustomBlockCursorIndex, blockItem.startIndex);
+            sliceHtml += getBodyInlineSlice(body, handleCustomBlockCursorIndex, blockItem.startIndex);
             const drawingItem = drawings[blockItem.blockId];
             if (drawingItem) {
                 switch (drawingItem.drawingType) {
@@ -159,7 +159,7 @@ export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endInde
             }
 
             handleCustomBlockCursorIndex = blockItem.startIndex + 1;
-            blockItemIndex = cloneCustomBlocks.findIndex((block) => handleCustomBlockCursorIndex < block.startIndex && endIndex >= block.startIndex);
+            blockItemIndex = cloneCustomBlocks.findIndex((block) => handleCustomBlockCursorIndex <= block.startIndex && endIndex >= block.startIndex);
         }
         sliceHtml = sliceHtml + getBodyInlineSlice(body, handleCustomBlockCursorIndex, endIndex + 1);
         return { sliceHtml, customBlockLength };

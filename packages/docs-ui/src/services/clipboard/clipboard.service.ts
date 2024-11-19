@@ -15,10 +15,12 @@
  */
 
 import type { IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
+import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 
+import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
@@ -45,7 +47,7 @@ export interface IDocClipboardService {
     copy(sliceType?: SliceBodyType): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(items: ClipboardItem[]): Promise<boolean>;
-    legacyPaste(html?: string, text?: string): Promise<boolean>;
+    legacyPaste(options: { html?: string; text?: string; files: File[] }): Promise<boolean>;
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
@@ -129,9 +131,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         return this._paste(partDocData);
     }
 
-    async legacyPaste(html?: string, text?: string): Promise<boolean> {
+    async legacyPaste(options: {
+        html?: string; text?: string; files: File[];
+    }): Promise<boolean> {
+        let { html, text, files } = options;
         const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
+        if (!html && !text && files.length) {
+            // 粘贴图片
+            const imageHtml = await this._createImagePasteHtml(files);
+            html = imageHtml;
+        }
         const partDocData = this._genDocDataFromHtmlAndText(html, text, docUnitId);
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
         if (docUnitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
@@ -405,13 +415,17 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             let html = '';
             let text = '';
-
             for (const clipboardItem of items) {
                 for (const type of clipboardItem.types) {
-                    if (type === PLAIN_TEXT_CLIPBOARD_MIME_TYPE) {
-                        text = await clipboardItem.getType(type).then((blob) => blob && blob.text());
-                    } else if (type === HTML_CLIPBOARD_MIME_TYPE) {
-                        html = await clipboardItem.getType(type).then((blob) => blob && blob.text());
+                    switch (type) {
+                        case PLAIN_TEXT_CLIPBOARD_MIME_TYPE: {
+                            text = await clipboardItem.getType(type).then((blob) => blob && blob.text());
+                            break;
+                        }
+                        case HTML_CLIPBOARD_MIME_TYPE: {
+                            html = await clipboardItem.getType(type).then((blob) => blob && blob.text());
+                            break;
+                        }
                     }
                 }
             }
@@ -453,5 +467,72 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             copyContentCache.set(copyId, doc);
         }
         return doc;
+    }
+
+    private async _createImagePasteHtml(files: File[]) {
+        const doc: IDocumentData = {
+            id: '',
+            documentStyle: {},
+            body: {
+                dataStream: '',
+                customBlocks: [],
+            },
+            drawings: {},
+        };
+        const fileToBase64 = async (file: File): Promise<string> => {
+            const reader = new FileReader();
+            return new Promise((res) => {
+                reader.onloadend = function () {
+                    res(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+        const getImageSize = (base64: string): Promise<{ width: number; height: number }> => {
+            const img = new Image();
+            const maxWidth = 500;
+            return new Promise((resolve) => {
+                img.src = base64;
+                img.onload = () => {
+                    const width = Math.min(maxWidth, img.naturalWidth);
+                    const scale = img.naturalHeight / img.naturalWidth;
+                    resolve({ width, height: width * scale });
+                };
+            });
+        };
+        await Promise.all(files.map(async (file, index) => {
+            const base64 = await fileToBase64(file);
+            const { width = 100, height = 100 } = await getImageSize(base64);
+            const itemId = `paste_image_id_${index}`;
+            const body = doc.body!;
+            const drawings = doc.drawings!;
+            body.dataStream += '\b';
+            body.customBlocks?.push({ startIndex: index, blockId: itemId });
+            drawings[itemId] = {
+                drawingId: itemId,
+                unitId: '',
+                subUnitId: '',
+                imageSourceType: ImageSourceType.BASE64,
+                title: '',
+                source: base64,
+                description: '',
+                layoutType: PositionedObjectLayoutType.INLINE,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                transform: {
+                    width,
+                    height,
+                    angle: 0,
+
+                },
+                docTransform: {
+                    angle: 0,
+                    size: { width, height },
+                    positionH: { relativeFrom: ObjectRelativeFromH.CHARACTER, posOffset: 0 },
+                    positionV: { relativeFrom: ObjectRelativeFromV.LINE, posOffset: 0 },
+                },
+            } as IDocImage;
+        }));
+        const html = this._umdToHtml.convert([doc]);
+        return html;
     }
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ITextRange, Workbook, Worksheet } from '@univerjs/core';
-import { BuildTextUtils, CustomRangeType, DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, Workbook, Worksheet } from '@univerjs/core';
+import { DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 
@@ -55,35 +55,20 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getDocRanges();
-    if (!textRanges.length || textRanges.length > 1) {
+    const textRanges = textSelectionService.getTextRanges();
+    if (!textRanges?.length) {
         return true;
     }
 
-    const activeRange = textRanges[0];
     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    if (!doc || !activeRange || activeRange.collapsed) {
+    if (!doc || textRanges.every((range) => range.collapsed)) {
         return true;
     }
 
-    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
+    const body = doc.getSelfOrHeaderFooterModel(textRanges[0].segmentId).getBody();
     if (!body) {
         return true;
     }
-    const paragraphs = body?.paragraphs ?? [];
 
-    for (let i = 0, len = paragraphs.length; i < len; i++) {
-        const p = paragraphs[i];
-        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
-            return true;
-        }
-
-        if (p.startIndex > activeRange.endOffset!) {
-            break;
-        }
-    }
-
-    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(activeRange as ITextRange, body.customRanges ?? []);
-    // can't insert hyperlink in range contains other custom ranges
-    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
+    return true;
 };

@@ -120,7 +120,7 @@ export const SetRangeValuesCommand: ICommand = {
                     selectionOperation,
                 ],
                 redoMutations: [
-                    { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
+                    { id: SetRangeValuesMutation.id, params: Tools.deepClone(setRangeValuesMutationParams) },
                     ...redos,
                     Tools.deepClone(selectionOperation),
                 ],

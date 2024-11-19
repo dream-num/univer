@@ -14336,11 +14336,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 },
                             },
                             body: {
-                                dataStream: '\u001Fhttps://univer.ai/\u001E\r\n',
+                                dataStream: 'https://univer.ai/\r\n',
                                 customRanges: [
                                     {
                                         startIndex: 0,
-                                        endIndex: 19,
+                                        endIndex: 17,
                                         rangeId: 'QY6zbQrxGw8IaLGXDgVVj',
                                         rangeType: 0,
                                         properties: {

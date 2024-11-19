@@ -267,11 +267,18 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
-                    // Need to remove text selections when focus drawings.
-                    const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
-                    if (activeTextRange) {
-                        this._docSelectionManagerService.replaceTextRanges([]);
-                    }
+                    const { unit } = this._context;
+                    const customBlocks = unit.getSnapshot().body?.customBlocks ?? [];
+                    const ranges = params.map((item) => {
+                        const id = item.drawingId;
+                        const block = customBlocks.find((b) => b.blockId === id);
+                        if (block) {
+                            return block.startIndex;
+                        }
+                        return null;
+                    }).filter((e) => e !== null).map((offset) => ({ startOffset: offset, endOffset: offset + 1 }));
+
+                    this._docSelectionManagerService.replaceTextRanges(ranges);
 
                     const prevSegmentId = this._docSelectionRenderService.getSegment();
                     const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);

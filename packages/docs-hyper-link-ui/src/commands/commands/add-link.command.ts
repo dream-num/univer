@@ -21,7 +21,7 @@ import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
     unitId: string;
-    selection?: ITextRangeParam;
+    selections?: ITextRangeParam[];
 }
 
 export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
@@ -32,7 +32,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             return false;
         }
 
-        const { payload, unitId, selection } = params;
+        const { payload, unitId, selections } = params;
         const commandService = accessor.get(ICommandService);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(
@@ -44,9 +44,10 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
                     url: payload,
                 },
                 unitId,
-                selection,
+                selections,
             }
         );
+
         if (doMutation) {
             return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
         }

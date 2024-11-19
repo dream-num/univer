@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
@@ -66,7 +66,9 @@ export class DocHyperLinkPopupService extends Disposable {
             this._editPopup.dispose();
         }
         this._editingLink$.next(linkInfo);
-        let activeRange: Nullable<ITextRangeParam> = this._textSelectionManagerService.getActiveTextRange();
+        const textRanges = this._textSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId });
+        let activeRange = textRanges?.[textRanges.length - 1];
+
         if (linkInfo) {
             const { segmentId, segmentPage, startIndex, endIndex } = linkInfo;
             activeRange = {

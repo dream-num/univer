@@ -15,15 +15,27 @@
  */
 
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
-import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import type { IDragCellPosition } from '../../services/drag-manager.service';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { IHoverCellPosition } from '../../services/hover-manager.service';
 
-import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import { IRefSelectionsService, RefSelectionsService, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { FSheetHooks } from '@univerjs/sheets/facade';
+import { KeyCode } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import { FSheetHooks } from '../../everything';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { DragManagerService } from '../../services/drag-manager.service';
+import { EditorBridgeService, IEditorBridgeService } from '../../services/editor-bridge.service';
+import { HoverManagerService } from '../../services/hover-manager.service';
+
+import { createFacadeTestBed } from './create-test-bed';
+import '../f-sheet-hooks';
 
 class MockDataTransfer implements DataTransfer {
     effectAllowed: 'none' | 'copy' | 'link' | 'move' | 'all' | 'copyLink' | 'copyMove' | 'linkMove' | 'uninitialized';
@@ -95,6 +107,10 @@ describe('Test FSheetHooks', () => {
         const testBed = createFacadeTestBed(undefined, [
             [HoverManagerService, { useValue: mockHoverManagerService }],
             [DragManagerService, { useValue: mockDragManagerService }],
+            [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [IEditorService, { useClass: EditorService }],
+            [DocSelectionManagerService],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
         ]);
         get = testBed.get;
         injector = testBed.injector;
@@ -107,6 +123,9 @@ describe('Test FSheetHooks', () => {
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
+
+        // onCellEditBefore
+        commandService.registerCommand(SetCellEditVisibleOperation);
 
         getValueByPosition = (
             startRow: number,
@@ -182,5 +201,51 @@ describe('Test FSheetHooks', () => {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         dragEndCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+    });
+
+    it('Test onCellRender', () => {
+        sheetHooks.onCellRender([{
+            drawWith: (ctx, info, skeleton, spreadsheets) => {
+                const { row, col } = info;
+                // Update to any cell location you want
+                if (row === 1 && col === 1) {
+                    const { primaryWithCoord } = info;
+                    const { startX, startY } = primaryWithCoord;
+                    ctx.fillText('✅', startX, startY + 10);
+
+                    expect(info.unitId).toEqual(workbook.getUnitId());
+                    expect(info.subUnitId).toEqual(workbook.getActiveSheet().getSheetId());
+                }
+            },
+        }]);
+    });
+
+    it('Test onBeforeCellEdit', () => {
+        const commandParams: IEditorBridgeServiceVisibleParam = {
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: workbook.getUnitId(),
+        };
+
+        sheetHooks.onBeforeCellEdit((params) => {
+            expect(params).toEqual(commandParams);
+        });
+
+        commandService.executeCommand(SetCellEditVisibleOperation.id, commandParams);
+    });
+
+    it('Test onAfterCellEdit', () => {
+        const commandParams: IEditorBridgeServiceVisibleParam = {
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            unitId: workbook.getUnitId(),
+            keycode: KeyCode.ENTER,
+        };
+
+        sheetHooks.onAfterCellEdit((params) => {
+            expect(params).toEqual(commandParams);
+        });
+
+        commandService.executeCommand(SetCellEditVisibleOperation.id, commandParams);
     });
 });

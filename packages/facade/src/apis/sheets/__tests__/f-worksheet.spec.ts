@@ -544,4 +544,9 @@ describe('Test FWorksheet', () => {
         expect(activeSheet?.getFrozenRows()).toBe(21);
         expect(activeSheet?.getFrozenColumns()).toBe(9);
     });
+
+    it('Worksheet refreshCanvas', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        activeSheet?.refreshCanvas();
+    });
 });

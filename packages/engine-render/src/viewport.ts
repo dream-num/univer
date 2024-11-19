@@ -20,8 +20,8 @@ import type { BaseObject } from './base-object';
 import type { IWheelEvent } from './basics/i-events';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
+import type { Scene } from './scene';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
-import type { ThinScene } from './thin-scene';
 import { EventSubject, Tools } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { fixLineWidthByScale, toPx } from './basics/tools';
@@ -165,7 +165,7 @@ export class Viewport {
 
     private _height: Nullable<number>;
 
-    private _scene!: ThinScene;
+    private _scene!: Scene;
 
     private _scrollBar?: Nullable<BaseScrollBar>;
 
@@ -241,7 +241,7 @@ export class Viewport {
     bufferEdgeX: number = 0;
     bufferEdgeY: number = 0;
 
-    constructor(viewportKey: string, scene: ThinScene, props?: IViewProps) {
+    constructor(viewportKey: string, scene: Scene, props?: IViewProps) {
         this._viewportKey = viewportKey;
         this._scene = scene;
         this._scene.addViewport(this);

@@ -16,12 +16,11 @@
 
 import type { IPaddingData, Nullable } from '@univerjs/core';
 
+import type { Scene } from './scene';
+import type { Viewport } from './viewport';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
-import type { Scene } from './scene';
-import type { ThinScene } from './thin-scene';
-import type { Viewport } from './viewport';
 
 export enum ScrollTimerType {
     NONE,
@@ -149,7 +148,7 @@ export class ScrollTimer {
         this._scrollY = viewportScrollVal?.y || 0;
 
         if (limited) {
-            const ancestorScene = this._findAncestorScene(viewport?.scene);
+            const ancestorScene = this._findAncestorScene(viewport?.scene) as unknown as Scene;
             const newViewport = this.getViewportByCoord(ancestorScene);
             if (newViewport) {
                 this._autoScroll(newViewport);
@@ -188,7 +187,7 @@ export class ScrollTimer {
         this._requestNewFrameNumber = requestNewFrame(this._runRenderLoop.bind(this));
     }
 
-    private _findAncestorScene(scene?: ThinScene) {
+    private _findAncestorScene(scene?: Scene) {
         let parent = scene?.getParent();
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {

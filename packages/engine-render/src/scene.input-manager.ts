@@ -20,7 +20,6 @@ import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneInputControlOptions, Scene } from './scene';
-import type { ThinScene } from './thin-scene';
 import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -41,7 +40,7 @@ export class InputManager extends Disposable {
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
 
-    private _scene!: ThinScene;
+    private _scene!: Scene;
 
     /** This is a defensive check to not allow control attachment prior to an already active one. If already attached, previous control is unattached before attaching the new one. */
     private _alreadyAttached = false;
@@ -71,15 +70,15 @@ export class InputManager extends Disposable {
     // private _onDragOver!: (evt: IDragEvent) => void;
     // private _onDrop!: (evt: IDragEvent) => void;
 
-    private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
+    private _currentMouseEnterPicked: Nullable<BaseObject | Scene>;
     private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     private _delayedTimeout: NodeJS.Timeout | number = -1;
     private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
     private _doubleClickOccurred = 0;
     private _tripleClickState = false;
-    private _currentObject: Nullable<BaseObject | ThinScene>;
+    private _currentObject: Nullable<BaseObject | Scene>;
 
-    constructor(scene: ThinScene) {
+    constructor(scene: Scene) {
         super();
         this._scene = scene;
     }
@@ -90,7 +89,7 @@ export class InputManager extends Disposable {
     override dispose(): void {
         super.dispose();
         this.detachControl();
-        this._scene = null as unknown as ThinScene;
+        this._scene = null as unknown as Scene;
         // this._currentMouseEnterPicked?.dispose();
         this._currentMouseEnterPicked = null;
         // this._currentObject?.dispose();
@@ -408,16 +407,15 @@ export class InputManager extends Disposable {
     }
 
     /**
-     * Just call this._scene?.pick, nothing special.
+     * Just call this._scene.pick, nothing special.
      * @param offsetX
      * @param offsetY
-     * @returns
      */
     private _getObjectAtPos(offsetX: number, offsetY: number) {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<ThinScene | BaseObject>) {
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
         let notObject = false;
         if (currentObject == null) {
             notObject = true;
@@ -425,7 +423,7 @@ export class InputManager extends Disposable {
 
         let isNotInSceneViewer = true;
         if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
-            const scene = (currentObject as BaseObject).getScene() as ThinScene;
+            const scene = (currentObject as BaseObject).getScene() as Scene;
             if (scene) {
                 const parent = scene.getParent();
                 isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;

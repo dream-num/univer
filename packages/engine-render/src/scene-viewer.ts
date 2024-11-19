@@ -16,17 +16,17 @@
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import { BaseObject } from './base-object';
-import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IObjectFullState } from './basics/interfaces';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
-import type { ThinScene } from './thin-scene';
+import type { Scene } from './scene';
+import { BaseObject } from './base-object';
+import { RENDER_CLASS_TYPE } from './basics/const';
 
 export class SceneViewer extends BaseObject {
-    private _subScenes = new Map<string, ThinScene>();
+    private _subScenes = new Map<string, Scene>();
 
-    private _activeSubScene: Nullable<ThinScene>;
+    private _activeSubScene: Nullable<Scene>;
 
     private _allowSelectedClipElement = false;
 
@@ -86,7 +86,7 @@ export class SceneViewer extends BaseObject {
         }
     }
 
-    addSubScene(scene: ThinScene) {
+    addSubScene(scene: Scene) {
         this._activeSubScene = scene;
         this._subScenes.set(scene.sceneKey, scene);
         this.makeDirty();

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, type Nullable } from '@univerjs/core';
-
 import type { Vector2 } from '../basics/vector2';
+
 import type { UniverRenderingContext } from '../context';
-import type { ThinScene } from '../thin-scene';
+import type { Scene } from '../scene';
 import type { Rect } from './rect';
+import { Disposable, type Nullable } from '@univerjs/core';
 
 export interface IScrollBarProps {
     thumbMargin?: number;
@@ -35,7 +35,7 @@ export interface IScrollBarProps {
     enableHorizontal?: boolean;
     enableVertical?: boolean;
 
-    mainScene?: ThinScene;
+    mainScene?: Scene;
 }
 
 export abstract class BaseScrollBar extends Disposable {

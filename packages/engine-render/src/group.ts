@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { CURSOR_TYPE } from './basics/const';
 
-import type { IViewportInfo, Vector2 } from './basics/vector2';
+import type { IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { sortRules } from '@univerjs/core';
 import { BaseObject } from './base-object';
@@ -275,7 +275,6 @@ export class Group extends BaseObject {
     //     return this;
     // }
 
-    // 判断自己scope下的所有对象是否有被选中的
     // override isHit(coord: Vector2) {
     //     return true;
     // }

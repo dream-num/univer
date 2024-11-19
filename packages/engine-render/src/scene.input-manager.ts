@@ -45,30 +45,8 @@ export class InputManager extends Disposable {
     /** This is a defensive check to not allow control attachment prior to an already active one. If already attached, previous control is unattached before attaching the new one. */
     private _alreadyAttached = false;
 
-    // private _alreadyAttachedTo: HTMLElement;
-
     // WorkBookObserver
     private _onInput$: Nullable<Subscription>;
-
-    // Pointers
-    // private _onPointerMove!: (evt: IMouseEvent) => void;
-    // private _onPointerDown!: (evt: IPointerEvent) => void;
-    // private _onPointerUp!: (evt: IPointerEvent) => void;
-    // private _onPointerOut!: (evt: IPointerEvent) => void;
-    // private _onPointerCancel!: (evt: IPointerEvent) => void;
-    // private _onPointerEnter!: (evt: IPointerEvent) => void;
-    // private _onPointerLeave!: (evt: IPointerEvent) => void;
-    // private _onMouseWheel!: (evt: IWheelEvent) => void;
-
-    // Keyboard
-    // private _onKeyDown!: (evt: IKeyboardEvent) => void;
-    // private _onKeyUp!: (evt: IKeyboardEvent) => void;
-
-    // Drag
-    // private _onDragEnter!: (evt: IDragEvent) => void;
-    // private _onDragLeave!: (evt: IDragEvent) => void;
-    // private _onDragOver!: (evt: IDragEvent) => void;
-    // private _onDrop!: (evt: IDragEvent) => void;
 
     private _currentMouseEnterPicked: Nullable<BaseObject | Scene>;
     private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
@@ -90,13 +68,12 @@ export class InputManager extends Disposable {
         super.dispose();
         this.detachControl();
         this._scene = null as unknown as Scene;
-        // this._currentMouseEnterPicked?.dispose();
         this._currentMouseEnterPicked = null;
-        // this._currentObject?.dispose();
         this._currentObject = null;
         this._startingPosition = null as unknown as Vector2;
         clearTimeout(this._delayedTimeout);
         clearTimeout(this._delayedTripeTimeout);
+
         this._onPointerMove = null as unknown as (evt: IMouseEvent) => void;
         this._onPointerDown = null as unknown as (evt: IPointerEvent) => void;
         this._onPointerUp = null as unknown as (evt: IPointerEvent) => void;
@@ -146,15 +123,7 @@ export class InputManager extends Disposable {
         }
 
         this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
-        const _isStop = this._currentObject?.triggerPointerMove(evt);
-
         this.mouseLeaveEnterHandler(evt);
-
-        // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-        //     if (this._scene.onPointerMoveObserver.hasObservers()) {
-        //         this._scene.onPointerMoveObserver.notifyObservers(evt);
-        //     }
-        // }
     }
 
     _onPointerLeave(evt: IPointerEvent) {
@@ -163,18 +132,8 @@ export class InputManager extends Disposable {
             evt.pointerId = 0;
         }
 
-        // this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-        // const isStop = this._currentObject?.triggerPointerMove(evt);
-
         this._currentObject = null;
-
         this.mouseLeaveEnterHandler(evt);
-
-        // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-        //     if (this._scene.onPointerMoveObserver.hasObservers()) {
-        //         this._scene.onPointerMoveObserver.notifyObservers(evt);
-        //     }
-        // }
     }
 
     _onPointerMove(evt: IMouseEvent) {
@@ -402,7 +361,6 @@ export class InputManager extends Disposable {
         }
         // engine.onInputChanged$.remove(this._onInput$);
         this._onInput$?.unsubscribe();
-
         this._alreadyAttached = false;
     }
 

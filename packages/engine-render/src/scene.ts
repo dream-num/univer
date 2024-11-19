@@ -116,7 +116,6 @@ export class Scene extends Disposable {
             }
             this._inputManager = new InputManager(this);
         } else if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            // 挂载到 sceneViewer 的 scene 需要响应前者的 transform
             const parent = this._parent as SceneViewer;
             parent.addSubScene(this);
         }
@@ -742,26 +741,18 @@ export class Scene extends Disposable {
     }
 
     /**
-     * prev getActiveViewportByRelativeCoord
+     * Get viewport by cursor position.
+     * Position is relative to canvas(event offsetXY).
      * @param coord
      * @returns
      */
-    findViewportByPosToViewport(coord: Vector2) {
+    findViewportByPosToScene(coord: Vector2) {
         return this._viewports.find((vp) => vp.isHit(coord));
     }
 
     getActiveViewportByCoord(coord: Vector2) {
-        // let parent: any = this.getParent();
-        // while (parent) {
-        //     if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-        //         const sv = parent as SceneViewer;
-        //         const transform = sv.transform.clone().invert();
-        //         coord = transform.applyPoint(coord);
-        //     }
-        //     parent = parent?.getParent && parent?.getParent();
-        // }
         coord = this.getCoordRelativeToViewport(coord);
-        return this.findViewportByPosToViewport(coord);
+        return this.findViewportByPosToScene(coord);
     }
 
     /**
@@ -781,7 +772,7 @@ export class Scene extends Disposable {
      */
     getScrollXYInfoByViewport(pos: Vector2, viewPort?: Viewport) {
         if (!viewPort) {
-            viewPort = this.findViewportByPosToViewport(pos) || this.getDefaultViewport();
+            viewPort = this.findViewportByPosToScene(pos) || this.getDefaultViewport();
         }
         return this.getViewportScrollXY(viewPort);
     }
@@ -1195,22 +1186,8 @@ export class Scene extends Disposable {
         this.makeDirty(true);
     }
 
-    private _getGroupCumLeftRight(object: BaseObject) {
-        let parent: any = object.parent;
-        let cumLeft = 0;
-        let cumTop = 0;
-        while (parent.classType === RENDER_CLASS_TYPE.GROUP) {
-            const { left, top } = parent;
-            cumLeft += left;
-            cumTop += top;
-
-            parent = parent.parent;
-        }
-        return { cumLeft, cumTop };
-    }
-
     /**
-     * If scene.event is disabled, scene.pick(curosrPos) return null.
+     * If scene.event is disabled, scene.pick(cursor Pos) return null.
      * Then only scene itself can response to pointer event, all objects under the scene would not.
      * see sceneInputManager@_onPointerMove
      */

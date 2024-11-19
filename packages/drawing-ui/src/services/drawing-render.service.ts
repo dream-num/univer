@@ -15,8 +15,8 @@
  */
 
 import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
+import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image } from '@univerjs/engine-render';
 import { insertGroupObject } from '../controllers/utils';
 
@@ -95,9 +95,9 @@ export class DrawingRenderService {
                 continue;
             }
 
-            const imageObject = scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
+            scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
             if (this._drawingManagerService.getDrawingEditable()) {
-                imageObject.attachTransformerTo(image);
+                scene.attachTransformerTo(image);
             }
 
             groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);

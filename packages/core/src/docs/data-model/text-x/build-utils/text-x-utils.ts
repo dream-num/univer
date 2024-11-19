@@ -114,7 +114,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
             const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
 
             const customRange = {
-                rangeId: index ? `${rangeId}-${index}` : rangeId,
+                rangeId: index ? `${rangeId}$${index}` : rangeId,
                 rangeType,
                 startIndex: 0,
                 endIndex: rangeEndIndex - rangeStartIndex,

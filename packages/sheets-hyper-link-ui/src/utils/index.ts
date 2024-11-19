@@ -70,5 +70,5 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    return true;
+    return false;
 };

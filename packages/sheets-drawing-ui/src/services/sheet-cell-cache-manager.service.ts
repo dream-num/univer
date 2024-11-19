@@ -93,6 +93,8 @@ class ImageCacheMap {
     }
 }
 
+// TODO: @weird94, this cache service should decouple with the render,
+// need to remove and implement in render process after some method are provided by @lumix
 export class SheetCellCacheManagerService extends Disposable {
     private _imageMaps = new Map<string, Map<string, ImageCacheMap>>();
     private _initedMap = new Map<string, Map<string, boolean>>();

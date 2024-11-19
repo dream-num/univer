@@ -208,6 +208,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._initialProps(config);
     }
 
+    updateZeroPoint(left: number, top: number) {
+        this.zeroLeft = left;
+        this.zeroTop = top;
+    }
+
     changeNotification() {
         this._changing$.next({
             objects: this._selectedObjectMap,

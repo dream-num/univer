@@ -146,7 +146,8 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
                 const cell = worksheet.getCellStyleOnly(targetRow, targetCol);
                 const style = workbook!.getStyles().getStyleByCell(cell);
-                const tr = style?.tr;
+                const tr = style?.tr?.a;
+
                 if (!tr && !currentCell.customRange) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;

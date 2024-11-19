@@ -172,11 +172,13 @@ export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl
     }
 
     const textX = BuildTextUtils.customRange.add({
-        range: {
-            startOffset: 0,
-            endOffset: body.dataStream.length - 1,
-            collapsed: false,
-        },
+        ranges: [
+            {
+                startOffset: 0,
+                endOffset: body.dataStream.length - 1,
+                collapsed: false,
+            },
+        ],
         rangeId: linkId,
         rangeType: CustomRangeType.HYPERLINK,
         body,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDisposable, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
+import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, ICustomTable, IDisposable, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';
@@ -22,6 +22,10 @@ import { DataStreamTreeNode } from './data-stream-tree-node';
 interface ITableCache {
     table: DataStreamTreeNode;
     isFinished: boolean;
+}
+
+interface ITableNodeCache {
+    table: DataStreamTreeNode;
 }
 
 export interface ICustomRangeInterceptor {
@@ -55,10 +59,11 @@ function batchParent(
     parent.setIndexRange(allChildren[0].startIndex - startOffset, allChildren[allChildren.length - 1].endIndex + 1);
 }
 
-export function parseDataStreamToTree(dataStream: string) {
+export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[]) {
     let content = '';
     const dataStreamLen = dataStream.length;
     const sectionList: DataStreamTreeNode[] = [];
+    const tableNodeCache: Map<string, ITableNodeCache> = new Map();
     // Only use to cache the outer paragraphs.
     const paragraphList: DataStreamTreeNode[] = [];
     // Use to cache paragraphs in cell.
@@ -80,6 +85,13 @@ export function parseDataStreamToTree(dataStream: string) {
             if (lastTableCache && lastTableCache.isFinished) {
                 // Paragraph Node will only has one table node.
                 batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
+
+                if (tables) {
+                    const table = tables.find((table) => table.startIndex === lastTableCache.table.startIndex && table.endIndex === lastTableCache.table.endIndex);
+                    if (table) {
+                        tableNodeCache.set(table.tableId, { table: lastTableCache.table });
+                    }
+                }
 
                 tableList.pop();
             }
@@ -154,11 +166,13 @@ export function parseDataStreamToTree(dataStream: string) {
         }
     }
 
-    return sectionList;
+    return { sectionList, tableNodeCache };
 }
 
 export class DocumentViewModel implements IDisposable {
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
+
+    private _tableNodeCache: Map<string, ITableNodeCache> = new Map();
 
     children: DataStreamTreeNode[] = [];
     private _sectionBreakCurrentIndex = 0;
@@ -183,7 +197,12 @@ export class DocumentViewModel implements IDisposable {
             return;
         }
 
-        this.children = parseDataStreamToTree(_documentDataModel.getBody()!.dataStream);
+        const body = _documentDataModel.getBody()!;
+
+        const { sectionList, tableNodeCache } = parseDataStreamToTree(body.dataStream, body.tables);
+
+        this.children = sectionList;
+        this._tableNodeCache = tableNodeCache;
 
         this._buildHeaderFooterViewModel();
     }
@@ -253,7 +272,13 @@ export class DocumentViewModel implements IDisposable {
     reset(documentDataModel: DocumentDataModel) {
         this._documentDataModel = documentDataModel;
 
-        this.children = parseDataStreamToTree(documentDataModel.getBody()!.dataStream);
+        const body = documentDataModel.getBody()!;
+
+        const { sectionList, tableNodeCache } = parseDataStreamToTree(body.dataStream, body.tables);
+
+        this.children = sectionList;
+
+        this._tableNodeCache = tableNodeCache;
 
         this._buildHeaderFooterViewModel();
     }
@@ -565,6 +590,10 @@ export class DocumentViewModel implements IDisposable {
         if (tableId != null && tableSource[tableId] != null) {
             return tableSource[tableId];
         }
+    }
+
+    findTableNodeById(id: string) {
+        return this._tableNodeCache.get(id)?.table;
     }
 
     getCustomRangeRaw(index: number) {

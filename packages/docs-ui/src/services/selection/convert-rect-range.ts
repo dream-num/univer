@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
+import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonPage, IDocumentSkeletonRow, INodePosition, IPoint } from '@univerjs/engine-render';
 import { type Nullable, Tools } from '@univerjs/core';
 import { DocumentSkeletonPageType, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
@@ -57,6 +57,7 @@ export function isValidRectRange(anchorNodePosition: INodePosition, focusNodePos
     return true;
 }
 
+// Determine whether the selection is in a table cell skeleton.
 export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePosition: INodePosition): boolean {
     const { path: anchorPath } = anchorNodePosition;
     const { path: focusPath } = focusNodePosition;
@@ -65,7 +66,39 @@ export function isInSameTableCell(anchorNodePosition: INodePosition, focusNodePo
         return false;
     }
 
+    if (anchorPath.length !== focusPath.length) {
+        return false;
+    }
+
     return Tools.diffValue(anchorPath, focusPath);
+}
+
+// Determine whether the selection is in the same table cell support across pages.
+export function isInSameTableCellData(skeleton: DocumentSkeleton, anchorNodePosition: INodePosition, focusNodePosition: INodePosition): boolean {
+    const { path: anchorPath } = anchorNodePosition;
+    const { path: focusPath } = focusNodePosition;
+
+    if (anchorPath.indexOf('cells') === -1 || focusPath.indexOf('cells') === -1) {
+        return false;
+    }
+
+    const anchorGlyph = skeleton.findGlyphByPosition(anchorNodePosition);
+    const focusGlyph = skeleton.findGlyphByPosition(focusNodePosition);
+
+    const anchorCellPage = anchorGlyph?.parent?.parent?.parent?.parent?.parent;
+    const focusCellPage = focusGlyph?.parent?.parent?.parent?.parent?.parent;
+
+    if (anchorCellPage == null || focusCellPage == null) {
+        return false;
+    }
+
+    const anchorRow = anchorCellPage.parent as IDocumentSkeletonRow;
+    const focusRow = focusCellPage.parent as IDocumentSkeletonRow;
+
+    const anchorColIndex = anchorRow.cells.indexOf(anchorCellPage);
+    const focusColIndex = focusRow.cells.indexOf(focusCellPage);
+
+    return anchorColIndex === focusColIndex && anchorRow.index === focusRow.index;
 }
 
 // Return true if a is before b.
@@ -103,31 +136,6 @@ export function compareNodePositionInTable(a: INodePosition, b: INodePosition): 
     return aCellCount <= bCellCount;
 }
 
-function firstGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {
-    const lines = cellPage.sections[0].columns[0].lines;
-    if (lines.length === 0) {
-        return;
-    }
-
-    return lines[0].divides[0].glyphGroup[0];
-}
-
-function lastGlyphInCellPage(cellPage: IDocumentSkeletonPage): Nullable<IDocumentSkeletonGlyph> {
-    const { sections } = cellPage;
-    const lastSection = sections[sections.length - 1];
-    const lastColumn = lastSection.columns[lastSection.columns.length - 1];
-    const lastLine = lastColumn.lines[lastColumn.lines.length - 1];
-
-    if (lastLine == null) {
-        return;
-    }
-
-    const lastDivide = lastLine.divides[lastLine.divides.length - 1];
-    const lastGlyphGroup = lastDivide.glyphGroup;
-
-    return lastGlyphGroup[lastGlyphGroup.length - 2];
-}
-
 function isEmptyCellPage(cell: IDocumentSkeletonPage) {
     return cell.sections[0].columns[0].lines.length === 0;
 }
@@ -155,19 +163,6 @@ function findNonEmptyCellPages(
     if (!isEmptyCellPage(startCell) && !isEmptyCellPage(endCell)) {
         return [startCell, endCell];
     }
-}
-
-function isAllSpanRows(positions: IRectRangeNodePositions[], cols: number) {
-    return positions.every((position) => {
-        const { anchor, focus } = position;
-        const { path: anchorPath } = anchor;
-        const { path: focusPath } = focus;
-
-        const anchorCol = anchorPath[anchorPath.length - 1] as number;
-        const focusCol = focusPath[focusPath.length - 1] as number;
-
-        return Math.abs(anchorCol - focusCol) === cols - 1;
-    });
 }
 
 interface IRectRangeNodePositions {
@@ -198,7 +193,7 @@ export class NodePositionConvertToRectRange {
         const { pages } = skeletonData;
 
         const { segmentPage: startSegmentPage, page: startPage, pageType } = startNodePosition;
-        const { segmentPage: endSegmentPage, page: endPage } = endNodePosition;
+        // const { segmentPage: endSegmentPage, page: endPage } = endNodePosition;
 
         const rectInfo = this._getTableRectRangeInfo(startNodePosition, endNodePosition);
 
@@ -225,9 +220,9 @@ export class NodePositionConvertToRectRange {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        const endIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? endPage : endSegmentPage;
+        // const endIndex = pageType === DocumentSkeletonPageType.BODY || pageType === DocumentSkeletonPageType.CELL ? endPage : endSegmentPage;
 
-        for (let p = skipPageIndex; p <= endIndex; p++) {
+        for (let p = skipPageIndex; p < pages.length; p++) {
             const page = pages[p];
             this._liquid.translatePagePadding(page);
             const { skeTables } = page;
@@ -254,8 +249,13 @@ export class NodePositionConvertToRectRange {
 
             for (const row of table.rows) {
                 if (row.index >= startRow && row.index <= endRow) {
-                    const rowStartCell = row.cells[startColumn];
-                    const rowEndCell = row.cells[endColumn];
+                    const cells = findNonEmptyCellPages(row.cells, startColumn, endColumn);
+
+                    if (cells == null) {
+                        continue;
+                    }
+
+                    const [rowStartCell, rowEndCell] = cells;
 
                     const position = {
                         startX: x + rowStartCell.left + tableLeft,
@@ -304,108 +304,54 @@ export class NodePositionConvertToRectRange {
             return;
         }
 
-        const { tableId, pages, startRowIndex, startColumnIndex, endRowIndex, endColumnIndex } = rectInfo;
+        const { tableId, startRowIndex, startColumnIndex, endRowIndex, endColumnIndex } = rectInfo;
 
-        const tables: IDocumentSkeletonTable[] = [];
+        const tableNode = this._docSkeleton.getViewModel().findTableNodeById(tableId);
 
-        // TODO: @JOCS handle table in header and footer.
-        for (const page of pages) {
-            const { skeTables } = page;
-
-            for (const [id, table] of skeTables.entries()) {
-                if (id.startsWith(tableId)) {
-                    tables.push(table);
-                }
-            }
-        }
-
-        if (tables.length === 0) {
+        if (tableNode == null) {
             return;
         }
 
-        for (const table of tables) {
-            this._collectPositionGroup(table, nodePositionGroup, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, anchorNodePosition, focusNodePosition, compare);
-        }
-
-        const totalColumns = tables[0].rows[0].cells.length;
+        const totalColumns = tableNode.children[0].children.length;
 
         // Span entires row.
-        if (isAllSpanRows(nodePositionGroup, totalColumns)) {
-            const firstPosition = nodePositionGroup[0];
-            const lastPosition = nodePositionGroup[nodePositionGroup.length - 1];
+        const spanEntireRow = startColumnIndex === 0 && endColumnIndex === totalColumns - 1;
 
-            nodePositionGroup.length = 0;
+        if (spanEntireRow) {
+            const startCellNode = tableNode.children[startRowIndex].children[startColumnIndex];
+            const startNodePosition = this._docSkeleton.findNodePositionByCharIndex(startCellNode.startIndex + 1);
+            const endCellNode = tableNode.children[endRowIndex].children[endColumnIndex];
+            const endNodePosition = this._docSkeleton.findNodePositionByCharIndex(endCellNode.endIndex - 2);
+
+            if (startNodePosition == null || endNodePosition == null) {
+                return;
+            }
 
             nodePositionGroup.push({
-                anchor: compare ? firstPosition.anchor : lastPosition.anchor,
-                focus: compare ? lastPosition.focus : firstPosition.focus,
+                anchor: compare ? startNodePosition : endNodePosition,
+                focus: compare ? endNodePosition : startNodePosition,
             });
+        } else {
+            for (let i = startRowIndex; i <= endRowIndex; i++) {
+                const rowNode = tableNode.children[i];
+                const startCellNode = rowNode.children[startColumnIndex];
+                const endCellNode = rowNode.children[endColumnIndex];
+
+                const startNodePosition = this._docSkeleton.findNodePositionByCharIndex(startCellNode.startIndex + 1);
+                const endNodePosition = this._docSkeleton.findNodePositionByCharIndex(endCellNode.endIndex - 2);
+
+                if (startNodePosition == null || endNodePosition == null) {
+                    return;
+                }
+
+                nodePositionGroup.push({
+                    anchor: compare ? startNodePosition : endNodePosition,
+                    focus: compare ? endNodePosition : startNodePosition,
+                });
+            }
         }
 
         return nodePositionGroup;
-    }
-
-    private _collectPositionGroup(
-        table: IDocumentSkeletonTable,
-        nodePositionGroup: IRectRangeNodePositions[],
-        startRowIndex: number,
-        endRowIndex: number,
-        startColumnIndex: number,
-        endColumnIndex: number,
-        anchorPosition: INodePosition,
-        focusPosition: INodePosition,
-        compare: boolean
-    ) {
-        // Not span entires row.
-        for (let i = 0; i < table.rows.length; i++) {
-            const row = table.rows[i];
-
-            if (row.index < startRowIndex) {
-                continue;
-            }
-
-            if (row.index > endRowIndex) {
-                break;
-            }
-
-            const cells = findNonEmptyCellPages(row.cells, startColumnIndex, endColumnIndex);
-
-            if (cells == null) {
-                continue;
-            }
-            const [startCell, endCell] = cells;
-
-            const startCellGlyph = firstGlyphInCellPage(startCell);
-            const endCellGlyph = lastGlyphInCellPage(endCell);
-
-            if (startCellGlyph == null || endCellGlyph == null) {
-                continue;
-            }
-
-            const startSegmentPage = compare ? anchorPosition.segmentPage : focusPosition.segmentPage;
-            const endSegmentPage = compare ? focusPosition.segmentPage : anchorPosition.segmentPage;
-
-            const startPosition = this._docSkeleton.findPositionByGlyph(startCellGlyph, startSegmentPage);
-            const endPosition = this._docSkeleton.findPositionByGlyph(endCellGlyph, endSegmentPage);
-
-            if (startPosition == null || endPosition == null) {
-                continue;
-            }
-
-            const anchor = compare ? startPosition : endPosition;
-            const focus = compare ? endPosition : startPosition;
-
-            nodePositionGroup.push({
-                anchor: {
-                    ...anchor,
-                    isBack: true, // true or false is the same.
-                },
-                focus: {
-                    ...focus,
-                    isBack: true,
-                },
-            });
-        }
     }
 
     private _getTableRectRangeInfo(anchorPosition: INodePosition, focusPosition: INodePosition) {

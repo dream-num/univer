@@ -34,7 +34,7 @@ import type { Documents, DocumentSkeleton, Engine, IDocumentSkeletonGlyph, INode
 import type { IDocRange } from './range-interface';
 import { type Nullable, RANGE_DIRECTION, Tools } from '@univerjs/core';
 import { getOffsetRectForDom } from '@univerjs/engine-render';
-import { isInSameTableCell, isValidRectRange } from './convert-rect-range';
+import { isInSameTableCell, isInSameTableCellData, isValidRectRange } from './convert-rect-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';
 import { TextRange } from './text-range';
 
@@ -140,13 +140,27 @@ export function getRangeListFromSelection(
 
     // TODO: @JOCS handle NEST table.
     // Handle selection in same table cell.
-    if (isInSameTableCell(anchorPosition, focusPosition)) {
-        textRanges.push(new TextRange(...rangeParams));
+    if (isInSameTableCellData(skeleton, anchorPosition, focusPosition)) {
+        // Table cell in one page.
+        if (isInSameTableCell(anchorPosition, focusPosition)) {
+            textRanges.push(new TextRange(...rangeParams));
 
-        return {
-            textRanges,
-            rectRanges,
-        };
+            return {
+                textRanges,
+                rectRanges,
+            };
+        } else {
+            const ranges = convertPositionsToRectRanges(
+                ...rangeParams
+            );
+
+            rectRanges.push(...ranges);
+
+            return {
+                textRanges,
+                rectRanges,
+            };
+        }
     }
 
     // Handle selection in different table cell but in the same table.

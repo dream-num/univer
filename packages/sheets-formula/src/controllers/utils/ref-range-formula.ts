@@ -148,7 +148,6 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
 export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const { sheetId: subUnitId, unitId } = formulaReferenceMoveParam;
     const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
 
     // If the formula data is the same, no operation is required
@@ -162,35 +161,36 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
     const redos: IMutationInfo[] = [];
     const undos: IMutationInfo[] = [];
 
-    if (Object.keys(redoFormulaData).length !== 0) {
-        const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: redoFormulaData,
-        };
-
-        const redoMutation = {
-            id: SetRangeValuesMutation.id,
-            params: redoSetRangeValuesMutationParams,
-        };
-
-        redos.push(redoMutation);
-    }
-
-    if (Object.keys(undoFormulaData).length !== 0) {
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: undoFormulaData,
-        };
-
-        const undoMutation = {
-            id: SetRangeValuesMutation.id,
-            params: undoSetRangeValuesMutationParams,
-        };
-
-        undos.push(undoMutation);
-    }
+    Object.keys(redoFormulaData).forEach((key) => {
+        const [unitId, subUnitId] = key.split('_');
+        if (Object.keys(redoFormulaData[key]).length !== 0) {
+            const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                subUnitId,
+                unitId,
+                cellValue: redoFormulaData[key],
+            };
+            const redoMutation = {
+                id: SetRangeValuesMutation.id,
+                params: redoSetRangeValuesMutationParams,
+            };
+            redos.push(redoMutation);
+        }
+    });
+    Object.keys(undoFormulaData).forEach((key) => {
+        const [unitId, subUnitId] = key.split('_');
+        if (Object.keys(undoFormulaData[key]).length !== 0) {
+            const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                subUnitId,
+                unitId,
+                cellValue: undoFormulaData[key],
+            };
+            const undoMutation = {
+                id: SetRangeValuesMutation.id,
+                params: undoSetRangeValuesMutationParams,
+            };
+            undos.push(undoMutation);
+        }
+    });
 
     return {
         undos,
@@ -208,28 +208,54 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
 export function refRangeFormula(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    let redoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
-    let undoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
+    const redoFormulaData: Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>> = {};
+    const undoFormulaData: Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>> = {};
 
-    const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
+    const { type, unitId: targetUnitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
-    if (checkFormulaDataNull(oldFormulaData, unitId, sheetId)) {
-        return {
-            redoFormulaData,
-            undoFormulaData,
-        };
-    }
+        // Iterate over all unitId in oldFormulaData
+    const allUnitIds = new Set([...Object.keys(oldFormulaData), ...Object.keys(newFormulaData)]);
 
-    const currentOldFormulaData = oldFormulaData[unitId]![sheetId];
-    const currentNewFormulaData = newFormulaData[unitId]![sheetId];
+    allUnitIds.forEach((unitId) => {
+        if (checkFormulaDataNull(oldFormulaData, unitId, sheetId)) {
+            return;
+        }
 
-    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData || {});
-    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData || {});
+        const allSheetIds = new Set([
+            ...Object.keys(oldFormulaData[unitId] || {}),
+            ...Object.keys(newFormulaData[unitId] || {}),
+        ]);
 
-    const rangeList = processFormulaChanges(oldFormulaMatrix, type, from, to, range);
+        allSheetIds.forEach((currentSheetId) => {
+            const currentOldFormulaData = oldFormulaData[unitId]?.[currentSheetId];
+            const currentNewFormulaData = newFormulaData[unitId]?.[currentSheetId];
 
-    redoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
-    undoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix);
+            const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData || {});
+            const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData || {});
+
+            let rangeList: IRangeChange[] = [];
+
+                // If the sheet where the range is changed is different from the current sheet, the position will not be changed.
+                // Simply get the data from newFormulaMatrix to update the range.
+            if (unitId !== targetUnitId || currentSheetId !== sheetId) {
+                rangeList = processFormulaRange(newFormulaMatrix);
+            } else {
+                rangeList = processFormulaChanges(oldFormulaMatrix, type, from, to, range);
+            }
+
+            const sheetRedoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
+            const sheetUndoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix);
+
+            redoFormulaData[`${unitId}_${currentSheetId}`] = {
+                ...redoFormulaData[`${unitId}_${currentSheetId}`],
+                ...sheetRedoFormulaData,
+            };
+            undoFormulaData[`${unitId}_${currentSheetId}`] = {
+                ...undoFormulaData[`${unitId}_${currentSheetId}`],
+                ...sheetUndoFormulaData,
+            };
+        });
+    });
 
     return {
         redoFormulaData,
@@ -263,6 +289,20 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
 
         // Note: The formula may only update the reference and not offset the position. The situation where the position is not shifted cannot be intercepted here.
         isReverse ? rangeList.unshift({ oldCell, newCell }) : rangeList.push({ oldCell, newCell });
+    });
+
+    return rangeList;
+}
+
+function processFormulaRange(newFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
+    const rangeList: IRangeChange[] = [];
+
+    newFormulaMatrix.forValue((row, column, cell) => {
+        if (cell == null || !isFormulaDataItem(cell)) return true;
+
+        const newCell = cellToRange(row, column);
+
+        rangeList.push({ oldCell: newCell, newCell });
     });
 
     return rangeList;

@@ -266,6 +266,9 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                     },
                 },
                 9: {
+                    0: {
+                        f: '=SUM(Sheet1!A1:A3)',
+                    },
                     9: {
                         f: '=SUM(A2:C4)',
                     },
@@ -985,6 +988,42 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(10, 0, 10, 0);
             expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A9)' }]]);
+        });
+
+        it('Remove row, changes to other sheet reference ranges', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+
+            const values1 = getValues(1, 0, 2, 0, 'sheet2');
+            expect(values1).toStrictEqual([[null], [{ f: '=SUM(DefinedName1)' }]]);
+            const values2 = getValues(8, 0, 9, 0, 'sheet2');
+            expect(values2).toStrictEqual([[null], [{ f: '=SUM(Sheet1!A1:A2)' }]]);
+            const values3 = getValues(8, 9, 9, 9, 'sheet2');
+            expect(values3).toStrictEqual([[null], [{ f: '=SUM(A2:C4)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo1 = getValues(1, 0, 2, 0, 'sheet2');
+            expect(valuesUndo1).toStrictEqual([[null], [{ f: '=SUM(DefinedName1)' }]]);
+            const valuesUndo2 = getValues(8, 0, 9, 0, 'sheet2');
+            expect(valuesUndo2).toStrictEqual([[null], [{ f: '=SUM(Sheet1!A1:A3)' }]]);
+            const valuesUndo3 = getValues(8, 9, 9, 9, 'sheet2');
+            expect(valuesUndo3).toStrictEqual([[null], [{ f: '=SUM(A2:C4)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo1 = getValues(1, 0, 2, 0, 'sheet2');
+            expect(valuesRedo1).toStrictEqual([[null], [{ f: '=SUM(DefinedName1)' }]]);
+            const valuesRedo2 = getValues(8, 0, 9, 0, 'sheet2');
+            expect(valuesRedo2).toStrictEqual([[null], [{ f: '=SUM(Sheet1!A1:A2)' }]]);
+            const valuesRedo3 = getValues(8, 9, 9, 9, 'sheet2');
+            expect(valuesRedo3).toStrictEqual([[null], [{ f: '=SUM(A2:C4)' }]]);
         });
 
         it('Remove column, update reference', async () => {

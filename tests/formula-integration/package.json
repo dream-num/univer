@@ -20,8 +20,7 @@
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
-        "examples-node": "workspace:*"
+        "@univerjs/sheets-numfmt": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

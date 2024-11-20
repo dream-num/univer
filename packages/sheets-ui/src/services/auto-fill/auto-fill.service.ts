@@ -347,7 +347,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                     const matrix = new ObjectMatrix(cellValue);
                     matrix.forValue((row, col, value) => {
                         const style = Object.keys(workbook.getStyles().get(value?.s) || {});
-                        if (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s))) {
+                        if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
                             autoHeightRanges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                         }
                     });

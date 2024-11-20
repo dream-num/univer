@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Viewport } from '../viewport';
+import type { ScrollTimer } from '../scroll-timer';
+import { Vector2 } from './vector2';
 
-export function getCurrentScrollXY(scrollTimer: any) {
+export function getCurrentScrollXY(scrollTimer: ScrollTimer) {
     const scene = scrollTimer.getScene();
-    const viewport = scrollTimer.getViewportByCoord(scene) as Viewport;
+    const viewport = scene.findViewportByPosToScene(Vector2.FromArray([scrollTimer.offsetX, scrollTimer.offsetY]));
     const scrollX = 0;
     const scrollY = 0;
     if (!viewport) {

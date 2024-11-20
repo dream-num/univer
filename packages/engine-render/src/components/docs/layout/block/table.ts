@@ -172,6 +172,9 @@ export function createTableSkeletons(
         const rowSkeletons: IDocumentSkeletonRow[] = [];
         const { hRule, val } = trHeight;
         const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
+        // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
+        const MAX_FONT_SIZE = 72;
+        const needOpenNewTable = remainHeight <= MAX_FONT_SIZE;
 
         const rowHeights = [0];
 
@@ -185,7 +188,7 @@ export function createTableSkeletons(
                 table,
                 row,
                 col,
-                canRowSplit ? remainHeight : Number.POSITIVE_INFINITY,
+                canRowSplit ? (needOpenNewTable ? pageContentHeight : remainHeight) : Number.POSITIVE_INFINITY,
                 canRowSplit ? pageContentHeight : Number.POSITIVE_INFINITY
             );
 
@@ -285,6 +288,13 @@ export function createTableSkeletons(
 
                 cellPageSkeleton.marginTop = marginTop;
             }
+        }
+
+        if (needOpenNewTable) {
+            curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+            skeTables.push(curTableSkeleton);
+            remainHeight = pageContentHeight;
+            rowTop = 0;
         }
 
         if (rowSkeletons.length > 1) {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
+import { describe, expect, it } from 'vitest';
 import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 
 function getTestBody() {
@@ -85,7 +85,7 @@ describe('test case in html and udm convert', () => {
             },
         ];
 
-        const html = convertor.convert(bodyList);
+        const html = convertor.convert(bodyList.map((b) => ({ body: b, id: '', documentStyle: {} })));
 
         expect(html).toBe('<p class="UniverNormal" >=SUM(<span style="color: #9e6de3;">F15:G18</span>)</p>');
     });
@@ -104,19 +104,19 @@ describe('test case in html and udm convert', () => {
 
         let expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
 
-        expect(getBodySliceHtml(documentBody, startIndex, endIndex)).toEqual(expectedHtml);
+        expect(getBodySliceHtml({ body: documentBody, id: '', documentStyle: {} }, startIndex, endIndex)).toEqual(expectedHtml);
 
         startIndex = 0;
         endIndex = 4;
 
         expectedHtml = '荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色';
-        expect(getBodySliceHtml(documentBody, startIndex, endIndex)).toEqual(expectedHtml);
+        expect(getBodySliceHtml({ body: documentBody, id: '', documentStyle: {} }, startIndex, endIndex)).toEqual(expectedHtml);
     });
 
     it('Should convert document body To Html(convertBodyToHtml)', () => {
         const documentBody = getTestBody();
         const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">作者：朱自清</p>';
 
-        expect(convertBodyToHtml(documentBody)).toEqual(expectedHtml);
+        expect(convertBodyToHtml({ body: documentBody, id: '', documentStyle: {} })).toEqual(expectedHtml);
     });
 });

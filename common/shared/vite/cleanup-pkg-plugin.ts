@@ -78,10 +78,6 @@ export function cleanupPkgPlugin(): Plugin {
         generateBundle() {
             const hasLocales = fs.existsSync(path.resolve(process.cwd(), 'src/locale'));
             const hasFacade = fs.existsSync(path.resolve(process.cwd(), 'src/facade/index.ts'));
-            pkg.exports = {
-                '.': './src/index.ts',
-                './*': './src/*',
-            };
             pkg.publishConfig = {
                 access: 'public',
                 main: './lib/es/index.js',

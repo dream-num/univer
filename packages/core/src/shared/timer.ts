@@ -17,3 +17,20 @@
 export function awaitTime(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function delayAnimationFrame(times: number = 1): Promise<void> {
+    return new Promise((resolve) => {
+        let count = 0;
+
+        const callback = () => {
+            count++;
+            if (count >= times) {
+                resolve();
+            } else {
+                requestAnimationFrame(callback);
+            }
+        };
+
+        requestAnimationFrame(callback);
+    });
+}

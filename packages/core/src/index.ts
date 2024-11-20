@@ -147,7 +147,7 @@ export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
 export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
-export { awaitTime } from './shared/timer';
+export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { Range } from './sheets/range';
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,

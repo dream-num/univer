@@ -150,7 +150,7 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
 
-    // If the formula data is the same, no operation is required
+        // If the formula data is the same, no operation is required
     if (Tools.diffValue(redoFormulaData, undoFormulaData)) {
         return {
             undos: [],
@@ -161,35 +161,38 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
     const redos: IMutationInfo[] = [];
     const undos: IMutationInfo[] = [];
 
-    Object.keys(redoFormulaData).forEach((key) => {
-        const [unitId, subUnitId] = key.split('_');
-        if (Object.keys(redoFormulaData[key]).length !== 0) {
-            const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-                subUnitId,
-                unitId,
-                cellValue: redoFormulaData[key],
-            };
-            const redoMutation = {
-                id: SetRangeValuesMutation.id,
-                params: redoSetRangeValuesMutationParams,
-            };
-            redos.push(redoMutation);
-        }
+    Object.keys(redoFormulaData).forEach((unitId) => {
+        Object.keys(redoFormulaData[unitId]).forEach((subUnitId) => {
+            if (Object.keys(redoFormulaData[unitId][subUnitId]).length !== 0) {
+                const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                    subUnitId,
+                    unitId,
+                    cellValue: redoFormulaData[unitId][subUnitId],
+                };
+                const redoMutation = {
+                    id: SetRangeValuesMutation.id,
+                    params: redoSetRangeValuesMutationParams,
+                };
+                redos.push(redoMutation);
+            }
+        });
     });
-    Object.keys(undoFormulaData).forEach((key) => {
-        const [unitId, subUnitId] = key.split('_');
-        if (Object.keys(undoFormulaData[key]).length !== 0) {
-            const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-                subUnitId,
-                unitId,
-                cellValue: undoFormulaData[key],
-            };
-            const undoMutation = {
-                id: SetRangeValuesMutation.id,
-                params: undoSetRangeValuesMutationParams,
-            };
-            undos.push(undoMutation);
-        }
+
+    Object.keys(undoFormulaData).forEach((unitId) => {
+        Object.keys(undoFormulaData[unitId]).forEach((subUnitId) => {
+            if (Object.keys(undoFormulaData[unitId][subUnitId]).length !== 0) {
+                const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                    subUnitId,
+                    unitId,
+                    cellValue: undoFormulaData[unitId][subUnitId],
+                };
+                const undoMutation = {
+                    id: SetRangeValuesMutation.id,
+                    params: undoSetRangeValuesMutationParams,
+                };
+                undos.push(undoMutation);
+            }
+        });
     });
 
     return {
@@ -208,12 +211,12 @@ export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
 export function refRangeFormula(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const redoFormulaData: Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>> = {};
-    const undoFormulaData: Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>> = {};
+    const redoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
+    const undoFormulaData: Record<string, Record<string, IObjectMatrixPrimitiveType<Nullable<ICellData>>>> = {};
 
     const { type, unitId: targetUnitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
-        // Iterate over all unitId in oldFormulaData
+    // Iterate over all unitId in oldFormulaData
     const allUnitIds = new Set([...Object.keys(oldFormulaData), ...Object.keys(newFormulaData)]);
 
     allUnitIds.forEach((unitId) => {
@@ -235,8 +238,8 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
 
             let rangeList: IRangeChange[] = [];
 
-                // If the sheet where the range is changed is different from the current sheet, the position will not be changed.
-                // Simply get the data from newFormulaMatrix to update the range.
+            // If the sheet where the range is changed is different from the current sheet, the position will not be changed.
+            // Simply get the data from newFormulaMatrix to update the range.
             if (unitId !== targetUnitId || currentSheetId !== sheetId) {
                 rangeList = processFormulaRange(newFormulaMatrix);
             } else {
@@ -246,12 +249,19 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
             const sheetRedoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
             const sheetUndoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix);
 
-            redoFormulaData[`${unitId}_${currentSheetId}`] = {
-                ...redoFormulaData[`${unitId}_${currentSheetId}`],
+            if (!redoFormulaData[unitId]) {
+                redoFormulaData[unitId] = {};
+            }
+            if (!undoFormulaData[unitId]) {
+                undoFormulaData[unitId] = {};
+            }
+
+            redoFormulaData[unitId][currentSheetId] = {
+                ...redoFormulaData[unitId][currentSheetId],
                 ...sheetRedoFormulaData,
             };
-            undoFormulaData[`${unitId}_${currentSheetId}`] = {
-                ...undoFormulaData[`${unitId}_${currentSheetId}`],
+            undoFormulaData[unitId][currentSheetId] = {
+                ...undoFormulaData[unitId][currentSheetId],
                 ...sheetUndoFormulaData,
             };
         });

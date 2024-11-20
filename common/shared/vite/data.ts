@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from '../common/type';
-
-export const PLUGIN_CONFIG_KEY = 'watermark.config';
-
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
-
-export interface IUniverWatermarkConfig {
-    userWatermarkSettings?: Partial<IUserInfoWatermarkConfig>;
-    textWatermarkSettings?: Partial<ITextWatermarkConfig>;
-    imageWatermarkSettings?: Partial<IImageWatermarkConfig>;
-}
-
-export const defaultPluginConfig: IUniverWatermarkConfig = {};
+export const peerDepsMap = {
+    react: {
+        global: 'React',
+        name: 'react',
+        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+    },
+    'react-dom': {
+        global: 'ReactDOM',
+        name: 'react-dom',
+        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+    },
+    rxjs: {
+        global: 'rxjs',
+        name: 'rxjs',
+        version: '>=7.0.0',
+    },
+    'rxjs/operators': {
+        global: 'rxjs.operators',
+        name: 'rxjs',
+        version: 'rxjs',
+    },
+    vue: {
+        global: 'Vue',
+        name: 'vue',
+        version: '>=3.0.0',
+        optional: true,
+    },
+};

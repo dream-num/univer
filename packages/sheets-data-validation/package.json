@@ -72,7 +72,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "^0.2.5",
         "@univerjs/protocol": "0.1.39-alpha.45",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*"

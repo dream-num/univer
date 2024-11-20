@@ -56,6 +56,14 @@ export class ScrollTimer {
         return new ScrollTimer(scene, scrollTimerType, padding);
     }
 
+    get offsetX() {
+        return this._offsetX;
+    }
+
+    get offsetY() {
+        return this._offsetY;
+    }
+
     set scrollTimerType(type: ScrollTimerType) {
         this._scrollTimerType = type;
     }

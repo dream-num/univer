@@ -281,8 +281,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.2.5
-        version: 0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.7
+        version: 0.2.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
@@ -5068,12 +5068,6 @@ packages:
 
   '@univerjs/icons-svg@0.2.7':
     resolution: {integrity: sha512-1aWsxylsYEn6/Cen5gCjuzHP4K4M7NtzCqHt7GxVnrHcVCP4JTCUjsIHdaqCpGZa+bWvMIf/DvAHw8wgKCFqoA==}
-
-  '@univerjs/icons@0.2.5':
-    resolution: {integrity: sha512-OfkOQoC5JR85T8vnsl/M2MkI5eeC0zUzQPluKT9p3ramJpSDyw0g4TCyzKpNZcCaVTMe90AOefwW3hEOZySFDA==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
 
   '@univerjs/icons@0.2.7':
     resolution: {integrity: sha512-eedEN4qz9+Oq/XjF/CRZMTHPeSl4eHL8ZW45nSksaOenqYIHWtsxEBZpE5N3rOWfpfDFmhJk0kNbpfpcNOsR7A==}
@@ -12135,11 +12129,6 @@ snapshots:
       eslint-visitor-keys: 4.2.0
 
   '@univerjs/icons-svg@0.2.7': {}
-
-  '@univerjs/icons@0.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   '@univerjs/icons@0.2.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:

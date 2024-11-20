@@ -37,6 +37,7 @@ function filterPackageName(packageName: string): string {
 export function cleanupPkgPlugin(): Plugin {
     const __pkg = path.resolve(process.cwd(), 'package.json');
     const pkg = fs.readJSONSync(__pkg);
+    const isPro = pkg.name.startsWith('@univerjs-pro');
 
     const peerDeps = {};
     const deps = {};
@@ -60,7 +61,11 @@ export function cleanupPkgPlugin(): Plugin {
             } else if (source.startsWith('@univerjs')) {
                 const name = filterPackageName(source);
                 if (['@univerjs/icons', '@univerjs/protocol'].includes(name)) {
-                    deps[name] = localPkg.devDependencies[name];
+                    if (name === '@univerjs/protocol' && isPro) {
+                        deps[name] = 'workspace:*';
+                    } else {
+                        deps[name] = localPkg.devDependencies[name];
+                    }
                 } else if (name !== pkg.name) {
                     const name = filterPackageName(source);
                     deps[name] = 'workspace:*';
@@ -136,7 +141,11 @@ export function cleanupPkgPlugin(): Plugin {
             if (pkg?.devDependencies) {
                 for (const key of Object.keys(pkg.devDependencies)) {
                     if (['@univerjs/protocol', '@univerjs/icons-svg'].includes(key)) {
-                        pkg.devDependencies[key] = localPkg.devDependencies[key];
+                        if (key === '@univerjs/protocol' && isPro) {
+                            pkg.devDependencies[key] = 'workspace:*';
+                        } else {
+                            pkg.devDependencies[key] = localPkg.devDependencies[key];
+                        }
                     }
                 }
             }

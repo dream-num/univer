@@ -124,10 +124,11 @@ export class SheetClipboardController extends RxDisposable {
         super();
         this._init();
         this._initCommandListener();
+        this._pasteWithDoc();
+    }
 
-        const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-
-        if (docSelectionRenderService) {
+    private _pasteWithDoc() {
+        const sheetPasteShortKeyFn = (docSelectionRenderService: DocSelectionRenderService) => {
             docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
                 if (!whenSheetEditorFocused(this._contextService)) {
                     return;
@@ -140,6 +141,29 @@ export class SheetClipboardController extends RxDisposable {
                 const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
                 const textContent = clipboardEvent.clipboardData?.getData('text/plain');
                 this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
+            });
+        };
+
+        // docSelectionRenderService would init before clipboardService controller when creating a univer.
+        // But when creating a sheet unit again after the previous sheet unit has been disposed, clipboard controller would init before docSelectionRenderService.
+        // In this case, DocSelectionRenderService isn't ready when clipboardService controller init.
+        // So better listening to the created$ event of the renderManagerService to get the DocSelectionRenderService instance.
+        let docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+
+        if (docSelectionRenderService) {
+            // console.log('SheetClipboardController init  doc selection service', docSelectionRenderService);
+            sheetPasteShortKeyFn(docSelectionRenderService);
+        } else {
+            // console.log('SheetClipboardController init  doc selection service DOCS_NORMAL_EDITOR_UNIT_ID_KEY', DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            this._renderManagerService.created$.subscribe((renderer) => {
+                if (renderer.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    console.log('SheetClipboardController init  doc selection service $$$$', renderer);
+                    docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+                    console.log('SheetClipboardController init  doc selection service $$$$$', docSelectionRenderService);
+                    if (docSelectionRenderService) {
+                        sheetPasteShortKeyFn(docSelectionRenderService);
+                    }
+                }
             });
         }
     }

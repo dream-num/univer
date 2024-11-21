@@ -60,9 +60,6 @@ const NilProgress: ICalculationProgress = { done: 0, count: 0 };
 
 const lo = { onlyLocal: true };
 
-// Due to the communication delay between the main thread and the worker thread, the calculation time may exceed 1 second without the formula. Try using 2 seconds.
-const START_DEPENDENCY_TIME = 2000;
-
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
@@ -389,11 +386,11 @@ export class TriggerCalculationController extends Disposable {
                         startDependencyTimer = null;
                     }
 
-                    // If the total calculation time exceeds the specified time, a progress bar is displayed.
+                    // If the total calculation time exceeds 1s, a progress bar is displayed.
                     startDependencyTimer = setTimeout(() => {
                         startDependencyTimer = null;
                         this._startProgress();
-                    }, START_DEPENDENCY_TIME);
+                    }, 1000);
                 } else if (command.id === SetFormulaCalculationStopMutation.id) {
                     this.clearProgress();
                 }

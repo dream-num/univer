@@ -62,7 +62,7 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
                 rangeType: DOC_RANGE_TYPE.RECT,
             });
 
-            offset = endIndex + 1;
+            offset = endIndex;
         }
 
         if (offset !== body.dataStream.length - 2) {

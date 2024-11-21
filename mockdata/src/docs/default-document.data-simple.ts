@@ -64,7 +64,7 @@ const tableStream = createTableDataStream(exampleTables);
 const dataStream = `${title}${description}${tableStream}${summary}\n`;
 
 const startIndex = dataStream.indexOf(TABLE_START);
-const endIndex = dataStream.indexOf(TABLE_END);
+const endIndex = tableStream.length + startIndex;
 
 function createParagraphAndSectionBreaks(dataStream: string) {
     const paragraphs: IParagraph[] = [];

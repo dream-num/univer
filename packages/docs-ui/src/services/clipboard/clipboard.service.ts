@@ -49,7 +49,7 @@ export interface IDocClipboardHook {
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
     onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
-    onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType }>;
+    onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType } | null>;
 }
 
 export interface IDocClipboardService {
@@ -527,6 +527,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         await Promise.all(files.map(async (file, index) => {
             const image = await onBeforePasteImage(file);
+            if (!image) {
+                return Promise.resolve();
+            }
             const { width = 100, height = 100 } = await getImageSize(file);
             const itemId = `paste_image_id_${index}`;
             const body = doc.body!;

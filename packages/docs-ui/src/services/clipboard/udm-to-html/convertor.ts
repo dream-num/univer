@@ -18,11 +18,29 @@ import type { IDocumentBody, IDocumentData, IParagraph, ITextRun } from '@univer
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
 import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
-import { DrawingTypeEnum } from '@univerjs/drawing';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 function covertImageToHtml(item: IDocImage) {
-    return `<img data-doc-transform-height="${item.docTransform.size.height}" data-doc-transform-width="${item.docTransform.size.width}" data-width="${item.transform?.width}" data-height="${item.transform?.height}" data-image-source-type="${item.imageSourceType}" src="${item.source}"></img>`;
+    const transformObjectToString = (obj: Record<string, string | number | undefined>) => {
+        let result = '';
+        Object.keys(obj).forEach((key) => {
+            if (obj[key] !== undefined) {
+                result += ` ${key}=${obj[key]}`;
+            }
+        });
+        return result;
+    };
+    const obj = {
+        'data-doc-transform-height': item.docTransform.size.height,
+        'data-doc-transform-width': item.docTransform.size.width,
+        'data-width': item.transform?.width,
+        'data-height': item.transform?.height,
+        'data-image-source-type': item.imageSourceType,
+        'data-source': item.imageSourceType === ImageSourceType.UUID ? item.source : undefined,
+        src: item.source,
+    };
+    return `<img  ${transformObjectToString(obj)}></img>`;
 }
 
 export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
@@ -223,7 +241,7 @@ export function convertBodyToHtml(doc: IDocumentData): string {
     return result.html;
 }
 
-// eslint-disable-next-line max-lines-per-function, complexity
+// eslint-disable-next-line max-lines-per-function
 function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtmlResult) {
     switch (node.nodeType) {
         case DataStreamTreeNodeType.SECTION_BREAK: {

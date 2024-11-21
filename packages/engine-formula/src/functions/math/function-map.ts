@@ -71,6 +71,7 @@ import { Randarray } from './randarray';
 import { Randbetween } from './randbetween';
 import { Roman } from './roman';
 import { Round } from './round';
+import { Roundbank } from './roundbank';
 import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
 import { Sec } from './sec';
@@ -152,6 +153,7 @@ export const functionMath = [
     [Randbetween, FUNCTION_NAMES_MATH.RANDBETWEEN],
     [Roman, FUNCTION_NAMES_MATH.ROMAN],
     [Round, FUNCTION_NAMES_MATH.ROUND],
+    [Roundbank, FUNCTION_NAMES_MATH.ROUNDBANK],
     [Rounddown, FUNCTION_NAMES_MATH.ROUNDDOWN],
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
     [Sec, FUNCTION_NAMES_MATH.SEC],

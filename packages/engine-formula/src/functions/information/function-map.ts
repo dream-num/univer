@@ -19,6 +19,7 @@ import { ErrorType } from './error-type';
 import { FUNCTION_NAMES_INFORMATION } from './function-names';
 import { Isblank } from './isblank';
 import { Isdate } from './isdate';
+import { Isemail } from './isemail';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
 import { Iseven } from './iseven/iseven';
@@ -30,6 +31,7 @@ import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
+import { Isurl } from './isurl';
 import { N } from './n';
 import { Na } from './na';
 import { Sheet } from './sheet';
@@ -41,6 +43,7 @@ export const functionInformation = [
     [ErrorType, FUNCTION_NAMES_INFORMATION.ERROR_TYPE],
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Isdate, FUNCTION_NAMES_INFORMATION.ISDATE],
+    [Isemail, FUNCTION_NAMES_INFORMATION.ISEMAIL],
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
     [Iserror, FUNCTION_NAMES_INFORMATION.ISERROR],
     [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],
@@ -52,6 +55,7 @@ export const functionInformation = [
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
+    [Isurl, FUNCTION_NAMES_INFORMATION.ISURL],
     [N, FUNCTION_NAMES_INFORMATION.N],
     [Na, FUNCTION_NAMES_INFORMATION.NA],
     [Sheet, FUNCTION_NAMES_INFORMATION.SHEET],

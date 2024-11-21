@@ -82,6 +82,19 @@ export default {
             value: { name: '値', detail: '日付であるかを検証する値です。' },
         },
     },
+    ISEMAIL: {
+        description: '値が有効なメールアドレスであるかどうかを検証します',
+        abstract: '値が有効なメールアドレスであるかどうかを検証します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256503?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'メールアドレスであるかどうかを検証する値です。' },
+        },
+    },
     ISERR: {
         description: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
         abstract: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
@@ -237,6 +250,19 @@ export default {
         ],
         functionParameter: {
             value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
+        },
+    },
+    ISURL: {
+        description: '値が有効な URL であるかどうかを検証します。',
+        abstract: '値が有効な URL であるかどうかを検証します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=ja&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'URL であるかを検証する値を指定します。' },
         },
     },
     N: {

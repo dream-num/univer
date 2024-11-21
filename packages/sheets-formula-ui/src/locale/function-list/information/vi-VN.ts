@@ -68,6 +68,19 @@ export default {
             value: { name: 'Giá trị', detail: 'Giá trị cần xác minh có phải là một ngày hay không.' },
         },
     },
+    ISEMAIL: {
+        description: 'Tra xem một giá trị có phải là địa chỉ email hợp lệ hay không bằng.',
+        abstract: 'Tra xem một giá trị có phải là địa chỉ email hợp lệ hay không bằng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/3256503?hl=vi&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'Giá trị', detail: 'Giá trị được xác minh là một địa chỉ email.' },
+        },
+    },
     ISERR: {
         description: 'Trả về TRUE nếu giá trị là bất kỳ giá trị lỗi nào ngoại trừ #N/A',
         abstract: 'Trả về TRUE nếu giá trị là bất kỳ giá trị lỗi nào ngoại trừ #N/A',
@@ -209,6 +222,19 @@ export default {
         ],
         functionParameter: {
             value: { name: 'Giá trị', detail: 'Giá trị mà bạn muốn kiểm tra. Đối số giá trị có thể là trống (ô trống), lỗi, giá trị lô-gic, văn bản, số, giá trị tham chiếu hoặc tên tham chiếu tới bất kỳ giá trị nào trong những giá trị này.' },
+        },
+    },
+    ISURL: {
+        description: 'Kiểm tra liệu giá trị có phải là một URL hợp lệ.',
+        abstract: 'Kiểm tra liệu giá trị có phải là một URL hợp lệ.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/3256501?hl=vi&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'Giá trị', detail: 'Giá trị được xác minh là một URL.' },
         },
     },
     N: {

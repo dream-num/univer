@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-import enUS from './en-US';
-
-export default enUS;
+export default {
+    ENCODEURL: {
+        description: 'Trả về một chuỗi được mã hóa URL.',
+        abstract: 'Trả về một chuỗi được mã hóa URL.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/encodeurl-%E5%87%BD%E6%95%B0-07c7fb90-7c60-4bff-8687-fac50fe33d0e',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'văn bản', detail: 'Một chuỗi cần mã hóa URL.' },
+        },
+    },
+};

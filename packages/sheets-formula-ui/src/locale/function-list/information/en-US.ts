@@ -82,6 +82,19 @@ export default {
             value: { name: 'value', detail: 'The value to be verified as a date.' },
         },
     },
+    ISEMAIL: {
+        description: 'Checks if a value is a valid email address',
+        abstract: 'Checks if a value is a valid email address',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3256503?hl=en&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as an email address.' },
+        },
+    },
     ISERR: {
         description: 'Returns TRUE if the value is any error value except #N/A',
         abstract: 'Returns TRUE if the value is any error value except #N/A',
@@ -237,6 +250,19 @@ export default {
         ],
         functionParameter: {
             value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
+        },
+    },
+    ISURL: {
+        description: 'Checks whether a value is a valid URL.',
+        abstract: 'Checks whether a value is a valid URL.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3256501?hl=en&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as a URL.' },
         },
     },
     N: {

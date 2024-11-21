@@ -82,6 +82,19 @@ export default {
             value: { name: '值', detail: '要驗證是否為日期的值。' },
         },
     },
+    ISEMAIL: {
+        description: '檢查某個值是否為有效的電子郵件地址',
+        abstract: '檢查某個值是否為有效的電子郵件地址',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hant&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為電子郵件地址的值。' },
+        },
+    },
     ISERR: {
         description: '如果值為 #N/A 以外的任何錯誤值，則傳回 TRUE',
         abstract: '如果值為 #N/A 以外的任何錯誤值，則傳回 TRUE',
@@ -236,6 +249,19 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+        },
+    },
+    ISURL: {
+        description: '檢查特定值是否為有效的網址',
+        abstract: '檢查特定值是否為有效的網址',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hant&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為網址的值。' },
         },
     },
     N: {

@@ -54,8 +54,8 @@ export function getDrawingSizeByCell(
     }
     const cellInfo = skeleton.getCellByIndex(location.row, location.col);
 
-    const cellWidth = cellInfo.mergeInfo.endX - cellInfo.mergeInfo.startX - 4;
-    const cellHeight = cellInfo.mergeInfo.endY - cellInfo.mergeInfo.startY - 4;
+    const cellWidth = cellInfo.mergeInfo.endX - cellInfo.mergeInfo.startX - 2;
+    const cellHeight = cellInfo.mergeInfo.endY - cellInfo.mergeInfo.startY - 2;
     const imageRatio = originImageWidth / originImageHeight;
     const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
     const imageHeight = imageWidth / imageRatio;

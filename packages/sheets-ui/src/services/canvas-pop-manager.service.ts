@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
@@ -34,7 +34,21 @@ export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' 
     extraProps?: Record<string, any>;
 }
 
+interface IPopupMenuItem {
+    label: string;
+    index: number;
+    commandId: string;
+    commandParams: {
+        unitId: string;
+       [key: string]: any;
+    };
+    disable: boolean;
+}
+type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
+
 export class SheetCanvasPopManagerService extends Disposable {
+    // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
+    private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -43,6 +57,32 @@ export class SheetCanvasPopManagerService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+    }
+
+    /**
+     * Register a feature menu callback for a specific drawing type.such as image, chart, etc.
+     */
+    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback) {
+        this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
+    }
+
+    /**
+     * Get the feature menu by drawing type, the function should be called when a drawing element need trigger popup menu, so the unitId, subUnitId, drawingId should be provided.
+     * @param {string} unitId the unit id
+     * @param {string} subUnitId the sub unit id
+     * @param {string} drawingId the drawing id
+     * @param {DrawingTypeEnum} drawingType the feature type
+     * @returns the feature menu if it exists, otherwise return undefined
+     */
+    getFeatureMenu(unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum): Nullable<IPopupMenuItem[]> {
+        const callback = this._popupMenuFeatureMap.get(drawingType);
+        if (callback) {
+            return callback(unitId, subUnitId, drawingId, drawingType);
+        }
+    }
+    override dispose(): void {
+        super.dispose();
+        this._popupMenuFeatureMap.clear();
     }
 
     private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetSkeleton; currentRender: IRender }) {

@@ -49,6 +49,22 @@ export default {
             },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: '在已知数值和相应权重的情况下，计算出一组值的加权平均值',
+        abstract: '在已知数值和相应权重的情况下，计算出一组值的加权平均值',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9084098?hl=zh-Hans&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: '值', detail: '要计算平均数的值。' },
+            weights: { name: '权重', detail: '要应用的相应权重列表。' },
+            additionalValues: { name: '其他值', detail: '要计算平均数的其他值。' },
+            additionalWeights: { name: '其他权重', detail: '要应用的其他权重。' },
+        },
+    },
     AVERAGEA: {
         description: '返回其参数的平均值，包括数字、文本和逻辑值。',
         abstract: '返回其参数的平均值，包括数字、文本和逻辑值',
@@ -887,6 +903,20 @@ export default {
             probability: { name: '概率', detail: '对应于对数正态分布的概率。' },
             mean: { name: '平均值', detail: '分布的算术平均值。' },
             standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
+        },
+    },
+    MARGINOFERROR: {
+        description: '根据一系列值和置信水平计算误差范围',
+        abstract: '根据一系列值和置信水平计算误差范围',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/12487850?hl=zh-Hans&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: '范围', detail: '用于计算误差范围的值范围。' },
+            confidence: { name: '置信度', detail: '所需的置信度介于 0 与 1 之间。' },
         },
     },
     MAX: {

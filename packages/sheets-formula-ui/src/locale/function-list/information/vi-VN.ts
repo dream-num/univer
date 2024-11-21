@@ -42,6 +42,23 @@ export default {
             errorVal: { name: 'Giá trị lỗi', detail: 'Giá trị lỗi có số nhận dạng mà bạn muốn tìm.' },
         },
     },
+    ISBETWEEN: {
+        description: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
+        abstract: 'Kiểm tra xem một số đã cho có nằm giữa hai số khác',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/10538337?hl=vi&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: 'giá_trị_muốn_so_sánh', detail: 'Giá trị muốn kiểm tra khi nằm trong khoảng từ `giới_hạn_dưới` đến `giới_hạn_trên`.' },
+            lowerValue: { name: 'giới_hạn_dưới', detail: 'Cận dưới của miền giá trị mà `giá_trị_muốn_so_sánh` có thể thuộc miền đó.' },
+            upperValue: { name: 'giới_hạn_trên', detail: 'Cận trên của miền giá trị mà `giá_trị_muốn_so_sánh` có thể thuộc miền đó.' },
+            lowerValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_dưới', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE.' },
+            upperValueIsInclusive: { name: 'bao_gồm_cả_giới_hạn_trên', detail: 'Liệu miền giá trị có bao gồm `giới_hạn_trên` hay không. Theo mặc định, hàm sẽ trả về TRUE.' },
+        },
+    },
     ISBLANK: {
         description: 'Trả về TRUE nếu giá trị trống',
         abstract: 'Trả về TRUE nếu giá trị trống',

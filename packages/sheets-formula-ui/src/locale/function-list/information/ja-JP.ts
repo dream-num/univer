@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: '指定した値が他の 2 つの値の範囲内にあるかどうかを確認します',
+        abstract: '指定した値が他の 2 つの値の範囲内にあるかどうかを確認します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/10538337?hl=ja&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: '比較する値', detail: '\'最小値\' と \'最大値\' の範囲内にあるかどうかを確認する値です。' },
+            lowerValue: { name: '最小値', detail: '\'比較する値\' が含まれる可能性のある値の範囲の下限を指定します。' },
+            upperValue: { name: '最大値', detail: '\'比較する値\' が含まれる可能性のある値の範囲の上限を指定します。' },
+            lowerValueIsInclusive: { name: '最小値を含む', detail: '値の範囲に \'最小値\' を含めるかどうかを指定します（デフォルトは TRUE）。' },
+            upperValueIsInclusive: { name: '最大値を含む', detail: '値の範囲に \'最大値\' を含めるかどうかを指定します（デフォルトは TRUE）。' },
+        },
+    },
     ISBLANK: {
         description: '対象が空白セルを参照するときに TRUE を返します。',
         abstract: '対象が空白セルを参照するときに TRUE を返します。',

@@ -43,6 +43,22 @@ export default {
             number2: { name: 'số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
+        abstract: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/9084098?hl=vi&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: 'giá_trị', detail: 'Giá trị cần tính trung bình.' },
+            weights: { name: 'trọng_số', detail: 'Danh sách trọng số tương ứng để áp dụng.' },
+            additionalValues: { name: 'giá_trị_bổ_sung', detail: 'Các giá trị bổ sung cần tính trung bình.' },
+            additionalWeights: { name: 'trọng_số_bổ_sung', detail: 'Các trọng số bổ sung để áp dụng.' },
+        },
+    },
     AVERAGEA: {
         description: 'Trả về giá trị trung bình của các tham số, bao gồm số, văn bản và giá trị logic.',
         abstract: 'Trả về giá trị trung bình của các tham số, bao gồm số, văn bản và giá trị logic.',
@@ -819,6 +835,20 @@ export default {
             probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
             mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
             standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        abstract: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/12487850?hl=vi&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'dải_ô', detail: 'Dải giá trị dùng để tính biên độ sai số.' },
+            confidence: { name: 'mức_tin_cậy', detail: 'Mức tin cậy mong muốn trong khoảng (0, 1).' },
         },
     },
     MAX: {

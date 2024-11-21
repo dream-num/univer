@@ -14,4 +14,34 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
+        abstract: 'Ràng buộc giá trị mảng vào một kích thước chỉ định sẵn.',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/3267036?hl=vi&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: 'mảng', detail: 'Dải ô giới hạn.' },
+            numRows: { name: 'số hàng', detail: 'Số hàng mà kết quả cần có.' },
+            numCols: { name: 'số cột', detail: 'Số cột mà kết quả cần có' },
+        },
+    },
+    FLATTEN: {
+        description: 'Làm phẳng tất cả giá trị trong một hoặc nhiều dải ô thành một cột duy nhất.',
+        abstract: 'Làm phẳng tất cả giá trị trong một hoặc nhiều dải ô thành một cột duy nhất.',
+        links: [
+            {
+                title: 'Giảng dạy',
+                url: 'https://support.google.com/docs/answer/10307761?hl=vi&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: 'dải ô 1', detail: 'Dải ô đầu tiên cần làm phẳng.' },
+            range2: { name: 'dải ô 2', detail: 'Các dải ô bổ sung để làm phẳng.' },
+        },
+    },
+};

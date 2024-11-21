@@ -151,15 +151,11 @@ export class SheetClipboardController extends RxDisposable {
         let docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService) {
-            // console.log('SheetClipboardController init  doc selection service', docSelectionRenderService);
             sheetPasteShortKeyFn(docSelectionRenderService);
         } else {
-            // console.log('SheetClipboardController init  doc selection service DOCS_NORMAL_EDITOR_UNIT_ID_KEY', DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             this._renderManagerService.created$.subscribe((renderer) => {
                 if (renderer.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    console.log('SheetClipboardController init  doc selection service $$$$', renderer);
                     docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-                    console.log('SheetClipboardController init  doc selection service $$$$$', docSelectionRenderService);
                     if (docSelectionRenderService) {
                         sheetPasteShortKeyFn(docSelectionRenderService);
                     }

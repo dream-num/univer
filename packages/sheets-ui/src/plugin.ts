@@ -139,7 +139,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoHeightController],
             [AutoWidthController],
             [FormulaEditorController],
-            [SheetClipboardController],
             [SheetsRenderService],
             [SheetUIController],
             [StatusBarController],
@@ -241,6 +240,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [MoveRangeRenderController],
 
             // editor
+            [SheetClipboardController],
             [EditorBridgeRenderController],
             [EditingRenderController],
 

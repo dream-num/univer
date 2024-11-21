@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const topLevelDomainSet = new Set([
+export const topLevelDomainSet = new Set([
     'ac',
     'ad',
     'ae',

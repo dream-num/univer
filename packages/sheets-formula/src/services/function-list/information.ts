@@ -107,6 +107,21 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_INFORMATION.ISEMAIL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISEMAIL.description',
+        abstract: 'formula.functionList.ISEMAIL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISEMAIL.functionParameter.value.name',
+                detail: 'formula.functionList.ISEMAIL.functionParameter.value.detail',
+                example: '"developer@univer.ai"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_INFORMATION.ISERR,
         functionType: FunctionType.Information,
         description: 'formula.functionList.ISERR.description',

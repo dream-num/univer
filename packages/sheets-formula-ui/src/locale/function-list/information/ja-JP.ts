@@ -82,6 +82,19 @@ export default {
             value: { name: '値', detail: '日付であるかを検証する値です。' },
         },
     },
+    ISEMAIL: {
+        description: '値が有効なメールアドレスであるかどうかを検証します',
+        abstract: '値が有効なメールアドレスであるかどうかを検証します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256503?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'メールアドレスであるかどうかを検証する値です。' },
+        },
+    },
     ISERR: {
         description: '対象が #N/A 以外のエラー値のときに TRUE を返します。',
         abstract: '対象が #N/A 以外のエラー値のときに TRUE を返します。',

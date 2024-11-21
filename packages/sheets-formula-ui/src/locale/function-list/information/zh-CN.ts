@@ -82,6 +82,19 @@ export default {
             value: { name: '值', detail: '要验证其是否为日期的值。' },
         },
     },
+    ISEMAIL: {
+        description: '检查输入的值是否为有效的电子邮件地址',
+        abstract: '检查输入的值是否为有效的电子邮件地址',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要验证其是否为电子邮件地址的值。' },
+        },
+    },
     ISERR: {
         description: '如果值为除 #N/A 以外的任何错误值，则返回 TRUE',
         abstract: '如果值为除 #N/A 以外的任何错误值，则返回 TRUE',

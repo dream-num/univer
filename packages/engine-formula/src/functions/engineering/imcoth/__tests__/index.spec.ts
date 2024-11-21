@@ -21,32 +21,28 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
-import { Imlog10 } from '../index';
+import { Imcoth } from '../index';
 
-describe('Test imlog10 function', () => {
-    const testFunction = new Imlog10(FUNCTION_NAMES_ENGINEERING.IMLOG10);
+describe('Test imcoth function', () => {
+    const testFunction = new Imcoth(FUNCTION_NAMES_ENGINEERING.IMCOTH);
 
-    describe('Imlog10', () => {
+    describe('Imcoth', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe('1.11394335230684+0.510732572130908i');
-
-            const inumber2 = StringValueObject.create('5-12i');
-            const result2 = testFunction.calculate(inumber2);
-            expect(result2.getValue()).toBe('1.11394335230684-0.510732572130908i');
+            expect(result.getValue()).toBe('1.00003851275523+0.0000822295549932979i');
         });
 
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(7.40990662548997);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.176091259055681);
+            expect(result.getValue()).toBe(1.10479139298251);
         });
 
         it('Value is normal string', () => {

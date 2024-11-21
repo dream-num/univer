@@ -21,12 +21,12 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
-import { Imlog10 } from '../index';
+import { Imlog } from '../index';
 
-describe('Test imlog10 function', () => {
-    const testFunction = new Imlog10(FUNCTION_NAMES_ENGINEERING.IMLOG10);
+describe('Test imlog function', () => {
+    const testFunction = new Imlog(FUNCTION_NAMES_ENGINEERING.IMLOG);
 
-    describe('Imlog10', () => {
+    describe('Imlog', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
@@ -35,6 +35,49 @@ describe('Test imlog10 function', () => {
             const inumber2 = StringValueObject.create('5-12i');
             const result2 = testFunction.calculate(inumber2);
             expect(result2.getValue()).toBe('1.11394335230684-0.510732572130908i');
+        });
+
+        it('Base value test', () => {
+            const inumber = StringValueObject.create('5+12i');
+            const base = NumberValueObject.create(0);
+            const result = testFunction.calculate(inumber, base);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+
+            const base2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(inumber, base2);
+            expect(result2.getValue()).toBe(ErrorType.VALUE);
+
+            const base3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [2],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(inumber, base3);
+            expect(result3.getValue()).toBe('3.70043971814109+1.69661688033575i');
+
+            const base4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(inumber, base4);
+            expect(result4.getValue()).toBe(ErrorType.VALUE);
+
+            const base5 = NumberValueObject.create(1);
+            const result5 = testFunction.calculate(inumber, base5);
+            expect(result5.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is large numbers', () => {

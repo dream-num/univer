@@ -21,32 +21,28 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_ENGINEERING } from '../../function-names';
-import { Imlog10 } from '../index';
+import { Imtanh } from '../index';
 
-describe('Test imlog10 function', () => {
-    const testFunction = new Imlog10(FUNCTION_NAMES_ENGINEERING.IMLOG10);
+describe('Test imtanh function', () => {
+    const testFunction = new Imtanh(FUNCTION_NAMES_ENGINEERING.IMTANH);
 
-    describe('Imlog10', () => {
+    describe('Imtanh', () => {
         it('Value is normal number', () => {
             const inumber = StringValueObject.create('5+12i');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe('1.11394335230684+0.510732572130908i');
-
-            const inumber2 = StringValueObject.create('5-12i');
-            const result2 = testFunction.calculate(inumber2);
-            expect(result2.getValue()).toBe('1.11394335230684-0.510732572130908i');
+            expect(result.getValue()).toBe('0.99996148196703-0.000082223221029802i');
         });
 
         it('Value is large numbers', () => {
             const inumber = NumberValueObject.create(25698432);
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(7.40990662548997);
+            expect(result.getValue()).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
             const inumber = StringValueObject.create('1.5');
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(0.176091259055681);
+            expect(result.getValue()).toBe(0.905148253644866);
         });
 
         it('Value is normal string', () => {
@@ -74,7 +70,7 @@ describe('Test imlog10 function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(inumber);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(result.getValue()).toBe(0);
         });
 
         it('Value is error', () => {

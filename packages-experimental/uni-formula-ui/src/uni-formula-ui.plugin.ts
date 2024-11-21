@@ -16,7 +16,6 @@
 
 import type { Dependency } from '@univerjs/core';
 import { DependentOn, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
-import { TriggerCalculationController } from '@univerjs/sheets-formula';
 
 import { IUniFormulaService, UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { DOC_FORMULA_UI_PLUGIN_NAME } from './const';
@@ -53,7 +52,6 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [IUniFormulaService],
-            [TriggerCalculationController],
         ]);
     }
 

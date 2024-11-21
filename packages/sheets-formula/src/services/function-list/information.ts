@@ -92,6 +92,36 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_INFORMATION.ISDATE,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISDATE.description',
+        abstract: 'formula.functionList.ISDATE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISDATE.functionParameter.value.name',
+                detail: 'formula.functionList.ISDATE.functionParameter.value.detail',
+                example: 'A1',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISEMAIL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISEMAIL.description',
+        abstract: 'formula.functionList.ISEMAIL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISEMAIL.functionParameter.value.name',
+                detail: 'formula.functionList.ISEMAIL.functionParameter.value.detail',
+                example: '"developer@univer.ai"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_INFORMATION.ISERR,
         functionType: FunctionType.Information,
         description: 'formula.functionList.ISERR.description',
@@ -273,6 +303,21 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
                 name: 'formula.functionList.ISTEXT.functionParameter.value.name',
                 detail: 'formula.functionList.ISTEXT.functionParameter.value.detail',
                 example: 'A1',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_INFORMATION.ISURL,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISURL.description',
+        abstract: 'formula.functionList.ISURL.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISURL.functionParameter.value.name',
+                detail: 'formula.functionList.ISURL.functionParameter.value.detail',
+                example: '"univer.ai"',
                 require: 1,
                 repeat: 0,
             },

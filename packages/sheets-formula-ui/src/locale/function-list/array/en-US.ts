@@ -14,4 +14,34 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    ARRAY_CONSTRAIN: {
+        description: 'Constrains an array result to a specified size.',
+        abstract: 'Constrains an array result to a specified size.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3267036?hl=en&sjid=8484774178571403392-AP',
+            },
+        ],
+        functionParameter: {
+            inputRange: { name: 'input_range', detail: 'The range to constrain.' },
+            numRows: { name: 'num_rows', detail: 'The number of rows the result should contain.' },
+            numCols: { name: 'num_cols', detail: 'The number of columns the result should contain' },
+        },
+    },
+    FLATTEN: {
+        description: 'Flattens all the values from one or more ranges into a single column.',
+        abstract: 'Flattens all the values from one or more ranges into a single column.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/10307761?hl=zh-Hans&sjid=17375453483079636084-AP',
+            },
+        ],
+        functionParameter: {
+            range1: { name: 'range1', detail: 'The first range to flatten.' },
+            range2: { name: 'range2', detail: 'Additional ranges to flatten.' },
+        },
+    },
+};

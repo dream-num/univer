@@ -817,6 +817,20 @@ export default {
             numDigits: { name: '桁数', detail: '数値を四捨五入した結果の桁数を指定します。' },
         },
     },
+    ROUNDBANK: {
+        description: '銀行家の丸めで数値を丸めます',
+        abstract: '銀行家の丸めで数値を丸めます',
+        links: [
+            {
+                title: '指導',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: '数値', detail: '銀行型丸めで丸める数値。' },
+            numDigits: { name: '桁数', detail: '銀行型丸めで丸める桁数。' },
+        },
+    },
     ROUNDDOWN: {
         description: '数値を指定された桁数で切り捨てます。',
         abstract: '数値を指定された桁数で切り捨てます。',

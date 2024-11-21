@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
-export enum FUNCTION_NAMES_ARRAY {}
+export enum FUNCTION_NAMES_ARRAY {
+    ARRAY_CONSTRAIN = 'ARRAY_CONSTRAIN',
+    FLATTEN = 'FLATTEN',
+}

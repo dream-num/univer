@@ -128,6 +128,20 @@ export default {
             months: { name: '月', detail: '開始日から起算した月数を指定します。' },
         },
     },
+    EPOCHTODATE: {
+        description: 'Unix エポック タイムスタンプ（秒、ミリ秒、またはマイクロ秒）を協定世界時（UTC）の日時に変換します。',
+        abstract: 'Unix エポック タイムスタンプ（秒、ミリ秒、またはマイクロ秒）を協定世界時（UTC）の日時に変換します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/13193461?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            timestamp: { name: 'タイムスタンプ', detail: 'Unix エポック タイムスタンプ（秒、ミリ秒、またはマイクロ秒）。' },
+            unit: { name: '時間の単位', detail: 'タイムスタンプを表示する時間の単位。デフォルト値は 1: \n1 は時間単位が秒であることを示します。\n2 は時間単位がミリ秒であることを示します。\n3 は時間単位がマイクロ秒であることを示します。' },
+        },
+    },
     HOUR: {
         description: 'シリアル値を時刻に変換します。',
         abstract: 'シリアル値を時刻に変換します。',
@@ -262,6 +276,19 @@ export default {
         ],
         functionParameter: {
             timeText: { name: '時刻文字列', detail: 'Microsoft Excel のいずれかの時刻形式で時刻を表すテキスト文字列。たとえば、"6:45 PM" と "18:45" のテキスト文字列は、時間を表す引用符で囲みます。' },
+        },
+    },
+    TO_DATE: {
+        description: '指定された数値を日付に変換します。',
+        abstract: '指定された数値を日付に変換します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3094239?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: '日付に変換する引数またはセルへの参照です。' },
         },
     },
     TODAY: {

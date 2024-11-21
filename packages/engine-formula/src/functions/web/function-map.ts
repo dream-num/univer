@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-export const functionWeb = [];
+import { Encodeurl } from './encodeurl';
+import { FUNCTION_NAMES_WEB } from './function-names';
+
+export const functionWeb = [
+    [Encodeurl, FUNCTION_NAMES_WEB.ENCODEURL],
+];

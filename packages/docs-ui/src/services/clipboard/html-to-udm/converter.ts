@@ -18,7 +18,7 @@ import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from 
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
-import { DrawingTypeEnum } from '@univerjs/drawing';
+import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
@@ -130,8 +130,8 @@ export class HtmlToUDMService {
                 }
             } else if (node.nodeName === 'IMG') {
                 const element = node as HTMLImageElement;
-                const source = element.src;
                 const imageSourceType = element.dataset.imageSourceType;
+                const source = imageSourceType === ImageSourceType.UUID ? element.dataset.source : element.src;
 
                 if (source && imageSourceType) {
                     const width = Number(element.dataset.width || 100);

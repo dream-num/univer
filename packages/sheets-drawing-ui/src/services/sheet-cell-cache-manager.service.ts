@@ -135,13 +135,14 @@ export class SheetCellCacheManagerService extends Disposable {
                     return;
                 }
 
-                const cellMatrix = new ObjectMatrix(cellValue);
+                const cellMatrix = new ObjectMatrix<Nullable<ICellData>>();
                 const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                 const worksheet = workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
                     return;
                 }
-                cellMatrix.forValue((row, col) => {
+
+                (new ObjectMatrix(cellValue)).forValue((row, col) => {
                     const value = worksheet.getCellRaw(row, col);
                     cellMatrix.setValue(row, col, value);
                 });

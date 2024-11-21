@@ -21,7 +21,11 @@ import { supportClipboardAPI } from './clipboard-utils';
 
 export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
 export const HTML_CLIPBOARD_MIME_TYPE = 'text/html';
-export const FILES_CLIPBOARD_MIME_TYPE = 'file';
+export const FILE_PNG_CLIPBOARD_MIME_TYPE = 'image/png';
+export const FILE__JPEG_CLIPBOARD_MIME_TYPE = 'image/jpeg';
+export const FILE__BMP_CLIPBOARD_MIME_TYPE = 'image/bmp';
+export const FILE__WEBP_CLIPBOARD_MIME_TYPE = 'image/webp';
+export const FILE_SVG_XML_CLIPBOARD_MIME_TYPE = 'image/svg+xml';
 
 /**
  * This interface provides an interface to access system's clipboard.

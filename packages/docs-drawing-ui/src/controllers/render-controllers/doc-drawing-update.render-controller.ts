@@ -255,25 +255,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const res = this._getCurrentSceneAndTransformer();
         if (res && res.transformer) {
             this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe((params) => {
-                const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
-                if (activeTextRange) {
-                    const { startOffset, endOffset } = activeTextRange;
-                    if (startOffset + 1 !== endOffset) {
-                        return;
-                    }
-                    const customBlocks = this._context.unit.getBody()?.customBlocks ?? [];
-                    const block = customBlocks.find((b) => b.startIndex === startOffset);
-                    if (block) {
-                        this._setDrawingSelections([{
-                            drawingId: block.blockId,
-                            drawingType: 5,
-                            unitId: this._context.unit.getUnitId(),
-                            subUnitId: this._context.unit.getUnitId(),
-                        }]);
-                    }
-                }
-
-                // this._setDrawingSelections(params);
+                this._docSelectionManagerService.refreshSelection();
             }));
         } else {
             throw new Error('transformer is not init');

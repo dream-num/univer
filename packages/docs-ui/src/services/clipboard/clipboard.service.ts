@@ -21,7 +21,15 @@ import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-
 import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
-import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import {
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+    HTML_CLIPBOARD_MIME_TYPE,
+    IClipboardInterfaceService,
+    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
+} from '@univerjs/ui';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -41,6 +49,7 @@ export interface IDocClipboardHook {
     onCopyProperty?(start: number, end: number): IClipboardPropertyItem;
     onCopyContent?(start: number, end: number): string;
     onBeforePaste?: (body: IDocumentBody) => IDocumentBody;
+    onBeforePasteImage?: (file: File) => Promise<{ source: string; imageSourceType: ImageSourceType }>;
 }
 
 export interface IDocClipboardService {
@@ -138,9 +147,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const currentDocInstance = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const docUnitId = currentDocInstance?.getUnitId() || '';
         if (!html && !text && files.length) {
-            // 粘贴图片
-            const imageHtml = await this._createImagePasteHtml(files);
-            html = imageHtml;
+            html = await this._createImagePasteHtml(files);
         }
         const partDocData = this._genDocDataFromHtmlAndText(html, text, docUnitId);
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
@@ -411,10 +418,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private async _genDocDataFromClipboardItems(items: ClipboardItem[]): Promise<Partial<IDocumentData>> {
         try {
-            // TODO: support paste image.
-
             let html = '';
             let text = '';
+            const files: File[] = [];
             for (const clipboardItem of items) {
                 for (const type of clipboardItem.types) {
                     switch (type) {
@@ -426,8 +432,20 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                             html = await clipboardItem.getType(type).then((blob) => blob && blob.text());
                             break;
                         }
+                        case FILE__BMP_CLIPBOARD_MIME_TYPE:
+                        case FILE__JPEG_CLIPBOARD_MIME_TYPE:
+                        case FILE__WEBP_CLIPBOARD_MIME_TYPE:
+                        case FILE_PNG_CLIPBOARD_MIME_TYPE: {
+                            const blob = await clipboardItem.getType(type);
+                            const file = new File([blob], `pasted_image.${type.split('/')[1]}`, { type });
+                            files.push(file);
+                            break;
+                        }
                     }
                 }
+            }
+            if (!html && !text && files.length) {
+                html = await this._createImagePasteHtml(files);
             }
 
             return this._genDocDataFromHtmlAndText(html, text);
@@ -479,20 +497,23 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             },
             drawings: {},
         };
-        const fileToBase64 = async (file: File): Promise<string> => {
+        const fileToBase64 = async (file: File): Promise<{ source: string; imageSourceType: ImageSourceType }> => {
             const reader = new FileReader();
             return new Promise((res) => {
                 reader.onloadend = function () {
-                    res(reader.result as string);
+                    res({
+                        source: reader.result as string,
+                        imageSourceType: ImageSourceType.BASE64,
+                    });
                 };
                 reader.readAsDataURL(file);
             });
         };
-        const getImageSize = (base64: string): Promise<{ width: number; height: number }> => {
+        const getImageSize = (base64: string | File): Promise<{ width: number; height: number }> => {
             const img = new Image();
             const maxWidth = 500;
             return new Promise((resolve) => {
-                img.src = base64;
+                img.src = typeof base64 === 'string' ? base64 : URL.createObjectURL(base64);
                 img.onload = () => {
                     const width = Math.min(maxWidth, img.naturalWidth);
                     const scale = img.naturalHeight / img.naturalWidth;
@@ -500,9 +521,13 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 };
             });
         };
+        // clipboardHooks 应该被重新设计,用来处理多个 hook 处理同一个节点的能力
+        // 参考 interceptor
+        const onBeforePasteImage = (this._clipboardHooks.find((e) => e.onBeforePasteImage)?.onBeforePasteImage!) ?? fileToBase64;
+
         await Promise.all(files.map(async (file, index) => {
-            const base64 = await fileToBase64(file);
-            const { width = 100, height = 100 } = await getImageSize(base64);
+            const image = await onBeforePasteImage(file);
+            const { width = 100, height = 100 } = await getImageSize(file);
             const itemId = `paste_image_id_${index}`;
             const body = doc.body!;
             const drawings = doc.drawings!;
@@ -512,9 +537,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 drawingId: itemId,
                 unitId: '',
                 subUnitId: '',
-                imageSourceType: ImageSourceType.BASE64,
+                imageSourceType: image.imageSourceType,
                 title: '',
-                source: base64,
+                source: image.source,
                 description: '',
                 layoutType: PositionedObjectLayoutType.INLINE,
                 drawingType: DrawingTypeEnum.DRAWING_IMAGE,
@@ -522,7 +547,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                     width,
                     height,
                     angle: 0,
-
                 },
                 docTransform: {
                     angle: 0,

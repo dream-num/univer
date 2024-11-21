@@ -140,10 +140,6 @@ export class HtmlToUDMService {
                     const docTransformHeight = Number(element.dataset.docTransformHeight || height);
                     // 外部会进行替换.
                     const id = Tools.generateRandomId(6);
-                    body.textRuns!.push({
-                        st: body.dataStream.length,
-                        ed: body.dataStream.length,
-                    });
                     doc.body?.customBlocks?.push({ startIndex: body.dataStream.length, blockId: id });
                     body.dataStream += '\b';
                     if (!doc.drawings) {

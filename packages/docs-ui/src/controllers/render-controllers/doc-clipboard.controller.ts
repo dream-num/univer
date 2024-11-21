@@ -23,7 +23,14 @@ import {
     Inject,
     RxDisposable,
 } from '@univerjs/core';
-import { FILES_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import {
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+    HTML_CLIPBOARD_MIME_TYPE,
+    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { whenDocOrEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
@@ -59,8 +66,16 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
             const clipboardEvent = config!.event as ClipboardEvent;
             let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
             const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
+
+            const imageTypes = [
+                FILE__BMP_CLIPBOARD_MIME_TYPE,
+                FILE__JPEG_CLIPBOARD_MIME_TYPE,
+                FILE__WEBP_CLIPBOARD_MIME_TYPE,
+                FILE_PNG_CLIPBOARD_MIME_TYPE,
+            ];
+
             const files = [...(clipboardEvent.clipboardData?.items || [])]
-                .filter((item) => item.kind === FILES_CLIPBOARD_MIME_TYPE && item.type === 'image/png')
+                .filter((item) => imageTypes.includes(item.type))
                 .map((item) => item.getAsFile()!)
                 .filter((e) => !!e);
 

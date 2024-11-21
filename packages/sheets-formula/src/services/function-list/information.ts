@@ -92,6 +92,21 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_INFORMATION.ISDATE,
+        functionType: FunctionType.Information,
+        description: 'formula.functionList.ISDATE.description',
+        abstract: 'formula.functionList.ISDATE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ISDATE.functionParameter.value.name',
+                detail: 'formula.functionList.ISDATE.functionParameter.value.detail',
+                example: 'A1',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_INFORMATION.ISERR,
         functionType: FunctionType.Information,
         description: 'formula.functionList.ISERR.description',

@@ -55,6 +55,19 @@ export default {
             value: { name: 'Giá trị', detail: 'Giá trị mà bạn muốn kiểm tra. Đối số giá trị có thể là trống (ô trống), lỗi, giá trị lô-gic, văn bản, số, giá trị tham chiếu hoặc tên tham chiếu tới bất kỳ giá trị nào trong những giá trị này.' },
         },
     },
+    ISDATE: {
+        description: 'xác định xem một giá trị có phải là ngày không.',
+        abstract: 'xác định xem một giá trị có phải là ngày không.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/9061381?hl=vi&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'Giá trị', detail: 'Giá trị cần xác minh có phải là một ngày hay không.' },
+        },
+    },
     ISERR: {
         description: 'Trả về TRUE nếu giá trị là bất kỳ giá trị lỗi nào ngoại trừ #N/A',
         abstract: 'Trả về TRUE nếu giá trị là bất kỳ giá trị lỗi nào ngoại trừ #N/A',

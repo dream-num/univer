@@ -128,6 +128,20 @@ export default {
             months: { name: '月份数', detail: '开始日期之前或之后的月份数。' },
         },
     },
+    EPOCHTODATE: {
+        description: '将 Unix 纪元时间戳（以秒、毫秒或微秒为单位）转换为世界协调时间 (UTC) 的日期时间',
+        abstract: '将 Unix 纪元时间戳（以秒、毫秒或微秒为单位）转换为世界协调时间 (UTC) 的日期时间',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/13193461?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            timestamp: { name: '时间戳', detail: 'Unix 纪元时间戳（以秒、毫秒或微秒为单位）。' },
+            unit: { name: '时间单位', detail: '表示时间戳的时间单位。默认情况为 1: \n1 表示时间单位是秒。\n2 表示时间单位是毫秒。\n3 表示时间单位是微秒。' },
+        },
+    },
     HOUR: {
         description: '将序列号转换为小时',
         abstract: '将序列号转换为小时',
@@ -262,6 +276,19 @@ export default {
         ],
         functionParameter: {
             timeText: { name: '时间文本', detail: '一个文本字符串，代表以任一时间格式表示的时间（例如，代表时间的具有引号的文本字符串 "6:45 PM" 和 "18:45"）。' },
+        },
+    },
+    TO_DATE: {
+        description: '将提供的数字转换为日期',
+        abstract: '将提供的数字转换为日期',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3094239?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要转换为日期的参数或其单元格引用。' },
         },
     },
     TODAY: {

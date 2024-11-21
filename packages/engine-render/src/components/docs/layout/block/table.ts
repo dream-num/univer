@@ -146,7 +146,7 @@ export function createTableSkeletons(
     sectionBreakConfig: ISectionBreakConfig,
     availableHeight: number
 ): ISlicedTableSkeletonParams {
-    const fromCurrentPage = true;
+    let fromCurrentPage = true;
     const skeTables: IDocumentSkeletonTable[] = [];
     const { pageWidth, marginLeft = 0, marginRight = 0, marginTop, marginBottom, pageHeight } = curPage;
     const pageContentHeight = pageHeight - marginTop - marginBottom;
@@ -174,7 +174,7 @@ export function createTableSkeletons(
         const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
         // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
         const MAX_FONT_SIZE = 72;
-        const needOpenNewTable = remainHeight <= MAX_FONT_SIZE;
+        let needOpenNewTable = remainHeight <= MAX_FONT_SIZE;
 
         const rowHeights = [0];
 
@@ -188,8 +188,8 @@ export function createTableSkeletons(
                 table,
                 row,
                 col,
-                canRowSplit ? (needOpenNewTable ? pageContentHeight : remainHeight) : Number.POSITIVE_INFINITY,
-                canRowSplit ? pageContentHeight : Number.POSITIVE_INFINITY
+                canRowSplit && !needOpenNewTable ? remainHeight : pageContentHeight,
+                pageContentHeight
             );
 
             while (rowSkeletons.length < cellPageSkeletons.length) {
@@ -239,6 +239,8 @@ export function createTableSkeletons(
                 rowHeights[rowIndex] = val.v;
             }
 
+            rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], pageContentHeight);
+
             let left = 0;
             // Set row height to cell page height.
             for (const cellPageSkeleton of rowSke.cells) {
@@ -287,6 +289,16 @@ export function createTableSkeletons(
                 marginTop = Math.max(originMarginTop, marginTop);
 
                 cellPageSkeleton.marginTop = marginTop;
+            }
+        }
+
+        if (rowHeights[0] > remainHeight) {
+            if (curTableSkeleton.rows.length > 0) {
+                needOpenNewTable = true;
+            } else {
+                fromCurrentPage = false;
+                remainHeight = pageContentHeight;
+                rowTop = 0;
             }
         }
 

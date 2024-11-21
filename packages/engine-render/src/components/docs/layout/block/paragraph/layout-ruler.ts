@@ -842,7 +842,7 @@ function _updateAndPositionTable(
 
         // Reset the position of the first table.
         skeTables.forEach((table, i) => {
-            table.top = i === 0 ? top : 0;
+            table.top = i === 0 && fromCurrentPage ? top : 0;
             table.left = left;
         });
 

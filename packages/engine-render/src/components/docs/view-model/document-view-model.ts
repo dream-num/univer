@@ -87,7 +87,7 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
                 batchParent(paragraphNode, [lastTableCache.table], DataStreamTreeNodeType.PARAGRAPH);
 
                 if (tables) {
-                    const table = tables.find((table) => table.startIndex === lastTableCache.table.startIndex && table.endIndex === lastTableCache.table.endIndex);
+                    const table = tables.find((table) => table.startIndex === lastTableCache.table.startIndex && table.endIndex === lastTableCache.table.endIndex + 1);
                     if (table) {
                         tableNodeCache.set(table.tableId, { table: lastTableCache.table });
                     }

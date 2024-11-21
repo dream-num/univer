@@ -220,7 +220,7 @@ export class Font extends SheetExtension {
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix, 2);
+            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix, 1);
             this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();

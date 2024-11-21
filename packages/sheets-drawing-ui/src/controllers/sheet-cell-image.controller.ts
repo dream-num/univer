@@ -20,9 +20,8 @@ import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationPar
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, InterceptorEffectEnum, IUniverInstanceService, Range } from '@univerjs/core';
 import { DocDrawingController } from '@univerjs/docs-drawing';
 import { type IReplaceSnapshotCommandParams, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
-import { IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RefRangeService, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
@@ -38,8 +37,8 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
                 row: location.row,
                 col: location.col,
             },
-            image.transform!.width!,
-            image.transform!.height!
+            image.docTransform!.size.width!,
+            image.docTransform!.size.height!
         );
 
         if (imageSize) {
@@ -51,6 +50,9 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
             image.transform!.top = 0;
             image.docTransform!.positionH.posOffset = 0;
             image.docTransform!.positionV.posOffset = 0;
+
+            cell.p.documentStyle.pageSize!.width = Infinity;
+            cell.p.documentStyle.pageSize!.height = Infinity;
             return true;
         }
     }
@@ -61,10 +63,7 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
 export class SheetCellImageController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IImageIoService private readonly _imageIoService: IImageIoService,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,

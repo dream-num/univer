@@ -186,8 +186,8 @@ const tableCell: ITableCell = {
 const tableRow: ITableRow = {
     tableCells: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableCell))],
     trHeight: {
-        val: { v: 2000 },
-        hRule: TableRowHeightRule.EXACT,
+        val: { v: 50 },
+        hRule: TableRowHeightRule.AUTO,
     },
     cantSplit: BooleanNumber.TRUE,
 };

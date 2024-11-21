@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
@@ -31,17 +31,14 @@ import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
-    extraProps?: Record<string, any>;
+    extraProps?: Record<string, unknown>;
 }
 
 interface IPopupMenuItem {
     label: string;
     index: number;
     commandId: string;
-    commandParams: {
-        unitId: string;
-       [key: string]: any;
-    };
+    commandParams: ICommandInfo['params'];
     disable: boolean;
 }
 type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
@@ -80,6 +77,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return callback(unitId, subUnitId, drawingId, drawingType);
         }
     }
+
     override dispose(): void {
         super.dispose();
         this._popupMenuFeatureMap.clear();

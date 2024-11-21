@@ -758,6 +758,38 @@ export default {
             k: { name: 'k', detail: 'Vị trí (tính từ lớn nhất) trong mảng hoặc phạm vi ô dữ liệu cần trả về.' },
         },
     },
+    LINEST: {
+        description: 'Trả về các tham số của xu hướng tuyến tính',
+        abstract: 'Trả về các tham số của xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = m*x+b.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = m*x+b.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 0 hay không.' },
+            stats: { name: 'thống kê', detail: 'Giá trị lô-gic chỉ rõ có trả về các thống kê hồi quy bổ sung hay không.' },
+        },
+    },
+    LOGEST: {
+        description: 'Trả về các tham số của xu hướng hàm mũ',
+        abstract: 'Trả về các tham số của xu hướng hàm mũ',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/logest-%E5%87%BD%E6%95%B0-f27462d8-3657-4030-866b-a272c1d18b4b',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = b*m^x.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = b*m^x.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 1 hay không.' },
+            stats: { name: 'thống kê', detail: 'Giá trị lô-gic chỉ rõ có trả về các thống kê hồi quy bổ sung hay không.' },
+        },
+    },
     LOGNORM_DIST: {
         description: 'Trả về phân bố chuẩn lô-ga-rít của',
         abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
@@ -1449,6 +1481,22 @@ export default {
             array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
             tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, T.TEST sử dụng phân phối một phía. Nếu đuôi = 2, T.TEST sử dụng phân phối hai phía.' },
             type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
+        },
+    },
+    TREND: {
+        description: 'Trả về các giá trị theo xu hướng tuyến tính',
+        abstract: 'Trả về các giá trị theo xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/trend-%E5%87%BD%E6%95%B0-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = m*x+b.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = m*x+b.' },
+            newXs: { name: 'dữ liệu mới_x', detail: 'Là những giá trị x mới mà bạn muốn hàm TREND trả về tương ứng với các giá trị y.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 0 hay không.' },
         },
     },
     TRIMMEAN: {

@@ -63,6 +63,8 @@ import { HypgeomDist } from './hypgeom-dist';
 import { Intercept } from './intercept';
 import { Kurt } from './kurt';
 import { Large } from './large';
+import { Linest } from './linest';
+import { Logest } from './logest';
 import { LognormDist } from './lognorm-dist';
 import { LognormInv } from './lognorm-inv';
 import { Max } from './max';
@@ -110,6 +112,7 @@ import { TDistRt } from './t-dist-rt';
 import { TInv } from './t-inv';
 import { TInv2t } from './t-inv-2t';
 import { TTest } from './t-test';
+import { Trend } from './trend';
 import { Trimmean } from './trimmean';
 import { VarP } from './var-p';
 import { VarS } from './var-s';
@@ -169,6 +172,8 @@ export const functionStatistical = [
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
     [Kurt, FUNCTION_NAMES_STATISTICAL.KURT],
     [Large, FUNCTION_NAMES_STATISTICAL.LARGE],
+    [Linest, FUNCTION_NAMES_STATISTICAL.LINEST],
+    [Logest, FUNCTION_NAMES_STATISTICAL.LOGEST],
     [LognormDist, FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST],
     [LognormInv, FUNCTION_NAMES_STATISTICAL.LOGNORM_INV],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
@@ -216,6 +221,7 @@ export const functionStatistical = [
     [TInv, FUNCTION_NAMES_STATISTICAL.T_INV],
     [TInv2t, FUNCTION_NAMES_STATISTICAL.T_INV_2T],
     [TTest, FUNCTION_NAMES_STATISTICAL.T_TEST],
+    [Trend, FUNCTION_NAMES_STATISTICAL.TREND],
     [Trimmean, FUNCTION_NAMES_STATISTICAL.TRIMMEAN],
     [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],

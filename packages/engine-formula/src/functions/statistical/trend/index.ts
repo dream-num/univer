@@ -23,7 +23,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Growth extends BaseFunction {
+export class Trend extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 4;
@@ -99,7 +99,7 @@ export class Growth extends BaseFunction {
     private _getResultByMultipleVariables(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number): BaseValueObject {
         const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
 
-        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, newXsValues, constb, true);
+        const _coefficients = getKnownsArrayCoefficients(knownYsValues, knownXsValues, newXsValues, constb, false);
 
         if (_coefficients instanceof ErrorValueObject) {
             return _coefficients;
@@ -118,7 +118,7 @@ export class Growth extends BaseFunction {
             let value = b;
 
             for (let j = cl - 2; j >= 0; j--) {
-                value *= (coefficients[0][cl - 2 - j] ** newX[i][j]);
+                value += coefficients[0][cl - 2 - j] * newX[i][j];
             }
 
             result[i].push(value);
@@ -135,10 +135,10 @@ export class Growth extends BaseFunction {
         const knownYsValuesFlat = knownYsValues.flat();
         const knownXsValuesFlat = knownXsValues.flat();
 
-        const { slope, intercept } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, true);
+        const { slope, intercept } = getSlopeAndIntercept(knownXsValuesFlat, knownYsValuesFlat, constb, false);
 
         const result = newXsValues.map((row) => {
-            return row.map((value) => intercept * (slope ** value));
+            return row.map((value) => slope * value + intercept);
         });
 
         return ArrayValueObject.createByArray(result);

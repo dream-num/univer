@@ -22,12 +22,12 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Growth } from '../index';
+import { Trend } from '../index';
 
-describe('Test growth function', () => {
-    const testFunction = new Growth(FUNCTION_NAMES_STATISTICAL.GROWTH);
+describe('Test trend function', () => {
+    const testFunction = new Trend(FUNCTION_NAMES_STATISTICAL.TREND);
 
-    describe('Growth', () => {
+    describe('Trend', () => {
         it('Value is normal', () => {
             const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -65,7 +65,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [136608.33775488546, 145970.01896985146],
+                [155404.53583526541, 162554.58675507212],
             ]);
         });
 
@@ -88,12 +88,12 @@ describe('Test growth function', () => {
             });
             const result = testFunction.calculate(knownYs);
             expect(getObjectValue(result)).toStrictEqual([
-                [32618.2037735398],
-                [47729.42261474784],
-                [69841.30085621751],
-                [102197.07337883243],
-                [149542.48674004586],
-                [218821.87621459534],
+                [12452.380952380954],
+                [48898.09523809524],
+                [85343.80952380951],
+                [121789.5238095238],
+                [158235.2380952381],
+                [194680.95238095237],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -337,7 +337,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [1806822.1964432173, 4216666.612455025],
+                [163575.8491131277, 173197.95788448816],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -358,12 +358,12 @@ describe('Test growth function', () => {
             });
             const result2 = testFunction.calculate(knownYs2, undefined, undefined, constb);
             expect(getObjectValue(result2)).toStrictEqual([
-                [14.748289539092573],
-                [217.51204432890742],
-                [3207.9306080026654],
-                [47311.48942814059],
-                [697763.5446119347],
-                [10290818.78576035],
+                [30908.79120879121],
+                [61817.58241758242],
+                [92726.37362637362],
+                [123635.16483516483],
+                [154543.95604395604],
+                [185452.74725274724],
             ]);
 
             const constb2 = ArrayValueObject.create({
@@ -383,12 +383,12 @@ describe('Test growth function', () => {
 
             const result4 = testFunction.calculate(knownYs2, undefined, undefined, constb);
             expect(getObjectValue(result4)).toStrictEqual([
-                [14.748289539092573],
-                [217.51204432890742],
-                [3207.9306080026654],
-                [47311.48942814059],
-                [697763.5446119347],
-                [10290818.78576035],
+                [30908.79120879121],
+                [61817.58241758242],
+                [92726.37362637362],
+                [123635.16483516483],
+                [154543.95604395604],
+                [185452.74725274724],
             ]);
         });
 
@@ -466,7 +466,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [3.2237097954706266, 5.583629154612603, 9.671129386411891, 16.750887463837827, 29.013388159235713, 50.252662391513546, 87.04016447770724],
+                [3, 4, 5, 6, 7, 8, 9],
             ]);
 
             const newXs2 = ArrayValueObject.create({
@@ -493,17 +493,17 @@ describe('Test growth function', () => {
             const constb2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(knownYs, knownXs, newXs2, constb2);
             expect(getObjectValue(result2)).toStrictEqual([
-                [2.307651218612649],
-                [2.727747733175308],
-                [3.224320744759815],
-                [3.8112924221868782],
-                [4.505119396395902],
-                [5.325254146764445],
-                [6.294690380529891],
-                [7.440607695843031],
-                [8.795133602548706],
-                [10.396244265088487],
-                [12.288829221203034],
+                [2.5757575757575757],
+                [3.090909090909091],
+                [3.606060606060606],
+                [4.121212121212121],
+                [4.636363636363637],
+                [5.151515151515151],
+                [5.666666666666666],
+                [6.181818181818182],
+                [6.696969696969697],
+                [7.212121212121212],
+                [7.727272727272727],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -557,32 +557,32 @@ describe('Test growth function', () => {
             });
             const result3 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb);
             expect(getObjectValue(result3)).toStrictEqual([
-                [1.1161231740339035],
-                [1.7617295898720453],
-                [2.780778340631825],
-                [4.38928211467954],
-                [6.92820323027555],
-                [10.935729065914696],
-                [17.261354239796905],
-                [27.245952089325364],
-                [43.00600607235713],
-                [67.88225099390954],
-                [107.14782470725653],
+                [0.9999999999999902],
+                [1.9999999999999938],
+                [2.9999999999999973],
+                [4.000000000000001],
+                [5.000000000000004],
+                [6.000000000000008],
+                [7.0000000000000115],
+                [8.000000000000014],
+                [9.000000000000018],
+                [10.000000000000021],
+                [11.000000000000025],
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
             expect(getObjectValue(result4)).toStrictEqual([
-                [1.1161231740339097],
-                [1.761729589872056],
-                [2.7807783406318434],
-                [4.38928211467957],
-                [6.928203230275601],
-                [10.935729065914781],
-                [17.261354239797047],
-                [27.2459520893256],
-                [43.00600607235752],
-                [67.88225099391019],
-                [107.14782470725761],
+                [1],
+                [2],
+                [3],
+                [4],
+                [5],
+                [6],
+                [7],
+                [8],
+                [9],
+                [10],
+                [11],
             ]);
 
             const knownYs3 = ArrayValueObject.create({
@@ -622,7 +622,7 @@ describe('Test growth function', () => {
             });
             const result5 = testFunction.calculate(knownYs3, knownXs3, newXs4, constb);
             expect(getObjectValue(result5)).toStrictEqual([
-                [1.1161231740339035, 1.7617295898720453, 2.780778340631825, 4.38928211467954, 6.92820323027555, 10.935729065914696, 17.261354239796905],
+                [0.9999999999999902, 1.9999999999999938, 2.9999999999999973, 4.000000000000001, 5.000000000000004, 6.000000000000008, 7.0000000000000115],
             ]);
         });
     });

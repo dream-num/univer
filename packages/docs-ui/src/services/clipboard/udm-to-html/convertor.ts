@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IParagraph, ITextRun } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IParagraph, ITextRun } from '@univerjs/core';
+import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
 import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
+
+function covertImageToHtml(item: IDocImage) {
+    return `<img data-doc-transform-height="${item.docTransform.size.height}" data-doc-transform-width="${item.docTransform.size.width}" data-width="${item.transform?.width}" data-height="${item.transform?.height}" data-image-source-type="${item.imageSourceType}" src="${item.source}"></img>`;
+}
 
 export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
     const { st: start, ed, ts = {} } = textRun;
@@ -83,7 +89,9 @@ export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): stri
 
 function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: number) {
     const { dataStream, textRuns = [] } = body;
-
+    if (startIndex === endIndex) {
+        return '';
+    }
     let cursorIndex = startIndex;
     const spanList: string[] = [];
 
@@ -116,32 +124,66 @@ function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: n
     return spanList.join('');
 }
 
-export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
-    const { customRanges = [] } = body;
+export function getBodySliceHtml(doc: IDocumentData, startIndex: number, endIndex: number) {
+    const body = doc.body!;
+    const drawings = doc.drawings || {};
+    const { customRanges = [], customBlocks = [] } = body || {};
+    const cloneCustomBlocks = [...customBlocks];
     const customRangesInRange = customRanges.filter((range) => range.startIndex >= startIndex && range.endIndex <= endIndex);
-
     let cursorIndex = startIndex;
     let html = '';
-    customRangesInRange.forEach((range) => {
-        const { startIndex, endIndex, rangeType, rangeId } = range;
-        const preHtml = getBodyInlineSlice(body, cursorIndex, startIndex);
-        html += preHtml;
-        const sliceHtml = getBodyInlineSlice(body, startIndex, endIndex + 1);
-        switch (rangeType) {
-            case CustomRangeType.HYPERLINK: {
-                html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml}</a>`;
-                break;
+    const handleCustomBlock = (startIndex: number, endIndex: number) => {
+        let sliceHtml = '';
+        let customBlockLength = 0;
+        let handleCustomBlockCursorIndex = startIndex;
+        let blockItemIndex = cloneCustomBlocks.findIndex((block) => startIndex <= block.startIndex && endIndex >= block.startIndex);
+
+        if (blockItemIndex === -1) {
+            sliceHtml = getBodyInlineSlice(body, startIndex, endIndex);
+            return { sliceHtml, customBlockLength };
+        }
+
+        while (blockItemIndex !== -1) {
+            const blockItem = cloneCustomBlocks[blockItemIndex];
+            cloneCustomBlocks.splice(blockItemIndex, 1);
+            sliceHtml += getBodyInlineSlice(body, handleCustomBlockCursorIndex, blockItem.startIndex);
+            const drawingItem = drawings[blockItem.blockId];
+            if (drawingItem) {
+                switch (drawingItem.drawingType) {
+                    case DrawingTypeEnum.DRAWING_IMAGE: {
+                        sliceHtml += covertImageToHtml(drawingItem as unknown as IDocImage);
+                        customBlockLength++;
+                        break;
+                    }
+                }
             }
 
+            handleCustomBlockCursorIndex = blockItem.startIndex + 1;
+            blockItemIndex = cloneCustomBlocks.findIndex((block) => handleCustomBlockCursorIndex <= block.startIndex && endIndex >= block.startIndex);
+        }
+        sliceHtml = sliceHtml + getBodyInlineSlice(body, handleCustomBlockCursorIndex, endIndex + 1);
+        return { sliceHtml, customBlockLength };
+    };
+    customRangesInRange.forEach((range) => {
+        const { startIndex, endIndex, rangeType, rangeId } = range;
+        const preHtml = handleCustomBlock(cursorIndex, startIndex);
+        html += preHtml.sliceHtml;
+        const sliceHtml = handleCustomBlock(startIndex, endIndex + 1);
+        switch (rangeType) {
+            case CustomRangeType.HYPERLINK: {
+                html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml.sliceHtml}</a>`;
+                break;
+            }
             default: {
-                html += sliceHtml;
+                html += sliceHtml.sliceHtml;
                 break;
             }
         }
-        cursorIndex = endIndex + 1;
+        // 如果涉及 customBlock,需要跳过其占位符.
+        cursorIndex = endIndex + 1 + (preHtml.customBlockLength + sliceHtml.customBlockLength);
     });
-    const endHtml = getBodyInlineSlice(body, cursorIndex, endIndex);
-    html += endHtml;
+    const endHtml = handleCustomBlock(cursorIndex, endIndex);
+    html += endHtml.sliceHtml;
     return html;
 }
 
@@ -149,9 +191,10 @@ interface IHtmlResult {
     html: string;
 }
 
-export function convertBodyToHtml(body: IDocumentBody): string {
+export function convertBodyToHtml(doc: IDocumentData): string {
+    const body = doc.body || {} as IDocumentBody;
     const { paragraphs = [], sectionBreaks = [] } = body;
-    let { dataStream } = body;
+    let { dataStream = '' } = body;
 
     if (!dataStream.endsWith('\r\n')) {
         dataStream += '\r\n';
@@ -174,18 +217,18 @@ export function convertBodyToHtml(body: IDocumentBody): string {
     const nodeList = parseDataStreamToTree(dataStream);
 
     for (const node of nodeList) {
-        processNode(node, body, result);
+        processNode(node, doc, result);
     }
 
     return result.html;
 }
 
-// eslint-disable-next-line max-lines-per-function
-function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtmlResult) {
+// eslint-disable-next-line max-lines-per-function, complexity
+function processNode(node: DataStreamTreeNode, doc: IDocumentData, result: IHtmlResult) {
     switch (node.nodeType) {
         case DataStreamTreeNodeType.SECTION_BREAK: {
             for (const n of node.children) {
-                processNode(n, body, result);
+                processNode(n, doc, result);
             }
 
             break;
@@ -193,7 +236,7 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
 
         case DataStreamTreeNodeType.PARAGRAPH: {
             const { children, startIndex, endIndex } = node;
-            const paragraph = body.paragraphs!.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
+            const paragraph = doc.body?.paragraphs!.find((p) => p.startIndex === endIndex) ?? {} as IParagraph;
             const { paragraphStyle = {} } = paragraph;
             const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];
@@ -222,11 +265,11 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
 
             if (children.length) {
                 for (const table of children) {
-                    processNode(table, body, result);
+                    processNode(table, doc, result);
                 }
             }
 
-            result.html += `${getBodySliceHtml(body, startIndex, endIndex)}</p>`;
+            result.html += `${getBodySliceHtml(doc, startIndex, endIndex)}</p>`;
 
             break;
         }
@@ -237,7 +280,7 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
             result.html += '<table class="UniverTable" style="width: 100%; border-collapse: collapse;"><tbody>';
 
             for (const row of children) {
-                processNode(row, body, result);
+                processNode(row, doc, result);
             }
 
             result.html += '</tbody></table>';
@@ -250,7 +293,7 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
 
             result.html += '<tr class="UniverTableRow">';
             for (const cell of children) {
-                processNode(cell, body, result);
+                processNode(cell, doc, result);
             }
             result.html += '</tr>';
 
@@ -262,7 +305,7 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
 
             result.html += '<td class="UniverTableCell">';
             for (const n of children) {
-                processNode(n, body, result);
+                processNode(n, doc, result);
             }
             result.html += '</td>';
             break;
@@ -275,15 +318,15 @@ function processNode(node: DataStreamTreeNode, body: IDocumentBody, result: IHtm
 }
 
 export class UDMToHtmlService {
-    convert(bodyList: IDocumentBody[]): string {
-        if (bodyList.length === 0) {
+    convert(docList: IDocumentData[]): string {
+        if (docList.length === 0) {
             throw new Error('The bodyList length at least to be 1');
         }
 
         let html = '';
 
-        for (const body of Tools.deepClone(bodyList)) {
-            html += convertBodyToHtml(body);
+        for (const doc of Tools.deepClone(docList)) {
+            html += convertBodyToHtml(doc);
         }
 
         return html;

@@ -17,7 +17,7 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import { FUniver } from '@univerjs/core';
-import { CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
+import { ComponentManager, CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
 
 interface IFUniverUIMixin {
     copy(): Promise<boolean>;
@@ -37,6 +37,12 @@ interface IFUniverUIMixin {
      * @returns the disposable object
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
+
+    /**
+     * Get the component manager
+     * @returns The component manager
+     */
+    getComponentManager(): ComponentManager;
 }
 
 class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -62,6 +68,10 @@ class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
             },
         });
         return disposable;
+    }
+
+    override getComponentManager(): ComponentManager {
+        return this._injector.get(ComponentManager);
     }
 }
 

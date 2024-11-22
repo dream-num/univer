@@ -125,7 +125,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateDefinedNameController],
         ]);
 
-        // The nodejs environment needs to be initialized, otherwise it has been initialized in FormulaUIController
+        // There is no rendering in the nodejs environment, so initialize it here
         if (isNodeEnv()) {
             touchDependencies(this._injector, [
                 [TriggerCalculationController],
@@ -137,5 +137,12 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         touchDependencies(this._injector, [
             [DefinedNameController],
         ]);
+
+        // Wait for rendering to complete before initializing formula calculation
+        if (!isNodeEnv()) {
+            touchDependencies(this._injector, [
+                [TriggerCalculationController],
+            ]);
+        }
     }
 }

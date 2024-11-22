@@ -15,7 +15,7 @@
  */
 
 import type { INumberUnit, ITable, ITableRow } from '@univerjs/core';
-import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
+import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
@@ -130,6 +130,20 @@ export function createTableSkeleton(
     tableSkeleton.left = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
 
     return tableSkeleton;
+}
+
+export function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, table: DataStreamTreeNode) {
+    const { startIndex, endIndex } = table;
+
+    for (const paragraphLists of listLevel.values()) {
+        for (const paragraphList of paragraphLists) {
+            const paragraphListIndex = paragraphList.findIndex((p) => p.paragraph.startIndex > startIndex && p.paragraph.startIndex < endIndex);
+
+            if (paragraphListIndex > -1) {
+                paragraphList.splice(paragraphListIndex);
+            }
+        }
+    }
 }
 
 export interface ISlicedTableSkeletonParams {

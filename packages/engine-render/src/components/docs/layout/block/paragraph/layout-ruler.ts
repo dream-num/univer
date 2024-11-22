@@ -61,7 +61,7 @@ import {
     lineIterator,
     mergeByV,
 } from '../../tools';
-import { createTableSkeletons } from '../table';
+import { createTableSkeletons, rollbackListCache } from '../table';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -827,6 +827,8 @@ function _updateAndPositionTable(
         const { segmentId } = page;
         const viewModel = ctx.viewModel.getSelfOrHeaderFooterViewModel(segmentId);
         const tableNode = firstUnPositionedTable.tableNode;
+
+        rollbackListCache(ctx.skeletonResourceReference.skeListLevel!, tableNode);
 
         const {
             fromCurrentPage,

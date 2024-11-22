@@ -128,7 +128,7 @@ import { cloneElement, createElement, useEffect, useRef } from 'react';
 
 type ComponentFramework = 'vue3' | 'react';
 
-interface IComponentOptions {
+export interface IComponentOptions {
     framework?: ComponentFramework;
 }
 

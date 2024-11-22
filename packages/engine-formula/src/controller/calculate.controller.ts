@@ -35,6 +35,11 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
 
+/**
+ * Susbcribe to specific mutations and start calculation process.
+ *
+ * @deprecated Anti-pattern and should be removed.
+ */
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

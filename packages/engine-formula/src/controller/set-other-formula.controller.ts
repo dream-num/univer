@@ -24,6 +24,9 @@ import {
     IOtherFormulaManagerService,
 } from '../services/other-formula-manager.service';
 
+/**
+ * @deprecated This controller is used for an anti-pattern to sync between threads and it should be removed.
+ */
 export class SetOtherFormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

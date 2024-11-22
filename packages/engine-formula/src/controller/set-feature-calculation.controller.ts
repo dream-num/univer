@@ -26,6 +26,9 @@ import {
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 
+/**
+ * @deprecated This controller is used for an anti-pattern to sync between threads and it should be removed.
+ */
 export class SetFeatureCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

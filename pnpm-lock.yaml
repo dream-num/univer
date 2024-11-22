@@ -3494,9 +3494,6 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../../packages/sheets-numfmt
-      examples-node:
-        specifier: workspace:*
-        version: link:../../examples-node
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

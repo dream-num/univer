@@ -76,6 +76,7 @@ export class FFormula extends FBase {
     onCalculationEnd(): Promise<void> {
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => {
+                // You should comment the above line to debug test.
                 reject(new Error('Calculation end timeout'));
             }, 30_000);
 

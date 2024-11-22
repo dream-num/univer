@@ -59,7 +59,7 @@ export interface IFormulaDependencyGenerator {
 
 export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGenerator>('engine-formula.dependency-generator');
 
-export class FormulaDependencyGenerator extends Disposable {
+export class FormulaDependencyGenerator extends Disposable implements IFormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     constructor(
@@ -81,7 +81,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
     async generate() {
         this._updateRangeFlatten();
-        // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
         const formulaData = this._currentConfigService.getFormulaData();
 
@@ -108,28 +107,26 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const unitData = this._currentConfigService.getUnitData();
 
-        const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
+        let sortedFormulaTrees = this._calculateRunList(
+            this._getUpdateTreeListAndMakeDependency(
+                await this._generateTreeList(formulaData, otherFormulaData, unitData
+                )
+            )
+        );
 
-        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
-
-        let finalTreeList = this._calculateRunList(updateTreeList);
-
-        const hasFeatureCalculation = this._dependencyFeatureCalculation(finalTreeList);
-
+        // TODO: if there are
+        const hasFeatureCalculation = this._dependencyFeatureCalculation(sortedFormulaTrees);
         if (hasFeatureCalculation) {
-            finalTreeList.forEach((tree) => {
-                tree.resetState();
-            });
-            finalTreeList = this._calculateRunList(finalTreeList);
+            sortedFormulaTrees.forEach((tree) => tree.resetState());
+            sortedFormulaTrees = this._calculateRunList(sortedFormulaTrees);
         }
 
-        const isCycleDependency = this._checkIsCycleDependency(finalTreeList);
-
-        if (isCycleDependency) {
+        const hasCycleDependency = this._checkIsCycleDependency(sortedFormulaTrees);
+        if (hasCycleDependency) {
             this._runtimeService.enableCycleDependency();
         }
 
-        return Promise.resolve(finalTreeList);
+        return Promise.resolve(sortedFormulaTrees);
     }
 
     private _dependencyFeatureCalculation(newTreeList: IFormulaDependencyTree[]) {

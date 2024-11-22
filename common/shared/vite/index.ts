@@ -167,8 +167,16 @@ export async function build(options?: IBuildOptions) {
         }
     }
 
+    const esbuild: InlineConfig['esbuild'] = {};
+    // don't minify identifiers for univerjs packages
+    if (!isPro) {
+        esbuild.minifyIdentifiers = false;
+        esbuild.keepNames = true;
+    }
+
     const sharedConfig: InlineConfig = {
         configFile: false,
+        esbuild,
         build: {
             target: 'chrome70',
         },

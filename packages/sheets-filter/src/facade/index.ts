@@ -19,3 +19,7 @@ import './f-range';
 import './f-worksheet';
 
 export { FFilter } from './f-filter';
+
+export type * from './f-filter';
+export type * from './f-range';
+export type * from './f-worksheet';

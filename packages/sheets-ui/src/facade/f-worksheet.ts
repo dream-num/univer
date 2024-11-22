@@ -18,7 +18,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-interface IFWorksheetSkeletonMixin {
+export interface IFWorksheetSkeletonMixin {
 
     /**
      * Refresh the canvas.
@@ -26,7 +26,7 @@ interface IFWorksheetSkeletonMixin {
     refreshCanvas(): void;
 }
 
-class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
+export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
     override refreshCanvas(): void {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;

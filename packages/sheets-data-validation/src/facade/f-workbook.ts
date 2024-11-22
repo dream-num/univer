@@ -33,10 +33,12 @@ import { AddSheetDataValidationCommand,
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
     UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { filter } from 'rxjs';
 
-interface IFWorkbookDataValidationMixin {
+export interface IFWorkbookDataValidationMixin {
     /**
      * get data validation validator status for current workbook
      * @returns matrix of validator status
@@ -121,7 +123,7 @@ interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 }
 
-class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
+export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 
     override _initialize(): void {

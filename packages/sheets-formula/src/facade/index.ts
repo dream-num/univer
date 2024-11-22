@@ -16,3 +16,6 @@
 
 import './f-univer';
 import './f-formula';
+
+export type * from './f-formula';
+export type * from './f-univer';

@@ -20,7 +20,7 @@ import { IConfigService, ILogService, LifecycleService, LifecycleStages } from '
 import { FFormula } from '@univerjs/engine-formula';
 import { PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 
-interface IFFormulaSheetsMixin {
+export interface IFFormulaSheetsMixin {
     /**
      * Update the calculation mode of the formula.
      * @param calculationMode
@@ -29,7 +29,7 @@ interface IFFormulaSheetsMixin {
     setInitialFormulaComputing(calculationMode: CalculationMode): void;
 }
 
-class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
+export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
     override setInitialFormulaComputing(calculationMode: CalculationMode): void {
         const lifecycleService = this._injector.get(LifecycleService);
         const lifecycleStage = lifecycleService.stage;

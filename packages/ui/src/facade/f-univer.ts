@@ -19,7 +19,7 @@ import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/
 import { FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
 
-interface IFUniverUIMixin {
+export interface IFUniverUIMixin {
     copy(): Promise<boolean>;
 
     paste(): Promise<boolean>;
@@ -45,7 +45,7 @@ interface IFUniverUIMixin {
     getComponentManager(): ComponentManager;
 }
 
-class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
+export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override copy(): Promise<boolean> {
         return this._commandService.executeCommand(CopyCommand.id);
     }

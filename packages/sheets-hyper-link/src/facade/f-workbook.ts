@@ -19,7 +19,7 @@ import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 
-interface IFWorkbookHyperlinkMixin {
+export interface IFWorkbookHyperlinkMixin {
     /**
      * create a hyperlink for the sheet
      * @param sheetId the sheet id to link

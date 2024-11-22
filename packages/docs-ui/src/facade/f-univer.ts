@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { FUniver, UniverInstanceType } from '@univerjs/core';
 import { FDocument } from './f-document';
 
-interface IFUniverDocsUIMixin {
+export interface IFUniverDocsUIMixin {
     /**
      * Create a new document and get the API handler of that document.
      *

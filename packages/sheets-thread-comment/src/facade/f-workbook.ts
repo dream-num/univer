@@ -25,7 +25,7 @@ import { filter } from 'rxjs';
 // eslint-disable-next-line ts/no-explicit-any
 type IUpdateCommandParams = any;
 
-interface IFWorkbookThreadCommentMixin {
+export interface IFWorkbookThreadCommentMixin {
     /**
      * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
      * @param callback Callback function that will be called when the event is fired
@@ -64,7 +64,7 @@ interface IFWorkbookThreadCommentMixin {
     ): IDisposable;
 }
 
-class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
+export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
     override _initialize(): void {

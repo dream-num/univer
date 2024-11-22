@@ -15,3 +15,5 @@
  */
 
 import './f-worksheet';
+
+export type * from './f-worksheet';

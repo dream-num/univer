@@ -20,7 +20,7 @@ import { FRange } from '@univerjs/sheets/facade';
 import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 
-interface IFRangeDataValidationMixin {
+export interface IFRangeDataValidationMixin {
     /**
      * set a data validation rule to current range
      * @param rule data validation rule, build by `FUniver.newDataValidation`

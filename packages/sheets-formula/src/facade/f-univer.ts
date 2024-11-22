@@ -19,7 +19,7 @@ import { debounce, FUniver } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 
-interface IFUniverSheetsFormulaMixin {
+export interface IFUniverSheetsFormulaMixin {
     /**
      * Register a function to the spreadsheet.
      *
@@ -31,7 +31,7 @@ interface IFUniverSheetsFormulaMixin {
     // TODO@Dushusir: this API should be implemented on FFormula.
 }
 
-class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
+export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
     /**
      * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
      */

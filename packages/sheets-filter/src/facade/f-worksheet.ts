@@ -20,11 +20,11 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { FFilter } from './f-filter';
 
-interface IFWorksheetFilter {
+export interface IFWorksheetFilter {
     getFilter(): FFilter | null;
 }
 
-class FWorksheetFilter extends FWorksheet implements IFWorksheetFilter {
+export class FWorksheetFilter extends FWorksheet implements IFWorksheetFilter {
     override getFilter(): FFilter | null {
         const filterModel = this._getFilterModel();
         if (!filterModel) return null;

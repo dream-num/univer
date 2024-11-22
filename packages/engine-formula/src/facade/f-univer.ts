@@ -17,11 +17,11 @@
 import { FUniver } from '@univerjs/core';
 import { FFormula } from './f-formula';
 
-interface IFUniverEngineFormulaMixin {
+export interface IFUniverEngineFormulaMixin {
     getFormula(): FFormula;
 }
 
-class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngineFormulaMixin {
+export class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngineFormulaMixin {
     override getFormula(): FFormula {
         return this._injector.createInstance(FFormula);
     }

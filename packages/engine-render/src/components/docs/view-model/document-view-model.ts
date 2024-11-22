@@ -170,6 +170,10 @@ export function parseDataStreamToTree(dataStream: string, tables?: ICustomTable[
 }
 
 export class DocumentViewModel implements IDisposable {
+    private _cacheSize = 1000;
+
+    private _textRunsCache: Map<number, Map<number, ITextRun>> = new Map();
+
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
     private _tableNodeCache: Map<string, ITableNodeCache> = new Map();
@@ -180,7 +184,6 @@ export class DocumentViewModel implements IDisposable {
     private _textRunCurrentIndex = 0;
     private _customBlockCurrentIndex = 0;
     private _tableBlockCurrentIndex = 0;
-    private _customRangeCurrentIndex = 0;
     private _editArea: DocumentEditArea = DocumentEditArea.BODY;
 
     private readonly _editAreaChange$ = new BehaviorSubject<Nullable<DocumentEditArea>>(null);
@@ -200,6 +203,7 @@ export class DocumentViewModel implements IDisposable {
         const body = _documentDataModel.getBody()!;
 
         const { sectionList, tableNodeCache } = parseDataStreamToTree(body.dataStream, body.tables);
+        this._buildTextRunsCache();
 
         this.children = sectionList;
         this._tableNodeCache = tableNodeCache;
@@ -279,6 +283,7 @@ export class DocumentViewModel implements IDisposable {
         this.children = sectionList;
 
         this._tableNodeCache = tableNodeCache;
+        this._buildTextRunsCache();
 
         this._buildHeaderFooterViewModel();
     }
@@ -400,10 +405,8 @@ export class DocumentViewModel implements IDisposable {
     resetCache() {
         this._sectionBreakCurrentIndex = 0;
         this._paragraphCurrentIndex = 0;
-        this._textRunCurrentIndex = 0;
         this._customBlockCurrentIndex = 0;
         this._tableBlockCurrentIndex = 0;
-        this._customRangeCurrentIndex = 0;
 
         if (this.headerTreeMap.size > 0) {
             for (const header of this.headerTreeMap.values()) {
@@ -456,88 +459,14 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
-    getTextRunRange(startIndex: number = 0, endIndex: number) {
-        const textRuns = this.getBody()!.textRuns;
-        if (textRuns == null) {
-            return [
-                {
-                    st: startIndex,
-                    ed: endIndex,
-                },
-            ];
-        }
-
-        const trRange: ITextRun[] = [];
-
-        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
-            const textRun = textRuns[i];
-            if (textRun.st > endIndex) {
-                this._textRunCurrentIndex = i;
-                break;
-            } else if (textRun.ed < startIndex) {
-                this._textRunCurrentIndex = i;
-                continue;
-            } else {
-                trRange.push({
-                    st: textRun.st < startIndex ? startIndex : textRun.st,
-                    ed: textRun.ed > endIndex ? endIndex : textRun.ed,
-                    sId: textRun.sId,
-                    ts: textRun.ts,
-                });
-                this._textRunCurrentIndex = i;
-            }
-        }
-
-        const firstTr = trRange[0] || { st: endIndex + 1 };
-        if (firstTr.st > startIndex) {
-            trRange.push({
-                st: startIndex,
-                ed: firstTr.st - 1,
-            });
-        }
-
-        const lastTr = trRange[trRange.length - 1] || { ed: startIndex - 1 };
-        if (lastTr.ed < endIndex) {
-            trRange.push({
-                st: lastTr.ed + 1,
-                ed: endIndex,
-            });
-        }
-
-        return trRange;
-    }
-
     /**
      * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
      */
     getTextRun(index: number): Nullable<ITextRun> {
-        const textRuns = this.getBody()?.textRuns;
-        if (textRuns == null) {
-            return;
-        }
+        const cacheIndex = Math.floor(index / this._cacheSize);
+        const textRunsCache = this._textRunsCache.get(cacheIndex);
 
-        const curTextRun = textRuns[this._textRunCurrentIndex];
-
-        if (curTextRun != null) {
-            if (index >= curTextRun.st && index < curTextRun.ed) {
-                return curTextRun;
-            }
-
-            if (index < curTextRun.st) {
-                // If the index is less than the current textRun, reset the current index to 0, and re-search from the beginning.
-                this._textRunCurrentIndex = 0;
-                return this.getTextRun(index);
-            }
-        }
-
-        for (let i = this._textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
-            const textRun = textRuns[i];
-
-            if (index >= textRun.st && index < textRun.ed) {
-                this._textRunCurrentIndex = i;
-                return textRun;
-            }
-        }
+        return textRunsCache?.get(index % this._cacheSize);
     }
 
     getCustomBlock(index: number) {
@@ -638,6 +567,25 @@ export class DocumentViewModel implements IDisposable {
         }
 
         return this.getCustomDecorationRaw(index);
+    }
+
+    private _buildTextRunsCache() {
+        const textRuns = this.getBody()?.textRuns ?? [];
+        this._textRunsCache.clear();
+
+        for (const textRun of textRuns) {
+            const { st, ed } = textRun;
+
+            for (let i = st; i < ed; i++) {
+                const cacheIndex = Math.floor(i / this._cacheSize);
+
+                if (!this._textRunsCache.has(cacheIndex)) {
+                    this._textRunsCache.set(cacheIndex, new Map());
+                }
+
+                this._textRunsCache.get(cacheIndex)!.set(i % this._cacheSize, textRun);
+            }
+        }
     }
 
     private _buildHeaderFooterViewModel() {

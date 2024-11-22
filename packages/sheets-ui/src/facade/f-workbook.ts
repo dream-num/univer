@@ -68,7 +68,7 @@ interface IFWorkbookSheetsUIMixin {
 
     /**
      * End the editing process
-     * !important: This method is asynchronous and returns a promise that resolves to a boolean value.
+     * @async
      * @param save - Whether to save the changes
      * @returns A promise that resolves to a boolean value
      */

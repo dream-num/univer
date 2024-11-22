@@ -21,7 +21,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 
-interface IFWorksheetDataValidationMixin {
+export interface IFWorksheetDataValidationMixin {
     /**
      * get all data validation rules in current sheet
      * @returns all data validation rules
@@ -34,7 +34,7 @@ interface IFWorksheetDataValidationMixin {
     getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>>;
 }
 
-class FWorksheetDataValidationMixin extends FWorksheet implements IFWorksheetDataValidationMixin {
+export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorksheetDataValidationMixin {
     override getDataValidations(): FDataValidation[] {
         const dataValidationModel = this._injector.get(DataValidationModel);
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));

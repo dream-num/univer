@@ -20,7 +20,7 @@ import { FRange } from '@univerjs/sheets/facade';
 import { SetSheetFilterRangeCommand, SheetsFilterService } from '@univerjs/sheets-filter';
 import { FFilter } from './f-filter';
 
-interface IFRangeFilter {
+export interface IFRangeFilter {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
      *
@@ -39,7 +39,7 @@ interface IFRangeFilter {
     getFilter(): FFilter | null;
 }
 
-class FRangeFilter extends FRange implements IFRangeFilter {
+export class FRangeFilter extends FRange implements IFRangeFilter {
     override async createFilter(): Promise<FFilter | null> {
         if (this._getFilterModel()) return null;
 

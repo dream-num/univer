@@ -17,3 +17,5 @@
 import './f-univer';
 
 export { FDocument } from './f-document';
+
+export type * from './f-univer';

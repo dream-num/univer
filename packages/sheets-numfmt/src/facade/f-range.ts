@@ -18,7 +18,7 @@ import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { FRange } from '@univerjs/sheets/facade';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
-interface IFRangeSheetsNumfmtMixin {
+export interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two
 
     /**
@@ -29,7 +29,7 @@ interface IFRangeSheetsNumfmtMixin {
     setNumberFormat(pattern: string): Promise<boolean>;
 }
 
-class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
+export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
     override setNumberFormat(pattern: string): Promise<boolean> {
         // TODO@Gggpound: the API should support other types of parameters
         const values: ISetNumfmtCommandParams['values'] = [];

@@ -17,3 +17,5 @@
 import './f-univer';
 
 export { FFormula } from './f-formula';
+
+export type * from './f-univer';

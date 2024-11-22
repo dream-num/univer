@@ -20,9 +20,9 @@ import { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from '@univer
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { ComponentManager } from '@univerjs/ui';
 
-interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
+export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
-interface IFWorksheetLegacy {
+export interface IFWorksheetLegacy {
     /**
      * add a float dom to position
      * @param layer float dom config
@@ -35,7 +35,7 @@ interface IFWorksheetLegacy {
     }>;
 }
 
-class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
+export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     override addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
         id: string;
         dispose: () => void;

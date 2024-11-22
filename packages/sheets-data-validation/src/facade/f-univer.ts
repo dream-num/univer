@@ -17,14 +17,13 @@
 import { FUniver } from '@univerjs/core';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
-class FUnvierDataValidationMixin {
+export class FUnvierDataValidationMixin {
     static newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 }
 
 FUniver.extend(FUnvierDataValidationMixin);
-
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/no-namespace
     namespace FUniver {

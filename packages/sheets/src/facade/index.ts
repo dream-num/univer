@@ -21,5 +21,9 @@ export { FRange } from './f-range';
 export type { FontLine, FontStyle, FontWeight } from './f-range';
 export { FSelection } from './f-selection';
 export { FSheetHooks } from './f-sheet-hooks';
+
 export { FWorkbook } from './f-workbook';
 export { FWorksheet } from './f-worksheet';
+
+// eslint-disable-next-line perfectionist/sort-exports
+export type * from './f-univer';

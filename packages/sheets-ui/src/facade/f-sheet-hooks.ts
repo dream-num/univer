@@ -21,7 +21,7 @@ import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorServic
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { DragManagerService, HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
-interface IFSheetHooksUIMixin {
+export interface IFSheetHooksUIMixin {
     /**
      * The onCellPointerMove event is fired when a pointer changes coordinates.
      * @param callback Callback function that will be called when the event is fired
@@ -74,7 +74,7 @@ interface IFSheetHooksUIMixin {
     onAfterCellEdit(callback: (params: IEditorBridgeServiceVisibleParam) => void): IDisposable;
 }
 
-class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMixin {
+export class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMixin {
     override onCellPointerMove(callback: (cellPos: Nullable<IHoverCellPosition>) => void): IDisposable {
         return toDisposable(this._injector.get(HoverManagerService).currentPosition$.subscribe(callback));
     }

@@ -23,7 +23,7 @@ import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/shee
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 
-interface IFWorkbookSheetsUIMixin {
+export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.
      *
@@ -75,7 +75,7 @@ interface IFWorkbookSheetsUIMixin {
     endEditing(save?: boolean): Promise<boolean>;
 }
 
-class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
+export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         this._logDeprecation('openSiderbar');
 
@@ -150,4 +150,3 @@ declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}
 }
-

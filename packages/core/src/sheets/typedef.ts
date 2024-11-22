@@ -290,8 +290,6 @@ export interface ICellDataForSheetInterceptor extends ICellData {
         downOffset?: number;
         isSkip?: boolean;
     };
-
-    images?: Record<string, HTMLImageElement>;
 }
 
 export function isICellData(value: any): value is ICellData {

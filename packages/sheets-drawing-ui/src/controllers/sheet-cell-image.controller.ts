@@ -23,7 +23,6 @@ import { type IReplaceSnapshotCommandParams, ReplaceSnapshotCommand } from '@uni
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { AddWorksheetMergeMutation, AFTER_CELL_EDIT, getSheetCommandTarget, InterceptCellContentPriority, INTERCEPTOR_POINT, RemoveWorksheetMergeMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 import { getDrawingSizeByCell } from './sheet-drawing-update.controller';
 
 export function resizeImageByCell(injector: Injector, location: ISheetLocationBase, cell: Nullable<ICellData>) {
@@ -68,31 +67,14 @@ export class SheetCellImageController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocDrawingController) private readonly _docDrawingController: DocDrawingController,
-        @Inject(IEditorBridgeService) private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SheetCellCacheManagerService) private readonly _sheetCellCacheManagerService: SheetCellCacheManagerService
+        @Inject(IEditorBridgeService) private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
 
-        this._initInterceptor();
         this._initHandleResize();
         this._handleInitEditor();
         this._handleWriteCell();
         this._initCellContentInterceptor();
-    }
-
-    private _initInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            handler: (cell, context, next) => {
-                const { row, col } = context;
-                const imageCache = this._sheetCellCacheManagerService.getImageElementByPosition(context.unitId, context.subUnitId, row, col);
-
-                if (imageCache && cell) {
-                    cell.images = imageCache;
-                }
-
-                return next(cell);
-            },
-        }));
     }
 
     private _initHandleResize() {

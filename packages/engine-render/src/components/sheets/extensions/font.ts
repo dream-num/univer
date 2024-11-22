@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -270,9 +270,18 @@ export class Font extends SheetExtension {
         const drawingDatas = documentDataModel.getDrawings();
         const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
         drawings?.forEach((drawing) => {
-            const drawingData = drawingDatas?.[drawing.drawingId];
+            const drawingData = drawingDatas?.[drawing.drawingId] as { imageSourceType: ImageSourceType; source: string } & IDocDrawingBase;
             if (drawingData) {
-                const image = fontsConfig.images?.[drawing.drawingId];
+                const image = fontsConfig.imageCacheMap.getImage(
+                    drawingData.imageSourceType,
+                    drawingData.source,
+                    () => {
+                        this.parent?.makeDirty();
+                    },
+                    () => {
+                        this.parent?.makeDirty();
+                    }
+                );
 
                 const x = fontX + drawing.aLeft;
                 const y = fontY + drawing.aTop;

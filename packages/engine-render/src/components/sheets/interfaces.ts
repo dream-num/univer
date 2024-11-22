@@ -18,6 +18,7 @@ import type {
     BorderStyleTypes,
     HorizontalAlign,
     ICellWithCoord,
+    ImageCacheMap,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -50,7 +51,7 @@ export interface IFontCacheItem {
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;
     // content?: string;
-    images?: Record<string, HTMLImageElement>;
+    imageCacheMap: ImageCacheMap;
 }
 
 type colorString = string;

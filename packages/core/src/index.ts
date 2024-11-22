@@ -169,6 +169,8 @@ export * from './sheets/typedef';
 export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { createDocumentModelWithStyle } from './sheets/util';
+export { ImageCacheMap } from './shared/cache/image-cache';
+export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
 // #endregion
 
 export { getWorksheetUID, Workbook } from './sheets/workbook';

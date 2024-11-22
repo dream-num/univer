@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
-import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { HoverManagerService } from '@univerjs/sheets-ui';
-import { combineLatest } from 'rxjs';
-import { SheetCellCacheManagerService } from '../services/sheet-cell-cache-manager.service';
 
 export class SheetCellImageHoverController extends Disposable {
     private _isSetCursor = false;
@@ -29,7 +27,6 @@ export class SheetCellImageHoverController extends Disposable {
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(SheetsSelectionsService) private _selectionsService: SheetsSelectionsService,
-        @Inject(SheetCellCacheManagerService) private _sheetCellCacheManagerService: SheetCellCacheManagerService,
         @Inject(DrawingRenderService) private _drawingRenderService: DrawingRenderService
     ) {
         super();
@@ -38,46 +35,10 @@ export class SheetCellImageHoverController extends Disposable {
     }
 
     private _initHover() {
-        this.disposeWithMe(combineLatest([this._hoverManagerService.currentRichText$, this._selectionsService.selectionMoveEnd$]).subscribe(([hover]) => {
-            if (hover) {
-                const currentSelection = this._selectionsService.getWorkbookSelections(hover.unitId).getSelectionOfWorksheet(hover.subUnitId)[0];
-                const renderer = this._renderManagerService.getRenderById(hover.unitId);
-                if (renderer) {
-                    if (hover.drawing && currentSelection?.primary?.actualColumn === hover.col && currentSelection?.primary?.actualRow === hover.row) {
-                        renderer.mainComponent?.setCursor(CURSOR_TYPE.ZOOM_IN);
-                        this._isSetCursor = true;
-                    } else {
-                        renderer.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
-                        this._isSetCursor = false;
-                    }
-                }
-            } else {
-                if (this._isSetCursor) {
-                    const renderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
-                    if (renderer) {
-                        renderer.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
-                        this._isSetCursor = false;
-                    }
-                }
-            }
-        }));
+
     }
 
     private _initImageClick() {
-        this.disposeWithMe(this._hoverManagerService.currentClickedCell$.subscribe((clickedCell) => {
-            if (clickedCell.drawing) {
-                if (this._isSetCursor) {
-                    const imageElement = this._sheetCellCacheManagerService.getImageElementByKey(
-                        clickedCell.location.unitId,
-                        clickedCell.location.subUnitId,
-                        clickedCell.location.row,
-                        clickedCell.location.col,
-                        clickedCell.drawing);
-                    if (imageElement) {
-                        this._drawingRenderService.previewImage(`${clickedCell.drawing}-preview-image`, imageElement.src, imageElement.width, imageElement.height);
-                    }
-                }
-            }
-        }));
+
     }
 }

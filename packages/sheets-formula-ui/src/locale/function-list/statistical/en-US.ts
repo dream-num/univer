@@ -49,6 +49,22 @@ export default {
             },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: 'Finds the weighted average of a set of values, given the values and the corresponding weights.',
+        abstract: 'Finds the weighted average of a set of values, given the values and the corresponding weights.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9084098?hl=en&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: 'values', detail: '要计算平均数的值。' },
+            weights: { name: 'weights', detail: '要应用的相应权重列表。' },
+            additionalValues: { name: 'additional_values', detail: '要计算平均数的其他值。' },
+            additionalWeights: { name: 'additional_weights', detail: '要应用的其他权重。' },
+        },
+    },
     AVERAGEA: {
         description: 'Returns the average of its arguments, including numbers, text, and logical values.',
         abstract: 'Returns the average of its arguments, including numbers, text, and logical values',
@@ -836,8 +852,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = m*x+b.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = m*x+b.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 0.' },
+            stats: { name: 'stats', detail: 'A logical value specifying whether to return additional regression statistics.' },
         },
     },
     LOGEST: {
@@ -850,8 +868,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = b*m^x.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = b*m^x.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 1.' },
+            stats: { name: 'stats', detail: 'A logical value specifying whether to return additional regression statistics.' },
         },
     },
     LOGNORM_DIST: {
@@ -883,6 +903,20 @@ export default {
             probability: { name: 'probability', detail: 'A probability corresponding to the lognormal distribution.' },
             mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
             standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'Calculates the margin of error from a range of values and a confidence level.',
+        abstract: 'Calculates the margin of error from a range of values and a confidence level.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/12487850?hl=en&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'range', detail: 'The range of values used to calculate the margin of error.' },
+            confidence: { name: 'confidence', detail: 'The desired confidence level between (0, 1).' },
         },
     },
     MAX: {
@@ -1557,8 +1591,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = m*x+b.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = m*x+b.' },
+            newXs: { name: "new_x's", detail: 'Are new x-values for which you want TREND to return corresponding y-values.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 0.' },
         },
     },
     TRIMMEAN: {

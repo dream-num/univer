@@ -63,10 +63,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"
     },

@@ -60,7 +60,6 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/icons": "^0.2.5",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {

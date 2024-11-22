@@ -201,6 +201,28 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_DATE.EPOCHTODATE,
+        functionType: FunctionType.Date,
+        description: 'formula.functionList.EPOCHTODATE.description',
+        abstract: 'formula.functionList.EPOCHTODATE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.EPOCHTODATE.functionParameter.timestamp.name',
+                detail: 'formula.functionList.EPOCHTODATE.functionParameter.timestamp.detail',
+                example: '1655906710',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.EPOCHTODATE.functionParameter.unit.name',
+                detail: 'formula.functionList.EPOCHTODATE.functionParameter.unit.detail',
+                example: '1',
+                require: 0,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_DATE.HOUR,
         functionType: FunctionType.Date,
         description: 'formula.functionList.HOUR.description',
@@ -387,6 +409,21 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
                 name: 'formula.functionList.TIMEVALUE.functionParameter.timeText.name',
                 detail: 'formula.functionList.TIMEVALUE.functionParameter.timeText.detail',
                 example: '"15:20:59"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_DATE.TO_DATE,
+        functionType: FunctionType.Date,
+        description: 'formula.functionList.TO_DATE.description',
+        abstract: 'formula.functionList.TO_DATE.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.TO_DATE.functionParameter.value.name',
+                detail: 'formula.functionList.TO_DATE.functionParameter.value.detail',
+                example: '40826.4375',
                 require: 1,
                 repeat: 0,
             },

@@ -15,34 +15,39 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { CURSOR_TYPE } from './basics/const';
 
-import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
-import type { ITimeMetric } from './basics/interfaces';
+import type { IEvent, IKeyboardEvent, IPointerEvent } from './basics/i-events';
+import type { ITimeMetric, ITransformChangeState } from './basics/interfaces';
 import type { IBasicFrameInfo } from './basics/performance-monitor';
 import type { Scene } from './scene';
-import { toDisposable, Tools } from '@univerjs/core';
+import { Disposable, EventSubject, toDisposable, Tools } from '@univerjs/core';
 import { Observable, shareReplay, Subject } from 'rxjs';
+import { type CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
 import { observeClientRect } from './floating/util';
-import { ThinEngine } from './thin-engine';
 
-export class Engine extends ThinEngine<Scene> {
+export class Engine extends Disposable {
     renderEvenInBackground = true;
 
     private readonly _beginFrame$ = new Subject<number>();
     readonly beginFrame$ = this._beginFrame$.asObservable();
-
     private readonly _endFrame$ = new Subject<IBasicFrameInfo>();
     readonly endFrame$ = this._endFrame$.asObservable();
 
     readonly renderFrameTimeMetric$ = new Subject<ITimeMetric>();
-
     readonly renderFrameTags$ = new Subject<[string, any]>();
+
+    onInputChanged$ = new EventSubject<IEvent>();
+
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
+
+    private _scenes: { [sceneKey: string]: Scene } = {};
+
+    private _activeScene: Scene | null = null;
 
     /**
      * time when render start, for elapsedTime
@@ -161,12 +166,53 @@ export class Engine extends ThinEngine<Scene> {
         return Tools.now() - this._renderStartTime;
     }
 
-    override get width() {
+    get width() {
         return this.getCanvas().getWidth();
     }
 
-    override get height() {
+    get height() {
         return this.getCanvas().getHeight();
+    }
+
+    get classType() {
+        return RENDER_CLASS_TYPE.ENGINE;
+    }
+
+    get activeScene() {
+        return this._activeScene;
+    }
+
+    getScenes() {
+        return this._scenes;
+    }
+
+    getScene(sceneKey: string): Scene | null {
+        return this._scenes[sceneKey];
+    }
+
+    hasScene(sceneKey: string): boolean {
+        return sceneKey in this._scenes;
+    }
+
+    addScene(sceneInstance: Scene): Scene {
+        const sceneKey = (sceneInstance as any).sceneKey;
+        if (this.hasScene(sceneKey)) {
+            console.warn('Scenes has same key, it will be covered');
+        }
+        this._scenes[sceneKey] = sceneInstance;
+        return sceneInstance;
+    }
+
+    setActiveScene(sceneKey: string): Scene | null {
+        const scene = this.getScene(sceneKey);
+        if (scene) {
+            this._activeScene = scene;
+        }
+        return scene;
+    }
+
+    hasActiveScene(): boolean {
+        return this._activeScene != null;
     }
 
     get requestNewFrameHandler() {
@@ -180,20 +226,20 @@ export class Engine extends ThinEngine<Scene> {
         return this._frameId;
     }
 
-    override setCanvasCursor(val: CURSOR_TYPE) {
+    setCanvasCursor(val: CURSOR_TYPE) {
         const canvasEl = this.getCanvas().getCanvasEle();
         canvasEl.style.cursor = val;
     }
 
-    override clearCanvas() {
+    clearCanvas() {
         this.getCanvas().clear();
     }
 
-    override getCanvas() {
+    getCanvas() {
         return this._canvas!;
     }
 
-    override getCanvasElement() {
+    getCanvasElement() {
         return this.getCanvas().getCanvasEle()!;
     }
 
@@ -201,7 +247,7 @@ export class Engine extends ThinEngine<Scene> {
      * To ensure mouse events remain bound to the host element,
      * preventing the events from becoming ineffective once the mouse leaves the host.
      */
-    override setRemainCapture() {
+    setRemainCapture() {
         try {
             this.getCanvasElement().setPointerCapture(this._remainCapture);
         } catch {
@@ -287,6 +333,13 @@ export class Engine extends ThinEngine<Scene> {
 
     override dispose() {
         super.dispose();
+
+        const scenes = { ...this.getScenes() };
+        const sceneKeys = Object.keys(scenes);
+        sceneKeys.forEach((key) => {
+            (scenes[key] as any).dispose();
+        });
+        this._scenes = {};
 
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();

@@ -49,6 +49,22 @@ export default {
             },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: '可在已知實際數值和對應權重的情況下，用來求得多項數值的加權平均值',
+        abstract: '可在已知實際數值和對應權重的情況下，用來求得多項數值的加權平均值',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9084098?hl=zh-Hant&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: '值', detail: '要計算平均值的數值。' },
+            weights: { name: '權重', detail: '要套用的權重對應清單。' },
+            additionalValues: { name: '其他值', detail: '要計算平均值的其他值。' },
+            additionalWeights: { name: '其他權重', detail: '要套用的其他權重。' },
+        },
+    },
     AVERAGEA: {
         description: '傳回其參數的平均值，包括數字、文字和邏輯值。 ',
         abstract: '傳回其參數的平均值，包括數字、文字和邏輯值',
@@ -836,8 +852,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '在 y = m*x+b 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = m*x+b 關係中一組已知的 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 0 的邏輯值。' },
+            stats: { name: '統計', detail: '指定是否要傳回額外迴歸統計值的邏輯值。' },
         },
     },
     LOGEST: {
@@ -850,8 +868,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '在 y = b*m^x 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = b*m^x 關係中一組已知的 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 1 的邏輯值。' },
+            stats: { name: '統計', detail: '指定是否要傳回額外迴歸統計值的邏輯值。' },
         },
     },
     LOGNORM_DIST: {
@@ -883,6 +903,20 @@ export default {
             probability: { name: '機率', detail: '對應到對數常態分佈的機率。' },
             mean: { name: '平均值', detail: '分佈的算術平均值。' },
             standardDev: { name: '標準差', detail: '分佈的標準差。' },
+        },
+    },
+    MARGINOFERROR: {
+        description: '計算特定值範圍和信賴水準的誤差範圍',
+        abstract: '計算特定值範圍和信賴水準的誤差範圍',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/12487850?hl=zh-Hant&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: '範圍', detail: '用來計算誤差範圍的值範圍。' },
+            confidence: { name: '信賴水準', detail: '想要的信賴水準介於 (0, 1) 之間。' },
         },
     },
     MAX: {
@@ -1557,8 +1591,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '在 y = m*x+b 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '在 y = m*x+b 關係中一組已知的 x 值。' },
+            newXs: { name: '新資料_x', detail: '要 TREND 傳回對應 y 值的新 x 值。' },
+            constb: { name: 'b', detail: '指定是否強迫常數 b 等於 0 的邏輯值。' },
         },
     },
     TRIMMEAN: {

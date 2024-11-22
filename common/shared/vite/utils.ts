@@ -15,8 +15,19 @@
  */
 
 import type { Plugin } from 'vite';
+import process from 'node:process';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 
+/**
+ * Convert the package name to the library name.
+ *
+ * @param name
+ * @returns Library name
+ * @example
+ * convertLibNameFromPackageName('@univerjs-pro/sheets-print') // UniverProSheetsPrint
+ * convertLibNameFromPackageName('@univerjs/sheets-ui') // UniverSheetsUi
+ * convertLibNameFromPackageName(''@univerjs/watermark/facade') // UniverWatermarkFacade
+ */
 export function convertLibNameFromPackageName(name: string) {
     return name
         .replace(/^@(univerjs(?:-pro)?)\//, (_, matchedPrefix) => {
@@ -28,12 +39,14 @@ export function convertLibNameFromPackageName(name: string) {
         .join('');
 };
 
+/**
+ * A plugin that obfuscates the @univerjs-pro/* packages.
+ */
 export function obfuscator(): Plugin {
     return {
         name: 'obfuscator',
         enforce: 'post',
         async generateBundle(_options, bundle) {
-            // eslint-disable-next-line node/prefer-global/process
             if (process.env.NODE_ENV === 'development') {
                 return;
             }

@@ -22,8 +22,7 @@ import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEven
 import type { ITransformChangeState } from './basics/interfaces';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
-import type { Scene } from './scene';
-import type { ThinEngine } from './thin-engine';
+import type { Engine } from './engine';
 import { Disposable, EventSubject } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Transform } from './basics/transform';
@@ -226,7 +225,7 @@ export abstract class ThinScene extends Disposable {
 
     abstract addObjects(objects: BaseObject[], zIndex?: number): void;
 
-    abstract getEngine(): Nullable<ThinEngine<Scene>>;
+    abstract getEngine(): Nullable<Engine>;
 
     abstract setObjectBehavior(o: BaseObject): void;
 

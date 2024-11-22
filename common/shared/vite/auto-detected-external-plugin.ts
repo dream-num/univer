@@ -15,41 +15,8 @@
  */
 
 import type { Plugin } from 'vite';
+import { peerDepsMap } from './data';
 import { convertLibNameFromPackageName } from './utils';
-
-const peerDepsMap = {
-    react: {
-        global: 'React',
-        name: 'react',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
-    },
-    // 'react/jsx-runtime': {
-    //     global: 'react/jsx-runtime',
-    //     name: 'react',
-    //     version: 'react',
-    // },
-    'react-dom': {
-        global: 'ReactDOM',
-        name: 'react-dom',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
-    },
-    rxjs: {
-        global: 'rxjs',
-        name: 'rxjs',
-        version: '>=7.0.0',
-    },
-    'rxjs/operators': {
-        global: 'rxjs.operators',
-        name: 'rxjs',
-        version: 'rxjs',
-    },
-    vue: {
-        global: 'Vue',
-        name: 'vue',
-        version: '>=3.0.0',
-        optional: true,
-    },
-};
 
 export function autoDetectedExternalPlugin(): Plugin {
     const globals = {};

@@ -138,6 +138,146 @@ export function matrixTranspose(matrix: number[][]): number[][] {
     return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
 }
 
+export function inverseMatrixByLUD(matrix: number[][]) {
+    const { smallPivotDetected, luMatrix, permutation } = performLUDecomposition(matrix);
+
+    if (smallPivotDetected) {
+        return null;
+    }
+
+    return transformMatrix(luMatrix, permutation);
+}
+
+function performLUDecomposition(matrix: number[][]) {
+    const decomposedMatrix = matrixTranspose(matrix);
+    const numRows = decomposedMatrix.length;
+    const numCols = decomposedMatrix[0].length;
+    let isRowSwap = true;
+    let smallPivotDetected = false;
+    const luMatrix = createMatrix(numRows, numCols, 0);
+    const permutation = new Array(numCols).fill(0).map((_, index) => index);
+
+    for (let c = 0; c < numCols; c++) {
+        for (let i = 0; i < c; i++) {
+            let value = decomposedMatrix[i][c];
+
+            for (let k = 0; k < i; k++) {
+                value -= luMatrix[i][k] * luMatrix[k][c];
+            }
+
+            luMatrix[i][c] = value;
+        }
+
+        let maxPivot = -Infinity;
+        let pivotRow = c;
+
+        for (let r = c; r < numRows; r++) {
+            let value = decomposedMatrix[r][c];
+
+            for (let k = 0; k < c; k++) {
+                value -= luMatrix[r][k] * luMatrix[k][c];
+            }
+
+            luMatrix[r][c] = value;
+
+            const absValue = Math.abs(value);
+
+            if (absValue > maxPivot) {
+                maxPivot = absValue;
+                pivotRow = r;
+            }
+        }
+
+        if (Math.abs(luMatrix[pivotRow][c]) < 1e-11) {
+            smallPivotDetected = true;
+            break;
+        }
+
+        if (pivotRow !== c) {
+            [luMatrix[c], luMatrix[pivotRow]] = [luMatrix[pivotRow], luMatrix[c]];
+            [decomposedMatrix[c], decomposedMatrix[pivotRow]] = [decomposedMatrix[pivotRow], decomposedMatrix[c]];
+            [permutation[c], permutation[pivotRow]] = [permutation[pivotRow], permutation[c]];
+            isRowSwap = !isRowSwap;
+        }
+
+        const pivotElement = luMatrix[c][c];
+
+        for (let r = c + 1; r < numRows; r++) {
+            luMatrix[r][c] /= pivotElement;
+        }
+    }
+
+    return {
+        rowSwap: isRowSwap,
+        smallPivotDetected,
+        luMatrix,
+        permutation,
+    };
+}
+
+function transformMatrix(inputMatrix: number[][], indices: number[]): number[][] {
+    const size = indices.length;
+    const identityMatrix = createMatrix(size, size, 0);
+
+    for (let i = 0; i < size; i++) {
+        identityMatrix[i][i] = 1;
+    }
+
+    const resultMatrix = createMatrix(size, size, 0);
+
+    for (let rowIndex = 0; rowIndex < size; rowIndex++) {
+        const index = indices[rowIndex];
+        for (let colIndex = 0; colIndex < size; colIndex++) {
+            resultMatrix[rowIndex][colIndex] = identityMatrix[index][colIndex];
+        }
+    }
+
+    for (let pivot = 0; pivot < size; pivot++) {
+        const currentRow = resultMatrix[pivot];
+
+        for (let row = pivot + 1; row < size; row++) {
+            const factor = inputMatrix[row][pivot];
+
+            for (let column = 0; column < size; column++) {
+                resultMatrix[row][column] -= currentRow[column] * factor;
+            }
+        }
+    }
+
+    for (let row = size - 1; row >= 0; row--) {
+        const currentRow = resultMatrix[row];
+        const pivotElement = inputMatrix[row][row];
+
+        for (let column = 0; column < size; column++) {
+            currentRow[column] /= pivotElement;
+        }
+
+        for (let upperRow = 0; upperRow < row; upperRow++) {
+            const upperFactor = inputMatrix[upperRow][row];
+
+            for (let upperCol = 0; upperCol < size; upperCol++) {
+                resultMatrix[upperRow][upperCol] -= currentRow[upperCol] * upperFactor;
+            }
+        }
+    }
+
+    return resultMatrix;
+}
+
+function createMatrix(rows: number, cols: number, initialValue: number): number[][] {
+    const matrix: number[][] = [];
+
+    for (let r = 0; r < rows; r++) {
+        matrix[r] = [];
+
+        for (let c = 0; c < cols; c++) {
+            matrix[r].push(initialValue);
+        }
+    }
+
+    return matrix;
+}
+
 export function inverseMatrixByUSV(matrix: number[][]): number[][] | null {
     const matrixUSV = getMatrixUSV(matrix);
 

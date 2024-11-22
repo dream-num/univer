@@ -68,10 +68,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.45",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*"
     },

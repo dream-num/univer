@@ -43,6 +43,22 @@ export default {
             number2: { name: '数値 2', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: '指定した値と対応するウェイトに基づいて、一連の値の加重平均値を求めます。',
+        abstract: '指定した値と対応するウェイトに基づいて、一連の値の加重平均値を求めます。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9084098?hl=ja&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: '値', detail: '平均化する値を指定します。' },
+            weights: { name: 'ウェイト', detail: '適用するウェイトの対応するリストを指定します。' },
+            additionalValues: { name: '追加の値', detail: '平均化する追加の値を指定します。' },
+            additionalWeights: { name: '追加のウェイト', detail: '適用する追加のウェイトを指定します。' },
+        },
+    },
     AVERAGEA: {
         description: '数値、文字列、および論理値を含む引数の平均値を返します。',
         abstract: '数値、文字列、および論理値を含む引数の平均値を返します',
@@ -811,8 +827,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
+            stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
     LOGEST: {
@@ -825,8 +843,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
+            stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
     LOGNORM_DIST: {
@@ -858,6 +878,20 @@ export default {
             probability: { name: '確率', detail: '対数正規分布における確率を指定します。' },
             mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
             standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'この関数は、値の範囲と信頼レベルから誤差の範囲を計算します。',
+        abstract: 'この関数は、値の範囲と信頼レベルから誤差の範囲を計算します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/12487850?hl=ja&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: '範囲', detail: '許容誤差の計算に使用される値の範囲。' },
+            confidence: { name: '信頼レベル', detail: '0 ～ 1 の信頼レベル。' },
         },
     },
     MAX: {
@@ -1520,8 +1554,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            newXs: { name: '新しい x', detail: 'TREND 関数を利用して、対応する y の値を計算する新しい x の値を指定します。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
         },
     },
     TRIMMEAN: {

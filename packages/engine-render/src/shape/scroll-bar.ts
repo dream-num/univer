@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { Subscription } from 'rxjs';
-
 import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
-import { Transform } from '../basics/transform';
-import { BaseScrollBar } from './base-scroll-bar';
-import { Rect } from './rect';
+
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
-import type { ThinScene } from '../thin-scene';
+import type { Scene } from '../scene';
 import type { Viewport } from '../viewport';
 import type { IScrollBarProps } from './base-scroll-bar';
+import { Subscription } from 'rxjs';
+import { Transform } from '../basics/transform';
+import { BaseScrollBar } from './base-scroll-bar';
+import { Rect } from './rect';
 
 const MINI_THUMB_SIZE = 17;
 
 export class ScrollBar extends BaseScrollBar {
     protected _viewport!: Viewport;
 
-    private _mainScene: Nullable<ThinScene>;
+    private _mainScene: Nullable<Scene>;
 
     private _lastX: number = -1;
 

@@ -795,21 +795,14 @@ export abstract class BaseObject extends Disposable {
 
     getScene(): Nullable<Scene> {
         let parent: any = this.parent;
-
-        if (parent == null) {
-            return null;
-        }
-
-        if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-            return parent;
-        }
-
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 return parent;
             }
             parent = parent.getParent();
         }
+
+        return null;
     }
 
     resetCursor() {

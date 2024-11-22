@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export const functionArray = [];
+import { ArrayConstrain } from './array-constrain';
+import { Flatten } from './flatten';
+import { FUNCTION_NAMES_ARRAY } from './function-names';
+
+export const functionArray = [
+    [ArrayConstrain, FUNCTION_NAMES_ARRAY.ARRAY_CONSTRAIN],
+    [Flatten, FUNCTION_NAMES_ARRAY.FLATTEN],
+];

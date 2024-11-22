@@ -25,11 +25,13 @@ import dts from 'vite-plugin-dts';
 import vitePluginExternal from 'vite-plugin-external';
 
 import { autoDetectedExternalPlugin } from './auto-detected-external-plugin';
-
+import { cleanupPkgPlugin } from './cleanup-pkg-plugin';
 import { convertLibNameFromPackageName, obfuscator } from './utils';
 
 interface IBuildExecuterOptions {
-    pkg: Record<string, any>;
+    pkg: {
+        name: string;
+    };
     entry: Record<string, string>;
     isPro: boolean;
 }
@@ -38,7 +40,7 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
     const { entry } = options;
 
     return Promise.all(Object.keys(entry).map((key) => {
-        const config: InlineConfig = mergeConfig(sharedConfig, {
+        const basicConfig: InlineConfig = {
             build: {
                 emptyOutDir: false,
                 outDir: 'lib',
@@ -55,16 +57,20 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                     },
                 },
             },
-            plugins: [
-                key === 'index'
-                    ? dts({
-                        entryRoot: 'src',
-                        outDir: 'lib/types',
-                        clearPureImport: false,
-                    })
-                    : null,
-            ],
-        });
+        };
+
+        const config: InlineConfig = mergeConfig(sharedConfig, basicConfig);
+
+        if (key === 'index') {
+            config.plugins?.unshift(cleanupPkgPlugin());
+            config.plugins?.push(
+                dts({
+                    entryRoot: 'src',
+                    outDir: 'lib/types',
+                    clearPureImport: false,
+                })
+            );
+        }
 
         return viteBuild(config);
     }));

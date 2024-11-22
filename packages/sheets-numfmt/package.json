@@ -23,7 +23,6 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
         "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
@@ -69,8 +68,6 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

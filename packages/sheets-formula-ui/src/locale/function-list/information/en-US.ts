@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: 'Checks whether a provided number is between two other numbers either inclusively or exclusively.',
+        abstract: 'Checks whether a provided number is between two other numbers either inclusively or exclusively.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/10538337?hl=en&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: 'value_to_compare', detail: 'The value to test as being between `lower_value` and `upper_value`.' },
+            lowerValue: { name: 'lower_value', detail: 'The lower boundary of the range of values that `value_to_compare` can fall within.' },
+            upperValue: { name: 'upper_value', detail: 'The upper boundary of the range of values that `value_to_compare` can fall within.' },
+            lowerValueIsInclusive: { name: 'lower_value_is_inclusive', detail: 'Whether the range of values includes the `lower_value`. By default this is TRUE.' },
+            upperValueIsInclusive: { name: 'upper_value_is_inclusive', detail: 'Whether the range of values includes the `upper_value`. By default this is TRUE.' },
+        },
+    },
     ISBLANK: {
         description: 'Returns TRUE if the value is blank',
         abstract: 'Returns TRUE if the value is blank',
@@ -67,6 +84,32 @@ export default {
         ],
         functionParameter: {
             value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
+        },
+    },
+    ISDATE: {
+        description: 'Returns whether a value is a date.',
+        abstract: 'Returns whether a value is a date.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/9061381?hl=en&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as a date.' },
+        },
+    },
+    ISEMAIL: {
+        description: 'Checks if a value is a valid email address',
+        abstract: 'Checks if a value is a valid email address',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3256503?hl=en&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as an email address.' },
         },
     },
     ISERR: {
@@ -224,6 +267,19 @@ export default {
         ],
         functionParameter: {
             value: { name: 'value', detail: 'The value that you want tested. The value argument can be a blank (empty cell), error, logical value, text, number, or reference value, or a name referring to any of these.' },
+        },
+    },
+    ISURL: {
+        description: 'Checks whether a value is a valid URL.',
+        abstract: 'Checks whether a value is a valid URL.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3256501?hl=en&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'value', detail: 'The value to be verified as a URL.' },
         },
     },
     N: {

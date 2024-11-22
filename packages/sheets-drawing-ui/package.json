@@ -41,15 +41,15 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./facade": {
-                "import": "./lib/es/facade.js",
-                "require": "./lib/cjs/facade.js",
-                "types": "./lib/types/facade/index.d.ts"
-            },
             "./locale/*": {
                 "import": "./lib/es/locale/*.js",
                 "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
+            },
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
             },
             "./lib/*": "./lib/*"
         }
@@ -79,7 +79,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.5",
+        "@univerjs/icons": "^0.2.7",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -106,15 +106,15 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./facade": {
-            "import": "./lib/es/facade.js",
-            "require": "./lib/cjs/facade.js",
-            "types": "./lib/types/facade/index.d.ts"
-        },
         "./locale/*": {
             "import": "./lib/es/locale/*.js",
             "require": "./lib/cjs/locale/*.js",
             "types": "./lib/types/locale/*.d.ts"
+        },
+        "./facade": {
+            "import": "./lib/es/facade.js",
+            "require": "./lib/cjs/facade.js",
+            "types": "./lib/types/facade/index.d.ts"
         },
         "./lib/*": "./lib/*"
     }

@@ -1128,6 +1128,28 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_MATH.ROUNDBANK,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ROUNDBANK.description',
+        abstract: 'formula.functionList.ROUNDBANK.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ROUNDBANK.functionParameter.number.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.number.detail',
+                example: '2.345',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.detail',
+                example: '2',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_MATH.ROUNDDOWN,
         functionType: FunctionType.Math,
         description: 'formula.functionList.ROUNDDOWN.description',

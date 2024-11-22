@@ -155,6 +155,20 @@ export default {
             },
         },
     },
+    EPOCHTODATE: {
+        description: 'Chuyển đổi dấu thời gian bắt đầu của hệ thống Unix ở dạng giây, mili giây hoặc micrô giây thành dạng ngày giờ theo Giờ phối hợp quốc tế (UTC).',
+        abstract: 'Chuyển đổi dấu thời gian bắt đầu của hệ thống Unix ở dạng giây, mili giây hoặc micrô giây thành dạng ngày giờ theo Giờ phối hợp quốc tế (UTC).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/13193461?hl=vi&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            timestamp: { name: 'dấu thời gian', detail: 'Dấu thời gian bắt đầu của hệ thống Unix ở dạng giây, mili giây hoặc micrô giây.' },
+            unit: { name: 'đơn vị thời gian', detail: 'Đơn vị thời gian mà dấu thời gian thể hiện. 1 theo mặc định: \n1 cho biết đơn vị thời gian là giây. \n2 cho biết đơn vị thời gian là mili giây.\n3 cho biết đơn vị thời gian là micrô giây.' },
+        },
+    },
     HOUR: {
         description: 'Chuyển đổi số sê-ri thành giờ',
         abstract: 'Chuyển đổi số sê-ri thành giờ',
@@ -304,6 +318,19 @@ export default {
                 name: 'Văn bản thời gian',
                 detail: 'Chuỗi văn bản đại diện cho một thời gian trong định dạng thời gian Excel, ví dụ, "6:45 PM" và "18:45" là văn bản chuỗi trong dấu ngoặc kép đại diện cho thời gian.',
             },
+        },
+    },
+    TO_DATE: {
+        description: 'Chuyển đổi một số cho sẵn thành giá trị ngày (theo lịch).',
+        abstract: 'Chuyển đổi một số cho sẵn thành giá trị ngày (theo lịch).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/3094239?hl=vi&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Đối số hoặc tham chiếu đến một ô sẽ được chuyển đổi thành ngày tháng.' },
         },
     },
     TODAY: {

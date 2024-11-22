@@ -43,6 +43,22 @@ export default {
             number2: { name: 'số 2', detail: 'Các số khác, tham chiếu ô hoặc phạm vi cần tính giá trị trung bình, tối đa là 255.' },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
+        abstract: 'Tìm trung bình cộng gia quyền của một tập giá trị khi biết các giá trị và trọng số tương ứng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/9084098?hl=vi&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: 'giá_trị', detail: 'Giá trị cần tính trung bình.' },
+            weights: { name: 'trọng_số', detail: 'Danh sách trọng số tương ứng để áp dụng.' },
+            additionalValues: { name: 'giá_trị_bổ_sung', detail: 'Các giá trị bổ sung cần tính trung bình.' },
+            additionalWeights: { name: 'trọng_số_bổ_sung', detail: 'Các trọng số bổ sung để áp dụng.' },
+        },
+    },
     AVERAGEA: {
         description: 'Trả về giá trị trung bình của các tham số, bao gồm số, văn bản và giá trị logic.',
         abstract: 'Trả về giá trị trung bình của các tham số, bao gồm số, văn bản và giá trị logic.',
@@ -758,6 +774,38 @@ export default {
             k: { name: 'k', detail: 'Vị trí (tính từ lớn nhất) trong mảng hoặc phạm vi ô dữ liệu cần trả về.' },
         },
     },
+    LINEST: {
+        description: 'Trả về các tham số của xu hướng tuyến tính',
+        abstract: 'Trả về các tham số của xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/linest-%E5%87%BD%E6%95%B0-84d7d0d9-6e50-4101-977a-fa7abf772b6d',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = m*x+b.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = m*x+b.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 0 hay không.' },
+            stats: { name: 'thống kê', detail: 'Giá trị lô-gic chỉ rõ có trả về các thống kê hồi quy bổ sung hay không.' },
+        },
+    },
+    LOGEST: {
+        description: 'Trả về các tham số của xu hướng hàm mũ',
+        abstract: 'Trả về các tham số của xu hướng hàm mũ',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/logest-%E5%87%BD%E6%95%B0-f27462d8-3657-4030-866b-a272c1d18b4b',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = b*m^x.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = b*m^x.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 1 hay không.' },
+            stats: { name: 'thống kê', detail: 'Giá trị lô-gic chỉ rõ có trả về các thống kê hồi quy bổ sung hay không.' },
+        },
+    },
     LOGNORM_DIST: {
         description: 'Trả về phân bố chuẩn lô-ga-rít của',
         abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
@@ -787,6 +835,20 @@ export default {
             probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
             mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
             standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        abstract: 'Tính biên độ sai số của một dải giá trị và mức tin cậy.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.google.com/docs/answer/12487850?hl=vi&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: 'dải_ô', detail: 'Dải giá trị dùng để tính biên độ sai số.' },
+            confidence: { name: 'mức_tin_cậy', detail: 'Mức tin cậy mong muốn trong khoảng (0, 1).' },
         },
     },
     MAX: {
@@ -1449,6 +1511,22 @@ export default {
             array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
             tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, T.TEST sử dụng phân phối một phía. Nếu đuôi = 2, T.TEST sử dụng phân phối hai phía.' },
             type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
+        },
+    },
+    TREND: {
+        description: 'Trả về các giá trị theo xu hướng tuyến tính',
+        abstract: 'Trả về các giá trị theo xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/trend-%E5%87%BD%E6%95%B0-e2f135f0-8827-4096-9873-9a7cf7b51ef1',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = m*x+b.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = m*x+b.' },
+            newXs: { name: 'dữ liệu mới_x', detail: 'Là những giá trị x mới mà bạn muốn hàm TREND trả về tương ứng với các giá trị y.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 0 hay không.' },
         },
     },
     TRIMMEAN: {

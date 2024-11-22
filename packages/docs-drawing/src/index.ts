@@ -15,7 +15,7 @@
  */
 
 export { UniverDocsDrawingPlugin } from './plugin';
-export { DocDrawingService, type IDocDrawing, IDocDrawingService } from './services/doc-drawing.service';
+export { DocDrawingService, type IDocDrawing, IDocDrawingService, type IDocImage } from './services/doc-drawing.service';
 
 export { DOCS_DRAWING_PLUGIN, type IDocDrawingModel } from './controllers/doc-drawing.controller';
 export { DocDrawingController } from './controllers/doc-drawing.controller';

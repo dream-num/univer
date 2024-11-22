@@ -20,7 +20,6 @@ import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ISceneInputControlOptions, Scene } from './scene';
-import type { ThinScene } from './thin-scene';
 import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -41,45 +40,23 @@ export class InputManager extends Disposable {
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
 
-    private _scene!: ThinScene;
+    private _scene!: Scene;
 
     /** This is a defensive check to not allow control attachment prior to an already active one. If already attached, previous control is unattached before attaching the new one. */
     private _alreadyAttached = false;
 
-    // private _alreadyAttachedTo: HTMLElement;
-
     // WorkBookObserver
     private _onInput$: Nullable<Subscription>;
 
-    // Pointers
-    // private _onPointerMove!: (evt: IMouseEvent) => void;
-    // private _onPointerDown!: (evt: IPointerEvent) => void;
-    // private _onPointerUp!: (evt: IPointerEvent) => void;
-    // private _onPointerOut!: (evt: IPointerEvent) => void;
-    // private _onPointerCancel!: (evt: IPointerEvent) => void;
-    // private _onPointerEnter!: (evt: IPointerEvent) => void;
-    // private _onPointerLeave!: (evt: IPointerEvent) => void;
-    // private _onMouseWheel!: (evt: IWheelEvent) => void;
-
-    // Keyboard
-    // private _onKeyDown!: (evt: IKeyboardEvent) => void;
-    // private _onKeyUp!: (evt: IKeyboardEvent) => void;
-
-    // Drag
-    // private _onDragEnter!: (evt: IDragEvent) => void;
-    // private _onDragLeave!: (evt: IDragEvent) => void;
-    // private _onDragOver!: (evt: IDragEvent) => void;
-    // private _onDrop!: (evt: IDragEvent) => void;
-
-    private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
+    private _currentMouseEnterPicked: Nullable<BaseObject | Scene>;
     private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
     private _delayedTimeout: NodeJS.Timeout | number = -1;
     private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
     private _doubleClickOccurred = 0;
     private _tripleClickState = false;
-    private _currentObject: Nullable<BaseObject | ThinScene>;
+    private _currentObject: Nullable<BaseObject | Scene>;
 
-    constructor(scene: ThinScene) {
+    constructor(scene: Scene) {
         super();
         this._scene = scene;
     }
@@ -90,14 +67,13 @@ export class InputManager extends Disposable {
     override dispose(): void {
         super.dispose();
         this.detachControl();
-        this._scene = null as unknown as ThinScene;
-        // this._currentMouseEnterPicked?.dispose();
+        this._scene = null as unknown as Scene;
         this._currentMouseEnterPicked = null;
-        // this._currentObject?.dispose();
         this._currentObject = null;
         this._startingPosition = null as unknown as Vector2;
         clearTimeout(this._delayedTimeout);
         clearTimeout(this._delayedTripeTimeout);
+
         this._onPointerMove = null as unknown as (evt: IMouseEvent) => void;
         this._onPointerDown = null as unknown as (evt: IPointerEvent) => void;
         this._onPointerUp = null as unknown as (evt: IPointerEvent) => void;
@@ -147,15 +123,7 @@ export class InputManager extends Disposable {
         }
 
         this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
-        const _isStop = this._currentObject?.triggerPointerMove(evt);
-
         this.mouseLeaveEnterHandler(evt);
-
-        // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-        //     if (this._scene.onPointerMoveObserver.hasObservers()) {
-        //         this._scene.onPointerMoveObserver.notifyObservers(evt);
-        //     }
-        // }
     }
 
     _onPointerLeave(evt: IPointerEvent) {
@@ -164,18 +132,8 @@ export class InputManager extends Disposable {
             evt.pointerId = 0;
         }
 
-        // this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-        // const isStop = this._currentObject?.triggerPointerMove(evt);
-
         this._currentObject = null;
-
         this.mouseLeaveEnterHandler(evt);
-
-        // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-        //     if (this._scene.onPointerMoveObserver.hasObservers()) {
-        //         this._scene.onPointerMoveObserver.notifyObservers(evt);
-        //     }
-        // }
     }
 
     _onPointerMove(evt: IMouseEvent) {
@@ -403,21 +361,19 @@ export class InputManager extends Disposable {
         }
         // engine.onInputChanged$.remove(this._onInput$);
         this._onInput$?.unsubscribe();
-
         this._alreadyAttached = false;
     }
 
     /**
-     * Just call this._scene?.pick, nothing special.
+     * Just call this._scene.pick, nothing special.
      * @param offsetX
      * @param offsetY
-     * @returns
      */
     private _getObjectAtPos(offsetX: number, offsetY: number) {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
-    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<ThinScene | BaseObject>) {
+    private _checkDirectSceneEventTrigger(isTrigger: boolean, currentObject: Nullable<Scene | BaseObject>) {
         let notObject = false;
         if (currentObject == null) {
             notObject = true;
@@ -425,7 +381,7 @@ export class InputManager extends Disposable {
 
         let isNotInSceneViewer = true;
         if (currentObject && currentObject.classType === RENDER_CLASS_TYPE.BASE_OBJECT) {
-            const scene = (currentObject as BaseObject).getScene() as ThinScene;
+            const scene = (currentObject as BaseObject).getScene() as Scene;
             if (scene) {
                 const parent = scene.getParent();
                 isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;

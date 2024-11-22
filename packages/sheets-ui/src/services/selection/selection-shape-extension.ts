@@ -473,9 +473,9 @@ export class SelectionShapeExtension {
         } else if (cursor === CURSOR_TYPE.SOUTH_RESIZE) {
             this._relativeSelectionPositionRow = startRow;
         }
-
         const scrollTimer = ScrollTimer.create(scene);
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
         this._scrollTimer = scrollTimer;
 
         scene.disableObjectsEvent();

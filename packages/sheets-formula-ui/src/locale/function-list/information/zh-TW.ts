@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: '檢查提供的數字是否介於另外兩個值之間',
+        abstract: '檢查提供的數字是否介於另外兩個值之間',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hant&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: '比較值', detail: '要比較的值，以查看該值是否介於「最小值」和「最大值」之間。' },
+            lowerValue: { name: '最小值', detail: '範圍的下限值，「比較值」可能落在這個範圍內。' },
+            upperValue: { name: '最大值', detail: '範圍的上限值，「比較值」可能落在這個範圍內。' },
+            lowerValueIsInclusive: { name: '包括最小值', detail: '用於指定「最小值」這個值是否包含在範圍中 (預設是 TRUE)。' },
+            upperValueIsInclusive: { name: '包括最大值', detail: '用於指定「最大值」這個值是否包含在範圍中 (預設是 TRUE)。' },
+        },
+    },
     ISBLANK: {
         description: '如果值為空，則傳回 TRUE',
         abstract: '若值為空，則傳回 TRUE',
@@ -67,6 +84,32 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+        },
+    },
+    ISDATE: {
+        description: '針對特定值是否可轉換為日期傳回結果',
+        abstract: '針對特定值是否可轉換為日期傳回結果',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hant&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為日期的值。' },
+        },
+    },
+    ISEMAIL: {
+        description: '檢查某個值是否為有效的電子郵件地址',
+        abstract: '檢查某個值是否為有效的電子郵件地址',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hant&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為電子郵件地址的值。' },
         },
     },
     ISERR: {
@@ -223,6 +266,19 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: '指的是要測試的值。參數值可以是空白（空白儲存格）、錯誤值、邏輯值、文字、數字、參考值，或引用要測試的以上任意值的名稱。' },
+        },
+    },
+    ISURL: {
+        description: '檢查特定值是否為有效的網址',
+        abstract: '檢查特定值是否為有效的網址',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hant&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要驗證是否為網址的值。' },
         },
     },
     N: {

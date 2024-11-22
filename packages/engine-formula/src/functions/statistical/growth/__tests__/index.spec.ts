@@ -113,7 +113,7 @@ describe('Test growth function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(knownYs2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
 
             const knownYs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -205,6 +205,52 @@ describe('Test growth function', () => {
             });
             const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+
+            const knownXs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4, 5],
+                    [2, 3, 4, 5, 6],
+                    [3, 4, 5, 6, 7],
+                    [4, 5, 6, 7, 8],
+                ]),
+                rowCount: 4,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(knownYs, knownXs2);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
+
+            const knownYs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4],
+                ]),
+                rowCount: 1,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4],
+                    [2, 3, 4, 5],
+                    [3, 4, 5, 6],
+                    [4, 5, 6, 7],
+                    [5, 6, 7, 8],
+                ]),
+                rowCount: 5,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(knownYs2, knownXs3);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NA);
         });
 
         it('NewXs length error', () => {
@@ -361,10 +407,24 @@ describe('Test growth function', () => {
             const knownXs = ErrorValueObject.create(ErrorType.NAME);
             const newXs = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(knownYs, knownXs);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
 
             const result2 = testFunction.calculate(knownYs, undefined, newXs);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+
+            const knownXs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 17, 18, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(knownYs, knownXs2);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('More test', () => {
@@ -497,32 +557,32 @@ describe('Test growth function', () => {
             });
             const result3 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb);
             expect(getObjectValue(result3)).toStrictEqual([
-                [1.1161231740339033],
-                [1.7617295898720449],
+                [1.1161231740339035],
+                [1.7617295898720453],
                 [2.780778340631825],
-                [4.389282114679539],
-                [6.928203230275548],
-                [10.935729065914693],
-                [17.2613542397969],
-                [27.245952089325357],
-                [43.00600607235712],
-                [67.88225099390945],
-                [107.14782470725646],
+                [4.38928211467954],
+                [6.92820323027555],
+                [10.935729065914696],
+                [17.261354239796905],
+                [27.245952089325364],
+                [43.00600607235713],
+                [67.88225099390954],
+                [107.14782470725653],
             ]);
 
             const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
             expect(getObjectValue(result4)).toStrictEqual([
-                [1.1161231740339057],
-                [1.7617295898720433],
-                [2.780778340631814],
-                [4.389282114679508],
-                [6.928203230275478],
-                [10.935729065914547],
-                [17.261354239796617],
-                [27.245952089324824],
-                [43.00600607235614],
-                [67.88225099390776],
-                [107.14782470725342],
+                [1.1161231740339097],
+                [1.761729589872056],
+                [2.7807783406318434],
+                [4.38928211467957],
+                [6.928203230275601],
+                [10.935729065914781],
+                [17.261354239797047],
+                [27.2459520893256],
+                [43.00600607235752],
+                [67.88225099391019],
+                [107.14782470725761],
             ]);
 
             const knownYs3 = ArrayValueObject.create({
@@ -562,7 +622,7 @@ describe('Test growth function', () => {
             });
             const result5 = testFunction.calculate(knownYs3, knownXs3, newXs4, constb);
             expect(getObjectValue(result5)).toStrictEqual([
-                [1.1161231740339033, 1.7617295898720449, 2.780778340631825, 4.389282114679539, 6.928203230275548, 10.935729065914693, 17.2613542397969],
+                [1.1161231740339035, 1.7617295898720453, 2.780778340631825, 4.38928211467954, 6.92820323027555, 10.935729065914696, 17.261354239796905],
             ]);
         });
     });

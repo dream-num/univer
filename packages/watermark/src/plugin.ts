@@ -38,17 +38,12 @@ export class UniverWatermarkPlugin extends Plugin {
     ) {
         super();
 
-        const { menu } = this._config;
-        if (menu) {
-            this._configService.setConfig('menu', menu, { merge: true });
-        }
-
         this._initWatermarkStorage();
         this._initDependencies();
     }
 
     private async _initWatermarkStorage() {
-        const { menu, ...rest } = this._config;
+        const { ...rest } = this._config;
         if (rest.userWatermarkSettings) {
             this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: { ...WatermarkUserInfoBaseConfig, ...rest.userWatermarkSettings } } });
         } else if (rest.textWatermarkSettings) {

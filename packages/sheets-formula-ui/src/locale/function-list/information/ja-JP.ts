@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: '指定した値が他の 2 つの値の範囲内にあるかどうかを確認します',
+        abstract: '指定した値が他の 2 つの値の範囲内にあるかどうかを確認します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/10538337?hl=ja&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: '比較する値', detail: '\'最小値\' と \'最大値\' の範囲内にあるかどうかを確認する値です。' },
+            lowerValue: { name: '最小値', detail: '\'比較する値\' が含まれる可能性のある値の範囲の下限を指定します。' },
+            upperValue: { name: '最大値', detail: '\'比較する値\' が含まれる可能性のある値の範囲の上限を指定します。' },
+            lowerValueIsInclusive: { name: '最小値を含む', detail: '値の範囲に \'最小値\' を含めるかどうかを指定します（デフォルトは TRUE）。' },
+            upperValueIsInclusive: { name: '最大値を含む', detail: '値の範囲に \'最大値\' を含めるかどうかを指定します（デフォルトは TRUE）。' },
+        },
+    },
     ISBLANK: {
         description: '対象が空白セルを参照するときに TRUE を返します。',
         abstract: '対象が空白セルを参照するときに TRUE を返します。',
@@ -67,6 +84,32 @@ export default {
         ],
         functionParameter: {
             value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
+        },
+    },
+    ISDATE: {
+        description: 'は、値が日付かどうかを返します',
+        abstract: 'は、値が日付かどうかを返します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9061381?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: '日付であるかを検証する値です。' },
+        },
+    },
+    ISEMAIL: {
+        description: '値が有効なメールアドレスであるかどうかを検証します',
+        abstract: '値が有効なメールアドレスであるかどうかを検証します',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256503?hl=ja&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'メールアドレスであるかどうかを検証する値です。' },
         },
     },
     ISERR: {
@@ -224,6 +267,19 @@ export default {
         ],
         functionParameter: {
             value: { name: '値', detail: 'テストする値を指定します。テストの対象引数には、空白セル、エラー、論理値、文字列、数値、参照値、または対象となるデータを参照する名前を指定することができます。' },
+        },
+    },
+    ISURL: {
+        description: '値が有効な URL であるかどうかを検証します。',
+        abstract: '値が有効な URL であるかどうかを検証します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3256501?hl=ja&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '値', detail: 'URL であるかを検証する値を指定します。' },
         },
     },
     N: {

@@ -16,12 +16,10 @@
 
 import type { IPaddingData, Nullable } from '@univerjs/core';
 
-import { RENDER_CLASS_TYPE } from './basics/const';
+import type { Scene } from './scene';
+import type { Viewport } from './viewport';
 import { cancelRequestFrame, requestNewFrame } from './basics/tools';
 import { Vector2 } from './basics/vector2';
-import type { Scene } from './scene';
-import type { ThinScene } from './thin-scene';
-import type { Viewport } from './viewport';
 
 export enum ScrollTimerType {
     NONE,
@@ -29,6 +27,8 @@ export enum ScrollTimerType {
     Y,
     ALL,
 }
+
+const THRESHOLD_TO_AUTO_MOVE: IPaddingData = { t: 0, b: 15, l: 0, r: 60 };
 
 export class ScrollTimer {
     private _requestNewFrameNumber: number = -1;
@@ -40,24 +40,28 @@ export class ScrollTimer {
     private _scrollX: number = 0;
     private _scrollY: number = 0;
     /**
-     * Custmize scroll function.
+     * Customize scroll function.
      */
     private _scrollFunction: Nullable<(x?: number, y?: number) => void>;
 
     constructor(
         private _scene: Scene,
         private _scrollTimerType: ScrollTimerType = ScrollTimerType.ALL,
-        private _padding?: IPaddingData
-        // private _smoothRatioX = 0.4,
-        // private _smoothRatioY = 0.05
+        private _thresholdAutoMove: IPaddingData = THRESHOLD_TO_AUTO_MOVE
     ) {
-        if (!this._padding) {
-            this._padding = { t: 0, b: 15, l: 0, r: 60 };
-        }
+        //
     }
 
-    static create(scene: any, scrollTimerType: ScrollTimerType = ScrollTimerType.ALL, padding?: IPaddingData) {
+    static create(scene: Scene, scrollTimerType: ScrollTimerType = ScrollTimerType.ALL, padding?: IPaddingData) {
         return new ScrollTimer(scene, scrollTimerType, padding);
+    }
+
+    get offsetX() {
+        return this._offsetX;
+    }
+
+    get offsetY() {
+        return this._offsetY;
     }
 
     set scrollTimerType(type: ScrollTimerType) {
@@ -86,7 +90,7 @@ export class ScrollTimer {
         if (targetViewport != null) {
             this._viewport = targetViewport;
         } else {
-            this._viewport = this.getViewportByCoord(this._scene);
+            this._viewport = this._scene.findViewportByPosToScene(Vector2.FromArray([offsetX, offsetY]));
         }
 
         this._runRenderLoop();
@@ -99,7 +103,7 @@ export class ScrollTimer {
         const leftBounding = viewport?.left || 0;
         const rightBounding = leftBounding + (viewport?.width || 0);
 
-        const { t = 0, b = 0, r = 0, l = 0 } = this._padding!;
+        const { t = 0, b = 0, r = 0, l = 0 } = this._thresholdAutoMove;
 
         let x = 0;
         let y = 0;
@@ -134,11 +138,7 @@ export class ScrollTimer {
             return;
         }
 
-        // const limited = viewport?.scrollBy({
-        //     x,
-        //     y,
-        // });
-        const limited = viewport?.scrollByViewportDeltaVal({
+        const scrolled = viewport?.scrollByViewportDeltaVal({
             viewportScrollX: x,
             viewportScrollY: y,
         });
@@ -147,14 +147,6 @@ export class ScrollTimer {
 
         this._scrollX = viewportScrollVal?.x || 0;
         this._scrollY = viewportScrollVal?.y || 0;
-
-        if (limited) {
-            const ancestorScene = this._findAncestorScene(viewport?.scene);
-            const newViewport = this.getViewportByCoord(ancestorScene);
-            if (newViewport) {
-                this._autoScroll(newViewport);
-            }
-        }
     }
 
     scrolling(offsetX: number, offsetY: number, scrollFunction: (x?: number, y?: number) => void) {
@@ -172,10 +164,6 @@ export class ScrollTimer {
         delete this._scrollFunction;
     }
 
-    getViewportByCoord(scene?: Scene) {
-        return scene?.findViewportByPosToViewport(Vector2.FromArray([this._offsetX, this._offsetY]));
-    }
-
     getScene() {
         return this._scene;
     }
@@ -186,15 +174,5 @@ export class ScrollTimer {
             this._scrollFunction(this._scrollX, this._scrollY);
         }
         this._requestNewFrameNumber = requestNewFrame(this._runRenderLoop.bind(this));
-    }
-
-    private _findAncestorScene(scene?: ThinScene) {
-        let parent = scene?.getParent();
-        while (parent) {
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-                return parent;
-            }
-            parent = parent?.getParent && parent?.getParent();
-        }
     }
 }

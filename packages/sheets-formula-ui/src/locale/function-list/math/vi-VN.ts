@@ -772,6 +772,20 @@ export default {
             numDigits: { name: 'số chữ số', detail: 'Số chữ số mà bạn muốn làm tròn số tới đó.' },
         },
     },
+    ROUNDBANK: {
+        description: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
+        abstract: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số mà bạn muốn làm tròn theo cách làm tròn của ngân hàng.' },
+            numDigits: { name: 'số chữ số', detail: 'Số chữ số mà bạn muốn làm tròn theo cách làm tròn của ngân hàng.' },
+        },
+    },
     ROUNDDOWN: {
         description: 'Làm tròn số xuống, tiến tới không.',
         abstract: 'Làm tròn số xuống, tiến tới không.',

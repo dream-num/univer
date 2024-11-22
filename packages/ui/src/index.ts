@@ -45,6 +45,11 @@ export { DesktopBeforeCloseService, IBeforeCloseService } from './services/befor
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export {
     BrowserClipboardService,
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+    FILE_SVG_XML_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
     IClipboardInterfaceService,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,

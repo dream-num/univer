@@ -23,6 +23,14 @@ import {
     Inject,
     RxDisposable,
 } from '@univerjs/core';
+import {
+    FILE__BMP_CLIPBOARD_MIME_TYPE,
+    FILE__JPEG_CLIPBOARD_MIME_TYPE,
+    FILE__WEBP_CLIPBOARD_MIME_TYPE,
+    FILE_PNG_CLIPBOARD_MIME_TYPE,
+    HTML_CLIPBOARD_MIME_TYPE,
+    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
+} from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { whenDocOrEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
@@ -37,6 +45,7 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @IContextService private readonly _contextService: IContextService,
         @IEditorService private readonly _editorService: IEditorService
+
     ) {
         super();
 
@@ -55,8 +64,20 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
 
             config!.event.preventDefault();
             const clipboardEvent = config!.event as ClipboardEvent;
-            let htmlContent = clipboardEvent.clipboardData?.getData('text/html');
-            const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+            let htmlContent = clipboardEvent.clipboardData?.getData(HTML_CLIPBOARD_MIME_TYPE);
+            const textContent = clipboardEvent.clipboardData?.getData(PLAIN_TEXT_CLIPBOARD_MIME_TYPE);
+
+            const imageTypes = [
+                FILE__BMP_CLIPBOARD_MIME_TYPE,
+                FILE__JPEG_CLIPBOARD_MIME_TYPE,
+                FILE__WEBP_CLIPBOARD_MIME_TYPE,
+                FILE_PNG_CLIPBOARD_MIME_TYPE,
+            ];
+
+            const files = [...(clipboardEvent.clipboardData?.items || [])]
+                .filter((item) => imageTypes.includes(item.type))
+                .map((item) => item.getAsFile()!)
+                .filter((e) => !!e);
 
             // TODO: @JOCS, work around to fix https://github.com/dream-num/univer-pro/issues/2006. and then when you paste it,
             // you need to distinguish between different editors,
@@ -67,7 +88,7 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
                 htmlContent = '';
             }
 
-            this._docClipboardService.legacyPaste(htmlContent, textContent);
+            this._docClipboardService.legacyPaste({ html: htmlContent, text: textContent, files });
         });
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import { FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
 
@@ -39,20 +39,10 @@ interface IFUniverUIMixin {
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
 
     /**
-     * Register a component
-     * @param name - The name of the component
-     * @param component - The component to register
-     * @param options - The options of the component
-     * @returns The disposable object
+     * Get the component manager
+     * @returns The component manager
      */
-    registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
-
-    /**
-     * Get a component
-     * @param name - The name of the component
-     * @returns The component
-     */
-    getComponent(name: string): ComponentType | undefined;
+    getComponentManager(): ComponentManager;
 }
 
 class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -80,14 +70,8 @@ class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return disposable;
     }
 
-    override registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
-        const componentService = this._injector.get(ComponentManager);
-        return componentService.register(name, component, options);
-    }
-
-    override getComponent(name: string): ComponentType | undefined {
-        const componentService = this._injector.get(ComponentManager);
-        return componentService.get(name);
+    override getComponentManager(): ComponentManager {
+        return this._injector.get(ComponentManager);
     }
 }
 

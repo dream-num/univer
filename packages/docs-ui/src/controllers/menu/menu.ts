@@ -767,7 +767,9 @@ const listValueFactory$ = (accessor: IAccessor) => {
             }
 
             textSubscription = docSelectionManagerService.textSelection$.subscribe(() => {
-                const range = docSelectionManagerService.getActiveTextRange();
+                const docRanges = docSelectionManagerService.getDocRanges();
+                const range = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
                     const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);

@@ -15,9 +15,9 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
-
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+
+import { CommandType, ICommandService } from '@univerjs/core';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {

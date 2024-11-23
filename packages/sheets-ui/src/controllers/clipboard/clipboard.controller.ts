@@ -152,16 +152,15 @@ export class SheetClipboardController extends RxDisposable {
 
         if (docSelectionRenderService) {
             sheetPasteShortKeyFn(docSelectionRenderService);
-        } else {
-            this._renderManagerService.created$.subscribe((renderer) => {
-                if (renderer.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-                    if (docSelectionRenderService) {
-                        sheetPasteShortKeyFn(docSelectionRenderService);
-                    }
-                }
-            });
         }
+        this._renderManagerService.created$.subscribe((renderer) => {
+            if (renderer.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+                if (docSelectionRenderService) {
+                    sheetPasteShortKeyFn(docSelectionRenderService);
+                }
+            }
+        });
     }
 
     private _init(): void {

@@ -169,6 +169,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             this._initAutoFocus();
         }
 
+        registerDependencies(this._injector, [
+            [SheetClipboardController],
+        ]);
+
         this._registerRenderBasics();
 
         touchDependencies(this._injector, [
@@ -240,7 +244,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [MoveRangeRenderController],
 
             // editor
-            [SheetClipboardController],
             [EditorBridgeRenderController],
             [EditingRenderController],
 

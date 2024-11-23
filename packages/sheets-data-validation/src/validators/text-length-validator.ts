@@ -26,7 +26,7 @@ import { isLegalFormulaResult } from '../utils/formula';
 import { FORMULA1, FORMULA2 } from './const';
 import { getTransformedFormula } from './util';
 
-export class TextLengthValidator extends BaseDataValidator<number> {
+export class TextLengthValidator extends BaseDataValidator {
     id: string = DataValidationType.TEXT_LENGTH;
     title: string = 'dataValidation.textLength.title';
     private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
@@ -50,7 +50,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));
     }
 
-    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, _unitId: string, _subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {
@@ -108,93 +108,9 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         };
     }
 
-    override async isValidType(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule) {
+    override async isValidType(cellInfo: IValidatorCellInfo<number>, _formula: IFormulaResult, _rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
         return typeof cellValue === 'string' || typeof cellValue === 'number';
-    }
-
-    override async validatorIsEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        if (!Tools.isDefine(formula1)) {
-            return false;
-        }
-
-        return cellInfo.value === formula1;
-    }
-
-    override async validatorIsNotEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        if (!Tools.isDefine(formula1)) {
-            return false;
-        }
-
-        return cellInfo.value !== formula1;
-    }
-
-    override async validatorIsBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1, formula2 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1) || !this._isValidFormula(formula2)) {
-            return false;
-        }
-
-        const max = Math.max(formula1, formula2);
-        const min = Math.min(formula1, formula2);
-
-        return cellValue >= min && cellValue <= max;
-    }
-
-    override async validatorIsNotBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1, formula2 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1) || !this._isValidFormula(formula2)) {
-            return false;
-        }
-
-        const max = Math.max(formula1, formula2);
-        const min = Math.min(formula1, formula2);
-
-        return cellValue < min || cellValue > max;
-    }
-
-    override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1)) {
-            return false;
-        }
-
-        return cellValue > formula1;
-    }
-
-    override async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1)) {
-            return false;
-        }
-
-        return cellValue >= formula1;
-    }
-
-    override async validatorIsLessThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1)) {
-            return false;
-        }
-
-        return cellValue < formula1;
-    }
-
-    override async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (!this._isValidFormula(formula1)) {
-            return false;
-        }
-
-        return cellValue <= formula1;
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase, pos: ISheetLocationBase) {

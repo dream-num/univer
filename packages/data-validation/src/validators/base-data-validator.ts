@@ -59,7 +59,7 @@ export interface IFormulaValidResult {
     formula2?: string;
 }
 
-export abstract class BaseDataValidator<DataType = CellValue> {
+export abstract class BaseDataValidator {
     abstract id: string;
     abstract title: string;
     abstract operators: DataValidationOperator[];
@@ -127,7 +127,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return false;
     }
 
-    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult>;
+    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>>;
 
     abstract validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult;
 
@@ -142,41 +142,82 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return true;
     };
 
-    transform(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): IValidatorCellInfo<DataType> {
-        return cellInfo as IValidatorCellInfo<DataType>;
+    transform(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): IValidatorCellInfo<number> {
+        return cellInfo as IValidatorCellInfo<number>;
     };
 
-    async validatorIsEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+    async validatorIsEqual(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        const { value: cellValue } = cellInfo;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
 
-    async validatorIsNotEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+        return cellValue === formula1;
+    }
 
-    async validatorIsBetween(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+    async validatorIsNotEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
 
-    async validatorIsNotBetween(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+        return cellInfo.value !== formula1;
+    }
 
-    async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+    async validatorIsBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1, formula2 } = formula;
+        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
+            return true;
+        }
 
-    async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+        const start = Math.min(formula1, formula2);
+        const end = Math.max(formula1, formula2);
+        return cellInfo.value >= start && cellInfo.value <= end;
+    }
 
-    async validatorIsLessThan(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+    async validatorIsNotBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1, formula2 } = formula;
+        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
+            return true;
+        }
+        const start = Math.min(formula1, formula2);
+        const end = Math.max(formula1, formula2);
+        return cellInfo.value < start || cellInfo.value > end;
+    }
 
-    async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
-        return true;
-    };
+    async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
+        return cellInfo.value > formula1;
+    }
+
+    async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
+        return cellInfo.value >= formula1;
+    }
+
+    async validatorIsLessThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
+        return cellInfo.value < formula1;
+    }
+
+    async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
+        const { formula1 } = formula;
+        if (Number.isNaN(formula1)) {
+            return true;
+        }
+
+        return cellInfo.value <= formula1;
+    }
 
     async validator(cellInfo: IValidatorCellInfo, rule: IDataValidationRule): Promise<boolean> {
         const { value: cellValue, unitId, subUnitId } = cellInfo;

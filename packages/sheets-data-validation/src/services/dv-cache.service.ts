@@ -86,12 +86,6 @@ export class DataValidationCacheService extends Disposable {
         this._dirtyRanges$.next({ unitId, subUnitId, ranges });
     }
 
-    markCellDirty(unitId: string, subUnitId: string, row: number, col: number) {
-        const cache = this._ensureCache(unitId, subUnitId);
-        cache.setValue(row, col, undefined);
-        this._dirtyRanges$.next({ unitId, subUnitId, ranges: [{ startRow: row, startColumn: col, endRow: row, endColumn: col }] });
-    }
-
     private _deleteRange(unitId: string, subUnitId: string, ranges: IRange[]) {
         const cache = this._ensureCache(unitId, subUnitId);
         ranges.forEach((range) => {
@@ -105,10 +99,5 @@ export class DataValidationCacheService extends Disposable {
     getValue(unitId: string, subUnitId: string, row: number, col: number) {
         const cache = this._ensureCache(unitId, subUnitId);
         return cache.getValue(row, col);
-    }
-
-    setValue(unitId: string, subUnitId: string, row: number, col: number, value: DataValidationStatus) {
-        const cache = this._ensureCache(unitId, subUnitId);
-        return cache.setValue(row, col, value);
     }
 }

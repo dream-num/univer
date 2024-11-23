@@ -232,6 +232,11 @@ export class DocumentViewModel implements IDisposable {
         });
 
         this._textRunsCache.clear();
+        this._paragraphCache.clear();
+        this._sectionBreakCache.clear();
+        this._customBlockCache.clear();
+        this._tableCache.clear();
+        this._tableNodeCache.clear();
     }
 
     getHeaderFooterTreeMap() {

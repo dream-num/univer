@@ -18,7 +18,6 @@ export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { type IValidStatusChange, SheetDataValidationModel } from './models/sheet-data-validation-model';
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { DataValidationCacheService } from './services/dv-cache.service';
-export type { IDataValidationResCache } from './services/dv-cache.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';

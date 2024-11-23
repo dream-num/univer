@@ -15,9 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { HyperLinkModel } from '../../models/hyper-link.model';
 import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
+import { CommandType, CustomRangeType, IUniverInstanceService } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { HyperLinkModel } from '../../models/hyper-link.model';
 
 export interface IUpdateHyperLinkMutationParams {
     unitId: string;
@@ -60,5 +61,41 @@ export const UpdateHyperLinkRefMutation: ICommand<IUpdateHyperLinkRefMutationPar
         const model = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, id, row, column, silent } = params;
         return model.updateHyperLinkRef(unitId, subUnitId, id, { row, column }, silent);
+    },
+};
+
+export interface IUpdateRichHyperLinkMutationParams {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    col: number;
+    id: string;
+    url: string;
+}
+
+export const UpdateRichHyperLinkMutation: ICommand<IUpdateRichHyperLinkMutationParams> = {
+    type: CommandType.MUTATION,
+    id: 'sheets.mutation.update-rich-hyper-link',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+
+        const { unitId, subUnitId, row, col, id, url } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetTarget = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
+        if (!sheetTarget) {
+            return false;
+        }
+        const { worksheet } = sheetTarget;
+        const cell = worksheet.getCellRaw(row, col);
+
+        const link = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.rangeId === id);
+        if (!link) {
+            return true;
+        }
+
+        link.properties!.url = url;
+        return true;
     },
 };

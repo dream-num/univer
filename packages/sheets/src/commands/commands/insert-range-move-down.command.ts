@@ -38,7 +38,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range-mutation';
-import { copyStylesIgnoreBorder, followSelectionOperation } from './utils/selection-utils';
+import { copyStylesOmitSpecProps, followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface InsertRangeMoveDownCommandParams {
@@ -130,7 +130,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
             if (!cellValue[row]) {
                 cellValue[row] = {};
             }
-            cell = copyStylesIgnoreBorder(cell, worksheet);
+            cell = copyStylesOmitSpecProps(cell, worksheet, ['bd']);
             cellValue[row][col] = { s: cell.s };
         });
         const insertRangeMutationParams: IInsertRangeMutationParams = {

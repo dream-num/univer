@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../../basics/selection';
 
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
@@ -290,23 +290,23 @@ export function copyRangeStylesWithoutBorder(
             }
 
             // univer-pro/issues/3016  insert row/column should not reuse border style
-            cell = copyStylesIgnoreBorder(cell, worksheet);
+            cell = copyStylesOmitSpecProps(cell, worksheet, ['bd']);
             cellDataMatrix[row][column] = { s: cell.s };
         }
     }
     return cellDataMatrix;
 }
 
-export function copyStylesIgnoreBorder(cell: ICellData, worksheet: Worksheet) {
+export function copyStylesOmitSpecProps(cell: ICellData, worksheet: Worksheet, props: (keyof IStyleData)[]) {
     if (typeof cell.s === 'string') {
         const styleData = worksheet.getStyleDataByHash(cell.s);
         if (styleData) {
-            delete styleData.bd;
+            props.forEach((prop) => delete styleData[prop]);
             cell.s = worksheet.setStyleData(styleData);
         }
     } else {
-        const styleData = { ...cell.s };
-        delete styleData.bd;
+        const styleData: IStyleData = { ...cell.s };
+        props.forEach((prop) => delete styleData[prop]);
         cell.s = worksheet.setStyleData(styleData);
     }
     return cell;

@@ -92,7 +92,7 @@ export const UpdateRichHyperLinkMutation: ICommand<IUpdateRichHyperLinkMutationP
 
         const link = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.rangeId === id);
         if (!link) {
-            return false;
+            return true;
         }
 
         link.properties!.url = url;

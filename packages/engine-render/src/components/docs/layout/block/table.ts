@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable, ITableRow, Nullable } from '@univerjs/core';
-import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, ISectionBreakConfig } from '../../../../basics';
+import type { INumberUnit, ITable, ITableRow } from '@univerjs/core';
+import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
-import { createSkeletonCellPage } from '../model/page';
+import { BooleanNumber, TableAlignmentType, TableRowHeightRule, VerticalAlignmentType } from '@univerjs/core';
+import { createNullCellPage, createSkeletonCellPages } from '../model/page';
 
 export function createTableSkeleton(
     ctx: ILayoutContext,
@@ -53,7 +53,7 @@ export function createTableSkeleton(
 
         for (const cellNode of cellNodes) {
             const col = cellNodes.indexOf(cellNode);
-            const cellPageSkeleton = createSkeletonCellPage(
+            const cellPageSkeleton = createSkeletonCellPages(
                 ctx,
                 viewModel,
                 cellNode,
@@ -61,7 +61,7 @@ export function createTableSkeleton(
                 table,
                 row,
                 col
-            );
+            )[0];
 
             const { marginTop = 0, marginBottom = 0 } = cellPageSkeleton;
             const pageHeight = cellPageSkeleton.height + marginTop + marginBottom;
@@ -132,65 +132,255 @@ export function createTableSkeleton(
     return tableSkeleton;
 }
 
-// When a table spreads pages, you need to split the table into two tables and place them on different pages,
-// and if you allow the spread to break the rows, you also need to split the rows.
-export function splitTable(
-    tableSke: IDocumentSkeletonTable,
+export function rollbackListCache(listLevel: Map<string, IParagraphList[][]>, table: DataStreamTreeNode) {
+    const { startIndex, endIndex } = table;
+
+    for (const paragraphLists of listLevel.values()) {
+        for (const paragraphList of paragraphLists) {
+            const paragraphListIndex = paragraphList.findIndex((p) => p.paragraph.startIndex > startIndex && p.paragraph.startIndex < endIndex);
+
+            if (paragraphListIndex > -1) {
+                paragraphList.splice(paragraphListIndex);
+            }
+        }
+    }
+}
+
+export interface ISlicedTableSkeletonParams {
+    skeTables: IDocumentSkeletonTable[];
+    fromCurrentPage: boolean;
+}
+
+// Create skeletons of a table, which may be divided into different pages according to the available height of the page.
+export function createTableSkeletons(
+    ctx: ILayoutContext,
+    curPage: IDocumentSkeletonPage,
+    viewModel: DocumentViewModel,
+    tableNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
     availableHeight: number
-): [
-        Nullable<IDocumentSkeletonTable>,
-        Nullable<IDocumentSkeletonTable>
-    ] {
-    // 处理极端情况，表格第一行高度都大于可用高度，那么表格从下一页开始排版
-    if (tableSke.rows[0].height > availableHeight) {
-        return [null, tableSke];
+): ISlicedTableSkeletonParams {
+    let fromCurrentPage = true;
+    const skeTables: IDocumentSkeletonTable[] = [];
+    const { pageWidth, marginLeft = 0, marginRight = 0, marginTop, marginBottom, pageHeight } = curPage;
+    const pageContentHeight = pageHeight - marginTop - marginBottom;
+
+    const { startIndex, endIndex, children: rowNodes } = tableNode;
+    const table = viewModel.getTable(startIndex);
+    if (table == null) {
+        throw new Error('Table not found when creating table skeletons');
     }
 
-    const { tableId: tableSliceId, tableSource } = tableSke;
-    const { tableId, sliceIndex } = getTableIdAndSliceIndex(tableSliceId);
-    const newTable = getNullTableSkeleton(0, 0, tableSource);
-
-    // Reset table id;
-    newTable.tableId = getTableSliceId(tableId, sliceIndex);
-    newTable.left = tableSke.left;
-    newTable.width = tableSke.width;
-    newTable.height = 0;
-    newTable.top = tableSke.top;
-    tableSke.top = 0;
-
+    let curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+    let rowTop = 0;
+    let tableWidth = 0;
     let remainHeight = availableHeight;
 
-    while (tableSke.rows.length && remainHeight >= tableSke.rows[0].height) {
-        const row = tableSke.rows.shift()!;
+    skeTables.push(curTableSkeleton);
 
-        newTable.rows.push(row);
+    for (const rowNode of rowNodes) {
+        const { children: cellNodes, startIndex, endIndex } = rowNode;
+        const row = rowNodes.indexOf(rowNode);
+        const rowSource = table.tableRows[row];
+        const { trHeight, cantSplit } = rowSource;
+        const rowSkeletons: IDocumentSkeletonRow[] = [];
+        const { hRule, val } = trHeight;
+        const canRowSplit = cantSplit === BooleanNumber.TRUE && trHeight.hRule === TableRowHeightRule.AUTO;
+        // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
+        const MAX_FONT_SIZE = 72;
+        let needOpenNewTable = remainHeight <= MAX_FONT_SIZE;
 
-        tableSke.height -= row.height;
-        newTable.height += row.height;
+        const rowHeights = [0];
 
-        // Reset row's parent index.
-        row.parent = newTable;
+        for (const cellNode of cellNodes) {
+            const col = cellNodes.indexOf(cellNode);
+            const cellPageSkeletons = createSkeletonCellPages(
+                ctx,
+                viewModel,
+                cellNode,
+                sectionBreakConfig,
+                table,
+                row,
+                col,
+                canRowSplit && !needOpenNewTable ? remainHeight : pageContentHeight,
+                pageContentHeight
+            );
 
-        remainHeight -= row.height;
-    }
+            while (rowSkeletons.length < cellPageSkeletons.length) {
+                const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
+                const colCount = cellNodes.length;
 
-    tableSke.tableId = getTableSliceId(tableId, sliceIndex + 1);
+                // Fill the row with null cell pages.
+                rowSkeleton.cells = [...new Array(colCount)].map((_, i) => {
+                    const cellSkeleton = createNullCellPage(
+                        ctx,
+                        sectionBreakConfig,
+                        table,
+                        row,
+                        i
+                    ).page;
 
-    // Reset st and ed.
-    newTable.st = newTable.rows[0].st - 1;
-    newTable.ed = newTable.rows[newTable.rows.length - 1].ed + 1;
+                    cellSkeleton.parent = rowSkeleton;
 
-    if (tableSke.rows.length > 0) {
-        tableSke.st = tableSke.rows[0].st - 1;
-        tableSke.ed = tableSke.rows[tableSke.rows.length - 1].ed + 1;
+                    return cellSkeleton;
+                });
 
-        // Reset row top.
-        for (const row of tableSke.rows) {
-            row.top -= newTable.height;
+                rowSkeletons.push(rowSkeleton);
+            }
+
+            while (rowHeights.length < cellPageSkeletons.length) {
+                rowHeights.push(0);
+            }
+
+            for (const cellPageSkeleton of cellPageSkeletons) {
+                const { marginTop: cellMarginTop = 0, marginBottom: cellMarginBottom = 0 } = cellPageSkeleton;
+                const cellPageHeight = cellPageSkeleton.height + cellMarginTop + cellMarginBottom;
+                const pageIndex = cellPageSkeletons.indexOf(cellPageSkeleton);
+                const rowSke = rowSkeletons[pageIndex];
+
+                cellPageSkeleton.parent = rowSke;
+                rowSke.cells[col] = cellPageSkeleton;
+                rowHeights[pageIndex] = Math.max(rowHeights[pageIndex], cellPageHeight);
+            }
+        }
+
+        for (const rowSke of rowSkeletons) {
+            const rowIndex = rowSkeletons.indexOf(rowSke);
+
+            if (hRule === TableRowHeightRule.AT_LEAST) {
+                rowHeights[rowIndex] = Math.max(rowHeights[rowIndex], val.v);
+            } else if (hRule === TableRowHeightRule.EXACT) {
+                rowHeights[rowIndex] = val.v;
+            }
+
+            rowHeights[rowIndex] = Math.min(rowHeights[rowIndex], pageContentHeight);
+
+            let left = 0;
+            // Set row height to cell page height.
+            for (const cellPageSkeleton of rowSke.cells) {
+                cellPageSkeleton.left = left;
+                cellPageSkeleton.pageHeight = rowHeights[rowIndex];
+
+                left += cellPageSkeleton.pageWidth;
+
+                tableWidth = Math.max(tableWidth, left);
+            }
+        }
+
+        // Handle vertical alignment in cell.
+        for (let i = 0; i < rowSource.tableCells.length; i++) {
+            const cellConfig = rowSource.tableCells[i];
+
+            for (const rowSkeleton of rowSkeletons) {
+                const cellPageSkeleton = rowSkeleton.cells[i];
+
+                if (cellPageSkeleton == null) {
+                    continue;
+                }
+
+                const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
+                const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+
+                let marginTop = originMarginTop;
+
+                switch (vAlign) {
+                    case VerticalAlignmentType.TOP: {
+                        marginTop = originMarginTop;
+                        break;
+                    }
+                    case VerticalAlignmentType.CENTER: {
+                        marginTop = (pageHeight - height) / 2;
+                        break;
+                    }
+                    case VerticalAlignmentType.BOTTOM: {
+                        marginTop = pageHeight - height - originMarginBottom;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
+                marginTop = Math.max(originMarginTop, marginTop);
+
+                cellPageSkeleton.marginTop = marginTop;
+            }
+        }
+
+        if (rowHeights[0] > remainHeight) {
+            if (curTableSkeleton.rows.length > 0) {
+                needOpenNewTable = true;
+            } else {
+                fromCurrentPage = false;
+                remainHeight = pageContentHeight;
+                rowTop = 0;
+            }
+        }
+
+        if (needOpenNewTable) {
+            curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+            skeTables.push(curTableSkeleton);
+            remainHeight = pageContentHeight;
+            rowTop = 0;
+        }
+
+        if (rowSkeletons.length > 1) {
+            for (let i = 0; i < rowSkeletons.length; i++) {
+                if (i !== 0) {
+                    curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
+                    skeTables.push(curTableSkeleton);
+                }
+
+                const rowSkeleton = rowSkeletons[i];
+                const rowHeight = rowHeights[i];
+
+                rowSkeleton.height = rowHeight;
+                rowSkeleton.top = i === 0 ? rowTop : 0;
+
+                curTableSkeleton.height += rowHeight;
+
+                curTableSkeleton.rows.push(rowSkeleton);
+                rowSkeleton.parent = curTableSkeleton;
+                remainHeight = pageContentHeight - rowHeight;
+
+                rowTop = rowHeight;
+            }
+        } else {
+            const rowSkeleton = rowSkeletons[0];
+            const rowHeight = rowHeights[0];
+
+            rowSkeleton.height = rowHeight;
+            rowSkeleton.top = rowTop;
+            rowTop += rowHeight;
+
+            curTableSkeleton.rows.push(rowSkeleton);
+            rowSkeleton.parent = curTableSkeleton;
+            remainHeight -= rowHeight;
+            curTableSkeleton.height = rowTop;
         }
     }
 
-    return [newTable, tableSke.rows.length > 0 ? tableSke : null];
+    const tableLeft = _getTableLeft(pageWidth - marginLeft - marginRight, tableWidth, table.align, table.indent);
+
+    let tableIndex = 0;
+    for (const tableSkeleton of skeTables) {
+        tableSkeleton.width = tableWidth;
+        tableSkeleton.left = tableLeft;
+
+        // Reset table st and ed.
+        tableSkeleton.st = tableSkeleton.rows[0].st - 1;
+        tableSkeleton.ed = tableSkeleton.rows[tableSkeleton.rows.length - 1].ed + 1;
+
+        // Reset table id.
+        if (skeTables.length > 1) {
+            tableSkeleton.tableId = getTableSliceId(table.tableId, tableIndex);
+            tableIndex++;
+        }
+    }
+
+    return {
+        skeTables,
+        fromCurrentPage,
+    };
 }
 
 function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {
@@ -230,7 +420,7 @@ function _getNullTableRowSkeleton(
     ed: number,
     index: number,
     rowSource: ITableRow,
-    parent: IDocumentSkeletonTable
+    parent?: IDocumentSkeletonTable
 ): IDocumentSkeletonRow {
     return {
         cells: [],

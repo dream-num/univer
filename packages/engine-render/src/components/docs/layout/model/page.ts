@@ -279,21 +279,20 @@ function _createSkeletonHeaderFooter(
     return page;
 }
 
-export function createSkeletonCellPage(
+export function createNullCellPage(
     ctx: ILayoutContext,
-    viewModel: DocumentViewModel,
-    cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableConfig: ITable,
     row: number,
-    col: number
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
 ) {
     const { lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
-    // Table cell only has one section.
-    const sectionNode = cellNode.children[0];
+
     const {
         start = { v: 10 },
         end = { v: 10 },
@@ -301,7 +300,7 @@ export function createSkeletonCellPage(
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
     const pageWidth = tableColumns[col].size.width.v;
-    const pageHeight = Number.POSITIVE_INFINITY;
+    const pageHeight = maxCellPageHeight;
 
     const cellSectionBreakConfig: ISectionBreakConfig = {
         lists,
@@ -319,21 +318,66 @@ export function createSkeletonCellPage(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, cellSectionBreakConfig, skeletonResourceReference);
+    const areaPage = createSkeletonPage(
+        ctx,
+        // Set first page height to availableHeight.
+        Object.assign({}, cellSectionBreakConfig, {
+            pageSize: {
+                width: pageWidth,
+                height: Number.isFinite(availableHeight) ? availableHeight : pageHeight,
+            },
+        }),
+        skeletonResourceReference
+    );
     areaPage.type = DocumentSkeletonPageType.CELL;
     areaPage.segmentId = tableId;
 
-    const page = dealWithSection(
+    return {
+        page: areaPage,
+        sectionBreakConfig: cellSectionBreakConfig,
+    };
+}
+
+export function createSkeletonCellPages(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+) {
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
+
+    const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+        ctx,
+        sectionBreakConfig,
+        tableConfig,
+        row,
+        col,
+        availableHeight,
+        maxCellPageHeight
+    );
+
+    const { pages } = dealWithSection(
         ctx,
         viewModel,
         sectionNode,
         areaPage,
         cellSectionBreakConfig
-    ).pages[0];
+    );
 
-    updateBlockIndex([page], cellNode.startIndex);
+    for (const p of pages) {
+        p.type = DocumentSkeletonPageType.CELL;
+        p.segmentId = tableConfig.tableId;
+    }
 
-    return page;
+    updateBlockIndex(pages, cellNode.startIndex);
+
+    return pages;
 }
 
 function _getVerticalMargin(

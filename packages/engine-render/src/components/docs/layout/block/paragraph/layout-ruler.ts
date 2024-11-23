@@ -61,7 +61,7 @@ import {
     lineIterator,
     mergeByV,
 } from '../../tools';
-import { splitTable } from '../table';
+import { createTableSkeletons, rollbackListCache } from '../table';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -549,7 +549,7 @@ function _lineOperator(
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, pDrawingAnchor?.get(paragraphIndex)?.top);
+        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -776,24 +776,24 @@ function _updateAndPositionTable(
     section: IDocumentSkeletonSection,
     skeTablesInParagraph: IParagraphTableCache[],
     paragraphIndex: number,
+    sectionBreakConfig: ISectionBreakConfig,
     drawingAnchorTop?: number
 ): boolean {
     if (skeTablesInParagraph.length === 0) {
         return false;
     }
 
-    // Paragraph will only have one table.
-    const lastTable = skeTablesInParagraph[skeTablesInParagraph.length - 1];
+    // Paragraph will only have one table, but will have multiple table slices.
+    const firstUnPositionedTable = skeTablesInParagraph.find((table) => table.hasPositioned === false);
 
-    if (lastTable.hasPositioned) {
+    if (firstUnPositionedTable == null) {
         return false;
     }
 
-    const { tableId, table } = lastTable;
+    const { tableId, table } = firstUnPositionedTable;
     const { tableSource } = table;
-    const isOriginTable = tableId.indexOf('#-#') === -1;
 
-    if (isOriginTable) {
+    if (firstUnPositionedTable.isSlideTable === false) {
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = lineTop;
@@ -817,38 +817,71 @@ function _updateAndPositionTable(
         }
     }
 
-    const { top, height } = table;
+    const { top, left, height } = table;
 
-    if (top + height > section.height) {
+    if (!ctx.isDirty && top + height > section.height && firstUnPositionedTable.isSlideTable === false) {
         // Need split table.
         skeTablesInParagraph.pop();
         const availableHeight = section.height - top;
-        const [newTable, remainTable] = splitTable(table, availableHeight);
+        // TODO: handle nested table.
+        const { segmentId } = page;
+        const viewModel = ctx.viewModel.getSelfOrHeaderFooterViewModel(segmentId);
+        const tableNode = firstUnPositionedTable.tableNode;
 
-        if (newTable != null) {
-            page.skeTables.set(newTable.tableId, newTable);
-            newTable.parent = page;
+        rollbackListCache(ctx.skeletonResourceReference.skeListLevel!, tableNode);
+
+        const {
+            fromCurrentPage,
+            skeTables,
+        } = createTableSkeletons(
+            ctx,
+            page,
+            viewModel,
+            tableNode,
+            sectionBreakConfig,
+            availableHeight
+        );
+
+        // Reset the position of the first table.
+        skeTables.forEach((table, i) => {
+            table.top = i === 0 && fromCurrentPage ? top : 0;
+            table.left = left;
+        });
+
+        if (fromCurrentPage) {
+            const firstTable = skeTables.shift()!;
+
+            page.skeTables.set(firstTable.tableId, firstTable);
+            firstTable.parent = page;
             skeTablesInParagraph.push({
-                table: newTable,
-                tableId: newTable.tableId,
+                table: firstTable,
+                tableId: firstTable.tableId,
                 hasPositioned: true,
+                isSlideTable: true,
+                tableNode,
+
             });
         }
 
-        if (remainTable != null) {
-            skeTablesInParagraph.push({
-                table: remainTable,
-                tableId: remainTable.tableId,
+        skeTablesInParagraph.push(...skeTables.map((table) => {
+            return {
+                table,
+                tableId: table.tableId,
                 hasPositioned: false,
-            });
-        }
+                isSlideTable: true,
+                tableNode,
+            };
+        }));
+
         return true;
     } else {
         page.skeTables.set(tableId, table);
         table.parent = page;
-        lastTable.hasPositioned = true;
+        firstUnPositionedTable.hasPositioned = true;
 
-        return false;
+        const isLastTable = firstUnPositionedTable === skeTablesInParagraph[skeTablesInParagraph.length - 1];
+
+        return !isLastTable;
     }
 }
 
@@ -945,8 +978,6 @@ function _reLayoutCheck(
 
             const collision = collisionDetection(targetObject, lineHeight, top, columnLeft, columnWidth);
             if (collision) {
-                // console.log(page, line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
-                // console.log('drawing: ', targetDrawing, 'lineHeight: ', lineHeight, 'top: ', top, 'width: ', width);
                 // No need to loop next line.
                 needBreakLineIterator = true;
 
@@ -1119,14 +1150,6 @@ function __getParagraphSpace(
     };
 }
 
-function __makeColumnsFull(columns: IDocumentSkeletonColumn[] = []) {
-    for (let i = 0; i < columns.length; i++) {
-        const column = columns[i];
-
-        setColumnFullState(column, true);
-    }
-}
-
 function __getLineHeight(
     glyphLineHeight: number,
     paragraphLineGapDefault: number,
@@ -1292,10 +1315,6 @@ function __getDrawingPosition(
 
         drawings.set(drawing.drawingId, drawing);
     }
-
-    // if (drawings.size) {
-    //     console.log(`lineTop: ${lineTop}, blockAnchorTop: ${blockAnchorTop}`, drawings);
-    // }
 
     return drawings;
 }

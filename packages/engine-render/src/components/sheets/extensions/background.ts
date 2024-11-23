@@ -144,7 +144,7 @@ export class Background extends SheetExtension {
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
             mergeRanges.forEach((range) => {
-                // bgConfig is requried to be checked in each color loop.
+                // bgConfig is required to be checked in each color loop.
                 const bgConfig = bgColorMatrix.getValue(range.startRow, range.startColumn);
                 if (bgConfig) {
                     const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);

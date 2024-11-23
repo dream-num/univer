@@ -607,9 +607,5 @@ function findAboveOrBellowCellLine(
         }
     }
 
-    if (newLine != null) {
-        return newLine;
-    }
-
     return newLine;
 }

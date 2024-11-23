@@ -21,6 +21,7 @@ import type {
     IDocDrawingBase,
     IDocumentRenderConfig,
     INestingLevel,
+    IParagraph,
     IParagraphProperties,
     ITable,
     ITableRow,
@@ -38,11 +39,16 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     parent?: unknown;
 }
 
+export interface IParagraphList {
+    bullet: IDocumentSkeletonBullet;
+    paragraph: IParagraph;
+}
+
 export interface ISkeletonResourceReference {
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
-    skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
+    skeListLevel?: Map<string, IParagraphList[][]>; // 有序列表缓存，id：{ level: max(width)的bullet }
     drawingAnchor?: Map<string, Map<number, IDocumentSkeletonDrawingAnchor>>; // Anchor point to assist floating element positioning
 }
 

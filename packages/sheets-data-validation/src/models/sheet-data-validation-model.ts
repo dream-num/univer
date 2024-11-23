@@ -163,15 +163,12 @@ export class SheetDataValidationModel extends Disposable {
 
         if (payload.type === UpdateRuleType.RANGE) {
             ruleMatrix.updateRange(ruleId, payload.payload);
-            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
-        } else if (payload.type === UpdateRuleType.SETTING) {
-            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
         } else if (payload.type === UpdateRuleType.ALL) {
             ruleMatrix.updateRange(ruleId, payload.payload.ranges);
-            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload.ranges, oldRule.ranges);
-            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
         }
 
+        this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
+        this._dataValidationCacheService.addRule(unitId, subUnitId, newRule);
         this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);
         this._dataValidationFormulaService.addRule(unitId, subUnitId, newRule);
         this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
@@ -228,20 +225,12 @@ export class SheetDataValidationModel extends Disposable {
         const validator = this.getValidator(rule.type);
         const cellRaw = worksheet.getCellRaw(row, col);
         const cellValue = getCellValueOrigin(cellRaw);
-        const interceptValue = getCellValueOrigin(cell);
 
         if (validator) {
             const cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
             const current = cache.getValue(row, col);
-            if (!current || current.value !== cellValue || current.interceptValue !== interceptValue || current.ruleId !== ruleId || current.formula1 !== formula1 || current.formula2 !== formula2) {
-                cache.setValue(row, col, {
-                    value: cellValue,
-                    interceptValue,
-                    status: DataValidationStatus.VALIDATING,
-                    ruleId,
-                    formula1: formula1 || '',
-                    formula2: formula2 || '',
-                });
+            if (current === null || current === undefined) {
+                cache.setValue(row, col, DataValidationStatus.VALIDATING);
                 validator.validator(
                     {
                         value: cellValue,
@@ -257,20 +246,14 @@ export class SheetDataValidationModel extends Disposable {
                     rule
                 ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
-                    cache.setValue(row, col, {
-                        value: cellValue,
-                        status: realStatus,
-                        ruleId,
-                        interceptValue,
-                        formula1: formula1 || '',
-                        formula2: formula2 || '',
-                    });
+                    cache.setValue(row, col, realStatus);
                     onCompete(realStatus, true);
                 });
                 return DataValidationStatus.VALIDATING;
             }
-            onCompete(current.status, false);
-            return current.status;
+
+            onCompete(current ?? DataValidationStatus.VALID, false);
+            return current ?? DataValidationStatus.VALID;
         } else {
             onCompete(DataValidationStatus.VALID, false);
             return DataValidationStatus.VALID;

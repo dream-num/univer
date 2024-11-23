@@ -75,7 +75,6 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
 
         return () => anchorRectSub.unsubscribe();
     }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
-
     if ((hidden && hiddenType === 'destroy')) {
         return null;
     }

@@ -22,7 +22,7 @@ import { CellValueType, DataValidationErrorStyle, dayjs, ICommandService, Locale
 import { Button, DatePanel } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
+import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
@@ -52,18 +52,24 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const commandService = useDependency(ICommandService);
     const rejectInputController = useDependency(DataValidationRejectInputController);
     const cellData = worksheet.getCell(row, col);
-    const rule = cellData?.dataValidation?.rule;
-    const validator = cellData?.dataValidation?.validator as DateValidator | undefined;
     const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
     const originDate = transformDate(cellStr);
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
-    const showTime = Boolean(rule?.bizInfo?.showTime);
+
     const date = localDate && localDate.isValid() ? localDate : dayjs();
     const localeService = useDependency(LocaleService);
-    if (!cellData || !rule || !validator) {
+    const sheetsDataValidationModel = useDependency(SheetDataValidationModel);
+
+    const rule = sheetsDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+    if (!rule) {
+        return null;
+    }
+    const validator = sheetsDataValidationModel.getValidator(rule.type) as DateValidator | undefined;
+
+    if (!cellData || !validator) {
         return;
     }
-
+    const showTime = Boolean(rule.bizInfo?.showTime);
     const handleSave = async () => {
         if (!date) {
             return;

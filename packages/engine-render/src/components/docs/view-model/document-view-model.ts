@@ -220,6 +220,8 @@ export class DocumentViewModel implements IDisposable {
         this.children.forEach((child) => {
             child.dispose();
         });
+
+        this._textRunsCache.clear();
     }
 
     selfPlus(_len: number, _index: number) {

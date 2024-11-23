@@ -23,7 +23,6 @@ export function CellDropdown() {
     const dropdownManagerService = useDependency(DataValidationDropdownManagerService);
     const activeDropdown = useObservable(dropdownManagerService.activeDropdown$, dropdownManagerService.activeDropdown);
     const componentManager = useDependency(ComponentManager);
-
     if (!activeDropdown) {
         return null;
     }

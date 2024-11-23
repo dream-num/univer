@@ -15,14 +15,14 @@
  */
 
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
-import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
+import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
 import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, transformCheckboxValue } from '@univerjs/sheets-data-validation';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, SheetDataValidationModel, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 
 const MARGIN_H = 6;
 
@@ -71,7 +71,8 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
     ) {
     }
 
@@ -100,12 +101,15 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
-        const { style, data, primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
+        const { style, primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
-        const rule = data.dataValidation?.rule;
-        const validator = data.dataValidation?.validator as CheckboxValidator;
-        if (!rule || !validator) {
+        const rule = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as CheckboxValidator;
+        if (!validator) {
             return;
         }
 
@@ -177,11 +181,14 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         if (evt.button === 2) {
             return;
         }
-        const { primaryWithCoord, unitId, subUnitId, data, worksheet, row, col } = info;
+        const { primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
         const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
-        const rule = data.dataValidation?.rule;
-        const validator = data.dataValidation?.validator as BaseDataValidator;
-        if (!rule || !validator) {
+        const rule = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as CheckboxValidator;
+        if (!validator) {
             return;
         }
 

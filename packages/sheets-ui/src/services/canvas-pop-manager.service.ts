@@ -426,7 +426,6 @@ export class SheetCanvasPopManagerService extends Disposable {
             canvasElement: currentRender.engine.getCanvasElement(),
             hiddenRects$: rects$,
         });
-
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(positionObserverDisposable);
         disposableCollection.add(toDisposable(() => {

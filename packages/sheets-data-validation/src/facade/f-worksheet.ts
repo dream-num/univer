@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
+import type { DataValidationStatus, Nullable, ObjectMatrix } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
@@ -31,7 +30,7 @@ export interface IFWorksheetDataValidationMixin {
      * get data validation validator status for current sheet
      * @returns matrix of validator status
      */
-    getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>>;
+    getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>>;
 }
 
 export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorksheetDataValidationMixin {
@@ -40,7 +39,7 @@ export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorks
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
     }
 
-    override getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>> {
+    override getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorksheet(
             this._workbook.getUnitId(),

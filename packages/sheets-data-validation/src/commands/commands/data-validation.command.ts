@@ -18,7 +18,7 @@ import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { RangeMutation } from '../../models/rule-matrix';
-import { CommandType, DataValidationType, ICommandService, isFormulaString, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
+import { CommandType, DataValidationType, ICommandService, isFormulaString, isRangesEqual, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
 import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -124,7 +124,7 @@ export function getDataValidationDiffMutations(
                     const newFormula = isFormulaString(diff.rule.formula1!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula1!, columnDiff, rowDiff) : diff.rule.formula1;
                     const newFormula2 = isFormulaString(diff.rule.formula2!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula2!, columnDiff, rowDiff) : diff.rule.formula2;
 
-                    if (newFormula !== diff.rule.formula1 || newFormula2 !== diff.rule.formula2) {
+                    if (newFormula !== diff.rule.formula1 || newFormula2 !== diff.rule.formula2 || !isRangesEqual(diff.newRanges, diff.oldRanges)) {
                         redoMutations.push({
                             id: UpdateDataValidationMutation.id,
                             params: {

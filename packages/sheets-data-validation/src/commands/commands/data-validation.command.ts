@@ -70,7 +70,7 @@ export function getDataValidationDiffMutations(
     }
     const { worksheet } = target;
     const redoMatrix = new ObjectMatrix<ICellData>();
-
+    let setRangeValue = false;
     function setRangesDefaultValue(ranges: IRange[], defaultValue: CellValue) {
         if (!fillDefaultValue) {
             return;
@@ -80,6 +80,7 @@ export function getDataValidationDiffMutations(
                 const cellData = worksheet.getCellRaw(row, column);
                 const value = getStringCellValue(cellData);
                 if (isBlankCell(cellData) || value === defaultValue) {
+                    setRangeValue = true;
                     redoMatrix.setValue(row, column, {
                         v: defaultValue,
                         p: null,
@@ -228,22 +229,24 @@ export function getDataValidationDiffMutations(
         }
     });
 
-    const redoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: {
-            unitId,
-            subUnitId,
-            cellValue: redoMatrix.getData(),
-        } as ISetRangeValuesMutationParams,
-    };
+    if (setRangeValue) {
+        const redoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                cellValue: redoMatrix.getData(),
+            } as ISetRangeValuesMutationParams,
+        };
 
-    const undoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
-    };
+        const undoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
+        };
 
-    redoMutations.push(redoSetRangeValues);
-    undoMutations.push(undoSetRangeValues);
+        redoMutations.push(redoSetRangeValues);
+        undoMutations.push(undoSetRangeValues);
+    }
 
     return {
         redoMutations,

@@ -18,8 +18,9 @@ import type { DocumentDataModel, IAccessor, Workbook, Worksheet } from '@univerj
 import { DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 
-export const getShouldDisableCellLink = (worksheet: Worksheet, row: number, col: number) => {
+export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
         return true;
@@ -29,8 +30,9 @@ export const getShouldDisableCellLink = (worksheet: Worksheet, row: number, col:
         DataValidationType.LIST,
         DataValidationType.LIST_MULTIPLE,
     ];
-
-    if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
+    const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
+    const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
+    if (rule && disables.includes(rule.type)) {
         return true;
     }
 
@@ -49,7 +51,7 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
     }
     const row = selections[0].range.startRow;
     const col = selections[0].range.startColumn;
-    return getShouldDisableCellLink(worksheet, row, col);
+    return getShouldDisableCellLink(accessor, worksheet, row, col);
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {

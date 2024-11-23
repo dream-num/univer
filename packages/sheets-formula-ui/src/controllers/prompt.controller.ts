@@ -935,9 +935,7 @@ export class PromptController extends Disposable {
         const refSelections: IRefSelection[] = [];
         const themeColorMap = new Map<string, string>();
         let refColorIndex = 0;
-
         const offset = this._getCurrentBodyDataStreamAndOffset()?.offset || 0;
-
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
             if (typeof node === 'string' || this._descriptionService.hasDefinedNameDescription(node.token.trim())) {
@@ -1002,6 +1000,7 @@ export class PromptController extends Disposable {
      * Draw the referenced selection text based on the style and token.
      * @param refSelections
      */
+
     private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
         // const [unitId, sheetId] = refSelectionRenderService.getLocation();
         const { unitId, sheetId } = this._editorBridgeService.getEditCellState()!;
@@ -1083,7 +1082,7 @@ export class PromptController extends Disposable {
     }
 
     private _getPrimary(range: IRange, themeColor: string, refIndex: number) {
-        const primary = this._insertSelections.find((selection) => {
+        const matchedInsertSelection = this._insertSelections.find((selection) => {
             const { startRow, startColumn, endRow, endColumn } = selection.range;
             if (
                 startRow === range.startRow &&
@@ -1103,9 +1102,9 @@ export class PromptController extends Disposable {
             }
 
             return false;
-        })?.primary;
+        });
 
-        if (primary == null) {
+        if (matchedInsertSelection?.primary == null) {
             return;
         }
 
@@ -1116,7 +1115,7 @@ export class PromptController extends Disposable {
             endRow: mergeEndRow,
             startColumn: mergeStartColumn,
             endColumn: mergeEndColumn,
-        } = primary;
+        } = matchedInsertSelection.primary;
 
         if (
             (isMerged || isMergedMainCell) &&
@@ -1131,7 +1130,7 @@ export class PromptController extends Disposable {
 
         return {
             range,
-            primary,
+            primary: matchedInsertSelection.primary,
             style: genFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
         };
     }
@@ -1411,21 +1410,21 @@ export class PromptController extends Disposable {
         }
 
         const refString = this._generateRefString(currentSelection);
-
         this._formulaPromptService.setSequenceNodes(insertNodes);
-
         this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
-
         this._syncToEditor(insertNodes, this._previousInsertRefStringIndex + refString.length);
-
-        const selectionDatas = this._selectionRenderService.getSelectionDataWithStyle();
-
+        const selectionsWithStyle = this._selectionRenderService.getSelectionDataWithStyle() || [];
         this._insertSelections = [];
 
-        selectionDatas.forEach((currentSelection) => {
-            const range = convertSelectionDataToRange(currentSelection);
+        // selectionsWithStyle.forEach((currentSelection) => {
+        //     const range = convertSelectionDataToRange(currentSelection);
+        //     this._insertSelections.push(range);
+        // });
+        const lastSelectionWithStyle = selectionsWithStyle[selectionsWithStyle.length - 1];
+        if (lastSelectionWithStyle) {
+            const range = convertSelectionDataToRange(lastSelectionWithStyle);
             this._insertSelections.push(range);
-        });
+        }
     }
 
     /**

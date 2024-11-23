@@ -15,8 +15,9 @@
  */
 
 import type { DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, ObjectMatrix, Range } from '@univerjs/core';
-import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
+import type { IRemoveSheetMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { RemoveSheetMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 
 export class DataValidationCacheService extends Disposable {
@@ -26,10 +27,12 @@ export class DataValidationCacheService extends Disposable {
     readonly dirtyRanges$ = this._dirtyRanges$.asObservable();
 
     constructor(
-        @Inject(ICommandService) private readonly _commandService: ICommandService
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initDirtyRanges();
+        this._initSheetRemove();
     }
 
     private _initDirtyRanges() {
@@ -41,6 +44,21 @@ export class DataValidationCacheService extends Disposable {
                     if (range.endRow === -1) return;
                     this.markRangeDirty(unitId, subUnitId, [range]);
                 }
+            }
+        }));
+    }
+
+    private _initSheetRemove() {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === RemoveSheetMutation.id) {
+                const { unitId, subUnitId } = commandInfo.params as IRemoveSheetMutationParams;
+                this._cacheMatrix.get(unitId)?.delete(subUnitId);
+            }
+        }));
+
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((univerInstance) => {
+            if (univerInstance.type === UniverInstanceType.UNIVER_SHEET) {
+                this._cacheMatrix.delete(univerInstance.getUnitId());
             }
         }));
     }

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IDocumentData, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IDisposable, IDocumentData, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { IUpdateRichHyperLinkMutationParams } from '../commands/mutations/update-hyper-link.mutation';
+import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
-import { RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { getSheetCommandTarget, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { UpdateRichHyperLinkMutation } from '../commands/mutations/update-hyper-link.mutation';
 import { ERROR_RANGE } from '../types/const';
 
 export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
@@ -48,7 +50,7 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
         return subUnitMap;
     }
 
-    private _isLegalRangeUrl(unitId: string, payload: string): Nullable<IRange> {
+    private _isLegalRangeUrl(unitId: string, payload: string) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
@@ -71,7 +73,10 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                 }
                 const range = deserializeRangeWithSheet(searchObj.range).range;
                 if (isValidRange(range, worksheet) && searchObj.range !== ERROR_RANGE) {
-                    return range;
+                    return {
+                        range,
+                        worksheet,
+                    };
                 }
             }
         }
@@ -88,12 +93,53 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
             p.body?.customRanges?.forEach((customRange) => {
                 if (customRange.rangeType === CustomRangeType.HYPERLINK) {
                     const payload = customRange.properties?.url;
-                    const range = this._isLegalRangeUrl(unitId, payload);
-                    if (range) {
+                    const rangeInfo = this._isLegalRangeUrl(unitId, payload);
+
+                    if (rangeInfo) {
+                        const { range, worksheet } = rangeInfo;
                         hasWatch = true;
-                        disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, range, (before, after) => {
-                            customRange.properties!.url = `#gid=${subUnitId}&range=${after ? serializeRange(after) : ERROR_RANGE}`;
-                        }));
+                        disposableCollection.add(
+                            this._refRangeService.registerRefRange(
+                                range,
+                                (commandInfo) => {
+                                    const newRange = handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+                                    if (newRange && Rectangle.equals(newRange, range)) {
+                                        return {
+                                            preRedos: [],
+                                            preUndos: [],
+                                            redos: [],
+                                            undos: [],
+                                        };
+                                    }
+                                    return {
+                                        preRedos: [{
+                                            id: UpdateRichHyperLinkMutation.id,
+                                            params: {
+                                                unitId,
+                                                subUnitId,
+                                                row,
+                                                col,
+                                                id: customRange.rangeId,
+                                                url: `#gid=${subUnitId}&range=${newRange ? serializeRange(newRange) : ERROR_RANGE}`,
+                                            },
+                                        }],
+                                        undos: [{
+                                            id: UpdateRichHyperLinkMutation.id,
+                                            params: {
+                                                unitId,
+                                                subUnitId,
+                                                row,
+                                                col,
+                                                id: customRange.rangeId,
+                                                url: payload,
+                                            },
+                                        }],
+                                        redos: [],
+                                    };
+                                },
+                                worksheet.getUnitId(),
+                                worksheet.getSheetId()
+                            ));
                     }
                 }
             });
@@ -172,6 +218,28 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                 this._registerRange(unitId, subUnitId, row, col, cell.p);
                             }
                         });
+                    }
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === UpdateRichHyperLinkMutation.id) {
+                    const params = commandInfo.params as IUpdateRichHyperLinkMutationParams;
+                    const { unitId, subUnitId, row, col } = params;
+                    const sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
+                    const map = this._enusreMap(unitId, subUnitId);
+                    const dispose = map.getValue(row, col);
+                    if (dispose) {
+                        dispose.dispose();
+                    }
+                    if (sheetTarget) {
+                        const { worksheet } = sheetTarget;
+                        const cell = worksheet.getCellRaw(row, col);
+                        if (cell && cell.p) {
+                            this._registerRange(unitId, subUnitId, row, col, cell.p);
+                        }
                     }
                 }
             })

@@ -20,7 +20,7 @@ import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
-import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands/mutations/update-hyper-link.mutation';
+import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, UpdateRichHyperLinkMutation } from '../commands/mutations/update-hyper-link.mutation';
 
 export class SheetsHyperLinkController extends Disposable {
     constructor(
@@ -43,6 +43,7 @@ export class SheetsHyperLinkController extends Disposable {
             UpdateHyperLinkMutation,
             RemoveHyperLinkMutation,
             UpdateHyperLinkRefMutation,
+            UpdateRichHyperLinkMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

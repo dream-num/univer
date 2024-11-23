@@ -246,7 +246,11 @@ export class SheetDataValidationModel extends Disposable {
                     rule
                 ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
-                    cache.setValue(row, col, realStatus);
+                    if (realStatus === DataValidationStatus.VALID) {
+                        cache.realDeleteValue(row, col);
+                    } else {
+                        cache.setValue(row, col, realStatus);
+                    }
                     onCompete(realStatus, true);
                 });
                 return DataValidationStatus.VALIDATING;

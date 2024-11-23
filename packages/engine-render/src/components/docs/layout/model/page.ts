@@ -239,7 +239,7 @@ function _createSkeletonHeaderFooter(
     const page = dealWithSection(
         ctx,
         headerOrFooterViewModel,
-        headerOrFooterViewModel.children[0],
+        headerOrFooterViewModel.getChildren()[0],
         areaPage,
         headerFooterConfig,
         layoutAnchor
@@ -248,7 +248,6 @@ function _createSkeletonHeaderFooter(
     if (ctx.isDirty && count < 10) {
         count++;
         resetContext(ctx);
-        headerOrFooterViewModel.resetCache();
 
         return _createSkeletonHeaderFooter(
             ctx,

@@ -1004,7 +1004,7 @@ const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
 
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
     const { viewModel, dataModel, docsConfig } = ctx;
-    const sectionNode = viewModel.children[nodeIndex];
+    const sectionNode = viewModel.getChildren()[nodeIndex];
     let { documentStyle } = dataModel;
     const { documentFlavor } = documentStyle;
     let sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
@@ -1081,7 +1081,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         renderConfig = global_renderConfig,
     } = sectionBreak;
 
-    const sectionNodeNext = viewModel.children[nodeIndex + 1];
+    const sectionNodeNext = viewModel.getChildren()[nodeIndex + 1];
     const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
 
     const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };

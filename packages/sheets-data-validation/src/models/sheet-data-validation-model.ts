@@ -202,9 +202,6 @@ export class SheetDataValidationModel extends Disposable {
 
     validator(rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId, worksheet } = pos;
-        const ruleId = rule.uid;
-        const formula1 = rule.formula1;
-        const formula2 = rule.formula2;
         const onCompete = (status: DataValidationStatus, changed: boolean) => {
             if (_onCompete) {
                 _onCompete(status, changed);

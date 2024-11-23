@@ -767,7 +767,9 @@ const listValueFactory$ = (accessor: IAccessor) => {
             }
 
             textSubscription = docSelectionManagerService.textSelection$.subscribe(() => {
-                const range = docSelectionManagerService.getActiveTextRange();
+                const docRanges = docSelectionManagerService.getDocRanges();
+                const range = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
                     const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
@@ -965,14 +967,17 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveTextRange();
 
-    if (docDataModel == null || activeTextRange == null) {
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+    const docRanges = textSelectionService.getDocRanges();
+    const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
+    if (docDataModel == null || activeRange == null) {
         return;
     }
 
-    const { startOffset, segmentId } = activeTextRange;
+    const { startOffset, segmentId } = activeRange;
 
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
 

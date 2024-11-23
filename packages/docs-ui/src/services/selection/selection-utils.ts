@@ -194,7 +194,7 @@ export function getRangeListFromSelection(
     let end = endOffset;
 
     // TODO: @JOCS handle in header and footer.
-    for (const section of viewModel.children) {
+    for (const section of viewModel.getChildren()) {
         for (const paragraph of section.children) {
             const { startIndex, endIndex, children } = paragraph;
             const table = children[0];

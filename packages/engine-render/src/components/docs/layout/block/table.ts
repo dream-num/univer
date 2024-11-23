@@ -30,7 +30,7 @@ export function createTableSkeleton(
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonTable {
     const { startIndex, endIndex, children: rowNodes } = tableNode;
-    const table = viewModel.getTable(startIndex);
+    const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
         throw new Error('Table not found');
     }
@@ -166,7 +166,7 @@ export function createTableSkeletons(
     const pageContentHeight = pageHeight - marginTop - marginBottom;
 
     const { startIndex, endIndex, children: rowNodes } = tableNode;
-    const table = viewModel.getTable(startIndex);
+    const table = viewModel.getTableByStartIndex(startIndex)?.tableSource;
     if (table == null) {
         throw new Error('Table not found when creating table skeletons');
     }

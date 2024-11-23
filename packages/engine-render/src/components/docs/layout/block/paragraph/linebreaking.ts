@@ -146,7 +146,7 @@ export function lineBreaking(
     const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
 
-    const paragraph = viewModel.getParagraph(endIndex, true) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     const { paragraphStyle = {}, bullet } = paragraph;
 

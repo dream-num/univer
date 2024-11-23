@@ -16,9 +16,10 @@
 
 import type { IDisposable, IDocumentData, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IUpdateRichHyperLinkMutationParams } from '../commands/mutations/update-hyper-link.mutation';
 import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { getSheetCommandTarget, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { UpdateRichHyperLinkMutation } from '../commands/mutations/update-hyper-link.mutation';
 import { ERROR_RANGE } from '../types/const';
 
@@ -122,7 +123,7 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                                 url: `#gid=${subUnitId}&range=${newRange ? serializeRange(newRange) : ERROR_RANGE}`,
                                             },
                                         }],
-                                        preUndos: [{
+                                        undos: [{
                                             id: UpdateRichHyperLinkMutation.id,
                                             params: {
                                                 unitId,
@@ -134,7 +135,6 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                             },
                                         }],
                                         redos: [],
-                                        undos: [],
                                     };
                                 },
                                 worksheet.getUnitId(),
@@ -218,6 +218,28 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                                 this._registerRange(unitId, subUnitId, row, col, cell.p);
                             }
                         });
+                    }
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === UpdateRichHyperLinkMutation.id) {
+                    const params = commandInfo.params as IUpdateRichHyperLinkMutationParams;
+                    const { unitId, subUnitId, row, col } = params;
+                    const sheetTarget = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
+                    const map = this._enusreMap(unitId, subUnitId);
+                    const dispose = map.getValue(row, col);
+                    if (dispose) {
+                        dispose.dispose();
+                    }
+                    if (sheetTarget) {
+                        const { worksheet } = sheetTarget;
+                        const cell = worksheet.getCellRaw(row, col);
+                        if (cell && cell.p) {
+                            this._registerRange(unitId, subUnitId, row, col, cell.p);
+                        }
                     }
                 }
             })

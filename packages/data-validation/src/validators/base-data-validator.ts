@@ -65,6 +65,8 @@ export abstract class BaseDataValidator {
     abstract operators: DataValidationOperator[];
     abstract scopes: string[] | string;
 
+    offsetFormulaByRange = true;
+
     // #region UI related
 
     formulaInput: string | undefined = undefined;

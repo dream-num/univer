@@ -93,6 +93,8 @@ export class ListValidator extends BaseDataValidator {
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
+    override readonly offsetFormulaByRange = false;
+
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
     operators: DataValidationOperator[] = [];

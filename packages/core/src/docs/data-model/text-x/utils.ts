@@ -92,17 +92,33 @@ export function getBodySlice(
         const clonedTable = Tools.deepClone(table);
         const { startIndex, endIndex } = clonedTable;
 
-        if (startIndex >= startOffset && endIndex <= endOffset) {
-            newTables.push({
-                ...clonedTable,
-                startIndex: startIndex - startOffset,
-                endIndex: endIndex - startOffset,
-            });
+        if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, startOffset, endOffset)) {
+            if (startOffset >= startIndex && startOffset <= endIndex) {
+                newTables.push({
+                    ...clonedTable,
+                    startIndex: startOffset,
+                    endIndex: Math.min(endOffset, endIndex),
+                });
+            } else if (endOffset >= startIndex && endOffset <= endIndex) {
+                newTables.push({
+                    ...clonedTable,
+                    startIndex: Math.max(startOffset, startIndex),
+                    endIndex: endOffset,
+                });
+            } else {
+                newTables.push(clonedTable);
+            }
         }
     }
 
     if (newTables.length) {
-        docBody.tables = newTables;
+        docBody.tables = newTables.map((t) => {
+            return {
+                ...t,
+                startIndex: t.startIndex - startOffset,
+                endIndex: t.endIndex - startOffset,
+            };
+        });
     }
 
     const newParagraphs: IParagraph[] = [];

@@ -248,7 +248,8 @@ export class SheetDataValidationModel extends Disposable {
                     } else {
                         cache.setValue(row, col, realStatus);
                     }
-                    onCompete(realStatus, true);
+                    const now = cache.getValue(row, col);
+                    onCompete(realStatus, current !== now);
                 });
                 return DataValidationStatus.VALIDATING;
             }

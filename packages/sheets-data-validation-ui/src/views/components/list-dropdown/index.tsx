@@ -28,7 +28,7 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '@univerjs/sheets-data-validation';
+import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -145,6 +145,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const instanceService = useDependency(IUniverInstanceService);
     const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
+    const sheetsDataValidationModel = useDependency(SheetDataValidationModel);
     useObservable(ruleChange$);
     const anchorRect = RectPopup.useContext();
     const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
@@ -172,9 +173,17 @@ export function ListDropDown(props: IDropdownComponentProps) {
         return null;
     }
 
+    const rule = sheetsDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+    if (!rule) {
+        return null;
+    }
+    const validator = sheetsDataValidationModel.getValidator(rule.type) as ListMultipleValidator | undefined;
+    if (!validator) {
+        return null;
+    }
+
     const cellData = worksheet.getCell(row, col);
-    const rule = cellData?.dataValidation?.rule;
-    const validator = cellData?.dataValidation?.validator as ListMultipleValidator | undefined;
+
     const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
 
     if (!cellData || !rule || !validator || validator.id.indexOf(DataValidationType.LIST) !== 0) {

@@ -19,7 +19,6 @@ import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } 
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
-import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
 import { type BooleanNumber, CellValueType } from '../types/enum';
 
@@ -272,7 +271,6 @@ export interface ICellMarks {
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
-    dataValidation?: Nullable<ICellValidationData>;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;

@@ -276,7 +276,7 @@ export function getInsertRowActionsParams(rangeInfo: IRangeInfo, position: INSER
     let rowIndex = 0;
 
     // TODO: handle nested tables
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const table = children[0];
@@ -324,7 +324,7 @@ export function getInsertColumnActionsParams(rangeInfo: IRangeInfo, position: IN
     let table: Nullable<DataStreamTreeNode> = null;
     let columnIndex = -1;
 
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const tableNode = children[0];
@@ -418,7 +418,7 @@ export function getDeleteRowsActionsParams(rangeInfo: IRangeInfo, viewModel: Doc
     let cursor = -1;
     let selectWholeTable = false;
 
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const table = children[0];
@@ -494,7 +494,7 @@ export function getDeleteColumnsActionParams(rangeInfo: IRangeInfo, viewModel: D
     let startColumnIndex = -1;
     let endColumnIndex = -1;
 
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const tableNode = children[0];
@@ -573,7 +573,7 @@ export function getDeleteTableActionParams(rangeInfo: IRangeInfo, viewModel: Doc
     let len = 0;
     let cursor = -1;
 
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const table = children[0];
@@ -624,7 +624,7 @@ export function getDeleteRowContentActionParams(rangeInfo: IRangeInfo, viewModel
     let startColumnIndex = -1;
     let endColumnIndex = -1;
 
-    for (const section of vm.children) {
+    for (const section of vm.getChildren()) {
         for (const paragraph of section.children) {
             const { children } = paragraph;
             const tableNode = children[0];
@@ -706,7 +706,7 @@ export function getCellOffsets(viewModel: DocumentViewModel, range: ITextRangeWi
 
     let targetTable = null;
 
-    for (const section of viewModel.children) {
+    for (const section of viewModel.getChildren()) {
         for (const paragraph of section.children) {
             const table = paragraph.children[0];
             if (table) {

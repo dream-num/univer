@@ -2507,6 +2507,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../sheets-data-validation
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../sheets-formula-ui

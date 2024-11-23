@@ -23,7 +23,7 @@ import type { Worksheet } from '../../sheets/worksheet';
 import type { IStyleData } from './i-style-data';
 
 export interface ICellRenderContext {
-    data: ICellDataForSheetInterceptor;
+    data: Nullable<ICellDataForSheetInterceptor>;
     style: Nullable<IStyleData>;
     primaryWithCoord: ICellWithCoord;
     unitId: string;

@@ -33,7 +33,7 @@ export function isLegalFormulaResult(res: string) {
 /**
  * Judge if the data-validation's formula need to be offseted by ranges
  */
-export function shouldOffsetFormulaByRange(type: DataValidationType, validatorRegistryService: DataValidatorRegistryService) {
+export function shouldOffsetFormulaByRange(type: DataValidationType | string, validatorRegistryService: DataValidatorRegistryService) {
     const validator = validatorRegistryService.getValidatorItem(type);
     return validator?.offsetFormulaByRange ?? false;
 }

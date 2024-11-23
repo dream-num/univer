@@ -25,7 +25,7 @@ export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Workshe
     if (cell?.f || cell?.si) {
         return true;
     }
-    const disables = [
+    const disables: string[] = [
         DataValidationType.CHECKBOX,
         DataValidationType.LIST,
         DataValidationType.LIST_MULTIPLE,

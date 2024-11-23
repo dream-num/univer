@@ -102,9 +102,6 @@ export class DataValidationAutoFillController extends Disposable {
                 redos: redoMutations,
             };
         };
-        const disabledDataVallation = [
-            DataValidationType.CHECKBOX,
-        ];
         const hook: ISheetAutoFillHook = {
             id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeFillData: (location) => {
@@ -112,7 +109,7 @@ export class DataValidationAutoFillController extends Disposable {
                 for (const row of sourceRange.rows) {
                     for (const col of sourceRange.cols) {
                         const dv = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
-                        if (dv && disabledDataVallation.indexOf(dv.type) > -1) {
+                        if (dv && dv.type === DataValidationType.CHECKBOX) {
                             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
                             return;
                         }

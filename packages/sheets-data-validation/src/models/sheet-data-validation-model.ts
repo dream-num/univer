@@ -182,7 +182,7 @@ export class SheetDataValidationModel extends Disposable {
         this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
     }
 
-    getValidator(type: DataValidationType) {
+    getValidator(type: DataValidationType | string) {
         return this._dataValidatorRegistryService.getValidatorItem(type);
     }
 

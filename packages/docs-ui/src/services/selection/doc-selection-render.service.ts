@@ -20,7 +20,7 @@ import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
@@ -729,7 +729,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         const HALF = 0.5;
-        const isBack = ratioX < HALF;
+        let isBack = ratioX < HALF;
+
+        if (glyph.glyphType === GlyphType.LIST) {
+            isBack = true;
+        }
 
         return {
             ...position,

@@ -130,7 +130,7 @@ export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookShee
         } as IEditorBridgeServiceVisibleParam);
     }
 
-    override async endEditing(save?: boolean): Promise<boolean> {
+    override async endEditing(save = true): Promise<boolean> {
         const commandService = this._injector.get(ICommandService);
         commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             eventType: DeviceInputEventType.Keyboard,

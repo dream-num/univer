@@ -197,6 +197,8 @@ export function getRangeListFromSelection(
     for (const section of viewModel.getChildren()) {
         for (const paragraph of section.children) {
             const { startIndex, endIndex, children } = paragraph;
+            const paragraphIndex = section.children.indexOf(paragraph);
+            const nextParagraph = section.children[paragraphIndex + 1];
             const table = children[0];
 
             let endInTable = false;
@@ -254,7 +256,7 @@ export function getRangeListFromSelection(
 
             if ((end >= startIndex && end <= endIndex + 1) || endInTable) {
                 // TO fix https://github.com/dream-num/univer-pro/issues/3437.
-                if (end === endIndex + 1 && !endInTable) {
+                if (end === endIndex + 1 && !endInTable && nextParagraph && nextParagraph.children.length) {
                     end = endIndex;
                     endInTable = true;
                 }

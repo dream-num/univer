@@ -1027,28 +1027,23 @@ export class PromptController extends Disposable {
              */
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
 
-            if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
-                continue;
-            }
+            if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) continue;
 
             // sheet name is designed to be unique.
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
-            if (!isSelfSheet && refSheetId !== selfSheetId) { // Cross sheet operation
-                continue;
-            }
+            // Cross sheet operation
+            if (!isSelfSheet && refSheetId !== selfSheetId) continue;
 
-            if (isSelfSheet && sheetName.length !== 0 && refSheetId !== sheetId) { // Current sheet operation
-                continue;
-            }
+            // Current sheet operation
+            if (isSelfSheet && sheetName.length !== 0 && refSheetId !== sheetId) continue;
 
-            if (this._exceedCurrentRange(range, worksheet.getRowCount(), worksheet.getColumnCount())) {
-                continue;
-            }
+            if (this._exceedCurrentRange(range, worksheet.getRowCount(), worksheet.getColumnCount())) continue;
 
             const lastRangeCopy = this._getPrimary(range, themeColor, refIndex);
             if (lastRangeCopy) {
                 lastRange = lastRangeCopy;
+                selectionWithStyle.push(lastRange);
                 continue;
             }
 
@@ -1072,9 +1067,10 @@ export class PromptController extends Disposable {
             });
         }
 
-        if (lastRange) {
-            selectionWithStyle.push(lastRange);
-        }
+        // why add lastRange after all?  that would changes selection sequence !!! why ???
+        // if (lastRange) {
+        // selectionWithStyle.push(lastRange);
+        // }
 
         if (selectionWithStyle.length) {
             this._refSelectionsService.addSelections(unitId, sheetId, selectionWithStyle);

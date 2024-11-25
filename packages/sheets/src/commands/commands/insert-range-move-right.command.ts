@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRangeMutationParams,
+    IRemoveColMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     BooleanNumber,
     CommandType,
@@ -26,20 +33,13 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range-mutation';
-import { followSelectionOperation } from './utils/selection-utils';
+import { copyStylesOmitSpecProps, followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type {
-    IInsertColMutationParams,
-    IInsertRangeMutationParams,
-    IRemoveColMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 
 export interface InsertRangeMoveRightCommandParams {
     range: IRange;
@@ -124,13 +124,14 @@ export const InsertRangeMoveRightCommand: ICommand = {
         // to keep style.
         const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
         Range.foreach(range, (row, col) => {
-            const cell = worksheet.getCell(row, col);
+            let cell = worksheet.getCell(row, col);
             if (!cell || !cell.s) {
                 return;
             }
             if (!cellValue[row]) {
                 cellValue[row] = {};
             }
+            cell = copyStylesOmitSpecProps(cell, worksheet, ['bd']);
             cellValue[row][col] = { s: cell.s };
         });
         const insertRangeMutationParams: IInsertRangeMutationParams = {

@@ -33,5 +33,13 @@ export function isLegalFormulaResult(res: string) {
  * Judge if the data-validation's formula need to be offseted by ranges
  */
 export function isCustomFormulaType(type: DataValidationType) {
-    return type !== DataValidationType.LIST && type !== DataValidationType.LIST_MULTIPLE && type !== DataValidationType.CHECKBOX && type !== DataValidationType.ANY;
+    // types not in this list is formula type
+    const invalidTypes = [
+        DataValidationType.LIST,
+        DataValidationType.LIST_MULTIPLE,
+        DataValidationType.CHECKBOX,
+        DataValidationType.ANY,
+    ];
+
+    return !invalidTypes.includes(type);
 }

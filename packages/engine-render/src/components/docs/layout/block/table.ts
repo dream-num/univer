@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, ITable, ITableRow } from '@univerjs/core';
+import type { INumberUnit, ITable, ITableRow, Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, IParagraphList, ISectionBreakConfig } from '../../../../basics';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -44,7 +44,7 @@ export function createTableSkeleton(
         const row = rowNodes.indexOf(rowNode);
         const rowSource = table.tableRows[row];
         const { trHeight } = rowSource;
-        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, tableSkeleton);
+        const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, false, tableSkeleton);
         const { hRule, val } = trHeight;
 
         tableSkeleton.rows.push(rowSkeleton);
@@ -155,6 +155,7 @@ interface ICreateTableCache {
     rowTop: number;
     tableWidth: number;
     remainHeight: number;
+    repeatRow: Nullable<DataStreamTreeNode>;
 }
 
 // Create skeletons of a table, which may be divided into different pages according to the available height of the page.
@@ -181,6 +182,7 @@ export function createTableSkeletons(
         rowTop: 0,
         tableWidth: 0,
         remainHeight: availableHeight,
+        repeatRow: needRepeatHeader ? rowNodes[0] : null,
     };
 
     skeTables.push(curTableSkeleton);
@@ -248,7 +250,8 @@ function dealWithTableRow(
     rowNode: DataStreamTreeNode,
     row: number,
     table: ITable,
-    cache: ICreateTableCache
+    cache: ICreateTableCache,
+    isRepeatRow = false
 ) {
     const { marginTop, marginBottom, pageHeight } = curPage;
     const pageContentHeight = pageHeight - marginTop - marginBottom;
@@ -280,7 +283,7 @@ function dealWithTableRow(
         );
 
         while (rowSkeletons.length < cellPageSkeletons.length) {
-            const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource);
+            const rowSkeleton = _getNullTableRowSkeleton(startIndex, endIndex, row, rowSource, isRepeatRow);
             const colCount = cellNodes.length;
 
             // Fill the row with null cell pages.
@@ -353,12 +356,30 @@ function dealWithTableRow(
         const rowSkeleton = rowSkeletons.shift()!;
 
         if (cache.remainHeight < MAX_FONT_SIZE || cache.remainHeight < rowSkeleton.height) {
+            cache.remainHeight = pageContentHeight;
+            cache.rowTop = 0;
+
             if (curTableSkeleton.rows.length > 0) {
                 curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
                 skeTables.push(curTableSkeleton);
+
+                // Handle repeat first row.
+                if (cache.repeatRow && isRepeatRow === false && rowSkeleton.index !== 0) {
+                    const FIRST_ROW_INDEX = 0;
+                    dealWithTableRow(
+                        ctx,
+                        curPage,
+                        skeTables,
+                        viewModel,
+                        sectionBreakConfig,
+                        cache.repeatRow,
+                        FIRST_ROW_INDEX,
+                        table,
+                        cache,
+                        true
+                    );
+                }
             }
-            cache.remainHeight = pageContentHeight;
-            cache.rowTop = 0;
         }
 
         rowSkeleton.top = cache.rowTop;
@@ -453,6 +474,7 @@ function _getNullTableRowSkeleton(
     ed: number,
     index: number,
     rowSource: ITableRow,
+    isRepeatRow = false,
     parent?: IDocumentSkeletonTable
 ): IDocumentSkeletonRow {
     return {
@@ -464,7 +486,7 @@ function _getNullTableRowSkeleton(
         ed,
         parent,
         rowSource,
-        isRepeatRow: false,
+        isRepeatRow,
     };
 }
 

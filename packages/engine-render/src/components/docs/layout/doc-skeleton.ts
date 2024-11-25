@@ -886,7 +886,12 @@ export class DocumentSkeleton extends Skeleton {
                 this._findLiquid?.translate(tableLeft, tableTop);
 
                 for (const row of rows) {
-                    const { top: rowTop, cells } = row;
+                    const { top: rowTop, cells, isRepeatRow } = row;
+
+                    // Cursor should not in repeat row.
+                    if (isRepeatRow) {
+                        continue;
+                    }
 
                     this._findLiquid?.translateSave();
                     this._findLiquid?.translate(0, rowTop);

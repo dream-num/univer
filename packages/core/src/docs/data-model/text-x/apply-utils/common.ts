@@ -257,11 +257,7 @@ export function insertCustomBlocks(
     textLength: number,
     currentIndex: number
 ) {
-    if (body.customBlocks == null) {
-        body.customBlocks = [];
-    }
-
-    const { customBlocks } = body;
+    const { customBlocks = [] } = body;
 
     for (let i = 0, len = customBlocks.length; i < len; i++) {
         const customBlock = customBlocks[i];
@@ -280,6 +276,10 @@ export function insertCustomBlocks(
 
         customBlocks.push(...insertCustomBlocks);
         customBlocks.sort(sortRulesFactory('startIndex'));
+    }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
     }
 }
 
@@ -758,10 +758,7 @@ export function deleteSectionBreaks(body: IDocumentBody, textLength: number, cur
 }
 
 export function deleteCustomBlocks(body: IDocumentBody, textLength: number, currentIndex: number) {
-    if (body.customBlocks == null) {
-        body.customBlocks = [];
-    }
-    const { customBlocks } = body;
+    const { customBlocks = [] } = body;
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
@@ -784,6 +781,10 @@ export function deleteCustomBlocks(body: IDocumentBody, textLength: number, curr
             newCustomBlocks.push(customBlock);
         }
         body.customBlocks = newCustomBlocks;
+    }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
     }
     return removeCustomBlocks;
 }

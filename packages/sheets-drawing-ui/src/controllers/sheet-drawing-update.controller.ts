@@ -71,7 +71,7 @@ export function getDrawingSizeByCell(
 
     return {
         width: originImageWidth * scale,
-        height: originImageWidth * scale,
+        height: originImageHeight * scale,
     };
 }
 

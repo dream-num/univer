@@ -174,6 +174,7 @@ export function createTableSkeletons(
         throw new Error('Table not found when creating table skeletons');
     }
 
+    const needRepeatHeader = table.tableRows[0].repeatHeaderRow === BooleanNumber.TRUE;
     const curTableSkeleton = getNullTableSkeleton(startIndex, endIndex, table);
 
     const createCache: ICreateTableCache = {
@@ -344,42 +345,8 @@ function dealWithTableRow(
     }
 
     // Handle vertical alignment in cell.
-    for (let i = 0; i < rowSource.tableCells.length; i++) {
-        const cellConfig = rowSource.tableCells[i];
-
-        for (const rowSkeleton of rowSkeletons) {
-            const cellPageSkeleton = rowSkeleton.cells[i];
-
-            if (cellPageSkeleton == null) {
-                continue;
-            }
-
-            const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
-            const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
-
-            let marginTop = originMarginTop;
-
-            switch (vAlign) {
-                case VerticalAlignmentType.TOP: {
-                    marginTop = originMarginTop;
-                    break;
-                }
-                case VerticalAlignmentType.CENTER: {
-                    marginTop = (pageHeight - height) / 2;
-                    break;
-                }
-                case VerticalAlignmentType.BOTTOM: {
-                    marginTop = pageHeight - height - originMarginBottom;
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            marginTop = Math.max(originMarginTop, marginTop);
-
-            cellPageSkeleton.marginTop = marginTop;
-        }
+    for (const rowSkeleton of rowSkeletons) {
+        _verticalAlignInCell(rowSkeleton, rowSource);
     }
 
     while (rowSkeletons.length > 0) {
@@ -405,6 +372,47 @@ function dealWithTableRow(
     }
 }
 
+function _verticalAlignInCell(
+    rowSkeleton: IDocumentSkeletonRow,
+    rowSource: ITableRow
+) {
+    for (let i = 0; i < rowSource.tableCells.length; i++) {
+        const cellConfig = rowSource.tableCells[i];
+
+        const cellPageSkeleton = rowSkeleton.cells[i];
+
+        if (cellPageSkeleton == null) {
+            continue;
+        }
+
+        const { vAlign = VerticalAlignmentType.CONTENT_ALIGNMENT_UNSPECIFIED } = cellConfig;
+        const { pageHeight, height, originMarginTop, originMarginBottom } = cellPageSkeleton;
+
+        let marginTop = originMarginTop;
+
+        switch (vAlign) {
+            case VerticalAlignmentType.TOP: {
+                marginTop = originMarginTop;
+                break;
+            }
+            case VerticalAlignmentType.CENTER: {
+                marginTop = (pageHeight - height) / 2;
+                break;
+            }
+            case VerticalAlignmentType.BOTTOM: {
+                marginTop = pageHeight - height - originMarginBottom;
+                break;
+            }
+            default:
+                break;
+        }
+
+        marginTop = Math.max(originMarginTop, marginTop);
+
+        cellPageSkeleton.marginTop = marginTop;
+    }
+}
+
 function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignmentType, indent: INumberUnit = { v: 0 }) {
     switch (align) {
         case TableAlignmentType.START: {
@@ -415,6 +423,9 @@ function _getTableLeft(pageWidth: number, tableWidth: number, align: TableAlignm
         }
         case TableAlignmentType.CENTER: {
             return Math.max(0, (pageWidth - tableWidth) / 2);
+        }
+        default: {
+            throw new Error('Unknown table alignment type');
         }
     }
 }

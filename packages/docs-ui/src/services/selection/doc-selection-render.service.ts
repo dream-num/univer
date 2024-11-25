@@ -20,7 +20,7 @@ import type { Subscription } from 'rxjs';
 import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
@@ -173,6 +173,24 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const document = mainComponent as Documents;
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
 
+        const generalAddRange = (startOffset: number, endOffset: number) => {
+            const rangeList = getRangeListFromCharIndex(
+                startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
+            );
+
+            if (rangeList == null) {
+                return;
+            }
+
+            const { textRanges, rectRanges } = rangeList;
+
+            for (const textRange of textRanges) {
+                this._addTextRange(textRange);
+            }
+
+            this._addRectRanges(rectRanges);
+        };
+
         for (const range of ranges) {
             const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
 
@@ -192,53 +210,45 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     this._addRectRanges([rectRange]);
                 }
             } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
-                let textRange: Nullable<TextRange> = null;
+                // TODO: Remove try catch when text range in cell support across pages.
+                try {
+                    let textRange: Nullable<TextRange> = null;
 
-                if (startNodePosition && endNodePosition) {
-                    textRange = getTextRangeFromCharIndex(
-                        startNodePosition.isBack ? startOffset : startOffset - 1,
-                        endNodePosition.isBack ? endOffset : endOffset - 1,
-                        scene,
-                        document,
-                        docSkeleton,
-                        style,
-                        segmentId,
-                        segmentPage,
-                        startNodePosition.isBack,
-                        endNodePosition.isBack
-                    );
-                } else {
-                    textRange = getTextRangeFromCharIndex(
-                        startOffset,
-                        endOffset,
-                        scene,
-                        document,
-                        docSkeleton,
-                        style,
-                        segmentId,
-                        segmentPage
-                    );
-                }
+                    if (startNodePosition && endNodePosition) {
+                        textRange = getTextRangeFromCharIndex(
+                            startNodePosition.isBack ? startOffset : startOffset - 1,
+                            endNodePosition.isBack ? endOffset : endOffset - 1,
+                            scene,
+                            document,
+                            docSkeleton,
+                            style,
+                            segmentId,
+                            segmentPage,
+                            startNodePosition.isBack,
+                            endNodePosition.isBack
+                        );
+                    } else {
+                        textRange = getTextRangeFromCharIndex(
+                            startOffset,
+                            endOffset,
+                            scene,
+                            document,
+                            docSkeleton,
+                            style,
+                            segmentId,
+                            segmentPage
+                        );
+                    }
 
-                if (textRange) {
-                    this._addTextRange(textRange);
+                    if (textRange) {
+                        this._addTextRange(textRange);
+                    }
+                // eslint-disable-next-line unused-imports/no-unused-vars
+                } catch (_e) {
+                    generalAddRange(startOffset, endOffset);
                 }
             } else {
-                const rangeList = getRangeListFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
-                );
-
-                if (rangeList == null) {
-                    continue;
-                }
-
-                const { textRanges, rectRanges } = rangeList;
-
-                for (const textRange of textRanges) {
-                    this._addTextRange(textRange);
-                }
-
-                this._addRectRanges(rectRanges);
+                generalAddRange(startOffset, endOffset);
             }
         }
 
@@ -719,7 +729,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         const HALF = 0.5;
-        const isBack = ratioX < HALF;
+        let isBack = ratioX < HALF;
+
+        if (glyph.glyphType === GlyphType.LIST) {
+            isBack = true;
+        }
 
         return {
             ...position,

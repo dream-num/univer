@@ -15,3 +15,5 @@
  */
 
 import './f-range';
+
+export type * from './f-range';

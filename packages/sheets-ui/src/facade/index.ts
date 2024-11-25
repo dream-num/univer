@@ -21,3 +21,10 @@ import './f-permission';
 import './f-sheet-hooks';
 
 export { type IFComponentKey, transformComponentKey } from './f-range';
+
+// eslint-disable-next-line perfectionist/sort-exports
+export type * from './f-permission';
+export type * from './f-sheet-hooks';
+export type * from './f-univer';
+export type * from './f-workbook';
+export type * from './f-worksheet';

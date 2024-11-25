@@ -45,7 +45,7 @@ const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UN
             return true;
         }
 
-        if (getShouldDisableCellLink(target.worksheet, state.row, state.column) === 1) {
+        if (getShouldDisableCellLink(accessor, target.worksheet, state.row, state.column) === 1) {
             return true;
         }
 
@@ -76,7 +76,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
 
-            return getShouldDisableCellLink(sheet, row, col);
+            return getShouldDisableCellLink(accessor, sheet, row, col);
         }),
         switchMap((disableCell) => {
             if (disableCell === DisableLinkType.DISABLED_BY_CELL) {

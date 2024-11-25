@@ -16,16 +16,14 @@
 
 import type { IRuleChange } from '@univerjs/data-validation';
 import type { IAddSheetDataValidationCommandParams,
-    IDataValidationResCache,
     IRemoveSheetAllDataValidationCommandParams,
     IRemoveSheetDataValidationCommandParams,
     IUpdateSheetDataValidationOptionsCommandParams,
     IUpdateSheetDataValidationRangeCommandParams,
-
     IUpdateSheetDataValidationSettingCommandParams,
     IValidStatusChange } from '@univerjs/sheets-data-validation';
+import { type DataValidationStatus, type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
 
-import { type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { AddSheetDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
@@ -33,15 +31,17 @@ import { AddSheetDataValidationCommand,
     SheetDataValidationModel,
     SheetsDataValidationValidatorService,
     UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from '@univerjs/sheets-data-validation';
 import { filter } from 'rxjs';
 
-interface IFWorkbookDataValidationMixin {
+export interface IFWorkbookDataValidationMixin {
     /**
      * get data validation validator status for current workbook
      * @returns matrix of validator status
      */
-    getValidatorStatus(this: FWorkbook): Promise<Record<string, ObjectMatrix<Nullable<IDataValidationResCache>>>>;
+    getValidatorStatus(this: FWorkbook): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
 
     /**
      * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
@@ -121,7 +121,7 @@ interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 }
 
-class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
+export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 
     override _initialize(): void {
@@ -136,7 +136,7 @@ class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataVa
      * get data validation validator status for current workbook
      * @returns matrix of validator status
      */
-    override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<IDataValidationResCache>>>> {
+    override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(this._workbook.getUnitId());
     }

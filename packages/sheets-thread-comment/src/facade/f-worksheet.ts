@@ -18,7 +18,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
-interface IFWorksheetCommentMixin {
+export interface IFWorksheetCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
@@ -26,7 +26,7 @@ interface IFWorksheetCommentMixin {
     getComments(): FThreadComment[];
 }
 
-class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
+export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
     override getComments(): FThreadComment[] {
         const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
         const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());

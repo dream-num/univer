@@ -146,7 +146,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col)?.status ?? DataValidationStatus.VALID;
+                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col) ?? DataValidationStatus.VALID;
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = pos.rawData;
                         let cache: Nullable<CellValue>;
@@ -167,12 +167,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                         return next({
                             ...cell,
-                            dataValidation: {
-                                ruleId,
-                                validStatus,
-                                rule,
-                                validator,
-                            },
                             markers: {
                                 ...cell?.markers,
                                 ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
@@ -205,15 +199,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
-                                    data: {
-                                        ...cell,
-                                        dataValidation: {
-                                            ruleId,
-                                            validStatus,
-                                            rule,
-                                            validator,
-                                        },
-                                    },
+                                    data: cell,
                                     style: skeleton.getsStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,
@@ -236,15 +222,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
-                                    data: {
-                                        ...cell,
-                                        dataValidation: {
-                                            ruleId,
-                                            validStatus,
-                                            rule,
-                                            validator,
-                                        },
-                                    },
+                                    data: cell,
                                     style: skeleton.getsStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,
@@ -305,7 +283,6 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         this._initAutoHeight();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initViewModelIntercept() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(
@@ -326,7 +303,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col)?.status ?? DataValidationStatus.VALID;
+                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col) ?? DataValidationStatus.VALID;
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = worksheet.getCellRaw(row, col);
                         const cellValue = getCellValueOrigin(cellOrigin);
@@ -334,12 +311,6 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                         return next({
                             ...cell,
-                            dataValidation: {
-                                ruleId,
-                                validStatus,
-                                rule,
-                                validator,
-                            },
                             markers: {
                                 ...cell?.markers,
                                 ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
@@ -372,15 +343,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                 const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
-                                    data: {
-                                        ...cell,
-                                        dataValidation: {
-                                            ruleId,
-                                            validStatus,
-                                            rule,
-                                            validator,
-                                        },
-                                    },
+                                    data: cell,
                                     style: skeleton.getsStyles().getStyleByCell(cell),
                                     primaryWithCoord: skeleton.getCellWithCoordByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
                                     unitId,

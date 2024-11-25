@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IHoverRichTextInfo, IHoverRichTextPosition } from '../services/hover-manager.service';
-import { type IDisposable, ILogService, toDisposable } from '@univerjs/core';
+import { awaitTime, ICommandService, type IDisposable, ILogService, toDisposable } from '@univerjs/core';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { HoverManagerService } from '@univerjs/sheets-ui';
-import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService } from '@univerjs/ui';
+import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 
-interface IFWorkbookSheetsUIMixin {
+export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.
      *
@@ -57,9 +59,23 @@ interface IFWorkbookSheetsUIMixin {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
+
+    /**
+     * Start the editing process
+     * @returns A boolean value
+     */
+    startEditing(): boolean;
+
+    /**
+     * End the editing process
+     * @async
+     * @param save - Whether to save the changes
+     * @returns A promise that resolves to a boolean value
+     */
+    endEditing(save?: boolean): Promise<boolean>;
 }
 
-class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
+export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         this._logDeprecation('openSiderbar');
 
@@ -104,6 +120,29 @@ class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMix
                 .subscribe(callback)
         );
     }
+
+    override startEditing(): boolean {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            eventType: DeviceInputEventType.Dblclick,
+            unitId: this._workbook.getUnitId(),
+            visible: true,
+        } as IEditorBridgeServiceVisibleParam);
+    }
+
+    override async endEditing(save?: boolean): Promise<boolean> {
+        const commandService = this._injector.get(ICommandService);
+        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: save ? KeyCode.ENTER : KeyCode.ESC,
+            visible: false,
+            unitId: this._workbook.getUnitId(),
+        } as IEditorBridgeServiceVisibleParam);
+
+        // wait for the async cell edit operation to complete
+        await awaitTime(0);
+        return true;
+    }
 }
 
 FWorkbook.extend(FWorokbookSheetsUIMixin);
@@ -111,4 +150,3 @@ declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}
 }
-

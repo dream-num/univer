@@ -29,7 +29,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 
-interface IFUniverSheetsUIMixin {
+export interface IFUniverSheetsUIMixin {
     /**
      * Customize the column header of the spreadsheet.
      *

@@ -28,19 +28,20 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const activeTextRange = docSelectionManagerService.getActiveTextRange();
-        if (docDataModel == null || activeTextRange == null) {
+        const docRanges = docSelectionManagerService.getDocRanges();
+        const activeRange = docRanges.find((range) => range.isActive) ?? docRanges[0];
+        if (docDataModel == null || activeRange == null) {
             return false;
         }
 
-        const { segmentId } = activeTextRange;
+        const { segmentId } = activeRange;
         const unitId = docDataModel.getUnitId();
-        const prevBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
-        if (prevBody == null) {
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+        if (body == null) {
             return false;
         }
 
-        const { tables = [] } = prevBody;
+        const { tables = [] } = body;
         const textRanges: ISuccinctDocRangeParam[] = [];
         let offset = 0;
 
@@ -64,10 +65,10 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             offset = endIndex;
         }
 
-        if (offset !== prevBody.dataStream.length - 2) {
+        if (offset !== body.dataStream.length - 2) {
             textRanges.push({
                 startOffset: offset,
-                endOffset: prevBody.dataStream.length - 2,
+                endOffset: body.dataStream.length - 2,
                 rangeType: DOC_RANGE_TYPE.TEXT,
             });
         }

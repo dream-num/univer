@@ -232,7 +232,7 @@ export function convertBodyToHtml(doc: IDocumentData): string {
 
     const result: IHtmlResult = { html: '' };
 
-    const nodeList = parseDataStreamToTree(dataStream);
+    const nodeList = parseDataStreamToTree(dataStream).sectionList;
 
     for (const node of nodeList) {
         processNode(node, doc, result);

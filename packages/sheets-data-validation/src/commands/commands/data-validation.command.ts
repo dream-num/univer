@@ -18,7 +18,7 @@ import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { RangeMutation } from '../../models/rule-matrix';
-import { CommandType, DataValidationType, ICommandService, isFormulaString, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
+import { CommandType, DataValidationType, ICommandService, isFormulaString, isRangesEqual, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
 import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -70,7 +70,7 @@ export function getDataValidationDiffMutations(
     }
     const { worksheet } = target;
     const redoMatrix = new ObjectMatrix<ICellData>();
-
+    let setRangeValue = false;
     function setRangesDefaultValue(ranges: IRange[], defaultValue: CellValue) {
         if (!fillDefaultValue) {
             return;
@@ -80,6 +80,7 @@ export function getDataValidationDiffMutations(
                 const cellData = worksheet.getCellRaw(row, column);
                 const value = getStringCellValue(cellData);
                 if (isBlankCell(cellData) || value === defaultValue) {
+                    setRangeValue = true;
                     redoMatrix.setValue(row, column, {
                         v: defaultValue,
                         p: null,
@@ -124,7 +125,7 @@ export function getDataValidationDiffMutations(
                     const newFormula = isFormulaString(diff.rule.formula1!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula1!, columnDiff, rowDiff) : diff.rule.formula1;
                     const newFormula2 = isFormulaString(diff.rule.formula2!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula2!, columnDiff, rowDiff) : diff.rule.formula2;
 
-                    if (newFormula !== diff.rule.formula1 || newFormula2 !== diff.rule.formula2) {
+                    if (newFormula !== diff.rule.formula1 || newFormula2 !== diff.rule.formula2 || !isRangesEqual(diff.newRanges, diff.oldRanges)) {
                         redoMutations.push({
                             id: UpdateDataValidationMutation.id,
                             params: {
@@ -228,22 +229,24 @@ export function getDataValidationDiffMutations(
         }
     });
 
-    const redoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: {
-            unitId,
-            subUnitId,
-            cellValue: redoMatrix.getData(),
-        } as ISetRangeValuesMutationParams,
-    };
+    if (setRangeValue) {
+        const redoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                cellValue: redoMatrix.getData(),
+            } as ISetRangeValuesMutationParams,
+        };
 
-    const undoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
-    };
+        const undoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
+        };
 
-    redoMutations.push(redoSetRangeValues);
-    undoMutations.push(undoSetRangeValues);
+        redoMutations.push(redoSetRangeValues);
+        undoMutations.push(undoSetRangeValues);
+    }
 
     return {
         redoMutations,

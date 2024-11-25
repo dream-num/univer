@@ -20,7 +20,7 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
-interface IFRangeCommentMixin {
+export interface IFRangeCommentMixin {
     /**
      * Get the comment of the start cell in the current range.
      * @returns The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
@@ -39,7 +39,7 @@ interface IFRangeCommentMixin {
     clearComment(): Promise<boolean>;
 }
 
-class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
+export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
     override getComment(): Nullable<FThreadComment> {
         const injector = this._injector;
         const sheetsTheadCommentModel = injector.get(SheetsThreadCommentModel);

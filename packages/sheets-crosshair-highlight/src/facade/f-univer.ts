@@ -18,7 +18,7 @@ import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheet
 import { FUniver } from '@univerjs/core';
 import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 
-interface IFUniverCrosshairHighlightMixin {
+export interface IFUniverCrosshairHighlightMixin {
     /**
      * Enable or disable crosshair highlight.
      * @param {boolean} enabled if crosshair highlight should be enabled
@@ -32,7 +32,7 @@ interface IFUniverCrosshairHighlightMixin {
     setCrosshairHighlightColor(color: string): void;
 }
 
-class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverCrosshairHighlightMixin {
+export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverCrosshairHighlightMixin {
     override setCrosshairHighlightEnabled(enabled: boolean): void {
         if (enabled) {
             this._commandService.executeCommand(EnableCrosshairHighlightOperation.id);

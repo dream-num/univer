@@ -18,7 +18,7 @@ import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/wate
 import { FUniver } from '@univerjs/core';
 import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 
-interface IFUniverWatermarkMixin {
+export interface IFUniverWatermarkMixin {
     /**
      * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
      *
@@ -43,7 +43,7 @@ interface IFUniverWatermarkMixin {
     deleteWatermark(): void;
 }
 
-class FUniverWatermarkMixin extends FUniver {
+export class FUniverWatermarkMixin extends FUniver {
     // #region watermark
 
     override addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): void;

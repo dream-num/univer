@@ -19,7 +19,7 @@ import { FUniver, IUniverInstanceService, UniverInstanceType } from '@univerjs/c
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
-interface IFUniverSheetsMixin {
+export interface IFUniverSheetsMixin {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      *
@@ -48,7 +48,7 @@ interface IFUniverSheetsMixin {
     getPermission(): FPermission;
 }
 
-class FUniverSheetsMixin extends FUniver {
+export class FUniverSheetsMixin extends FUniver {
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const instanceService = this._injector.get(IUniverInstanceService);
         const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);

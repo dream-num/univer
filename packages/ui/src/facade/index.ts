@@ -16,3 +16,6 @@
 
 import './f-univer';
 import './f-hooks';
+
+export type * from './f-hooks';
+export type * from './f-univer';

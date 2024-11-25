@@ -1001,7 +1001,7 @@ export class DocumentSkeleton extends Skeleton {
     private _prepareLayoutContext(): ILayoutContext {
         const viewModel = this.getViewModel();
         const dataModel = viewModel.getDataModel();
-        const { headerTreeMap, footerTreeMap } = viewModel;
+        const { headerTreeMap, footerTreeMap } = viewModel.getHeaderFooterTreeMap();
         const { documentStyle, drawings, lists: customLists = {} } = dataModel;
         const lists = {
             ...PRESET_LIST_TYPE,
@@ -1089,8 +1089,6 @@ export class DocumentSkeleton extends Skeleton {
 
         const allSkeletonPages = skeleton.pages;
 
-        viewModel.resetCache();
-
         let startSectionIndex = 0;
 
         const layoutAnchor = ctx.layoutStartPointer[''];
@@ -1099,8 +1097,8 @@ export class DocumentSkeleton extends Skeleton {
         ctx.layoutStartPointer[''] = null;
 
         if (layoutAnchor != null) {
-            for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {
-                const sectionNode = viewModel.children[sectionIndex];
+            for (let sectionIndex = 0; sectionIndex < viewModel.getChildren().length; sectionIndex++) {
+                const sectionNode = viewModel.getChildren()[sectionIndex];
                 const { endIndex, startIndex } = sectionNode;
                 if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
                     startSectionIndex = sectionIndex;
@@ -1110,8 +1108,8 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         // Loop the sections with the start section index.
-        for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
-            const sectionNode = viewModel.children[i];
+        for (let i = startSectionIndex, len = viewModel.getChildren().length; i < len; i++) {
+            const sectionNode = viewModel.getChildren()[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
             const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
 

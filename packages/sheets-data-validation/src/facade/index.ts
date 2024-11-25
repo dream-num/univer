@@ -21,3 +21,8 @@ import './f-worksheet';
 
 export { FDataValidation } from './f-data-validation';
 export { FDataValidationBuilder } from './f-data-validation-builder';
+
+export type * from './f-range';
+export type * from './f-univer';
+export type * from './f-workbook';
+export type * from './f-worksheet';

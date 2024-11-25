@@ -27,7 +27,7 @@ export interface ICellHyperLink {
     label: string;
 }
 
-interface IFRangeHyperlinkMixin {
+export interface IFRangeHyperlinkMixin {
     /**
      * Get all hyperlinks in the cell in the range.
      * @returns hyperlinks
@@ -51,7 +51,7 @@ interface IFRangeHyperlinkMixin {
     cancelHyperLink(id: string): Promise<boolean>;
 }
 
-class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
+export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
     /**

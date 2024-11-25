@@ -30,7 +30,7 @@ import {
 } from '@univerjs/core';
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';

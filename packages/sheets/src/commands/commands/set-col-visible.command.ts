@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
+
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ICommandService,
@@ -22,9 +26,7 @@ import {
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     SetColHiddenMutation,
@@ -35,8 +37,6 @@ import {
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface ISetSpecificColsVisibleCommandParams {
     unitId: string;

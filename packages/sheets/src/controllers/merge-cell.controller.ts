@@ -16,6 +16,27 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type {
+    ICommandInfo, IMutationInfo, IRange, Workbook,
+} from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IInsertColMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../basics/interfaces/mutation-interface';
+
+import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
+import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
+import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
+import type { InsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
+import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
+import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
+import type { EffectRefRangeParams } from '../services/ref-range/type';
 import {
     createInterceptorKey,
     Dimension,
@@ -31,10 +52,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { first } from 'rxjs';
-
-import type {
-    ICommandInfo, IMutationInfo, IRange, Workbook,
-} from '@univerjs/core';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
@@ -60,25 +77,8 @@ import { SetWorksheetActiveOperation } from '../commands/operations/set-workshee
 import { RefRangeService } from '../services/ref-range/ref-range.service';
 import { EffectRefRangId } from '../services/ref-range/type';
 import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
-import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../services/selections/selection.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IInsertColMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../basics/interfaces/mutation-interface';
-import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
-import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
-import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
-import type { InsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
-import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
-import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
-import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
-import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
-import type { EffectRefRangeParams } from '../services/ref-range/type';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];

@@ -89,7 +89,6 @@ export class SheetsSelectionsService extends RxDisposable {
         if (!current) {
             throw new Error('[SheetsSelectionsService]: cannot find current selection position!');
         }
-
         const { unitId, sheetId } = current;
         this._ensureWorkbookSelection(unitId).addSelections(sheetId, unitIdOrSelections);
     }

@@ -46,7 +46,7 @@ import { type IMoveRangeMutationParams, MoveRangeMutation } from '../../commands
 import { type IMoveColumnsMutationParams, type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import { SheetsSelectionsService } from '../selections/selection-manager.service';
+import { SheetsSelectionsService } from '../selections/selection.service';
 import { EffectRefRangId, OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, IConfigService, IContextService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -108,6 +108,7 @@ describe('Test EndEditController', () => {
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
         configService = get(IConfigService);
+        const injector = get(Injector);
 
         const worksheet = workbook.getActiveSheet()!;
         const config = worksheet.getConfig();
@@ -118,7 +119,8 @@ describe('Test EndEditController', () => {
             workbook.getStyles(),
             localeService,
             contextService,
-            configService
+            configService,
+            injector
         );
 
         getCellDataByInputCell = (cell: ICellData, inputCell: ICellData) => {

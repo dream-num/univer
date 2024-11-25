@@ -14152,7 +14152,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             documentStyle: {
                                 pageSize: {
                                     width: 58,
-                                    height: null,
+                                    height: undefined,
                                 },
                                 marginTop: 0,
                                 marginBottom: 2,

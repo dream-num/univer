@@ -42,7 +42,7 @@ import {
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
-import { copyRangeStyles, copyRangeStylesWithoutBorder, followSelectionOperation } from './utils/selection-utils';
+import { copyRangeStylesWithoutBorder, followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IInsertRowCommandParams {
@@ -182,7 +182,7 @@ export const InsertRowBeforeCommand: ICommand = {
                 endColumn,
             },
             // copy styles from the row above
-            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1),
+            cellValue: copyRangeStylesWithoutBorder(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
@@ -364,8 +364,8 @@ export const InsertColBeforeCommand: ICommand = {
                 rangeType: RANGE_TYPE.COLUMN,
             },
 
-            // copy styles from the column before
-            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1),
+            // copy styles from the left adjacent column
+            cellValue: copyRangeStylesWithoutBorder(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);

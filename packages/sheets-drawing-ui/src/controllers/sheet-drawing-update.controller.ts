@@ -36,12 +36,21 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
+function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
+    const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度
+    const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+    const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
+    return { rotatedWidth, rotatedHeight };
+}
+
 export function getDrawingSizeByCell(
     accessor: IAccessor,
     location: ISheetLocationBase,
     originImageWidth: number,
-    originImageHeight: number
+    originImageHeight: number,
+    angle: number
 ) {
+    const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(originImageWidth, originImageHeight, angle);
     const renderManagerService = accessor.get(IRenderManagerService);
     const currentRender = renderManagerService.getRenderById(location.unitId);
     if (!currentRender) {
@@ -56,13 +65,13 @@ export function getDrawingSizeByCell(
 
     const cellWidth = cellInfo.mergeInfo.endX - cellInfo.mergeInfo.startX - 2;
     const cellHeight = cellInfo.mergeInfo.endY - cellInfo.mergeInfo.startY - 2;
-    const imageRatio = originImageWidth / originImageHeight;
+    const imageRatio = rotatedWidth / rotatedHeight;
     const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
-    const imageHeight = imageWidth / imageRatio;
+    const scale = imageWidth / rotatedWidth;
 
     return {
-        width: imageWidth,
-        height: imageHeight,
+        width: originImageWidth * scale,
+        height: originImageWidth * scale,
     };
 }
 
@@ -241,7 +250,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 col: selection.primary.actualColumn,
             },
             width,
-            height
+            height,
+            0
         );
         if (!imageSize) {
             return false;

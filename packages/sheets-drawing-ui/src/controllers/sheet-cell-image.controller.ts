@@ -37,7 +37,8 @@ export function resizeImageByCell(injector: Injector, location: ISheetLocationBa
                 col: location.col,
             },
             image.docTransform!.size.width!,
-            image.docTransform!.size.height!
+            image.docTransform!.size.height!,
+            image.docTransform!.angle
         );
 
         if (imageSize) {

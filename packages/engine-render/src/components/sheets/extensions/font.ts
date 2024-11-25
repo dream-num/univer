@@ -34,6 +34,13 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
+function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
+    const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度
+    const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+    const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
+    return { rotatedWidth, rotatedHeight };
+}
+
 interface IRenderFontContext {
     ctx: UniverRenderingContext;
     scale: number;
@@ -285,9 +292,18 @@ export class Font extends SheetExtension {
 
                 const x = fontX + drawing.aLeft;
                 const y = fontY + drawing.aTop;
+                const width = drawing.width;
+                const height = drawing.height;
+                const angle = drawing.angle;
+                const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(width, height, angle);
 
                 if (image && image.complete) {
-                    ctx.drawImage(image, x, y, drawing.width, drawing.height);
+                    const angleRadians = angle * Math.PI / 180;
+                    ctx.save();
+                    ctx.translate(x + rotatedWidth / 2, y + rotatedHeight / 2);
+                    ctx.rotate(angleRadians);
+                    ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                    ctx.restore();
                 }
             }
         });

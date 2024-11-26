@@ -268,6 +268,11 @@ export class AstTreeBuilder extends Disposable {
 
             let astNode: Nullable<BaseAstNode> = null;
             if (item instanceof LexerNode) {
+                if (item.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER && item.getChildren().length === 0) {
+                    // =trim(      ) is #NAME?
+                    return ErrorNode.create(ErrorType.NAME);
+                }
+
                 astNode = this._parse(item, currentAstNode);
                 if (astNode === currentAstNode) {
                     continue;
@@ -282,9 +287,11 @@ export class AstTreeBuilder extends Disposable {
             }
 
             astNode = getAstNodeTopParent(astNode);
-            if (astNode == null) {
-                return;
+
+            if (astNode == null || astNode?.nodeType === NodeType.ERROR) {
+                return astNode;
             }
+
             // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 // case NodeType.ERROR:

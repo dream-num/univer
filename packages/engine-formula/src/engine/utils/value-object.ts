@@ -302,10 +302,10 @@ export enum ReferenceObjectType {
 const referenceObjectFromCache: Map<string, BaseReferenceObject> = new Map();
 
 export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
-    const o = referenceObjectFromCache.get(trimToken);
-    if (o) {
-        return o;
-    }
+    // const o = referenceObjectFromCache.get(trimToken);
+    // if (o) {
+    //     return o;
+    // }
 
     let referenceObject: BaseReferenceObject;
     switch (type) {
@@ -322,29 +322,29 @@ export function getReferenceObjectFromCache(trimToken: string, type: ReferenceOb
             throw new Error('Unknown reference object type');
     }
 
-    referenceObjectFromCache.set(trimToken, referenceObject);
+    // referenceObjectFromCache.set(trimToken, referenceObject);
 
     return referenceObject;
 }
 
 export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
-    const key = `${variant1.getToken()}:${variant2.getToken()}`;
-    const o = referenceObjectFromCache.get(key);
-    if (o) {
-        const { x, y } = variant1.getRefOffset();
-        o.setRefOffset(x, y);
-        return o;
-    }
+    // const key = `${variant1.getToken()}:${variant2.getToken()}`;
+    // const o = referenceObjectFromCache.get(key);
+    // if (o) {
+    //     const { x, y } = variant1.getRefOffset();
+    //     o.setRefOffset(x, y);
+    //     return o;
+    // }
     let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);
     if (variant1.isCell() && variant2.isCell()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+        // referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     } else if (variant1.isRow() && variant2.isRow()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+        // referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     } else if (variant1.isColumn() && variant2.isColumn()) {
         referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
-        referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
+        // referenceObjectFromCache.set(key, referenceObject as BaseReferenceObject);
     }
 
     return referenceObject;

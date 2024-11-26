@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -36,6 +36,10 @@ export class Index extends BaseFunction {
     override maxParams = 4;
 
     override needsReferenceObject = true;
+
+    override isAddress() {
+        return true;
+    }
 
     // eslint-disable-next-line max-lines-per-function, complexity
     override calculate(reference: FunctionVariantType, rowNum?: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {

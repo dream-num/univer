@@ -49,7 +49,7 @@ export class FunctionNode extends BaseAstNode {
         private _definedNamesService: IDefinedNamesService,
         private _formulaDataModel: FormulaDataModel
     ) {
-        super('');
+        super(token);
 
         if (this._functionExecutor.isAsync()) {
             this.setAsync();

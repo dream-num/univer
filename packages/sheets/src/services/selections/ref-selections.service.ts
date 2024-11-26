@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 import type { WorkbookSelectionModel } from './selection-data-model';
 import { createIdentifier, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, map, merge, switchMap, takeUntil } from 'rxjs';
-import { SheetsSelectionsService } from './selection-manager.service';
+import { SheetsSelectionsService } from './selection.service';
 
 /**
  * Ref selections service reuses code of `SelectionManagerService`. And it only contains ref selections

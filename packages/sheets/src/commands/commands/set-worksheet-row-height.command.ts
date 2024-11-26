@@ -30,7 +30,7 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     SetWorksheetRowHeightMutation,

@@ -38,7 +38,7 @@ import { RangeProtectionService } from './services/permission/range-permission/r
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from './services/selections/selection-manager.service';
+import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';

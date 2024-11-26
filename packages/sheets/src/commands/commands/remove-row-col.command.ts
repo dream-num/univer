@@ -15,6 +15,13 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     ICommandService,
@@ -22,14 +29,7 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {

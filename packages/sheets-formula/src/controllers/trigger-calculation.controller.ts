@@ -22,7 +22,8 @@ import type {
     IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
-    ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+    ISetFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
@@ -33,7 +34,8 @@ import {
     IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
-    SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+    SetFormulaCalculationStopMutation,
+} from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
     SetBorderCommand,
@@ -301,9 +303,9 @@ export class TriggerCalculationController extends Disposable {
                     const { startRow: existingStartRow, startColumn: existingStartColumn, endRow: existingEndRow, endColumn: existingEndColumn } = existingRange.range;
                     if (
                         startRow === existingStartRow &&
-                    startColumn === existingStartColumn &&
-                    endRow === existingEndRow &&
-                    endColumn === existingEndColumn
+                        startColumn === existingStartColumn &&
+                        endRow === existingEndRow &&
+                        endColumn === existingEndColumn
                     ) {
                         isDuplicate = true;
                         break;
@@ -366,31 +368,6 @@ export class TriggerCalculationController extends Disposable {
                     if (forceCalculation) {
                         this._forceCalculating = true;
                     }
-
-                    // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
-                    if (this._calculationMode === CalculationMode.NO_CALCULATION) {
-                        return;
-                    }
-
-                    // When calculations are started multiple times in succession, only the first time is recognized
-                    if (calculationProcessCount === 0) {
-                        this._startExecutionTime = performance.now();
-                    }
-
-                    // Increment the calculation process count and assign a new ID
-                    calculationProcessCount++;
-
-                    // Clear any existing timer to prevent duplicate executions
-                    if (startDependencyTimer !== null) {
-                        clearTimeout(startDependencyTimer);
-                        startDependencyTimer = null;
-                    }
-
-                    // If the total calculation time exceeds 1s, a progress bar is displayed.
-                    startDependencyTimer = setTimeout(() => {
-                        startDependencyTimer = null;
-                        this._startProgress();
-                    }, 1000);
                 } else if (command.id === SetFormulaCalculationStopMutation.id) {
                     this.clearProgress();
                 }
@@ -406,7 +383,32 @@ export class TriggerCalculationController extends Disposable {
                         stage,
                     } = params.stageInfo;
 
-                    if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                    if (stage === FormulaExecuteStageType.START) {
+                        // In NO_CALCULATION mode, the following processes will not be triggered, so there is no need to start
+                        if (this._calculationMode === CalculationMode.NO_CALCULATION) {
+                            return;
+                        }
+
+                        // When calculations are started multiple times in succession, only the first time is recognized
+                        if (calculationProcessCount === 0) {
+                            this._startExecutionTime = performance.now();
+                        }
+
+                        // Increment the calculation process count and assign a new ID
+                        calculationProcessCount++;
+
+                        // Clear any existing timer to prevent duplicate executions
+                        if (startDependencyTimer !== null) {
+                            clearTimeout(startDependencyTimer);
+                            startDependencyTimer = null;
+                        }
+
+                        // If the total calculation time exceeds 1s, a progress bar is displayed.
+                        startDependencyTimer = setTimeout(() => {
+                            startDependencyTimer = null;
+                            this._startProgress();
+                        }, 1000);
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
                         this._executionInProgressParams = params.stageInfo;
 
                         if (startDependencyTimer === null) {

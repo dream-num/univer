@@ -122,14 +122,22 @@ export interface IChannelClient {
     getChannel<T extends IChannel>(channelName: string): T;
 }
 
-/**
- *
- */
 export interface IChannelServer {
     registerChannel<T extends IChannel>(channelName: string, channel: T): void;
 }
 
 enum RequestType {
+    /**
+     * In Univer, we cannot make sure that when IPCServer constructs, the process (or thread)
+     * where the corresponding IPCClient resident is there and ready to recieve messages. This
+     * may result in the IPCClient hanging there, waiting for the `INITIALIZE` message that it
+     * already misses. So the client should send a REQUEST_INITIALIZATION in case of that.
+     *
+     * Later, we may want a more sophisticated RPC system where the server can server more than
+     * one clients, and this event may be removed.
+     */
+    REQUEST_INITIALIZATION = 50,
+
     /** A simple remote calling wrapper in a Promise. */
     CALL = 100,
 
@@ -168,7 +176,8 @@ interface IRPCResponse {
     /** It should be the same as its corresponding requests' `seq`. */
     seq: number;
     type: ResponseType;
-    data?: any;
+
+    data?: any; // TODO: replace it with ISerializable.
 }
 
 interface IResponseHandler {
@@ -187,8 +196,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
     constructor(private readonly _protocol: IMessageProtocol) {
         super();
 
-        // TODO: subscribe to the state of the protocol and see if it is connected \
-        // and initialized.
+        this._protocol.send({ type: RequestType.REQUEST_INITIALIZATION });
         this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onMessage(message));
     }
 
@@ -334,7 +342,7 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         super();
 
         this._protocol.onMessage.pipe(takeUntil(this.dispose$)).subscribe((message) => this._onRequest(message));
-        this._sendResponse({ seq: -1, type: ResponseType.INITIALIZE });
+        this._sendInitialize();
     }
 
     override dispose(): void {
@@ -350,6 +358,9 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
 
     private _onRequest(request: IRPCRequest): void {
         switch (request.type) {
+            case RequestType.REQUEST_INITIALIZATION:
+                this._sendInitialize();
+                break;
             case RequestType.CALL:
                 this._onMethodCall(request);
                 break;
@@ -362,6 +373,10 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
             default:
                 break;
         }
+    }
+
+    private _sendInitialize(): void {
+        this._sendResponse({ seq: -1, type: ResponseType.INITIALIZE });
     }
 
     private _onMethodCall(request: IRPCRequest): void {
@@ -436,3 +451,12 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         this._protocol.send(response);
     }
 }
+
+export class IPCClient {
+
+}
+
+export class IPCServer {
+
+}
+

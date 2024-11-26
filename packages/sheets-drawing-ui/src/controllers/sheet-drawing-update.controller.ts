@@ -68,9 +68,11 @@ export function getDrawingSizeByCell(
     const imageRatio = rotatedWidth / rotatedHeight;
     const imageWidth = Math.ceil(Math.min(cellWidth, cellHeight * imageRatio));
     const scale = imageWidth / rotatedWidth;
+    const realScale = !(scale) || Number.isNaN(scale) ? 0.001 : scale;
+
     return {
-        width: originImageWidth * (Number.isNaN(scale) ? 0 : scale),
-        height: originImageHeight * (Number.isNaN(scale) ? 0 : scale),
+        width: originImageWidth * realScale,
+        height: originImageHeight * realScale,
     };
 }
 

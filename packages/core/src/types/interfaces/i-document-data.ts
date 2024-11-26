@@ -429,7 +429,7 @@ export enum DocumentFlavor {
 export interface IDocStyleBase extends IMargin {
     pageNumberStart?: number; // pageNumberStart
     pageSize?: ISize; // pageSize
-
+    // PORTRAIT and LANDSCAPE
     pageOrient?: PageOrientType;
 
     documentFlavor?: DocumentFlavor; // DocumentFlavor: TRADITIONAL, MODERN
@@ -445,8 +445,10 @@ export interface IDocumentLayout {
     defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   0.5 in  = 36pt，this value should be converted to the default font size when exporting
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
     paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
-    spaceWidthEastAsian?: BooleanNumber; // add space between east asian and English
 
+    autoSpaceDE?: BooleanNumber; // 17.3.1.2 autoSpaceDE (Automatically Adjust Spacing of Latin and East Asian Text)
+    autoSpaceDN?: BooleanNumber; // 17.3.1.3 autoSpaceDN (Automatically Adjust Spacing of East Asian Text and Numbers)
+    // Hyphenation.
     autoHyphenation?: BooleanNumber; // 17.15.1.10 autoHyphenation (Automatically Hyphenate Document Contents When Displayed)
     consecutiveHyphenLimit?: number; // 17.15.1.22 consecutiveHyphenLimit (Maximum Number of Consecutively Hyphenated Lines)
     doNotHyphenateCaps?: BooleanNumber; // 17.15.1.37 doNotHyphenateCaps (Do Not Hyphenate Words in ALL CAPITAL LETTERS)
@@ -500,6 +502,27 @@ export interface ISectionBreakBase {
 
     columnProperties?: ISectionColumnProperties[]; // columnProperties 17.6.4 cols (Column Definitions)
     columnSeparatorType?: ColumnSeparatorType; // ColumnSeparatorType
+    // If this attribute is present and its value is set to true or 1, then all columns for this text
+    // section are of an equal width and are calculated as follows:
+    // - Take width of page (from margin to margin)
+    // - Divide by number of columns specified in num attribute
+    // - For each column, leave space after as defined in the space attribute
+    // - Remaining width of each column is the text column width.
+    // If this attribute is present and its value is set to false or 0, then all columns for this text
+    // section are of different widths and are defined by each col element as follows:
+    // - Each col element defines a single column
+    // - Each w attribute defines the text column width
+    // - Each space attribute defines the space after the text column
+    equalWidth?: BooleanNumber; // Specifies whether all text columns in the current section are of equal width. 17.6.4 cols (Column Definitions)
+    // If all columns are not of equal width (the equalWidth attribute is not set), then this
+    // element is ignored, and the number of columns is defined by the number of col elements
+    // defined under the cols element.
+    numOfEqualWidthColumns?: number; // Specifies the number of text columns in the current section.
+    // Specifies the spacing between text columns in the current section.
+    // If all columns are not of equal width (the equalWidth attribute is not set), then this
+    // element is ignored, and the spacing after columns is defined by the space attribute on
+    // each of the col elements defined under the cols element.
+    spaceBetweenEqualWidthColumns?: INumberUnit;
     contentDirection?: TextDirection; // contentDirection
     sectionType?: SectionType; // sectionType 17.6.22 type (Section Type)
     // deprecated: The attribute does not exist in Word and should be deprecated.
@@ -745,6 +768,8 @@ export interface IParagraphProperties extends IIndentStart {
     widowControl?: BooleanNumber; // 17.3.1.44 widowControl (Allow First/Last Line to Display on a Separate Page)
     shading?: IShading; // shading
     suppressHyphenation?: BooleanNumber; // 17.3.1.34 suppressAutoHyphens (Suppress Hyphenation for Paragraph)
+    autoSpaceDE?: BooleanNumber; // 17.3.1.2 autoSpaceDE (Automatically Adjust Spacing of Latin and East Asian Text)
+    autoSpaceDN?: BooleanNumber; // 17.3.1.3 autoSpaceDN (Automatically Adjust Spacing of East Asian Text and Numbers)
 }
 
 /**

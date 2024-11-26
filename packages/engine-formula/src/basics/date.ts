@@ -257,7 +257,7 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
         workingDays++;
     }
 
-    return end > start ? workingDays : -workingDays;
+    return end >= start ? workingDays : -workingDays;
 }
 
 export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[]): (number | ErrorValueObject) {

@@ -52,7 +52,7 @@ export const DEFAULT_SKELETON_FOOTER = {
 
 export const DEFAULT_OFFSET_SPACING = 1;
 
-export const DEFAULT_DOCUMENT_FONTSIZE = 14;
+export const DEFAULT_DOCUMENT_FONTSIZE = 11;
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/CSS/cursor

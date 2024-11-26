@@ -342,9 +342,9 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
             for (const column of columns) {
                 const { lines } = column;
-                const columStartIndex = preColumnStartIndex;
-                const columnEndIndex = columStartIndex;
-                let preLineStartIndex = columStartIndex;
+                const columnStartIndex = preColumnStartIndex;
+                const columnEndIndex = columnStartIndex;
+                let preLineStartIndex = columnStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = Number.NEGATIVE_INFINITY;
                 // const preLine: Nullable<IDocumentSkeletonLine> = null;
@@ -429,7 +429,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     // because of float objects will between lines.
                     preLineStartIndex = line.ed;
                 }
-                column.st = columStartIndex + 1;
+                column.st = columnStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
 
@@ -464,6 +464,18 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         page.width = maxContentWidth;
 
         prePageStartIndex = page.ed;
+    }
+}
+
+export function updatePagesLeft(pages: IDocumentSkeletonPage[]) {
+    const maxPageWidth = Math.max(...pages.map((page) => page.pageWidth));
+
+    if (!Number.isFinite(maxPageWidth) || Number.isNaN(maxPageWidth)) {
+        return;
+    }
+
+    for (const page of pages) {
+        page.left = (maxPageWidth - page.pageWidth) / 2;
     }
 }
 

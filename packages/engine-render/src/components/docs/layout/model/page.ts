@@ -68,7 +68,11 @@ export function createSkeletonPage(
 
     const { skeHeaders, skeFooters } = skeletonResourceReference;
 
-    const { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
+    let { width: pageWidth = Number.POSITIVE_INFINITY, height: pageHeight = Number.POSITIVE_INFINITY } = pageSize;
+
+    if (pageOrient === PageOrientType.LANDSCAPE) {
+        [pageWidth, pageHeight] = [pageHeight, pageWidth];
+    }
 
     page.pageNumber = pageNumber;
     page.pageNumberStart = pageNumberStart;

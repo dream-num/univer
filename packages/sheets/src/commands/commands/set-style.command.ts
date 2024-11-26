@@ -41,7 +41,7 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';

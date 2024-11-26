@@ -34,7 +34,7 @@ import {
 } from '@univerjs/core';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import { SheetsSelectionsService } from '../selections/selection-manager.service';
+import { SheetsSelectionsService } from '../selections/selection.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';

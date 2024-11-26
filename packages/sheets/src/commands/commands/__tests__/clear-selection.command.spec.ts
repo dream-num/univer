@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import {
     CellValueType,
     ICommandService,
@@ -23,11 +24,11 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -35,7 +36,6 @@ import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-wo
 import { ClearSelectionAllCommand } from '../clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../clear-selection-format.command';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -201,7 +201,8 @@ describe('Test clear selection content commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 // set formats
@@ -343,7 +344,8 @@ describe('Test clear selection content commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 // set formats

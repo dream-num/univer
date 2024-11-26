@@ -249,7 +249,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleWorkbookAdded(unit: Workbook) {
-        const formulaData = this._formulaDataModel.getFormulaData();
+        const formulaData: IFormulaData = {};
         const unitId = unit.getUnitId();
         const newFormulaData: IFormulaData = { [unitId]: {} };
 

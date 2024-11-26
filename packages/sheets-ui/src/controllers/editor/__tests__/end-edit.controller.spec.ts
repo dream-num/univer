@@ -62,6 +62,7 @@ const richTextDemo: IDocumentData = {
             vertexAngle: 0,
             verticalAlign: 0,
             wrapStrategy: 0,
+            zeroWidthParagraphBreak: 1,
         },
         marginTop: 0,
         marginBottom: 2,
@@ -272,7 +273,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            const target = { v: null, f: null, si: null, p: richTextDemo };
+            const target = { v: null, f: null, si: null, p: richTextDemo, t: undefined };
             expect(cellData).toEqual({
                 ...target,
             });

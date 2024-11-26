@@ -24,6 +24,7 @@ function getDefaultDocWithCustomRange() {
     const doc: IDocumentBody = {
         dataStream: '人之初,\r性本善。\r\n',
         textRuns: [],
+        customBlocks: [],
         customRanges: [{
             startIndex: 1,
             endIndex: 3,

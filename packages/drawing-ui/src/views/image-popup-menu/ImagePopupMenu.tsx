@@ -86,7 +86,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                     <ul className={styles.imagePopupMenu}>
                         {availableMenu.map((item) => (
                             <li
-                                key={item.index}
+                                key={item.index + item.label}
                                 onClick={() => handleClick(item)}
                                 className={styles.imagePopupMenuItem}
                             >

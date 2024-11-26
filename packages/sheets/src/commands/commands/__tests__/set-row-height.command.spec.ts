@@ -15,6 +15,7 @@
  */
 
 import type { Injector, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { IDeltaRowHeightCommand, ISetRowHeightCommandParams } from '../set-worksheet-row-height.command';
 import {
     BooleanNumber,
     ICommandService,
@@ -24,14 +25,13 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../../mutations/set-worksheet-row-height.mutation';
-import type { IDeltaRowHeightCommand, ISetRowHeightCommandParams } from '../set-worksheet-row-height.command';
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,

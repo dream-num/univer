@@ -15,6 +15,12 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
     CommandType,
     Dimension,
@@ -26,19 +32,13 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

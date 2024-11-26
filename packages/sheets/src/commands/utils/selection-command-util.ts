@@ -16,8 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { IContextService } from '@univerjs/core';
-import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { IRefSelectionsService } from '../../services/selections/ref-selections.service';
+import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '../../services/selections/selection.service';
 
 export function getSelectionsService(
     accessor: IAccessor

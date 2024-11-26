@@ -121,6 +121,15 @@ export class Worksheet {
         return this._spanModel;
     }
 
+    getStyleDataByHash(hash: string): Nullable<IStyleData> {
+        const data = this._styles.get(hash);
+        return { ...data };
+    }
+
+    setStyleData(style: IStyleData): Nullable<string> {
+        return this._styles.setValue(style);
+    }
+
     /**
      * Get the style of the column.
      * @param {number} column The column index

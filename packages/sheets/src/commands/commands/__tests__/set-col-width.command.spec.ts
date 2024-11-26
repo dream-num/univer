@@ -15,12 +15,12 @@
  */
 
 import type { Injector, Univer, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
-import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
 import type { IDeltaColumnWidthCommandParams, ISetColWidthCommandParams } from '../set-worksheet-col-width.command';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../set-worksheet-col-width.command';
 import { createCommandTestBed } from './create-command-test-bed';
 

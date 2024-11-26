@@ -20,13 +20,13 @@ import type {
     IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDataItem,
+    IFormulaIdMap,
+    IFormulaIdMapData,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-
-import type { IFormulaIdMap } from './utils/formula-data-util';
 
 import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
@@ -38,7 +38,7 @@ export interface IRangeChange {
 }
 
 export class FormulaDataModel extends Disposable {
-    private _formulaData: IFormulaData = {};
+    private _formulaIdMapData: IFormulaIdMapData = {};
 
     private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
@@ -49,15 +49,14 @@ export class FormulaDataModel extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
-
-        this.initFormulaData();
+        this._initFormulaIdMap();
     }
 
     override dispose() {
         super.dispose();
-        this._formulaData = {};
         this._arrayFormulaRange = {};
         this._arrayFormulaCellData = {};
+        this._formulaIdMapData = {};
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
@@ -157,12 +156,48 @@ export class FormulaDataModel extends Disposable {
         });
     }
 
-    getFormulaData() {
-        return this._formulaData;
+    getFormulaData(): IFormulaData {
+        const formulaData: IFormulaData = {};
+        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (allSheets.length === 0) {
+            return formulaData;
+        }
+
+        allSheets.forEach((workbook) => {
+            const unitId = workbook.getUnitId();
+            formulaData[unitId] = {};
+
+            const worksheets = workbook.getSheets();
+            worksheets.forEach((worksheet) => {
+                const cellMatrix = worksheet.getCellMatrix();
+                const sheetId = worksheet.getSheetId();
+
+                initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            });
+        });
+
+        return formulaData;
     }
 
-    setFormulaData(value: IFormulaData) {
-        this._formulaData = value;
+    getSheetFormulaData(unitId: string, sheetId: string) {
+        const formulaData: IFormulaData = {};
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        if (workbook == null) {
+            return {};
+        }
+
+        formulaData[unitId] = {};
+
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (worksheet == null) {
+            return {};
+        }
+
+        const cellMatrix = worksheet.getCellMatrix();
+
+        initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+        return formulaData[unitId][sheetId];
     }
 
     getArrayFormulaRange(): IArrayFormulaRangeType {
@@ -208,53 +243,6 @@ export class FormulaDataModel extends Disposable {
         });
     }
 
-    mergeFormulaData(formulaData: IFormulaData) {
-        Object.keys(formulaData).forEach((unitId) => {
-            const sheetData = formulaData[unitId];
-
-            if (sheetData === undefined) {
-                return;
-            }
-
-            if (sheetData === null) {
-                delete this._formulaData[unitId];
-                return;
-            }
-
-            if (!this._formulaData[unitId]) {
-                this._formulaData[unitId] = {};
-            }
-
-            Object.keys(sheetData).forEach((sheetId) => {
-                const currentSheetData = sheetData[sheetId];
-
-                if (currentSheetData === undefined) {
-                    return;
-                }
-
-                if (currentSheetData === null) {
-                    delete this._formulaData[unitId]?.[sheetId];
-                    return;
-                }
-
-                if (!this._formulaData[unitId]?.[sheetId]) {
-                    this._formulaData[unitId]![sheetId] = {};
-                }
-
-                const sheetFormula = new ObjectMatrix(currentSheetData);
-                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]![sheetId]);
-
-                sheetFormula.forValue((r, c, v) => {
-                    if (v == null) {
-                        formulaMatrix.realDeleteValue(r, c);
-                    } else {
-                        formulaMatrix.setValue(r, c, v);
-                    }
-                });
-            });
-        });
-    }
-
     deleteArrayFormulaRange(unitId: string, sheetId: string, row: number, column: number) {
         const cellMatrixData = this._arrayFormulaRange[unitId]?.[sheetId];
         if (cellMatrixData == null) {
@@ -268,32 +256,6 @@ export class FormulaDataModel extends Disposable {
                 this._arrayFormulaRange[unitId]![sheetId] = rangeMatrixData.getData();
             }
         }
-    }
-
-    /**
-     * Cache all formulas on the snapshot to the formula model
-     * @returns
-     */
-    initFormulaData() {
-        // TODO@Dushusir: load doc/slide formula data
-        // Load formula data from workbook config data.
-        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (allSheets.length === 0) {
-            return;
-        }
-
-        // Since there is at least a sheet, there must be current univer sheet instance.
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        this._formulaData[unitId] = {};
-
-        const worksheets = workbook.getSheets();
-        worksheets.forEach((worksheet) => {
-            const cellMatrix = worksheet.getCellMatrix();
-            const sheetId = worksheet.getSheetId();
-
-            initSheetFormulaData(this._formulaData, unitId, sheetId, cellMatrix);
-        });
     }
 
     getCalculateData() {
@@ -342,10 +304,19 @@ export class FormulaDataModel extends Disposable {
     updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
-        const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
+        if (this._formulaIdMapData[unitId] == null) {
+            this._formulaIdMapData[unitId] = {};
+        }
+
+        if (this._formulaIdMapData[unitId][sheetId] == null) {
+            this._formulaIdMapData[unitId][sheetId] = {};
+        }
+
+        const formulaIdMap = this._formulaIdMapData[unitId][sheetId]; // Connect the formula and ID
+
         const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
 
-        const formulaData = this._formulaData;
+        const formulaData = this.getFormulaData();
         if (formulaData[unitId] == null) {
             formulaData[unitId] = {};
         }
@@ -368,7 +339,7 @@ export class FormulaDataModel extends Disposable {
             const formulaId = cell?.si || '';
 
             if (isFormulaId(formulaId)) {
-                const formulaInfo = formulaIdMap.get(formulaId);
+                const formulaInfo = formulaIdMap?.[formulaId];
                 const deleteFormula = deleteFormulaIdMap.get(formulaId);
 
                 if (formulaInfo && !isFormulaString(formulaString)) {
@@ -383,11 +354,7 @@ export class FormulaDataModel extends Disposable {
                     const y = cell?.y || 0;
                     const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
 
-                    deleteFormulaIdMap.set(formulaId, {
-                        r,
-                        c,
-                        f: offsetFormula,
-                    });
+                    deleteFormulaIdMap.set(formulaId, { r, c, f: offsetFormula });
 
                     sheetFormulaDataMatrix.setValue(r, c, { f: offsetFormula, si: formulaId });
                     newSheetFormulaDataMatrix.setValue(r, c, { f: offsetFormula, si: formulaId });
@@ -395,18 +362,8 @@ export class FormulaDataModel extends Disposable {
                     const x = c - deleteFormula.c;
                     const y = r - deleteFormula.r;
 
-                    sheetFormulaDataMatrix.setValue(r, c, {
-                        f: deleteFormula.f,
-                        si: formulaId,
-                        x,
-                        y,
-                    });
-                    newSheetFormulaDataMatrix.setValue(r, c, {
-                        f: deleteFormula.f,
-                        si: formulaId,
-                        x,
-                        y,
-                    });
+                    sheetFormulaDataMatrix.setValue(r, c, { f: deleteFormula.f, si: formulaId, x, y });
+                    newSheetFormulaDataMatrix.setValue(r, c, { f: deleteFormula.f, si: formulaId, x, y });
                 }
             }
         });
@@ -459,108 +416,54 @@ export class FormulaDataModel extends Disposable {
         });
     }
 
-    getFormulaItemBySId(sId: string, sheetId: string, unitId: string): Nullable<IFormulaDataItem> {
-        const formulaData = this._formulaData;
-        if (formulaData[unitId] == null) {
-            return null;
-        }
-        const workbookFormulaData = formulaData[unitId];
-
-        if (workbookFormulaData?.[sheetId] == null) {
-            return null;
-        }
-
-        const cellMatrix = new ObjectMatrix(workbookFormulaData[sheetId] || {});
-
-        let formulaDataItem: Nullable<IFormulaDataItem> = null;
-
-        cellMatrix.forValue((row, column, item) => {
-            if (item == null) {
-                return true;
-            }
-            const { f, si, x = 0, y = 0 } = item;
-
-            if (si === sId && f.length > 0 && x === 0 && y === 0) {
-                formulaDataItem = item;
-                return false;
-            }
-        });
-
-        return formulaDataItem;
-    }
-
-    getFormulaDataItem(row: number, column: number, sheetId: string, unitId: string) {
-        return this._formulaData?.[unitId]?.[sheetId]?.[row]?.[column];
-    }
-
-    getFormulaIdMap(unitId: string, sheetId: string): Map<string, IFormulaIdMap> {
-        const formulaIdMap = new Map<string, IFormulaIdMap>(); // Connect the formula and ID
-
-        const formulaData = this._formulaData;
-        if (formulaData[unitId] == null) {
-            return formulaIdMap;
-        }
-        const workbookFormulaData = formulaData[unitId];
-
-        if (workbookFormulaData?.[sheetId] == null) {
-            return formulaIdMap;
-        }
-
-        const sheetFormulaDataMatrix = new ObjectMatrix(workbookFormulaData[sheetId] || {});
-
-        sheetFormulaDataMatrix.forValue((r, c, cell) => {
-            const formulaString = cell?.f || '';
-            const formulaId = cell?.si || '';
-            const x = cell?.x || 0;
-            const y = cell?.y || 0;
-
-            if (isFormulaString(formulaString) && isFormulaId(formulaId) && x === 0 && y === 0) {
-                formulaIdMap.set(formulaId, { f: formulaString, r, c });
-            }
-        });
-
-        return formulaIdMap;
-    }
-
     getFormulaStringByCell(row: number, column: number, sheetId: string, unitId: string) {
-        const formulaDataItem = this.getFormulaDataItem(row, column, sheetId, unitId);
-
-        if (formulaDataItem == null) {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        if (workbook == null) {
             return null;
         }
 
-        const { f, si, x = 0, y = 0 } = formulaDataItem;
-
-        // x and y support negative numbers. Negative numbers appear when the drop-down fill moves up or to the left.
-        if (si != null && (x !== 0 || y !== 0)) {
-            let formulaString = '';
-            if (f.length > 0) {
-                formulaString = f;
-            } else {
-                const originItem = this.getFormulaItemBySId(
-                    si,
-                    sheetId,
-                    unitId
-                );
-
-                if (originItem == null || originItem.f.length === 0) {
-                    return null;
-                }
-
-                formulaString = originItem.f;
-            }
-
-            formulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
-                formulaString,
-                x,
-                y
-            );
-
-            return formulaString;
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (worksheet == null) {
+            return null;
         }
+
+        const cellMatrix = worksheet.getCellMatrix();
+
+        const cell = cellMatrix.getValue(row, column);
+
+        if (cell == null) {
+            return null;
+        }
+
+        const { f, si } = cell;
 
         if (isFormulaString(f)) {
             return f;
+        }
+
+        if (isFormulaId(si)) {
+            let formulaString: Nullable<string> = null;
+
+            // Get the result in one traversal, pay attention to performance
+            cellMatrix.forValue((r, c, cell) => {
+                if (cell == null) {
+                    return true;
+                }
+
+                const { f, si: currentId } = cell;
+
+                if (isFormulaString(f) && si === currentId) {
+                    formulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
+                        f as string,
+                        column - c,
+                        row - r
+                    );
+
+                    return false;
+                }
+            });
+
+            return formulaString;
         }
 
         return null;
@@ -571,7 +474,7 @@ export class FormulaDataModel extends Disposable {
      * @returns
      */
     getFormulaDirtyRanges(): IUnitRange[] {
-        const formulaData = this._formulaData;
+        const formulaData = this.getFormulaData();
 
         const dirtyRanges: IUnitRange[] = [];
 
@@ -646,6 +549,56 @@ export class FormulaDataModel extends Disposable {
         }
 
         return dirtyRanges;
+    }
+
+    private _initFormulaIdMap() {
+        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (allSheets.length === 0) {
+            return;
+        }
+
+        allSheets.forEach((workbook) => {
+            const unitId = workbook.getUnitId();
+            this._formulaIdMapData[unitId] = {};
+
+            const worksheets = workbook.getSheets();
+            worksheets.forEach((worksheet) => {
+                const sheetId = worksheet.getSheetId();
+
+                if (this._formulaIdMapData[unitId]) {
+                    this._formulaIdMapData[unitId][sheetId] = this._getSheetFormulaIdMap(unitId, sheetId);
+                }
+            });
+        });
+    }
+
+    private _getSheetFormulaIdMap(unitId: string, sheetId: string) {
+        const formulaIdMap: Nullable<{ [formulaId: string]: IFormulaIdMap }> = {}; // Connect the formula and ID
+
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        if (workbook == null) {
+            return formulaIdMap;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (worksheet == null) {
+            return formulaIdMap;
+        }
+
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.forValue((r, c, cell) => {
+            if (cell == null) {
+                return true;
+            }
+
+            const { f, si } = cell;
+
+            if (isFormulaString(f) && isFormulaId(si)) {
+                formulaIdMap[si as string] = { f: f as string, r, c };
+            }
+        });
+
+        return formulaIdMap;
     }
 }
 

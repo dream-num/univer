@@ -34,7 +34,7 @@ export { DocRenderController } from './controllers/render-controllers/doc.render
 export * from './docs-ui-plugin';
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
-export { DocEventManagerService } from './services/doc-event-manager.service';
+export { DocEventManagerService } from './services/event/doc-event-manager.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 export { calcDocRangePositions, DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';

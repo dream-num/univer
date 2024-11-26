@@ -15,15 +15,14 @@
  */
 
 import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Documents, IBoundRectNoAngle, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ITablePositionInfo } from './util';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
-import { DOC_VERTICAL_PADDING } from '../types/const/padding';
-import { transformOffset2Bound } from './doc-popup-manager.service';
-import { NodePositionConvertToCursor } from './selection/convert-text-range';
-import { getLineBounding } from './selection/text-range';
+import { transformOffset2Bound } from '../doc-popup-manager.service';
+import { calcDocGlyphPosition, calcDocRangePositions, calcTablePositions } from './util';
 
 interface ICustomRangeBound {
     customRange: ICustomRange;
@@ -39,55 +38,6 @@ interface IBulletBound {
     paragraph: IParagraph;
 }
 
-const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
-    const skeletonData = skeleton.getSkeletonData();
-    let end = range.endOffset;
-    if (range.segmentId) {
-        const root = Array.from(skeletonData?.skeFooters.get(range.segmentId)?.values() ?? [])[0] ?? Array.from(skeletonData?.skeHeaders.get(range.segmentId)?.values() ?? [])[0];
-        if (root) {
-            end = Math.min(root.ed, end);
-        }
-    }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
-    if (!endPosition || !startPosition) {
-        return;
-    }
-
-    const documentOffsetConfig = documents.getOffsetConfig();
-    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, endPosition);
-    const bounds = getLineBounding(borderBoxPointGroup);
-
-    return bounds.map((rect) => ({
-        top: rect.top + documentOffsetConfig.docsTop - DOC_VERTICAL_PADDING,
-        bottom: rect.bottom + documentOffsetConfig.docsTop + DOC_VERTICAL_PADDING,
-        left: rect.left + documentOffsetConfig.docsLeft,
-        right: rect.right + documentOffsetConfig.docsLeft,
-    }));
-};
-
-export const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, documents: Documents, skeleton: DocumentSkeleton, pageIndex = -1): IBoundRectNoAngle | undefined => {
-    const start = skeleton.findPositionByGlyph(glyph, pageIndex);
-    if (!start) {
-        return;
-    }
-
-    const documentOffsetConfig = documents.getOffsetConfig();
-    const startPosition = { ...start, isBack: true };
-    const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
-    const { borderBoxPointGroup } = convertor.getRangePointData(startPosition, startPosition);
-    const bounds = getLineBounding(borderBoxPointGroup);
-    const rect = bounds[0];
-
-    return {
-        top: rect.top + documentOffsetConfig.docsTop,
-        bottom: rect.bottom + documentOffsetConfig.docsTop,
-        left: rect.left + documentOffsetConfig.docsLeft,
-        right: rect.left + documentOffsetConfig.docsLeft + glyph.width,
-    };
-};
-
 interface ICustomRangeActive {
     range: ICustomRange;
     segmentId?: string;
@@ -100,6 +50,18 @@ interface IBulletActive {
     segmentId?: string;
     segmentPageIndex: number;
     rect: IBoundRectNoAngle;
+}
+
+interface ITableRowGridActive {
+    tableId: string;
+    pageIndex: number;
+    rowIndex: number;
+}
+
+interface ITableColumnGridActive {
+    tableId: string;
+    pageIndex: number;
+    columnIndex: number;
 }
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
@@ -115,8 +77,15 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     private readonly _clickBullet$ = new Subject<IBulletActive>();
     readonly clickBullets$ = this._clickBullet$.asObservable();
 
+    private readonly _hoverTableRowGrid$ = new Subject<Nullable<ITableRowGridActive>>();
+    readonly hoverTableRowGrid$ = this._hoverTableRowGrid$.pipe(distinctUntilChanged((pre, aft) => pre?.tableId === aft?.tableId && pre?.pageIndex === aft?.pageIndex && pre?.rowIndex === aft?.rowIndex));
+
+    private readonly _hoverTableColumnGrid$ = new Subject<Nullable<ITableColumnGridActive>>();
+    readonly hoverTableColumnGrid$ = this._hoverTableColumnGrid$.pipe(distinctUntilChanged((pre, aft) => pre?.tableId === aft?.tableId && pre?.pageIndex === aft?.pageIndex && pre?.columnIndex === aft?.columnIndex));
+
     private _customRangeDirty = true;
     private _bulletDirty = true;
+    private _tableDirty = true;
 
     /**
      * cache the bounding of custom ranges,
@@ -128,6 +97,8 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
      * it will be updated when the doc-skeleton is recalculated
      */
     private _bulletBounds: IBulletBound[] = [];
+
+    private _tableBounds: ITablePositionInfo[] = [];
 
     private get _skeleton() {
         return this._docSkeletonManagerService.getSkeleton();
@@ -155,13 +126,11 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
     }
 
     private _initPointer() {
-        let preCursor = CURSOR_TYPE.TEXT;
         this.disposeWithMe(this.hoverCustomRanges$.subscribe((ranges) => {
             if (ranges.length) {
-                preCursor = this._context.scene.getCursor();
                 this._context.scene.setCursor(CURSOR_TYPE.POINTER);
             } else {
-                this._context.scene.setCursor(preCursor);
+                this._context.scene.resetCursor();
             }
         }));
     }
@@ -190,7 +159,12 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             this._hoverBullet$.next(
                 this._calcActiveBullet(evt)
             );
+
+            const tableGrid = this._calcActiveTableGrid(evt);
+            this._hoverTableColumnGrid$.next(tableGrid?.column);
+            this._hoverTableRowGrid$.next(tableGrid?.row);
         }));
+
         this.disposeWithMe(this._context.scene.onPointerEnter$.subscribeEvent(() => {
             this._hoverBullet$.next(null);
             this._hoverCustomRanges$.next([]);
@@ -201,7 +175,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         this.disposeWithMe(onPointerDown$.pipe(
             switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
             filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
-            // filter(({ down, up }) => down.offsetX === up.offsetX && down.offsetY === up.offsetY)
         ).subscribe(({ down }) => {
             if (down.button === 2) {
                 return;
@@ -386,5 +359,63 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
             return false;
         });
         return bullet;
+    }
+
+    private _buildTableBounds() {
+        if (!this._tableDirty) {
+            return;
+        }
+        this._tableDirty = false;
+        this._tableBounds = calcTablePositions(this._documents, this._skeleton);
+    }
+
+    getTableBounds() {
+        this._buildTableBounds();
+        return this._tableBounds;
+    }
+
+    private _calcActiveTableGrid(evt: IPointerEvent | IMouseEvent) {
+        this._buildTableBounds();
+
+        const { offsetX, offsetY } = evt;
+        const { x, y } = transformOffset2Bound(offsetX, offsetY, this._context.scene);
+
+        const matched = this._tableBounds.find((layout) => {
+            const { top, left, width, height } = layout;
+            if (x >= left && x <= left + width && y >= top && y <= top + height) {
+                return true;
+            }
+            return false;
+        });
+
+        if (matched) {
+            const THRESHOLD_X = 3;
+            const THRESHOLD_Y = 3;
+            const innerX = x - matched.left;
+            const innerY = y - matched.top;
+
+            const rowIndex = [0, ...matched.rowAccumulateHeight].findIndex((height) => innerY >= height - THRESHOLD_Y && innerY <= height + THRESHOLD_Y);
+
+            if (rowIndex !== -1) {
+                return {
+                    row: {
+                        tableId: matched.id,
+                        pageIndex: matched.pageIndex,
+                        rowIndex,
+                    },
+                };
+            }
+
+            const columnIndex = [0, ...matched.colAccumulateWidth].findIndex((width) => innerX >= width - THRESHOLD_X && innerX <= width + THRESHOLD_X);
+            if (columnIndex !== -1) {
+                return {
+                    column: {
+                        tableId: matched.id,
+                        pageIndex: matched.pageIndex,
+                        columnIndex,
+                    },
+                };
+            }
+        }
     }
 }

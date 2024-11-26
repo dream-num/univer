@@ -58,6 +58,7 @@ export class RuleMatrix {
         if (!this._dirty || this._disableTree) {
             return;
         }
+        this._tree.clear();
         const items: IRuleItem[] = [];
         this._map.forEach((ranges, ruleId) => {
             ranges.forEach((range) => {

@@ -452,11 +452,3 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
     }
 }
 
-export class IPCClient {
-
-}
-
-export class IPCServer {
-
-}
-

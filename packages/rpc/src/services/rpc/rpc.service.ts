@@ -131,7 +131,7 @@ enum RequestType {
      * In Univer, we cannot make sure that when IPCServer constructs, the process (or thread)
      * where the corresponding IPCClient residents has bootstrapped and been ready to recieve messages.
      * This may result in the IPCClient hanging there, waiting for the `INITIALIZE` message that it has
-     * already misses. So the client should send a REQUEST_INITIALIZATION in case of that.
+     * already missed. So the client should send a REQUEST_INITIALIZATION in case of that.
      *
      * Later, we may want a more sophisticated RPC system where the server can serve more than
      * one clients, and this event may be removed.

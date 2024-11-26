@@ -1115,6 +1115,14 @@ export class Scene extends Disposable {
         return true;
     }
 
+    triggerPointerCancel(evt: IPointerEvent) {
+        if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            (this._parent as SceneViewer)?.triggerPointerCancel(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerEnter$.emitEvent(evt);
         if (

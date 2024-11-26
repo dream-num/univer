@@ -718,6 +718,14 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
+    triggerPointerCancel(evt: IPointerEvent) {
+        if (!this.onPointerEnter$.emitEvent(evt)?.stopPropagation) {
+            this._parent?.triggerPointerCancel(evt);
+            return false;
+        }
+        return true;
+    }
+
     triggerDragLeave(evt: IDragEvent | IMouseEvent) {
         if (!this.onDragLeave$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragLeave(evt);

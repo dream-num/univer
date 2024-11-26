@@ -247,7 +247,7 @@ export class Engine extends Disposable {
      * To ensure mouse events remain bound to the host element,
      * preventing the events from becoming ineffective once the mouse leaves the host.
      */
-    setRemainCapture() {
+    setCapture() {
         try {
             this.getCanvasElement().setPointerCapture(this._remainCapture);
         } catch {

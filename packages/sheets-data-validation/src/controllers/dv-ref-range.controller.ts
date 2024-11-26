@@ -18,14 +18,13 @@ import type { ISheetDataValidationRule } from '@univerjs/core';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { Disposable, Inject, Injector, isRangesEqual, toDisposable } from '@univerjs/core';
-import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { DataValidatorRegistryService, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { isCustomFormulaType } from '../utils/formula';
+import { shouldOffsetFormulaByRange } from '../utils/formula';
 
 export class DataValidationRefRangeController extends Disposable {
     private _disposableMap: Map<string, Set<() => void>> = new Map();
@@ -34,9 +33,9 @@ export class DataValidationRefRangeController extends Disposable {
         @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private _injector: Injector,
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
-        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
+        @Inject(DataValidatorRegistryService) private _validatorRegistryService: DataValidatorRegistryService
     ) {
         super();
         this._initRefRange();
@@ -47,7 +46,7 @@ export class DataValidationRefRangeController extends Disposable {
     }
 
     registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
-        if (isCustomFormulaType(rule.type)) {
+        if (shouldOffsetFormulaByRange(rule.type, this._validatorRegistryService)) {
             return;
         }
         this.register(unitId, subUnitId, rule);

@@ -46,7 +46,7 @@ export class FDataValidation {
      *
      * @returns The data validation type
      */
-    getCriteriaType(): DataValidationType {
+    getCriteriaType(): DataValidationType | string {
         return this.rule.type;
     };
 

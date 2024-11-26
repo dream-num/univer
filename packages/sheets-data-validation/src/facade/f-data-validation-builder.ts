@@ -73,7 +73,7 @@ export class FDataValidationBuilder {
      *
      * @returns {DataValidationType} The data validation type
      */
-    getCriteriaType(): DataValidationType {
+    getCriteriaType(): DataValidationType | string {
         return this._rule.type;
     }
 
@@ -438,7 +438,7 @@ export class FDataValidationBuilder {
      * operator is a DataValidationOperator enum value, formula1 is the first formula, and formula2 is the second formula.
      * @return The current instance of the FDataValidationBuilder class, allowing for method chaining.
      */
-    withCriteriaValues(type: DataValidationType, values: [DataValidationOperator, string, string]): this {
+    withCriteriaValues(type: DataValidationType | string, values: [DataValidationOperator, string, string]): this {
         this._rule.type = type;
         this._rule.operator = values[0];
         this._rule.formula1 = values[1];

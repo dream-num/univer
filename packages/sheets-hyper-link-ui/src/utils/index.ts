@@ -20,19 +20,21 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 
+const disables = new Set<string>([
+    DataValidationType.CHECKBOX,
+    DataValidationType.LIST,
+    DataValidationType.LIST_MULTIPLE,
+]);
+
 export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
         return true;
     }
-    const disables = [
-        DataValidationType.CHECKBOX,
-        DataValidationType.LIST,
-        DataValidationType.LIST_MULTIPLE,
-    ];
+
     const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
     const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
-    if (rule && disables.includes(rule.type)) {
+    if (rule && disables.has(rule.type)) {
         return true;
     }
 

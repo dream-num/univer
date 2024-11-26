@@ -25,6 +25,8 @@ export class AnyValidator extends BaseDataValidator {
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
 
+    override readonly offsetFormulaByRange = false;
+
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         return {
             formula1: rule.formula1,

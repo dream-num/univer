@@ -54,6 +54,8 @@ export class CheckboxValidator extends BaseDataValidator {
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
 
+    override readonly offsetFormulaByRange = false;
+
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string; row: number; column: number }) => {

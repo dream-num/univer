@@ -19,6 +19,7 @@ import type { IAddMergeCommandParams } from '../commands/add-worksheet-merge.com
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { Dimension } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SelectionMoveType } from '../../services/selections/type';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams, ranges: IRange[]) => {
@@ -66,7 +67,7 @@ export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, para
             const setSelectionsParamByRedo: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.ONLY_SET,
                 selections: selectionsByRedo,
             };
             return {
@@ -90,7 +91,7 @@ export const AddMergeUndoSelectionsOperationFactory = (accessor: IAccessor, para
             const setSelectionsParamByUndo: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.ONLY_SET,
                 selections: [...selectionsBeforeMutation],
             };
             return {

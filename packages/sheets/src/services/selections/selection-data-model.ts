@@ -65,13 +65,13 @@ export class WorkbookSelectionModel extends Disposable {
     /** Clear all selections in this workbook. */
     clear(): void {
         this._worksheetSelections.clear();
-        this._emitOnEnd([]);
+        this._eventAfterSetSelections([]);
     }
 
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
         const selections = this.getSelectionsOfWorksheet(sheetId);
         selections.push(...selectionDatas);
-        this._emitOnEnd(selections);
+        this._eventAfterSetSelections(selections);
     }
 
     /**
@@ -97,14 +97,13 @@ export class WorkbookSelectionModel extends Disposable {
             case SelectionMoveType.MOVE_END:
                 this._beforeSelectionMoveEnd$.next(selectionDatas);
                 this._selectionMoveEnd$.next(selectionDatas);
-                // this._emitOnEnd(selectionDatas);
                 break;
             case SelectionMoveType.ONLY_SET: {
-                this._selectionSet$.next(selectionDatas);
+                this._eventAfterSetSelections(selectionDatas);
                 break;
             }
             default:
-                this._emitOnEnd(selectionDatas);
+                this._eventAfterSetSelections(selectionDatas);
                 break;
         }
     }
@@ -156,7 +155,7 @@ export class WorkbookSelectionModel extends Disposable {
         this._worksheetSelections.set(sheetId, []);
     }
 
-    private _emitOnEnd(selections: ISelectionWithStyle[]): void {
+    private _eventAfterSetSelections(selections: ISelectionWithStyle[]): void {
         this._selectionSet$.next(selections);
     }
 }

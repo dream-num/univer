@@ -65,11 +65,26 @@ function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[]) {
 // Add some spacing between Han characters and western characters.
 // See Requirements for Chinese Text Layout, Section 3.2.2 Mixed Text Composition in Horizontal
 // Written Mode
-function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
+function addCJKLatinSpacing(
+    shapedTextList: IShapedText[],
+    autoSpaceDE: BooleanNumber = BooleanNumber.TRUE,
+    autoSpaceDN: BooleanNumber = BooleanNumber.TRUE
+) {
+    if (autoSpaceDE === BooleanNumber.FALSE && autoSpaceDN === BooleanNumber.FALSE) {
+        return;
+    }
+
+    let LATIN_REG = /[a-z\d]/i;
+
+    if (autoSpaceDE === BooleanNumber.FALSE) {
+        LATIN_REG = /[\d]/i;
+    } else if (autoSpaceDN === BooleanNumber.FALSE) {
+        LATIN_REG = /[a-z]/i;
+    }
+
     const shapedGlyphs = shapedTextList.flatMap((shapedText) => shapedText.glyphs);
     let prevGlyph = null;
     const len = shapedGlyphs.length;
-    const LATIN_REG = /[a-z\d]/i;
 
     for (let i = 0; i < len; i++) {
         const curGlyph = shapedGlyphs[i];
@@ -125,12 +140,15 @@ export function shaping(
     const { endIndex } = paragraphNode;
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
     const { paragraphStyle = {} } = paragraph;
-    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { hyphen, languageDetector, docsConfig } = ctx;
+    const {
+        snapToGrid = BooleanNumber.TRUE,
+        autoSpaceDE = docsConfig.autoSpaceDE,
+        autoSpaceDN = docsConfig.autoSpaceDN,
+    } = paragraphStyle;
     let last = 0;
     let bk;
     let lastGlyphIndex = 0;
-
-    const { hyphen, languageDetector } = ctx;
 
     const paragraphBody = prepareParagraphBody(viewModel.getBody()!, endIndex);
 
@@ -352,7 +370,7 @@ export function shaping(
     }
 
     // Add some spacing between Han characters and western characters.
-    addCJKLatinSpacing(shapedTextList);
+    addCJKLatinSpacing(shapedTextList, autoSpaceDE, autoSpaceDN);
 
     return shapedTextList;
 }

@@ -25,7 +25,7 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { BooleanNumber, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Skeleton } from '../../skeleton';
@@ -1016,6 +1016,8 @@ export class DocumentSkeleton extends Skeleton {
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {},
+            autoSpaceDE = BooleanNumber.TRUE,
+            autoSpaceDN = BooleanNumber.TRUE,
         } = documentStyle;
 
         const docsConfig: IDocsConfig = {
@@ -1023,11 +1025,12 @@ export class DocumentSkeleton extends Skeleton {
             footerTreeMap,
             lists,
             drawings,
-
             localeService: this._localeService,
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,
+            autoSpaceDE,
+            autoSpaceDN,
         };
 
         const skeleton = getNullSkeleton();

@@ -646,5 +646,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         useFirstPageHeaderFooter: BooleanNumber.FALSE,
         marginHeader: 30,
         marginFooter: 30,
+        autoSpaceDE: BooleanNumber.TRUE,
+        autoSpaceDN: BooleanNumber.TRUE,
     },
 };

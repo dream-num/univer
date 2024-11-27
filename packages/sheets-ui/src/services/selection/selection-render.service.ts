@@ -60,8 +60,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
-
-        window.srs = this;
     }
 
     private _init(): void {

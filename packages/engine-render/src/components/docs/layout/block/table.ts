@@ -156,6 +156,7 @@ interface ICreateTableCache {
     tableWidth: number;
     remainHeight: number;
     repeatRow: Nullable<DataStreamTreeNode>;
+    repeatRowHeight: number;
 }
 
 // Create skeletons of a table, which may be divided into different pages according to the available height of the page.
@@ -183,6 +184,7 @@ export function createTableSkeletons(
         tableWidth: 0,
         remainHeight: availableHeight,
         repeatRow: needRepeatHeader ? rowNodes[0] : null,
+        repeatRowHeight: 0,
     };
 
     skeTables.push(curTableSkeleton);
@@ -254,7 +256,7 @@ function dealWithTableRow(
     isRepeatRow = false
 ) {
     const { marginTop, marginBottom, pageHeight } = curPage;
-    const pageContentHeight = pageHeight - marginTop - marginBottom;
+    const pageContentHeight = pageHeight - marginTop - marginBottom - cache.repeatRowHeight;
     const { children: cellNodes, startIndex, endIndex } = rowNode;
     const rowSource = table.tableRows[row];
     const { trHeight, cantSplit } = rowSource;
@@ -345,6 +347,10 @@ function dealWithTableRow(
 
         // Set row Skeleton height.
         rowSke.height = rowHeights[rowIndex];
+    }
+
+    if (row === 0 && cache.repeatRow) {
+        cache.repeatRowHeight = rowHeights[rowHeights.length - 1];
     }
 
     // Handle vertical alignment in cell.

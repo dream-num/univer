@@ -357,7 +357,7 @@ export function shaping(
         const lastShapedGlyphs = shapedGlyphsList[shapedGlyphsList.length - 1];
 
         for (const shapedGlyphs of shapedGlyphsList) {
-            const word = shapedGlyphs.map((g) => g.content).join('');
+            const word = shapedGlyphs.map((g) => g.raw).join('');
 
             shapedTextList.push({
                 text: word,

@@ -16,20 +16,20 @@
 
 import type { Dependency, IWorkbookData } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
+
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
-
-import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
-import { ConditionalFormattingService } from '../conditional-formatting.service';
-import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
-import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
 import { AddConditionalRuleMutation } from '../../commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from '../../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingFormulaMarkDirty } from '../../commands/mutations/formula-mark-dirty.mutation';
 import { MoveConditionalRuleMutation } from '../../commands/mutations/move-conditional-rule.mutation';
 import { SetConditionalRuleMutation } from '../../commands/mutations/set-conditional-rule.mutation';
+import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
+import { ConditionalFormattingViewModelV2 } from '../../models/conditional-formatting-view-model-v2';
+import { ConditionalFormattingService } from '../conditional-formatting.service';
+import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
 
 const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     id: 'test',
@@ -81,7 +81,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormattingService]);
             this._injector.add([ConditionalFormattingFormulaService]);
             this._injector.add([ConditionalFormattingRuleModel]);
-            this._injector.add([ConditionalFormattingViewModel]);
+            this._injector.add([ConditionalFormattingViewModelV2]);
             this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { /* empty */ } } as any) }]);
             this._injector.get(ConditionalFormattingService);
         }
@@ -108,7 +108,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     univerInstanceService.focusUnit('test');
     univerInstanceService.setCurrentUnitForType(unitId);
     const getConditionalFormattingRuleModel = () => injector.get(ConditionalFormattingRuleModel);
-    const getConditionalFormattingViewModel = () => injector.get(ConditionalFormattingViewModel);
+    const getConditionalFormattingViewModel = () => injector.get(ConditionalFormattingViewModelV2);
     const getConditionalFormattingService = () => injector.get(ConditionalFormattingService);
     return {
         univer,

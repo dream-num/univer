@@ -16,11 +16,12 @@
 
 import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
 import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModelV2, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { merge } from 'rxjs';
 import { bufferTime, filter } from 'rxjs/operators';
 
 export class SheetsCfRenderController extends Disposable {
@@ -33,196 +34,39 @@ export class SheetsCfRenderController extends Disposable {
         @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
+        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
     ) {
         super();
 
         this._initViewModelInterceptor();
-        this._initViewModel();
         this._initSkeleton();
-        this._initVmEffectByRule();
         this.disposeWithMe(() => {
             this._ruleChangeCacheMap.clear();
         });
     }
 
-    public markDirtySkeleton() {
+    private _markDirtySkeleton() {
         const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
         this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
         this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
     }
 
     private _initSkeleton() {
-        // After the conditional formatting is marked dirty to drive a rendering, to trigger the window within the conditional formatting recalculation
-        this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return false;
+        this.disposeWithMe(merge(this._conditionalFormattingRuleModel.$ruleChange, this._conditionalFormattingViewModel.markDirty$)
+            .pipe(
+                bufferTime(16),
+                filter((v) => !!v.length),
+                filter((v) => {
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                    if (!workbook) return false;
 
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return false;
+                    const worksheet = workbook.getActiveSheet();
+                    if (!worksheet) return false;
 
-            return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(() => this.markDirtySkeleton()));
-
-        // Sort and delete does not mark dirty.
-        this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return false;
-
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return false;
-
-            return v.filter((item) => ['sort', 'delete'].includes(item.type) && item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(() => this.markDirtySkeleton()));
-
-        // Once the calculation is complete, a view update is triggered
-        // This rendering does not trigger conditional formatting recalculation,because the rule is not mark dirty
-        this.disposeWithMe(this._conditionalFormattingService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return false;
-
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return false;
-
-            return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(() => this.markDirtySkeleton()));
-    }
-
-    private _initVmEffectByRule() {
-        this.disposeWithMe(
-            this._conditionalFormattingRuleModel.$ruleChange.subscribe((config) => {
-                const { rule, unitId, subUnitId } = config;
-                switch (config.type) {
-                    case 'add': {
-                        this._handleRuleAdd(unitId, subUnitId, rule);
-                        return;
-                    }
-                    case 'delete': {
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, rule.cfId);
-                            });
-                        });
-                        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-                        return;
-                    }
-                    case 'set': {
-                        this._handleRuleChange(unitId, subUnitId, rule, config.oldRule!);
-                        return;
-                    }
-                    case 'sort': {
-                        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
-                        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-                            map.set(cur, index);
-                            return map;
-                        }, new Map<string, number>());
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                            });
-                        });
-                    }
-                }
-            }));
-    }
-
-    private _initViewModel() {
-        let isNeedMark = false;
-        const workbookList = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        workbookList.forEach((workbook) => {
-            const unitId = workbook.getUnitId();
-            const subRuleMap = this._conditionalFormattingRuleModel.getUnitRules(unitId);
-            if (subRuleMap) {
-                [...subRuleMap.keys()].forEach((subUnitId) => {
-                    const ruleList = subRuleMap.get(subUnitId)!;
-                    ruleList.forEach((rule) => {
-                        this._handleRuleAdd(unitId, subUnitId, rule);
-                        isNeedMark = true;
-                    });
-                });
-            }
-        });
-        isNeedMark && this.markDirtySkeleton();
-    }
-
-    private _handleRuleAdd(
-        unitId: string,
-        subUnitId: string,
-        rule: IConditionFormattingRule) {
-        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
-        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-            map.set(cur, index);
-            return map;
-        }, new Map<string, number>());
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-            });
-        });
-        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-    }
-
-    private _handleRuleChange(
-        unitId: string,
-        subUnitId: string,
-        rule: IConditionFormattingRule,
-        oldRule: IConditionFormattingRule
-    ) {
-        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
-        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-            map.set(cur, index);
-            return map;
-        }, new Map<string, number>());
-
-        // After each setting, the cache needs to be cleared,
-        // and this cleanup is deferred until the end of the calculation.
-        // Otherwise the render will flash once
-        const handleChange = (oldRule: IConditionFormattingRule, newRule: IConditionFormattingRule) => {
-            oldRule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                });
-            });
-            newRule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                    this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                });
-            });
-        };
-        const dispose = this._conditionalFormattingService.interceptorManager.intercept(this._conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
-            handler: (config, _, next) => {
-                if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
-                    const list = this._ruleChangeCacheMap.get(config.cfId) || [];
-                    list.forEach((config) => {
-                        handleChange(config.oldRule, config.rule);
-                        config.dispose();
-                    });
-                    this._ruleChangeCacheMap.delete(config.cfId);
-                    return;
-                }
-                next(config);
-            },
-        });
-
-        if (oldRule.cfId === rule.cfId) {
-            let list = this._ruleChangeCacheMap.get(oldRule.cfId);
-            if (!list) {
-                list = [];
-                this._ruleChangeCacheMap.set(oldRule.cfId, list);
-            }
-            list.push({ oldRule, rule, dispose });
-        }
-
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-            });
-        });
-
-        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
+                    return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
+                })
+            ).subscribe(() => this._markDirtySkeleton()));
     }
 
     private _initViewModelInterceptor() {

@@ -21,7 +21,6 @@ import type {
     IFormulaData,
     IFormulaDataItem,
     IFormulaIdMap,
-    IFormulaIdMapData,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
@@ -38,8 +37,6 @@ export interface IRangeChange {
 }
 
 export class FormulaDataModel extends Disposable {
-    private _formulaIdMapData: IFormulaIdMapData = {};
-
     private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
     private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
@@ -49,14 +46,12 @@ export class FormulaDataModel extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
-        this._initFormulaIdMap();
     }
 
     override dispose() {
         super.dispose();
         this._arrayFormulaRange = {};
         this._arrayFormulaCellData = {};
-        this._formulaIdMapData = {};
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
@@ -304,22 +299,16 @@ export class FormulaDataModel extends Disposable {
     updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
-        if (this._formulaIdMapData[unitId] == null) {
-            this._formulaIdMapData[unitId] = {};
-        }
-
-        if (this._formulaIdMapData[unitId][sheetId] == null) {
-            this._formulaIdMapData[unitId][sheetId] = {};
-        }
-
-        const formulaIdMap = this._formulaIdMapData[unitId][sheetId]; // Connect the formula and ID
+        const formulaIdMap = this._getSheetFormulaIdMap(unitId, sheetId); // Connect the formula and ID
 
         const deleteFormulaIdMap = new Map<string, string | IFormulaIdMap>();
 
         const formulaData = this.getFormulaData();
+
         if (formulaData[unitId] == null) {
             formulaData[unitId] = {};
         }
+
         const workbookFormulaData = formulaData[unitId]!;
 
         if (workbookFormulaData[sheetId] == null) {
@@ -549,27 +538,6 @@ export class FormulaDataModel extends Disposable {
         }
 
         return dirtyRanges;
-    }
-
-    private _initFormulaIdMap() {
-        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (allSheets.length === 0) {
-            return;
-        }
-
-        allSheets.forEach((workbook) => {
-            const unitId = workbook.getUnitId();
-            this._formulaIdMapData[unitId] = {};
-
-            const worksheets = workbook.getSheets();
-            worksheets.forEach((worksheet) => {
-                const sheetId = worksheet.getSheetId();
-
-                if (this._formulaIdMapData[unitId]) {
-                    this._formulaIdMapData[unitId][sheetId] = this._getSheetFormulaIdMap(unitId, sheetId);
-                }
-            });
-        });
     }
 
     private _getSheetFormulaIdMap(unitId: string, sheetId: string) {

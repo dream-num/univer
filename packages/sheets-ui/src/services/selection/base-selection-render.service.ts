@@ -425,13 +425,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._downObserver = null;
     }
 
-    // resetAndEndSelection(): void {
-    //     this.endSelection();
-    //     this._reset();
-    // }
-
-    // TODO: @wzhudev: refactor the method to make it more readable
-
     /**
      * Init pointer move listener in each pointer down, unbind in each pointer up.
      * Both cell selections and row-column selections are supported by this method.
@@ -442,7 +435,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param moveStartPosX
      * @param moveStartPosY
      */
-    // eslint-disable-next-line max-lines-per-function
+
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,
@@ -462,7 +455,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveStartPosX, moveStartPosY]));
 
         // #region onPointerMove$
-        // eslint-disable-next-line max-lines-per-function, complexity
+        // eslint-disable-next-line complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 

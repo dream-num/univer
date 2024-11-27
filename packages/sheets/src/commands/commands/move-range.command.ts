@@ -32,6 +32,7 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
@@ -90,8 +91,8 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-
                     selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
+                    type: SelectionMoveType.MOVE_END,
                 } as ISetSelectionsOperationParams,
             },
         ];
@@ -104,8 +105,8 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
+                    type: SelectionMoveType.MOVE_END,
                 } as ISetSelectionsOperationParams,
             },
         ];

@@ -41,7 +41,6 @@ describe('test-color-scale', () => {
             },
             accessor: null as any,
             getCellValue: (row, col) => ({ v: row + col, t: CellValueType.NUMBER }),
-            calculateEmit: () => { },
         });
         const count = vi.spyOn(colorScaleUnit, 'getCellResult' as any);
 

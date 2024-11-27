@@ -51,7 +51,7 @@
         "lib"
     ],
     "scripts": {
-        "prepare": "node ./scripts/build-icons",
+        "prepare": "tsx ./scripts/build-icons.ts",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
@@ -71,9 +71,9 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/icons-svg": "^0.2.7",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.11",
-        "vitest": "^2.1.5"
+        "typescript": "^5.7.2",
+        "vite": "^6.0.0",
+        "vitest": "^2.1.6"
     },
     "space": {
         ".": {

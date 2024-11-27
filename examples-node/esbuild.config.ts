@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-import './f-univer';
+import type { BuildOptions, SameShape } from 'esbuild';
+import esbuild from 'esbuild';
 
-export { FPermission } from './f-permission';
-export { FRange } from './f-range';
-export type { FontLine, FontStyle, FontWeight } from './f-range';
-export { FSelection } from './f-selection';
-export { FSheetHooks } from './f-sheet-hooks';
+const config: SameShape<BuildOptions, BuildOptions> = {
+    bundle: true,
+    color: true,
+    minify: false,
+    target: 'chrome70',
+    entryPoints: [
+        './src/cases/basic.ts',
+        './src/sdk/worker.ts',
+    ],
+    platform: 'node',
+    outdir: './dist',
+    define: {
+        'process.env.NODE_ENV': '"production"',
 
-export { FWorkbook } from './f-workbook';
-// eslint-disable-next-line perfectionist/sort-exports
-export { FWorksheet } from './f-worksheet';
+    },
+};
 
-// eslint-disable-next-line perfectionist/sort-exports
-export type * from './f-univer';
+async function main() {
+    await esbuild.build(config);
+}
+
+main();

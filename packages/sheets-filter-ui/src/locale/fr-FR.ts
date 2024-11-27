@@ -67,6 +67,20 @@ const locale: typeof enUS = {
         msg: {
             'filter-header-forbidden': 'Vous ne pouvez pas déplacer la ligne d\'en-tête d\'un filtre.',
         },
+        date: {
+            1: 'Jan',
+            2: 'Fév',
+            3: 'Mar',
+            4: 'Avr',
+            5: 'Mai',
+            6: 'Juin',
+            7: 'Juil',
+            8: 'Août',
+            9: 'Sept',
+            10: 'Oct',
+            11: 'Nov',
+            12: 'Déc',
+        },
     },
 };
 

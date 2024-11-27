@@ -605,6 +605,7 @@ const locale: typeof enUS = {
             setCellStyle: 'Définir le style de cellule',
             copy: 'Copier',
             alert: 'Alerte',
+            search: 'Rechercher',
             alertContent: 'Cette plage est protégée et aucune permission de modification n\'est actuellement disponible. Si vous avez besoin de modifier, veuillez contacter le créateur.',
             userEmpty: 'aucune personne désignée, Partagez le lien pour inviter des personnes spécifiques.',
             listEmpty: 'Vous n\'avez défini aucune plage ou feuille comme protégée.',

@@ -50,7 +50,8 @@ const indexTemplate = `<!doctype html>
 
         <script type="module" src="./main.js"></script>
     </body>
-</html>`;
+</html>
+`;
 
 /**
  * Generate html files

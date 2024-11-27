@@ -23,6 +23,7 @@ export { FSelection } from './f-selection';
 export { FSheetHooks } from './f-sheet-hooks';
 
 export { FWorkbook } from './f-workbook';
+// eslint-disable-next-line perfectionist/sort-exports
 export { FWorksheet } from './f-worksheet';
 
 // eslint-disable-next-line perfectionist/sort-exports

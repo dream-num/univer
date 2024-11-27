@@ -382,6 +382,8 @@ function dealWithTableRow(
             }
         }
 
+        curTableSkeleton = skeTables[skeTables.length - 1];
+
         rowSkeleton.top = cache.rowTop;
         curTableSkeleton.height += rowSkeleton.height;
 

@@ -577,9 +577,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
@@ -1454,9 +1451,6 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
-      '@univerjs/docs-drawing':
-        specifier: workspace:*
-        version: link:../docs-drawing
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
@@ -1479,6 +1473,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../docs-drawing
       less:
         specifier: ^4.2.1
         version: 4.2.1

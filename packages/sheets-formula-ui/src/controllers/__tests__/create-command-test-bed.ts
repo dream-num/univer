@@ -55,6 +55,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
+    has: Injector['has'];
     sheet: Workbook;
 }
 
@@ -62,6 +63,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
+    const has = injector.has.bind(injector);
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
@@ -125,6 +127,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     return {
         univer,
         get,
+        has,
         sheet,
     };
 }

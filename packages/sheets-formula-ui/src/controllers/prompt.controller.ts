@@ -197,7 +197,7 @@ export class PromptController extends Disposable {
     ) {
         super();
 
-        this._initialize();
+        // this._initialize();
     }
 
     override dispose(): void {
@@ -218,17 +218,17 @@ export class PromptController extends Disposable {
     }
 
     private _initialize(): void {
-        this._initialCursorSync();
-        this._initAcceptFormula();
-        this._initialFormulaTheme();
-        this._initSelectionsEndListener();
+        // this._initialCursorSync();
+        // this._initAcceptFormula();
+        // this._initialFormulaTheme();
+        // this._initSelectionsEndListener();
         this._closeRangePromptWhenEditorInvisible();
-        this._initialEditorInputChange();
-        this._commandExecutedListener();
-        this._cursorStateListener();
-        this._inputFormulaListener();
-        this._userMouseListener();
-        this._initialChangeEditor();
+        // this._initialEditorInputChange();
+        // this._commandExecutedListener();
+        // this._cursorStateListener();
+        // this._inputFormulaListener();
+        // this._userMouseListener();
+        // this._initialChangeEditor();
     }
 
     private _initialFormulaTheme() {

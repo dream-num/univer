@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
-import { IEditorService, TextEditor } from '@univerjs/docs-ui';
+import type { IAccessor, Workbook } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
-import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { matchRefDrawToken } from '@univerjs/engine-formula';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { of } from 'rxjs';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
 
@@ -35,6 +40,38 @@ const EDITOR_DEFAULT_POSITION = {
     left: HIDDEN_EDITOR_POSITION,
 };
 
+function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
+    const univerInstanceService = accssor.get(IUniverInstanceService);
+    const documentModel = univerInstanceService.getCurrentUniverDocInstance();
+
+    if (!documentModel?.getBody()) {
+        return;
+    }
+
+    const dataStream = documentModel.getBody()?.dataStream ?? '';
+    return { dataStream, offset: 0 };
+}
+
+function getCurrentChar(accssor: IAccessor) {
+    const docSelectionManagerService = accssor.get(DocSelectionManagerService);
+    const activeRange = docSelectionManagerService.getActiveTextRange();
+
+    if (activeRange == null) {
+        return;
+    }
+
+    const { startOffset } = activeRange;
+
+    const config = getCurrentBodyDataStreamAndOffset(accssor);
+
+    if (config == null || startOffset == null) {
+        return;
+    }
+
+    const dataStream = config.dataStream;
+
+    return dataStream[startOffset - 1 + config.offset];
+}
 /**
  * Cell editor container.
  * @returns
@@ -44,38 +81,33 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]);
+    const workbook = useObservable(workbook$);
+    const worksheet = useObservable(workbook?.activeSheet$);
+    // const editorBridgeService
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
-
+    const componentManager = useDependency(ComponentManager);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
+    const renderer = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const [selectionFocusing, setSelectionFocusing] = useState(false);
+    const visible = useObservable(editorBridgeService.visible$);
+    const injector = useDependency(Injector);
+    const onFocus$ = useMemo(() => docSelectionRenderService?.onFocus$ ?? of(), [docSelectionRenderService?.onFocus$]);
+    const onBlur$ = useMemo(() => docSelectionRenderService?.onBlur$ ?? of(), [docSelectionRenderService?.onBlur$]);
+    const textSelections$ = useMemo(() => docSelectionRenderService?.textSelectionInner$ ?? of(), [docSelectionRenderService?.textSelectionInner$]);
+    const forceKeepVisible = useObservable(editorBridgeService.forceKeepVisible$);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
         false,
         undefined,
         [contextService, DISABLE_AUTO_FOCUS_KEY]
     );
-
-    const snapshot: IDocumentData = {
-        id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-        body: {
-            dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-            tables: [],
-            textRuns: [],
-            paragraphs: [
-                {
-                    startIndex: 0,
-                },
-            ],
-            sectionBreaks: [
-                {
-                    startIndex: 1,
-                },
-            ],
-        },
-        tableSource: {},
-        documentStyle: {
-            documentFlavor: DocumentFlavor.UNSPECIFIED,
-        },
-    };
+    const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
+    const editState = editorBridgeService.getEditLocation();
 
     useEffect(() => {
         const sub = cellEditorManagerService.state$.subscribe((param) => {
@@ -127,6 +159,34 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
 
+    useEffect(() => {
+        const sub1 = onFocus$.subscribe(() => {
+            setSelectionFocusing(true);
+        });
+
+        const sub2 = onBlur$.subscribe(() => {
+            setSelectionFocusing(false);
+        });
+
+        return () => {
+            sub1.unsubscribe();
+            sub2.unsubscribe();
+        };
+    }, [onBlur$, onFocus$]);
+
+    useEffect(() => {
+        const sub = textSelections$.subscribe(() => {
+            const char = getCurrentChar(injector);
+            const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
+            if (dataStream?.substring(0, 1) === '=' && char && matchRefDrawToken(char)) {
+                editorBridgeService.enableForceKeepVisible();
+            } else {
+                editorBridgeService.disableForceKeepVisible();
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [editorBridgeService, injector, textSelections$]);
     return (
         <div
             className={styles.editorContainer}
@@ -137,14 +197,18 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            <TextEditor
-                id={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
-                className={styles.editorInput}
-                snapshot={snapshot}
-                cancelDefaultResizeListener
-                isSheetEditor
-                isSingle={false}
-            />
+            {FormulaEditor && (
+                <FormulaEditor
+                    editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
+                    className={styles.editorInput}
+                    isSingle={false}
+                    initValue=""
+                    onChange={() => {}}
+                    isFocus={visible?.visible && forceKeepVisible}
+                    unitId={editState?.unitId}
+                    subUnitId={editState?.sheetId}
+                />
+            )}
         </div>
     );
 };

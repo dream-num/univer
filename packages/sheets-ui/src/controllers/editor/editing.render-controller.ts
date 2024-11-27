@@ -63,9 +63,9 @@ import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from '../../services/editor/cell-editor-resize.service';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
@@ -293,17 +293,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
         * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
         */
     private _commandExecutedListener(d: DisposableCollection) {
-        const updateCommandList = [RichTextEditingMutation.id];
-
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (updateCommandList.includes(command.id)) {
+            if (command.id === RichTextEditingMutation.id) {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId: commandUnitId } = params;
 
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
                 if (
                     !this._isCurrentSheetFocused() ||
-                    !this._editorService.isSheetEditor(commandUnitId) ||
                     isRangeSelector(commandUnitId)
                 ) {
                     return;
@@ -449,7 +446,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const editCellState = this._editorBridgeService.getEditCellState();
-
         let { keycode } = param;
         this._setOpenForCurrent(null, null);
 

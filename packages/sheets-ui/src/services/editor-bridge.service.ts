@@ -27,7 +27,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_STANDALONE,
-    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     IContextService,
     Inject,
     IUniverInstanceService,
@@ -83,8 +82,8 @@ export interface IEditorBridgeService {
     currentEditCellState$: Observable<Nullable<ICellEditorState>>;
     currentEditCellLayout$: Observable<Nullable<ICellEditorLayout>>;
     currentEditCell$: Observable<Nullable<IEditorBridgeServiceParam>>;
-
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
+    forceKeepVisible$: Observable<boolean>;
 
     dispose(): void;
     refreshEditCellState(): void;
@@ -107,9 +106,6 @@ export interface IEditorBridgeService {
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
     private _editorUnitId: string = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
-
-    private _isForceKeepVisible: boolean = false;
-
     private _editorIsDirty: boolean = false;
 
     private _isDisabled: boolean = false;
@@ -139,6 +135,9 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly afterVisible$ = this._afterVisible$.asObservable();
+
+    private readonly _forceKeepVisible$ = new BehaviorSubject(false);
+    readonly forceKeepVisible$ = this._forceKeepVisible$.asObservable();
 
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -251,7 +250,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
              */
             this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
-            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
+            // this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
 
         const editCellState = this.getLatestEditCellState();
@@ -442,15 +441,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     enableForceKeepVisible(): void {
-        this._isForceKeepVisible = true;
+        this._forceKeepVisible$.next(true);
     }
 
     disableForceKeepVisible(): void {
-        this._isForceKeepVisible = false;
+        this._forceKeepVisible$.next(false);
     }
 
     isForceKeepVisible(): boolean {
-        return this._isForceKeepVisible;
+        return this._forceKeepVisible$.getValue();
     }
 
     changeEditorDirty(dirtyStatus: boolean) {

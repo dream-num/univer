@@ -16,18 +16,18 @@
 
 import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { ComponentContainer, KeyCode, useComponentsOfPart } from '@univerjs/ui';
+import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import styles from './index.module.less';
 
@@ -47,11 +47,14 @@ export function FormulaBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
+    const [isFocus, setIsFocus] = useState(false);
 
     const [disable, setDisable] = useState<boolean>(false);
     const currentWorkbook = useActiveWorkbook();
+    const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
 
+    const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
@@ -235,16 +238,23 @@ export function FormulaBar() {
                 </div>
 
                 <div className={styles.formulaInput}>
-                    <TextEditor
-                        id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                        isSheetEditor={true}
-                        resizeCallBack={resizeCallBack}
-                        cancelDefaultResizeListener={true}
-                        onContextMenu={(e) => e.preventDefault()}
-                        className={styles.formulaContent}
-                        snapshot={INITIAL_SNAPSHOT}
-                        isSingle={false}
-                    />
+                    {FormulaEditor && (
+                        <FormulaEditor
+                            editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                            isSheetEditor
+                            resizeCallBack={resizeCallBack}
+                            className={styles.formulaContent}
+                            snapshot={INITIAL_SNAPSHOT}
+                            isSingle={false}
+                            initValue=""
+                            onChange={() => {
+
+                            }}
+                            isFocus={false}
+                            // onFocus={() => setIsFocus(true)}
+                            // onBlur={() => setIsFocus(false)}
+                        />
+                    )}
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (

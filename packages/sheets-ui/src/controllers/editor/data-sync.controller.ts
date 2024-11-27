@@ -45,8 +45,8 @@ export class EditorDataSyncController extends Disposable {
     }
 
     private _initialize() {
-        this._syncFormulaEditorContent();
-        this._commandExecutedListener();
+        // this._syncFormulaEditorContent();
+        // this._commandExecutedListener();
     }
 
     private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {

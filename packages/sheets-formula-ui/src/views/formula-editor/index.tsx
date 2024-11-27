@@ -57,19 +57,28 @@ export interface IFormulaEditorProps {
     actions?: {
         handleOutClick?: (e: MouseEvent, cb: () => void) => void;
     };
+    className?: string;
+    editorId?: string;
 }
 const noop = () => { };
 export function FormulaEditor(props: IFormulaEditorProps) {
-    const { errorText, initValue, unitId, subUnitId, isFocus: _isFocus = true, isSupportAcrossSheet = false,
-            onFocus = noop,
-            onBlur = noop,
-            onChange,
-            onVerify,
-            actions,
+    const {
+        errorText,
+        initValue,
+        unitId,
+        subUnitId,
+        isFocus: _isFocus = true,
+        isSupportAcrossSheet = false,
+        onFocus = noop,
+        onBlur = noop,
+        onChange,
+        onVerify,
+        actions,
+        className,
+        editorId: propEditorId,
     } = props;
 
     const editorService = useDependency(IEditorService);
-
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const [formulaText, formulaTextSet] = useState(() => {
         if (initValue.startsWith(operatorToken.EQUALS)) {
@@ -77,7 +86,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
         return '';
     });
-
     // init actions
     if (actions) {
         actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
@@ -96,7 +104,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const [editor, editorSet] = useState<Editor>();
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
-    const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
+    const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
     const getFormulaToken = useFormulaToken();
@@ -243,7 +251,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }, 30);
     };
     return (
-        <div className={styles.sheetEmbeddingFormulaEditor}>
+        <div className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>
             <div
                 className={clsx(styles.sheetEmbeddingFormulaEditorWrap, {
                     [styles.sheetEmbeddingFormulaEditorActive]: isFocus,

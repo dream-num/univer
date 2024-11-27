@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Null
 import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorConfigParams, IEditorStateParams } from './editor';
-import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -339,7 +339,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         if (!isInternalEditorID(editorUnitId)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, true);
-            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, editor.isSingle());
+            // this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, editor.isSingle());
         }
 
         if (!this._spreadsheetFocusState) {
@@ -586,7 +586,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         editor.dispose();
         this._editors.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
-        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
+        // this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
 
         // DEBT: no necessary when we refactor editor module
         if (!this.isSheetEditor(editorUnitId)) return;

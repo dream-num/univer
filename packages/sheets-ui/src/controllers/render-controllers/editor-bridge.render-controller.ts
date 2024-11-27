@@ -171,13 +171,11 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                     if (!this._isCurrentSheetFocused()) {
                         return;
                     }
-
                     const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
                     const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
                     const unitId = render.unitId;
                     if (this._editorBridgeService.isVisible().visible) return;
-
-                    if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                    if (unitId && isFocusSheets && !isFocusFormulaEditor) {
                         this._showEditorByKeyboard(config);
                     }
                 }));

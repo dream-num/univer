@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    formula: {
+        progress: {
+            analyzing: 'Analyse en cours',
+            calculating: 'Calcul en cours',
+            'array-analysis': 'Analyse de tableau',
+            'array-calculation': 'Calcul de tableau',
+            done: 'Terminé',
+        },
+    },
+};
+
+export default locale;

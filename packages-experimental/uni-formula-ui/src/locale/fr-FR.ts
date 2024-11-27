@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    'uni-formula': {
+        popup: {
+            title: {
+                new: 'Créer une nouvelle formule',
+                existing: 'Modifier la formule',
+            },
+            placeholder: 'Cliquez ici pour insérer une formule ou continuez à taper pour fermer...',
+            button: {
+                confirm: 'Confirmer',
+                cancel: 'Annuler',
+            },
+        },
+        command: {
+            'stream-placeholder': 'Formule Uni',
+        },
+    },
+};
+
+export default locale;

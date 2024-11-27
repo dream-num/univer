@@ -110,7 +110,7 @@ export class SheetsSelectionsService extends RxDisposable {
         type?: SelectionMoveType
     ): void {
         if (typeof unitIdOrSelections === 'string' && typeof worksheetIdOrType === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
+            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType, selectionDatas!, type ?? SelectionMoveType.ONLY_SET);
             return;
         }
 

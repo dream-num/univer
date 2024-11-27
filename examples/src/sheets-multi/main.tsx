@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -69,7 +69,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         // create univer sheet instance
-        univer.createUniverSheet(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
     };
 }
 
@@ -113,4 +113,4 @@ export function App() {
         />
     );
 };
-createRoot(document.getElementById('container')!).render(<App />);
+createRoot(document.getElementById('app')!).render(<App />);

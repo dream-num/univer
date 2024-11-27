@@ -5,11 +5,12 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "scripts": {
-        "build:demo": "node ./esbuild.config.mjs",
-        "dev:demo": "node ./esbuild.config.mjs --watch",
-        "dev:e2e": "node ./esbuild.config.mjs --watch --e2e",
-        "build:e2e": "node ./esbuild.config.mjs --e2e",
-        "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"
+        "prepare": "tsx ./scripts/generate-locales.ts && tsx ./scripts/generate-html.ts",
+        "build:demo": "tsx ./esbuild.config.ts",
+        "dev:demo": "tsx ./esbuild.config.ts --watch",
+        "dev:e2e": "tsx ./esbuild.config.ts --watch --e2e",
+        "build:e2e": "tsx ./esbuild.config.ts --e2e",
+        "lint:types": "tsc --noEmit"
     },
     "dependencies": {
         "@univerjs/action-recorder": "workspace:*",
@@ -68,14 +69,13 @@
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
-        "clsx": "^2.1.1",
         "monaco-editor": "0.52.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "react-mosaic-component": "^6.1.0",
-        "rxjs": "^7.8.1"
+        "react-mosaic-component": "^6.1.0"
     },
     "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
         "@univerjs-infra/shared": "workspace:*",
@@ -85,8 +85,9 @@
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
-        "less": "^4.2.0",
+        "fs-extra": "^11.2.0",
+        "less": "^4.2.1",
         "minimist": "^1.2.8",
-        "typescript": "^5.6.3"
+        "typescript": "^5.7.2"
     }
 }

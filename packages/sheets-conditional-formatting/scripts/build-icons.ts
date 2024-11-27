@@ -1,4 +1,20 @@
-const fs = require('node:fs').promises;
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import fs from 'node:fs';
 
 const progress = [
     ['progress0', '@univerjs/icons-svg/single/start-page/progress-0-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
@@ -88,9 +104,9 @@ const cell = [
 
 ];
 
-async function replaceFillAndConvertToBase64(filePath, replaceMap) {
+function replaceFillAndConvertToBase64(filePath, replaceMap) {
     try {
-        let svgContent = await fs.readFile(filePath, 'utf8');
+        let svgContent = fs.readFileSync(filePath, 'utf8');
         if (replaceMap) {
             for (const key in replaceMap) {
                 svgContent = svgContent.replace(new RegExp(`"${key}"`, 'g'), `"${replaceMap[key]}"`);
@@ -103,7 +119,8 @@ async function replaceFillAndConvertToBase64(filePath, replaceMap) {
         console.error('An error occurred:', error);
     }
 }
-const runTask = async () => {
+
+function runTask() {
     const base64EncodedSVGs = {};
     const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedback2, flag, cell };
     for (const iconType in obj) {
@@ -112,16 +129,16 @@ const runTask = async () => {
         base64EncodedSVGs[iconType] = map;
         for (const element of list) {
             const [key, path, replaceMap] = element;
-            const base64 = await replaceFillAndConvertToBase64(`./node_modules/${path}`, replaceMap);
+            const base64 = replaceFillAndConvertToBase64(`./node_modules/${path}`, replaceMap);
             map[key] = `data:image/svg+xml;charset=utf-8,${base64}`;
         }
     }
-    try {
-        await fs.stat('./src/assets');
-    } catch (err) {
-        await fs.mkdir('./src/assets');
+
+    if (!fs.existsSync('./src/assets')) {
+        fs.mkdirSync('./src/assets');
     }
 
-    fs.writeFile('./src/assets/icon-map.json', `${JSON.stringify(base64EncodedSVGs, null, 4)}\n`, 'utf8');
+    fs.writeFileSync('./src/assets/icon-map.json', `${JSON.stringify(base64EncodedSVGs, null, 4)}\n`);
 };
+
 runTask();

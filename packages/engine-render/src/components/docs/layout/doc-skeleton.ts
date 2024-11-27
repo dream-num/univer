@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import type { INumberUnit, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -25,7 +25,7 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
-import { BooleanNumber, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import { Skeleton } from '../../skeleton';
@@ -1119,7 +1119,16 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = startSectionIndex, len = viewModel.getChildren().length; i < len; i++) {
             const sectionNode = viewModel.getChildren()[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
-            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
+            const {
+                sectionType,
+                columnProperties = [],
+                columnSeparatorType = ColumnSeparatorType.COLUMN_SEPARATOR_STYLE_UNSPECIFIED,
+                sectionTypeNext,
+                pageNumberStart = 1,
+                equalWidth = BooleanNumber.TRUE,
+                numOfEqualWidthColumns = 1,
+                spaceBetweenEqualWidthColumns = { v: 10 },
+            } = sectionBreakConfig;
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
@@ -1128,7 +1137,14 @@ export class DocumentSkeleton extends Skeleton {
 
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
-                this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
+                this._addNewSectionByContinuous(
+                    curSkeletonPage,
+                    columnProperties,
+                    columnSeparatorType,
+                    equalWidth,
+                    numOfEqualWidthColumns,
+                    spaceBetweenEqualWidthColumns
+                );
                 isContinuous = true;
             } else if (layoutAnchor == null || curSkeletonPage == null) {
                 curSkeletonPage = createSkeletonPage(
@@ -1200,7 +1216,10 @@ export class DocumentSkeleton extends Skeleton {
     private _addNewSectionByContinuous(
         curSkeletonPage: IDocumentSkeletonPage,
         columnProperties: ISectionColumnProperties[],
-        columnSeparatorType: ColumnSeparatorType
+        columnSeparatorType: ColumnSeparatorType,
+        equalWidth: BooleanNumber,
+        numOfEqualWidthColumns: number,
+        spaceBetweenEqualWidthColumns: INumberUnit
     ) {
         const sections = curSkeletonPage.sections;
         const lastSection = sections[sections.length - 1];
@@ -1216,6 +1235,9 @@ export class DocumentSkeleton extends Skeleton {
         const pageContentHeight = pageHeight - curPageMT - curPageMB;
         const lastSectionBottom = (lastSection?.top || 0) + (lastSection?.height || 0);
         const newSection = createSkeletonSection(
+            equalWidth,
+            numOfEqualWidthColumns,
+            spaceBetweenEqualWidthColumns,
             columnProperties,
             columnSeparatorType,
             lastSectionBottom,

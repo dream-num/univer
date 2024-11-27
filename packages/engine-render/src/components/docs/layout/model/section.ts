@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { ISectionColumnProperties } from '@univerjs/core';
+import type { INumberUnit, ISectionColumnProperties } from '@univerjs/core';
 import type { IDocumentSkeletonColumn, IDocumentSkeletonSection } from '../../../../basics/i-document-skeleton-cached';
-
-import { ColumnSeparatorType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType } from '@univerjs/core';
 
 export function createSkeletonSection(
+    equalWidth: BooleanNumber = BooleanNumber.TRUE,
+    numOfEqualWidthColumns: number = 1,
+    spaceBetweenEqualWidthColumns: INumberUnit = { v: 10 },
     columnProperties: ISectionColumnProperties[] = [],
     columnSeparatorType: ColumnSeparatorType = ColumnSeparatorType.NONE,
     top: number = 0,
@@ -30,30 +32,40 @@ export function createSkeletonSection(
     const columns: IDocumentSkeletonColumn[] = [];
     let colWidth = 0;
     let spaceWidth = 0;
+    let leftOffset = left;
 
-    if (columnProperties.length === 0) {
-        columns.push(_getSkeletonColumn(left, sectionWidth, 0, ColumnSeparatorType.NONE));
+    if (equalWidth === BooleanNumber.TRUE) {
+        colWidth = sectionWidth / numOfEqualWidthColumns;
+
+        for (let i = 0; i < numOfEqualWidthColumns; i++) {
+            spaceWidth = i === numOfEqualWidthColumns - 1 ? 0 : spaceBetweenEqualWidthColumns.v;
+            columns.push(_getSkeletonColumn(leftOffset, colWidth, spaceWidth, columnSeparatorType));
+            leftOffset += colWidth + spaceWidth;
+        }
     } else {
-        for (let i = 0; i < columnProperties.length; i++) {
-            const { width, paddingEnd } = columnProperties[i];
+        if (columnProperties.length <= 1) {
+            columns.push(_getSkeletonColumn(leftOffset, sectionWidth, 0, ColumnSeparatorType.NONE));
+        } else {
+            for (let i = 0; i < columnProperties.length; i++) {
+                const { width, paddingEnd } = columnProperties[i];
 
-            spaceWidth = paddingEnd;
-            colWidth = width;
+                spaceWidth = paddingEnd;
+                colWidth = width;
 
-            columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
+                if (i === columnProperties.length - 1) {
+                    spaceWidth = 0;
+                }
 
-            left += colWidth + spaceWidth;
+                columns.push(_getSkeletonColumn(leftOffset, colWidth, spaceWidth, columnSeparatorType));
 
-            if (i === columnProperties.length - 1) {
-                colWidth = sectionWidth !== Number.POSITIVE_INFINITY ? sectionWidth - colWidth : width;
-                spaceWidth = 0;
-                columns.push(_getSkeletonColumn(left, colWidth, spaceWidth, columnSeparatorType));
+                leftOffset += colWidth + spaceWidth;
             }
         }
     }
+
     const newSection = {
         columns,
-        colCount: columnProperties?.length || 1,
+        colCount: columns.length,
         height: sectionHeight,
         top,
         st: 0,

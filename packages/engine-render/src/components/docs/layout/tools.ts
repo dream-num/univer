@@ -1085,6 +1085,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
         evenAndOddHeaders = global_evenAndOddHeaders,
 
+        equalWidth = BooleanNumber.TRUE,
+        numOfEqualWidthColumns = 1,
+        spaceBetweenEqualWidthColumns = { v: 10 },
         columnProperties = [],
         columnSeparatorType = ColumnSeparatorType.NONE,
         contentDirection,
@@ -1135,6 +1138,9 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionTypeNext,
         textDirection,
         renderConfig,
+        equalWidth,
+        numOfEqualWidthColumns,
+        spaceBetweenEqualWidthColumns,
 
         autoHyphenation,
         doNotHyphenateCaps,

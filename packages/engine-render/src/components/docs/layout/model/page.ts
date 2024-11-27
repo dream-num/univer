@@ -24,7 +24,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PageOrientType } from '@univerjs/core';
 import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex } from '../tools';
@@ -56,7 +56,7 @@ export function createSkeletonPage(
         footerTreeMap,
         headerTreeMap,
         columnProperties = [],
-        columnSeparatorType,
+        columnSeparatorType = ColumnSeparatorType.COLUMN_SEPARATOR_STYLE_UNSPECIFIED,
         marginTop = 0,
         marginBottom = 0,
         marginHeader: _marginHeader = 0,
@@ -64,6 +64,9 @@ export function createSkeletonPage(
         marginLeft = 0,
         marginRight = 0,
         renderConfig = {},
+        equalWidth = BooleanNumber.TRUE,
+        numOfEqualWidthColumns = 1,
+        spaceBetweenEqualWidthColumns = { v: 10 },
     } = sectionBreakConfig;
 
     const { skeHeaders, skeFooters } = skeletonResourceReference;
@@ -153,6 +156,9 @@ export function createSkeletonPage(
     }
 
     const newSection = createSkeletonSection(
+        equalWidth,
+        numOfEqualWidthColumns,
+        spaceBetweenEqualWidthColumns,
         columnProperties,
         columnSeparatorType,
         lastSectionBottom,

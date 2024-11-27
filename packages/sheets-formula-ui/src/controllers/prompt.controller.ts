@@ -464,7 +464,7 @@ export class PromptController extends Disposable {
                     }
                     this._onSelectionControlChange(toRange, c);
                 }));
-                d.add(merge(c.selectionMoved$, c.selectionScaled$).subscribe(() => {
+                d.add(merge(c.selectionMoveEnd$, c.selectionScaled$).subscribe(() => {
                     this._formulaPromptService.disableLockedSelectionChange();
                 }));
             });
@@ -1242,7 +1242,7 @@ export class PromptController extends Disposable {
      * @param sequenceNodes
      * @param textSelectionOffset
      */
-    // eslint-disable-next-line max-lines-per-function
+
     private _syncToEditor(
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
@@ -1542,7 +1542,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionControl) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
@@ -1759,7 +1758,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];

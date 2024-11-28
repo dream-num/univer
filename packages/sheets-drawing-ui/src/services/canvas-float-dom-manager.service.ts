@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IPosition, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
-import type { IDrawingJsonUndo1, type ITransformState } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, ITransformState } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';

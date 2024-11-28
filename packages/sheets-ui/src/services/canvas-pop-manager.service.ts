@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';

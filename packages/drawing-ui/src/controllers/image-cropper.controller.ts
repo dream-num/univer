@@ -18,9 +18,9 @@ import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core'
 import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
-import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { checkIfMove, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { filter, switchMap } from 'rxjs';

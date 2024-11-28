@@ -23,6 +23,7 @@ export { type IImageData } from './models/image-model-interface';
 export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
 export { ImageIoService } from './services/image-io-impl.service';
 export type { IRotationSkewFlipTransform, ITransformState } from './services/interface';
+export { checkIfMove, MOVE_BUFFER_VALUE, ROTATE_BUFFER_VALUE } from './utils/check-if-move';
 export {
     ArrangeTypeEnum,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,

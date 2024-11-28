@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, ITransformState, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 import type { Engine, IShapeProps, IViewportInfo, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
 import { Canvas, Rect, Shape } from '@univerjs/engine-render';
 

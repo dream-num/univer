@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam } from '@univerjs/drawing';
+import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
+import { CommandType, type IMutation } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 

@@ -20,7 +20,6 @@ import {
     BooleanNumber,
     ColumnSeparatorType,
     DocumentFlavor,
-    DrawingTypeEnum,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -28,6 +27,7 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/drawing';
 
 export const docsDemoData: IDocumentData = {
     id: 'd',

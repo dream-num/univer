@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IDocDrawingPosition, type ITransformState, type Nullable, ObjectRelativeFromH, ObjectRelativeFromV } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
+import { type IDocDrawingPosition, type Nullable, ObjectRelativeFromH, ObjectRelativeFromV } from '@univerjs/core';
 
 export function docDrawingPositionToTransform(position: IDocDrawingPosition): Nullable<ITransformState> {
     // const { from, to } = position;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 import { offsetRotationAxis } from './offset-rotation-axis';
 import { Vector2 } from './vector2';
 

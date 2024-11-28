@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';

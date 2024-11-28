@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingParam } from '@univerjs/drawing';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
-import { CreateCopySingle } from '@univerjs/icons';
 import { Button, Select } from '@univerjs/design';
+import { CreateCopySingle } from '@univerjs/icons';
 import clsx from 'clsx';
+import React, { useEffect, useRef, useState } from 'react';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 

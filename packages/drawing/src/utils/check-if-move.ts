@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '../types/interfaces/i-document-data';
-import type { Nullable } from './types';
+import type { Nullable } from '@univerjs/core';
+import type { ITransformState } from '../services/interface';
 
 export const MOVE_BUFFER_VALUE = 2;
 

@@ -53,7 +53,6 @@ export * from './docs/data-model';
 export { JSON1, JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
-export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export {
     type IDeleteAction,

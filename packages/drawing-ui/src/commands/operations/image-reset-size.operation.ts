@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type IDrawingSearch, type IOperation } from '@univerjs/core';
+import type { IDrawingSearch } from '@univerjs/drawing';
+import { CommandType, type IOperation } from '@univerjs/core';
 
 export const ImageResetSizeOperation: IOperation<IDrawingSearch[]> = {
     id: 'sheet.operation.image-reset-size',

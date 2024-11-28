@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch } from '@univerjs/core';
+import type { IDrawingSearch } from '@univerjs/drawing';
 
 export function getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId }: IDrawingSearch, index?: number): string {
     return typeof index === 'number'

@@ -20,7 +20,6 @@ import {
     BooleanNumber,
     BorderStyleTypes,
     ColumnSeparatorType,
-    DrawingTypeEnum,
     HorizontalAlign,
     LocaleType,
     ObjectRelativeFromH,
@@ -33,6 +32,7 @@ import {
     WrapStrategy,
     WrapTextType,
 } from '@univerjs/core';
+import { DrawingTypeEnum } from '@univerjs/drawing';
 
 const richTextTestFloat: IDocumentData = {
     id: 'd',

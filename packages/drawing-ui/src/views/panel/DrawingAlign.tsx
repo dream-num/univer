@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingParam } from '@univerjs/drawing';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useState } from 'react';
 import { Select } from '@univerjs/design';
 import clsx from 'clsx';
+import React, { useState } from 'react';
 import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import styles from './index.module.less';
 

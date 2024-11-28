@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDrawingParam, ITransformState } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 
+import type { IRect } from './interfaces';
 import { degToRad, precisionTo, radToDeg } from './tools';
 import { Vector2 } from './vector2';
-import type { IRect } from './interfaces';
 
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];
 

@@ -17,7 +17,6 @@
 export { afterInitApply } from './after-init-apply';
 export * from './array-search';
 export * from './blob';
-export { checkIfMove, MOVE_BUFFER_VALUE, ROTATE_BUFFER_VALUE } from './check-if-move';
 export * from './clipboard';
 export * from './color/color';
 export { ColorKit, COLORS, type IRgbColor, RGB_PAREN, RGBA_PAREN } from './color/color-kit';

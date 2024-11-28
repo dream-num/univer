@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { DrawingTypeEnum } from '@univerjs/drawing';
 
 export interface IInsertDrawingCommandParams {
     unitId: string;

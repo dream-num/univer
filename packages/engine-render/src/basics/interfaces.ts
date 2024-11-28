@@ -26,7 +26,7 @@ import type {
     ISectionBreakBase,
     ISize,
     ITextStyle,
-    ITransformState,
+    ITransformStateDeprecated,
     LocaleService,
 } from '@univerjs/core';
 
@@ -45,7 +45,7 @@ import type {
 import type { ITransformerConfig } from './transformer-config';
 import type { Vector2 } from './vector2';
 
-export interface IObjectFullState extends ITransformState {
+export interface IObjectFullState extends ITransformStateDeprecated {
     strokeWidth?: number;
     zIndex?: number;
     forceRender?: boolean;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch } from '@univerjs/core';
+import type { IDrawingSearch } from '@univerjs/drawing';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';

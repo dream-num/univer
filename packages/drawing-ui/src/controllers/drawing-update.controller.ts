@@ -22,13 +22,12 @@ import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, 
 import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
-    checkIfMove,
     Disposable,
     ICommandService,
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { checkIfMove, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';

@@ -1088,15 +1088,7 @@ export enum PageOrientType {
 // is an anti-pattern. After fixing the problem, these types should be removed.
 
 /** @deprecated */
-export enum ArrangeTypeEnum {
-    forward,
-    backward,
-    front,
-    back,
-}
-
-/** @deprecated */
-export enum DrawingTypeEnum {
+enum DrawingTypeEnum {
     UNRECOGNIZED = -1,
     DRAWING_IMAGE = 0,
     DRAWING_SHAPE = 1,
@@ -1110,21 +1102,21 @@ export enum DrawingTypeEnum {
 }
 
 /** @deprecated */
-export type DrawingType = DrawingTypeEnum | number;
+type DrawingType = DrawingTypeEnum | number;
 
 /** @deprecated */
-export interface IDrawingSpace {
+interface IDrawingSpace {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
 
 /** @deprecated */
-export interface IDrawingSearch extends IDrawingSpace {
+interface IDrawingSearch extends IDrawingSpace {
     drawingId: string;
 }
 
 /** @deprecated */
-export interface IRotationSkewFlipTransform {
+interface IRotationSkewFlipTransform {
     angle?: number;
     skewX?: number;
     skewY?: number;
@@ -1133,13 +1125,13 @@ export interface IRotationSkewFlipTransform {
 }
 
 /** @deprecated */
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+export interface ITransformStateDeprecated extends IAbsoluteTransform, IRotationSkewFlipTransform {}
 
 /** @deprecated */
-export interface IDrawingParam extends IDrawingSearch {
+interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
-    transform?: Nullable<ITransformState>;
-    transforms?: Nullable<ITransformState[]>;
+    transform?: Nullable<ITransformStateDeprecated>;
+    transforms?: Nullable<ITransformStateDeprecated[]>;
     // The same drawing render in different place, like image in header and footer.
     // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
     isMultiTransform?: BooleanNumber;

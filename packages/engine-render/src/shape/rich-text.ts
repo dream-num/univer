@@ -21,20 +21,20 @@ import type {
     IKeyValue,
     IStyleBase,
     ITextDecoration,
-    ITransformState,
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
-
+import type { ITransformState } from '@univerjs/drawing';
 import type { BASE_OBJECT_ARRAY } from '../base-object';
+
+import type { IViewportInfo } from '../basics/vector2';
+import type { UniverRenderingContext } from '../context';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
 import { BaseObject, ObjectType } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import type { IViewportInfo } from '../basics/vector2';
-import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { Documents } from '../components/docs/document';
+import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
-import type { UniverRenderingContext } from '../context';
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;

@@ -1731,6 +1731,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       cjk-regex:
         specifier: ^3.1.0
         version: 3.1.0
@@ -2964,6 +2967,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -3080,6 +3086,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

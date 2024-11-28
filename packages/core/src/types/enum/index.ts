@@ -23,7 +23,6 @@ export * from './delete-direction';
 export * from './developer-metadata-visibility';
 export * from './dimension';
 export * from './direction';
-export * from './format-type';
 export * from './interpolation-point-type';
 export * from './locale-type';
 export * from './mention-type';

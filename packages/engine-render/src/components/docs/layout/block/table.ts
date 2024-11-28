@@ -243,6 +243,21 @@ function updateTableSkeletonsPosition(
     }
 }
 
+function getCurTableSkeleton(skeTables: IDocumentSkeletonTable[]): IDocumentSkeletonTable {
+    return skeTables[skeTables.length - 1];
+}
+
+function getAvailableHeight(curPage: IDocumentSkeletonPage, cache: ICreateTableCache, hasRepeatHeader: boolean) {
+    const { marginTop, marginBottom, pageHeight } = curPage;
+    let pageContentHeight = pageHeight - marginTop - marginBottom;
+
+    if (hasRepeatHeader) {
+        pageContentHeight -= cache.repeatRowHeight;
+    }
+
+    return pageContentHeight;
+}
+
 function dealWithTableRow(
     ctx: ILayoutContext,
     curPage: IDocumentSkeletonPage,
@@ -255,8 +270,8 @@ function dealWithTableRow(
     cache: ICreateTableCache,
     isRepeatRow = false
 ) {
-    const { marginTop, marginBottom, pageHeight } = curPage;
-    const pageContentHeight = pageHeight - marginTop - marginBottom - cache.repeatRowHeight;
+    const pageContentHeight = getAvailableHeight(curPage, cache, false);
+    const availableHeight = getAvailableHeight(curPage, cache, true);
     const { children: cellNodes, startIndex, endIndex } = rowNode;
     const rowSource = table.tableRows[row];
     const { trHeight, cantSplit } = rowSource;
@@ -266,7 +281,7 @@ function dealWithTableRow(
     // If the remain height is less than 50 pixels, you can't fit the next line, so you can start typography directly from the second page.
     const MAX_FONT_SIZE = 72;
     const needOpenNewTable = cache.remainHeight <= MAX_FONT_SIZE;
-    let curTableSkeleton = skeTables[skeTables.length - 1];
+    let curTableSkeleton = getCurTableSkeleton(skeTables);
 
     const rowHeights = [0];
 
@@ -280,7 +295,7 @@ function dealWithTableRow(
             table,
             row,
             col,
-            canRowSplit && !needOpenNewTable ? cache.remainHeight : pageContentHeight,
+            canRowSplit && !needOpenNewTable ? cache.remainHeight : availableHeight,
             pageContentHeight
         );
 
@@ -360,9 +375,10 @@ function dealWithTableRow(
 
     while (rowSkeletons.length > 0) {
         const rowSkeleton = rowSkeletons.shift()!;
+        const lastRow = curTableSkeleton.rows[curTableSkeleton.rows.length - 1];
 
         if (cache.remainHeight < MAX_FONT_SIZE || cache.remainHeight < rowSkeleton.height) {
-            cache.remainHeight = pageContentHeight;
+            cache.remainHeight = getAvailableHeight(curPage, cache, row !== 0 && rowSkeleton.index !== lastRow.index);
             cache.rowTop = 0;
 
             if (curTableSkeleton.rows.length > 0) {
@@ -370,8 +386,10 @@ function dealWithTableRow(
                 skeTables.push(curTableSkeleton);
 
                 // Handle repeat first row.
-                if (cache.repeatRow && isRepeatRow === false && rowSkeleton.index !== 0) {
+                // 如果当前行跨页，那么不用再第二页上面重复标题行了。
+                if (cache.repeatRow && isRepeatRow === false && row !== 0 && rowSkeleton.index !== lastRow.index) {
                     const FIRST_ROW_INDEX = 0;
+                    cache.remainHeight = getAvailableHeight(curPage, cache, false);
                     dealWithTableRow(
                         ctx,
                         curPage,
@@ -388,7 +406,7 @@ function dealWithTableRow(
             }
         }
 
-        curTableSkeleton = skeTables[skeTables.length - 1];
+        curTableSkeleton = getCurTableSkeleton(skeTables);
 
         rowSkeleton.top = cache.rowTop;
         curTableSkeleton.height += rowSkeleton.height;

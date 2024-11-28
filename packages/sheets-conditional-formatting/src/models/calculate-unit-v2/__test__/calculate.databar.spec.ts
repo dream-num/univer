@@ -127,16 +127,6 @@ describe('Test conditional formatting data bar', () => {
             },
             isShowValue: true,
         });
-        // When the cell value is 0,display a placeholder.
-        expect(six).toEqual({
-            dataBar: {
-                color: '#000',
-                startPoint: 0,
-                value: 0,
-                isGradient: true,
-                isShowValue: true,
-            },
-            isShowValue: true,
-        });
+        expect(six).toEqual({});
     });
 });

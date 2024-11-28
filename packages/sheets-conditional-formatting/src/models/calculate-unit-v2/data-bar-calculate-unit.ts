@@ -103,7 +103,7 @@ export class DataBarCalculateUnit extends BaseCalculateUnit<IConfig> {
         const isShowValue = ruleConfig.isShowValue;
         const isGradient = ruleConfig.config.isGradient;
         const value = getValue(row, col, context.getCellValue);
-        if (value === null || value < min) {
+        if (value === null || value < min || (min === max || max < min)) {
             return undefined;
         }
 
@@ -111,9 +111,7 @@ export class DataBarCalculateUnit extends BaseCalculateUnit<IConfig> {
             // Renders a placeholder if the current value is 0
             return { color: defaultPlaceholderColor, startPoint, value: 0, isGradient, isShowValue };
         }
-        if (min === max || max < min) {
-            // do nothing,don't know how it work.
-        } else if (min < 0 && max <= 0) {
+        if (min < 0 && max <= 0) {
             const length = max - min;
 
             const v = getSafeValue((max - value) / length * 100);

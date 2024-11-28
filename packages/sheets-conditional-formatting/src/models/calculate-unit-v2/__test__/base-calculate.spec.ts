@@ -39,6 +39,7 @@ describe('test-color-scale', () => {
                     ],
                 } as IColorScale,
             },
+            limit: 1000,
             accessor: null as any,
             getCellValue: (row, col) => ({ v: row + col, t: CellValueType.NUMBER }),
         });

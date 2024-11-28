@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject, isInternalEditorID, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
 /**
  * This service is for document build and manage doc skeletons. It also manages

@@ -14,53 +14,12 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IDisposable, Nullable } from '@univerjs/core';
+import type { ArrangeTypeEnum, IDisposable, IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import type { ITransformState } from './interface';
 import { createIdentifier } from '@univerjs/core';
 
-export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
-
-export enum ArrangeTypeEnum {
-    forward,
-    backward,
-    front,
-    back,
-}
-
-export enum DrawingTypeEnum {
-    UNRECOGNIZED = -1,
-    DRAWING_IMAGE = 0,
-    DRAWING_SHAPE = 1,
-    DRAWING_CHART = 2,
-    DRAWING_TABLE = 3,
-    DRAWING_SMART_ART = 4,
-    DRAWING_VIDEO = 5,
-    DRAWING_GROUP = 6,
-    DRAWING_UNIT = 7,
-    DRAWING_DOM = 8,
-}
-
-export type DrawingType = DrawingTypeEnum | number;
-
-export interface IDrawingSpace {
-    unitId: string;
-    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
-}
-
-export interface IDrawingSearch extends IDrawingSpace {
-    drawingId: string;
-}
-
-export interface IDrawingParam extends IDrawingSearch {
-    drawingType: DrawingType;
-    transform?: Nullable<ITransformState>;
-    transforms?: Nullable<ITransformState[]>;
-    // The same drawing render in different place, like image in header and footer.
-    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
-    isMultiTransform?: BooleanNumber;
-    groupId?: string;
-}
+export { ArrangeTypeEnum, DEFAULT_DOCUMENT_SUB_COMPONENT_ID, DrawingTypeEnum } from '@univerjs/core';
+export type { DrawingType, IDrawingParam, IDrawingSearch, IDrawingSpace } from '@univerjs/core';
 
 export interface IDrawingMap<T extends IDrawingParam> {
     [unitId: string]: IDrawingSubunitMap<T>;

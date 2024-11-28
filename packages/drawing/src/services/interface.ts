@@ -14,14 +14,4 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform } from '@univerjs/core';
-
-export interface IRotationSkewFlipTransform {
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
-
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+export type { IRotationSkewFlipTransform, ITransformState } from '@univerjs/core';

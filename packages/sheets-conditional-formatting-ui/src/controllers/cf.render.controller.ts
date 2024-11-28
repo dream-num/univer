@@ -19,7 +19,7 @@ import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@
 import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModelV2, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { merge } from 'rxjs';
 import { bufferTime, filter } from 'rxjs/operators';
@@ -34,7 +34,7 @@ export class SheetsCfRenderController extends Disposable {
         @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2,
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
     ) {
         super();

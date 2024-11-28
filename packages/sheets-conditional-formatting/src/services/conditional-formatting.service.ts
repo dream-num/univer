@@ -24,11 +24,11 @@ import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutati
 import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModelV2 } from '../models/conditional-formatting-view-model-v2';
+import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
 
 export class ConditionalFormattingService extends Disposable {
     get _conditionalFormattingViewModelV2() {
-        return this._injector.get(ConditionalFormattingViewModelV2);
+        return this._injector.get(ConditionalFormattingViewModel);
     }
 
     constructor(

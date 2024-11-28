@@ -31,7 +31,7 @@ import {
 import {
     createTopMatrixFromMatrix, findAllRectangle,
 } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModelV2, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingCopyPasteController extends Disposable {
@@ -48,7 +48,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(Injector) private _injector: Injector,
-        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2,
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
 
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {

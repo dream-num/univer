@@ -19,7 +19,7 @@ import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationP
 import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, ConditionalFormattingViewModelV2, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingAutoFillController extends Disposable {
@@ -28,7 +28,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IAutoFillService) private _autoFillService: IAutoFillService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
     ) {
         super();
 

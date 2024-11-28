@@ -28,9 +28,9 @@ import {
     PLUGIN_CONFIG_KEY,
 } from './controllers/config.schema';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModelV2 } from './models/conditional-formatting-view-model-v2';
-import { ConditionalFormattingService } from './services/conditional-formatting.service';
+import { ConditionalFormattingViewModel } from './models/conditional-formatting-view-model';
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
+import { ConditionalFormattingService } from './services/conditional-formatting.service';
 
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
@@ -52,7 +52,7 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
             [ConditionalFormattingService],
             [ConditionalFormattingFormulaService],
             [ConditionalFormattingRuleModel],
-            [ConditionalFormattingViewModelV2],
+            [ConditionalFormattingViewModel],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
@@ -70,6 +70,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.get(ConditionalFormattingService);
-        touchDependencies(this._injector, [[ConditionalFormattingService], [ConditionalFormattingViewModelV2]]);
+        touchDependencies(this._injector, [[ConditionalFormattingService], [ConditionalFormattingViewModel]]);
     }
 }

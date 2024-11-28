@@ -688,6 +688,8 @@ export class SelectionControl extends Disposable {
     /**
      * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
      *
+     * @deprecated  use `updateRangeBySelectionWithCoord` and `updateStyle` to do same thing.
+     *
      * @param newSelectionRange
      * @param rowHeaderWidth
      * @param columnHeaderHeight

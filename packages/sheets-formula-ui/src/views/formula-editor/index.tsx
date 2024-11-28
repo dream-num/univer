@@ -164,7 +164,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
-    useRefactorEffect(isFocus && isSelecting, unitId);
+    useRefactorEffect(isFocus, isSelecting, unitId);
     useLeftAndRightArrow(isFocus && moveCursor, editor);
 
     const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {

@@ -229,7 +229,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useSheetSelectionChange(isNeed, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
 
-    useRefactorEffect(isNeed, unitId);
+    useRefactorEffect(isNeed, isNeed, unitId);
 
     useOnlyOneRange(unitId, isOnlyOneRange);
 
@@ -479,7 +479,7 @@ function RangeSelectorDialog(props: {
 
     const highlightSheet = useSheetHighlight(unitId);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
-    useRefactorEffect(focusIndex >= 0, unitId);
+    useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId);
     useOnlyOneRange(unitId, isOnlyOneRange);
     useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, () => highlightSheet(refSelections));
 

@@ -22,7 +22,7 @@ import { useEffect, useLayoutEffect } from 'react';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
+export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -31,7 +31,7 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     useLayoutEffect(() => {
-        if (isNeed) {
+        if (isNeed && selecting) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             contextService.setContextValue(EDITOR_ACTIVATED, true);
@@ -42,7 +42,7 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
                 d1?.dispose();
             };
         }
-    }, [isNeed]);
+    }, [isNeed, selecting]);
 
     useLayoutEffect(() => {
         if (isNeed) {

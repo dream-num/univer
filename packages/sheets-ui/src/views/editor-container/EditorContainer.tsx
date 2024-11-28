@@ -21,6 +21,7 @@ import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys, useObserva
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '../../commands/commands/set-selection.command';
+import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -198,9 +199,17 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                         direction,
                     });
                 }
+            } else {
+                commandService.executeCommand(SetCellEditVisibleArrowOperation.id, {
+                    keycode,
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    isShift: metaKey === MetaKeys.SHIFT || metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT),
+                    unitId: editState?.unitId,
+                });
             }
         },
-    }), [commandService, editorBridgeService]);
+    }), [commandService, editState?.unitId, editorBridgeService]);
 
     return (
         <div

@@ -448,7 +448,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const editCellState = this._editorBridgeService.getEditCellState();
         let { keycode } = param;
         this._setOpenForCurrent(null, null);
-
         this._cursorChange = CursorChange.InitialState;
 
         this._exitInput(param);

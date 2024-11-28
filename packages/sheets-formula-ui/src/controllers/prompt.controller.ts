@@ -1004,9 +1004,9 @@ export class PromptController extends Disposable {
     private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
         // const [unitId, sheetId] = refSelectionRenderService.getLocation();
         const { unitId, sheetId } = this._editorBridgeService.getEditCellState()!;
-        const { unitId: selfUnitId, sheetId: selfSheetId } = this._getCurrentUnitIdAndSheetId();
+        const { unitId: selfUnitId, sheetId: currSheetId } = this._getCurrentUnitIdAndSheetId();
 
-        const isSelfSheet = sheetId === selfSheetId;
+        const isSelfSheet = sheetId === currSheetId;
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
         const worksheet = workbook.getSheetBySheetId(sheetId)!;
@@ -1033,7 +1033,7 @@ export class PromptController extends Disposable {
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
             // Cross sheet operation
-            if (!isSelfSheet && refSheetId !== selfSheetId) continue;
+            if (!isSelfSheet && refSheetId !== currSheetId) continue;
 
             // Current sheet operation
             if (isSelfSheet && sheetName.length !== 0 && refSheetId !== sheetId) continue;
@@ -1073,7 +1073,7 @@ export class PromptController extends Disposable {
         // }
 
         if (selectionWithStyle.length) {
-            this._refSelectionsService.addSelections(unitId, sheetId, selectionWithStyle);
+            this._refSelectionsService.addSelections(unitId, currSheetId, selectionWithStyle);
         }
     }
 

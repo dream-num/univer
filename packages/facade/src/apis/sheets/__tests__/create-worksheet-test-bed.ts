@@ -45,7 +45,7 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModelV2 } from '@univerjs/sheets-conditional-formatting';
 
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -179,7 +179,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
                 [ConditionalFormattingService],
                 [ConditionalFormattingFormulaService],
                 [ConditionalFormattingRuleModel],
-                [ConditionalFormattingViewModel],
+                [ConditionalFormattingViewModelV2],
 
                 // data validation
                 [DataValidationCacheService],

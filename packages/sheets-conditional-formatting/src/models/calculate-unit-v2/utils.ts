@@ -16,12 +16,12 @@
 
 import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
-import type { IContext } from './type';
+import type { IContext } from './base-calculate-unit';
 import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
-import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
+import { ConditionalFormattingViewModelV2 } from '../../models/conditional-formatting-view-model-v2';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
 
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
@@ -158,7 +158,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
             const formulaText = String(value.value);
             const conditionalFormattingFormulaService = accessor.get(ConditionalFormattingFormulaService);
             conditionalFormattingFormulaService.registerFormulaWithRange(unitId, subUnitId, cfId, formulaText);
-            const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, cfId, formulaText);
+            const result = conditionalFormattingFormulaService.getFormulaResultWithCoords(unitId, subUnitId, cfId, formulaText);
             return result;
         }
         case CFValueType.num: {
@@ -173,14 +173,14 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
 
 export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, rule: IConditionFormattingRule, context: IContext) => {
     const { accessor } = context;
-    const conditionalFormattingViewModel = accessor.get(ConditionalFormattingViewModel);
+    const conditionalFormattingViewModel = accessor.get(ConditionalFormattingViewModelV2);
     const matrix = new ObjectMatrix<S>();
     rule.ranges.forEach((range) => {
         Range.foreach(range, (row, col) => {
-            const cellCfItem = conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col);
+            const cellCfItem = conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
             if (cellCfItem) {
-                const item = cellCfItem.cfList.find((item) => item.cfId === rule.cfId);
-                item?.ruleCache && matrix.setValue(row, col, item.ruleCache as any);
+                const item = cellCfItem.find((item) => item.cfId === rule.cfId);
+                item?.result && matrix.setValue(row, col, item.result);
             }
         });
     });

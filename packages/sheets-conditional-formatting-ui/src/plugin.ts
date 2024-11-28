@@ -55,6 +55,7 @@ import { ConditionalFormattingPanelController } from './controllers/cf.panel.con
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
+import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin)
@@ -93,6 +94,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingEditorController],
             [ConditionalFormattingClearController],
             [ConditionalFormattingPainterController],
+            [ConditionalFormattingViewportController],
         ]);
 
         touchDependencies(this._injector, [
@@ -117,6 +119,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingPainterController],
             [ConditionalFormattingPermissionController],
             [SheetsCfRefRangeController],
+            [ConditionalFormattingViewportController],
         ]);
     }
 

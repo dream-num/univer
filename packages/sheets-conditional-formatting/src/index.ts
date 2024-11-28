@@ -16,18 +16,16 @@
 
 export * from './base/const';
 export * from './models/conditional-formatting-rule-model';
-export * from './models/conditional-formatting-view-model';
+export * from './models/conditional-formatting-view-model-v2';
 export * from './models/icon-map';
 export * from './models/type';
 export { UniverSheetsConditionalFormattingPlugin } from './plugin';
 export * from './render/data-bar.render';
 export * from './render/icon.render';
 export * from './render/type';
-export * from './services/calculate-unit/type';
-export * from './services/calculate-unit/utils';
 export * from './services/conditional-formatting.service';
 export * from './services/conditional-formatting-formula.service';
-
+export * from './models/calculate-unit-v2/utils';
 export * from './utils/anchor';
 export * from './utils/create-cf-id';
 export * from './utils/is-ranges-equal';

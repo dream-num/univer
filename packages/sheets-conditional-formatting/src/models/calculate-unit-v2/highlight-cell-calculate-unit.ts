@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-
-import type { IStyleBase } from '@univerjs/core';
-import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
-import type { ICalculateUnit } from './type';
-import { CellValueType, dayjs, ObjectMatrix, Range } from '@univerjs/core';
+import type { IStyleData, Nullable } from '@univerjs/core';
+import type { IAverageHighlightCell, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../type';
+import type { IContext } from './base-calculate-unit';
+import { CellValueType, dayjs, Range } from '@univerjs/core';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { EMPTY_STYLE } from './type';
-import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import { CFNumberOperator, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { BaseCalculateUnit, CalculateEmitStatus } from './base-calculate-unit';
+import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 
-export const highlightCellCalculateUnit: ICalculateUnit = {
-    type: CFRuleType.highlightCell,
-    handle: async (rule: IConditionFormattingRule, context) => {
-        const ruleConfig = rule.rule as IHighlightCell;
-
-        const { worksheet, unitId, subUnitId } = context;
-        const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
-
+interface IConfig {
+    value: any;
+    type: CFSubRuleType;
+}
+export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConfig>, Nullable<IStyleData>> {
+    // eslint-disable-next-line max-lines-per-function
+    override preComputing(row: number, col: number, context: IContext): void {
+        const ruleConfig = context.rule.rule as IHighlightCell;
+        const ranges = context.rule.ranges;
+        // eslint-disable-next-line max-lines-per-function, complexity
         const getCache = () => {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.average: {
@@ -41,7 +41,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     let count = 0;
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
-                            const cell = worksheet?.getCellRaw(row, col);
+                            const cell = context.getCellValue(row, col);
                             const v = getCellValue(cell || undefined);
                             if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
                                 sum += Number(v) || 0;
@@ -49,14 +49,14 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             }
                         });
                     });
-                    return { average: sum / count };
+                    return { value: sum / count, type: ruleConfig.subType };
                 }
                 case CFSubRuleType.uniqueValues:
                 case CFSubRuleType.duplicateValues: {
                     const cacheMap: Map<any, number> = new Map();
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
-                            const cell = worksheet?.getCellRaw(row, col);
+                            const cell = context.getCellValue(row, col);
                             const v = getCellValue(cell || undefined);
                             if (v !== undefined) {
                                 const cache = cacheMap.get(v);
@@ -68,13 +68,13 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             }
                         });
                     });
-                    return { count: cacheMap };
+                    return { value: cacheMap, type: ruleConfig.subType };
                 }
                 case CFSubRuleType.rank: {
                     const allValue: number[] = [];
                     ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
-                            const cell = worksheet?.getCellRaw(row, col);
+                            const cell = context.getCellValue(row, col);
                             const v = getCellValue(cell || undefined);
                             if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
                                 allValue.push(Number(v) || 0);
@@ -82,119 +82,144 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         });
                     });
                     allValue.sort((a, b) => b - a);
-                    const configRule = rule.rule as IRankHighlightCell;
+                    const configRule = context.rule.rule as IRankHighlightCell;
                     const targetIndex = configRule.isPercent
                         ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
                         : Math.floor(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
                     if (configRule.isBottom) {
-                        return { rank: allValue[allValue.length - targetIndex - 1] };
+                        return { value: allValue[allValue.length - targetIndex - 1], type: ruleConfig.subType };
                     } else {
-                        return { rank: allValue[Math.max(targetIndex - 1, 0)] };
+                        return { value: allValue[Math.max(targetIndex - 1, 0)], type: ruleConfig.subType };
                     }
                 }
                 case CFSubRuleType.formula: {
                     const _ruleConfig = ruleConfig as IFormulaHighlightCell;
                     const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-                    conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, rule.cfId, _ruleConfig.value, rule.ranges);
-                    break;
+                    conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value, context.rule.ranges);
+                    const result = conditionalFormattingFormulaService.getFormulaMatrix(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value);
+                    if (result && result.status === FormulaResultStatus.SUCCESS) {
+                        this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
+                        return {
+                            value: result.result,
+                            type: ruleConfig.subType,
+                        };
+                    } else {
+                        this._preComputingStatus$.next(CalculateEmitStatus.preComputing);
+                    }
+                    return null;
                 }
                 case CFSubRuleType.timePeriod: {
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
                     switch (subRuleConfig.operator) {
                         case CFTimePeriodOperator.last7Days: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().subtract(7, 'day').valueOf(),
                                     end: dayjs().valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.lastMonth: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('month').subtract(1, 'month').valueOf(),
                                     end: dayjs().endOf('month').subtract(1, 'month').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.lastWeek: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('week').subtract(1, 'week').valueOf(),
                                     end: dayjs().endOf('week').subtract(1, 'week').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.nextMonth: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('month').add(1, 'month').valueOf(),
                                     end: dayjs().endOf('month').add(1, 'month').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.nextWeek: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('week').add(1, 'week').valueOf(),
                                     end: dayjs().endOf('week').add(1, 'week').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.thisMonth: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('month').valueOf(),
                                     end: dayjs().endOf('month').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.thisWeek: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('week').valueOf(),
                                     end: dayjs().endOf('week').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.today: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('day').valueOf(),
                                     end: dayjs().endOf('day').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.tomorrow: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('day').add(1, 'day').valueOf(),
                                     end: dayjs().endOf('day').add(1, 'day').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                         case CFTimePeriodOperator.yesterday: {
                             return {
-                                timePeriod: {
+                                value: {
                                     start: dayjs().startOf('day').subtract(1, 'day').valueOf(),
                                     end: dayjs().endOf('day').subtract(1, 'day').valueOf(),
                                 },
+                                type: ruleConfig.subType,
                             };
                         }
                     }
                 }
             }
         };
-        const cache = getCache();
+        const result = getCache();
+        this.setPreComputingCache(result);
+    }
 
-        // eslint-disable-next-line complexity
-        const check = (row: number, col: number) => {
-            const cellValue = worksheet?.getCellRaw(row, col);
+    // eslint-disable-next-line max-lines-per-function
+    protected override getCellResult(row: number, col: number, preComputingResult: Nullable<IConfig>, context: IContext) {
+        const cellValue = context.getCellValue(row, col);
+        const ruleConfig = context.rule.rule as IHighlightCell;
+        // eslint-disable-next-line max-lines-per-function, complexity
+        const run = () => {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.number: {
                     const v = cellValue && Number(cellValue.v);
                     if (isNullable(v) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
-                        return false;
+                        return;
                     }
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
                     return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v || 0);
@@ -242,21 +267,21 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 }
                 case CFSubRuleType.timePeriod: {
                     const value = getCellValue(cellValue!);
-                    if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER) {
-                        return false;
+                    if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
+                        return;
                     }
                     const v = serialTimeToTimestamp(Number(value));
-                    const { start, end } = cache!.timePeriod!;
+                    const { start, end } = preComputingResult.value!;
                     return v >= start && v <= end;
                 }
                 case CFSubRuleType.average: {
                     const value = cellValue && cellValue.v;
                     const v = Number(value);
-                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
+                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as IAverageHighlightCell;
-                    const average = cache?.average!;
+                    const average = preComputingResult.value;
 
                     switch (subRuleConfig.operator) {
                         case CFNumberOperator.greaterThan: {
@@ -287,11 +312,11 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
 
                     const v = Number(value);
 
-                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
+                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER || !preComputingResult) {
                         return false;
                     }
 
-                    const targetValue = cache!.rank!;
+                    const targetValue = preComputingResult.value;
                     const subRuleConfig = ruleConfig as IRankHighlightCell;
                     if (subRuleConfig.isBottom) {
                         return v <= targetValue;
@@ -302,53 +327,33 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 case CFSubRuleType.uniqueValues: {
                     const value = getCellValue(cellValue!);
 
-                    if (isNullable(value)) {
+                    if (isNullable(value) || !preComputingResult) {
                         return false;
                     }
-                    const uniqueCache = cache!.count!;
+                    const uniqueCache = preComputingResult.value;
                     return uniqueCache.get(value) === 1;
                 }
                 case CFSubRuleType.duplicateValues: {
                     const value = getCellValue(cellValue!);
 
-                    if (isNullable(value)) {
+                    if (isNullable(value) || !preComputingResult) {
                         return false;
                     }
-                    const uniqueCache = cache!.count!;
+                    const uniqueCache = preComputingResult.value;
                     return uniqueCache.get(value) !== 1;
                 }
                 case CFSubRuleType.formula: {
-                    const _ruleConfig = ruleConfig as IFormulaHighlightCell;
-                    const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-                    const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, rule.cfId, _ruleConfig.value, row, col);
-                    if (result && result.status === FormulaResultStatus.SUCCESS) {
-                        return result.result === true;
+                    // const _ruleConfig = ruleConfig as IFormulaHighlightCell;
+                    const cache = preComputingResult?.value;
+                    if (cache) {
+                        const value = cache.getValue(row, col);
+                        return value === true;
                     }
                     return false;
                 }
             }
         };
-        const computeResult = new ObjectMatrix<IStyleBase>();
-        if (ruleConfig.subType === CFSubRuleType.formula) {
-            const _ruleConfig = ruleConfig as IFormulaHighlightCell;
-            const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
-            const aliasItemMap = conditionalFormattingFormulaService.getSubUnitFormulaMap(unitId, subUnitId);
-            const item = aliasItemMap?.getValue(conditionalFormattingFormulaService.createCFormulaId(rule.cfId, _ruleConfig.value), ['id']);
-            if (!item || (item.status !== FormulaResultStatus.SUCCESS)) {
-                return conditionalFormattingFormulaService.getCache(unitId, subUnitId, rule.cfId) || computeResult;
-            }
-        }
-        ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                if (check(row, col)) {
-                    computeResult.setValue(row, col, ruleConfig.style);
-                } else {
-                    // Returns an empty property indicating that it has been processed.
-                    computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
-                }
-            });
-        });
-        return computeResult;
-    },
-};
-
+        const result = run();
+        return result ? ruleConfig.style : {};
+    }
+}

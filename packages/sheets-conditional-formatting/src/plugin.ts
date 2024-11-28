@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
@@ -28,7 +28,7 @@ import {
     PLUGIN_CONFIG_KEY,
 } from './controllers/config.schema';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';
-import { ConditionalFormattingViewModel } from './models/conditional-formatting-view-model';
+import { ConditionalFormattingViewModelV2 } from './models/conditional-formatting-view-model-v2';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
 
@@ -52,7 +52,7 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
             [ConditionalFormattingService],
             [ConditionalFormattingFormulaService],
             [ConditionalFormattingRuleModel],
-            [ConditionalFormattingViewModel],
+            [ConditionalFormattingViewModelV2],
         ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
@@ -70,5 +70,6 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
 
     override onStarting(): void {
         this._injector.get(ConditionalFormattingService);
+        touchDependencies(this._injector, [[ConditionalFormattingService], [ConditionalFormattingViewModelV2]]);
     }
 }

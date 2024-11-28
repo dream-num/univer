@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { InputProps } from 'rc-input';
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import RcInput from 'rc-input';
 import React from 'react';
-import type { InputProps } from 'rc-input';
 
 import styles from './index.module.less';
 

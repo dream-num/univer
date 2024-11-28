@@ -166,7 +166,10 @@ export function SelectFunction(props: ISelectFunctionProps) {
                     <li
                         key={index}
                         className={active === index
-                            ? `${styles.formulaSelectFunctionResultItem} ${styles.formulaSelectFunctionResultItemActive}`
+                            ? `
+                              ${styles.formulaSelectFunctionResultItem}
+                              ${styles.formulaSelectFunctionResultItemActive}
+                            `
                             : styles.formulaSelectFunctionResultItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}

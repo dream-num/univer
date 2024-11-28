@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';
 export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';

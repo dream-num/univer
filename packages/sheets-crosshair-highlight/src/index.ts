@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSheetsCrosshairHighlightPlugin } from './plugin';
 export { CROSSHAIR_HIGHLIGHT_COLORS } from './services/crosshair.service';
 

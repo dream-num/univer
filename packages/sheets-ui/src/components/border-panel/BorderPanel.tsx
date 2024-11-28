@@ -101,7 +101,12 @@ export function BorderPanel(props: IBorderPanelProps) {
                 {BORDER_LINE_CHILDREN.map((item) => (
                     <div
                         key={item.value}
-                        className={borderStyleManagerService.getBorderInfo().type === item.value ? (`${styles.uiPluginSheetsBorderPanelPositionItemActive} ${styles.uiPluginSheetsBorderPanelPositionItem}`) : styles.uiPluginSheetsBorderPanelPositionItem}
+                        className={borderStyleManagerService.getBorderInfo().type === item.value
+                            ? (`
+                              ${styles.uiPluginSheetsBorderPanelPositionItemActive}
+                              ${styles.uiPluginSheetsBorderPanelPositionItem}
+                            `)
+                            : styles.uiPluginSheetsBorderPanelPositionItem}
                         onClick={(e) => {
                             e.stopPropagation();
                             handleClick(item.value, 'type');

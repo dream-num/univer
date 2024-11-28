@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverDocUniFormulaUIPlugin } from './uni-formula-ui.plugin';
 export { UniFormulaService } from './services/uni-formula.service';

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSlidesUIPlugin } from './slides-ui-plugin';
 export { SlidesUIController } from './controllers/slide-ui.controller';
 export { SlideSideBar } from './components/slide-bar/SlideBar';

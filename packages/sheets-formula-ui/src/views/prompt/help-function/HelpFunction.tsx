@@ -222,7 +222,13 @@ interface IParamsProps {
 
 const Params = (props: IParamsProps) => (
     <div className={styles.formulaHelpFunctionContentParams}>
-        <div className={`${styles.formulaHelpFunctionContentParamsTitle} ${props.className}`}>{props.title}</div>
+        <div className={`
+          ${styles.formulaHelpFunctionContentParamsTitle}
+          ${props.className}
+        `}
+        >
+            {props.title}
+        </div>
         <div className={styles.formulaHelpFunctionContentParamsDetail}>{props.value}</div>
     </div>
 );

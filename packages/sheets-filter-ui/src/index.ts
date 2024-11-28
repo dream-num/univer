@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
 export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';

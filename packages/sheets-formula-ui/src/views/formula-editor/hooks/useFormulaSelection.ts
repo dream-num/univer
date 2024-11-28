@@ -15,12 +15,13 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
+import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { matchRefDrawToken } from '@univerjs/engine-formula';
+import { matchRefDrawToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
@@ -56,19 +57,25 @@ function getCurrentChar(accssor: IAccessor) {
     return dataStream[startOffset - 1 + config.offset];
 }
 
-export function useFormulaSelecting(editorId: string) {
+export function useFormulaSelecting(editorId: string, nodes: (string | ISequenceNode)[]) {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const injector = useDependency(Injector);
     const textSelections$ = useMemo(() => docSelectionRenderService?.textSelectionInner$ ?? of(), [docSelectionRenderService?.textSelectionInner$]);
     const [isSelecting, setIsSelecting] = useState(false);
+    const nodesRef = useRef(nodes);
+    nodesRef.current = nodes;
 
     useEffect(() => {
         const sub = textSelections$.subscribe(() => {
             const char = getCurrentChar(injector);
+            const activeRange = docSelectionRenderService?.getActiveTextRange();
+            const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
+            const lastNode = nodesRef.current[nodesRef.current.length - 1];
+            const isFocusingLastNode = typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE && lastNode.startIndex <= index - 1 && lastNode.endIndex >= index - 2;
             const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
-            if (dataStream?.substring(0, 1) === '=' && char && matchRefDrawToken(char)) {
+            if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || isFocusingLastNode)) {
                 setIsSelecting(true);
             } else {
                 setIsSelecting(false);
@@ -76,7 +83,7 @@ export function useFormulaSelecting(editorId: string) {
         });
 
         return () => sub.unsubscribe();
-    }, [injector, textSelections$]);
+    }, [docSelectionRenderService, injector, textSelections$]);
 
     return isSelecting;
 }

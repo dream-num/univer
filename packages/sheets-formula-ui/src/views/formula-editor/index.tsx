@@ -116,9 +116,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
-    const isSelecting = useFormulaSelecting(editorId);
+
     const getFormulaToken = useFormulaToken();
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol]);
+    const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
 
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
         onChange(`=${text}`);

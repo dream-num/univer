@@ -43,7 +43,8 @@ export const useSheetSelectionChange = (
     sequenceNodes: INode[],
     isSupportAcrossSheet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop) => {
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop
+) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
 

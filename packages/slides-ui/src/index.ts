@@ -29,7 +29,7 @@ export { CanvasView } from './controllers/canvas-view';
 export { SLIDES_IMAGE_MENU_ID } from './controllers/image.menu';
 export { SHAPE_MENU_ID } from './controllers/shape.menu';
 
-export { menuSchema } from './controllers/menu.schema';
+export { menuSchema as SlidesUIMenuSchema } from './controllers/menu.schema';
 
 // #region - all commands
 

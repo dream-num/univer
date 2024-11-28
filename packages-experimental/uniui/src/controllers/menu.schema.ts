@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup, menuSchema as UIMenuSchema } from '@univerjs/ui';
+import { RibbonStartGroup, UIMenuSchema } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
 import {
     DELETE_MENU_ID,

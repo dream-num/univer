@@ -380,7 +380,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             sheetId,
             isInArrayFormulaRange = false,
         } = editCellState;
-
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
 import type { FormulaSelectingType } from './hooks/useFormulaSelection';
-import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
-import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
@@ -91,12 +90,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const editorService = useDependency(IEditorService);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
-    const [formulaText, formulaTextSet] = useState(() => {
-        if (initValue.startsWith(operatorToken.EQUALS)) {
-            return initValue;
-        }
-        return '';
-    });
+
     // init actions
     if (actions) {
         actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
@@ -107,9 +101,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         };
     }
 
-    const formulaWithoutEqualSymbol = useMemo(() => {
-        return getFormulaText(formulaText);
-    }, [formulaText]);
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const [editor, editorSet] = useState<Editor>();
@@ -117,9 +108,13 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
-
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const document = univerInstanceService.getUnit<DocumentDataModel>(editorId);
+    useObservable(document?.change$);
     const getFormulaToken = useFormulaToken();
-    const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol]);
+    const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
+    const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
+    const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
 
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
@@ -170,9 +165,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useLeftAndRightArrow(isFocus && moveCursor, editor);
 
     const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {
-        const result = `=${refString}`;
         needEmit();
-        formulaTextSet(result);
         highligh(refString);
         if (isEnd) {
             focus();
@@ -201,7 +194,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             const d = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
                 needEmit();
-                formulaTextSet(text);
                 highligh(getFormulaText(text), false);
             });
             return () => {
@@ -237,7 +229,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const handleFunctionSelect = (v: string) => {
         const res = handlerFormulaReplace(v);
         if (res) {
-            formulaTextSet(`=${res.text}`);
             const selections = editor?.getSelectionRanges();
             if (selections && selections.length === 1) {
                 const range = selections[0];

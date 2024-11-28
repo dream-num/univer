@@ -239,21 +239,22 @@ export function FormulaBar() {
 
                 <div className={styles.formulaInput}>
                     {FormulaEditor && (
-                        <FormulaEditor
-                            editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                            isSheetEditor
-                            resizeCallBack={resizeCallBack}
-                            className={styles.formulaContent}
-                            snapshot={INITIAL_SNAPSHOT}
-                            isSingle={false}
-                            initValue=""
-                            onChange={() => {
+                        null
+                        // <FormulaEditor
+                        //     editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                        //     isSheetEditor
+                        //     resizeCallBack={resizeCallBack}
+                        //     className={styles.formulaContent}
+                        //     snapshot={INITIAL_SNAPSHOT}
+                        //     isSingle={false}
+                        //     initValue=""
+                        //     onChange={() => {
 
-                            }}
-                            isFocus={false}
-                            // onFocus={() => setIsFocus(true)}
-                            // onBlur={() => setIsFocus(false)}
-                        />
+                        //     }}
+                        //     isFocus={false}
+                        //     // onFocus={() => setIsFocus(true)}
+                        //     // onBlur={() => setIsFocus(false)}
+                        // />
                     )}
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down

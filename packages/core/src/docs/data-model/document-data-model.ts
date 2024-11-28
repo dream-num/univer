@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { Tools } from '../../shared/tools';
-import { getEmptySnapshot } from './empty-snapshot';
-import { JSONX } from './json-x/json-x';
-import { PRESET_LIST_TYPE } from './preset-list-type';
-import { getBodySlice, SliceBodyType } from './text-x/utils';
 import type { Nullable } from '../../shared';
 import type {
     IDocumentBody,
@@ -32,6 +25,13 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { UnitModel, UniverInstanceType } from '../../common/unit';
+import { Tools } from '../../shared/tools';
+import { getEmptySnapshot } from './empty-snapshot';
+import { JSONX } from './json-x/json-x';
+import { PRESET_LIST_TYPE } from './preset-list-type';
+import { getBodySlice, SliceBodyType } from './text-x/utils';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -228,6 +228,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
+    change$ = new Subject<number>();
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
@@ -281,6 +282,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this._initializeHeaderFooterModel();
+        this.change$.next(Date.now());
     }
 
     getSelfOrHeaderFooterModel(segmentId?: string) {
@@ -315,6 +317,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             this._initializeHeaderFooterModel();
         }
 
+        this.change$.next(Date.now());
         return this.snapshot;
     }
 

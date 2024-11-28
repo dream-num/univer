@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-
+import { Direction, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, useDependency } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
-import { matchRefDrawToken } from '@univerjs/engine-formula';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, IRenderManagerService } from '@univerjs/engine-render';
-import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET, IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { of } from 'rxjs';
+import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '../../commands/commands/set-selection.command';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -40,38 +37,6 @@ const EDITOR_DEFAULT_POSITION = {
     left: HIDDEN_EDITOR_POSITION,
 };
 
-function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
-    const univerInstanceService = accssor.get(IUniverInstanceService);
-    const documentModel = univerInstanceService.getCurrentUniverDocInstance();
-
-    if (!documentModel?.getBody()) {
-        return;
-    }
-
-    const dataStream = documentModel.getBody()?.dataStream ?? '';
-    return { dataStream, offset: 0 };
-}
-
-function getCurrentChar(accssor: IAccessor) {
-    const docSelectionManagerService = accssor.get(DocSelectionManagerService);
-    const activeRange = docSelectionManagerService.getActiveTextRange();
-
-    if (activeRange == null) {
-        return;
-    }
-
-    const { startOffset } = activeRange;
-
-    const config = getCurrentBodyDataStreamAndOffset(accssor);
-
-    if (config == null || startOffset == null) {
-        return;
-    }
-
-    const dataStream = config.dataStream;
-
-    return dataStream[startOffset - 1 + config.offset];
-}
 /**
  * Cell editor container.
  * @returns
@@ -81,11 +46,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), [univerInstanceService]);
-    const workbook = useObservable(workbook$);
-    const worksheet = useObservable(workbook?.activeSheet$);
-    // const editorBridgeService
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
     const componentManager = useDependency(ComponentManager);
@@ -95,11 +55,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const [selectionFocusing, setSelectionFocusing] = useState(false);
     const visible = useObservable(editorBridgeService.visible$);
-    const injector = useDependency(Injector);
     const onFocus$ = useMemo(() => docSelectionRenderService?.onFocus$ ?? of(), [docSelectionRenderService?.onFocus$]);
     const onBlur$ = useMemo(() => docSelectionRenderService?.onBlur$ ?? of(), [docSelectionRenderService?.onBlur$]);
-    const textSelections$ = useMemo(() => docSelectionRenderService?.textSelectionInner$ ?? of(), [docSelectionRenderService?.textSelectionInner$]);
     const forceKeepVisible = useObservable(editorBridgeService.forceKeepVisible$);
+    const commandService = useDependency(ICommandService);
+    const isRefSelecting = useRef(false);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
         false,
@@ -174,19 +134,74 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         };
     }, [onBlur$, onFocus$]);
 
-    useEffect(() => {
-        const sub = textSelections$.subscribe(() => {
-            const char = getCurrentChar(injector);
-            const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
-            if (dataStream?.substring(0, 1) === '=' && char && matchRefDrawToken(char)) {
-                editorBridgeService.enableForceKeepVisible();
-            } else {
-                editorBridgeService.disableForceKeepVisible();
+    const keyCodeConfig = useMemo(() => ({
+        keyCodes: [
+            { keyCode: KeyCode.ENTER },
+            { keyCode: KeyCode.ESC },
+            { keyCode: KeyCode.TAB },
+            { keyCode: KeyCode.ARROW_DOWN },
+            { keyCode: KeyCode.ARROW_LEFT },
+            { keyCode: KeyCode.ARROW_RIGHT },
+            { keyCode: KeyCode.ARROW_UP },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+        ],
+        handler: (keycode: KeyCode, metaKey?: MetaKeys) => {
+            if (keycode === KeyCode.ENTER || keycode === KeyCode.ESC || keycode === KeyCode.TAB) {
+                editorBridgeService.changeVisible({
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    keycode,
+                    unitId: '',
+                });
+                return;
             }
-        });
 
-        return () => sub.unsubscribe();
-    }, [editorBridgeService, injector, textSelections$]);
+            let direction = Direction.DOWN;
+            if (keycode === KeyCode.ARROW_DOWN) {
+                direction = Direction.DOWN;
+            } else if (keycode === KeyCode.ARROW_UP) {
+                direction = Direction.UP;
+            } else if (keycode === KeyCode.ARROW_LEFT) {
+                direction = Direction.LEFT;
+            } else if (keycode === KeyCode.ARROW_RIGHT) {
+                direction = Direction.RIGHT;
+            }
+
+            if (isRefSelecting.current) {
+                if (metaKey === MetaKeys.CTRL_COMMAND) {
+                    commandService.executeCommand(MoveSelectionCommand.id, {
+                        direction,
+                        jumpOver: JumpOver.moveGap,
+                    });
+                } else if (metaKey === MetaKeys.SHIFT) {
+                    commandService.executeCommand(ExpandSelectionCommand.id, {
+                        direction,
+                    });
+                } else if (metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT)) {
+                    commandService.executeCommand(ExpandSelectionCommand.id, {
+                        direction,
+                        jumpOver: JumpOver.moveGap,
+                    });
+                } else {
+                    commandService.executeCommand(MoveSelectionCommand.id, {
+                        direction,
+                    });
+                }
+            }
+        },
+    }), [commandService, editorBridgeService]);
+
     return (
         <div
             className={styles.editorContainer}
@@ -204,9 +219,19 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     isSingle={false}
                     initValue=""
                     onChange={() => {}}
-                    isFocus={visible?.visible && forceKeepVisible}
+                    isFocus={visible?.visible}
                     unitId={editState?.unitId}
                     subUnitId={editState?.sheetId}
+                    moveCursor={false}
+                    keyboradEventConfig={keyCodeConfig}
+                    onFormulaSelectingChange={(isSelecting: boolean) => {
+                        isRefSelecting.current = isSelecting;
+                        if (isSelecting) {
+                            editorBridgeService.enableForceKeepVisible();
+                        } else {
+                            editorBridgeService.disableForceKeepVisible();
+                        }
+                    }}
                 />
             )}
         </div>

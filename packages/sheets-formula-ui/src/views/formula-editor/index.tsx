@@ -17,10 +17,12 @@
 import type { IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
+import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
+import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEmitChange } from '../range-selector/hooks/useEmitChange';
@@ -28,6 +30,7 @@ import { useFirstHighlightDoc } from '../range-selector/hooks/useFirstHighlightD
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighlight';
+import { useKeyboardEvent } from '../range-selector/hooks/useKeyboardEvent';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
 import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useRefocus } from '../range-selector/hooks/useRefocus';
@@ -37,6 +40,7 @@ import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
+import { useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
 import styles from './index.module.less';
@@ -59,6 +63,9 @@ export interface IFormulaEditorProps {
     };
     className?: string;
     editorId?: string;
+    moveCursor?: boolean;
+    onFormulaSelectingChange?: (isSelecting: boolean) => void;
+    keyboradEventConfig?: IKeyboardEventConfig;
 }
 const noop = () => { };
 export function FormulaEditor(props: IFormulaEditorProps) {
@@ -76,6 +83,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         actions,
         className,
         editorId: propEditorId,
+        moveCursor = true,
+        onFormulaSelectingChange: propOnFormulaSelectingChange,
+        keyboradEventConfig,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -99,14 +109,14 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaWithoutEqualSymbol = useMemo(() => {
         return getFormulaText(formulaText);
     }, [formulaText]);
-
+    const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
     const [editor, editorSet] = useState<Editor>();
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
-
+    const isSelecting = useFormulaSelecting(editorId);
     const getFormulaToken = useFormulaToken();
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol]);
 
@@ -125,12 +135,16 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         highlightSheet(ranges);
     };
 
-    // const refSelections = useDocHight(editorId, sequenceNodes);
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
     const resetSelection = useResetSelection(isFocus);
 
+    useEffect(() => {
+        onFormulaSelectingChange(isSelecting);
+    }, [onFormulaSelectingChange, isSelecting]);
+
+    useKeyboardEvent(isFocus, keyboradEventConfig, editor);
     useLayoutEffect(() => {
         // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
         if (_isFocus) {
@@ -150,8 +164,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
-    useRefactorEffect(isFocus, unitId);
-    useLeftAndRightArrow(isFocus, editor);
+    useRefactorEffect(isFocus && isSelecting, unitId);
+    useLeftAndRightArrow(isFocus && moveCursor, editor);
 
     const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {
         const result = `=${refString}`;

@@ -15,9 +15,9 @@
  */
 
 import type { IKeyValue } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { Tools } from '@univerjs/core';
 import { Shape } from './shape';
 
 export interface ICheckboxProps extends IShapeProps {
@@ -26,7 +26,7 @@ export interface ICheckboxProps extends IShapeProps {
 
 export const CHECK_OBJECT_ARRAY = ['checked'];
 
-export class Checkbox extends Shape<ICheckboxProps> {
+export class CheckboxShape extends Shape<ICheckboxProps> {
     _checked = false;
 
     constructor(key: string, props: ICheckboxProps) {
@@ -63,14 +63,14 @@ export class Checkbox extends Shape<ICheckboxProps> {
     }
 
     protected override _draw(ctx: UniverRenderingContext) {
-        Checkbox.drawWith(ctx, this);
+        CheckboxShape.drawWith(ctx, this);
     }
 
     override toJson() {
         const props: IKeyValue = {};
         CHECK_OBJECT_ARRAY.forEach((key) => {
-            if (this[key as keyof Checkbox]) {
-                props[key] = this[key as keyof Checkbox];
+            if (this[key as keyof CheckboxShape]) {
+                props[key] = this[key as keyof CheckboxShape];
             }
         });
 

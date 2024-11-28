@@ -28,8 +28,6 @@ export enum CalculateEmitStatus {
     preComputingError = 'preComputingError',
 
 }
-// The default is a 50-line,20-column viewable area.
-const INIT_LENGTH = 50 * 20 * 3 * 3;
 export interface IContext {
     unitId: string;
     subUnitId: string;
@@ -38,7 +36,7 @@ export interface IContext {
     accessor: IAccessor;
     rule: IConditionFormattingRule;
     getCellValue: (row: number, col: number,) => ICellData;
-    limit?: number;
+    limit: number;
 }
 /**
  * Processing Main Path Calculation Logic
@@ -58,7 +56,7 @@ export abstract class BaseCalculateUnit<C = any, S = any> {
     private _rule: IConditionFormattingRule;
 
     constructor(private _context: IContext) {
-        this._cache = new LRUMap(_context.limit ?? INIT_LENGTH);
+        this._cache = new LRUMap(_context.limit);
         this._rule = _context.rule;
         this._preComputingCache = null;
         this._initClearCacheListener();

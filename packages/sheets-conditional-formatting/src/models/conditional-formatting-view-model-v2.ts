@@ -28,6 +28,8 @@ import { HighlightCellCalculateUnit } from './calculate-unit-v2/highlight-cell-c
 import { IconSetCalculateUnit } from './calculate-unit-v2/icon-set-calculate-unit';
 import { ConditionalFormattingRuleModel } from './conditional-formatting-rule-model';
 
+// The default is a 50-row,20-column viewable area.
+export const CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH = 50 * 20 * 3 * 3;
 export class ConditionalFormattingViewModelV2 extends Disposable {
     //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _calculateUnitManagers: Map<string, Map<string, Map<string, BaseCalculateUnit>>> = new Map();
@@ -36,7 +38,7 @@ export class ConditionalFormattingViewModelV2 extends Disposable {
     /**
      * 1nd-level cache
      */
-    private _cellCache = new LRUMap<string, { cfId: string; result: any; priority: number }[]>(50 * 20 * 9);
+    private _cellCache = new LRUMap<string, { cfId: string; result: any; priority: number }[]>(CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH);
 
     private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string; isImmediately?: boolean }>();
     /**
@@ -162,7 +164,7 @@ export class ConditionalFormattingViewModelV2 extends Disposable {
                 if (e.type === 'set') {
                     const { unitId, subUnitId } = e;
                     const oldRule = e.oldRule!;
-                // If the range of a custom formula is modified,then the cached formulas must be cleared and recalculated.
+                    // If the range of a custom formula is modified,then the cached formulas must be cleared and recalculated.
                     if (oldRule.rule.type === CFRuleType.highlightCell && oldRule.rule.subType === CFSubRuleType.formula) {
                         this._conditionalFormattingFormulaService.deleteCache(unitId, subUnitId, oldRule.cfId);
                     }
@@ -243,6 +245,7 @@ export class ConditionalFormattingViewModelV2 extends Disposable {
             subUnitId,
             accessor: this._injector,
             rule,
+            limit: CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH,
             getCellValue: (row: number, col: number) => worksheet.getCellRaw(row, col) || {},
         };
         switch (rule.rule.type) {
@@ -263,5 +266,19 @@ export class ConditionalFormattingViewModelV2 extends Disposable {
 
     private _createCacheKey(unitId: string, subUnitId: string, row: number, col: number) {
         return `${unitId}_${subUnitId}_${row}_${col}`;
+    }
+
+    public setCacheLength(length: number = CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH) {
+        if (this._cellCache.limit === length) {
+            return;
+        }
+        this._cellCache.limit = length;
+        this._calculateUnitManagers.forEach((subunitMap) => {
+            subunitMap.forEach((unitMap) => {
+                unitMap.forEach((unit) => {
+                    unit.setCacheLength(length);
+                });
+            });
+        });
     }
 }

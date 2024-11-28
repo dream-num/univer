@@ -28,7 +28,7 @@ export enum CalculateEmitStatus {
     preComputingError = 'preComputingError',
 
 }
-// 默认是 50 行,20 列的可视区域.
+// The default is a 50-line,20-column viewable area.
 const INIT_LENGTH = 50 * 20 * 3 * 3;
 export interface IContext {
     unitId: string;
@@ -41,15 +41,15 @@ export interface IContext {
     limit?: number;
 }
 /**
- * 处理主路径计算逻辑
+ * Processing Main Path Calculation Logic
  */
 export abstract class BaseCalculateUnit<C = any, S = any> {
     /**
-     * 3 级缓存
+     * 3nd-level cache
      */
     private _cache: LRUMap<string, Nullable<S>>;
 
-    protected _preComputingStatus$ = new BehaviorSubject<CalculateEmitStatus>(CalculateEmitStatus.preComputingEnd);
+    protected _preComputingStatus$ = new BehaviorSubject<CalculateEmitStatus>(CalculateEmitStatus.preComputingStart);
     public preComputingStatus$ = this._preComputingStatus$.asObservable().pipe(distinctUntilChanged());
     /**
      * 2nd-level cache
@@ -73,7 +73,7 @@ export abstract class BaseCalculateUnit<C = any, S = any> {
     }
 
     public resetPreComputingCache() {
-        this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
+        this._preComputingStatus$.next(CalculateEmitStatus.preComputingStart);
         this._preComputingCache = null;
     }
 
@@ -122,7 +122,6 @@ export abstract class BaseCalculateUnit<C = any, S = any> {
 
     protected setPreComputingCache(v: C) {
         this._preComputingCache = v;
-        this.clearCache();
     }
 
     protected getPreComputingResult(_row: number, _col: number) {

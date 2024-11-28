@@ -76,6 +76,7 @@ export class IconSetCalculateUnit extends BaseCalculateUnit<IConfigItem[]> {
                 return result;
             }, [] as { operator: CFNumberOperator; value: number; iconType: string; iconId: string }[]);
             this.setPreComputingCache(splitValue);
+            this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
             return;
         }
         this._preComputingStatus$.next(CalculateEmitStatus.preComputing);

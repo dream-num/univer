@@ -20,8 +20,7 @@ import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/m
 import type { IConditionalFormattingRuleConfig } from '../models/type';
 
 import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, ObjectMatrix, RefAlias, Tools } from '@univerjs/core';
-import {
-    IActiveDirtyManagerService,
+import { IActiveDirtyManagerService,
     RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation,
@@ -65,7 +64,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
     // Cache Formula ID and formula mapping.
     private _formulaMap: Map<string, Map<string, RefAlias<IFormulaItem, 'id' | 'formulaId'>>> = new Map();
 
-    private _result$ = new Subject<IFormulaItem>();
+    private _result$ = new Subject<IFormulaItem & { isAllFinished: boolean }>();
     public result$ = this._result$.asObservable();
 
     constructor(
@@ -135,7 +134,9 @@ export class ConditionalFormattingFormulaService extends Disposable {
                             });
 
                             formulaMapAlias.status = FormulaResultStatus.SUCCESS;
-                            this._result$.next(formulaMapAlias);
+                            const allFormulaMapAlias = this._getAllFormulaResultByCfId(unitId, subUnitId, formulaMapAlias.cfId);
+                            const isAllFinished = allFormulaMapAlias.every((item) => item.status === FormulaResultStatus.SUCCESS);
+                            this._result$.next({ ...formulaMapAlias, isAllFinished });
                         }
                     }
                 }
@@ -269,6 +270,15 @@ export class ConditionalFormattingFormulaService extends Disposable {
             });
             return values;
         }
+    }
+
+    private _getAllFormulaResultByCfId(unitId: string, subUnitId: string, cfId: string) {
+        const map = this.getSubUnitFormulaMap(unitId, subUnitId);
+        if (!map) {
+            return [];
+        }
+        const values = map.getValues().filter((v) => v.cfId === cfId);
+        return values;
     }
 
     /**

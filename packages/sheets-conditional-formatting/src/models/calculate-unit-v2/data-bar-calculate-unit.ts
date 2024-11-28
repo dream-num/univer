@@ -89,11 +89,13 @@ export class DataBarCalculateUnit extends BaseCalculateUnit<IConfig> {
                 startPoint = 0;
             }
             this.setPreComputingCache({ min, max, startPoint });
+            this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
             return;
         }
         this._preComputingStatus$.next(CalculateEmitStatus.preComputing);
     }
 
+    // eslint-disable-next-line complexity
     protected override getCellResult(row: number, col: number, preComputingResult: IConfig, context: IContext) {
         const { min, max, startPoint } = preComputingResult;
         const rule = context.rule as IConditionFormattingRule<IDataBar>;
@@ -101,7 +103,7 @@ export class DataBarCalculateUnit extends BaseCalculateUnit<IConfig> {
         const isShowValue = ruleConfig.isShowValue;
         const isGradient = ruleConfig.config.isGradient;
         const value = getValue(row, col, context.getCellValue);
-        if (value === null) {
+        if (value === null || value < min) {
             return undefined;
         }
 

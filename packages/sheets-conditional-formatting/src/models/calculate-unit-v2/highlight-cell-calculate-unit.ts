@@ -98,6 +98,7 @@ export class HighlightCellCalculateUnit extends BaseCalculateUnit<Nullable<IConf
                     conditionalFormattingFormulaService.registerFormulaWithRange(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value, context.rule.ranges);
                     const result = conditionalFormattingFormulaService.getFormulaMatrix(context.unitId, context.subUnitId, context.rule.cfId, _ruleConfig.value);
                     if (result && result.status === FormulaResultStatus.SUCCESS) {
+                        this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
                         return {
                             value: result.result,
                             type: ruleConfig.subType,

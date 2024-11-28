@@ -17,10 +17,10 @@
 import type { Workbook } from '@univerjs/core';
 import type { BaseCalculateUnit, IContext } from './calculate-unit-v2/base-calculate-unit';
 import type { IConditionFormattingRule } from './type';
-import { Inject, Injector, IUniverInstanceService, LRUMap, RTree } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LRUMap, RTree } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { bufferTime, filter } from 'rxjs/operators';
-import { CFRuleType } from '../base/const';
+import { bufferTime, filter, map } from 'rxjs/operators';
+import { CFRuleType, CFSubRuleType } from '../base/const';
 import { ConditionalFormattingFormulaService } from '../services/conditional-formatting-formula.service';
 import { ColorScaleCalculateUnit } from './calculate-unit-v2/color-scale-calculate-unit';
 import { DataBarCalculateUnit } from './calculate-unit-v2/data-bar-calculate-unit';
@@ -28,7 +28,7 @@ import { HighlightCellCalculateUnit } from './calculate-unit-v2/highlight-cell-c
 import { IconSetCalculateUnit } from './calculate-unit-v2/icon-set-calculate-unit';
 import { ConditionalFormattingRuleModel } from './conditional-formatting-rule-model';
 
-export class ConditionalFormattingViewModelV2 {
+export class ConditionalFormattingViewModelV2 extends Disposable {
     //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _calculateUnitManagers: Map<string, Map<string, Map<string, BaseCalculateUnit>>> = new Map();
     private _rTreeManager: RTree = new RTree();
@@ -38,7 +38,7 @@ export class ConditionalFormattingViewModelV2 {
      */
     private _cellCache = new LRUMap<string, { cfId: string; result: any; priority: number }[]>(50 * 20 * 9);
 
-    private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string }>();
+    private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string; isImmediately?: boolean }>();
     /**
      * The rendering layer listens to this variable to determine whether a reRender is necessary.
      * @memberof ConditionalFormattingViewModelV2
@@ -49,16 +49,21 @@ export class ConditionalFormattingViewModelV2 {
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(ConditionalFormattingFormulaService) private _conditionalFormattingFormulaService: ConditionalFormattingFormulaService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService) {
+        super();
         this._initRuleListener();
+        this._handleCustomFormulasSeparately();
         this._initCFFormulaListener();
     }
 
     private _initCFFormulaListener() {
-        this._conditionalFormattingFormulaService.result$.pipe(bufferTime(16), filter((e) => !!e.length)).subscribe((list) => {
-            list.forEach(({ cfId, unitId, subUnitId }) => {
-                this.markRuleDirty(unitId, subUnitId, cfId, true);
-            });
-        });
+        // If a conditional format depends on multiple formula results,removing the 2nd level cache when a single result is returned can cause screen flickering.
+        // It is necessary to wait until all results are ready before removing the cache.
+        this.disposeWithMe(
+            this._conditionalFormattingFormulaService.result$.subscribe(({ unitId, subUnitId, cfId, isAllFinished }) => {
+                if (isAllFinished) {
+                    this._markRuleDirtyAtOnce(unitId, subUnitId, cfId, isAllFinished);
+                }
+            }));
     }
 
     public getCellCfs(unitId: string, subUnitId: string, row: number, col: number) {
@@ -103,7 +108,7 @@ export class ConditionalFormattingViewModelV2 {
      After the calculation is finished, it is only for marking as dirty, and the 2nd-level cache need to be cleared.
      * @param {boolean} [isNeedResetPreComputingCache]
      */
-    public markRuleDirty(unitId: string, subUnitId: string, cfId: string, isNeedResetPreComputingCache: boolean = true) {
+    private _markRuleDirtyAtOnce = (unitId: string, subUnitId: string, cfId: string, isNeedResetPreComputingCache: boolean = true) => {
         this._cellCache.clear();
         if (isNeedResetPreComputingCache) {
             const _calculateUnitManagers = this._ensureCalculateUnitManager(unitId, subUnitId);
@@ -116,50 +121,99 @@ export class ConditionalFormattingViewModelV2 {
         this._markDirty$.next({
             unitId, subUnitId, cfId,
         });
+    };
+
+    /**
+     * For the same condition format being marked dirty multiple times at the same time,
+     * it will cause the style cache to be cleared, thereby causing the screen to flicker.
+     * Here,multiple dirties are merged into one..
+     */
+    public markRuleDirty = (() => {
+        const rxItem = new Subject<{ unitId: string; subUnitId: string; cfId: string; isNeedResetPreComputingCache: boolean }>();
+        rxItem.pipe(bufferTime(100), filter((e) => !!e.length), map((list) => {
+            const set = new Set();
+            const result: typeof list = [];
+            list.forEach((item) => {
+                const kye = `${item.unitId}_${item.subUnitId}_${item.cfId}`;
+                if (set.has(kye)) {
+                    if (item.isNeedResetPreComputingCache) {
+                        const i = result.find((e) => e.cfId === item.cfId)!;
+                        i.isNeedResetPreComputingCache = true;
+                    }
+                    return;
+                }
+                set.add(kye);
+                result.push({ ...item });
+            });
+            return result;
+        })).subscribe((list) => {
+            list.forEach((item) => {
+                this._markRuleDirtyAtOnce(item.unitId, item.subUnitId, item.cfId, item.isNeedResetPreComputingCache);
+            });
+        });
+        return (unitId: string, subUnitId: string, cfId: string, isNeedResetPreComputingCache: boolean = true) => {
+            rxItem.next({ unitId, subUnitId, cfId, isNeedResetPreComputingCache });
+        };
+    })();
+
+    private _handleCustomFormulasSeparately() {
+        this.disposeWithMe(
+            this._conditionalFormattingRuleModel.$ruleChange.subscribe((e) => {
+                if (e.type === 'set') {
+                    const { unitId, subUnitId } = e;
+                    const oldRule = e.oldRule!;
+                // If the range of a custom formula is modified,then the cached formulas must be cleared and recalculated.
+                    if (oldRule.rule.type === CFRuleType.highlightCell && oldRule.rule.subType === CFSubRuleType.formula) {
+                        this._conditionalFormattingFormulaService.deleteCache(unitId, subUnitId, oldRule.cfId);
+                    }
+                }
+            }));
     }
 
     private _initRuleListener() {
-        this._conditionalFormattingRuleModel.$ruleChange.subscribe((e) => {
-            const { unitId, subUnitId, rule } = e;
-            const { cfId, ranges } = rule;
-            const calculateUnitManager = this._ensureCalculateUnitManager(unitId, subUnitId);
-            this.markRuleDirty(unitId, subUnitId, cfId);
-            switch (e.type) {
-                case 'add': {
-                    this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
-                    const instance = this._createRuleCalculateUnitInstance(unitId, subUnitId, rule);
-                    if (!instance) {
-                        return;
-                    }
-                    calculateUnitManager.set(rule.cfId, instance);
-                    break;
-                }
-                case 'delete': {
-                    this._rTreeManager.bulkRemove(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
-                    calculateUnitManager.delete(rule.cfId);
-                    break;
-                }
-                case 'set': {
-                    const oldRule = e.oldRule!;
-                    this._rTreeManager.bulkRemove(oldRule.ranges.map((r) => ({ unitId, sheetId: subUnitId, id: oldRule.cfId, range: r })));
-                    this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
-                    if (oldRule.rule.type !== rule.rule.type) {
+        this.disposeWithMe(
+            this._conditionalFormattingRuleModel.$ruleChange.subscribe((e) => {
+                const { unitId, subUnitId, rule } = e;
+                const { cfId, ranges } = rule;
+                const calculateUnitManager = this._ensureCalculateUnitManager(unitId, subUnitId);
+                this.markRuleDirty(unitId, subUnitId, cfId);
+                switch (e.type) {
+                    case 'add': {
+                        this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
                         const instance = this._createRuleCalculateUnitInstance(unitId, subUnitId, rule);
                         if (!instance) {
                             return;
                         }
-                        calculateUnitManager.delete(oldRule.cfId);
                         calculateUnitManager.set(rule.cfId, instance);
-                    } else {
-                        const instance = calculateUnitManager.get(oldRule.cfId);
-                        if (!instance) {
-                            return;
+                        break;
+                    }
+                    case 'delete': {
+                        this._rTreeManager.bulkRemove(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
+                        calculateUnitManager.delete(rule.cfId);
+                        break;
+                    }
+                    case 'set': {
+                        const oldRule = e.oldRule!;
+
+                        this._rTreeManager.bulkRemove(oldRule.ranges.map((r) => ({ unitId, sheetId: subUnitId, id: oldRule.cfId, range: r })));
+                        this._rTreeManager.bulkInsert(ranges.map((r) => ({ unitId, sheetId: subUnitId, id: cfId, range: r })));
+                        if (oldRule.rule.type !== rule.rule.type) {
+                            const instance = this._createRuleCalculateUnitInstance(unitId, subUnitId, rule);
+                            if (!instance) {
+                                return;
+                            }
+                            calculateUnitManager.delete(oldRule.cfId);
+                            calculateUnitManager.set(rule.cfId, instance);
+                        } else {
+                            const instance = calculateUnitManager.get(oldRule.cfId);
+                            if (!instance) {
+                                return;
+                            }
+                            instance.updateRule(rule);
                         }
-                        instance.updateRule(rule);
                     }
                 }
-            }
-        });
+            }));
     }
 
     private _ensureCalculateUnitManager(unitId: string, subUnitId: string) {

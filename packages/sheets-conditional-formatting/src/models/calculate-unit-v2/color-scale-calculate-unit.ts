@@ -69,6 +69,7 @@ export class ColorScaleCalculateUnit extends BaseCalculateUnit<IConfigItem[], st
                 })
                 .result;
             this.setPreComputingCache(colorList);
+            this._preComputingStatus$.next(CalculateEmitStatus.preComputingEnd);
             return;
         }
         this._preComputingStatus$.next(CalculateEmitStatus.preComputing);

@@ -53,7 +53,7 @@ export const AccountingPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 options ">
+            <div className="m-t-16 options">
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>
 

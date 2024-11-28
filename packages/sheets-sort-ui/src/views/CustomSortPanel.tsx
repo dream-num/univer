@@ -16,10 +16,10 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import { LocaleService, LocaleType, throttle, useDependency } from '@univerjs/core';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
+import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
 import styles from './index.module.less';
@@ -116,7 +116,11 @@ export function CustomSortPanel() {
                             </div>
                         )
                         : (
-                            <div className={`${styles.addCondition} ${styles.addConditionDisable}`}>
+                            <div className={`
+                              ${styles.addCondition}
+                              ${styles.addConditionDisable}
+                            `}
+                            >
                                 <IncreaseSingle />
                                 <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
                             </div>

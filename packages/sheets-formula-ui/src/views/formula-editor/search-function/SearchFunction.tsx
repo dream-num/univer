@@ -208,7 +208,10 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     <li
                         key={index}
                         className={active === index
-                            ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
+                            ? `
+                              ${styles.formulaSearchFunctionItem}
+                              ${styles.formulaSearchFunctionItemActive}
+                            `
                             : styles.formulaSearchFunctionItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}

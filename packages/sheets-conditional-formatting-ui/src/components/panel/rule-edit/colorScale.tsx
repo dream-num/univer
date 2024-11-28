@@ -223,11 +223,18 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={`${styles.cfPreviewWrap}`}>
+            <div className={`
+              ${styles.cfPreviewWrap}
+            `}
+            >
                 <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormattingRuleConfig} />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+            <div className={`
+              ${stylesBase.labelContainer}
+              ${stylesBase.mTSm}
+            `}
+            >
                 <Select
                     style={{ flexShrink: 0 }}
                     options={minOptions}
@@ -241,7 +248,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="min"
-                    className={`${stylesBase.mLXxs}`}
+                    className={`
+                      ${stylesBase.mLXxs}
+                    `}
                     value={minValue}
                     type={minType}
                     onChange={(v) => {
@@ -259,7 +268,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
-            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+            <div className={`
+              ${stylesBase.labelContainer}
+              ${stylesBase.mTSm}
+            `}
+            >
                 <Select
                     style={{ flexShrink: 0 }}
                     options={medianOptions}
@@ -274,7 +287,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
                 <TextInput
                     id="median"
-                    className={` ${stylesBase.mLXxs}`}
+                    className={`
+                      ${stylesBase.mLXxs}
+                    `}
                     value={medianValue}
                     type={medianType}
                     onChange={(v) => {
@@ -295,7 +310,11 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
             </div>
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+            <div className={`
+              ${stylesBase.labelContainer}
+              ${stylesBase.mTSm}
+            `}
+            >
                 <Select
                     style={{ flexShrink: 0 }}
                     options={maxOptions}
@@ -309,7 +328,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="max"
-                    className={`${stylesBase.mLXxs}`}
+                    className={`
+                      ${stylesBase.mLXxs}
+                    `}
                     value={maxValue}
                     type={maxType}
                     onChange={(v) => {

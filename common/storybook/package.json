@@ -32,6 +32,7 @@
         "@univerjs/ui": "workspace:*",
         "css-loader": "^7.1.2",
         "less-loader": "^12.2.0",
+        "postcss-loader": "^8.1.1",
         "storybook": "^8.4.5",
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^4.0.0",
@@ -39,6 +40,10 @@
         "typescript": "^5.7.2"
     },
     "devDependencies": {
-        "@univerjs-infra/shared": "workspace:*"
+        "@types/fs-extra": "^11.0.4",
+        "@univerjs-infra/shared": "workspace:*",
+        "fs-extra": "^11.2.0",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.15"
     }
 }

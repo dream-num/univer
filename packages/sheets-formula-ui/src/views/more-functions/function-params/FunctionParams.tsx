@@ -28,7 +28,13 @@ export function FunctionParams(props: IParamsProps) {
     const { className, value, title } = props;
     return (
         <div className={styles.formulaFunctionParams}>
-            <div className={`${styles.formulaFunctionParamsTitle} ${className}`}>{title}</div>
+            <div className={`
+              ${styles.formulaFunctionParamsTitle}
+              ${className}
+            `}
+            >
+                {title}
+            </div>
             <div className={styles.formulaFunctionParamsDetail}>{value}</div>
         </div>
     );

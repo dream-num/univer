@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { SheetsUIPart } from './consts/ui-name';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
@@ -62,9 +64,9 @@ export {
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
-export { genSelectionByRange, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll as getAllSelection } from './services/selection/base-selection-render.service';
+export { genSelectionByRange, selectionDataForSelectAll as getAllSelection, getTopLeftSelectionOfCurrSheet } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
-export { SelectionControl as SelectionShape, SelectionControl } from './services/selection/selection-control';
+export { SelectionControl, SelectionControl as SelectionShape } from './services/selection/selection-control';
 export { SelectionShapeExtension } from './services/selection/selection-shape-extension';
 export { genNormalSelectionStyle } from './services/selection/const';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';

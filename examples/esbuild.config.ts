@@ -25,6 +25,7 @@ import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
+import tailwindcss from 'tailwindcss';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -88,6 +89,9 @@ const config: SameShape<BuildOptions, BuildOptions> = {
             },
         }),
         stylePlugin({
+            postcss: {
+                plugins: [tailwindcss],
+            },
             cssModulesOptions: {
                 localsConvention: 'camelCaseOnly',
                 generateScopedName: 'univer-[local]',

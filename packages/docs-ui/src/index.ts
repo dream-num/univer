@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { DocAutoFormatService } from '../../docs-ui/src/services/doc-auto-format.service';
 export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';

@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverDocsHyperLinkUIPlugin } from './plugin';

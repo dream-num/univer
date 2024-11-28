@@ -210,10 +210,12 @@ export class InputManager extends Disposable {
     }
 
     _onKeyDown(evt: IKeyboardEvent) {
+        // currently nobody using this. use `fromGlobalEvent('keydown')` from rx.js instead.
         this._scene.onKeyDown$.emitEvent(evt);
     }
 
     _onKeyUp(evt: IKeyboardEvent) {
+        // currently nobody using this. use `fromGlobalEvent('keyup')` from rx.js instead.
         this._scene.onKeyUp$.emitEvent(evt);
     }
 

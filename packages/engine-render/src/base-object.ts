@@ -676,16 +676,6 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
-    // triggerKeyDown(evt: IKeyboardEvent) {
-    //     // this.onKeyDownObservable.notifyObservers(evt);
-    //     this._parent?.triggerKeyDown(evt);
-    // }
-
-    // triggerKeyUp(evt: IKeyboardEvent) {
-    //     // this.onKeyUpObservable.notifyObservers(evt);
-    //     this._parent?.triggerKeyUp(evt);
-    // }
-
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOut$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerOut(evt);

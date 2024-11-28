@@ -189,7 +189,6 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
-
         /**
          * parent is SceneViewer, make it dirty
          */

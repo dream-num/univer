@@ -30,6 +30,13 @@ import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './ba
 import { Canvas, CanvasRenderMode } from './canvas';
 import { observeClientRect } from './floating/util';
 
+export interface IEngineOption {
+    elementWidth: number;
+    elementHeight: number;
+    dpr?: number;
+    renderMode?: CanvasRenderMode;
+}
+
 export class Engine extends Disposable {
     renderEvenInBackground = true;
 
@@ -41,6 +48,9 @@ export class Engine extends Disposable {
     readonly renderFrameTimeMetric$ = new Subject<ITimeMetric>();
     readonly renderFrameTags$ = new Subject<[string, any]>();
 
+    /**
+     * Pass event to scene.input-manager
+     */
     onInputChanged$ = new EventSubject<IEvent>();
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
@@ -78,8 +88,6 @@ export class Engine extends Disposable {
     private _renderingQueueLaunched = false;
 
     private _renderFrameTasks = new Array<() => void>();
-
-    private _renderFunction = (_timestamp: number) => { /* empty */ };
 
     private _requestNewFrameHandler: number = -1;
 
@@ -140,10 +148,37 @@ export class Engine extends Disposable {
 
     private _unitId: string = ''; // unitId
 
-    constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
+    constructor();
+    constructor(unitId: string, options?: IEngineOption);
+    constructor(elemW: number, elemH: number, dpr?: number, renderMode?: CanvasRenderMode);
+    constructor(...args: any[]) {
         super();
+        let elemWidth = 1;
+        let elemHeight = 1;
+        let pixelRatio = 1;
+        let renderMode = CanvasRenderMode.Rendering;
+
+        if (args[0] && typeof args[0] === 'string') {
+            this._unitId = args[0];
+            const options = args[1] ?? {
+                elemWidth: 1,
+                elemHeight: 1,
+                pixelRatio: 1,
+                renderMode: CanvasRenderMode.Rendering,
+            };
+            elemWidth = options.elementWidth;
+            elemHeight = options.elementHeight;
+            pixelRatio = options.pixelRatio ?? 1;
+            renderMode = options.renderMode ?? CanvasRenderMode.Rendering;
+        } else {
+            elemWidth = args[0] ?? 1;
+            elemHeight = args[1] ?? 1;
+            pixelRatio = args[2] ?? 1;
+            renderMode = args[3] ?? CanvasRenderMode.Rendering;
+        }
+
         this._canvas = new Canvas({
-            mode,
+            mode: renderMode,
             width: elemWidth,
             height: elemHeight,
             pixelRatio,
@@ -153,13 +188,17 @@ export class Engine extends Disposable {
         this._handlePointerAction();
         this._handleDragAction();
 
-        if (mode !== CanvasRenderMode.Printing) {
+        if (renderMode !== CanvasRenderMode.Printing) {
             this._matchMediaHandler();
         }
     }
 
     _init() {
         this._performanceMonitor = new PerformanceMonitor();
+    }
+
+    get unitId(): string {
+        return this._unitId;
     }
 
     get elapsedTime(): number {
@@ -380,7 +419,7 @@ export class Engine extends Disposable {
         if (!this._renderingQueueLaunched) {
             this._renderStartTime = performance.now();
             this._renderingQueueLaunched = true;
-            this._renderFunction = this._renderFunctionCore.bind(this);
+            // this._renderFunction = this._renderFunctionCore.bind(this);
             this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
         }
     }
@@ -393,6 +432,31 @@ export class Engine extends Disposable {
         this.addFunction2RenderLoop(renderFunction);
         this.startRenderLoop();
     }
+
+    /**
+     * call itself by raf
+     * Exec all function in _renderFrameTasks in _renderFrame()
+     */
+    private _renderFunction = (timestamp: number) => {
+        let shouldRender = true;
+        if (!this.renderEvenInBackground) {
+            shouldRender = false;
+        }
+
+        if (shouldRender) {
+            // Start new frame
+            this._beginFrame(timestamp);
+            // exec functions in _renderFrameTasks
+            this._renderFrame(timestamp);
+            this._endFrame(timestamp);
+        }
+
+        if (this._renderFrameTasks.length > 0) {
+            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
+        } else {
+            this._renderingQueueLaunched = false;
+        }
+    };
 
     /**
      * stop executing a render loop function and remove it from the execution array
@@ -492,38 +556,11 @@ export class Engine extends Disposable {
         return window;
     }
 
-    /**
-     * call itself by raf
-     * Exec all function in _renderFrameTasks in _renderFrame()
-     */
-    private _renderFunctionCore(timestamp: number): void {
-        let shouldRender = true;
-        if (!this.renderEvenInBackground) {
-            shouldRender = false;
-        }
-
-        if (shouldRender) {
-            // Start new frame
-            this._beginFrame(timestamp);
-            this._renderFrame(timestamp);
-            this._endFrame(timestamp);
-        }
-
-        if (this._renderFrameTasks.length > 0) {
-            this._requestNewFrameHandler = requestNewFrame(this._renderFunction);
-        } else {
-            this._renderingQueueLaunched = false;
-        }
-    }
-
     private _handleKeyboardAction() {
         const keyboardDownEvent = (evt: KeyboardEvent) => {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            // deviceEvent.previousState = 0;
-            // deviceEvent.currentState = 1;
-
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 
@@ -531,9 +568,6 @@ export class Engine extends Disposable {
             const deviceEvent = evt as unknown as IKeyboardEvent;
             deviceEvent.deviceType = DeviceType.Keyboard;
             deviceEvent.inputIndex = evt.keyCode;
-            // deviceEvent.previousState = 1;
-            // deviceEvent.currentState = 0;
-
             this.onInputChanged$.emitEvent(deviceEvent);
         };
 

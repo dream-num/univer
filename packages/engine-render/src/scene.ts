@@ -79,7 +79,15 @@ export class Scene extends Disposable {
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheel$ = new EventSubject<IWheelEvent>();
+
+    /**
+     * @deprecated  use `fromGlobalEvent('keydown')` from rx.js instead.
+     */
     onKeyDown$ = new EventSubject<IKeyboardEvent>();
+
+    /**
+     * @deprecated  use `fromGlobalEvent('keyup')` from rx.js instead.
+     */
     onKeyUp$ = new EventSubject<IKeyboardEvent>();
 
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
@@ -1004,19 +1012,19 @@ export class Scene extends Disposable {
         return isPickedObject;
     }
 
-    triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDown$.emitEvent(evt);
+    // triggerKeyDown(evt: IKeyboardEvent) {
+    //     this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
-    }
+    // }
 
-    triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUp$.emitEvent(evt);
+    // triggerKeyUp(evt: IKeyboardEvent) {
+    //     this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }
-    }
+    // }
 
     triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (

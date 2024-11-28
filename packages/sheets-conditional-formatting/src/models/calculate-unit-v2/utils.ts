@@ -20,8 +20,8 @@ import type { IContext } from './base-calculate-unit';
 import { BooleanNumber, CellValueType, ColorKit, dayjs, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFValueType } from '../../base/const';
-import { ConditionalFormattingViewModelV2 } from '../../models/conditional-formatting-view-model-v2';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../../services/conditional-formatting-formula.service';
+import { ConditionalFormattingViewModel } from '../conditional-formatting-view-model';
 
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
@@ -173,7 +173,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>
 
 export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, rule: IConditionFormattingRule, context: IContext) => {
     const { accessor } = context;
-    const conditionalFormattingViewModel = accessor.get(ConditionalFormattingViewModelV2);
+    const conditionalFormattingViewModel = accessor.get(ConditionalFormattingViewModel);
     const matrix = new ObjectMatrix<S>();
     rule.ranges.forEach((range) => {
         Range.foreach(range, (row, col) => {

@@ -19,7 +19,7 @@ import type { IAddConditionalRuleMutationParams, IDeleteConditionalRuleMutationP
 import type { IFormatPainterHook } from '@univerjs/sheets-ui';
 import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModelV2, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
 
 const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
@@ -82,7 +82,7 @@ export class ConditionalFormattingPainterController extends Disposable {
         @Inject(SheetsSelectionsService) private _sheetsSelectionsService: SheetsSelectionsService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
 
-        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
 
     ) {
         super();

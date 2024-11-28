@@ -16,7 +16,7 @@
 
 export * from './base/const';
 export * from './models/conditional-formatting-rule-model';
-export * from './models/conditional-formatting-view-model-v2';
+export * from './models/conditional-formatting-view-model';
 export * from './models/icon-map';
 export * from './models/type';
 export { UniverSheetsConditionalFormattingPlugin } from './plugin';

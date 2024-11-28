@@ -17,12 +17,12 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH, ConditionalFormattingViewModelV2 } from '@univerjs/sheets-conditional-formatting';
+import { CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingViewportController extends Disposable {
     constructor(
-        @Inject(ConditionalFormattingViewModelV2) private _conditionalFormattingViewModel: ConditionalFormattingViewModelV2,
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private _renderManagerService: IRenderManagerService) {
         super();

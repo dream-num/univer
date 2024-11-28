@@ -30,7 +30,7 @@ import { ConditionalFormattingRuleModel } from './conditional-formatting-rule-mo
 
 // The default is a 50-row,20-column viewable area.
 export const CONDITIONAL_FORMATTING_VIEWPORT_CACHE_LENGTH = 50 * 20 * 3 * 3;
-export class ConditionalFormattingViewModelV2 extends Disposable {
+export class ConditionalFormattingViewModel extends Disposable {
     //  Map<unitID ,<sheetId ,ObjectMatrix>>
     private _calculateUnitManagers: Map<string, Map<string, Map<string, BaseCalculateUnit>>> = new Map();
     private _rTreeManager: RTree = new RTree();
@@ -43,7 +43,7 @@ export class ConditionalFormattingViewModelV2 extends Disposable {
     private _markDirty$ = new Subject<{ cfId: string; unitId: string; subUnitId: string; isImmediately?: boolean }>();
     /**
      * The rendering layer listens to this variable to determine whether a reRender is necessary.
-     * @memberof ConditionalFormattingViewModelV2
+     * @memberof ConditionalFormattingViewModel
      */
     public markDirty$ = this._markDirty$.asObservable();
     constructor(

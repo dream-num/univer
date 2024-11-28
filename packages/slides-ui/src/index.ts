@@ -26,7 +26,7 @@ export { SLIDE_EDITOR_ID } from './const';
 
 export { CanvasView } from './controllers/canvas-view';
 
-export { IMAGE_MENU_ID } from './controllers/image.menu';
+export { SLIDES_IMAGE_MENU_ID } from './controllers/image.menu';
 export { SHAPE_MENU_ID } from './controllers/shape.menu';
 
 export { menuSchema } from './controllers/menu.schema';

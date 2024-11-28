@@ -86,7 +86,7 @@ interface IMasterProperties {
     name: string;
 }
 
-export interface IRichTextProps extends ITransformState, IStyleBase {
+export interface ISlideRichTextProps extends ITransformState, IStyleBase {
     text?: string;
     rich?: IDocumentData;
 }
@@ -115,7 +115,7 @@ export interface IPageElement {
     // elementGroup: IGroup;
     shape?: IShape;
     image?: IImage;
-    richText?: IRichTextProps;
+    richText?: ISlideRichTextProps;
 
     /** @deprecated */
     spreadsheet?: {

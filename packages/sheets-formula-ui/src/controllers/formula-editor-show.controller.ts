@@ -17,11 +17,13 @@
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionWithStyle, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import {
-    ColorKit, Disposable,
-    ICommandService,
+import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
+import { ColorKit,
+    Disposable, ICommandService,
+    IConfigService,
     ILogService,
     Inject,
+    isFormulaString,
     ObjectMatrix,
     ThemeService,
     toDisposable,
@@ -33,13 +35,14 @@ import {
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { AFTER_CELL_EDIT, BEFORE_CELL_EDIT, SetWorksheetRowAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import {
     attachSelectionWithCoord,
     SELECTION_SHAPE_DEPTH,
     SelectionControl,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
+import { PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 
 /**
  * For Array formula in cell editing
@@ -56,11 +59,13 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
         this._initSkeletonChangeListener();
         this._initInterceptorEditorStart();
+        this._initInterceptorEditorEnd();
         this._commandExecutedListener();
 
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
@@ -151,6 +156,33 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                 )
             )
         );
+    }
+
+    private _initInterceptorEditorEnd() {
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+
+        const isTriggerCalculation = config?.isTriggerCalculation ?? true;
+
+        if (!isTriggerCalculation) {
+            // fix #3742 #3648, if the formula is not executed, the formula string will be displayed in the cell
+            this.disposeWithMe(
+                toDisposable(
+                    this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT,
+                        {
+                            handler: (value, context, next) => {
+                                if (value?.f && isFormulaString(value?.f)) {
+                                    value.v = value.f;
+                                    value.f = null;
+                                    return next(value);
+                                }
+
+                                return next(value);
+                            },
+                        }
+                    )
+                )
+            );
+        }
     }
 
     private _commandExecutedListener(): void {

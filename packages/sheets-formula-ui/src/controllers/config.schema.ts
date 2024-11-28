@@ -30,6 +30,11 @@ export interface IUniverSheetsFormulaBaseConfig {
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+
+    /**
+     * Whether to trigger calculation after entering the formula
+     */
+    isTriggerCalculation?: boolean;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};

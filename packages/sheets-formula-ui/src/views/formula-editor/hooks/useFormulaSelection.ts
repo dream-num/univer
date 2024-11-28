@@ -57,13 +57,19 @@ function getCurrentChar(accssor: IAccessor) {
     return dataStream[startOffset - 1 + config.offset];
 }
 
+export enum FormulaSelectingType {
+    NOT_SELECT = 0,
+    NEED_ADD = 1,
+    CAN_EDIT = 2,
+}
+
 export function useFormulaSelecting(editorId: string, nodes: (string | ISequenceNode)[]) {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const injector = useDependency(Injector);
     const textSelections$ = useMemo(() => docSelectionRenderService?.textSelectionInner$ ?? of(), [docSelectionRenderService?.textSelectionInner$]);
-    const [isSelecting, setIsSelecting] = useState(false);
+    const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const nodesRef = useRef(nodes);
     nodesRef.current = nodes;
 
@@ -76,9 +82,13 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
             const isFocusingLastNode = typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE && lastNode.startIndex <= index - 1 && lastNode.endIndex >= index - 2;
             const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
             if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || isFocusingLastNode)) {
-                setIsSelecting(true);
+                if (isFocusingLastNode) {
+                    setIsSelecting(FormulaSelectingType.CAN_EDIT);
+                } else {
+                    setIsSelecting(FormulaSelectingType.NEED_ADD);
+                }
             } else {
-                setIsSelecting(false);
+                setIsSelecting(FormulaSelectingType.NOT_SELECT);
             }
         });
 

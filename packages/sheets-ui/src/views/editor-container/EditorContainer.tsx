@@ -15,11 +15,10 @@
  */
 
 import { Direction, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, useDependency } from '@univerjs/core';
-import { DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET, IRenderManagerService } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/docs-ui';
+import { DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, KeyCode, MetaKeys, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { of } from 'rxjs';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
@@ -50,17 +49,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
     const componentManager = useDependency(ComponentManager);
-    const renderManagerService = useDependency(IRenderManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const renderer = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
-    const [selectionFocusing, setSelectionFocusing] = useState(false);
     const visible = useObservable(editorBridgeService.visible$);
-    const onFocus$ = useMemo(() => docSelectionRenderService?.onFocus$ ?? of(), [docSelectionRenderService?.onFocus$]);
-    const onBlur$ = useMemo(() => docSelectionRenderService?.onBlur$ ?? of(), [docSelectionRenderService?.onBlur$]);
-    const forceKeepVisible = useObservable(editorBridgeService.forceKeepVisible$);
     const commandService = useDependency(ICommandService);
-    const isRefSelecting = useRef(false);
+    const isRefSelecting = useRef<0 | 1 | 2>(0);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
         false,
@@ -120,21 +112,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [disableAutoFocus, state]);
 
-    useEffect(() => {
-        const sub1 = onFocus$.subscribe(() => {
-            setSelectionFocusing(true);
-        });
-
-        const sub2 = onBlur$.subscribe(() => {
-            setSelectionFocusing(false);
-        });
-
-        return () => {
-            sub1.unsubscribe();
-            sub2.unsubscribe();
-        };
-    }, [onBlur$, onFocus$]);
-
     const keyCodeConfig = useMemo(() => ({
         keyCodes: [
             { keyCode: KeyCode.ENTER },
@@ -163,7 +140,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     keycode,
-                    unitId: '',
+                    unitId: editState!.unitId!,
                 });
                 return;
             }
@@ -209,7 +186,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             }
         },
-    }), [commandService, editState?.unitId, editorBridgeService]);
+    }), [commandService, editState, editorBridgeService]);
 
     return (
         <div
@@ -233,9 +210,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     subUnitId={editState?.sheetId}
                     moveCursor={false}
                     keyboradEventConfig={keyCodeConfig}
-                    onFormulaSelectingChange={(isSelecting: boolean) => {
+                    onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
-                        if (isSelecting) {
+                        if (isSelecting === 1) {
                             editorBridgeService.enableForceKeepVisible();
                         } else {
                             editorBridgeService.disableForceKeepVisible();

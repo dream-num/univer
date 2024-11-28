@@ -416,15 +416,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
-        /**
-         * Non-sheetEditor and formula selection mode,
-         * double-clicking cannot activate the sheet editor.
-         */
-        const editor = this._editorService.getFocusEditor();
-        if (this._refSelectionsService.getCurrentSelections().length > 0 && editor && !editor.isSheetEditor()) {
-            return;
-        }
-
         this._visible = param;
 
         // Reset the dirty status when the editor is visible.

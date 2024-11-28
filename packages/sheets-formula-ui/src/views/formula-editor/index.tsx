@@ -18,6 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
+import type { FormulaSelectingType } from './hooks/useFormulaSelection';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { operatorToken } from '@univerjs/engine-formula';
@@ -64,7 +65,7 @@ export interface IFormulaEditorProps {
     className?: string;
     editorId?: string;
     moveCursor?: boolean;
-    onFormulaSelectingChange?: (isSelecting: boolean) => void;
+    onFormulaSelectingChange?: (isSelecting: FormulaSelectingType) => void;
     keyboradEventConfig?: IKeyboardEventConfig;
 }
 const noop = () => { };
@@ -165,7 +166,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
-    useRefactorEffect(isFocus, isSelecting, unitId);
+    useRefactorEffect(isFocus, Boolean(isSelecting), unitId);
     useLeftAndRightArrow(isFocus && moveCursor, editor);
 
     const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {

@@ -80,19 +80,23 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: boole
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
                         jumpOver: JumpOver.moveGap,
+                        extra: 'formula-editor',
                     });
                 } else if (metaKey === MetaKeys.SHIFT) {
                     commandService.executeCommand(ExpandSelectionCommand.id, {
                         direction,
+                        extra: 'formula-editor',
                     });
                 } else if (metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT)) {
                     commandService.executeCommand(ExpandSelectionCommand.id, {
                         direction,
                         jumpOver: JumpOver.moveGap,
+                        extra: 'formula-editor',
                     });
                 } else {
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
+                        extra: 'formula-editor',
                     });
                 }
             } else {

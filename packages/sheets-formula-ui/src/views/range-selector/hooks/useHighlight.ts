@@ -103,7 +103,7 @@ export function useDocHight(_leadingCharacter: string = '') {
     const colorMap = useColor();
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
-    const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
+    const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true, clearTextRun = true) => {
         const data = editor.getDocumentData();
         if (!data) {
             return [];
@@ -114,9 +114,11 @@ export function useDocHight(_leadingCharacter: string = '') {
         }
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            // cloneBody.textRuns = [];
-            // const cloneData = { ...data, body: cloneBody };
-            // editor.setDocumentData(cloneData);
+            if (clearTextRun) {
+                cloneBody.textRuns = [];
+                const cloneData = { ...data, body: cloneBody };
+                editor.setDocumentData(cloneData);
+            }
             return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);

@@ -25,7 +25,6 @@ import { DisposableCollection, ICommandService, IUniverInstanceService, useDepen
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation } from '@univerjs/sheets';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -285,12 +284,8 @@ export const useSheetSelectionChange = (
                     return;
                 }
 
-                const params = commandInfo.params as ISetSelectionsOperationParams & { trigger: string };
-                if (
-                    params.trigger !== MoveSelectionCommand.id &&
-                    params.trigger !== MoveSelectionEnterAndTabCommand.id &&
-                    params.trigger !== ExpandSelectionCommand.id
-                ) {
+                const params = commandInfo.params as ISetSelectionsOperationParams;
+                if (params.extra !== 'formula-editor') {
                     return;
                 }
                 const { unitId, subUnitId, selections } = params;

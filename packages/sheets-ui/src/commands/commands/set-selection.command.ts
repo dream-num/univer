@@ -54,11 +54,13 @@ export interface IMoveSelectionCommandParams {
     direction: Direction;
     jumpOver?: JumpOver;
     nextStep?: number;
+    extra?: string;
 }
 
 export interface IMoveSelectionEnterAndTabCommandParams {
     direction: Direction;
     keycode: KeyCode;
+    extra?: string;
 }
 
 /**
@@ -81,7 +83,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
-        const { direction, jumpOver } = params;
+        const { direction, jumpOver, extra } = params;
         const { range, primary } = selection;
         const startRange = getStartRange(range, primary, direction);
 
@@ -125,7 +127,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
             selections,
-            trigger: MoveSelectionCommand.id,
+            extra,
         });
 
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -163,7 +165,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             return false;
         }
 
-        const { direction, keycode } = params;
+        const { direction, keycode, extra } = params;
         const { range, primary } = selection;
         let startRange = getStartRange(range, primary, direction);
         const shortcutExperienceService = accessor.get(ShortcutExperienceService);
@@ -273,7 +275,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             unitId,
             subUnitId: sheetId,
             selections: [resultRange],
-            trigger: MoveSelectionEnterAndTabCommand.id,
+            extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
@@ -286,6 +288,7 @@ export interface IExpandSelectionCommandParams {
     direction: Direction;
     jumpOver?: JumpOver;
     nextStep?: number;
+    extra?: string;
 }
 
 // Though the command's name is "expand-selection", it actually does not expand but shrink the selection.
@@ -305,7 +308,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         if (!selection) return false;
 
         const { range: startRange, primary } = selection;
-        const { jumpOver, direction } = params;
+        const { jumpOver, direction, extra } = params;
 
         const isShrink = checkIfShrink(selection, direction, worksheet);
         const destRange = !isShrink
@@ -334,7 +337,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     primary, // this remains unchanged
                 },
             ],
-            trigger: ExpandSelectionCommand.id,
+            extra,
         });
     },
 };

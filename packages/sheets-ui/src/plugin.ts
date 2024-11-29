@@ -20,7 +20,7 @@ import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
@@ -67,13 +67,13 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
+import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 import {
     FormulaEditorManagerService,
     IFormulaEditorManagerService,
 } from './services/editor/formula-editor-manager.service';
-import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';

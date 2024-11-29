@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
+import type { IBaseSheetBarProps } from './SheetBarItem';
+import type { IScrollState } from './utils/slide-tab-bar';
 import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
+
 import { LockSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
@@ -32,20 +37,15 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, Menu, PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, Menu, UI_PLUGIN_CONFIG_KEY, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-
 import { merge } from 'rxjs';
-import type { ICommandInfo } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import { useActiveWorkbook } from '../../../components/hook';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarItem } from './SheetBarItem';
 import { SlideTabBar } from './utils/slide-tab-bar';
-import type { IBaseSheetBarProps } from './SheetBarItem';
-import type { IScrollState } from './utils/slide-tab-bar';
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);

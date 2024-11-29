@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-
-import { Input } from '@univerjs/design';
-import { RangeSelector, TextEditor } from '@univerjs/docs-ui';
-import React, { useState } from 'react';
 import type { Workbook } from '@univerjs/core';
+
+import { createInternalEditorID, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Input } from '@univerjs/design';
+import { DocRangeSelector, TextEditor } from '@univerjs/docs-ui';
+import React, { useState } from 'react';
 
 const editorStyle: React.CSSProperties = {
     width: '100%',
@@ -88,7 +88,7 @@ export const TestEditorContainer = () => {
                 canvasStyle={{ fontSize: 14 }}
             />
             <br />
-            <RangeSelector
+            <DocRangeSelector
                 placeholder="please input value"
                 id={createInternalEditorID('test-rangeSelector-1')}
                 width={280}
@@ -97,7 +97,7 @@ export const TestEditorContainer = () => {
                 openForSheetSubUnitId={sheetId}
             />
             <br />
-            <RangeSelector
+            <DocRangeSelector
                 placeholder="please input value"
                 value="I am a wolf man"
                 id={createInternalEditorID('test-rangeSelector-2')}

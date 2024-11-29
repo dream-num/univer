@@ -121,23 +121,25 @@ export class TextRange implements IDocRange {
     }
 
     private _anchorBlink() {
-        const tickFn = () => {
+        setTimeout(() => {
+            if (this._anchorShape) {
+                if (this._anchorShape.visible) {
+                    this.deactivateStatic();
+                }
+            }
+        }, BLINK_ON);
+
+        this._anchorBlinkTimer = setInterval(() => {
             if (this._anchorShape) {
                 if (this._anchorShape.visible) {
                     this.activeStatic();
+
                     setTimeout(() => {
                         this.deactivateStatic();
                     }, BLINK_ON);
                 }
             }
-        };
-
-        // wait for anchorShape created.
-        setTimeout(() => {
-            tickFn();
-        }, 0);
-
-        this._anchorBlinkTimer = setInterval(tickFn, BLINK_OFF + BLINK_ON);
+        }, BLINK_OFF + BLINK_ON);
     }
 
     // The start position of the range
@@ -474,6 +476,7 @@ export class TextRange implements IDocRange {
         }
 
         this._anchorShape = anchor;
+
         this._scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
     }
 

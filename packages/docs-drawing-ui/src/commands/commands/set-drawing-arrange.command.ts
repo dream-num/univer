@@ -22,7 +22,8 @@ import {
     CommandType,
     ICommandService,
     JSONX,
-    Tools } from '@univerjs/core';
+    Tools,
+} from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 

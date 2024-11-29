@@ -125,6 +125,16 @@ export interface IFormulaData {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
 }
 
+export interface IFormulaIdMap {
+    f: string;
+    r: number;
+    c: number;
+}
+
+export interface IFormulaIdMapData {
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaIdMap }> }>;
+}
+
 export interface IOtherFormulaData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IOtherFormulaDataItem }> }>;
 }

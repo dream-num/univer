@@ -209,7 +209,7 @@ function getValueMatrixOfPasteFromIsNull(
     formulaDataModel: FormulaDataModel
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
-    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
+    const formulaData = formulaDataModel.getSheetFormulaData(unitId, subUnitId);
 
     matrix.forValue((row, col, value) => {
         const toRow = range.rows[row];
@@ -248,7 +248,7 @@ function getSpecialPasteValueValueMatrix(
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
     const arrayFormulaCellData = formulaDataModel.getArrayFormulaCellData()?.[pasteFrom.unitId]?.[pasteFrom.subUnitId];
-    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
+    const formulaData = formulaDataModel.getSheetFormulaData(unitId, subUnitId);
 
     matrix.forValue((row, col, value) => {
         const fromRow = pasteFrom.range.rows[row % pasteFrom.range.rows.length];
@@ -393,7 +393,7 @@ function getDefaultPasteValueMatrix(
 ): ObjectMatrix<ICellData> {
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaIdMap = new Map<string, string>();
-    const formulaData = formulaDataModel.getFormulaData()?.[unitId]?.[subUnitId];
+    const formulaData = formulaDataModel.getSheetFormulaData(unitId, subUnitId);
 
     matrix.forValue((row, col, value) => {
         const toRow = range.rows[row];

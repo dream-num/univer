@@ -250,10 +250,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             registerFormulaDependencies(this._injector);
             dependencies?.forEach((d) => this._injector.add(d));
         }
-
-        override onReady(): void {
-            this._formulaDataModel?.initFormulaData();
-        }
     }
 
     univer.registerPlugin(TestPlugin);

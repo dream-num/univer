@@ -18,7 +18,6 @@
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
@@ -313,9 +312,6 @@ describe('Test FRange', () => {
     });
 
     it('Range getFormulas', () => {
-        const formulaDataModel = get(FormulaDataModel);
-        formulaDataModel.initFormulaData();
-
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
         const formulas = activeSheet?.getRange(0, 3, 5, 1)?.getFormulas();
         expect(formulas).toStrictEqual([

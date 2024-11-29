@@ -25,7 +25,7 @@ export { t } from './components/hooks/locale';
 export { useObservable, useObservableRef } from './components/hooks/observable';
 export { RectPopup } from './views/components/popup/RectPopup';
 export { useVirtualList } from './components/hooks/virtual-list';
-export { Menu } from './components/menu/desktop/Menu';
+export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';

@@ -56,7 +56,7 @@ import { ConditionalFormattingPermissionController } from './controllers/cf.perm
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
-import { defaultPluginConfig } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {

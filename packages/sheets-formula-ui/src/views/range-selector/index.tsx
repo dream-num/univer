@@ -237,7 +237,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useVerify(isNeed, onVerify, sequenceNodes);
 
-    useLeftAndRightArrow(isNeed, editor);
+    useLeftAndRightArrow(isNeed, false, editor);
 
     useRefocus();
 

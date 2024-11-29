@@ -40,6 +40,7 @@ export class SheetsSelectionsService extends RxDisposable {
     selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
     selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
     selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
+    selectionSet$: Observable<ISelectionWithStyle[]>;
 
     constructor(
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
@@ -54,6 +55,7 @@ export class SheetsSelectionsService extends RxDisposable {
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
+        this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$));
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._removeWorkbookSelection(workbook.getUnitId());

@@ -213,7 +213,6 @@ export function FormulaBar() {
                             className={styles.formulaContent}
                             unitId={editState?.unitId}
                             subUnitId={editState?.sheetId}
-                            moveCursor={false}
                             keyboradEventConfig={keyCodeConfig}
                             onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                                 isRefSelecting.current = isSelecting;

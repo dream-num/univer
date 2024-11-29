@@ -19,11 +19,11 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 
-import type { ISelectionWithCoord } from '@univerjs/sheets';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { DisposableCollection, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, type ISelectionWithCoord } from '@univerjs/sheets';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export const useSheetSelectionChange = (
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-
+    const refSelectionService = useDependency(IRefSelectionsService);
     const sequenceNodesRef = useStateRef(sequenceNodes);
 
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
@@ -179,6 +179,13 @@ export const useSheetSelectionChange = (
                 }
             });
 
+            const d3 = refSelectionService.selectionSet$.subscribe((selections) => {
+                handleSelectionsChange(selections.map((item) => ({
+                    ...item,
+                    rangeWithCoord: item.range!,
+                    primaryWithCoord: item.primary!,
+                } as any)));
+            });
             // const d2 = refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
             //     handleSelectionsChange(selections);
             // });
@@ -186,6 +193,7 @@ export const useSheetSelectionChange = (
             return () => {
                 d1.unsubscribe();
                 // d2.unsubscribe();
+                d3.unsubscribe();
             };
         }
     }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed]);

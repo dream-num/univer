@@ -132,7 +132,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     isFocus={visible?.visible}
                     unitId={editState?.unitId}
                     subUnitId={editState?.sheetId}
-                    moveCursor={false}
                     keyboradEventConfig={keyCodeConfig}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;

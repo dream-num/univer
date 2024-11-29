@@ -18,7 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
 import { IConfigService, Inject, Injector, Plugin, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
+import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
 import { SetDefinedNameController } from './controller/set-defined-name.controller';
 import { SetDependencyController } from './controller/set-dependency.controller';
@@ -69,7 +69,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

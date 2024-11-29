@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, useDependency } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import clsx from 'clsx';

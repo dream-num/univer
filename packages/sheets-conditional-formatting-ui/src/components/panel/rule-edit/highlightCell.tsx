@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Input, InputNumber, Select } from '@univerjs/design';
+import type {
+    IConditionalFormattingRuleConfig,
+    IHighlightCell,
+    INumberHighlightCell,
+    ITextHighlightCell,
+    ITimePeriodHighlightCell,
+} from '@univerjs/sheets-conditional-formatting';
+import type { IStyleEditorProps } from './type';
 import { LocaleService, useDependency } from '@univerjs/core';
+import { Input, InputNumber, Select } from '@univerjs/design';
 import {
     CFNumberOperator,
     CFRuleType,
@@ -25,18 +32,11 @@ import {
     CFTimePeriodOperator,
     createDefaultValue,
 } from '@univerjs/sheets-conditional-formatting';
-import type {
-    IConditionalFormattingRuleConfig,
-    IHighlightCell,
-    INumberHighlightCell,
-    ITextHighlightCell,
-    ITimePeriodHighlightCell,
-} from '@univerjs/sheets-conditional-formatting';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
-import stylesBase from '../index.module.less';
 import { WrapperError } from '../../wrapper-error/WrapperError';
-import type { IStyleEditorProps } from './type';
+import stylesBase from '../index.module.less';
 import styles from './index.module.less';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.operator.${text}`), value: text });
@@ -127,7 +127,10 @@ const HighlightCellInput = (props: {
                     onChange(value);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm}`}>
+                    <div className={`
+                      ${stylesBase.mTSm}
+                    `}
+                    >
                         <WrapperError errorText={textError}>
                             <Input
                                 className={styles.width100}
@@ -154,7 +157,10 @@ const HighlightCellInput = (props: {
                     numberErrorSet('');
                 };
                 return (
-                    <div className={`${stylesBase.mTSm}`}>
+                    <div className={`
+                      ${stylesBase.mTSm}
+                    `}
+                    >
                         <WrapperError errorText={numberError}>
                             <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={styles.width100} value={inputNumberValue} onChange={_onChange} />
                         </WrapperError>
@@ -175,12 +181,24 @@ const HighlightCellInput = (props: {
                     numberMaxErrorSet('');
                 };
                 return (
-                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} `}>
+                    <div className={`
+                      ${stylesBase.mTSm}
+                      ${stylesBase.labelContainer}
+                    `}
+                    >
                         <WrapperError errorText={numberMinError}>
                             <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
                         </WrapperError>
                         <WrapperError errorText={numberMaxError}>
-                            <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
+                            <InputNumber
+                                min={Number.MIN_SAFE_INTEGER}
+                                max={Number.MAX_SAFE_INTEGER}
+                                className={`
+                                  ${stylesBase.mLSm}
+                                `}
+                                value={inputNumberMax}
+                                onChange={onChangeMax}
+                            />
                         </WrapperError>
 
                     </div>
@@ -377,16 +395,45 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     return (
         <div>
-            <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onTypeChange} value={subType} options={typeOptions} />
-            {operatorOptions?.length && <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />}
+            <div className={`
+              ${stylesBase.title}
+              ${stylesBase.mTBase}
+            `}
+            >
+                {localeService.t('sheet.cf.panel.styleRule')}
+            </div>
+            <Select
+                className={`
+                  ${stylesBase.mTSm}
+                  ${styles.width100}
+                `}
+                onChange={onTypeChange}
+                value={subType}
+                options={typeOptions}
+            />
+            {operatorOptions?.length && (
+                <Select
+                    className={`
+                      ${stylesBase.mTSm}
+                      ${styles.width100}
+                    `}
+                    onChange={onOperatorChange}
+                    value={operator || ''}
+                    options={operatorOptions}
+                />
+            )}
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
-            <div className={`${styles.cfPreviewWrap}`}>
+            <div className={`
+              ${styles.cfPreviewWrap}
+            `}
+            >
                 <Preview rule={getResult({}) as IConditionalFormattingRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`${stylesBase.mLXxs}`}
+                className={`
+                  ${stylesBase.mLXxs}
+                `}
                 onChange={(v) => {
                     styleSet(v);
                     onChange(getResult({ style: v }));

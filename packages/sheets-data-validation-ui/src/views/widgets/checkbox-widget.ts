@@ -20,7 +20,7 @@ import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderin
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
 import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import { Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
+import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, SheetDataValidationModel, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 

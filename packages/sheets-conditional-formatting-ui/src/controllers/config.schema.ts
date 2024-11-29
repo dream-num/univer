@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'sheets-conditional-formatting-ui.config';
+export const SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY = 'sheets-conditional-formatting-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsConditionalFormattingUIConfig {
     menu?: MenuConfig;

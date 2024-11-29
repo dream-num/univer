@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'slides.config';
+export const SLIDES_PLUGIN_CONFIG_KEY = 'slides.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SLIDES_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSlidesConfig {
 }

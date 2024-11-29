@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    Nullable,
-} from '@univerjs/core';
-import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
+import type { DrawingTypeEnum, ICommandInfo, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {

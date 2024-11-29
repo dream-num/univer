@@ -24,6 +24,8 @@ export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 export const defaultDataBarPositiveColor = '#ffbe38';
 export const defaultDataBarNativeColor = '#abd91a';
 
+export const defaultPlaceholderColor = '#000';
+
 const EXTENSION_Z_INDEX = 34;
 
 export class DataBar extends SheetExtension {

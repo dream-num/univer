@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { LocaleService, Tools, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import { GroupSingle, UngroupSingle } from '@univerjs/icons';
+import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
+import { DrawingTypeEnum, type IDrawingParam, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import clsx from 'clsx';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
-import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import { GroupSingle, UngroupSingle } from '@univerjs/icons';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
 
 import styles from './index.module.less';

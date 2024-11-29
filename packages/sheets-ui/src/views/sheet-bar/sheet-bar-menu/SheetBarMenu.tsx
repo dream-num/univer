@@ -145,9 +145,15 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                             key={item.index}
                             onClick={() => handleClick(item)}
                             className={item.selected
-                                ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
+                                ? `
+                                  ${styles.sheetBarMenuItem}
+                                  ${styles.sheetBarMenuItemSelect}
+                                `
                                 : item.hidden
-                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
+                                    ? `
+                                      ${styles.sheetBarMenuItem}
+                                      ${styles.sheetBarMenuItemHide}
+                                    `
                                     : styles.sheetBarMenuItem}
                         >
                             <span className={styles.sheetBarMenuItemIcon}>

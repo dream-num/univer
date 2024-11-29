@@ -35,7 +35,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
-import { PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 import styles from './index.module.less';
 
 interface ISelectListProps {
@@ -57,7 +57,7 @@ const SelectList = (props: ISelectListProps) => {
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
-    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
     const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
     const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
         {

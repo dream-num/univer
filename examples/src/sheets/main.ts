@@ -55,6 +55,8 @@ import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
 
+import '../global.css';
+
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 

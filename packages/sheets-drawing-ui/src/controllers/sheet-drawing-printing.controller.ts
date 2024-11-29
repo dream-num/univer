@@ -15,8 +15,8 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, Inject, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import { Disposable, DrawingTypeEnum, Inject, Tools } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';

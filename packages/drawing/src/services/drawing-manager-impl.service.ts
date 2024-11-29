@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { type Observable, Subject } from 'rxjs';

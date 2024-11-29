@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-find-replace.config';
+export const SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY = 'sheets-find-replace.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsFindReplaceConfig {
 }

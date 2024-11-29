@@ -108,6 +108,10 @@ export class SheetsDataValidationValidatorService extends Disposable {
     }
 
     validatorRanges(unitId: string, subUnitId: string, ranges: IRange[]) {
+        if (!ranges.length) {
+            return Promise.resolve([]);
+        }
+
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             throw new Error(`cannot find current workbook, unitId: ${unitId}`);

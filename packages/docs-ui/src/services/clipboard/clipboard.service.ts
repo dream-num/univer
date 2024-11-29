@@ -18,9 +18,9 @@ import type { IDisposable, IDocumentBody, IDocumentData, Nullable } from '@unive
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 
-import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DrawingTypeEnum, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
+import { ImageSourceType } from '@univerjs/drawing';
 import {
     FILE__BMP_CLIPBOARD_MIME_TYPE,
     FILE__JPEG_CLIPBOARD_MIME_TYPE,

@@ -1,3 +1,5 @@
+const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
+
 exports.baseRules = {
     curly: ['error', 'multi-line'],
     'no-param-reassign': ['warn'],
@@ -139,6 +141,29 @@ exports.facadePreset = () => {
         files: ['**/facade/src/**/*.ts'],
         rules: {
             'ts/explicit-function-return-type': 'error',
+        },
+    };
+};
+
+exports.tailwindcssPreset = () => {
+    return {
+        files: ['**/*.{jsx,tsx}'],
+        languageOptions: {
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+        },
+        plugins: {
+            'readable-tailwind': eslintPluginReadableTailwind,
+        },
+        rules: {
+            ...eslintPluginReadableTailwind.configs.warning.rules,
+            ...eslintPluginReadableTailwind.configs.error.rules,
+            'jsonc/sort-keys': ['warn'],
+            'readable-tailwind/multiline': ['warn', { printWidth: 120 }],
+            'react-hooks/rules-of-hooks': 'off',
         },
     };
 };

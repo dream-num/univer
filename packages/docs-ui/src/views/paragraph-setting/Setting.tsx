@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as React from 'react';
 import { HorizontalAlign, LocaleService, SpacingRule, useDependency } from '@univerjs/core';
-import { useMemo } from 'react';
 import { InputNumber, Select, Tooltip } from '@univerjs/design';
-import clsx from 'clsx';
 import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
+import clsx from 'clsx';
+import * as React from 'react';
+import { useMemo } from 'react';
 import {
     useCurrentParagraph,
     useFirstParagraphHorizontalAlign,
@@ -93,7 +93,11 @@ export function ParagraphSetting() {
     return (
         <div className={styles.paragraphSetting}>
             <div className={styles.paragraphSettingTitle}>{localeService.t('doc.paragraphSetting.alignment')}</div>
-            <div className={`${styles.paragraphSettingIconList} ${styles.paragraphSettingMtBase}`}>
+            <div className={`
+              ${styles.paragraphSettingIconList}
+              ${styles.paragraphSettingMtBase}
+            `}
+            >
                 {alignmentOptions.map((item) => {
                     return (
                         <Tooltip title={item.label} key={item.value} placement="bottom">
@@ -164,7 +168,13 @@ export function ParagraphSetting() {
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
                     <div className={styles.paragraphSettingLabel}>{localeService.t('doc.paragraphSetting.lineSpace')}</div>
-                    <div className={`${styles.paragraphSettingMtBase} ${styles.paragraphSettingSpaceLine}`} style={{ width: 162 }}>
+                    <div
+                        className={`
+                          ${styles.paragraphSettingMtBase}
+                          ${styles.paragraphSettingSpaceLine}
+                        `}
+                        style={{ width: 162 }}
+                    >
                         <Select
                             value={`${spacingRule}`}
                             options={[

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from 'react';
 import { type IRange, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AscendingSingle, DescendingSingle } from '@univerjs/icons';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import React, { useCallback } from 'react';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import styles from './index.module.less';
 
@@ -48,11 +48,23 @@ export default function EmbedSortBtn(props: any) {
 
     return (
         <div className={styles.embedSortBtnContainer}>
-            <div className={`${styles.embedSortBtn} ${styles.embedSortBtnAsc}`} onClick={() => apply(true)}>
+            <div
+                className={`
+                  ${styles.embedSortBtn}
+                  ${styles.embedSortBtnAsc}
+                `}
+                onClick={() => apply(true)}
+            >
                 <AscendingSingle className={styles.embedSortBtnIcon} />
                 {localeService.t('sheets-sort.general.sort-asc')}
             </div>
-            <div className={`${styles.embedSortBtn} ${styles.embedSortBtnDesc}`} onClick={() => apply(false)}>
+            <div
+                className={`
+                  ${styles.embedSortBtn}
+                  ${styles.embedSortBtnDesc}
+                `}
+                onClick={() => apply(false)}
+            >
                 <DescendingSingle className={styles.embedSortBtnIcon} />
                 {localeService.t('sheets-sort.general.sort-desc')}
             </div>

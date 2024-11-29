@@ -18,7 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverActionRecorderConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ACTION_RECORDER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { ActionRecorderService } from './services/action-recorder.service';
 import { ActionReplayService } from './services/replay.service';
 
@@ -41,7 +41,7 @@ export class UniverActionRecorderPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(ACTION_RECORDER_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -144,6 +144,7 @@ export interface IDocumentSkeletonRow {
     ed: number; // endIndex 文本结束索引
     rowSource: ITableRow;
     parent?: IDocumentSkeletonTable;
+    isRepeatRow: boolean; // 是否是标题重复行
 }
 
 export interface IDocumentSkeletonColumn {

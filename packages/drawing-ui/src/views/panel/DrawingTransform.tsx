@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { debounce, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import { Checkbox, InputNumber } from '@univerjs/design';
-import clsx from 'clsx';
+import type { IDrawingParam, Nullable } from '@univerjs/core';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDrawingParam } from '@univerjs/drawing';
+import { debounce, LocaleService, useDependency } from '@univerjs/core';
+import { Checkbox, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { getUpdateParams } from '../../utils/get-update-params';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
+import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
 
 export interface IDrawingTransformProps {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-sort.config';
+export const SHEETS_SORT_PLUGIN_CONFIG_KEY = 'sheets-sort.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_SORT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsSortConfig {
 }

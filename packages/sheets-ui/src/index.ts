@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { SheetsUIPart } from './consts/ui-name';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
@@ -22,7 +24,6 @@ export { SheetScrollManagerService } from './services/scroll-manager.service';
 export { deriveStateFromActiveSheet$, getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { calculateDocSkeletonRects, getCustomRangePosition, getEditingCustomRangePosition } from './services/utils/doc-skeleton-util';
-export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
@@ -62,9 +63,9 @@ export {
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
-export { genSelectionByRange, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll as getAllSelection } from './services/selection/base-selection-render.service';
+export { genSelectionByRange, selectionDataForSelectAll as getAllSelection, getTopLeftSelectionOfCurrSheet } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
-export { SelectionControl as SelectionShape, SelectionControl } from './services/selection/selection-control';
+export { SelectionControl, SelectionControl as SelectionShape } from './services/selection/selection-control';
 export { SelectionShapeExtension } from './services/selection/selection-shape-extension';
 export { genNormalSelectionStyle } from './services/selection/const';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
@@ -113,11 +114,10 @@ export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
 export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/isEmbeddingFormulaEditor';
 export { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
-export { menuSchema } from './controllers/menu.schema';
+export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';
 
 // #region - all commands
-export { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteParams,

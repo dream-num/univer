@@ -25,7 +25,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -50,7 +50,7 @@ export function useSheetHighlight(unitId: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = (refSelections: IRefSelection[]) => {
+    const highlightSheet = useCallback((refSelections: IRefSelection[]) => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -94,7 +94,7 @@ export function useSheetHighlight(unitId: string) {
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
         }
-    };
+    }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, univerInstanceService]);
     return highlightSheet;
 }
 
@@ -103,7 +103,7 @@ export function useDocHight(_leadingCharacter: string = '') {
     const colorMap = useColor();
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
-    const highlightDoc = (editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
+    const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
         const data = editor.getDocumentData();
         if (!data) {
             return [];
@@ -114,9 +114,9 @@ export function useDocHight(_leadingCharacter: string = '') {
         }
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            cloneBody.textRuns = [];
-            const cloneData = { ...data, body: cloneBody };
-            editor.setDocumentData(cloneData);
+            // cloneBody.textRuns = [];
+            // const cloneData = { ...data, body: cloneBody };
+            // editor.setDocumentData(cloneData);
             return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
@@ -150,7 +150,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             editor.setDocumentData(cloneData, selections);
             return refSelections;
         }
-    };
+    }, [descriptionService, colorMap, leadingCharacterLength, _leadingCharacter]);
     return highlightDoc;
 }
 

@@ -21,6 +21,7 @@ import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@u
 import type { ICellEditorState } from '../../services/editor-bridge.service';
 import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -101,8 +102,8 @@ export class EditorDataSyncController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === RichTextEditingMutation.id) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
-                    if (params.isSync) {
+                    const { unitId, trigger, isSync } = params;
+                    if (isSync || trigger === ReplaceSnapshotCommand.id) {
                         return;
                     }
 

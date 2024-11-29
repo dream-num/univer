@@ -24,7 +24,7 @@ import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEmitChange } from '../range-selector/hooks/useEmitChange';
 import { useFirstHighlightDoc } from '../range-selector/hooks/useFirstHighlightDoc';
 import { useFocus } from '../range-selector/hooks/useFocus';
@@ -123,14 +123,18 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
-    const highligh = (text: string, isNeedResetSelection: boolean = true) => {
+    const highligh = useCallback((text: string, isNeedResetSelection: boolean = true) => {
         if (!editor) {
             return;
         }
         const sequenceNodes = getFormulaToken(text);
         const ranges = highlightDoc(editor, sequenceNodes, isNeedResetSelection);
         highlightSheet(ranges);
-    };
+    }, [editor, getFormulaToken, highlightDoc, highlightSheet]);
+
+    useEffect(() => {
+        highligh(formulaWithoutEqualSymbol, false);
+    }, [highligh, formulaWithoutEqualSymbol]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -188,19 +192,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
-
-    useEffect(() => {
-        if (editor) {
-            const d = editor.input$.subscribe((e) => {
-                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
-                needEmit();
-                highligh(getFormulaText(text), false);
-            });
-            return () => {
-                d.unsubscribe();
-            };
-        }
-    }, [editor]);
 
     useFirstHighlightDoc(formulaWithoutEqualSymbol, '=', isFocus, highlightDoc, highlightSheet, editor);
 

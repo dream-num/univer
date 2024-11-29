@@ -17,7 +17,7 @@
 import './global.css';
 
 export { UniverDocsDrawingUIPlugin } from './plugin';
-export { IMAGE_MENU_ID } from './views/menu/image.menu';
+export { DOCS_IMAGE_MENU_ID } from './views/menu/image.menu';
 
 // #region - all commands
 

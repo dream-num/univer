@@ -15,10 +15,10 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { SlidesUIMenuSchema } from '@univerjs/slides-ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { UNI_MENU_POSITIONS } from '@univerjs/uniui';
-import { menuSchema as slidesUIMenuSchema } from '@univerjs/slides-ui';
 
 export const menuSchema: MenuSchemaType = {
-    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (slidesUIMenuSchema as any)[RibbonStartGroup.FORMAT],
+    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (SlidesUIMenuSchema as any)[RibbonStartGroup.FORMAT],
 };

@@ -29,7 +29,7 @@ export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
 export { TextEditor } from './components/editor/TextEditor';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { DocUIController } from './controllers/doc-ui.controller';
-export { menuSchema } from './controllers/menu.schema';
+export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';

@@ -23,7 +23,7 @@ import { Observable } from 'rxjs';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
-export const IMAGE_MENU_ID = 'doc.menu.image';
+export const DOCS_IMAGE_MENU_ID = 'doc.menu.image';
 export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageCommand.id;
 
 // TODO: @Jocs, remove this when cell support drawing.
@@ -63,7 +63,7 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: IMAGE_MENU_ID,
+        id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',

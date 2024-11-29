@@ -19,8 +19,10 @@ import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
 
 import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
+// TODO: @ybzky Need to solve the Circular Dependency in sheet-filter.service, when the import order changes, it will cause the test to fail
+// eslint-disable-next-line perfectionist/sort-imports
+import { SheetsFilterController } from './controllers/sheets-filter.controller';
 
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

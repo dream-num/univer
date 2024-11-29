@@ -37,7 +37,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, Menu, UI_PLUGIN_CONFIG_KEY, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, UI_PLUGIN_CONFIG_KEY, UIMenu, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -414,7 +414,7 @@ export function SheetBarTabs() {
             align={{ offset }}
             trigger={['contextMenu']}
             overlay={(
-                <Menu
+                <UIMenu
                     menuType={ContextMenuPosition.FOOTER_TABS}
                     onOptionSelect={(params) => {
                         const { label: id, value, commandId } = params;

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
+import type { IImageData } from '@univerjs/drawing';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
+import { DrawingTypeEnum, type IDrawingSearch } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image } from '@univerjs/engine-render';
 import { insertGroupObject } from '../controllers/utils';
 

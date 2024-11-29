@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core';
-import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
+import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';

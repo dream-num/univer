@@ -18,9 +18,6 @@ import type { ArrangeTypeEnum, IDisposable, IDrawingParam, IDrawingSearch, Nulla
 import type { Observable } from 'rxjs';
 import { createIdentifier } from '@univerjs/core';
 
-export { ArrangeTypeEnum, DEFAULT_DOCUMENT_SUB_COMPONENT_ID, DrawingTypeEnum } from '@univerjs/core';
-export type { DrawingType, IDrawingParam, IDrawingSearch, IDrawingSpace } from '@univerjs/core';
-
 export interface IDrawingMap<T extends IDrawingParam> {
     [unitId: string]: IDrawingSubunitMap<T>;
 }

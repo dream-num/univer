@@ -38,7 +38,7 @@ import {
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { PLUGIN_CONFIG_KEY } from '../controller/config.schema';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
@@ -265,7 +265,7 @@ export class CalculateFormulaService extends Disposable {
 
         let pendingTasks: (() => void)[] = [];
 
-        const config = this._configService.getConfig(PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
+        const config = this._configService.getConfig(ENGINE_FORMULA_PLUGIN_CONFIG_KEY) as IUniverEngineFormulaConfig;
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
 
         const treeCount = treeList.length;

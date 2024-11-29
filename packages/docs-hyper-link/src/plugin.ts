@@ -18,7 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddHyperLinkMuatation, DeleteHyperLinkMuatation, UpdateHyperLinkMuatation } from './commands/mutations/hyper-link.mutation';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from './controllers/resource.controller';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {
@@ -35,7 +35,7 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

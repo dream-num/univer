@@ -16,9 +16,9 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 
-export const PLUGIN_CONFIG_KEY = 'drawing.config';
+export const DRAWING_PLUGIN_CONFIG_KEY = 'drawing.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DRAWING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDrawingConfig {
     override?: DependencyOverride;

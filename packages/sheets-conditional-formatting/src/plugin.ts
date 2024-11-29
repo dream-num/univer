@@ -25,7 +25,7 @@ import { MoveConditionalRuleMutation } from './commands/mutations/move-condition
 import { SetConditionalRuleMutation } from './commands/mutations/set-conditional-rule.mutation';
 import {
     defaultPluginConfig,
-    PLUGIN_CONFIG_KEY,
+    SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY,
 } from './controllers/config.schema';
 import { ConditionalFormattingRuleModel } from './models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from './models/conditional-formatting-view-model';
@@ -46,7 +46,7 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY, rest);
 
         ([
             [ConditionalFormattingService],

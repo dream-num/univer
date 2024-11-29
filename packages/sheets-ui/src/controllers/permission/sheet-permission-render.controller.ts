@@ -30,7 +30,7 @@ import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/err
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 import { PermissionDetailUserPart } from '../../views/permission/panel-detail/PermissionDetailUserPart';
-import { type IUniverSheetsUIConfig, PLUGIN_CONFIG_KEY } from '../config.schema';
+import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
@@ -72,7 +72,7 @@ export class SheetPermissionRenderManagerController extends Disposable {
 
     private _initUiPartComponents(): void {
         const configService = this._injector.get(IConfigService);
-        const config = configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (!config?.customComponents?.has(UNIVER_SHEET_PERMISSION_USER_PART)) {
             this.disposeWithMe(this._uiPartsService.registerComponent(UNIVER_SHEET_PERMISSION_USER_PART, () => connectInjector(PermissionDetailUserPart, this._injector)));
         }
@@ -92,7 +92,7 @@ export class SheetPermissionRenderController extends Disposable implements IRend
     ) {
         super();
 
-        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
             return;
         }
@@ -147,7 +147,7 @@ export class WorksheetProtectionRenderController extends Disposable implements I
     ) {
         super();
 
-        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
             return;
         }

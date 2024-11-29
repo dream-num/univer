@@ -18,7 +18,7 @@ import type { IUniverSheetsNumfmtUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { defaultPluginConfig } from './controllers/config.schema';
 import { SheetNumfmtUIController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
@@ -45,7 +45,7 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

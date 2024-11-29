@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
+export const SetSheetsFilterRangeMutationId = 'sheet.mutation.set-filter-range';
+export const SetSheetsFilterCriteriaMutationId = 'sheet.mutation.set-filter-criteria';
+export const RemoveSheetsFilterMutationId = 'sheet.mutation.remove-filter';
+export const ReCalcSheetsFilterMutationId = 'sheet.mutation.re-calc-filter';
 
-export const DEBUGGER_PLUGIN_CONFIG_KEY = 'debugger.config';
+export const FILTER_MUTATIONS = new Set([
+    SetSheetsFilterRangeMutationId,
+    SetSheetsFilterCriteriaMutationId,
+    RemoveSheetsFilterMutationId,
+    ReCalcSheetsFilterMutationId,
+]);
 
-export const configSymbol = Symbol(DEBUGGER_PLUGIN_CONFIG_KEY);
-
-export interface IUniverDebuggerConfig {
-    menu?: MenuConfig;
-}
-
-export const defaultPluginConfig: IUniverDebuggerConfig = {};

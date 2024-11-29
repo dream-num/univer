@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-drawing.config';
+export const SHEETS_DRAWING_PLUGIN_CONFIG_KEY = 'sheets-drawing.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_DRAWING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsDrawingConfig {
 }

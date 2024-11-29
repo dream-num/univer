@@ -18,7 +18,7 @@ import type { IUniverFindReplaceConfig } from './controllers/config.schema';
 import { IConfigService, Plugin } from '@univerjs/core';
 
 import { type Dependency, Inject, Injector } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
@@ -36,7 +36,7 @@ export class UniverFindReplacePlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(FIND_REPLACE_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

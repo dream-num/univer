@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'ssheets-conditional-formatting.config';
+export const SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY = 'ssheets-conditional-formatting.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsConditionalFormattingConfig {
 }

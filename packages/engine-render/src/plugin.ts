@@ -17,7 +17,7 @@
 import type { IUniverEngineRenderConfig } from './controllers/config.schema';
 
 import { createIdentifier, IConfigService, Inject, Injector, Plugin, registerDependencies } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
 
@@ -40,7 +40,7 @@ export class UniverRenderEnginePlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(ENGINE_RENDER_PLUGIN_CONFIG_KEY, rest);
 
         registerDependencies(this._injector, [
             [IRenderingEngine, { useFactory: () => new Engine() }],

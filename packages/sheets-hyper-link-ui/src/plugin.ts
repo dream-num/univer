@@ -21,7 +21,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
@@ -50,7 +50,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_HYPER_LINK_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

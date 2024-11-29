@@ -29,7 +29,7 @@ export { Menu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
-export { type IUniverUIConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { ErrorController } from './controllers/error/error.controller';
 export { menuSchema as UIMenuSchema } from './controllers/menus/menu.schema';
 export {

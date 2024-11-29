@@ -85,8 +85,8 @@ import {
     SetCellEditVisibleWithF2Operation,
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
@@ -107,7 +107,7 @@ import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-ite
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
@@ -347,7 +347,7 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (config?.formulaBar !== false) {
             this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
         }

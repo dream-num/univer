@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-thread-comment.config';
+export const SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'sheets-thread-comment.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsThreadCommentBaseConfig {
 }

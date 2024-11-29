@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'sheets-data-validation-ui.config';
+export const SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY = 'sheets-data-validation-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsDataValidationUIConfig {
     menu?: MenuConfig;

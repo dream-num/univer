@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'docs-hyper-link.config';
+export const DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY = 'docs-hyper-link.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_HYPER_LINK_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsHyperLinkConfig {
 }

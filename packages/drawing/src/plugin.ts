@@ -15,14 +15,14 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-
-import { ImageIoService } from './services/image-io-impl.service';
-import { DrawingManagerService } from './services/drawing-manager-impl.service';
-import { IImageIoService } from './services/image-io.service';
-import { IDrawingManagerService } from './services/drawing-manager.service';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DrawingManagerService } from './services/drawing-manager-impl.service';
+import { IDrawingManagerService } from './services/drawing-manager.service';
+import { ImageIoService } from './services/image-io-impl.service';
+import { IImageIoService } from './services/image-io.service';
 
 const PLUGIN_NAME = 'UNIVER_DRAWING_PLUGIN';
 
@@ -38,7 +38,7 @@ export class UniverDrawingPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DRAWING_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

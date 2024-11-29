@@ -19,7 +19,7 @@ import type { IUniverSheetsFindReplaceConfig } from './controllers/config.schema
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
 
 const NAME = 'SHEET_FIND_REPLACE_PLUGIN';
@@ -38,7 +38,7 @@ export class UniverSheetsFindReplacePlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

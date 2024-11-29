@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'drawing-ui.config';
+export const DRAWING_UI_PLUGIN_CONFIG_KEY = 'drawing-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DRAWING_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDrawingUIConfig {
     menu?: MenuConfig;

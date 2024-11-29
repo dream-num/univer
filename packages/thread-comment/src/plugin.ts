@@ -19,7 +19,7 @@ import type { IUniverThreadCommentConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
@@ -39,7 +39,7 @@ export class UniverThreadCommentPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(THREAD_COMMENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

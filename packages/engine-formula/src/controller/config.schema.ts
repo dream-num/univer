@@ -18,9 +18,9 @@ import type { Ctor } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 
-export const PLUGIN_CONFIG_KEY = 'engine-formula.config';
+export const ENGINE_FORMULA_PLUGIN_CONFIG_KEY = 'engine-formula.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEngineFormulaConfig {
     notExecuteFormula?: boolean;

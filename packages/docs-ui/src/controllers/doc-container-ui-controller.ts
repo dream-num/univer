@@ -15,11 +15,11 @@
  */
 
 import type { LocaleType } from '@univerjs/core';
-import { IConfigService, Inject, Injector, LocaleService } from '@univerjs/core';
-
 import type { DocContainer } from '../views/doc-container/DocContainer';
+
 import type { IUniverDocsUIConfig } from './config.schema';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { IConfigService, Inject, Injector, LocaleService } from '@univerjs/core';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 
 export class DocContainerUIController {
     private _docContainer?: DocContainer;
@@ -35,7 +35,7 @@ export class DocContainerUIController {
     getUIConfig() {
         const config = {
             injector: this._injector,
-            config: this._configService.getConfig<IUniverDocsUIConfig>(PLUGIN_CONFIG_KEY),
+            config: this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY),
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
         };

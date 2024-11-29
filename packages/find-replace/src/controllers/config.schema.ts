@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'find-replace.config';
+export const FIND_REPLACE_PLUGIN_CONFIG_KEY = 'find-replace.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(FIND_REPLACE_PLUGIN_CONFIG_KEY);
 
 export interface IUniverFindReplaceConfig {
     menu?: MenuConfig;

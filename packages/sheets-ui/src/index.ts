@@ -119,7 +119,6 @@ export { menuSchema as SheetsUIMenuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';
 
 // #region - all commands
-export { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteParams,

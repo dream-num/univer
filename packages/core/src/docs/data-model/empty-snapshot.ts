@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '../../types/interfaces';
 import { Tools } from '../../shared/tools';
 import { BooleanNumber } from '../../types/enum';
 import { LocaleType } from '../../types/enum/locale-type';
-import { DocumentFlavor, type IDocumentData } from '../../types/interfaces';
+import { DocumentFlavor } from '../../types/interfaces';
 
 export function getEmptySnapshot(
     unitID = Tools.generateRandomId(6),

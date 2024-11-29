@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { DrawingTypeEnum, type IDrawingManagerService, type IDrawingParam, type IImageData } from '@univerjs/drawing';
+import type { IDrawingParam, Nullable } from '@univerjs/core';
+import type { IDrawingManagerService, IImageData } from '@univerjs/drawing';
 import type { BaseObject, Image } from '@univerjs/engine-render';
+import { DrawingTypeEnum } from '@univerjs/core';
 
 export function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<IDrawingParam>[] {
     const params: Nullable<IDrawingParam>[] = [];

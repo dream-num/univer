@@ -45,8 +45,8 @@ export class EditorDataSyncController extends Disposable {
     }
 
     private _initialize() {
-        // this._syncFormulaEditorContent();
-        // this._commandExecutedListener();
+        this._syncFormulaEditorContent();
+        this._commandExecutedListener();
     }
 
     private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {
@@ -105,6 +105,7 @@ export class EditorDataSyncController extends Disposable {
                     if (params.isSync) {
                         return;
                     }
+
                     if (INCLUDE_LIST.includes(unitId)) {
                         // sync cell content to formula editor bar when edit cell editor and vice verse.
                         const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);

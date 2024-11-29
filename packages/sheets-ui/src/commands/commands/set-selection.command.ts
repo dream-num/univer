@@ -139,7 +139,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTabCommandParams> = {
     id: 'sheet.command.move-selection-enter-tab',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor, params) => {
         if (!params) {
             return false;
@@ -318,6 +318,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     worksheet
                 )
                 : shrinkToNextCell(startRange, direction, worksheet);
+        destRange.rangeType = selection.range.rangeType;
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;

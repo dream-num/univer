@@ -16,6 +16,7 @@
 
 import type { DocumentDataModel, IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
+import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
@@ -65,7 +66,9 @@ export interface IFormulaEditorProps {
     moveCursor?: boolean;
     onFormulaSelectingChange?: (isSelecting: FormulaSelectingType) => void;
     keyboradEventConfig?: IKeyboardEventConfig;
+    onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
 }
+
 const noop = () => { };
 export function FormulaEditor(props: IFormulaEditorProps) {
     const {
@@ -85,6 +88,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         moveCursor = true,
         onFormulaSelectingChange: propOnFormulaSelectingChange,
         keyboradEventConfig,
+        onMoveInEditor,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -116,6 +120,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
     const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
+
     useEffect(() => {
         if (isSelecting === FormulaSelectingType.NEED_ADD) {
             setShouldMoveRefSelection(true);
@@ -174,11 +179,13 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { checkScrollBar } = useResize(editor);
     useRefactorEffect(isFocus, Boolean(isSelecting), unitId);
-    useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor);
+    useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor, onMoveInEditor);
 
-    const handleSelectionChange = (refString: string, offset: number, isEnd: boolean) => {
+    const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         needEmit();
-        highligh(refString);
+        if (refString !== formulaText) {
+            highligh(refString);
+        }
         if (isEnd) {
             focus();
             if (offset !== -1) {
@@ -192,8 +199,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             }
             checkScrollBar();
         }
-    };
-    useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
+    });
+    useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
 
     useRefocus();
     useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);

@@ -28,6 +28,7 @@ export interface ISetSelectionsOperationParams {
 
     /** If should scroll to the selected range. */
     reveal?: boolean;
+    trigger?: string;
 }
 
 /**

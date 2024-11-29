@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService, useDependency } from '@univerjs/core';
+import type { KeyCode } from '@univerjs/ui';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
-import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
+import { DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
+import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
+import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -50,6 +52,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const componentManager = useDependency(ComponentManager);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const visible = useObservable(editorBridgeService.visible$);
+    const commandService = useDependency(ICommandService);
     const isRefSelecting = useRef<0 | 1 | 2>(0);
     const disableAutoFocus = useObservable(
         () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
@@ -112,6 +115,16 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
     const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId!);
 
+    const onMoveInEditor = useEvent((keycode: KeyCode, metaKey: MetaKeys) => {
+        commandService.executeCommand(SetCellEditVisibleArrowOperation.id, {
+            keycode,
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            isShift: metaKey === MetaKeys.SHIFT || metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT),
+            unitId: editState?.unitId,
+        });
+    });
+
     return (
         <div
             className={styles.editorContainer}
@@ -133,6 +146,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     unitId={editState?.unitId}
                     subUnitId={editState?.sheetId}
                     keyboradEventConfig={keyCodeConfig}
+                    onMoveInEditor={onMoveInEditor}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
                         if (isSelecting === 1) {

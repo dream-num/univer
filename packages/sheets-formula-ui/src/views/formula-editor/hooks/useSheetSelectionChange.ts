@@ -19,11 +19,13 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 
+import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
-import { DisposableCollection, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IRefSelectionsService, type ISelectionWithCoord } from '@univerjs/sheets';
+import { SetSelectionsOperation } from '@univerjs/sheets';
+import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -42,12 +44,13 @@ export const useSheetSelectionChange = (
     subUnitId: string,
     sequenceNodes: INode[],
     isSupportAcrossSheet: boolean,
+    listenSelectionSet: boolean,
     editor?: Editor,
     handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const refSelectionService = useDependency(IRefSelectionsService);
+    const commandService = useDependency(ICommandService);
     const sequenceNodesRef = useStateRef(sequenceNodes);
 
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
@@ -169,7 +172,8 @@ export const useSheetSelectionChange = (
                     handleRangeChange(result, result.length, true);
                 }
             };
-            const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+            const disposableCollection = new DisposableCollection();
+            disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections);
                 isScalingRef.current = false;
                 if (scalingOptionRef.current) {
@@ -177,23 +181,10 @@ export const useSheetSelectionChange = (
                     handleRangeChange(result, offset || -1, true);
                     scalingOptionRef.current = undefined;
                 }
-            });
-
-            const d3 = refSelectionService.selectionSet$.subscribe((selections) => {
-                handleSelectionsChange(selections.map((item) => ({
-                    ...item,
-                    rangeWithCoord: item.range!,
-                    primaryWithCoord: item.primary!,
-                } as any)));
-            });
-            // const d2 = refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-            //     handleSelectionsChange(selections);
-            // });
+            }));
 
             return () => {
-                d1.unsubscribe();
-                // d2.unsubscribe();
-                d3.unsubscribe();
+                disposableCollection.dispose();
             };
         }
     }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed]);
@@ -286,4 +277,62 @@ export const useSheetSelectionChange = (
             };
         }
     }, [isNeed, refSelectionsRenderService, editor]);
+
+    useEffect(() => {
+        if (listenSelectionSet) {
+            const d = commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const params = commandInfo.params as ISetSelectionsOperationParams & { trigger: string };
+                if (
+                    params.trigger !== MoveSelectionCommand.id &&
+                    params.trigger !== MoveSelectionEnterAndTabCommand.id &&
+                    params.trigger !== ExpandSelectionCommand.id
+                ) {
+                    return;
+                }
+                const { unitId, subUnitId, selections } = params;
+
+                if (selections.length) {
+                    const last = selections[selections.length - 1];
+                    if (last) {
+                        const range = last.range;
+                        const sheetId = range.sheetId ?? subUnitId;
+                        const unitRangeName = {
+                            range,
+                            unitId: range.unitId ?? unitId,
+                            sheetName: getSheetNameById(sheetId),
+                        };
+                        const sequenceNodes = [...sequenceNodesRef.current];
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        const result = refRanges[0];
+                        const lastNode = sequenceNodes[sequenceNodes.length - 1];
+                        if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {
+                            lastNode.token = result;
+                            lastNode.endIndex = lastNode.startIndex + result.length;
+                            const refStr = sequenceNodeToText(sequenceNodes);
+                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        } else {
+                            const start = getOffsetFromSequenceNodes(sequenceNodes);
+                            sequenceNodes.push({
+                                nodeType: sequenceNodeType.REFERENCE,
+                                token: result,
+                                startIndex: start,
+                                endIndex: start + result.length,
+                            });
+
+                            const refStr = sequenceNodeToText(sequenceNodes);
+                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        }
+                    }
+                }
+            });
+
+            return () => {
+                d.dispose();
+            };
+        }
+    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef]);
 };

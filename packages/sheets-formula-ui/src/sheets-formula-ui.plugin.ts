@@ -20,7 +20,7 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencie
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
+import { EMBEDDING_CELL_EDITOR_COMPONENT_KEY, EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
@@ -36,6 +36,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { CellEditor } from './views/formula-editor/cell-editor';
 import { FormulaEditor } from './views/formula-editor/index';
 import { RangeSelector } from './views/range-selector';
 
@@ -96,6 +97,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
         componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
         componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
+        componentManager.register(EMBEDDING_CELL_EDITOR_COMPONENT_KEY, CellEditor);
     }
 
     override onSteady(): void {

@@ -67,7 +67,7 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -121,11 +121,13 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             },
         ];
 
-        const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        const rs = accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
             selections,
+            trigger: MoveSelectionCommand.id,
         });
+
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
         selectionService?.refreshSelectionMoveEnd();
@@ -140,7 +142,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
     id: 'sheet.command.move-selection-enter-tab',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -267,11 +269,11 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             };
         }
 
-        const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        const rs = accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
-
             selections: [resultRange],
+            trigger: MoveSelectionEnterAndTabCommand.id,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
@@ -291,7 +293,7 @@ export interface IExpandSelectionCommandParams {
 export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
     id: 'sheet.command.expand-selection',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -323,16 +325,16 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
-        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        return accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-
             selections: [
                 {
                     range: destRange,
                     primary, // this remains unchanged
                 },
             ],
+            trigger: ExpandSelectionCommand.id,
         });
     },
 };

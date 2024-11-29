@@ -34,10 +34,8 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
         if (isNeed && selecting) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
-            contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
-                contextService.setContextValue(EDITOR_ACTIVATED, false);
                 contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
                 d1?.dispose();
             };
@@ -55,8 +53,10 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     //right context controller
     useEffect(() => {
         if (isNeed) {
+            contextService.setContextValue(EDITOR_ACTIVATED, true);
             contextMenuService.disable();
             return () => {
+                contextService.setContextValue(EDITOR_ACTIVATED, false);
                 contextMenuService.enable();
             };
         }

@@ -35,7 +35,7 @@ import { BorderStyleManagerService } from '../../../services/border-style-manage
 import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {

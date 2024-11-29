@@ -25,9 +25,9 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
-import { RangeProtectionCache } from './model/range-protection.cache';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
+import { RangeProtectionCache } from './model/range-protection.cache';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
@@ -38,7 +38,7 @@ import { RangeProtectionService } from './services/permission/range-permission/r
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from './services/selections/selection-manager.service';
+import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';

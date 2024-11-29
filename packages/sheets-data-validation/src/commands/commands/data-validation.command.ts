@@ -23,7 +23,7 @@ import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
-import { isCustomFormulaType } from '../../utils/formula';
+import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
 
@@ -57,6 +57,7 @@ export function getDataValidationDiffMutations(
     fillDefaultValue = true
 ) {
     const lexerTreeBuilder = accessor.get(LexerTreeBuilder);
+    const validatorRegistryService = accessor.get(DataValidatorRegistryService);
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
     const sheetDataValidationModel = accessor.get(SheetDataValidationModel);
@@ -115,7 +116,7 @@ export function getDataValidationDiffMutations(
                 });
                 break;
             case 'update': {
-                if (isCustomFormulaType(diff.rule.type)) {
+                if (shouldOffsetFormulaByRange(diff.rule.type, validatorRegistryService)) {
                     const originRow = diff.oldRanges[0].startRow;
                     const originColumn = diff.oldRanges[0].startColumn;
                     const newRow = diff.newRanges[0].startRow;
@@ -157,6 +158,34 @@ export function getDataValidationDiffMutations(
                                         ranges: diff.oldRanges,
                                     },
                                 },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+                    } else {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.newRanges,
+                                },
+                                source,
+                            } as IUpdateDataValidationMutationParams,
+                        });
+
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.oldRanges,
+                                },
+                                source,
                             } as IUpdateDataValidationMutationParams,
                         });
                     }

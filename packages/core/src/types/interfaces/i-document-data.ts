@@ -197,7 +197,7 @@ export interface INestingLevel {
     startNumber: number;
 
     // Union field glyph_kind can be only one of the following:
-    glyphType?: GlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
+    glyphType?: ListGlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
     glyphSymbol?: string; // the tag of the unordered list
     // End of list of possible types for union field glyph_kind.
 }
@@ -214,7 +214,7 @@ export enum FollowNumberWithType {
 /**
  * An enumeration of the supported glyph types.
  */
-export enum GlyphType {
+export enum ListGlyphType {
     BULLET, // The glyph type is unspecified or unsupported.
     NONE, // 	An empty string.
     DECIMAL, // 	A number, like 1, 2, or 3.

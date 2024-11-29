@@ -57,7 +57,7 @@ export class DataValidatorRegistryService {
         }
     }
 
-    register(validator: BaseDataValidator<any>) {
+    register(validator: BaseDataValidator) {
         this._validatorMap.set(validator.id, validator);
 
         if (Array.isArray(validator.scopes)) {

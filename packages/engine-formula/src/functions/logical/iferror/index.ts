@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { BaseFunction } from '../../base-function';
 
 export class Iferror extends BaseFunction {
@@ -25,14 +25,6 @@ export class Iferror extends BaseFunction {
     override maxParams = 2;
 
     override calculate(value: BaseValueObject, valueIfError: BaseValueObject) {
-        if (value.isError()) {
-            return value;
-        }
-
-        if (valueIfError.isError()) {
-            return valueIfError;
-        }
-
         if (!value.isArray()) {
             return value.isError() ? valueIfError : value;
         }

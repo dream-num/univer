@@ -15,13 +15,13 @@
  */
 
 import type { Injector, Workbook } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../../basics/interfaces/mutation-interface';
+import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+
+import { beforeEach, describe, expect, it } from 'vitest';
 import { InsertColMutation, InsertRowMutation } from '../insert-row-col.mutation';
 import {
     RemoveColMutation,
@@ -52,6 +52,7 @@ describe('Test moving rows & cols', () => {
     beforeEach(() => {
         const bed = createCommandTestBed();
         get = bed.get;
+        has = bed.has;
         const commandService = get(ICommandService);
         const commandList = [InsertColMutation, InsertRowMutation, RemoveColMutation, RemoveRowMutation];
         commandList.forEach((cm) => commandService.registerCommand(cm));

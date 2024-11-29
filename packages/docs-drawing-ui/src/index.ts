@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverDocsDrawingUIPlugin } from './plugin';
 export { IMAGE_MENU_ID } from './views/menu/image.menu';
 

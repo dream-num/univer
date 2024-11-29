@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Tools, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -31,7 +31,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-import { enUS, faIR, ruRU, zhCN } from '../locales';
+import { enUS, faIR, frFR, ruRU, zhCN } from '../locales';
 
 import 'react-mosaic-component/react-mosaic-component.css';
 import './index.css';
@@ -44,6 +44,7 @@ function factory(id: string) {
             locales: {
                 [LocaleType.ZH_CN]: zhCN,
                 [LocaleType.EN_US]: enUS,
+                [LocaleType.FR_FR]: frFR,
                 [LocaleType.RU_RU]: ruRU,
                 [LocaleType.FA_IR]: faIR,
             },
@@ -68,7 +69,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         // create univer sheet instance
-        univer.createUniverSheet(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
+        univer.createUnit(UniverInstanceType.UNIVER_SHEET, Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
     };
 }
 
@@ -112,4 +113,4 @@ export function App() {
         />
     );
 };
-createRoot(document.getElementById('container')!).render(<App />);
+createRoot(document.getElementById('app')!).render(<App />);

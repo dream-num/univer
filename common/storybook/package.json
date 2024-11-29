@@ -17,28 +17,33 @@
     },
     "dependencies": {
         "@chromatic-com/storybook": "^3.2.2",
-        "@storybook/addon-essentials": "^8.4.4",
-        "@storybook/addon-interactions": "^8.4.4",
-        "@storybook/addon-links": "^8.4.4",
+        "@storybook/addon-essentials": "^8.4.5",
+        "@storybook/addon-interactions": "^8.4.5",
+        "@storybook/addon-links": "^8.4.5",
         "@storybook/addon-styling-webpack": "^1.0.1",
         "@storybook/addon-webpack5-compiler-swc": "^1.0.5",
-        "@storybook/blocks": "^8.4.4",
+        "@storybook/blocks": "^8.4.5",
         "@storybook/icons": "^1.2.12",
-        "@storybook/react": "^8.4.4",
-        "@storybook/react-webpack5": "^8.4.4",
-        "@storybook/types": "^8.4.4",
+        "@storybook/react": "^8.4.5",
+        "@storybook/react-webpack5": "^8.4.5",
+        "@storybook/types": "^8.4.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "css-loader": "^7.1.2",
         "less-loader": "^12.2.0",
-        "storybook": "^8.4.4",
+        "postcss-loader": "^8.1.1",
+        "storybook": "^8.4.5",
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^4.0.0",
         "tsconfig-paths-webpack-plugin": "^4.2.0",
-        "typescript": "^5.6.3"
+        "typescript": "^5.7.2"
     },
     "devDependencies": {
-        "@univerjs-infra/shared": "workspace:*"
+        "@types/fs-extra": "^11.0.4",
+        "@univerjs-infra/shared": "workspace:*",
+        "fs-extra": "^11.2.0",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.15"
     }
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/thread-comment-panel';

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 export { UniverSheetsThreadCommentUIPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';

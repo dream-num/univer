@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSheetsSortUIPlugin } from './plugin';
 
 // #region - all commands

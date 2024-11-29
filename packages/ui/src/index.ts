@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';

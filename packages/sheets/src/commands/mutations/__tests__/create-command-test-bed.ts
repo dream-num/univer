@@ -21,6 +21,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    LocaleType,
     LogLevel,
     Plugin,
     Univer,
@@ -32,7 +33,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     sheetOrder: ['uE_mIgOi73GuLCvu577On'],
     name: 'UniverSheet Demo',
     appVersion: '3.0.0-alpha',
-    locale: 'zhCN' as any,
+    locale: LocaleType.EN_US,
     styles: {},
     sheets: {
         uE_mIgOi73GuLCvu577On: {
@@ -101,6 +102,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
+    has: Injector['has'];
     sheet: Workbook;
 }
 
@@ -136,6 +138,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     return {
         univer,
         get: injector.get.bind(injector),
+        has: injector.has.bind(injector),
         sheet,
     };
 }

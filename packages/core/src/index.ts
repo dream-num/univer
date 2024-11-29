@@ -178,9 +178,7 @@ export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets
 
 export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
-export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';
-export * from './types/enum';
 export * from './types/enum';
 export { DataValidationErrorStyle } from './types/enum/data-validation-error-style';
 export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
@@ -189,10 +187,9 @@ export { DataValidationRenderMode } from './types/enum/data-validation-render-mo
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
 export * from './types/interfaces';
-export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
-export { type IRTreeItem, RTree } from './shared/r-tree';
+export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 
 export { type IUniverConfig, Univer } from './univer';
 export { isNodeEnv } from './shared/tools';

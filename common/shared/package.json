@@ -15,25 +15,29 @@
         "./eslint": "./eslint/index.js",
         "./tsconfigs/*": "./tsconfigs/*.json",
         "./vite": "./vite/index.ts",
-        "./vitest": "./vitest/index.js"
+        "./vitest": "./vitest/index.js",
+        "./tailwind": "./tailwind/tailwind.config.ts",
+        "./postcss": "./postcss/postcss.config.mjs"
     },
     "main": "bin/index.js",
     "bin": {
         "univer-cli": "bin/index.ts"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^8.15.0",
-        "@vitejs/plugin-react": "^4.3.3",
-        "@vitejs/plugin-vue": "^5.2.0",
-        "@vitest/coverage-istanbul": "^2.1.5",
+        "@typescript-eslint/parser": "^8.16.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "@vitest/coverage-istanbul": "^2.1.6",
+        "eslint-plugin-readable-tailwind": "^1.8.2",
         "fs-extra": "^11.2.0",
         "happy-dom": "15.0.0",
         "javascript-obfuscator": "^4.1.1",
         "sort-keys": "^5.1.0",
-        "vite": "^5.4.11",
+        "tailwindcss": "^3.4.15",
+        "vite": "^6.0.0",
         "vite-plugin-dts": "^4.3.0",
         "vite-plugin-external": "^4.3.1",
-        "vitest": "^2.1.5"
+        "vitest": "^2.1.6"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",

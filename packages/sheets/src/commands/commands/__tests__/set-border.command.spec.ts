@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IBorderData, Injector, IRange, Univer } from '@univerjs/core';
 import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IBorderData, Injector, IRange, Univer } from '@univerjs/core';
 
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';

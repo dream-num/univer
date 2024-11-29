@@ -29,7 +29,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { WorksheetEditPermission } from '../../services/permission/permission-point';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';

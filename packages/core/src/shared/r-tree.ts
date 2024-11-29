@@ -361,3 +361,5 @@ export class RTree {
         }
     }
 }
+
+export { type BBox, RBush };

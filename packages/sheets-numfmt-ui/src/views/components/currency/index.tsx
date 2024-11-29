@@ -74,7 +74,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 options ">
+            <div className="m-t-16 options">
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>
                     <div className="m-t-8 w-120">

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { Avatar, type IAvatarProps } from './components/avatar';
 export { Button, type ButtonSize, type ButtonType, type IButtonProps } from './components/button';
 export { CascaderList, type ICascaderListProps } from './components/cascader-list';

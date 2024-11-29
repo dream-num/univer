@@ -42,7 +42,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -55,6 +55,8 @@ import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
+
+import '../global.css';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -77,6 +79,7 @@ const univer = new Univer({
     locales: {
         [LocaleType.ZH_CN]: zhCN,
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FR_FR]: frFR,
         [LocaleType.RU_RU]: ruRU,
         [LocaleType.ZH_TW]: zhTW,
         [LocaleType.VI_VN]: viVN,

@@ -17,7 +17,7 @@
 import { ThemeService, useDependency } from '@univerjs/core';
 import { Tooltip } from '@univerjs/design';
 import { CloseSingle } from '@univerjs/icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from './index.module.less';
 
 export interface IProgressBarProps {
@@ -35,30 +35,36 @@ export function ProgressBar(props: IProgressBarProps) {
     const color = barColor ?? themeService.getCurrentTheme().primaryColor; ;
 
     const progressBarInnerRef = useRef<HTMLDivElement>(null);
-    // Introduce a state variable for visibility
-    const [visible, setVisible] = useState(count > 0);
+    const progressBarContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!progressBarInnerRef.current) return;
-
         const progressBarInner = progressBarInnerRef.current;
+        const progressBarContainer = progressBarContainerRef.current;
+
+        if (!progressBarInner || !progressBarContainer) return;
 
         // Hide immediately if both count and done are zero
         if (count === 0 && done === 0) {
-            setVisible(false);
+            progressBarContainer.style.display = 'none';
             progressBarInner.style.width = '0%';
+            return;
         }
         // Update the width of the progress bar
         else if (count > 0) {
-            setVisible(true);
+            progressBarContainer.style.display = 'flex';
+
+            const width = Math.floor((done / count) * 100);
 
             // Trigger the animation to prevent the progress bar from not being closed due to reaching 100% too quickly without animation
             if (done === count) {
                 requestAnimationFrame(() => {
-                    progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+                    progressBarInner.style.width = `${width - 1}%`; // Set a width slightly smaller than the target
+                    requestAnimationFrame(() => {
+                        progressBarInner.style.width = `${width}%`; // Then set the target width
+                    });
                 });
             } else {
-                progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+                progressBarInner.style.width = `${width}%`;
             }
         }
         // Else, wait for the transition to end before hiding
@@ -67,7 +73,8 @@ export function ProgressBar(props: IProgressBarProps) {
         const handleTransitionEnd = () => {
             if (done === count) {
                 // Hide the progress bar after the animation finishes
-                setVisible(false);
+                progressBarContainer.style.display = 'none';
+                progressBarInner.style.width = '0%';
 
                 // Notify the parent component to reset the progress after the animation ends
                 // After the progress bar is completed 100%, the upper props data source may not be reset, resulting in count and done still being the previous values (displaying 100%) when the progress bar is triggered next time, so a message is reported here to trigger clearing.
@@ -84,7 +91,7 @@ export function ProgressBar(props: IProgressBarProps) {
     }, [count, done]);
 
     return (
-        <div className={styles.progressBarContainer} style={{ display: visible ? 'flex' : 'none' }}>
+        <div ref={progressBarContainerRef} className={styles.progressBarContainer} style={{ display: 'none' }}>
 
             <Tooltip showIfEllipsis title={label}>
                 <span className={styles.progressBarLabel}>{label}</span>

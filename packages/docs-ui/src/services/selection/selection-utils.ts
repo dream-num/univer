@@ -197,6 +197,8 @@ export function getRangeListFromSelection(
     for (const section of viewModel.getChildren()) {
         for (const paragraph of section.children) {
             const { startIndex, endIndex, children } = paragraph;
+            const paragraphIndex = section.children.indexOf(paragraph);
+            const nextParagraph = section.children[paragraphIndex + 1];
             const table = children[0];
 
             let endInTable = false;
@@ -252,13 +254,13 @@ export function getRangeListFromSelection(
                 }
             }
 
-            if ((end >= startIndex && end <= endIndex + 1) || endInTable) {
-                // TO fix https://github.com/dream-num/univer-pro/issues/3437.
-                if (end === endIndex + 1 && !endInTable) {
-                    end = endIndex;
-                    endInTable = true;
-                }
+            // TO fix https://github.com/dream-num/univer-pro/issues/3437.
+            if (end === endIndex + 1 && !endInTable && nextParagraph && nextParagraph.children.length) {
+                end = endIndex;
+                endInTable = true;
+            }
 
+            if ((end >= startIndex && end <= endIndex) || endInTable) {
                 const sp = skeleton.findNodePositionByCharIndex(start, true, segmentId, segmentPage);
                 const ep = skeleton.findNodePositionByCharIndex(end, !endInTable, segmentId, segmentPage);
                 const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;

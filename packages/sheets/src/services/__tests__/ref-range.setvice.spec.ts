@@ -15,15 +15,15 @@
  */
 
 import type { Injector, IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { RefRangeService } from '../ref-range/ref-range.service';
-import { SheetsSelectionsService } from '../selections/selection-manager.service';
+import { SheetsSelectionsService } from '../selections/selection.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from './util';
 

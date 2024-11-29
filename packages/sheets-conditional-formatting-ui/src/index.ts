@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
 export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';

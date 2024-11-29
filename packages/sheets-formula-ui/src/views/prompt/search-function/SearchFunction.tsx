@@ -161,7 +161,10 @@ export function SearchFunction() {
                     <li
                         key={index}
                         className={active === index
-                            ? `${styles.formulaSearchFunctionItem} ${styles.formulaSearchFunctionItemActive}`
+                            ? `
+                              ${styles.formulaSearchFunctionItem}
+                              ${styles.formulaSearchFunctionItemActive}
+                            `
                             : styles.formulaSearchFunctionItem}
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}

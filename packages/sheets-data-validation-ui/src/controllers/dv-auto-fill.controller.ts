@@ -24,7 +24,7 @@ import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscret
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -37,7 +37,7 @@ export class DataValidationAutoFillController extends Disposable {
 
         const generalApplyFunc = (location: IAutoFillLocation, applyType: APPLY_TYPE) => {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
-            const ruleMatrixCopy = this._dataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
+            const ruleMatrixCopy = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
 
             const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
             const [vSourceRange, vTargetRange] = virtualRange.ranges;
@@ -75,44 +75,40 @@ export class DataValidationAutoFillController extends Disposable {
                         sourceRange
                     );
                     const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
-                    const ruleId = this._dataValidationModel.getRuleIdByLocation(unitId, subUnitId, sourceRow, sourceCol);
-                    if (ruleId) {
-                        const targetPositionRange = Rectangle.getPositionRange(
-                            {
-                                startRow: row,
-                                startColumn: col,
-                                endColumn: col,
-                                endRow: row,
-                            },
-                            targetRange
-                        );
-                        const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
+                    // if ruleId exists, set more dv rules, if not, clear dv rules.
+                    const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, sourceRow, sourceCol) || '';
+                    const targetPositionRange = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                            endRow: row,
+                        },
+                        targetRange
+                    );
+                    const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
 
-                        additionMatrix.setValue(targetRow, targetCol, ruleId);
-                        additionRules.add(ruleId);
-                    }
+                    additionMatrix.setValue(targetRow, targetCol, ruleId);
+                    additionRules.add(ruleId);
                 });
             });
             const additions = Array.from(additionRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
             ruleMatrixCopy.addRangeRules(additions);
-            const diffs = ruleMatrixCopy.diff(this._dataValidationModel.getRules(unitId, subUnitId));
+            const diffs = ruleMatrixCopy.diff(this._sheetDataValidationModel.getRules(unitId, subUnitId));
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched', applyType === APPLY_TYPE.ONLY_FORMAT);
             return {
                 undos: undoMutations,
                 redos: redoMutations,
             };
         };
-        const disabledDataVallation = [
-            DataValidationType.CHECKBOX,
-        ];
         const hook: ISheetAutoFillHook = {
             id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeFillData: (location) => {
                 const { source: sourceRange, unitId, subUnitId } = location;
                 for (const row of sourceRange.rows) {
                     for (const col of sourceRange.cols) {
-                        const dv = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
-                        if (dv && disabledDataVallation.indexOf(dv.type) > -1) {
+                        const dv = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+                        if (dv && dv.type === DataValidationType.CHECKBOX) {
                             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
                             return;
                         }

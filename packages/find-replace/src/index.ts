@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverFindReplacePlugin } from './plugin';
 export { FindReplaceController } from './controllers/find-replace.controller';
 export type {

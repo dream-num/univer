@@ -25,21 +25,22 @@ export enum DisableLinkType {
     DISABLED_BY_CELL = 1,
     ALLOW_ON_EDITING = 2,
 }
+const disables = new Set<string>([
+    DataValidationType.CHECKBOX,
+    DataValidationType.LIST,
+    DataValidationType.LIST_MULTIPLE,
+]);
 
 export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
         return DisableLinkType.DISABLED_BY_CELL;
     }
-    const disables = [
-        DataValidationType.CHECKBOX,
-        DataValidationType.LIST,
-        DataValidationType.LIST_MULTIPLE,
-    ];
+
     const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
     const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
-    if (rule && disables.includes(rule.type)) {
-        return DisableLinkType.DISABLED_BY_CELL;
+    if (rule && disables.has(rule.type)) {
+        return true;
     }
 
     if (cell?.p?.drawingsOrder?.length) {

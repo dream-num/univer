@@ -29,7 +29,6 @@ export { RefSelectionsRenderService } from './services/render-services/ref-selec
 
 // #region - all commands
 
-export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
 

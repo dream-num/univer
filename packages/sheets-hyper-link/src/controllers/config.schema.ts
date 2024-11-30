@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-hyper-link.config';
+export const SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY = 'sheets-hyper-link.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsHyperLinkConfig {
 }

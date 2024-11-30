@@ -20,7 +20,7 @@ import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
-import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
@@ -30,7 +30,7 @@ import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
@@ -67,13 +67,13 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
+import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 import {
     FormulaEditorManagerService,
     IFormulaEditorManagerService,
 } from './services/editor/formula-editor-manager.service';
-import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { HoverManagerService } from './services/hover-manager.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
@@ -111,7 +111,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -139,7 +139,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoHeightController],
             [AutoWidthController],
             [FormulaEditorController],
-            [SheetClipboardController],
             [SheetsRenderService],
             [SheetUIController],
             [StatusBarController],
@@ -169,6 +168,10 @@ export class UniverSheetsUIPlugin extends Plugin {
         if (!this._config.disableAutoFocus) {
             this._initAutoFocus();
         }
+
+        registerDependencies(this._injector, [
+            [SheetClipboardController],
+        ]);
 
         this._registerRenderBasics();
 

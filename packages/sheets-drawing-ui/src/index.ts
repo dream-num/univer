@@ -18,7 +18,7 @@ import './global.css';
 
 export { UniverSheetsDrawingUIPlugin } from './plugin';
 export { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
-export { IMAGE_MENU_ID } from './views/menu/image.menu';
+export { SHEETS_IMAGE_MENU_ID } from './views/menu/image.menu';
 
 // #region - all commands
 

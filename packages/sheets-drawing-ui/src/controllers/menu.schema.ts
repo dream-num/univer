@@ -17,11 +17,11 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
-import { IMAGE_MENU_ID, ImageMenuFactory, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { ImageMenuFactory, SHEETS_IMAGE_MENU_ID, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {
-        [IMAGE_MENU_ID]: {
+        [SHEETS_IMAGE_MENU_ID]: {
             order: 3,
             menuItemFactory: ImageMenuFactory,
             [InsertFloatImageCommand.id]: {

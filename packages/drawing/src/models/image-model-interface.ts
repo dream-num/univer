@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
-import type { IDrawingParam } from '../services/drawing-manager.service';
+import type { IDrawingParam, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 import type { ImageSourceType } from '../services/image-io.service';
 
 export interface IImageData extends IDrawingParam {

@@ -25,20 +25,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
-import {
-    ReCalcSheetsFilterMutation,
-    RemoveSheetsFilterMutation,
-    SetSheetsFilterCriteriaMutation,
-    SetSheetsFilterRangeMutation,
-} from '../commands/mutations/sheets-filter.mutation';
+import { FILTER_MUTATIONS } from '../common/const';
 import { FilterModel } from '../models/filter-model';
-
-export const FILTER_MUTATIONS = new Set([
-    SetSheetsFilterRangeMutation.id,
-    SetSheetsFilterCriteriaMutation.id,
-    RemoveSheetsFilterMutation.id,
-    ReCalcSheetsFilterMutation.id,
-]);
 
 type WorksheetID = string;
 export interface ISheetsFilterResource {

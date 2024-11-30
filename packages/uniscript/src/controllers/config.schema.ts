@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'uniscript.config';
+export const UNISCRIPT_PLUGIN_CONFIG_KEY = 'uniscript.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(UNISCRIPT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverUniscriptConfig {
     menu?: MenuConfig;

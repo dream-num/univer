@@ -25,13 +25,13 @@ export { t } from './components/hooks/locale';
 export { useObservable, useObservableRef } from './components/hooks/observable';
 export { RectPopup } from './views/components/popup/RectPopup';
 export { useVirtualList } from './components/hooks/virtual-list';
-export { Menu } from './components/menu/desktop/Menu';
+export { Menu as UIMenu } from './components/menu/desktop/Menu';
 export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
-export { type IUniverUIConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+export { type IUniverUIConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { ErrorController } from './controllers/error/error.controller';
-export { menuSchema } from './controllers/menus/menu.schema';
+export { menuSchema as UIMenuSchema } from './controllers/menus/menu.schema';
 export {
     CopyShortcutItem,
     CutShortcutItem,

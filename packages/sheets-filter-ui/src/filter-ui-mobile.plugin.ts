@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
-import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -42,7 +42,7 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

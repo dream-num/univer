@@ -80,7 +80,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
- * Usually triggered by dragging srcollbar and click scrolltrack or moving selection range.
+ * Usually triggered by dragging scroll bar and click scroll track or moving selection range.
  * NOT same as SetScrollRelativeCommand which usually trigger by wheelevent.
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {

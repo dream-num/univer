@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { ITransformState } from '@univerjs/drawing';
+import type { ITransformState, Nullable } from '@univerjs/core';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { precisionTo } from '@univerjs/engine-render';
 import { attachRangeWithCoord, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';

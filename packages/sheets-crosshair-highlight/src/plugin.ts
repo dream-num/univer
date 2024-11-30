@@ -15,13 +15,13 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { defaultPluginConfig, SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsCrosshairHighlightController } from './controllers/crosshair.controller';
 import { SheetsCrosshairHighlightService } from './services/crosshair.service';
 import { SheetCrosshairHighlightRenderController } from './views/widgets/crosshair-highlight.render-controller';
-import type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
     static override pluginName: string = 'SHEET_CROSSHAIR_HIGHLIGHT_PLUGIN';
@@ -37,7 +37,7 @@ export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

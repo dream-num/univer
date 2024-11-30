@@ -21,7 +21,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
@@ -57,7 +57,7 @@ export class UniverSheetsPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_PLUGIN_CONFIG_KEY, rest);
 
         this._initConfig();
         this._initDependencies();

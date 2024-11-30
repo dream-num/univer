@@ -25,7 +25,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 
@@ -45,7 +45,7 @@ export class UniverSheetsSortUIPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_SORT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'action-recorder.config';
+export const ACTION_RECORDER_PLUGIN_CONFIG_KEY = 'action-recorder.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(ACTION_RECORDER_PLUGIN_CONFIG_KEY);
 
 export interface IUniverActionRecorderConfig {
     menu?: MenuConfig;

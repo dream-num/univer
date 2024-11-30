@@ -17,9 +17,9 @@
 import type { DependencyOverride } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'thread-comment-ui.config';
+export const THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY = 'thread-comment-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverThreadCommentUIConfig {
     overrides?: DependencyOverride;

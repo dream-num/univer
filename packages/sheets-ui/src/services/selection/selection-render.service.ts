@@ -369,6 +369,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this._clearUpdatingListeners();
         this._addEndingListeners();
         scene.getTransformer()?.clearSelectedObjects();
+
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, offsetX, offsetY);
         this._escapeShortcutDisposable = this._shortcutService.forceEscape();
 
@@ -384,5 +385,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             this._escapeShortcutDisposable?.dispose();
             this._escapeShortcutDisposable = null;
         });
+
+        this._scene.getEngine()?.setCapture();
     }
 }

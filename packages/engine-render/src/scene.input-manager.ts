@@ -149,7 +149,7 @@ export class InputManager extends Disposable {
 
         if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
             this._scene.onPointerMove$.emitEvent(evt);
-            this._scene.getEngine()?.setRemainCapture();
+            this._scene.getEngine()?.setCapture();
         }
     }
 
@@ -185,10 +185,14 @@ export class InputManager extends Disposable {
 
     _onPointerCancel(evt: IPointerEvent) {
         this._scene.onPointerCancel$.emitEvent(evt);
+        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        currentObject?.triggerPointerCancel(evt);
     }
 
     _onPointerOut(evt: IPointerEvent) {
         this._scene.onPointerOut$.emitEvent(evt);
+        const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
+        currentObject?.triggerPointerOut(evt);
     }
 
     _onMouseWheel(evt: IWheelEvent) {
@@ -196,19 +200,22 @@ export class InputManager extends Disposable {
         const isStop = currentObject?.triggerMouseWheel(evt);
 
         // for doc
-        const viewportMain = (this._scene as Scene).getMainViewport();
+        const viewportMain = this._scene.getMainViewport();
         viewportMain.onMouseWheel$.emitEvent(evt);
 
+        // what is checkDirectSceneEventTrigger??  for what ???
         if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
             this._scene.onMouseWheel$.emitEvent(evt);
         }
     }
 
     _onKeyDown(evt: IKeyboardEvent) {
+        // currently nobody using this. use `fromGlobalEvent('keydown')` from rx.js instead.
         this._scene.onKeyDown$.emitEvent(evt);
     }
 
     _onKeyUp(evt: IKeyboardEvent) {
+        // currently nobody using this. use `fromGlobalEvent('keyup')` from rx.js instead.
         this._scene.onKeyUp$.emitEvent(evt);
     }
 
@@ -233,7 +240,7 @@ export class InputManager extends Disposable {
 
         if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
             this._scene.onDragOver$.emitEvent(evt);
-            this._scene.getEngine()?.setRemainCapture();
+            this._scene.getEngine()?.setCapture();
         }
     }
 

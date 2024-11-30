@@ -203,10 +203,6 @@ export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies
 
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onReady(): void {
-            this._formulaDataModel?.initFormulaData();
-        }
     }
 
     univer.registerPlugin(TestPlugin);

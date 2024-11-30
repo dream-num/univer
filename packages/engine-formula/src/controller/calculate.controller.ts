@@ -15,11 +15,9 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IFormulaData } from '../basics/common';
 
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IFormulaDirtyData } from '../services/current-data.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
@@ -30,7 +28,6 @@ import {
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
@@ -56,11 +53,6 @@ export class CalculateController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._calculateFormulaService.stopFormulaExecution();
-                } else if (command.id === SetFormulaDataMutation.id) {
-                    const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
-
-                    // formulaData is the incremental data sent from the main thread and needs to be merged into formulaDataModel
-                    this._formulaDataModel.mergeFormulaData(formulaData);
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
 

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform } from '@univerjs/core';
+export const SetSheetsFilterRangeMutationId = 'sheet.mutation.set-filter-range';
+export const SetSheetsFilterCriteriaMutationId = 'sheet.mutation.set-filter-criteria';
+export const RemoveSheetsFilterMutationId = 'sheet.mutation.remove-filter';
+export const ReCalcSheetsFilterMutationId = 'sheet.mutation.re-calc-filter';
 
-export interface IRotationSkewFlipTransform {
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
+export const FILTER_MUTATIONS = new Set([
+    SetSheetsFilterRangeMutationId,
+    SetSheetsFilterCriteriaMutationId,
+    RemoveSheetsFilterMutationId,
+    ReCalcSheetsFilterMutationId,
+]);
 
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}

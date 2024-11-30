@@ -17,11 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
-import { DocMentionService } from './services/doc-mention.service';
 import { DocMentionPopupService } from './services/doc-mention-popup.service';
+import { DocMentionService } from './services/doc-mention.service';
 import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 
 export class UniverDocsMentionUIPlugin extends Plugin {
@@ -40,7 +40,7 @@ export class UniverDocsMentionUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_MENTION_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

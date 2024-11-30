@@ -20,13 +20,13 @@ import { DependentOn, ICommandService, IConfigService, Inject, Injector, Plugin,
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
-import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { SheetsThreadCommentPopupController } from './controllers/sheets-thread-comment-popup.controller';
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
+import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT } from './types/const';
 
@@ -48,7 +48,7 @@ export class UniverSheetsThreadCommentUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

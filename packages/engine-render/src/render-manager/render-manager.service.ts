@@ -196,7 +196,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @returns renderUnit:IRender
      */
     createRender(unitId: string): IRender {
-        const renderer = this._createRender(unitId, new Engine());
+        const renderer = this._createRender(unitId, new Engine(unitId));
         this._renderCreated$.next(renderer);
         return renderer;
     }

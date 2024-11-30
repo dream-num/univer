@@ -22,11 +22,11 @@ import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
-export const IMAGE_MENU_ID = 'sheet.menu.image';
+export const SHEETS_IMAGE_MENU_ID = 'sheet.menu.image';
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: IMAGE_MENU_ID,
+        id: SHEETS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'sheetImage.title',

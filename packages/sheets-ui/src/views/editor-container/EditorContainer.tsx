@@ -149,13 +149,12 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     onMoveInEditor={onMoveInEditor}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
-                        if (isSelecting === 1) {
+                        if (isSelecting) {
                             editorBridgeService.enableForceKeepVisible();
                         } else {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
-                    modifyRangeByPointer={false}
                 />
             )}
         </div>

@@ -214,10 +214,9 @@ export function FormulaBar() {
                             unitId={editState?.unitId}
                             subUnitId={editState?.sheetId}
                             keyboradEventConfig={keyCodeConfig}
-                            modifyRangeByPointer={false}
                             onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                                 isRefSelecting.current = isSelecting;
-                                if (isSelecting === 1) {
+                                if (isSelecting) {
                                     editorBridgeService.enableForceKeepVisible();
                                 } else {
                                     editorBridgeService.disableForceKeepVisible();

@@ -79,8 +79,8 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
             const activeRange = docSelectionRenderService?.getActiveTextRange();
             const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
             const lastNode = nodesRef.current[nodesRef.current.length - 1];
-            const isFocusingLastNode = typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE && lastNode.startIndex <= index - 1 && lastNode.endIndex >= index - 2;
             const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
+            const isFocusingLastNode = typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE && index === (dataStream?.length ?? 2) - 2;
             if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || isFocusingLastNode)) {
                 if (isFocusingLastNode) {
                     setIsSelecting(FormulaSelectingType.CAN_EDIT);

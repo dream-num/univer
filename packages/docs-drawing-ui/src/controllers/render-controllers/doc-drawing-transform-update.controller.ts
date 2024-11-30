@@ -159,7 +159,10 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
          */
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const { headerId, footerId, pageWidth } = page;
+            const { headerId, footerId, pageWidth, left: pageLeft } = page;
+
+            this._liquid.translateSave();
+            this._liquid.translate(pageLeft, 0);
 
             if (headerId) {
                 const headerPage = skeHeaders.get(headerId)?.get(pageWidth);
@@ -186,6 +189,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             }
 
             this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
+
+            this._liquid.translateRestore();
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 

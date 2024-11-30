@@ -33,7 +33,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
     id: 'doc.command-replace-snapshot',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor, params: IReplaceSnapshotCommandParams) => {
+    handler: (accessor, params: IReplaceSnapshotCommandParams) => {
         const { unitId, snapshot, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);

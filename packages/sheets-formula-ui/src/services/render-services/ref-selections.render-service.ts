@@ -178,6 +178,19 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         return control;
     }
 
+    private _initSelectionChangeListener(): void {
+        // used for refresh selection when focus in formula editor.
+        // TODO @lumixraku The response of the formula selection to keyboard events is different from that of a regular selection; I believe they should be consistent.
+        // unlike normal selection, there is no need to listen selectionService.selectionMoveEnd$ for keyboard moving event. prompt@highlightFormula would refresh selection.
+        this.disposeWithMe(this._refSelectionsService.selectionSet$.subscribe((selectionsWithStyles) => {
+            this._reset();
+            const skeleton = this._skeleton;
+            if (!skeleton) return;
+            // The selections' style would be colorful here. PromptController would change the color of selections later.
+            this.resetSelectionsByModelData(selectionsWithStyles || []);
+        }));
+    }
+
     /**
      * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
      */
@@ -203,22 +216,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
             type
         );
-    }
-
-    private _initSelectionChangeListener(): void {
-        // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
-        // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
-
-        // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
-        this.disposeWithMe(this._workbookSelections.selectionSet$.subscribe((selectionsWithStyles) => {
-            this._reset();
-            const skeleton = this._skeleton;
-            if (!skeleton) return;
-            // The selections' style would be colorful here. PromptController would change the color of selections later.
-            for (const selectionWithStyle of selectionsWithStyles) {
-                this._addSelectionControlByModelData(selectionWithStyle);
-            }
-        }));
     }
 
     private _initSkeletonChangeListener(): void {
@@ -266,7 +263,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line complexity
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

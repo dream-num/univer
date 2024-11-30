@@ -797,6 +797,7 @@ function _updateAndPositionTable(
         switch (tableSource.textWrap) {
             case TableTextWrapType.NONE: {
                 table.top = lineTop;
+                table.left = column.left;
                 break;
             }
             case TableTextWrapType.WRAP: {

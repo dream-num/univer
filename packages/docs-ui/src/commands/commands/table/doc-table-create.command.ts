@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../../basics/paragraph';
 import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
@@ -51,7 +51,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             return false;
         }
         const { segmentId, segmentPage } = activeRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
         if (docDataModel == null || body == null) {
             return false;
@@ -132,12 +132,14 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             styleCache
         );
         const { dataStream: tableDataStream, paragraphs: tableParagraphs, sectionBreaks } = genEmptyTable(rowCount, colCount);
-        const page = curGlyph.parent?.parent?.parent?.parent?.parent;
-        if (page == null) {
+        const section = curGlyph.parent?.parent?.parent?.parent;
+        if (section == null) {
             return false;
         }
-        const { pageWidth, marginLeft, marginRight } = page;
-        const tableSource = genTableSource(rowCount, colCount, pageWidth - marginLeft - marginRight);
+        const { columns } = section;
+        // The new inserted table should have the same column width as the smallest column width in the section.
+        const minColumnWidth = Math.min(...columns.map((c) => c.width));
+        const tableSource = genTableSource(rowCount, colCount, minColumnWidth);
 
         textX.push({
             t: TextXActionType.INSERT,

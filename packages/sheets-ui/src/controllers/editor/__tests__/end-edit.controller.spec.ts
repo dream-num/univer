@@ -395,6 +395,9 @@ describe('Test EndEditController', () => {
             expect(normalizeStringByLexer('＄ｗ')).toEqual('＄ｗ');
             expect(normalizeStringByLexer('ｔｒｕｅ＋１')).toEqual('ｔｒｕｅ＋１');
 
+            // sheet name
+            expect(normalizeStringByLexer("='Sheet1（副本）'!F20:H29")).toEqual("='Sheet1（副本）'!F20:H29");
+
             // TODO@Dushusir: Differences from Excel, pending,
             // '＝＠＠ｉｆ＠ｓ'
             // '＝＠＠ｉｆ＋＠ｓ'

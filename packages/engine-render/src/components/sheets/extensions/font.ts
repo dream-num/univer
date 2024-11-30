@@ -17,13 +17,13 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import { HorizontalAlign, Range, WrapStrategy } from '@univerjs/core';
+import { HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
@@ -33,6 +33,13 @@ import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skel
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
+
+function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
+    const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度
+    const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+    const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
+    return { rotatedWidth, rotatedHeight };
+}
 
 interface IRenderFontContext {
     ctx: UniverRenderingContext;
@@ -216,6 +223,15 @@ export class Font extends SheetExtension {
 
         ctx.closePath();
         ctx.restore();
+        const documentDataModel = fontsConfig.documentSkeleton.getViewModel().getDataModel();
+        if (documentDataModel.getDrawingsOrder()?.length) {
+            ctx.save();
+            ctx.beginPath();
+            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix, 1);
+            this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
+            ctx.closePath();
+            ctx.restore();
+        }
 
         renderFontCtx.startX = 0;
         renderFontCtx.startY = 0;
@@ -226,6 +242,73 @@ export class Font extends SheetExtension {
         return false;
     };
 
+    private _renderImages(ctx: UniverRenderingContext, fontsConfig: IFontCacheItem, startX: number, startY: number, endX: number, endY: number) {
+        const { documentSkeleton, verticalAlign, horizontalAlign } = fontsConfig;
+        const fontHeight = documentSkeleton.getSkeletonData()!.pages[0].height;
+        const fontWidth = documentSkeleton.getSkeletonData()!.pages[0].width;
+        const PADDING = 2;
+        let fontX = startX;
+        let fontY = startY;
+        switch (verticalAlign) {
+            case VerticalAlign.TOP:
+                fontY = startY + PADDING;
+                break;
+            case VerticalAlign.MIDDLE:
+                fontY = (startY + endY) / 2 - fontHeight / 2;
+                break;
+            default:
+                fontY = endY - fontHeight - PADDING;
+                break;
+        }
+
+        switch (horizontalAlign) {
+            case HorizontalAlign.RIGHT:
+                fontX = endX - fontWidth - PADDING;
+                break;
+            case HorizontalAlign.CENTER:
+                fontX = (startX + endX) / 2 - fontWidth / 2;
+                break;
+            default:
+                fontX = startX + PADDING;
+                break;
+        }
+
+        const documentDataModel = documentSkeleton.getViewModel().getDataModel();
+        const drawingDatas = documentDataModel.getDrawings();
+        const drawings = documentSkeleton.getSkeletonData()?.pages[0].skeDrawings;
+        drawings?.forEach((drawing) => {
+            const drawingData = drawingDatas?.[drawing.drawingId] as { imageSourceType: ImageSourceType; source: string } & IDocDrawingBase;
+            if (drawingData) {
+                const image = fontsConfig.imageCacheMap.getImage(
+                    drawingData.imageSourceType,
+                    drawingData.source,
+                    () => {
+                        this.parent?.makeDirty();
+                    },
+                    () => {
+                        this.parent?.makeDirty();
+                    }
+                );
+
+                const x = fontX + drawing.aLeft;
+                const y = fontY + drawing.aTop;
+                const width = drawing.width;
+                const height = drawing.height;
+                const angle = drawing.angle;
+                const { rotatedHeight, rotatedWidth } = rotatedBoundingBox(width, height, angle);
+
+                if (image && image.complete) {
+                    const angleRadians = angle * Math.PI / 180;
+                    ctx.save();
+                    ctx.translate(x + rotatedWidth / 2, y + rotatedHeight / 2);
+                    ctx.rotate(angleRadians);
+                    ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                    ctx.restore();
+                }
+            }
+        });
+    }
+
     /**
      * Change font render bounds, for overflow and filter icon & custom render.
      * @param renderFontContext
@@ -233,7 +316,7 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontMatrix
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
@@ -288,7 +371,8 @@ export class Font extends SheetExtension {
                         endColumn,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
                     this._clipRectangleForOverflow(
@@ -299,7 +383,8 @@ export class Font extends SheetExtension {
                         col,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 } else {
                     this._clipRectangleForOverflow(
@@ -310,7 +395,8 @@ export class Font extends SheetExtension {
                         endColumn,
                         scale,
                         rowHeightAccumulation,
-                        columnWidthAccumulation
+                        columnWidthAccumulation,
+                        padding
                     );
                 }
             }
@@ -346,13 +432,14 @@ export class Font extends SheetExtension {
         const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
         const cellHeight = endY - startY;
         const cellWidth = endX - startX;
+        const documentDataModel = documentSkeleton.getViewModel().getDataModel();
 
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
+            documentDataModel.updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
         } else {
-            documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
+            documentDataModel.updateDocumentDataPageSize(Number.POSITIVE_INFINITY);
         }
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
@@ -363,7 +450,7 @@ export class Font extends SheetExtension {
         if (isOverflow) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
-            const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
+            const documentStyle = documentDataModel.getSnapshot().documentStyle;
             if (contentSize && documentStyle) {
                 const { width } = contentSize;
                 const { marginRight = 0, marginLeft = 0 } = documentStyle;
@@ -389,7 +476,8 @@ export class Font extends SheetExtension {
         endColumn: number,
         scale: number,
         rowHeightAccumulation: number[],
-        columnWidthAccumulation: number[]
+        columnWidthAccumulation: number[],
+        padding = 0
     ) {
         const startY = rowHeightAccumulation[startRow - 1] || 0;
         const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
@@ -397,7 +485,7 @@ export class Font extends SheetExtension {
         const startX = columnWidthAccumulation[startColumn - 1] || 0;
         const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-        ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
+        ctx.rectByPrecision(startX + padding, startY + padding, endX - startX - 2 * padding, endY - startY - 2 * padding);
         ctx.clip();
         // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }

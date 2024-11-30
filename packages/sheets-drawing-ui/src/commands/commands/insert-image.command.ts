@@ -29,6 +29,18 @@ export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     handler: (accessor) => {
         const renderManagerService = accessor.get(IRenderManagerService);
         return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
-            ?.with(SheetDrawingUpdateController).insertFloatImage() ?? false;
+            ?.with(SheetDrawingUpdateController)
+            .insertFloatImage() ?? false;
+    },
+};
+
+export const InsertCellImageCommand: ICommand = {
+    id: 'sheet.command.insert-cell-image',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+            ?.with(SheetDrawingUpdateController)
+            .insertCellImage() ?? false;
     },
 };

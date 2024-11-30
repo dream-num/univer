@@ -95,13 +95,12 @@ export function getClearContentMutationParamForRange(worksheet: Worksheet, range
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && row >= startRow && col >= startColumn) {
-            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && cellData.v !== '') {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && (cellData.v !== '' || (cellData.p?.body?.dataStream?.length ?? 0) > 2)) {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);
         }
     });
-
     redoMatrix.setValue(startRow, startColumn, leftTopCellValue);
 
     return redoMatrix;

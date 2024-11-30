@@ -275,7 +275,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
 
-                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId)!;
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     if (!workbook) {
                         return;
                     }

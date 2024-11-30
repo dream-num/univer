@@ -17,6 +17,8 @@
 import type { IRange, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
+    IMoveRangeCommandParams,
+    IReorderRangeMutationParams,
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -25,6 +27,8 @@ import type {
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    MoveRangeCommand,
+    ReorderRangeCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -88,22 +92,25 @@ export class AutoHeightController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
         // for intercept'SetRangeValuesCommand' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
-                if (command.id !== SetRangeValuesCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
+            getMutations: (command) => {
+                if (command.id === SetRangeValuesCommand.id) {
+                    const params = command.params as ISetRangeValuesRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight(params.range);
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
+
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
@@ -148,6 +155,25 @@ export class AutoHeightController extends Disposable {
                 }
 
                 return this.getUndoRedoParamsOfAutoHeight(selections);
+            },
+        }));
+
+        this.disposeWithMe(sheetInterceptorService.interceptAfterCommand({
+            getMutations: (command) => {
+                if (command.id === MoveRangeCommand.id) {
+                    const params = command.params as IMoveRangeCommandParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
+                }
+
+                if (command.id === ReorderRangeCommand.id) {
+                    const params = command.params as IReorderRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.range]);
+                }
+
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
     }

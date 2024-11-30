@@ -147,7 +147,7 @@ export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
 export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
-export { awaitTime } from './shared/timer';
+export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { Range } from './sheets/range';
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
@@ -168,7 +168,9 @@ export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
 export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
-
+export { createDocumentModelWithStyle } from './sheets/util';
+export { ImageCacheMap } from './shared/cache/image-cache';
+export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
 // #endregion
 
 export { getWorksheetUID, Workbook } from './sheets/workbook';

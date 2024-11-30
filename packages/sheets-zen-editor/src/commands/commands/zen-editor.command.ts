@@ -15,11 +15,11 @@
  */
 
 import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentDataModel, DocumentFlavor, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { CommandType, delayAnimationFrame, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentDataModel, DocumentFlavor, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
+import { ISidebarService, IZenZoneService } from '@univerjs/ui';
 
 export const OpenZenEditorCommand: ICommand = {
     id: 'zen-editor.command.open-zen-editor',
@@ -29,6 +29,12 @@ export const OpenZenEditorCommand: ICommand = {
         const editorService = accessor.get(IEditorService);
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sideBarService = accessor.get(ISidebarService);
+
+        if (sideBarService.visible) {
+            sideBarService.close();
+            await delayAnimationFrame();
+        }
 
         zenZoneService.open();
 
@@ -87,7 +93,12 @@ export const CancelZenEditCommand: ICommand = {
         const zenZoneEditorService = accessor.get(IZenZoneService);
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const univerInstanceManager = accessor.get(IUniverInstanceService);
+        const sideBarService = accessor.get(ISidebarService);
 
+        if (sideBarService.visible) {
+            sideBarService.close();
+            await delayAnimationFrame();
+        }
         zenZoneEditorService.close();
 
         const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -112,7 +123,12 @@ export const ConfirmZenEditCommand: ICommand = {
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const univerInstanceManager = accessor.get(IUniverInstanceService);
         const editorService = accessor.get(IEditorService);
+        const sideBarService = accessor.get(ISidebarService);
 
+        if (sideBarService.visible) {
+            sideBarService.close();
+            await delayAnimationFrame();
+        }
         zenZoneEditorService.close();
 
         const editor = editorService.getEditor(DOCS_ZEN_EDITOR_UNIT_ID_KEY);

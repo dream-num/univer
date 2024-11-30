@@ -131,6 +131,10 @@ export type AsyncInterceptorHandler<M = unknown, C = unknown> = (
 ) => Promise<Nullable<M>>;
 
 export interface IAsyncInterceptor<M, C> {
+    /**
+     * The priority of the interceptor, the larger the number, the higher the priority.
+     * @default 0
+     */
     priority?: number;
     handler: AsyncInterceptorHandler<M, C>;
 }

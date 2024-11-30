@@ -60,7 +60,6 @@ export const SetRangeValuesCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const permissionService = accessor.get(IPermissionService);
-
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 

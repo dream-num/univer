@@ -1019,6 +1019,7 @@ export class Worksheet {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    zeroWidthParagraphBreak: 1,
                 }
             );
         } else if (cell.v != null) {
@@ -1099,7 +1100,10 @@ export class Worksheet {
             height: Number.POSITIVE_INFINITY,
         };
 
-        documentData.documentStyle.renderConfig = renderConfig;
+        documentData.documentStyle.renderConfig = {
+            ...documentData.documentStyle.renderConfig,
+            ...renderConfig,
+        };
 
         const paragraphs = documentData.body.paragraphs || [];
 

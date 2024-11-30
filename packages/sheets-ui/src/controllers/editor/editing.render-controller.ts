@@ -569,7 +569,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
-
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
@@ -716,8 +715,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            resetBodyStyle(snapshot.body!, removeStyle);
-
+            emptyBody(snapshot.body!, removeStyle);
+            snapshot.drawings = {};
+            snapshot.drawingsOrder = [];
             documentDataModel.reset(snapshot);
             documentViewModel.reset(documentDataModel);
         };
@@ -759,8 +759,15 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
+    if (snapshot.drawingsOrder?.length) {
+        cellData.v = '';
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = snapshot;
+        cellData.t = CellValueType.STRING;
+    }
     // Text format ('@@@') has the highest priority
-    if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
+    else if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
         // If the style is text format ('@@@'), the data should be set as a string.
         cellData.v = newDataStream;
         cellData.f = null;
@@ -860,7 +867,7 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
     return null;
 }
 
-function resetBodyStyle(body: IDocumentBody, removeStyle = false) {
+function emptyBody(body: IDocumentBody, removeStyle = false) {
     body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
     if (body.textRuns != null) {

@@ -82,6 +82,7 @@ export class SheetInterceptorService extends Disposable {
     private _rangeInterceptors: IRangeInterceptors[] = [];
 
     private _beforeCommandInterceptor: IBeforeCommandInterceptor[] = [];
+    private _afterCommandInterceptors: ICommandInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -179,6 +180,26 @@ export class SheetInterceptorService extends Disposable {
             preUndos: infos.map((i) => i.preUndos ?? []).flat(),
             undos: infos.map((i) => i.undos).flat(),
             preRedos: infos.map((i) => i.preRedos ?? []).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
+    }
+
+    interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {
+        if (this._afterCommandInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._afterCommandInterceptors.push(interceptor);
+        this._afterCommandInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._afterCommandInterceptors, interceptor)));
+    }
+
+    afterCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._afterCommandInterceptors.map((i) => i.getMutations(info));
+
+        return {
+            undos: infos.map((i) => i.undos).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
     }

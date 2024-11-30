@@ -16,6 +16,7 @@
 
 import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
 import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
+import { addDrawing } from './drawings';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
@@ -59,6 +60,10 @@ export class BuildTextUtils {
             toggleChecklist: toggleChecklistParagraph,
             changeNestLevel: changeParagraphBulletNestLevel,
         },
+    };
+
+    static drawing = {
+        add: addDrawing,
     };
 }
 

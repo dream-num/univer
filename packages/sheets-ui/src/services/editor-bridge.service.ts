@@ -362,6 +362,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                 const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
                 const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
                 blankModel.documentModel!.documentStyle.renderConfig = {
+                    ...renderConfig,
                     verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
                 };
             }

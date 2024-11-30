@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 
 import clsx from 'clsx';
@@ -25,12 +25,13 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IMessageService } from '../../services/message/message.service';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
+import { IZenZoneService } from '../../services/zen-zone/zen-zone.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Ribbon } from '../components/ribbon/Ribbon';
 import { Sidebar } from '../components/sidebar/Sidebar';
-import { ZenZone } from '../components/zen-zone/ZenZone';
 
+import { ZenZone } from '../components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from '../parts';
 import styles from './workbench.module.less';
 
@@ -62,6 +63,8 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
+    const zenService = useDependency(IZenZoneService);
+    const zenZoneVisible = useObservable(zenService.visible$, zenService.visible);
 
     const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
 
@@ -168,11 +171,16 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             >
                                 <ComponentContainer key="content" components={contentComponents} />
                             </section>
+
                         </section>
 
-                        <aside className={styles.workbenchContainerSidebar}>
-                            <Sidebar />
-                        </aside>
+                        {zenZoneVisible
+                            ? null
+                            : (
+                                <aside className={styles.workbenchContainerSidebar}>
+                                    <Sidebar />
+                                </aside>
+                            )}
                     </div>
 
                     {/* footer */}
@@ -182,12 +190,14 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                         </footer>
                     )}
                     <ZenZone />
+
                 </section>
             </div>
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
+
         </ConfigProvider>
     );
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, ICellData, Injector, IPageElement } from '@univerjs/core';
+import type { EventState, ICellData, IPageElement } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import { IConfigService, IContextService, Inject, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
+import { IConfigService, IContextService, Inject, Injector, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import {
     getColor,
     Rect,
@@ -53,7 +53,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
     }
@@ -101,7 +102,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             styleModel,
             this._localeService,
             this._contextService,
-            this._configService
+            this._configService,
+            this._injector
         );
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;

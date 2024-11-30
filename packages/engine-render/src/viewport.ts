@@ -23,6 +23,7 @@ import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import { EventSubject, Tools } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
@@ -95,9 +96,22 @@ interface IViewportScrollPosition {
     viewportScrollY: number;
 }
 
+export interface IViewportReSizeParam {
+    width: number;
+    height: number;
+    left: number;
+    top: number;
+    paddingStartX?: number;
+    paddingStartY?: number;
+    paddingEndX?: number;
+    paddingEndY?: number;
+}
+
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 
 export class Viewport {
+    private _viewportKey: string = '';
+
     /**
      * scrollX means scroll x value for scrollbar in viewMain
      * use getBarScroll to get scrolling value(scrollX, scrollY) for scrollbar
@@ -131,45 +145,29 @@ export class Viewport {
     private _sceneHeightAfterScale: number;
 
     onMouseWheel$ = new EventSubject<IWheelEvent>();
-
     onScrollAfter$ = new EventSubject<IScrollObserverParam>();
-
-    // onScrollBefore$ = new EventSubject<IScrollObserverParam>();
-
     onScrollEnd$ = new EventSubject<IScrollObserverParam>();
-
     onScrollByBar$ = new EventSubject<IScrollObserverParam>();
-
-    private _viewportKey: string = '';
+    onResized$ = new Subject<IViewportReSizeParam>();
 
     /**
      * viewport top origin value in logic, scale does not affect it.
      */
     private _topOrigin: number = 0;
-
     /**
      * viewport left origin value in logic, scale does not affect it.
      */
     private _leftOrigin: number = 0;
-
     private _bottomOrigin: number = 0;
-
     private _rightOrigin: number = 0;
-
     private _widthOrigin: Nullable<number>;
-
     private _heightOrigin: Nullable<number>;
 
     private _top: number = 0;
-
     private _left: number = 0;
-
     private _bottom: number = 0;
-
     private _right: number = 0;
-
     private _width: Nullable<number>;
-
     private _height: Nullable<number>;
 
     private _scene!: Scene;
@@ -177,44 +175,20 @@ export class Viewport {
     private _scrollBar?: Nullable<BaseScrollBar>;
 
     private _isWheelPreventDefaultX: boolean = false;
-
     private _isWheelPreventDefaultY: boolean = false;
 
     private _scrollStopNum: NodeJS.Timeout | number = 0;
 
     private _clipViewport = true;
-
     private _active = true;
 
+    /**
+     * after create a freeze column & row, there is a "padding distance" from row header to curr viewport.
+     */
     private _paddingStartX: number = 0;
-
-    /**
-     * after create a freeze column, there is a "padding distace" from row header to curr viewport.
-     */
     private _paddingEndX: number = 0;
-
-    /**
-     * after create a freeze row, there is a "padding distace" from column header to curr viewport.
-     */
     private _paddingStartY: number = 0;
-
     private _paddingEndY: number = 0;
-
-    /**
-     * Usually for viewport by after freeze, _explicitViewportWidthSet true means viewport's width is specify explicitly.
-     * ex: ViewMainLeft _explicitViewportWidthSet is true when freeze at a certain col, the width of viewMainLeft is decided by freeze line.
-     * Usually this prop is false for viewMain, viewport width is decided by engine size - freeze line
-     */
-    private _explicitViewportWidthSet: boolean = false;
-
-    /**
-     * _explicitViewportHeightSet true means viewport's height is specify explicitly.
-     * Used for viewport by after freeze.
-     * ex: ViewMainTop _explicitViewportHeightSet is true when freeze at a certain row, the height of viewMainTop is decided by freeze line.
-     */
-    private _explicitViewportHeightSet: boolean = false;
-
-    // private _preViewportInfo: Nullable<IViewportInfo>;
 
     /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
@@ -231,7 +205,7 @@ export class Viewport {
 
     /**
      *  Whether the viewport needs to be updated.
-     *  In future, viewMain dirty would not affect othew viewports.
+     *  In future, viewMain dirty would not affect other viewports.
      */
     private _isDirty = true;
     private _cacheCanvas: UniverCanvas | null = null;
@@ -254,9 +228,6 @@ export class Viewport {
         this._scene.addViewport(this);
         this._active = Tools.isDefine(props?.active) ? props?.active : true;
 
-        this._explicitViewportWidthSet = props?.explicitViewportWidthSet || false;
-        this._explicitViewportHeightSet = props?.explicitViewportHeightSet || false;
-
         this._setViewportSize(props);
         this.initCacheCanvas(props);
 
@@ -267,9 +238,9 @@ export class Viewport {
         this.getBounding();
 
         this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
-            this._mainCanvasResizeHandler();
+            this.markForceDirty(true);
         });
-        this._mainCanvasResizeHandler();
+        this.markForceDirty(true);
     }
 
     initCacheCanvas(props?: IViewProps) {
@@ -447,6 +418,16 @@ export class Viewport {
     resetCanvasSizeAndUpdateScroll() {
         this._resizeCacheCanvas();
         this._updateScrollByViewportScrollValue();
+        this.onResized$.next({
+            width: this._width,
+            height: this._height,
+            left: this._left,
+            top: this._top,
+            paddingStartX: this._paddingStartX,
+            paddingEndX: this._paddingEndX,
+            paddingStartY: this._paddingStartY,
+            paddingEndY: this._paddingEndY,
+        } as IViewportReSizeParam);
     }
 
     setScrollBar(instance: BaseScrollBar) {
@@ -506,7 +487,7 @@ export class Viewport {
     // 2. changing curr skeleton
     // 3. changing selection which cross viewport
     // 4. changing the viewport size (also include change window size)
-    // 5. changing the scroll bar position(click at certain pos of scrolltrack)
+    // 5. changing the scroll bar position(click at certain pos of scroll track)
     // Debug
     // scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
@@ -514,7 +495,7 @@ export class Viewport {
     }
 
     /**
-     * Srolling by current position plus delta.
+     * Scrolling by current position plus delta.
      * the most common case is triggered by scroll-timer(in sheet)
      * @param delta
      * @returns isLimited
@@ -651,7 +632,7 @@ export class Viewport {
 
     /**
      * Just record state of scroll. This method won't scroll viewport and scrollbar.
-     * TODO: @lumixraku this method is so wierd, viewportMain did not call it, now only called in freeze situation.
+     * TODO: @lumixraku this method is so wried, viewportMain did not call it, now only called in freeze situation.
      * @param current
      * @returns Viewport
      */
@@ -756,7 +737,7 @@ export class Viewport {
             this._drawScrollbar(mainCtx);
             mainCtx.restore();
         }
-        // TODO @lumix, preScrollX is also handled by updateScroll(), this method is empty.
+        // TODO @lumixraku, preScrollX is also handled by updateScroll(), this method is empty.
         this._afterRender();
     }
 
@@ -1188,16 +1169,16 @@ export class Viewport {
         this._left = left;
         this._top = top;
 
-        if (Tools.isDefine(this._widthOrigin) || this._explicitViewportWidthSet) {
-            // viewMainLeft viewMainLeftTop ---> width is specific by freezeline
+        if (Tools.isDefine(this._widthOrigin)) {
+            // viewMainLeft viewMainLeftTop ---> width is specific by freeze line
             width = (this._widthOrigin || 0) * scaleX;
         } else {
             // viewMainTop  viewMain
             width = parentWidth - (this._left + this._right);
         }
 
-        if (Tools.isDefine(this._heightOrigin) || this._explicitViewportHeightSet) {
-            //viewMainLeftTop viewMainTop ---> height is specific by freezeline
+        if (Tools.isDefine(this._heightOrigin)) {
+            //viewMainLeftTop viewMainTop ---> height is specific by freeze line
             height = (this._heightOrigin || 0) * scaleY;
         } else {
             // viewMainLeft viewMain
@@ -1528,13 +1509,5 @@ export class Viewport {
             this.height = null;
             this._heightOrigin = null;
         }
-    }
-
-    /**
-     * main canvas element resize
-     * called by this.scene.getEngine()?.onTransformChange$.add
-     */
-    private _mainCanvasResizeHandler() {
-        this.markForceDirty(true);
     }
 }

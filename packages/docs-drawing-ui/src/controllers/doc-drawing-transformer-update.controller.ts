@@ -526,8 +526,11 @@ export class DocDrawingTransformerController extends Disposable {
         const pageType = page.type;
 
         for (const p of pages) {
-            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom } = p;
+            const { headerId, footerId, pageHeight, pageWidth, marginLeft, marginBottom, left: pageLeft } = p;
             const pIndex = pages.indexOf(p);
+
+            this._liquid.translateSave();
+            this._liquid.translate(pageLeft, 0);
 
             if (segmentPage > -1 && pIndex === segmentPage) {
                 switch (pageType) {
@@ -562,14 +565,17 @@ export class DocDrawingTransformerController extends Disposable {
                     }
                 }
 
+                // this._liquid.translateRestore();
                 break;
             }
 
             this._liquid.translatePagePadding(p);
             if (p === page) {
+                // this._liquid.translateRestore();
                 break;
             }
 
+            this._liquid.translateRestore();
             this._liquid.restorePagePadding(p);
             this._liquid.translatePage(p, pageLayoutType, pageMarginLeft, pageMarginTop);
         }

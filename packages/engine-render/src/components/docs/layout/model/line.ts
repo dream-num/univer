@@ -66,7 +66,7 @@ export function createSkeletonLine(
     paragraphIndex: number,
     lineType: LineType,
     lineBoundingBox: ILineBoundingBox,
-    columnWidth: number,
+    column: IDocumentSkeletonColumn,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
     paragraphConfig: IParagraphConfig,
@@ -113,10 +113,10 @@ export function createSkeletonLine(
     const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) => drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE));
     const wrapTypeTables = new Map(Array.from(pageSkeTables).filter(([_, table]) => table.tableSource.textWrap === TableTextWrapType.WRAP));
 
-    lineSke.divides = _calculateDividesByDrawings(
+    lineSke.divides = _calculateDividesByFloatObjects(
         lineHeight,
         lineTop,
-        columnWidth,
+        column,
         paddingLeft,
         paddingRight,
         page,
@@ -248,10 +248,10 @@ function _getLineTopWidthWrapTopBottom(
     return sTop + sHeight;
 }
 
-function _calculateDividesByDrawings(
+function _calculateDividesByFloatObjects(
     lineHeight: number,
     lineTop: number,
-    columnWidth: number,
+    column: IDocumentSkeletonColumn,
     paddingLeft: number,
     paddingRight: number,
     page: IDocumentSkeletonPage,
@@ -270,7 +270,7 @@ function _calculateDividesByDrawings(
             width: paddingLeft,
         },
         {
-            left: columnWidth - paddingRight,
+            left: column.width - paddingRight,
             width: paddingRight,
         }
     );
@@ -278,7 +278,7 @@ function _calculateDividesByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, column);
 
             if (split) {
                 drawingsMix.push(split);
@@ -289,7 +289,7 @@ function _calculateDividesByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, columnWidth);
+            const split = _calculateSplit(transformedDrawing, lineHeight, lineTop, column);
 
             if (split) {
                 drawingsMix.push(split);
@@ -298,7 +298,7 @@ function _calculateDividesByDrawings(
     }
 
     paragraphNonInlineSkeDrawings?.forEach((drawing) => {
-        const split = _calculateSplit(drawing, lineHeight, lineTop, columnWidth);
+        const split = _calculateSplit(drawing, lineHeight, lineTop, column);
 
         if (split) {
             drawingsMix.push(split);
@@ -309,7 +309,7 @@ function _calculateDividesByDrawings(
         wrapTypeTables.forEach((table) => {
             const { left, top, width, height, tableSource } = table;
             const { dist } = tableSource;
-            const split = __getSplitWidthNoAngle(top, height, left, width, lineTop, lineHeight, columnWidth, dist);
+            const split = __getSplitWidthNoAngle(top, height, left, width, lineTop, lineHeight, column, dist);
 
             if (split) {
                 drawingsMix.push(split);
@@ -317,7 +317,7 @@ function _calculateDividesByDrawings(
         });
     }
 
-    return _calculateDivideByDrawings(columnWidth, drawingsMix);
+    return _calculateDivideByDrawings(column.width, drawingsMix);
 }
 
 export function updateDivideInfo(divide: IDocumentSkeletonDivide, states: Partial<IDocumentSkeletonDivide>) {
@@ -354,10 +354,11 @@ function _calculateSplit(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,
-    columnWidth: number
+    column: IDocumentSkeletonColumn
 ): Nullable<IDrawingsSplit> {
-    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
+    const { aTop, aLeft, height, width, angle = 0, drawingOrigin } = drawing;
     const { layoutType } = drawingOrigin;
+    const columnWidth = column.width;
 
     if (
         layoutType === PositionedObjectLayoutType.WRAP_NONE ||
@@ -395,7 +396,7 @@ function _calculateSplit(
 
     if (angle === 0) {
         // 无旋转的情况， wrapSquare | wrapThrough | wrapTight
-        return __getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, columnWidth, dist, layoutType, wrapText);
+        return __getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, column, dist, layoutType, wrapText);
     }
 
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
@@ -411,7 +412,7 @@ function _calculateSplit(
             sWidth!,
             lineTop,
             lineHeight,
-            columnWidth,
+            column,
             dist,
             layoutType,
             wrapText
@@ -507,7 +508,7 @@ function __getSplitWidthNoAngle(
     width: number,
     lineTop: number,
     lineHeight: number,
-    columnWidth: number,
+    column: IDocumentSkeletonColumn,
     dist: IDistFromText,
     layoutType: PositionedObjectLayoutType = PositionedObjectLayoutType.WRAP_SQUARE,
     wrapText: WrapTextType = WrapTextType.BOTH_SIDES
@@ -518,15 +519,22 @@ function __getSplitWidthNoAngle(
         distT = 0,
         distB = 0,
     } = dist;
-
+    const columnWidth = column.width;
     const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
     const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB + distT : 0);
+    const newALeft = left - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distL : 0);
+    const newWidth = width + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distL + distR : 0);
 
-    if (newAtop + newHeight <= lineTop || newAtop >= lineHeight + lineTop) {
+    if (
+        newAtop + newHeight <= lineTop ||
+        newAtop >= lineHeight + lineTop ||
+        newALeft + newWidth < column.left ||
+        column.left + columnWidth < newALeft
+    ) {
         return;
     }
 
-    let resultLeft = left - distL;
+    let resultLeft = left - distL - column.left;
     let resultWidth = width + distL + distR;
     const ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
 
@@ -534,7 +542,7 @@ function __getSplitWidthNoAngle(
         resultWidth = columnWidth - resultLeft;
     } else if (ruler === WrapTextRuler.RIGHT) {
         resultLeft = 0;
-        resultWidth = left + width + distR;
+        resultWidth = left + width + distR - column.left;
     }
 
     return {

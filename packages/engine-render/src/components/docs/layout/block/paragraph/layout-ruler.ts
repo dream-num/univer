@@ -627,7 +627,7 @@ function _lineOperator(
             marginTop,
             spaceBelowApply,
         },
-        column.width,
+        column,
         lineIndex,
         isParagraphFirstShapedText,
         paragraphConfig,

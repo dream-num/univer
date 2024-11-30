@@ -24,12 +24,12 @@ export function getSheetNameById(univerInstanceService: IUniverInstanceService, 
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() || '';
 }
 
-export const unitRangesToText = (ranges: IUnitRangeName[], isNeedSheetName: boolean = false) => {
+export const unitRangesToText = (ranges: IUnitRangeName[], isNeedSheetName: boolean = false, originSheetName = '') => {
     if (!isNeedSheetName) {
         return ranges.map((item) => serializeRange(item.range));
     } else {
         return ranges.map((item) => {
-            if (item.sheetName !== '') {
+            if (item.sheetName !== '' && item.sheetName !== originSheetName) {
                 return serializeRangeWithSheet(item.sheetName, item.range);
             }
             return serializeRange(item.range);

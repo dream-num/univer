@@ -98,7 +98,7 @@ export const useSheetSelectionChange = (
                             sheetName: getSheetNameById(rangeSheetId),
                         };
                         const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
                         sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                         const result = sequenceNodeToText(newSequenceNodes);
@@ -147,7 +147,7 @@ export const useSheetSelectionChange = (
                                 unitId: selection.rangeWithCoord.unitId ?? unitId,
                                 sheetName: getSheetNameById(rangeSheetId),
                             };
-                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
                             return refRanges[0];
                         }
                         return item.token;
@@ -162,7 +162,7 @@ export const useSheetSelectionChange = (
                             sheetName: getSheetNameById(rangeSheetId),
                         };
                         const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
                         theLastList.push(refRanges[0]);
                     }
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
@@ -301,7 +301,7 @@ export const useSheetSelectionChange = (
                             sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
                         };
                         const sequenceNodes = [...sequenceNodesRef.current];
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
                         const result = refRanges[0];
                         let lastNode = sequenceNodes[sequenceNodes.length - 1];
                         if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {

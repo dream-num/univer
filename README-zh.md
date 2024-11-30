@@ -37,6 +37,7 @@
     - [📽️ Univer Slide](#%EF%B8%8F-univer-slide积极开发中)
 - [🌐 国际化](#-国际化)
 - [👾 在线示例](#-在线示例)<!-- - [📦 生态系统](#-生态系统) -->
+- [🔗 链接](#-链接)
 - [💬 社区](#-社区)
 - [🤝 贡献](#-贡献)
 - [❤️ 赞助](#%EF%B8%8F-赞助)
@@ -81,7 +82,7 @@ Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一�
 - **协同编辑**[^1]：支持多个用户同时编辑电子表格，同时支持历史记录与恢复。
 - **打印**[^1]：允许打印电子表格或将其导出为 PDF。
 - **导入和导出**[^1]：支持导入导出 XLSX 格式的数据。
-- **图表**[^2]：由 [VChart][vchart-link] 支持第三方图表。
+- **图表**: 支持创建各种类型的图表，包括柱状图、折线图、饼图、散点图等。
 
 ### 📝 Univer Doc（beta 测试中）
 
@@ -102,16 +103,17 @@ Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一�
 
 Univer 内置多种语言支持，包括：
 
-- `zh-CN`
-- `zh-TW`
 - `en-US`
+- `fa-IR`
+- `fr-FR`
 - `ru-RU`
 - `vi-VN`
-- `fa-IR`
+- `zh-CN`
+- `zh-TW`
 
 其中 `zh-CN` 和 `en-US` 由官方支持，其余为社区贡献。
 
-你可以通过[自定义语言包](https://univer.ai/zh-CN/guides/sheet/getting-started/i18n#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80%E5%8C%85)来添加你想要的语言。也可以参考[贡献指南](/CONTRIBUTING.md)来帮助我们添加新的语言支持。
+你可以通过[自定义语言包](https://docs.univer.ai/zh-CN/guides/sheets/getting-started/i18n#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80%E5%8C%85)来添加你想要的语言。也可以参考[贡献指南](/CONTRIBUTING.md)来帮助我们添加新的语言支持。
 
 ## 👾 在线示例
 
@@ -134,6 +136,11 @@ Univer 内置多种语言支持，包括：
 <!-- ## 📦 生态
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+
+## 🔗 链接
+
+- [官网](https://univer.ai)
+- [Presets 仓库](https://github.com/dream-num/univer-presets)
 
 ## 💬 社区
 
@@ -190,7 +197,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 
 <!-- Footnotes -->
 [^1]: 这些功能是由 Univer 的闭源部分提供的，该版本亦可用于商业用途，还包括付费升级计划。
-[^2]: VChart 是为 Univer 提供图表支持的第三方库。你可以在这里找到更多信息：[univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -264,9 +270,6 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
 
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
-
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -284,20 +287,20 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
-[examples-link-0]: https://univer.ai/examples/sheets/
+[examples-link-0]: https://univer.ai/zh-CN/features/sheets-basic
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/
-[examples-link-3]: https://univer.ai/examples/sheets-big-data/
+[examples-link-3]: https://univer.ai/zh-CN/features/sheets-big-data
 [examples-link-4]: https://univer.ai/pro/examples/sheets-collaboration/
 [examples-link-5]: https://univer.ai/pro/examples/sheets-collaboration-playground/
 [examples-link-6]: https://univer.ai/pro/examples/sheets-exchange/
 [examples-link-7]: https://univer.ai/pro/examples/sheets-print/
-[examples-link-8]: https://univer.ai/examples/docs/
+[examples-link-8]: https://univer.ai/zh-CN/features/docs-basic
 [examples-link-9]: https://univer.ai/examples/docs-multi/
 [examples-link-10]: https://univer.ai/examples/docs-uniscript/
-[examples-link-11]: https://univer.ai/examples/docs-big-data/
+[examples-link-11]: https://univer.ai/zh-CN/features/docs-big-data
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/features/zen-editor
+[examples-link-15]: https://docs.univer.ai/zh-CN/guides/sheets/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

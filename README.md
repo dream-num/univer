@@ -37,6 +37,7 @@ Extensible. High-performance. Embedded to your application.
     - [📽️ Univer Slide](#%EF%B8%8F-univer-slide-under-development)
 - [🌐 Internationalization](#-internationalization)
 - [👾 Showcase](#-showcase)<!-- - [📦 Ecosystem](#-ecosystem) -->
+- [🔗 Links](#-links)
 - [💬 Community](#-community)
 - [🤝 Contribution](#-contribution)
 - [❤️ Sponsor](#%EF%B8%8F-sponsors)
@@ -81,7 +82,7 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
 - **Import & Export**[^1]: Support for importing and exporting data in XLSX.
-- **Charts**[^2]: Third-party chart support via [VChart][vchart-link].
+- **Charts**: Supports creating various types of charts, including bar, line, pie, scatter, and more.
 
 ### 📝 Univer Doc (beta)
 
@@ -102,16 +103,17 @@ Univer provides a wide range of features for spreadsheets, documents and present
 
 Univer supports multiple languages, including:
 
-- `zh-CN`
-- `zh-TW`
 - `en-US`
+- `fa-IR`
+- `fr-FR`
 - `ru-RU`
 - `vi-VN`
-- `fa-IR`
+- `zh-CN`
+- `zh-TW`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 
-You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
+You can add the language you want by [Using Custom Locales](https://docs.univer.ai/en-US/guides/sheets/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
 
 ## 👾 Showcase
 
@@ -192,7 +194,6 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 
 <!-- Footnotes -->
 [^1]: These features are provided by the non-OSS version of Univer, which is free for commercial use and also includes paid upgrade plans.
-[^2]: VChart is a third-party library that provides chart support for Univer. You can find more information here: [univer-vchart-plugin][vchart-univer-link].
 
 <!-- Links -->
 [github-license-shield]: https://img.shields.io/github/license/dream-num/univer?style=flat-square
@@ -266,9 +267,6 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [backer-badge-5]: https://opencollective.com/univer/backer/5/avatar.svg
 [backer-badge-6]: https://opencollective.com/univer/backer/6/avatar.svg
 
-[vchart-link]: https://github.com/VisActor/VChart
-[vchart-univer-link]: https://github.com/VisActor/univer-vchart-plugin
-
 [examples-preview-0]: ./docs/img/examples-sheets.gif
 [examples-preview-1]: ./docs/img/examples-sheets-multi.gif
 [examples-preview-2]: ./docs/img/examples-sheets-uniscript.gif
@@ -286,20 +284,20 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [examples-preview-14]: ./docs/img/examples-slides.gif
 [examples-preview-15]: ./docs/img/zen-mode.gif
 [examples-preview-16]: ./docs/img/univer-workspace-drag-chart.gif
-[examples-link-0]: https://univer.ai/examples/sheets/
+[examples-link-0]: https://univer.ai/en-US/features/sheets-basic
 [examples-link-1]: https://univer.ai/examples/sheets-multi/
 [examples-link-2]: https://univer.ai/examples/sheets-uniscript/
-[examples-link-3]: https://univer.ai/examples/sheets-big-data/
+[examples-link-3]: https://univer.ai/en-US/features/sheets-big-data
 [examples-link-4]: https://univer.ai/pro/examples/sheets-collaboration/
 [examples-link-5]: https://univer.ai/pro/examples/sheets-collaboration-playground/
 [examples-link-6]: https://univer.ai/pro/examples/sheets-exchange/
 [examples-link-7]: https://univer.ai/pro/examples/sheets-print/
-[examples-link-8]: https://univer.ai/examples/docs/
+[examples-link-8]: https://univer.ai/en-US/features/docs-basic
 [examples-link-9]: https://univer.ai/examples/docs-multi/
 [examples-link-10]: https://univer.ai/examples/docs-uniscript/
-[examples-link-11]: https://univer.ai/examples/docs-big-data/
+[examples-link-11]: https://univer.ai/en-US/features/docs-big-data
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
+[examples-link-15]: https://docs.univer.ai/en-US/guides/sheets/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

@@ -1246,7 +1246,7 @@ export function updateInlineDrawingPosition(
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
 
-                drawing.aLeft = divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                drawing.aLeft = column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
                 drawing.aTop = top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
                 drawing.width = width;
                 drawing.height = height;

@@ -227,45 +227,50 @@ export class NodePositionConvertToRectRange {
             this._liquid.translatePagePadding(page);
             const { skeTables, left } = page;
 
-            let table = null;
+            const tables = [];
 
             for (const [id, tableSke] of skeTables.entries()) {
                 if (id.startsWith(tableId)) {
-                    table = tableSke;
+                    tables.push(tableSke);
                 }
             }
 
-            if (table == null) {
+            if (tables.length === 0) {
                 this._liquid.restorePagePadding(page);
                 this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 continue;
             }
 
             this._liquid.translateSave();
-            this._liquid.translate(left, table.top);
 
-            const { x, y } = this._liquid;
-            const { left: tableLeft } = table;
+            for (const table of tables) {
+                this._liquid.translateSave();
+                this._liquid.translate(left, table.top);
 
-            for (const row of table.rows) {
-                if (row.index >= startRow && row.index <= endRow) {
-                    const cells = findNonEmptyCellPages(row.cells, startColumn, endColumn);
+                const { x, y } = this._liquid;
+                const { left: tableLeft } = table;
 
-                    if (cells == null) {
-                        continue;
+                for (const row of table.rows) {
+                    if (row.index >= startRow && row.index <= endRow) {
+                        const cells = findNonEmptyCellPages(row.cells, startColumn, endColumn);
+
+                        if (cells == null) {
+                            continue;
+                        }
+
+                        const [rowStartCell, rowEndCell] = cells;
+
+                        const position = {
+                            startX: x + rowStartCell.left + tableLeft,
+                            startY: y + row.top,
+                            endX: x + rowEndCell.left + rowEndCell.pageWidth + tableLeft,
+                            endY: y + row.top + row.height,
+                        };
+
+                        pointGroup.push(pushToPoints(position));
                     }
-
-                    const [rowStartCell, rowEndCell] = cells;
-
-                    const position = {
-                        startX: x + rowStartCell.left + tableLeft,
-                        startY: y + row.top,
-                        endX: x + rowEndCell.left + rowEndCell.pageWidth + tableLeft,
-                        endY: y + row.top + row.height,
-                    };
-
-                    pointGroup.push(pushToPoints(position));
                 }
+                this._liquid.translateRestore();
             }
 
             this._liquid.translateRestore();

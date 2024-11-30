@@ -18,6 +18,7 @@ import type { IDistFromText, Nullable } from '@univerjs/core';
 import type { IParagraphConfig } from '../../../../basics';
 
 import type {
+    IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
@@ -138,6 +139,7 @@ export function calculateLineTopByDrawings(
     lineHeight: number = 15.6,
     lineTop: number = 0,
     page: IDocumentSkeletonPage,
+    column: IDocumentSkeletonColumn,
     headerPage: Nullable<IDocumentSkeletonPage>,
     footerPage: Nullable<IDocumentSkeletonPage>
 ) {
@@ -150,7 +152,7 @@ export function calculateLineTopByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -160,7 +162,7 @@ export function calculateLineTopByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -168,14 +170,14 @@ export function calculateLineTopByDrawings(
     }
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop, column);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
     });
 
     skeNonWrapTables?.forEach((table) => {
-        const top = _getLineTopWidthWrapNone(table, lineHeight, lineTop);
+        const top = _getLineTopWidthWrapNone(table, lineHeight, lineTop, column);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
@@ -184,20 +186,31 @@ export function calculateLineTopByDrawings(
     return maxTop;
 }
 
-function _getLineTopWidthWrapNone(table: IDocumentSkeletonTable, lineHeight: number, lineTop: number) {
-    const { top, height } = table;
+function _getLineTopWidthWrapNone(
+    table: IDocumentSkeletonTable,
+    lineHeight: number, lineTop: number,
+    column: IDocumentSkeletonColumn
+) {
+    const { top, height, left, width } = table;
+    const { left: colLeft, width: colWidth } = column;
 
     // No need to consider the dist.
-    if (top + height < lineTop || top > lineHeight + lineTop) {
+    if (top + height < lineTop || top > lineHeight + lineTop || colLeft + colWidth < left || colLeft > left + width) {
         return;
     }
 
     return top + height;
 }
 
-function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number) {
+function _getLineTopWidthWrapTopBottom(
+    drawing: IDocumentSkeletonDrawing,
+    lineHeight: number,
+    lineTop: number,
+    column: IDocumentSkeletonColumn
+) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
-    const { layoutType, distT = 0, distB = 0 } = drawingOrigin;
+    const { layoutType, distT = 0, distB = 0, distL = 0, distR = 0 } = drawingOrigin;
+    const { left: colLeft, width: colWidth } = column;
 
     if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
         return;
@@ -212,20 +225,24 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
     if (angle === 0) {
         const newAtop = aTop - distT;
         const newHeight = distT + height + distB;
+        const newALeft = aLeft - distL;
+        const newWidth = distL + width + distR;
 
-        if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
+        if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop || colLeft + colWidth < newALeft || colLeft > newALeft + newWidth) {
             return;
         }
 
         return newAtop + newHeight;
     }
-    // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    let { top: sTop = 0, height: sHeight = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
+    // 旋转的情况，要考虑行首位与 drawing 旋转后得到的最大区域
+    let { top: sTop = 0, height: sHeight = 0, width: sWidth = 0, left: sLeft = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
 
     sTop -= distT;
-    sHeight += distB;
+    sHeight += distT + distB;
+    sLeft = sLeft - distL;
+    sWidth += distL + distR;
 
-    if (sTop + sHeight < lineTop || sTop > lineHeight + lineTop) {
+    if (sTop + sHeight < lineTop || sTop > lineHeight + lineTop || colLeft + colWidth < sLeft || colLeft > sLeft + sWidth) {
         return;
     }
     return sTop + sHeight;

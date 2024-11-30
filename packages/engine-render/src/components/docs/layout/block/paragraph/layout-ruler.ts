@@ -523,7 +523,7 @@ function _lineOperator(
     const headerPage = skeHeaders?.get(headerId)?.get(pageWidth);
     const footerPage = skeFooters?.get(footerId)?.get(pageWidth);
 
-    let needOpenNewPageByTableLayout = false;
+    let needOpenNewColumnByTableLayout = false;
 
     // Handle float object relative to line.
     // FIXME: @jocs, it will not update the last line's drawings.
@@ -549,18 +549,19 @@ function _lineOperator(
     }
 
     if (skeTablesInParagraph != null && skeTablesInParagraph.length > 0) {
-        needOpenNewPageByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
+        needOpenNewColumnByTableLayout = _updateAndPositionTable(ctx, lineTop, lineHeight, lastPage, column, section, skeTablesInParagraph, paragraphConfig.paragraphIndex, sectionBreakConfig, pDrawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
         lineTop,
         lastPage,
+        column,
         headerPage,
         footerPage
     ); // WRAP_TOP_AND_BOTTOM 的 drawing 和 WRAP NONE 的 table 会改变行的起始 top
 
-    if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewPageByTableLayout) {
+    if ((lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) || needOpenNewColumnByTableLayout) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
@@ -793,14 +794,14 @@ function _updateAndPositionTable(
     const { tableId, table } = firstUnPositionedTable;
     const { tableSource } = table;
 
-    if (firstUnPositionedTable.isSlideTable === false) {
-        switch (tableSource.textWrap) {
-            case TableTextWrapType.NONE: {
-                table.top = lineTop;
-                table.left = column.left;
-                break;
-            }
-            case TableTextWrapType.WRAP: {
+    switch (tableSource.textWrap) {
+        case TableTextWrapType.NONE: {
+            table.top = lineTop;
+            table.left = column.left;
+            break;
+        }
+        case TableTextWrapType.WRAP: {
+            if (firstUnPositionedTable.isSlideTable === false) {
                 __updateWrapTablePosition(
                     ctx,
                     table,
@@ -810,11 +811,11 @@ function _updateAndPositionTable(
                     paragraphIndex,
                     drawingAnchorTop
                 );
-                break;
             }
-            default: {
-                throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
-            }
+            break;
+        }
+        default: {
+            throw new Error(`Unsupported table text wrap type: ${tableSource.textWrap}`);
         }
     }
 

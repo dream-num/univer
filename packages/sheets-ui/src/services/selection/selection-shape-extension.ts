@@ -27,7 +27,7 @@ import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import { attachSelectionWithCoord } from './util';
+import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -258,12 +258,8 @@ export class SelectionShapeExtension {
         });
 
         this._targetSelection = { ...selectionWithCoord.rangeWithCoord };
-        // DO NOT UPDATE CURR CELL while dragging whole selection.
-        // Updating the primary cell during the middle of a drag operation may result in the primary cell being out of range in certain scenarios.
-        // ex: dragging normal selection to a merged area. there is a check to see if this move is valid, if not, the selection process would revert back to  original state.
-
-        // normal selection should keep the original state when dragging whole selection.
-        // Now ref selection needs _control.selectionMoving$ update selection when dragging.
+        const primaryWithCoordAndMergeInfo = attachPrimaryWithCoord(this._skeleton, primaryCell);
+        this._control.updateCurrCell(primaryWithCoordAndMergeInfo);
         this._control.selectionMoving$.next(selectionWithCoord.rangeWithCoord);
     }
 

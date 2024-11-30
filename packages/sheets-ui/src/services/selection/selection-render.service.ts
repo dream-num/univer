@@ -23,7 +23,7 @@ import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, merge, startWith } from 'rxjs';
+import { distinctUntilChanged, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -146,7 +146,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initSelectionChangeListener(): void {
         // normal selection: after dragging selection(move end)
-        this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionWithStyleList) => {
+        this.disposeWithMe(this._workbookSelections.selectionSet$.subscribe((selectionWithStyleList) => {
             this.resetSelectionsByModelData(selectionWithStyleList);
         }));
     }

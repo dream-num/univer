@@ -15,14 +15,17 @@
  */
 
 import type { Direction, ICommand, IRange } from '@univerjs/core';
+import type {
+    ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     expandToContinuousRange,
     getCellAtRowCol,
     getSelectionsService,
     getSheetCommandTarget,
+    SelectionMoveType,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -125,7 +128,8 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
             selections,
-        });
+            type: SelectionMoveType.MOVE_END,
+        } as ISetSelectionsOperationParams);
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
         selectionService?.refreshSelectionMoveEnd();

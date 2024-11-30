@@ -906,7 +906,7 @@ export class PromptController extends Disposable {
 
         const bodyList = this._getFormulaAndCellEditorBody(unitIds).filter((b) => !!b);
 
-        this._refSelectionsService.clear();
+        // this._refSelectionsService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             this._existsSequenceNode = false;
@@ -1073,7 +1073,7 @@ export class PromptController extends Disposable {
         // }
 
         if (selectionWithStyle.length) {
-            this._refSelectionsService.addSelections(unitId, currSheetId, selectionWithStyle);
+            this._refSelectionsService.setSelections(unitId, currSheetId, selectionWithStyle);
         }
     }
 
@@ -1404,6 +1404,12 @@ export class PromptController extends Disposable {
         if (insertNodes == null) {
             return;
         }
+
+        const { skeleton } = this._getCurrentUnitIdAndSheetId();
+        const unitId = skeleton?.worksheet.getUnitId();
+        const sheetId = skeleton?.worksheet.getSheetId();
+        currentSelection.range.sheetId = sheetId;
+        currentSelection.range.unitId = unitId;
 
         const refString = this._generateRefString(currentSelection);
         this._formulaPromptService.setSequenceNodes(insertNodes);
@@ -1830,7 +1836,7 @@ export class PromptController extends Disposable {
                         const selectionData = this._sheetsSelectionsService.getCurrentLastSelection();
                         if (selectionData != null) {
                             const selectionDataNew = Tools.deepClone(selectionData);
-                            this._refSelectionsService.addSelections([selectionDataNew]);
+                            this._refSelectionsService.setSelections([selectionDataNew]);
                         }
                     }
 

@@ -178,6 +178,17 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         return control;
     }
 
+    private _initSelectionChangeListener(): void {
+        // used for refresh selection when focus in formula editor.
+        this.disposeWithMe(this._refSelectionsService.selectionSet$.subscribe((selectionsWithStyles) => {
+            this._reset();
+            const skeleton = this._skeleton;
+            if (!skeleton) return;
+            // The selections' style would be colorful here. PromptController would change the color of selections later.
+            this.resetSelectionsByModelData(selectionsWithStyles || []);
+        }));
+    }
+
     /**
      * Update selectionModel in this._workbookSelections by user action in spreadsheet area.
      */
@@ -203,22 +214,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
             type
         );
-    }
-
-    private _initSelectionChangeListener(): void {
-        // selectionMoveEnd$ beforeSelectionMoveEnd$ was triggered when pointerup after dragging to change selection area.
-        // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
-
-        // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
-        this.disposeWithMe(this._workbookSelections.selectionSet$.subscribe((selectionsWithStyles) => {
-            this._reset();
-            const skeleton = this._skeleton;
-            if (!skeleton) return;
-            // The selections' style would be colorful here. PromptController would change the color of selections later.
-            for (const selectionWithStyle of selectionsWithStyles) {
-                this._addSelectionControlByModelData(selectionWithStyle);
-            }
-        }));
     }
 
     private _initSkeletonChangeListener(): void {
@@ -266,7 +261,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line complexity
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

@@ -49,5 +49,4 @@ export * from './scene-viewer';
 export * from './scroll-timer';
 export * from './shape';
 export { ThinEngine } from './thin-engine';
-export { ThinScene } from './thin-scene';
 export * from './viewport';

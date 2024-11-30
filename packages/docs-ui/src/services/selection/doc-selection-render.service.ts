@@ -1025,7 +1025,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.deactivate();
 
-        this._context.scene?.getEngine()?.setRemainCapture();
+        this._context.scene?.getEngine()?.setCapture();
     }
 
     __attachScrollEvent() {
@@ -1261,4 +1261,3 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onPointerDown$.complete();
     }
 }
-

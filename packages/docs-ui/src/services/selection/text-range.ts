@@ -476,8 +476,8 @@ export class TextRange implements IDocRange {
         }
 
         this._anchorShape = anchor;
-
         this._scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
+        this.activeStatic();
     }
 
     private _setCursorList(cursorList: ITextRange[]) {

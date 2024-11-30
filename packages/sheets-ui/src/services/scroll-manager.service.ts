@@ -30,7 +30,7 @@ export interface IScrollState {
      */
     offsetY: number;
     /**
-     * currrent start row in viewport visible area
+     * current start row in viewport visible area
      */
     sheetViewStartRow: number;
     /**

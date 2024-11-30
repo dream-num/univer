@@ -327,11 +327,11 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         const editArea = viewModel.getEditArea();
                         const isEditBody = editArea === DocumentEditArea.BODY;
                         const { page, pageLeft, pageTop, ctx } = config;
-                        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
+                        const { pageWidth, pageHeight, marginTop, marginBottom, left } = page;
 
                         // Draw header footer label.
                         ctx.save();
-                        ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+                        ctx.translate(pageLeft - 0.5 + left, pageTop - 0.5);
 
                         // Cover header and footer.
                         if (isEditBody) {

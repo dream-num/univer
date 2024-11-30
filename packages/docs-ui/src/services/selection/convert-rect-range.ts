@@ -225,7 +225,7 @@ export class NodePositionConvertToRectRange {
         for (let p = skipPageIndex; p < pages.length; p++) {
             const page = pages[p];
             this._liquid.translatePagePadding(page);
-            const { skeTables } = page;
+            const { skeTables, left } = page;
 
             let table = null;
 
@@ -242,7 +242,7 @@ export class NodePositionConvertToRectRange {
             }
 
             this._liquid.translateSave();
-            this._liquid.translate(0, table.top);
+            this._liquid.translate(left, table.top);
 
             const { x, y } = this._liquid;
             const { left: tableLeft } = table;

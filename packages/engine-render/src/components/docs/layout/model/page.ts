@@ -117,7 +117,13 @@ export function createSkeletonPage(
                 true
             );
 
-            skeHeaders.set(headerId, new Map([[pageWidth, header]]));
+            let headerMap = skeHeaders.get(headerId);
+            if (headerMap == null) {
+                headerMap = new Map();
+                skeHeaders.set(headerId, headerMap);
+            }
+
+            headerMap.set(pageWidth, header);
         }
         page.headerId = headerId;
     }
@@ -222,9 +228,15 @@ function _createSkeletonHeaderFooter(
         lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
         marginLeft = 0, marginRight = 0,
         marginHeader = 0, marginFooter = 0,
+        pageOrient = PageOrientType.PORTRAIT,
     } = sectionBreakConfig;
-    const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
-    const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
+    let pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
+    let pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
+
+    if (pageOrient === PageOrientType.LANDSCAPE) {
+        [pageWidth, pageHeight] = [pageHeight, pageWidth];
+    }
+
     const headerFooterConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,

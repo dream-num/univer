@@ -82,10 +82,10 @@ export class DocBackground extends DocComponent {
             }
 
             // Draw background and margin identifier.
-            const { width, pageWidth, height, pageHeight, originMarginTop, originMarginBottom, marginLeft, marginRight } = page;
+            const { width, pageWidth, height, pageHeight, originMarginTop, originMarginBottom, marginLeft, marginRight, left } = page;
 
             ctx.save();
-            ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+            ctx.translate(pageLeft - 0.5 + left, pageTop - 0.5);
             const backgroundOptions = {
                 width: pageWidth ?? width,
                 height: pageHeight ?? height,

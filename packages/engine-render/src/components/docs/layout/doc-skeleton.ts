@@ -448,7 +448,10 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
 
-            const { marginTop, marginBottom, pageWidth, pageHeight } = page;
+            const { marginTop, marginBottom, pageWidth, pageHeight, left } = page;
+
+            this._findLiquid.translateSave();
+            this._findLiquid.translate(left, 0);
 
             if (
                 x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
@@ -480,6 +483,7 @@ export class DocumentSkeleton extends Skeleton {
                 break;
             }
 
+            this._findLiquid.translateRestore();
             this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
@@ -510,6 +514,7 @@ export class DocumentSkeleton extends Skeleton {
         };
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
+
         const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
         const pageLength = pages.length;
 
@@ -517,9 +522,12 @@ export class DocumentSkeleton extends Skeleton {
         if (restrictions == null) {
             for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
-                const { headerId, footerId, pageWidth } = page;
+                const { headerId, footerId, pageWidth, left } = page;
 
                 let exactMatch = null;
+
+                this._findLiquid.translateSave();
+                this._findLiquid.translate(left, 0);
 
                 if (editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER) {
                     const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
@@ -568,6 +576,8 @@ export class DocumentSkeleton extends Skeleton {
                     );
                 }
 
+                this._findLiquid.translateRestore();
+
                 if (exactMatch) {
                     return exactMatch;
                 }
@@ -581,11 +591,13 @@ export class DocumentSkeleton extends Skeleton {
             if (strict === false) {
                 for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
-                    const { headerId, footerId, pageWidth } = page;
+                    const { headerId, footerId, pageWidth, left } = page;
+
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(left, 0);
 
                     if (segmentId !== '') {
                         const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
-
                         if (headerSke) {
                             exactMatch = this._collectNearestNode(
                                 headerSke,
@@ -630,6 +642,8 @@ export class DocumentSkeleton extends Skeleton {
                         );
                     }
 
+                    this._findLiquid.translateRestore();
+
                     if (exactMatch) {
                         return exactMatch;
                     }
@@ -639,9 +653,14 @@ export class DocumentSkeleton extends Skeleton {
             } else {
                 for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
+                    const { left } = page;
+
+                    this._findLiquid.translateSave();
+                    this._findLiquid.translate(left, 0);
 
                     if (segmentId) {
                         if (segmentPage !== pi) {
+                            this._findLiquid.translateRestore();
                             this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                             continue;
                         }
@@ -676,6 +695,8 @@ export class DocumentSkeleton extends Skeleton {
                             pageLength
                         );
                     }
+
+                    this._findLiquid.translateRestore();
 
                     if (exactMatch) {
                         return exactMatch;

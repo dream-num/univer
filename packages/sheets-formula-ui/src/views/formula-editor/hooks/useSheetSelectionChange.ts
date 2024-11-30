@@ -288,25 +288,27 @@ export const useSheetSelectionChange = (
                 if (params.extra !== 'formula-editor') {
                     return;
                 }
-                const { unitId, subUnitId, selections } = params;
+                const { selections } = params;
 
                 if (selections.length) {
                     const last = selections[selections.length - 1];
                     if (last) {
                         const range = last.range;
-                        const sheetId = range.sheetId ?? subUnitId;
+                        const sheetId = subUnitId;
                         const unitRangeName = {
                             range,
-                            unitId: range.unitId ?? unitId,
-                            sheetName: getSheetNameById(sheetId),
+                            unitId: params.unitId === unitId ? '' : params.unitId,
+                            sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
                         };
                         const sequenceNodes = [...sequenceNodesRef.current];
                         const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
                         const result = refRanges[0];
-                        const lastNode = sequenceNodes[sequenceNodes.length - 1];
+                        let lastNode = sequenceNodes[sequenceNodes.length - 1];
                         if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {
+                            lastNode = { ...lastNode };
                             lastNode.token = result;
                             lastNode.endIndex = lastNode.startIndex + result.length;
+                            sequenceNodes[sequenceNodes.length - 1] = lastNode;
                             const refStr = sequenceNodeToText(sequenceNodes);
                             handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
                         } else {

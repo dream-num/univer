@@ -46,7 +46,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation, ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 
@@ -246,7 +246,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
-
             const state = this._editorBridgeService.getEditCellState();
             if (state == null) {
                 return;
@@ -274,7 +273,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
+            this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
+                unitId: editorUnitId,
+                snapshot: Tools.deepClone(documentModel!.getSnapshot()),
+            });
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
             this._textSelectionManagerService.replaceTextRanges([{
                 startOffset: 0,
@@ -497,7 +499,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
-        const documentDataModel = editCellState.documentLayoutObject.documentModel;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
         if (documentDataModel) {
             await this._submitCellData(documentDataModel);

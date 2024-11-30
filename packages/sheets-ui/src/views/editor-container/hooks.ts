@@ -20,14 +20,6 @@ import { KeyCode } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-//     commandService.executeCommand(SetCellEditVisibleArrowOperation.id, {
-//         keycode,
-//         visible: false,
-//         eventType: DeviceInputEventType.Keyboard,
-//         isShift: metaKey === MetaKeys.SHIFT || metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT),
-//         unitId,
-//     });
-
 export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 | 2>, unitId: string) {
     const editorBridgeService = useDependency(IEditorBridgeService);
 
@@ -39,6 +31,7 @@ export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 |
         ],
         handler: (keycode: KeyCode) => {
             if (keycode === KeyCode.ENTER || keycode === KeyCode.ESC || keycode === KeyCode.TAB) {
+                editorBridgeService.disableForceKeepVisible();
                 editorBridgeService.changeVisible({
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,

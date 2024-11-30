@@ -63,7 +63,7 @@ const define = {
     'process.env.IS_E2E': isE2E ? 'true' : 'false',
 };
 
-if (!args.watch && !isE2E) {
+if (!args.watch) {
     const gitCommitHash = isE2E ? 'E2E' : execSync('git rev-parse --short HEAD').toString().trim();
     const gitRefName = isE2E ? 'E2E' : execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
 

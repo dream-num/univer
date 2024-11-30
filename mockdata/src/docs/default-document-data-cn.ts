@@ -606,10 +606,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 columnProperties: [
                     {
                         width: ptToPixel(240),
-                        paddingEnd: ptToPixel(15),
+                        paddingEnd: ptToPixel(11),
                     },
                     {
-                        width: ptToPixel(487),
+                        width: ptToPixel(240),
+                        paddingEnd: ptToPixel(11),
+                    },
+                    {
+                        width: ptToPixel(240),
                         paddingEnd: ptToPixel(0),
                     },
                 ],

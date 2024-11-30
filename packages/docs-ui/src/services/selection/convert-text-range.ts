@@ -578,6 +578,7 @@ export class NodePositionConvertToCursor {
                     s
                 );
 
+                this._liquid.translateSave();
                 this._liquid.translateSection(section);
 
                 for (let c = start_c; c <= end_c; c++) {
@@ -591,6 +592,7 @@ export class NodePositionConvertToCursor {
                         c
                     );
 
+                    this._liquid.translateSave();
                     this._liquid.translateColumn(column);
 
                     for (let l = start_l; l <= end_l; l++) {
@@ -640,7 +642,11 @@ export class NodePositionConvertToCursor {
 
                         this._liquid.translateRestore();
                     }
+
+                    this._liquid.translateRestore();
                 }
+
+                this._liquid.translateRestore();
             }
             this._liquid.translateRestore();
 

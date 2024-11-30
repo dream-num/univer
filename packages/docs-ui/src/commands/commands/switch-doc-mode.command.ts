@@ -19,6 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, ObjectRelativeFromV } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export interface ISwitchDocModeCommandParams { }
@@ -33,7 +34,6 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
@@ -42,6 +42,8 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
         }
 
         const unitId = docDataModel.getUnitId();
+
+        const docPageLayoutService = renderManagerService.getRenderById(unitId)?.with(DocPageLayoutService);
 
         const skeleton = renderManagerService.getRenderById(unitId)
             ?.with(DocSkeletonManagerService)
@@ -164,6 +166,8 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
+        docPageLayoutService?.calculatePagePosition();
 
         return Boolean(result);
     },

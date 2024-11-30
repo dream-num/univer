@@ -985,6 +985,7 @@ const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
         width: ptToPixel(595),
         height: Number.POSITIVE_INFINITY,
     },
+    pageOrient: PageOrientType.PORTRAIT,
     marginTop: ptToPixel(50),
     marginBottom: ptToPixel(50),
     marginRight: ptToPixel(50),
@@ -1011,6 +1012,7 @@ const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
 const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
+    equalWidth: BooleanNumber.FALSE,
     sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
 };
 

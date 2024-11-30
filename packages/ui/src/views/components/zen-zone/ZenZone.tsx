@@ -20,7 +20,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { IZenZoneService } from '../../../services/zen-zone/zen-zone.service';
-import { Sidebar } from '../sidebar/Sidebar';
 import styles from './index.module.less';
 
 export function ZenZone() {
@@ -62,13 +61,6 @@ export function ZenZone() {
             <div className={styles.zenZoneEditorContainer}>
                 {Component && <Component />}
             </div>
-            {hidden
-                ? null
-                : (
-                    <aside style={{ height: '100%' }}>
-                        <Sidebar />
-                    </aside>
-                )}
         </section>
     );
 }

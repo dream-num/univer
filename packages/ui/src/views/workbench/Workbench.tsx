@@ -174,13 +174,9 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
 
                         </section>
 
-                        {zenZoneVisible
-                            ? null
-                            : (
-                                <aside className={styles.workbenchContainerSidebar}>
-                                    <Sidebar />
-                                </aside>
-                            )}
+                        <aside className={styles.workbenchContainerSidebar}>
+                            <Sidebar />
+                        </aside>
                     </div>
 
                     {/* footer */}

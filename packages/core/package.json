@@ -62,7 +62,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "0.1.39-alpha.45",
+        "@univerjs/protocol": "0.1.39",
         "@wendellhu/redi": "0.16.1",
         "dayjs": "^1.11.13",
         "fast-diff": "1.3.0",

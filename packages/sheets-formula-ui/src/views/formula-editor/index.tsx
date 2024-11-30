@@ -66,6 +66,7 @@ export interface IFormulaEditorProps {
     onFormulaSelectingChange?: (isSelecting: FormulaSelectingType) => void;
     keyboradEventConfig?: IKeyboardEventConfig;
     onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
+    modifyRangeByPointer?: boolean;
 }
 
 const noop = () => { };
@@ -88,6 +89,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onFormulaSelectingChange: propOnFormulaSelectingChange,
         keyboradEventConfig,
         onMoveInEditor,
+        modifyRangeByPointer = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -179,7 +181,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
-    useRefactorEffect(isFocus, Boolean(isSelecting), unitId);
+    const shouldUseRefSelection = modifyRangeByPointer ? Boolean(isSelecting) : isSelecting === FormulaSelectingType.NEED_ADD;
+    useRefactorEffect(isFocus, shouldUseRefSelection, unitId);
     useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {

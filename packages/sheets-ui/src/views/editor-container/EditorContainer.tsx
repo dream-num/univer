@@ -155,6 +155,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
+                    modifyRangeByPointer={false}
                 />
             )}
         </div>

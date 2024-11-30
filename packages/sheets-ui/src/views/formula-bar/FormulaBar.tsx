@@ -214,6 +214,7 @@ export function FormulaBar() {
                             unitId={editState?.unitId}
                             subUnitId={editState?.sheetId}
                             isSupportAcrossSheet
+                            resetSelectionOnBlur={false}
                             keyboradEventConfig={keyCodeConfig}
                             onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                                 isRefSelecting.current = isSelecting;

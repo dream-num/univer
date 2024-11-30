@@ -148,6 +148,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     keyboradEventConfig={keyCodeConfig}
                     onMoveInEditor={onMoveInEditor}
                     isSupportAcrossSheet
+                    resetSelectionOnBlur={false}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
                         if (isSelecting) {

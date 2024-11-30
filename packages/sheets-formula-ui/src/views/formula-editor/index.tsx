@@ -66,6 +66,7 @@ export interface IFormulaEditorProps {
     onFormulaSelectingChange?: (isSelecting: FormulaSelectingType) => void;
     keyboradEventConfig?: IKeyboardEventConfig;
     onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void;
+    resetSelectionOnBlur?: boolean;
 }
 
 const noop = () => { };
@@ -88,6 +89,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         onFormulaSelectingChange: propOnFormulaSelectingChange,
         keyboradEventConfig,
         onMoveInEditor,
+        resetSelectionOnBlur = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -173,10 +175,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 clearTimeout(time);
             };
         } else {
-            resetSelection();
+            if (resetSelectionOnBlur) {
+                resetSelection();
+            }
             isFocusSet(_isFocus);
         }
-    }, [_isFocus, focus]);
+    }, [_isFocus, focus, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor);
     useRefactorEffect(isFocus, Boolean(isSelecting), unitId);

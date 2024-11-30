@@ -154,7 +154,7 @@ export function serializeRange(range: IRange): string {
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
     if (needsQuoting(sheetName)) {
-        return `'${sheetName}'!${serializeRange(range)}`;
+        return `'${quoteSheetName(sheetName)}'!${serializeRange(range)}`;
     }
     return `${sheetName}!${serializeRange(range)}`;
 }
@@ -167,7 +167,7 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  */
 export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
     if (needsQuoting(unit) || needsQuoting(sheetName)) {
-        return `'[${unit}]${sheetName}'!${serializeRange(range)}`;
+        return `'[${quoteSheetName(unit)}]${quoteSheetName(sheetName)}'!${serializeRange(range)}`;
     }
 
     return `[${unit}]${sheetName}!${serializeRange(range)}`;
@@ -439,4 +439,13 @@ function isR1C1Notation(name: string) {
 function startsWithNonAlphabetic(name: string) {
     // Check if the first character is not a letter (including non-English characters)
     return !/^\p{Letter}/u.test(name.charAt(0));
+}
+
+/**
+ * Add a single quote before the single quote
+ * @param name
+ * @returns
+ */
+export function quoteSheetName(name: string) {
+    return name.replace(/'/g, "''");
 }

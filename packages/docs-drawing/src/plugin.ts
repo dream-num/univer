@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsDrawingConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, DOCS_DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocDrawingController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
 import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
@@ -42,10 +42,10 @@ export class UniverDocsDrawingPlugin extends Plugin {
             [DocDrawingController],
             [DocDrawingService],
             [IDocDrawingService, { useClass: DocDrawingService }],
-        ] as Dependency[
+        ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
 
-        ]).forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(DocDrawingController);
+        touchDependencies(this._injector, [
+            [DocDrawingController],
+        ]);
     }
 }

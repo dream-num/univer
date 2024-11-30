@@ -82,7 +82,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
-            [SheetCellImageController],
         ]);
     }
 
@@ -99,6 +98,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
+            [SheetCellImageController],
             [SheetCellImageHoverController],
             [SheetCellImageAutofillController],
         ]);

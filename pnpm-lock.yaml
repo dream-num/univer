@@ -160,8 +160,8 @@ importers:
         specifier: ^0.2.8
         version: 0.2.8
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
 
   common/storybook:
     dependencies:
@@ -1046,8 +1046,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
@@ -1117,8 +1117,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1972,8 +1972,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-numfmt
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2168,8 +2168,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2600,8 +2600,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2983,8 +2983,8 @@ importers:
         specifier: ^0.2.8
         version: 0.2.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3189,8 +3189,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.45
-        version: 0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39
+        version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -5118,8 +5118,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.39-alpha.45':
-    resolution: {integrity: sha512-Qzvv9oSojsCRNoEEF00tQqls4HanycqLmYsr+Hj+Kpr7z0aPdzNYD2aya3cYcfs5P8qHl/0EK2V0QP6AC3Cb9Q==}
+  '@univerjs/protocol@0.1.39':
+    resolution: {integrity: sha512-KduLLVX/r1K39VIMcSTneH8j735qkztV3xgeXrtJWLJFufClZd5rwbX3VMJxJG18lY+WdRuQc1FwoCTIEVGdeQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': 1.9.14
@@ -12188,7 +12188,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.39-alpha.45(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1

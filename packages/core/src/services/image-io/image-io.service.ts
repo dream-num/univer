@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { createIdentifier } from '@univerjs/core';
+import type { Nullable } from '../../shared/types';
+import { createIdentifier } from '../../common/di';
 
 export enum ImageSourceType {
     URL = 'URL',

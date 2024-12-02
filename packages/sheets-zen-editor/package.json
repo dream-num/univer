@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-zen-editor",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "private": false,
     "description": "Zen Editor plugin for Univer Sheets.",
     "author": "DreamNum <developer@univer.ai>",

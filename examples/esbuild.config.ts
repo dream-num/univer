@@ -72,6 +72,39 @@ if (!args.watch) {
     define['process.env.BUILD_TIME'] = `"${new Date().toISOString()}"`;
 }
 
+const entryPoints = [
+    // homepage
+    './src/main.tsx',
+
+    // sheets
+    './src/sheets/main.ts',
+    './src/sheets/worker.ts',
+
+    // sheets-multi
+    './src/sheets-multi/main.tsx',
+
+    // sheets-uniscript
+    './src/sheets-uniscript/main.ts',
+
+    // docs
+    './src/docs/main.ts',
+
+    // docs-uniscript
+    './src/docs-uniscript/main.ts',
+
+    // slides
+    './src/slides/main.ts',
+
+    // uni
+    './src/uni/main.ts',
+    './src/uni/worker.ts',
+    './src/uni/lazy.ts',
+
+    // mobile sheet
+    './src/mobile-s/main.ts',
+    './src/mobile-s/worker.ts',
+];
+
 const config: SameShape<BuildOptions, BuildOptions> = {
     bundle: true,
     format: 'esm',
@@ -81,64 +114,50 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     sourcemap: args.watch,
     minify: false,
     target: 'chrome70',
-    plugins: [
-        copyPlugin({
-            assets: {
-                from: ['./public/**/*'],
-                to: ['./'],
+    plugins: [{
+        name: 'ignore-global-css',
+        setup(build) {
+            build.onResolve({ filter: /\/global\.css$/ }, (args) => {
+                if (args.importer.includes('packages')) {
+                    return {
+                        path: args.path,
+                        namespace: 'ignore-global-css',
+                        pluginData: {
+                            importer: args.importer,
+                        },
+                    };
+                }
+            });
+
+            build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
+                return { contents: '' };
+            });
+        },
+    },
+    copyPlugin({
+        assets: {
+            from: ['./public/**/*'],
+            to: ['./'],
+        },
+    }),
+    stylePlugin({
+        postcss: {
+            plugins: [tailwindcss],
+        },
+        cssModulesOptions: {
+            localsConvention: 'camelCaseOnly',
+            generateScopedName: 'univer-[local]',
+        },
+        renderOptions: {
+            lessOptions: {
+                paths: [nodeModules],
             },
-        }),
-        stylePlugin({
-            postcss: {
-                plugins: [tailwindcss],
-            },
-            cssModulesOptions: {
-                localsConvention: 'camelCaseOnly',
-                generateScopedName: 'univer-[local]',
-            },
-            renderOptions: {
-                lessOptions: {
-                    paths: [nodeModules],
-                },
-            },
-        }),
-        vue() as unknown as Plugin,
+        },
+    }),
+    vue() as unknown as Plugin,
     ],
-    entryPoints: [
-        // homepage
-        './src/main.tsx',
-
-        // sheets
-        './src/sheets/main.ts',
-        './src/sheets/worker.ts',
-
-        // sheets-multi
-        './src/sheets-multi/main.tsx',
-
-        // sheets-uniscript
-        './src/sheets-uniscript/main.ts',
-
-        // docs
-        './src/docs/main.ts',
-
-        // docs-uniscript
-        './src/docs-uniscript/main.ts',
-
-        // slides
-        './src/slides/main.ts',
-
-        // uni
-        './src/uni/main.ts',
-        './src/uni/worker.ts',
-        './src/uni/lazy.ts',
-
-        // mobile sheet
-        './src/mobile-s/main.ts',
-        './src/mobile-s/worker.ts',
-    ],
-
+    entryPoints,
     outdir: './local',
-
     define,
 };
 

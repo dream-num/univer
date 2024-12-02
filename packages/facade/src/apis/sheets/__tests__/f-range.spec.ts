@@ -812,7 +812,7 @@ describe('Test FRange', () => {
 
     it('Range setNumberFormat', () => {
         univerAPI.getHooks().onRendered(() => {
-            const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+            const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
             const range = activeSheet?.getRange(0, 0, 1, 1);
             range?.setValue(1234.5678);
             range?.setNumberFormat('#,###');

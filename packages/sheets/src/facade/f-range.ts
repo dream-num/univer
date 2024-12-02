@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '@univerjs/sheets';
+import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ISyncableCommandExecutionOptions, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
@@ -309,21 +309,23 @@ export class FRange extends FBase {
      * Sets a different value for each cell in the range. The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats. If a value begins with `=`, it is interpreted as a formula.
      * @param value
      */
-    setValues(
+    setValues<S extends boolean = false>(
         value:
             | CellValue[][]
             | IObjectMatrixPrimitiveType<CellValue>
             | ICellData[][]
-            | IObjectMatrixPrimitiveType<ICellData>
-    ): Promise<boolean> {
+            | IObjectMatrixPrimitiveType<ICellData>,
+        options: ISyncableCommandExecutionOptions<S> = {}
+    ) {
+        const { sync } = options;
         const realValue = covertCellValues(value, this._range);
-
-        return this._commandService.executeCommand(SetRangeValuesCommand.id, {
+        const params = {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
-        });
+        } as ISetRangeValuesCommandParams;
+        return this._commandService.syncableExecuteCommand<ISetRangeValuesCommandParams, boolean, S>(SetRangeValuesCommand.id, params, { sync });
     }
 
     /**

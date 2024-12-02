@@ -88,6 +88,7 @@ export {
     type IMutationInfo,
     type IOperation,
     type IOperationInfo,
+    type ISyncableCommandExecutionOptions,
     NilCommand,
     sequenceExecute,
     sequenceExecuteAsync,

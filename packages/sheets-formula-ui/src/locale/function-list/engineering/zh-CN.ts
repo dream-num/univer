@@ -438,7 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '复数', detail: '需要计算其余弦的复数。' },
+            inumber: { name: '复数', detail: '需要计算其余弦值的复数。' },
         },
     },
     IMCOSH: {
@@ -464,7 +464,20 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '复数', detail: '需要计算其余切的复数。' },
+            inumber: { name: '复数', detail: '需要计算其余切值的复数。' },
+        },
+    },
+    IMCOTH: {
+        description: '返回复数的双曲余切值',
+        abstract: '返回复数的双曲余切值',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9366256?hl=zh-Hans&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '复数', detail: '需要计算其双曲余切值的复数。' },
         },
     },
     IMCSC: {
@@ -531,6 +544,20 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '复数', detail: '需要计算其自然对数的复数。' },
+        },
+    },
+    IMLOG: {
+        description: '返回复数的以特定数为底的对数',
+        abstract: '返回复数的以特定数为底的对数',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hans&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '复数', detail: '需要计算其以特定数为底的对数的复数。' },
+            base: { name: '底数', detail: '用于计算相应对数的底数。' },
         },
     },
     IMLOG10: {
@@ -704,6 +731,19 @@ export default {
         ],
         functionParameter: {
             inumber: { name: '复数', detail: '需要计算其正切值的复数。' },
+        },
+    },
+    IMTANH: {
+        description: '返回复数的双曲正切值',
+        abstract: '返回复数的双曲正切值',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9366655?hl=zh-Hans&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '复数', detail: '需要计算其双曲正切值的复数。' },
         },
     },
     OCT2BIN: {

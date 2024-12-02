@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUniscriptConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
@@ -40,7 +40,7 @@ export class UniverUniscriptPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(UNISCRIPT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

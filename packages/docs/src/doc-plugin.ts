@@ -26,7 +26,7 @@ import {
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
@@ -46,7 +46,7 @@ export class UniverDocsPlugin extends Plugin {
 
         // Manage the plugin configuration.
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

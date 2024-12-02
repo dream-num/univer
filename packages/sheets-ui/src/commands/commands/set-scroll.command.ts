@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { ICommand, IRange, Nullable } from '@univerjs/core';
+import type { IScrollState } from '../../services/scroll-manager.service';
+
 import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import type { ICommand, IRange, Nullable } from '@univerjs/core';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
-import type { IScrollState } from '../../services/scroll-manager.service';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -80,7 +80,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
- * Usually triggered by dragging srcollbar and click scrolltrack or moving selection range.
+ * Usually triggered by dragging scroll bar and click scroll track or moving selection range.
  * NOT same as SetScrollRelativeCommand which usually trigger by wheelevent.
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
@@ -130,6 +130,8 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
 
 export interface IScrollToCellCommandParams {
     range: IRange;
+    forceTop?: boolean;
+    forceLeft?: boolean;
 }
 
 /**
@@ -144,7 +146,7 @@ export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
         const scrollController = renderManagerService
             .getRenderById(instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
             .with(SheetsScrollRenderController);
-        return scrollController.scrollToRange(params!.range);
+        return scrollController.scrollToRange(params!.range, params!.forceTop, params!.forceLeft);
     },
 };
 

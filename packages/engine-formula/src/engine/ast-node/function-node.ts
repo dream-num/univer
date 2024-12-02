@@ -28,6 +28,7 @@ import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
+import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
@@ -45,9 +46,10 @@ export class FunctionNode extends BaseAstNode {
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService
+        private _definedNamesService: IDefinedNamesService,
+        private _formulaDataModel: FormulaDataModel
     ) {
-        super(token);
+        super('');
 
         if (this._functionExecutor.isAsync()) {
             this.setAsync();
@@ -64,6 +66,10 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.needsSheetsInfo) {
             this._setSheetsInfo();
         }
+
+        if (this._functionExecutor.needsFormulaDataModel) {
+            this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
+        }
     }
 
     override get nodeType() {
@@ -78,7 +84,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
             if (object == null) {
                 continue;
             }
@@ -100,6 +107,7 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result);
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -111,7 +119,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
 
             if (object == null) {
                 continue;
@@ -163,14 +172,21 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
 
-        const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+        let lookupCountRow: number;
+        let lookupCountColumn: number;
+
+        if (lookupVectorOrArray?.isReferenceObject()) {
+            const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+            const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
+
+            lookupCountRow = endRow - startRow + 1;
+            lookupCountColumn = endColumn - startColumn + 1;
+        } else {
+            lookupCountRow = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getRowCount() : 1;
+            lookupCountColumn = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getColumnCount() : 1;
+        }
 
         const resultVectorRange = (resultVector as BaseReferenceObject).getRangeData();
-
-        const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
-
-        const lookupCountRow = endRow - startRow + 1;
-        const lookupCountColumn = endColumn - startColumn + 1;
 
         const { startRow: reStartRow, startColumn: reStartColumn, endRow: reEndRow, endColumn: reEndColumn } = resultVectorRange;
 
@@ -255,6 +271,12 @@ export class FunctionNode extends BaseAstNode {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
 
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn);
+
+        if (this._functionExecutor.needsSheetRowColumnCount) {
+            const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);
+
+            this._functionExecutor.setSheetRowColumnCount(rowCount, columnCount);
+        }
     }
 
     private _setRefData(variant: FunctionVariantType) {
@@ -298,6 +320,7 @@ export class ErrorFunctionNode extends BaseAstNode {
 
     override async executeAsync() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -312,7 +335,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
     }
@@ -328,7 +352,14 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
+        return new FunctionNode(
+            token,
+            functionExecutor,
+            this._currentConfigService,
+            this._runtimeService,
+            this._definedNamesService,
+            this._formulaDataModel
+        );
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -337,7 +368,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._runtimeService);
 
         if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
             return ErrorNode.create(ErrorType.VALUE);

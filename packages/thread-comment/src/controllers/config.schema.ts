@@ -16,9 +16,9 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 
-export const PLUGIN_CONFIG_KEY = 'thread-comment.config';
+export const THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'thread-comment.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(THREAD_COMMENT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverThreadCommentConfig {
     overrides?: DependencyOverride;

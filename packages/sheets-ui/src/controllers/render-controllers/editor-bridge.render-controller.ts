@@ -46,7 +46,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        // FIXME: should use WorkbookSelections
+        // FIXME: should use WorkbookSelectionModel
         // FIXME: should check if it is the current sheet, if it becomes the current sheet,
         // it should update cell params, otherwise it should do nothing.
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
@@ -101,7 +101,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             const unitId = this._context.unitId;
             const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
             if (!sheetId) return;
-            const mergeInfo = this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.getCellByIndex(primary.actualRow, primary.actualColumn);
+            const mergeInfo = this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.getCellWithCoordByIndex(primary.actualRow, primary.actualColumn);
             const newPrimary: ISelectionCell = mergeInfo
                 ? {
                     actualRow: mergeInfo.actualRow,

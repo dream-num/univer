@@ -17,8 +17,7 @@
 import type { ITextRange } from '../../../../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
 import { CustomRangeType, type ICustomRange } from '../../../../../types/interfaces';
-import { DataStreamTreeTokenType } from '../../../types';
-import { excludePointsFromRange, getCustomRangesInterestsWithSelection, shouldDeleteCustomRange } from '../custom-range';
+import { excludePointsFromRange, getCustomRangesInterestsWithSelection } from '../custom-range';
 
 describe('excludePointsFromRange function', () => {
     it('should handle empty points array', () => {
@@ -112,8 +111,8 @@ describe('getCustomRangesInterestsWithSelection function', () => {
     it('should return empty array if no custom ranges intersect', () => {
         const range: ITextRange = { startOffset: 5, endOffset: 10, collapsed: false };
         const customRanges: ICustomRange[] = [
-            { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 11, endIndex: 15, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 11, endIndex: 15, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ];
         expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([]);
     });
@@ -121,20 +120,20 @@ describe('getCustomRangesInterestsWithSelection function', () => {
     it('should return intersecting custom ranges', () => {
         const range: ITextRange = { startOffset: 5, endOffset: 10, collapsed: false };
         const customRanges: ICustomRange[] = [
-            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ];
         expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([
-            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ]);
     });
 
     it('should handle collapsed range', () => {
         const range: ITextRange = { startOffset: 5, endOffset: 5, collapsed: true };
         const customRanges: ICustomRange[] = [
-            { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 5, endIndex: 10, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 5, endIndex: 10, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ];
         expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([]);
     });
@@ -142,65 +141,15 @@ describe('getCustomRangesInterestsWithSelection function', () => {
     it('should handle multiple intersecting custom ranges', () => {
         const range: ITextRange = { startOffset: 5, endOffset: 15, collapsed: false };
         const customRanges: ICustomRange[] = [
-            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ];
 
         expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([
-            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
-            { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK },
+            { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK, properties: {} },
+            { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK, properties: {} },
         ]);
-    });
-});
-
-describe('shouldDeleteCustomRange function', () => {
-    it('should return false if end is less than 0', () => {
-        const deleteStart = 0;
-        const deleteLen = 5;
-        const customRange: ICustomRange = { startIndex: 10, endIndex: 20, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = 'some random data stream';
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(false);
-    });
-
-    it('should return true if start is 0 and end is greater than or equal to dataStreamSlice length', () => {
-        const deleteStart = 0;
-        const deleteLen = 11;
-        const customRange: ICustomRange = { startIndex: 0, endIndex: 10, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = 'some random data stream';
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(true);
-    });
-
-    it('should return false if result contains non-split symbols', () => {
-        const deleteStart = 1;
-        const deleteLen = 1;
-        const customRange: ICustomRange = { startIndex: 0, endIndex: 10, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = 'some random data stream';
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(false);
-    });
-
-    it('should return true if result contains only split symbols', () => {
-        const deleteStart = 1;
-        const deleteLen = 1;
-        const customRange: ICustomRange = { startIndex: 0, endIndex: 10, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(true);
-    });
-
-    it('should handle deletion within the range', () => {
-        const deleteStart = 2;
-        const deleteLen = 3;
-        const customRange: ICustomRange = { startIndex: 0, endIndex: 10, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}abc${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(false);
-    });
-
-    it('should handle deletion that spans the entire range', () => {
-        const deleteStart = 0;
-        const deleteLen = 11;
-        const customRange: ICustomRange = { startIndex: 0, endIndex: 10, rangeId: '1', rangeType: CustomRangeType.HYPERLINK };
-        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}abc${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-        expect(shouldDeleteCustomRange(deleteStart, deleteLen, customRange, dataStream)).toBe(true);
     });
 });

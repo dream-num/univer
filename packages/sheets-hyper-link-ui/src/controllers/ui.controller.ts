@@ -17,9 +17,6 @@
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { LinkSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
-import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CellLinkPopup } from '../views/CellLinkPopup';
@@ -58,13 +55,6 @@ export class SheetsHyperLinkUIController extends Disposable {
             CloseHyperLinkPopupOperation,
             InsertHyperLinkOperation,
             InsertHyperLinkToolbarOperation,
-
-            AddHyperLinkCommand,
-            UpdateHyperLinkCommand,
-            CancelHyperLinkCommand,
-            UpdateRichHyperLinkCommand,
-            CancelRichHyperLinkCommand,
-            AddRichHyperLinkCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

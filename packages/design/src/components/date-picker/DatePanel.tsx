@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import React, { useContext } from 'react';
-import type { Dayjs } from 'dayjs';
-import generateConfig from 'rc-picker/lib/generate/dayjs';
+import type { dayjs } from '@univerjs/core';
 import type { BasePickerPanelProps } from 'rc-picker';
 import { PickerPanel } from 'rc-picker';
+import generateConfig from 'rc-picker/lib/generate/dayjs';
+import React, { useContext } from 'react';
 import { ConfigContext } from '../config-provider';
 import styles from './index.module.less';
 
-export type IDatePanelProps = Omit<BasePickerPanelProps<Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'>;
+export type IDatePanelProps = Omit<BasePickerPanelProps<dayjs.Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'>;
 
 export const DatePanel = (props: IDatePanelProps) => {
     const { locale } = useContext(ConfigContext);

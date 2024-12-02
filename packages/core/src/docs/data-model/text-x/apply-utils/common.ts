@@ -25,11 +25,12 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { shallowEqual } from '../../../../common/equal';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
+import { getBodySlice } from '../utils';
 
-export function normalizeTextRuns(textRuns: ITextRun[]) {
+export function normalizeTextRuns(textRuns: ITextRun[], reserveEmptyTextRun = false): ITextRun[] {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
@@ -44,7 +45,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
         }
 
         // Delete textRun if it has no style(ts is empty or has no sId)
-        if (Tools.isEmptyObject(ts) && textRun.sId == null) {
+        if (!reserveEmptyTextRun && Tools.isEmptyObject(ts) && textRun.sId == null) {
             continue;
         }
 
@@ -256,11 +257,7 @@ export function insertCustomBlocks(
     textLength: number,
     currentIndex: number
 ) {
-    const { customBlocks } = body;
-
-    if (customBlocks == null) {
-        return;
-    }
+    const { customBlocks = [] } = body;
 
     for (let i = 0, len = customBlocks.length; i < len; i++) {
         const customBlock = customBlocks[i];
@@ -279,6 +276,10 @@ export function insertCustomBlocks(
 
         customBlocks.push(...insertCustomBlocks);
         customBlocks.sort(sortRulesFactory('startIndex'));
+    }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
     }
 }
 
@@ -314,6 +315,152 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     }
 }
 
+export function sliceByParagraph(body: IDocumentBody) {
+    const { dataStream, paragraphs = [] } = body;
+    const ranges = [];
+
+    let cursor = 0;
+    for (let i = 0, len = paragraphs.length; i < len; i++) {
+        const paragraph = paragraphs[i];
+        const { startIndex } = paragraph;
+        if (cursor < startIndex) {
+            ranges.push({
+                startOffset: cursor,
+                endOffset: startIndex,
+            });
+            cursor = startIndex;
+        }
+        ranges.push({
+            startOffset: startIndex,
+            endOffset: startIndex + 1,
+        });
+        cursor = startIndex + 1;
+    }
+
+    if (cursor < dataStream.length) {
+        ranges.push({
+            startOffset: cursor,
+            endOffset: dataStream.length,
+        });
+    }
+
+    return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
+}
+
+const ID_SPLIT_SYMBOL = '$';
+const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
+
+export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
+    if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+
+    const mergedRanges: ICustomRange[] = [];
+    let currentRange = { ...ranges[0] };
+    currentRange.rangeId = getRootId(currentRange.rangeId);
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+        nextRange.rangeId = getRootId(nextRange.rangeId);
+        if (
+            nextRange.rangeId === currentRange.rangeId &&
+            shallowEqual(currentRange.properties, nextRange.properties) &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+        }
+    }
+    // Push the last range
+    mergedRanges.push(currentRange);
+
+    const idMap: Record<string, number> = Object.create(null);
+    for (let i = 0, len = mergedRanges.length; i < len; i++) {
+        const range = mergedRanges[i];
+        const id = range.rangeId;
+        if (idMap[id]) {
+            range.rangeId = `${id}${ID_SPLIT_SYMBOL}${idMap[id]}`;
+            idMap[id] = idMap[id] + 1;
+        } else {
+            idMap[id] = 1;
+        }
+    }
+
+    return mergedRanges;
+}
+
+export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
+    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+
+    if (matchedCustomRange) {
+        customRanges.splice(matchedCustomRangeIndex, 1, {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: matchedCustomRange.startIndex,
+            endIndex: currentIndex - 1,
+            properties: { ...matchedCustomRange.properties },
+        },
+        {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: currentIndex,
+            endIndex: matchedCustomRange.endIndex,
+            properties: { ...matchedCustomRange.properties },
+        });
+    }
+}
+
+export function mergeContinuousDecorations(ranges: ICustomDecoration[]): ICustomDecoration[] {
+    if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+
+    const mergedRanges: ICustomDecoration[] = [];
+    let currentRange = { ...ranges[0] };
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+        if (
+            nextRange.id === currentRange.id &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+        }
+    }
+    // Push the last range
+    mergedRanges.push(currentRange);
+
+    return mergedRanges;
+}
+
+export function splitCustomDecoratesByIndex(customDecorations: ICustomDecoration[], currentIndex: number) {
+    const matches = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+
+    matches.forEach((matched) => {
+        const index = customDecorations.indexOf(matched);
+        customDecorations.splice(index, 1, {
+            id: matched.id,
+            type: matched.type,
+            startIndex: matched.startIndex,
+            endIndex: currentIndex - 1,
+        },
+        {
+            id: matched.id,
+            type: matched.type,
+            startIndex: currentIndex,
+            endIndex: matched.endIndex,
+        });
+    });
+}
+
 export function insertCustomRanges(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -325,64 +472,32 @@ export function insertCustomRanges(
     }
 
     const { customRanges } = body;
-    const customRangeMap: Record<string, ICustomRange> = {};
+    splitCustomRangesByIndex(customRanges, currentIndex);
+
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
-        customRangeMap[customRange.rangeId] = customRange;
-        const { startIndex, endIndex } = customRange;
+        const { startIndex } = customRange;
+        // move custom range when insert text before it
         if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
-        } else if (endIndex > currentIndex - 1) {
-            customRange.endIndex += textLength;
         }
     }
 
-    const currentRange = customRanges.find((range) => range.startIndex > currentIndex && range.endIndex < currentIndex);
-
-    if (currentRange) {
-        return;
-    }
-
-    const insertCustomRanges: ICustomRange[] = [];
+    const insertRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
-            const oldCustomRange = customRangeMap[customRange.rangeId];
-
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
-            if (oldCustomRange) {
-                if (oldCustomRange.startIndex <= customRange.startIndex &&
-                    oldCustomRange.endIndex >= customRange.endIndex) {
-                    continue;
-                }
-
-                const isClosed =
-                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
-
-                if (isClosed) {
-                    insertCustomRanges.push(customRange);
-                    continue;
-                }
-
-                // old is start
-                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
-                    oldCustomRange.endIndex = customRange.endIndex;
-                    continue;
-                }
-                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-                    oldCustomRange.startIndex = customRange.startIndex;
-                    continue;
-                }
-            }
-            insertCustomRanges.push(customRange);
+            // new custom range
+            insertRanges.push(customRange);
         }
 
-        customRanges.push(...insertCustomRanges);
-        customRanges.sort(sortRulesFactory('startIndex'));
+        customRanges.push(...insertRanges);
     }
+
+    body.customRanges = mergeContinuousRanges(customRanges);
 }
 
 interface IIndexRange {
@@ -436,33 +551,34 @@ export function insertCustomDecorations(
     if (!body.customDecorations) {
         body.customDecorations = [];
     }
+
     const { customDecorations } = body;
-    if (textLength > 0) {
-        for (let i = 0, len = customDecorations.length; i < len; i++) {
-            const customDecoration = customDecorations[i];
-            const { startIndex, endIndex } = customDecoration;
-            if (startIndex >= currentIndex) {
-                customDecoration.startIndex += textLength;
-                customDecoration.endIndex += textLength;
-            } else if (endIndex > currentIndex - 1) {
-                customDecoration.endIndex += textLength;
-            }
+    splitCustomDecoratesByIndex(customDecorations, currentIndex);
+
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const { startIndex } = customDecoration;
+        // move custom range when insert text before it
+        if (startIndex >= currentIndex) {
+            customDecoration.startIndex += textLength;
+            customDecoration.endIndex += textLength;
         }
     }
 
+    const insertRanges: ICustomDecoration[] = [];
     if (insertBody.customDecorations) {
-        const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
-            insertCustomDecorations.push(customDecoration);
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;
+            // new custom range
+            insertRanges.push(customDecoration);
         }
 
-        customDecorations.push(...insertCustomDecorations);
-        body.customDecorations = mergeDecorations(customDecorations);
-        body.customDecorations.sort(sortRulesFactory('startIndex'));
+        customDecorations.push(...insertRanges);
     }
+
+    body.customDecorations = mergeContinuousDecorations(customDecorations);
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -471,20 +587,6 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
-
-    // Handles special case where repeated set inline format style by cursor.
-    // if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
-    //     const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
-    //     removeTextRuns.push({
-    //         ...textRun,
-    //         st: textRun.st - currentIndex,
-    //         ed: textRun.ed - currentIndex,
-    //     });
-
-    //     body.textRuns = body.textRuns?.filter((t) => t !== textRun);
-
-    //     return removeTextRuns;
-    // }
 
     if (textRuns) {
         const newTextRuns = [];
@@ -656,8 +758,7 @@ export function deleteSectionBreaks(body: IDocumentBody, textLength: number, cur
 }
 
 export function deleteCustomBlocks(body: IDocumentBody, textLength: number, currentIndex: number) {
-    const { customBlocks } = body;
-
+    const { customBlocks = [] } = body;
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
@@ -680,6 +781,10 @@ export function deleteCustomBlocks(body: IDocumentBody, textLength: number, curr
             newCustomBlocks.push(customBlock);
         }
         body.customBlocks = newCustomBlocks;
+    }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
     }
     return removeCustomBlocks;
 }
@@ -708,6 +813,10 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 table.startIndex = segments[0];
                 table.endIndex = segments[1];
 
@@ -731,8 +840,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const { customRanges } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength - 1;
+    // TODO: @JOCS, removeCustomRanges is not used, should we remove it?
     const removeCustomRanges: ICustomRange[] = [];
 
     if (customRanges) {
@@ -740,16 +849,17 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
-            // delete custom-range start means delete custom-range
-            if (startIndex <= st && endIndex >= st) {
-                removeCustomRanges.push({
-                    ...customRange,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
-                });
+            // delete decoration
+            if (st >= startIndex && ed <= endIndex) {
+                removeCustomRanges.push(customRange);
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
+            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];
             } else if (endIndex < st) {
@@ -758,7 +868,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             }
             newCustomRanges.push(customRange);
         }
-        body.customRanges = newCustomRanges;
+
+        body.customRanges = mergeContinuousRanges(newCustomRanges);
     }
 
     return removeCustomRanges;
@@ -783,6 +894,11 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
                 // substr decoration
             } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customDecoration.startIndex = segments[0];
                 customDecoration.endIndex = segments[1];
             } else if (endIndex < st) {

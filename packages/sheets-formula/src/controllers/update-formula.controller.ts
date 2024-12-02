@@ -17,21 +17,25 @@
 import type {
     ICommandInfo,
     IExecutionOptions,
+    IUnitRange,
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import type { IFormulaData, IFormulaDataItem, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, IFormulaDataItem, IFormulaDirtyData, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
+
 import {
     Disposable,
     ICommandService,
+    IConfigService,
     Inject,
     Injector,
     IUniverInstanceService,
@@ -53,7 +57,6 @@ import { deserializeRangeWithSheetWithCache,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
-
 import {
     ClearSelectionFormatCommand,
     InsertSheetMutation,
@@ -64,6 +67,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from './config.schema';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -88,6 +92,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @IConfigService private readonly _configService: IConfigService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();
@@ -101,9 +106,21 @@ export class UpdateFormulaController extends Disposable {
         }));
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (!command.params) return;
 
+                if (command.id === RemoveSheetMutation.id) {
+                    const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
+                    this._handleWorkbookDisposed(unitId, sheetId);
+                } else if (command.id === InsertSheetMutation.id) {
+                    this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
+                }
+            })
+        );
+
+        // Make sure to get the complete formula history data before updating, which contains the complete mapping of f and si
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
@@ -116,11 +133,6 @@ export class UpdateFormulaController extends Disposable {
                         return;
                     }
                     this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
-                } else if (command.id === RemoveSheetMutation.id) {
-                    const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
-                    this._handleWorkbookDisposed(unitId, sheetId);
-                } else if (command.id === InsertSheetMutation.id) {
-                    this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
             })
         );
@@ -244,7 +256,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _handleWorkbookAdded(unit: Workbook) {
-        const formulaData = this._formulaDataModel.getFormulaData();
+        const formulaData: IFormulaData = {};
         const unitId = unit.getUnitId();
         const newFormulaData: IFormulaData = { [unitId]: {} };
 
@@ -259,7 +271,35 @@ export class UpdateFormulaController extends Disposable {
         });
 
         this._commandService.executeCommand(SetFormulaDataMutation.id, { formulaData: newFormulaData }, { onlyLocal: true });
-        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
+
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+        const calculationMode = config?.initialFormulaComputing ?? CalculationMode.WHEN_EMPTY;
+        const params = this._getDiryDataByCalculationMode(calculationMode);
+
+        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, { onlyLocal: true });
+    }
+
+    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+        const forceCalculation = calculationMode === CalculationMode.FORCED;
+
+        // loop all sheets cell data, and get the dirty data
+        const dirtyRanges: IUnitRange[] = calculationMode === CalculationMode.WHEN_EMPTY ? this._formulaDataModel.getFormulaDirtyRanges() : [];
+
+        const dirtyNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
+        const dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+        const dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
+        const clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
+
+        return {
+            forceCalculation,
+            dirtyRanges,
+            dirtyNameMap,
+            dirtyDefinedNameMap,
+            dirtyUnitFeatureMap,
+            dirtyUnitOtherFormulaMap,
+            clearDependencyTreeCache,
+        };
     }
 
     private _getUpdateFormula(command: ICommandInfo) {

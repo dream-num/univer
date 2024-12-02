@@ -264,8 +264,6 @@ export class DocMoveCursorController extends Disposable {
                 }
             }
             const skipTokens: string[] = [
-                DataStreamTreeTokenType.CUSTOM_RANGE_START,
-                DataStreamTreeTokenType.CUSTOM_RANGE_END,
                 DataStreamTreeTokenType.TABLE_START,
                 DataStreamTreeTokenType.TABLE_END,
                 DataStreamTreeTokenType.TABLE_ROW_START,
@@ -607,10 +605,6 @@ function findAboveOrBellowCellLine(
                 newLine = lineBeforeTable;
             }
         }
-    }
-
-    if (newLine != null) {
-        return newLine;
     }
 
     return newLine;

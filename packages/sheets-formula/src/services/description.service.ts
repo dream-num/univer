@@ -115,7 +115,7 @@ export interface IDescriptionService {
     isFormulaDefinedName(name: string): boolean;
 }
 
-export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
+export const IDescriptionService = createIdentifier<IDescriptionService>('formula.description-service');
 
 export class DescriptionService implements IDescriptionService, IDisposable {
     private _descriptions: IFunctionInfo[] = [];

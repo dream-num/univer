@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, IRange, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import {
     cellToRange,
     ICommandService,
@@ -26,16 +27,15 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../mutations/move-rows-cols.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import { MoveColsCommand, MoveRowsCommand } from '../move-rows-cols.command';
 import { createCommandTestBed } from './create-command-test-bed';
 

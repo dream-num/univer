@@ -15,31 +15,41 @@
  */
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
-import { createInternalEditorID } from '@univerjs/core';
-
-import { FormLayout } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
-import React from 'react';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
+import React, { useRef, useState } from 'react';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;
-    const formula1Res = showError ? validResult?.formula1 : '';
+    const formula1Res = showError ? validResult?.formula1 : undefined;
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
     return (
-        <FormLayout error={formula1Res}>
-            <TextEditor
-                value={value?.formula1 ?? ''}
-                id={createInternalEditorID(`dataValidation-custom-formula-${unitId}-${subUnitId}`)}
-                onChange={(newValue) => {
-                    onChange?.({
-                        ...value,
-                        formula1: (newValue ?? '').trim(),
-                    });
-                }}
-                onlyInputFormula
-                openForSheetUnitId={unitId}
-                openForSheetSubUnitId={subUnitId}
-            />
-        </FormLayout>
+        <FormulaEditor
+            initValue={value?.formula1 ?? '' as any}
+            unitId={unitId}
+            subUnitId={subUnitId}
+            isFocus={isFocusFormulaEditor}
+            onChange={(newValue) => {
+                const newFormula = (newValue ?? '').trim();
+                if (newFormula === value?.formula1) {
+                    return;
+                }
+
+                onChange?.({
+                    ...value,
+                    formula1: newFormula,
+                });
+            }}
+            errorText={formula1Res}
+            onFocus={() => isFocusFormulaEditorSet(true)}
+            actions={formulaEditorActionsRef.current}
+            isSupportAcrossSheet
+        />
     );
 }

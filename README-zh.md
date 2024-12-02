@@ -47,12 +47,14 @@
 ## 🌈 亮点
 
 - 📈 **支持多种类文档** Univer 目前支持**电子表格**和**富文本文档**，未来还会增加对**幻灯片**的支持。
+- 🧙‍♀️ **多端同构** 可以在浏览器和 Node.js 环境中运行。
 - ⚙️ **易于集成** Univer 能够无缝集成到你的应用当中。
 - 🎇 **功能强大** Univer 支持非常多的功能，包括但不限于**公式计算**、**条件格式**、**数据验证**、**筛选**、**协同编辑**、**打印**、**导入导出**等等，更多的功能即将陆续发布。
-- 🔌 **高度可扩展**Univer 的 *插件化架构* 和 *Facade API* 使得扩展 Univer 的功能变得轻松容易，你可以在 Univer 之上实现自己的业务需求。
+- 🔌 **高度可扩展** Univer 的*插件化架构*使得扩展 Univer 的功能变得轻松容易，你可以在 Univer 之上实现自己的业务需求。
 - 💄 **高度可定制** 你可以通过*主题*来自定义 Univer 的外观，另外还支持国际化。
+- 🥤 **易于使用** *Presets* 和 *Facade API* 使得 Univer 很容易上手
 - ⚡ **性能优越**
-  - ✏️ Univer 实现了基于 canvas 的 *渲染引擎*，能够高效地渲染不同类型的文档。渲染引擎支持 *标点挤压* *盘古之白* *图文混排* *滚动贴图* 等高级特性。
+  - ✏️ Univer 实现了基于 canvas 的*渲染引擎*，能够高效地渲染不同类型的文档。渲染引擎支持 *标点挤压* *盘古之白* *图文混排* *滚动贴图* 等高级特性。
   - 🧮 自研的 *公式引擎* 拥有超快的计算速度，还能在 Web Worker 中运行，未来将会支持服务端计算。
 - 🌌 **高度集成** 文档、电子表格和幻灯片能够互操作，甚至是渲染在同一个画布上，使得信息和数据能够在 Univer 当中自由地流动。
 
@@ -76,12 +78,12 @@ Univer 提供了丰富的电子表格、文档和幻灯片功能。以下是一�
 - **评论**：允许向单元格添加评论以提供额外信息。
 - **十字高亮**：支持在电子表格中显示十字高亮，以帮助用户快速定位选中的单元格。
 - **数据透视表**[^1]：支持数据透视表，允许用户对数据进行汇总和分析。
-- **协同编辑**[^1]：支持多个用户同时编辑电子表格。
+- **协同编辑**[^1]：支持多个用户同时编辑电子表格，同时支持历史记录与恢复。
 - **打印**[^1]：允许打印电子表格或将其导出为 PDF。
 - **导入和导出**[^1]：支持导入导出 XLSX 格式的数据。
 - **图表**[^2]：由 [VChart][vchart-link] 支持第三方图表。
 
-### 📝 Univer Doc（积极开发中）
+### 📝 Univer Doc（beta 测试中）
 
 - **核心功能**：Univer 支持文档的核心功能，包括段落、标题、列表、上标、下标等。
 - **列表**：支持有序列表、无序列表和任务列表。
@@ -297,5 +299,5 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

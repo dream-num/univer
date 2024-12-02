@@ -93,7 +93,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
     }
 
     /**
-     * Custimize column header, such as custom header text and background.
+     * Customize column header, such as custom header text and background.
      * @param cfg
      */
     setCustomHeader(cfg: IColumnsHeaderCfgParam): void {

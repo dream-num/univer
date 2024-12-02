@@ -137,9 +137,10 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                             this._threadCommentModel.addComment(unitId, subUnitId, { id, threadId: id, ref: '', dT: '', personId: '', text: { dataStream: '' }, unitId, subUnitId });
                         }
                     });
-                    deleteIds.forEach((id) => {
-                        this._threadCommentModel.deleteThread(unitId, subUnitId, id);
-                    });
+
+                    // deleteIds.forEach((id) => {
+                    //     this._threadCommentModel.deleteThread(unitId, subUnitId, id);
+                    // });
 
                     this._threadCommentModel.syncThreadComments(unitId, subUnitId, [...addIds]);
                 }

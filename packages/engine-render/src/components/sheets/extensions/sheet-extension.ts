@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '@univerjs/core';
 import type { IRange } from '@univerjs/core';
-
-import { getCellByIndex } from '../../../basics/tools';
-import { ComponentExtension } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+
+import { Rectangle } from '@univerjs/core';
+import { ComponentExtension } from '../../extension';
 
 export enum SHEET_EXTENSION_TYPE {
     GRID,
@@ -32,30 +31,6 @@ export const SHEET_EXTENSION_PREFIX = 'sheet-ext-';
 
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
-
-    // cellCache: ObjectMatrix<ISelectionCellWithMergeInfo> = new ObjectMatrix();
-    /**
-     * @deprecated The function maybe cause performance issue, use spreadsheetSkeleton.getCellByIndexWithNoHeader instead.
-     * Get ISelectionCellWithMergeInfo by cell rowIndex and cell columnIndex.
-     * The startXY in return value does not include rowHeader and columnHeader.
-     * @param rowIndex
-     * @param columnIndex
-     * @param rowHeightAccumulation
-     * @param columnWidthAccumulation
-     * @param dataMergeCache
-     * @returns {ISelectionCellWithMergeInfo} cell Position & mergeInfo
-     */
-    getCellByIndex(
-        rowIndex: number,
-        columnIndex: number,
-        rowHeightAccumulation: number[],
-        columnWidthAccumulation: number[],
-        dataMergeCache: IRange[]
-    ) {
-        // TODO @lumixraku: there are two coords in sheet!! This one does not include rowHeader and columnHeader. Should keep coord to be only one.
-        const cell = getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-        return cell;
-    }
 
     isRenderDiffRangesByCell(rangeP: IRange, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
@@ -161,7 +136,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     }
 
     /**
-     * 传入的 row 范围和 diffRanges 有相交, 返回 true
+     * Check if row range is in view ranges
      * @param curStartRow
      * @param curEndRow
      * @param viewranges

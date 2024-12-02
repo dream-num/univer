@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-import dayjs from 'dayjs';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import localeData from 'dayjs/plugin/localeData';
-import weekday from 'dayjs/plugin/weekday';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
-import weekYear from 'dayjs/plugin/weekYear';
-
-dayjs.extend(customParseFormat);
-dayjs.extend(advancedFormat);
-dayjs.extend(weekday);
-dayjs.extend(localeData);
-dayjs.extend(weekOfYear);
-dayjs.extend(weekYear);
+import './global.css';
 
 export { Avatar, type IAvatarProps } from './components/avatar';
 export { Button, type ButtonSize, type ButtonType, type IButtonProps } from './components/button';
@@ -46,7 +33,7 @@ export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu } from './components/menu';
 export { type IMessageOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
-export { type IPopupProps, type IRectPopupProps, Popup, RectPopup } from './components/popup';
+export { type IPopupProps, Popup } from './components/popup';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';

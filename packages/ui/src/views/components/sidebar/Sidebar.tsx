@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { CloseSingle } from '@univerjs/icons';
+import type { ISidebarMethodOptions } from './interface';
 import { useDependency } from '@univerjs/core';
+import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
-import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import { useObservable } from '../../../components/hooks/observable';
+import { ISidebarService } from '../../../services/sidebar/sidebar.service';
 import styles from './index.module.less';
-import type { ISidebarMethodOptions } from './interface';
 
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);
@@ -55,6 +55,14 @@ export function Sidebar() {
         return copy;
     }, [sidebarOptions]);
 
+    useEffect(() => {
+        if (scrollRef.current) {
+            sidebarService.setContainer(scrollRef.current);
+        }
+        return () => {
+            sidebarService.setContainer(undefined);
+        };
+    }, [sidebarService]);
     useEffect(() => {
         const handleScroll = (e: Event) => {
             sidebarService.scrollEvent$.next(e);

@@ -303,10 +303,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                 return;
             }
 
-            if (!this._isTraditionalMode()) {
-                return;
-            }
-
             if (currentRender == null) {
                 return;
             }
@@ -322,6 +318,11 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         if (this._editorService.isEditor(unitId)) {
                             return;
                         }
+
+                        if (!this._isTraditionalMode()) {
+                            return;
+                        }
+
                         const viewModel = this._docSkeletonManagerService.getViewModel();
                         const editArea = viewModel.getEditArea();
                         const isEditBody = editArea === DocumentEditArea.BODY;
@@ -425,9 +426,5 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
 
         return documentFlavor === DocumentFlavor.TRADITIONAL;
-    }
-
-    private _getDocDataModel() {
-        return this._context.unit;
     }
 }

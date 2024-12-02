@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useContext } from 'react';
+import type { dayjs } from '@univerjs/core';
+import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
+import { CalendarSingle, GuideSingle } from '@univerjs/icons';
 import { RangePicker } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import { CalendarSingle, GuideSingle } from '@univerjs/icons';
-import type { Dayjs } from 'dayjs';
-import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
+import React, { useContext } from 'react';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -27,12 +27,12 @@ export interface IDateRangePickerProps {
     /**
      * The value of the date picker.
      */
-    value: NoUndefinedRangeValueType<Dayjs>;
+    value: NoUndefinedRangeValueType<dayjs.Dayjs>;
 
     /**
      * Callback when the value of the date picker changes.
      */
-    onChange: (date: NoUndefinedRangeValueType<Dayjs>, dateString: [string, string]) => void;
+    onChange: (date: NoUndefinedRangeValueType<dayjs.Dayjs>, dateString: [string, string]) => void;
 }
 
 export function DateRangePicker(props: IDateRangePickerProps) {
@@ -40,14 +40,14 @@ export function DateRangePicker(props: IDateRangePickerProps) {
 
     const { locale } = useContext(ConfigContext);
 
-    function handleChange(date: NoUndefinedRangeValueType<Dayjs> | null, dateString: [string, string]) {
+    function handleChange(date: NoUndefinedRangeValueType<dayjs.Dayjs> | null, dateString: [string, string]) {
         if (Array.isArray(date) && Array.isArray(dateString)) {
             onChange(date, dateString);
         }
     }
 
     return (
-        <RangePicker<Dayjs>
+        <RangePicker<dayjs.Dayjs>
             value={value}
             prefixCls={styles.dateRangePicker}
             generateConfig={generateConfig}

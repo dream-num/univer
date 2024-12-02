@@ -22,12 +22,11 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
@@ -54,7 +53,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -65,7 +64,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "^0.1.84",
+        "@univerjs/icons": "^0.2.8",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -75,12 +74,14 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
+        "postcss": "^8.4.49",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "tailwindcss": "^3.4.15",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.1",
+        "vitest": "^2.1.6"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
             "require": "./lib/cjs/index.js",

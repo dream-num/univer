@@ -15,9 +15,12 @@
  */
 
 import { Disposable, ICommandService } from '@univerjs/core';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
-import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands/mutations/update-hyper-link.mutation';
+import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, UpdateRichHyperLinkMutation } from '../commands/mutations/update-hyper-link.mutation';
 
 export class SheetsHyperLinkController extends Disposable {
     constructor(
@@ -30,10 +33,17 @@ export class SheetsHyperLinkController extends Disposable {
 
     private _registerCommands() {
         [
+            AddHyperLinkCommand,
+            UpdateHyperLinkCommand,
+            CancelHyperLinkCommand,
+            UpdateRichHyperLinkCommand,
+            CancelRichHyperLinkCommand,
+            AddRichHyperLinkCommand,
             AddHyperLinkMutation,
             UpdateHyperLinkMutation,
             RemoveHyperLinkMutation,
             UpdateHyperLinkRefMutation,
+            UpdateRichHyperLinkMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

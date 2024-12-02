@@ -18,7 +18,7 @@ import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Null
 import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import type { IEditorConfigParams, IEditorStateParams } from './editor';
-import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -46,20 +46,35 @@ export interface IEditorInputFormulaParam {
     formulaString: string;
 }
 
+/**
+ * @deprecated
+ */
 export interface IEditorService {
     getEditor(id?: string): Readonly<Nullable<Editor>>;
 
     register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable;
 
+    /**
+     * @deprecated
+     */
     isVisible(id: string): Nullable<boolean>;
 
     inputFormula$: Observable<IEditorInputFormulaParam>;
 
+    /**
+     * @deprecated
+     */
     setFormula(formulaString: string): void;
 
     resize$: Observable<string>;
+    /**
+     * @deprecated
+     */
     resize(id: string): void;
 
+    /**
+     * @deprecated
+     */
     getAllEditor(): Map<string, Editor>;
 
     /**
@@ -80,43 +95,91 @@ export interface IEditorService {
     isSheetEditor(editorUnitId: string): boolean;
 
     closeRangePrompt$: Observable<unknown>;
+    /**
+     * @deprecated
+     */
     closeRangePrompt(): void;
 
     blur$: Observable<unknown>;
+    /**
+     * @deprecated
+     */
     blur(): void;
 
     focus$: Observable<ISuccinctDocRangeParam>;
+    /**
+     * @deprecated
+     */
     focus(editorUnitId?: string): void;
 
     setValue$: Observable<IEditorSetValueParam>;
     valueChange$: Observable<Readonly<Editor>>;
 
+    /**
+     * @deprecated
+     */
     setValue(val: string, editorUnitId?: string): void;
 
+    /**
+     * @deprecated
+     */
     setValueNoRefresh(val: string, editorUnitId?: string): void;
 
+    /**
+     * @deprecated
+     */
     setRichValue(body: IDocumentBody, editorUnitId?: string): void;
 
+    /**
+     * @deprecated
+     */
     getFirstEditor(): Editor;
 
     focusStyle$: Observable<Nullable<string>>;
+    /**
+     * @deprecated
+     */
     focusStyle(editorUnitId: Nullable<string>): void;
 
+    /**
+     * @deprecated
+     */
     refreshValueChange(editorId: string): void;
 
+    /**
+     * @deprecated
+     */
     checkValueLegality(editorId: string): boolean;
 
+    /**
+     * @deprecated
+     */
     getValue(id: string): Nullable<string>;
 
+    /**
+     * @deprecated
+     */
     getRichValue(id: string): Nullable<IDocumentBody>;
 
+    /**
+     * @deprecated
+     */
     changeSpreadsheetFocusState(state: boolean): void;
 
+    /**
+     * @deprecated
+     */
     getSpreadsheetFocusState(): boolean;
 
+    /**
+     * @deprecated
+     */
     selectionChangingState(): boolean;
 
     singleSelection$: Observable<boolean>;
+    /**
+     * @deprecated
+     */
     singleSelection(state: boolean): void;
 
     setFocusId(id: Nullable<string>): void;
@@ -273,9 +336,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         editor.setFocus(true);
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
-        this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, true);
 
-        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, editor.isSingle());
+        if (!isInternalEditorID(editorUnitId)) {
+            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, true);
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, editor.isSingle());
+        }
 
         if (!this._spreadsheetFocusState) {
             this.singleSelection(!!editor.isSingleChoice());
@@ -353,8 +418,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.focusStyle(editorUnitId);
 
         this._focus$.next({
-            startOffset: valueCount - 2,
-            endOffset: valueCount - 2,
+            startOffset: valueCount,
+            endOffset: valueCount,
         });
     }
 

@@ -25,7 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何全形字母，則文字不會變更。' },
+            text: { name: '文字', detail: '文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何全形字母，則文字不會變更。' },
         },
     },
     ARRAYTOTEXT: {
@@ -65,7 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: '這是介於 1 和 255 之間的數字，用以指定您所需的字元。 此字元來自您電腦所使用的字元集。' },
+            number: { name: '數值', detail: '介於 1 和 255 之間的數字，用以指定所需的字元。' },
         },
     },
     CLEAN: {
@@ -78,7 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是要從中移除無法列印之字元的任何工作表資訊。' },
+            text: { name: '文字', detail: '要從中移除無法列印之字元的任何工作表資訊。' },
         },
     },
     CODE: {
@@ -91,7 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是欲求其第一個字元代碼的文字。' },
+            text: { name: '文字', detail: '欲求其第一個字元代碼的文字。' },
         },
     },
     CONCAT: {
@@ -132,7 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何半形英文字母或片假名，文字就不會變更。' },
+            text: { name: '文字', detail: '文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何半形英文字母或片假名，文字就不會變更。' },
         },
     },
     DOLLAR: {
@@ -145,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: '這是一個數字、一個含有數字之儲存格的參照，或一個評估為數字的公式。' },
-            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
+            number: { name: '數值', detail: '一個數字、一個含有數字之儲存格的參照，或一個評估為數字的公式。' },
+            decimals: { name: '小數位數', detail: '小數點右邊的小數位數。 如果是負數，則會將數位四捨五入到小數點的左邊。 如果省略 decimals，則假設為 2。' },
         },
     },
     EXACT: {
@@ -159,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: '文字1', detail: '這是第一個文字字串。' },
-            text2: { name: '文字2', detail: '這是第二個文字字串。' },
+            text1: { name: '文字1', detail: '第一個文字字串。' },
+            text2: { name: '文字2', detail: '第二個文字字串。' },
         },
     },
     FIND: {
@@ -173,8 +173,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     FINDB: {
@@ -187,8 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     FIXED: {
@@ -201,9 +203,9 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: '這是要四捨五入並轉換為文字的數字。' },
-            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
-            noCommas: { name: '禁用分隔符', detail: '這是邏輯值，如果為 TRUE，會阻止 FIXED 在傳回的文字中包含逗號。' },
+            number: { name: '數值', detail: '要四捨五入並轉換為文字的數字。' },
+            decimals: { name: '小數位數', detail: '小數點右邊的小數位數。 如果是負數，則會將數位四捨五入到小數點的左邊。 如果省略 decimals，則假設為 2。' },
+            noCommas: { name: '禁用分隔符', detail: '邏輯值，如果為 TRUE，會阻止 FIXED 在傳回的文字中包含逗號。' },
         },
     },
     LEFT: {
@@ -216,8 +218,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            numChars: { name: '字元數', detail: '指定要 LEFT 擷取的字元數目。' },
         },
     },
     LEFTB: {
@@ -230,8 +232,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '內含所要擷取字元的文字字串。' },
-            numBytes: { name: '字元數', detail: '指定 LEFTB 所要擷取的字元數，以位元組為單位。' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            numBytes: { name: '字節數', detail: '指定要 LEFTB 擷取的字元數目，以位元組為單位。' },
         },
     },
     LEN: {
@@ -270,10 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: '文字',
-                detail: '要轉換為小寫字母的文字。 LOWER 不會改變文字中的非字母字元。 ',
-            },
+            text: { name: '文字', detail: '要轉換成小寫的文字。' },
         },
     },
     MID: {
@@ -286,9 +285,9 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '這是包含您想擷取之字元的文字字串。' },
-            startNum: { name: 'start_num', detail: ' 這是要在文字中擷取之第一個字元的位置。 文字中的第一個字元start_num 1，依此類文字。\n如果start_num大於文字的長度，MID/MIDB 會傳回 “” (空白文字) 。\n如果start_num小於文字的長度，但start_num加上num_chars超過文字的長度，MID/MIDB 會傳回文字結尾的字元。\n如果 start_num 小於 1，MID/MIDB 會傳回 #VALUE！ 錯誤值。' },
-            numChars: { name: 'num_chars', detail: '指定您要 MID 從文字傳回的字元數。\n如果 num_chars 為負數，MID 會傳回 #VALUE! 的錯誤值。' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            startNum: { name: '開始位置', detail: '要在文字中擷取之第一個字元的位置。' },
+            numChars: { name: '字元數', detail: '指定要 MID 擷取的字元數目。' },
         },
     },
     MIDB: {
@@ -300,8 +299,9 @@ export default {
                 url: 'https://support.microsoft.com/zh-tw/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
             }],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            startNum: { name: '開始位置', detail: '要在文字中擷取之第一個字元的位置。' },
+            numBytes: { name: '字節數', detail: '指定要 MIDB 擷取的字元數目，以位元組為單位。' },
         },
     },
     NUMBERVALUE: {
@@ -343,7 +343,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是以引號括住的文字、傳回文字的公式，或包含要將部分變為大寫之文字的儲存格參照。' },
+            text: { name: '文字', detail: '以引號括住的文字、傳回文字的公式，或包含要將部分變為大寫之文字的儲存格參照。' },
         },
     },
     REGEXEXTRACT: {
@@ -399,8 +399,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '舊文字', detail: '要替換其中某些字元的文字。' },
+            startNum: { name: '開始位置', detail: '要在文字中替換的第一個字元的位置。' },
+            numChars: { name: '字元數', detail: '指定要 REPLACE 替換的字元數目。' },
+            newText: { name: '替換文字', detail: '在舊文字中要替換字元的文字。' },
         },
     },
     REPLACEB: {
@@ -413,8 +415,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '舊文字', detail: '要替換其中某些字元的文字。' },
+            startNum: { name: '開始位置', detail: '要在文字中替換的第一個字元的位置。' },
+            numBytes: { name: '字節數', detail: '指定要 REPLACEB 替換的字元數目，以位元組為單位。' },
+            newText: { name: '替換文字', detail: '在舊文字中要替換字元的文字。' },
         },
     },
     REPT: {
@@ -427,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是要重複的文字。' },
-            numberTimes: { name: '重複次數', detail: '這是指定文字重複次數的正數。' },
+            text: { name: '文字', detail: '要重複的文字。' },
+            numberTimes: { name: '重複次數', detail: '指定文字重複次數的正數。' },
         },
     },
     RIGHT: {
@@ -441,8 +445,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
-            numChars: { name: '字元數', detail: '這會指定您要 RIGHT 擷取的字元數目。' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            numChars: { name: '字元數', detail: '指定要 RIGHT 擷取的字元數目。' },
         },
     },
     RIGHTB: {
@@ -455,8 +459,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
-            numBytes: { name: '字節數', detail: '這會指定要 RIGHTB 擷取的字元數目，以位元組為單位。' },
+            text: { name: '文字', detail: '包含想擷取之字元的文字字串。' },
+            numBytes: { name: '字節數', detail: '指定要 RIGHTB 擷取的字元數目，以位元組為單位。' },
         },
     },
     SEARCH: {
@@ -469,8 +473,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     SEARCHB: {
@@ -483,8 +488,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     SUBSTITUTE: {
@@ -497,10 +503,10 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是包含要以字元取代文字的文字或參照。' },
-            oldText: { name: '搜尋文字', detail: '這是要取代的文字。' },
-            newText: { name: '取代文字', detail: '這是要用來取代 old_text 的文字。' },
-            instanceNum: { name: '指定取代對象', detail: '指定要將第幾個 old_text 取代為 new_text。 如果您指定 instance_num，則只會取代該 old_text。 否則，text 中的每一個 old_text 都會變更為 new_text。' },
+            text: { name: '文字', detail: '包含要以字元取代文字的文字或參照。' },
+            oldText: { name: '搜尋文字', detail: '要取代的文字。' },
+            newText: { name: '取代文字', detail: '要用來取代 old_text 的文字。' },
+            instanceNum: { name: '指定取代對象', detail: '指定要將第幾個 old_text 取代為 new_text。 如果指定 instance_num，則只會取代該 old_text。 否則，text 中的每一個 old_text 都會變更為 new_text。' },
         },
     },
     T: {
@@ -513,7 +519,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '這是要檢定的值。' },
+            value: { name: '值', detail: '要檢定的值。' },
         },
     },
     TEXT: {
@@ -540,7 +546,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
             matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
@@ -558,7 +564,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
             matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
@@ -576,8 +582,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: '分隔符號', detail: '文字字串，可以是空白、雙引號括起來的一或多個字元，或是有效文字字串的參照。' },
+            ignoreEmpty: { name: '忽略空白', detail: '如果為 TRUE，則會忽略空白儲存格。' },
+            text1: { name: '文字1', detail: '要加入的文字項目。 文字字串或字串陣列，例如儲存格範圍。' },
+            text2: { name: '文字2', detail: '要加入的其他文字項目。 文字項目最多可有 252 個文字引數，包含 text1。 每個項目可以是文字字串或字串陣列，例如儲存格範圍。' },
         },
     },
     TEXTSPLIT: {
@@ -599,7 +607,7 @@ export default {
         },
     },
     TRIM: {
-        description: '刪除文字中的空格',
+        description: '刪除文字的所有空格，僅保留單字之間的單個空格。',
         abstract: '刪除文字中的空格',
         links: [
             {
@@ -608,8 +616,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要從中刪除空格的文字。' },
         },
     },
     UNICHAR: {
@@ -635,7 +642,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '是您要使用 Unicode 值的字元。' },
+            text: { name: '文字', detail: '是要使用 Unicode 值的字元。' },
         },
     },
     UPPER: {
@@ -648,8 +655,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要轉換成大寫的文字。' },
         },
     },
     VALUE: {

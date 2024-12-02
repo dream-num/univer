@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import type { Dependency, IWorkbookData, Worksheet } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+
 import type { IFindQuery } from '@univerjs/find-replace';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { hitCell } from '../sheet-find-replace.controller';
 import {
     isBeforePositionWithColumnPriority,
     isBeforePositionWithRowPriority,
@@ -27,7 +28,6 @@ import {
     isBehindPositionWithRowPriority,
     isSamePosition,
 } from '../utils';
-import { hitCell } from '../sheet-find-replace.controller';
 
 describe('Test sheet find replace utils', () => {
     it('Should "isSamePosition" work as expected', () => {

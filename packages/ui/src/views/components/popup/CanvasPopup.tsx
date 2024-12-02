@@ -16,12 +16,12 @@
 
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
 import { useDependency } from '@univerjs/core';
-import { RectPopup } from '@univerjs/design';
 import React, { useEffect, useMemo, useState } from 'react';
-import { animationFrameScheduler, throttleTime } from 'rxjs';
+import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable } from '../../../components/hooks/observable';
+import { useObservable, useObservableRef } from '../../../components/hooks/observable';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
+import { RectPopup } from './RectPopup';
 
 interface ISingleCanvasPopupProps {
     popup: IPopup;
@@ -30,53 +30,63 @@ interface ISingleCanvasPopupProps {
 
 const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const [hidden, setHidden] = useState(false);
-    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(throttleTime(0, animationFrameScheduler)), [popup.anchorRect$]);
+    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(
+        throttleTime(0, animationFrameScheduler),
+        map((anchorRect) => {
+            const { bottom, left, right, top } = anchorRect;
+            const [x = 0, y = 0] = popup.offset ?? [];
+            return {
+                left: left - x,
+                right: right + x,
+                top: top - y,
+                bottom: bottom + y,
+            };
+        })
+    ), [popup.anchorRect$, popup.offset]);
+    const hiddenRects$ = useMemo(() => popup.hiddenRects$?.pipe(throttleTime(0, animationFrameScheduler)) ?? of([]), [popup.hiddenRects$]);
     const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
-    const anchorRect = useObservable(anchorRect$, popup.anchorRect);
-    const excludeRects = useObservable(excludeRects$, popup.excludeRects);
-    const { offset, canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
-
-    // We add an offset to the anchor rect to make the popup offset with the anchor.
-    const rectWithOffset = useMemo(() => {
-        if (!anchorRect) {
-            return null;
-        }
-
-        const { bottom, left, right, top } = anchorRect;
-        const [x = 0, y = 0] = offset ?? [];
-        return {
-            left: left - x,
-            right: right + x,
-            top: top - y,
-            bottom: bottom + y,
-        };
-    }, [anchorRect, offset]);
+    const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
+    const { canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 
     useEffect(() => {
-        if (!hideOnInvisible || !rectWithOffset) {
+        if (!hideOnInvisible) {
             return;
         }
-        const rect = canvasElement.getBoundingClientRect();
-        const { top, left, bottom, right } = rect;
-        if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right) {
-            setHidden(true);
-        } else {
-            setHidden(false);
-        }
-    }, [rectWithOffset, canvasElement, hideOnInvisible]);
 
-    if ((hidden && hiddenType === 'destroy') || !rectWithOffset) {
+        const anchorRectSub = combineLatest([anchorRect$, hiddenRects$]).subscribe(([rectWithOffset, hiddenRects]) => {
+            const rect = canvasElement.getBoundingClientRect();
+            const { top, left, bottom, right } = rect;
+            const rectHeight = rectWithOffset.bottom - rectWithOffset.top;
+            const rectWidth = rectWithOffset.right - rectWithOffset.left;
+
+            const isInHiddenRect = hiddenRects.some((hiddenRect) => {
+                return rectWithOffset.top >= (hiddenRect.top - (0.5 * rectHeight)) &&
+                    rectWithOffset.bottom <= (hiddenRect.bottom + (0.5 * rectHeight)) &&
+                    rectWithOffset.left >= (hiddenRect.left - (0.5 * rectWidth)) &&
+                    rectWithOffset.right <= (hiddenRect.right + (0.5 * rectWidth));
+            });
+
+            if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect) {
+                setHidden(true);
+            } else {
+                setHidden(false);
+            }
+        });
+
+        return () => anchorRectSub.unsubscribe();
+    }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
+    if ((hidden && hiddenType === 'destroy')) {
         return null;
     }
 
     return (
         <RectPopup
             hidden={hidden}
-            anchorRect={rectWithOffset}
+            anchorRect$={anchorRect$}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
-            excludeRects={excludeRects}
+            excludeRects={excludeRectsRef}
             onPointerEnter={popup.onPointerEnter}
             onPointerLeave={popup.onPointerLeave}
             onClick={popup.onClick}

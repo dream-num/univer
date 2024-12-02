@@ -208,6 +208,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._initialProps(config);
     }
 
+    updateZeroPoint(left: number, top: number) {
+        this.zeroLeft = left;
+        this.zeroTop = top;
+    }
+
     changeNotification() {
         this._changing$.next({
             objects: this._selectedObjectMap,
@@ -1036,7 +1041,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                     topScene.disableObjectsEvent();
 
-                    const viewportActualXY = topScene.getVpScrollXYInfoByPosToVp(Vector2.create(evtOffsetX, evtOffsetY));
+                    const viewportActualXY = topScene.getScrollXYInfoByViewport(Vector2.create(evtOffsetX, evtOffsetY));
 
                     this._viewportScrollX = viewportActualXY.x;
                     this._viewportScrollY = viewportActualXY.y;

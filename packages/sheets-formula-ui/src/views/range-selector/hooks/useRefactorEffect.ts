@@ -14,53 +14,40 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { EDITOR_ACTIVATED, IContextService, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRange: boolean) => {
+export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
-    const editorBridgeService = useDependency(IEditorBridgeService);
-    const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const contextMenuService = useDependency(IContextMenuService);
+    const refSelectionsService = useDependency(IRefSelectionsService);
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (isNeed) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
-            editorBridgeService.enableForceKeepVisible();
+            contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
-                d1?.dispose();
+                contextService.setContextValue(EDITOR_ACTIVATED, false);
                 contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
-                editorBridgeService.disableForceKeepVisible();
+                d1?.dispose();
             };
         }
     }, [isNeed]);
 
-    // reset selection
     useLayoutEffect(() => {
         if (isNeed) {
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const sheet = workbook?.getActiveSheet();
-            const selections = [...sheetsSelectionsService.getCurrentSelections()];
             return () => {
-                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                const currentSheet = workbook?.getActiveSheet();
-                if (currentSheet && currentSheet === sheet) {
-                    sheetsSelectionsService.setSelections(selections);
-                }
+                refSelectionsService.clear();
             };
         }
     }, [isNeed]);
@@ -81,12 +68,4 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             refSelectionsRenderService?.setSkipLastEnabled(false);
         }
     }, [isNeed]);
-
-    useEffect(() => {
-        if (isOnlyOneRange) {
-            refSelectionsRenderService?.setRemainLastEnabled(false);
-        } else {
-            refSelectionsRenderService?.setRemainLastEnabled(true);
-        }
-    }, [isOnlyOneRange]);
 };

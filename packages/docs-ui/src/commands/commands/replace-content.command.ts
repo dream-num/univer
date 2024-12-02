@@ -21,7 +21,7 @@ import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniver
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
-interface IReplaceSnapshotCommandParams {
+export interface IReplaceSnapshotCommandParams {
     unitId: string;
     snapshot: IDocumentData;
     textRanges: ITextRangeWithStyle[];
@@ -334,13 +334,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, body, '', 0, false));
-        // insert
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: insertBody,
-            len: insertBody.dataStream.length,
-        });
+        textX.push(...BuildTextUtils.selection.delete([selection], body, 0, insertBody));
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         return true;

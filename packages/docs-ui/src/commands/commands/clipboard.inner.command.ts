@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     ICommand,
+    ICustomTable,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
@@ -33,11 +34,13 @@ import {
     IUniverInstanceService,
     JSONX,
     MemoryCursor,
+    SHEET_EDITOR_UNITS,
     TextX,
     TextXActionType,
     Tools,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition } from '../../basics/paragraph';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -78,6 +81,7 @@ export interface IInnerPasteCommandParams {
     textRanges: ITextRangeWithStyle[];
 }
 
+const UNITS = SHEET_EDITOR_UNITS;
 // Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
@@ -89,10 +93,10 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const originSelections = docSelectionManagerService.getTextRanges();
+        const selections = docSelectionManagerService.getTextRanges();
         const rectRanges = docSelectionManagerService.getRectRanges();
         const { body, tableSource, drawings } = doc;
-        if (!Array.isArray(originSelections) || originSelections.length === 0 || body == null) {
+        if (!Array.isArray(selections) || selections.length === 0 || body == null) {
             return false;
         }
 
@@ -101,7 +105,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         if (docDataModel == null || originBody == null) {
             return false;
         }
-        const selections = originSelections.map((range) => BuildTextUtils.selection.getInsertSelection(range, originBody));
         const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -141,7 +144,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        for (const selection of selections) {
+        for (let i = 0; i < selections.length; i++) {
+            const selection = selections[i];
             const { startOffset, endOffset, collapsed } = selection;
 
             const len = startOffset - memoryCursor.cursor;
@@ -185,21 +189,36 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                 }
             }
 
+            const customRange = getCustomRangeAtPosition(originBody.customRanges ?? [], endOffset, UNITS.includes(unitId));
+            const customDecorations = getCustomDecorationAtPosition(originBody.customDecorations ?? [], endOffset);
+            if (customRange) {
+                cloneBody.customRanges = [{
+                    ...customRange,
+                    startIndex: 0,
+                    endIndex: body.dataStream.length - 1,
+                }];
+            }
+            if (customDecorations.length) {
+                cloneBody.customDecorations = customDecorations.map((customDecoration) => ({
+                    ...customDecoration,
+                    startIndex: 0,
+                    endIndex: body.dataStream.length - 1,
+                }));
+            }
             if (collapsed) {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len,
                 });
+                textX.push({
+                    t: TextXActionType.INSERT,
+                    body: cloneBody,
+                    len: body.dataStream.length,
+                });
             } else {
-                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor, originBody);
+                const dos = BuildTextUtils.selection.delete([selection], body, memoryCursor.cursor, cloneBody, selections.length === 1);
                 textX.push(...dos);
             }
-
-            textX.push({
-                t: TextXActionType.INSERT,
-                body: cloneBody,
-                len: body.dataStream.length,
-            });
 
             memoryCursor.reset();
             memoryCursor.moveCursor(endOffset);
@@ -222,6 +241,19 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     },
 };
 
+// TODO: WORKAROUND to fix https://github.com/dream-num/univer-pro/issues/2560.
+function adjustSelectionByTable(selection: ITextRange, tables: ICustomTable[]): ITextRange {
+    const { startOffset, endOffset } = selection;
+    const endsWithTable = tables.some((t) => t.startIndex === endOffset);
+    const newEndOffset = Math.max(startOffset, endsWithTable ? endOffset - 1 : endOffset);
+
+    return {
+        ...selection,
+        endOffset: newEndOffset,
+        collapsed: startOffset === newEndOffset,
+    };
+}
+
 function getCutActionsFromTextRanges(
     selections: ITextRange[],
     docDataModel: DocumentDataModel,
@@ -237,16 +269,14 @@ function getCutActionsFromTextRanges(
         return rawActions;
     }
 
+    const { tables = [] } = originBody;
+
     const memoryCursor = new MemoryCursor();
     memoryCursor.reset();
 
-    for (const selection of selections) {
+    for (let i = 0; i < selections.length; i++) {
+        const selection = adjustSelectionByTable(selections[i], tables);
         const { startOffset, endOffset, collapsed } = selection;
-
-        if (startOffset == null || endOffset == null) {
-            continue;
-        }
-
         const len = startOffset - memoryCursor.cursor;
 
         if (collapsed) {
@@ -255,7 +285,7 @@ function getCutActionsFromTextRanges(
                 len,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
+            textX.push(...BuildTextUtils.selection.delete([selection], originBody, memoryCursor.cursor, null, false));
         }
 
         memoryCursor.reset();
@@ -446,10 +476,9 @@ export interface IInnerCutCommandParams {
     selections?: ITextRange[];
 }
 
-const INNER_CUT_COMMAND_ID = 'doc.command.inner-cut';
-
 export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
-    id: INNER_CUT_COMMAND_ID,
+    id: 'doc.command.inner-cut',
+
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IInnerCutCommandParams) => {
@@ -458,6 +487,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selections = params.selections ?? docSelectionManagerService.getTextRanges();
+
         const rectRanges = docSelectionManagerService.getRectRanges();
 
         if (

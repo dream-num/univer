@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { IOperation } from '@univerjs/core';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
+
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
-import type { IOperation } from '@univerjs/core';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
-import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
     id: 'sheet.operation.set-scroll',

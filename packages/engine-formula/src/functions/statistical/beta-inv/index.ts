@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { betaINV } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class BetaInv extends BaseFunction {
     override minParams = 3;
@@ -91,6 +91,26 @@ export class BetaInv extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
+        if (probabilityObject.isError()) {
+            return probabilityObject;
+        }
+
+        if (alphaObject.isError()) {
+            return alphaObject;
+        }
+
+        if (betaObject.isError()) {
+            return betaObject;
+        }
+
+        if (AObject.isError()) {
+            return AObject;
+        }
+
+        if (BObject.isError()) {
+            return BObject;
+        }
+
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject, alphaObject, betaObject, AObject, BObject);
 
         if (isError) {

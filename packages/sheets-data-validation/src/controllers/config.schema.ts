@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'sheets-data-validation.config';
+export const SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY = 'sheets-data-validation.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsDataValidationConfig {
 }

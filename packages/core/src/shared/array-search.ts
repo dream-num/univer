@@ -14,6 +14,60 @@
  * limitations under the License.
  */
 
+/**
+ * Return the index of the first value in an ascending array that is greater than the target value. If there is no value greater than the target, return -1.
+ *
+ * Alternatively, you can consider inserting a number to ensure the array remains sorted, and return the position for insertion. If the target is the same as the maximum value, return arr.length -1
+ * @param arr
+ * @param target
+ */
+export function searchInOrderedArray(arr: number[], target: number) {
+    let left = 0;
+    let right = arr.length - 1;
+
+    if (target < arr[0]) return 0;
+    if (target >= arr[arr.length - 1]) return arr.length - 1;
+
+    while (left <= right) {
+        // When an equal value is found, it is necessary to find the position immediately following the last occurrence of that equal value.
+        if (arr[left] === target) {
+            while (left < arr.length && arr[left] === target) {
+                left++;
+            }
+            return left;
+        }
+
+        if (target > arr[left] && target < arr[left + 1]) {
+            return left + 1;
+        }
+
+        if (arr[right] === target) {
+            while (right < arr.length && arr[right] === target) {
+                right++;
+            }
+            return right;
+        }
+
+        if (target > arr[right - 1] && target < arr[right]) {
+            return right;
+        }
+
+        left++;
+        right--;
+    }
+
+    return -1;
+}
+
+/**
+ * Return the index of the first value in an ascending array that is greater than the target value. If there is no value greater than the target, return last index.
+ *
+ * @param arr
+ * @param pos
+ */
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1)  return 2
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
+// binarySearchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
 export function binarySearchArray(arr: number[], pos: number) {
     let low: number = 0;
     let high = arr.length - 1;
@@ -36,70 +90,72 @@ export function binarySearchArray(arr: number[], pos: number) {
     return -1;
 }
 
-export function orderSearchArray(arr: number[], pos: number) {
-    let i = 0;
-    let cur = 0;
-    let cur_pre = 0;
-    let cur_index = -1;
-    let i_ed = arr.length - 1;
+/**
+ * Return the index of the last index in an ascending array which value is just greater than the target. If there is no value greater than the target, return arr.length - 1.
+ *
+ * Alternatively, you can consider inserting a number to ensure the array remains sorted, and return the position for insertion.
+ *
+ * @param arr
+ * @param target
+ */
 
-    while (i < arr.length && i_ed >= 0 && i_ed >= i) {
-        cur = arr[i_ed];
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1)  return 2
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return last index, because max value 5 is not greater than target 5
+// binarySearchArray ([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 8)  return last index, because max value 5 is not greater than target 8.
+export function binSearchFirstGreaterThanTarget(arr: number[], target: number) {
+    let left = 0;
+    let right = arr.length;
 
-        if (i_ed === 0) {
-            cur_pre = 0;
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+
+        // If the middle value is less than or equal to the target value, continue searching in the right half.
+        if (arr[mid] <= target) {
+            left = mid + 1;
         } else {
-            cur_pre = arr[i_ed - 1];
+            right = mid;
         }
-
-        if (pos >= cur_pre && pos <= cur) {
-            cur_index = i_ed;
-            break;
-        }
-
-        cur = arr[i];
-
-        if (i === 0) {
-            cur_pre = 0;
-        } else {
-            cur_pre = arr[i - 1];
-        }
-
-        if (pos >= cur_pre && pos < cur) {
-            cur_index = i;
-            break;
-        }
-
-        i++;
-        i_ed--;
     }
 
-    return cur_index;
+    // Returns the index of the first element greater than the target value;
+    // returns last index if no value in array is greater than target.
+    return left < arr.length ? left : arr.length - 1;
 }
 
 /**
- * return the first index which arr[index] > num
- * ex: searchArray([1, 3, 5, 7, 9], 7) = 4
- * @param arr
- * @param num
+ * Find value in the data that is just greater than the target; if there are equal values greater than the target, select the last one.
+ * If firstMatch is true, then return the index of the first number greater than the target.
+ * see #univer/pull/3903
+ *
+ * @param arr ascending array
+ * @param target value wants to find
+ * @param firstMatch if true, return the first match when value > target in the array, otherwise return the last value > target. if not match,
  * @returns {number} index
  */
-export function searchArray(arr: number[], num: number) {
+
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1) return 2
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 1) return 7 (first 5 index)
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return 9
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 8) return 9
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5) return 9
+// searchArray([0, 1, 2, 3, 4, 4, 4, 5, 5, 5], 5, true) return 7 (first 5 index)
+
+export function searchArray(arr: number[], target: number, firstMatch = false) {
     let index: number = arr.length - 1;
-    if (num < 0) {
-        return -1;
-    }
-    if (num < arr[0]) {
+    if (target < 0 || target < arr[0]) {
         return 0;
     }
-    if (num > arr[arr.length - 1]) {
-        return Number.POSITIVE_INFINITY;
+
+    // Excluding the special conditions mentioned above, the next return values can only be between 1 and length - 1.
+    if (arr.length < 40 || target <= arr[20] || target >= arr[index - 20]) {
+        index = searchInOrderedArray(arr, target);
+    } else {
+        index = binSearchFirstGreaterThanTarget(arr, target);
     }
 
-    if (arr.length < 40 || num <= arr[20] || num >= arr[index - 20]) {
-        index = orderSearchArray(arr, num);
-    } else {
-        index = binarySearchArray(arr, num);
+    if (firstMatch) {
+        const val = arr[index];
+        return arr.indexOf(val);
     }
 
     return index;

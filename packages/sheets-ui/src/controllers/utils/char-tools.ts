@@ -77,8 +77,8 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
             return `'${str.slice(1)}`;
         }
 
-        // covert all full width characters to normal characters
-        normalStr = str.split('').map(toHalfWidth).join('');
+        // Handle quoted parts separately (e.g., sheet names)
+        normalStr = handleQuotedParts(normalStr);
     }
 
     // Check if it is a formula
@@ -98,12 +98,36 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     return parsedValue == null ? str : normalStr;
 }
 
+// Helper function to handle sheet names with quotes
+function handleQuotedParts(str: string): string {
+    const sheetNamePattern = /['"].*?['"]/g; // Pattern to match quoted parts (sheet names)
+    const quotedParts: string[] = [];
+    const parts = str.split(sheetNamePattern);
+
+    // Save quoted parts and remove them from the string temporarily
+    str.replace(sheetNamePattern, (match) => {
+        quotedParts.push(match);
+        return ''; // Remove quoted parts for now
+    });
+
+    // Convert all full-width characters to half-width characters in non-quoted parts
+    let normalStr = parts.join('').split('').map(toHalfWidth).join('');
+
+    // Reinserting the quoted parts into the final string
+    quotedParts.forEach((part, idx) => {
+        normalStr = normalStr.slice(0, idx * 2) + part + normalStr.slice((idx + 1) * 2);
+    });
+
+    return normalStr;
+}
+
 function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
     const nodes = lexerTreeBuilder.sequenceNodesBuilder(normalStr);
 
     if (!nodes) return str;
 
     let _normalStr = normalStr;
+    let totalOffset = 0; // Cumulative offset
 
     nodes.forEach((node, index) => {
         if (typeof node === 'object') {
@@ -111,33 +135,48 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
 
             // boolean or function name
             if (booleanMap[token.toLowerCase()]) {
-                const startIndex = node.startIndex + 1;
-                const endIndex = node.endIndex + 2;
+                const startIndex = node.startIndex + totalOffset + 1;
+                const endIndex = node.endIndex + totalOffset + 2;
+
                 _normalStr = replaceString(token.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
             } else if ((node.nodeType === sequenceNodeType.FUNCTION && hasFunctionName(token, functionService, nodes, index)) || node.nodeType === sequenceNodeType.REFERENCE) {
                 const sheetNameIndex = token.indexOf('!');
 
                 if (sheetNameIndex > -1) {
                     const refBody = token.substring(sheetNameIndex + 1);
-                    const startIndex = node.startIndex + (sheetNameIndex + 1) + 1;
-                    const endIndex = node.endIndex + 2;
+                    const startIndex = node.startIndex + totalOffset + (sheetNameIndex + 1) + 1;
+                    const endIndex = node.endIndex + totalOffset + 2;
+
                     _normalStr = replaceString(refBody.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
                 } else {
-                    const startIndex = node.startIndex + 1;
-                    const endIndex = node.endIndex + 2;
+                    const startIndex = node.startIndex + totalOffset + 1;
+                    const endIndex = node.endIndex + totalOffset + 2;
+
                     _normalStr = replaceString(token.toLocaleUpperCase(), _normalStr, startIndex, endIndex);
                 }
             } else if ((token.startsWith('"') && token.endsWith('"')) || (token.startsWith("'") && token.endsWith("'"))) {
-                const startIndex = node.startIndex + 2;
-                const endIndex = node.endIndex + 1;
+                const startIndex = node.startIndex + totalOffset + 2;
+                const endIndex = node.endIndex + totalOffset + 1;
                 _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
             } else if (node.nodeType !== sequenceNodeType.ARRAY) {
                 const parsedValue = numfmt.parseValue(token);
 
                 if (parsedValue == null) {
-                    const startIndex = node.startIndex + 1;
-                    const endIndex = node.endIndex + 2;
+                    const startIndex = node.startIndex + totalOffset + 1;
+                    const endIndex = node.endIndex + totalOffset + 2;
                     _normalStr = replaceString(str.slice(startIndex, endIndex), _normalStr, startIndex, endIndex);
+                }
+                // Entering =.07/0.1 in a cell will automatically convert to =0.07/0.1
+                // Entering =1.0+2.00 in a cell will automatically convert to =1+2
+                else if (typeof parsedValue.v === 'number' && (parsedValue.z === undefined || !numfmt.isDate(parsedValue.z))) {
+                    const v = `${parsedValue.v}`;
+                    const startIndex = node.startIndex + totalOffset + 1;
+                    const endIndex = node.endIndex + totalOffset + 2;
+                    const { processedString, offset } = processNumberStringWithSpaces(token, v);
+                    _normalStr = replaceString(processedString, _normalStr, startIndex, endIndex);
+
+                    // Update cumulative offset
+                    totalOffset += offset;
                 }
             }
         }
@@ -168,4 +207,18 @@ function toHalfWidth(char: string): string {
 
 function replaceString(replacedString: string, normalStr: string, startIndex: number, endIndex: number): string {
     return normalStr.substring(0, startIndex) + replacedString + normalStr.substring(endIndex);
+}
+
+function processNumberStringWithSpaces(token: string, numStr: string): { processedString: string; offset: number } {
+    // Preserve original leading and trailing spaces
+    const leadingSpaces = token.match(/^\s*/)?.[0] || '';
+    const trailingSpaces = token.match(/\s*$/)?.[0] || '';
+
+    // Reassemble, keeping the original spaces
+    const processedString = leadingSpaces + numStr + trailingSpaces;
+
+    // Calculating the offset
+    const offset = processedString.length - token.length;
+
+    return { processedString, offset };
 }

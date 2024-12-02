@@ -114,6 +114,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onValid,
         isValueValid = true,
         placeholder,
+        disabled,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -317,7 +318,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
     return (
         <>
-            <div {...propsNew} className={className + borderStyle} ref={editorRef}>
+            <div {...propsNew} style={{ ...propsNew.style, ...(disabled ? { pointerEvents: 'none', opacity: 0 } : {}) }} className={className + borderStyle} ref={editorRef}>
                 <div style={{ display: validationVisible ? 'none' : 'block' }} className={styles.textEditorValidationError}>{validationContent}</div>
                 <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholderValue}</div>
             </div>

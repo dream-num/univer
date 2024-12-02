@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Ispmt } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Ispmt } from '../index';
 
 describe('Test ispmt function', () => {
     const testFunction = new Ispmt(FUNCTION_NAMES_FINANCIAL.ISPMT);
@@ -69,7 +69,7 @@ describe('Test ispmt function', () => {
             const nper = NumberValueObject.create(3 * 12);
             const pv = NumberValueObject.create(80000);
             const result = testFunction.calculate(rate, per, nper, pv);
-            expect(result.getValue()).toBe(0 | -0);
+            expect(result.getValue()).toBe(-0);
         });
 
         it('Value is normal string', () => {
@@ -123,8 +123,8 @@ describe('Test ispmt function', () => {
             const pv = NumberValueObject.create(80000);
             const result = testFunction.calculate(rate, per, nper, pv);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 4800, 0 | -0, ErrorType.NA],
-                [-72000, 0 | -0, ErrorType.NAME, ErrorType.NA],
+                [ErrorType.VALUE, 4800, -0, ErrorType.NA],
+                [-72000, -0, ErrorType.NAME, ErrorType.NA],
                 [ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);

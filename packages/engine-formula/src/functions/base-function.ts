@@ -16,12 +16,11 @@
 
 import type { IRange, LocaleType, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
-
 import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
-
 import { ErrorType } from '../basics/error-type';
 import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -45,6 +44,9 @@ export class BaseFunction {
     private _locale: LocaleType;
     private _sheetOrder: string[];
     private _sheetNameMap: { [sheetId: string]: string };
+    protected _formulaDataModel: Nullable<FormulaDataModel>;
+    protected _rowCount: number = -1;
+    protected _columnCount: number = -1;
 
     /**
      * Whether the function needs to expand the parameters
@@ -65,6 +67,16 @@ export class BaseFunction {
      * Whether the function needs sheets info
      */
     needsSheetsInfo: boolean = false;
+
+    /**
+     * Whether the function needs function methods in FormulaDataModel
+     */
+    needsFormulaDataModel: boolean = false;
+
+    /**
+     * Whether the function needs the number of rows and columns in the sheet
+     */
+    needsSheetRowColumnCount: boolean = false;
 
     /**
      * Minimum number of parameters
@@ -148,6 +160,15 @@ export class BaseFunction {
     }) {
         this._sheetOrder = sheetOrder;
         this._sheetNameMap = sheetNameMap;
+    }
+
+    setFormulaDataModel(_formulaDataModel: FormulaDataModel) {
+        this._formulaDataModel = _formulaDataModel;
+    }
+
+    setSheetRowColumnCount(rowCount: number, columnCount: number) {
+        this._rowCount = rowCount;
+        this._columnCount = columnCount;
     }
 
     isAsync() {
@@ -313,7 +334,8 @@ export class BaseFunction {
         }
 
         if (resultValue.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            // return ErrorValueObject.create(ErrorType.NA);
+            return NumberValueObject.create(0);
         }
 
         return resultValue;

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
-
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
 import type { ISidebarService } from './sidebar.service';
+
+import { toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export class DesktopSidebarService implements ISidebarService {
     private _sidebarOptions: ISidebarMethodOptions = {};
     readonly sidebarOptions$ = new Subject<ISidebarMethodOptions>();
 
     readonly scrollEvent$ = new Subject<Event>();
+
+    private container?: HTMLElement;
 
     get visible(): boolean {
         return this._sidebarOptions.visible || false;
@@ -59,5 +61,13 @@ export class DesktopSidebarService implements ISidebarService {
         };
         this.sidebarOptions$.next(this._sidebarOptions);
         this._sidebarOptions.onClose && this._sidebarOptions.onClose();
+    }
+
+    getContainer() {
+        return this.container;
+    }
+
+    setContainer(element: HTMLElement) {
+        this.container = element;
     }
 }

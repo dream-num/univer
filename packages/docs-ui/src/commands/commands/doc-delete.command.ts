@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, ITextRange, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
-    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
-    generateRandomId,
-    getCustomDecorationSlice,
-    getCustomRangeSlice,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -41,8 +37,6 @@ import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
-
-const getDeleteSelection = BuildTextUtils.selection.getDeleteSelection;
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -164,7 +158,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, originBody);
+        const actualRange = activeRange;
         const unitId = docDataModel.getUnitId();
 
         const { startOffset, collapsed } = actualRange;
@@ -362,7 +356,7 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, body);
+        const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
@@ -572,7 +566,7 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, body, DeleteDirection.RIGHT);
+        const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {
@@ -670,76 +664,6 @@ export const DeleteRightCommand: ICommand = {
         return result;
     },
 };
-
-function getParagraphBody(
-    accessor: IAccessor,
-    unitId: string,
-    body: IDocumentBody,
-    start: number,
-    end: number
-): IDocumentBody {
-    const { textRuns: originTextRuns = [], customBlocks: originCustomBlocks = [] } = body;
-    const dataStream = body.dataStream.substring(start, end);
-
-    const bodySlice: IDocumentBody = {
-        dataStream,
-        customRanges: getCustomRangeSlice(body, start, end).customRanges.map((range) => ({
-            ...Tools.deepClone(range),
-            rangeId: generateRandomId(),
-        })),
-        customDecorations: getCustomDecorationSlice(body, start, end),
-    };
-
-    const textRuns: ITextRun[] = [];
-
-    for (const textRun of originTextRuns) {
-        const { st, ed } = textRun;
-        if (ed <= start || st >= end) {
-            continue;
-        }
-
-        if (st < start) {
-            textRuns.push({
-                ...textRun,
-                st: 0,
-                ed: ed - start,
-            });
-        } else if (ed > end) {
-            textRuns.push({
-                ...textRun,
-                st: st - start,
-                ed: end - start,
-            });
-        } else {
-            textRuns.push({
-                ...textRun,
-                st: st - start,
-                ed: ed - start,
-            });
-        }
-    }
-
-    if (textRuns.length > 0) {
-        bodySlice.textRuns = textRuns;
-    }
-
-    const customBlocks: ICustomBlock[] = [];
-    for (const block of originCustomBlocks) {
-        const { startIndex } = block;
-        if (startIndex >= start && startIndex <= end) {
-            customBlocks.push({
-                ...block,
-                startIndex: startIndex - start,
-            });
-        }
-    }
-
-    if (customBlocks.length > 0) {
-        bodySlice.customBlocks = customBlocks;
-    }
-
-    return bodySlice;
-}
 
 // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
 function getTextRangesWhenDelete(activeRange: ITextRangeWithStyle, ranges: readonly ITextRange[]) {

@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { DocMentionPopupService } from './services/doc-mention-popup.service';
 export { UniverDocsMentionUIPlugin } from './plugin';

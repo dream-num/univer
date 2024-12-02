@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
-
-import { SheetsFilterService } from '@univerjs/sheets-filter';
-
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import type { ICommandInfo } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+
+import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {

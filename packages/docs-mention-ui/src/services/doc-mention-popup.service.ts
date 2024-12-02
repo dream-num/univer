@@ -28,7 +28,7 @@ export class DocMentionPopupService extends Disposable {
         return this._infoPopup$.value;
     }
 
-    private readonly _editPopup$ = new BehaviorSubject<Nullable<{ anchor: number; popup: IDisposable }>>(undefined);
+    private readonly _editPopup$ = new BehaviorSubject<Nullable<{ anchor: number; popup: IDisposable; unitId: string }>>(undefined);
     readonly editPopup$ = this._editPopup$.asObservable();
     get editPopup() {
         return this._editPopup$.value;
@@ -66,7 +66,7 @@ export class DocMentionPopupService extends Disposable {
             },
             unitId
         );
-        this._editPopup$.next({ popup: dispose, anchor: index });
+        this._editPopup$.next({ popup: dispose, anchor: index, unitId });
     }
 
     closeEditPopup() {

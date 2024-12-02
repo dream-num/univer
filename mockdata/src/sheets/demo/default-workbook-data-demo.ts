@@ -14146,6 +14146,98 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 345,
                         t: 2,
                     },
+                    7: {
+                        p: {
+                            id: 'd',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 58,
+                                    height: undefined,
+                                },
+                                marginTop: 0,
+                                marginBottom: 2,
+                                marginRight: 2,
+                                marginLeft: 2,
+                                renderConfig: {
+                                    horizontalAlign: 0,
+                                    verticalAlign: 0,
+                                    centerAngle: 0,
+                                    vertexAngle: 0,
+                                    wrapStrategy: 0,
+                                    zeroWidthParagraphBreak: 1,
+                                },
+                            },
+                            body: {
+                                dataStream: '\b\r\n',
+                                textRuns: [],
+                                paragraphs: [
+                                    {
+                                        startIndex: 1,
+                                        paragraphStyle: {
+                                            horizontalAlign: 0,
+                                        },
+                                    },
+                                ],
+                                sectionBreaks: [
+                                    {
+                                        startIndex: 2,
+                                    },
+                                ],
+                                customBlocks: [
+                                    {
+                                        startIndex: 0,
+                                        blockId: 'BYxg4d',
+                                    },
+                                ],
+                                customRanges: [],
+                                customDecorations: [],
+                            },
+                            drawings: {
+                                BYxg4d: {
+                                    unitId: 'd',
+                                    subUnitId: 'd',
+                                    drawingId: 'BYxg4d',
+                                    drawingType: 0,
+                                    // @ts-ignore
+                                    imageSourceType: 'BASE64',
+                                    source: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMSEhUTExAVFRIWEBUWExUVFxcVEBIVFRgYGhgYGBgYHSgiGholHRgZITEtJSkrLi4uFyAzODMtNzQtLisBCgoKDg0OGxAQGi0lICYvMC4vLi8tLS0vKzAtLy0tLS0vNS0tLy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rLf/AABEIAOEA4QMBIgACEQEDEQH/xAAbAAEAAgMBAQAAAAAAAAAAAAAABAYCAwUHAf/EADsQAAEDAgMFBgUCBQMFAAAAAAEAAhEDIQQxQQUSUWFxBiKBkaHwEzKxwdFC4RQVUoLxByNiM1Nyc5L/xAAaAQEAAgMBAAAAAAAAAAAAAAAAAQQCAwUG/8QALBEBAAICAQMCBAUFAAAAAAAAAAECAxEEEiExQVEFE2GBIjIzQqEjccHR8P/aAAwDAQACEQMRAD8A9xREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAWL3gCSQBzXF2t2iZS7rIc/UaN6qobQ2tVqmXGJBFuVx9VWy8mtO0d5WMfHtbvPaF0xPaCk35ZeeVvqoFTtI45Ma2eJn1CrFMgidJvwzGvvJSIJBItaS4denQ3VSeVkt4lZjBSvmHebtyrn3SMslso7feBdodBvoVxRTtJiM8zHv8rZAZoTJk8j7hRGXJ7k46eyzYfbLHZgt9QekLo06gcJBkFUtueojMaFbcLjHs+V0XuP0nwW+nKn9zVfjx+1cUXP2ftNtSxs70PRdBXK2i0bhUtWazqRFoxGLZT+d7W8JIBPTioLu0OH/7hPRrvwsL58dO1rRH3Q6qLlM7Q0D+sjq134U3DY2nU+So13Q38kpnx37VtE/cSERFtBERAREQEREBERAREQEREHxxhU7tL2nzpUT1cMzyHJSe2e2fht+Ew94glxH6RaPNUQm5vaZNuB/b6qlyM+vw1XOPh3+KUlz7zc29emqU2W5eXAWJ0z456rW0QQZGs5E6cM7wt9M34Hw6RHif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',
+                                    transform: {
+                                        left: 0,
+                                        top: 0,
+                                        width: 54,
+                                        height: 54,
+                                    },
+                                    docTransform: {
+                                        size: {
+                                            width: 54,
+                                            height: 54,
+                                        },
+                                        positionH: {
+                                            relativeFrom: 0,
+                                            posOffset: 0,
+                                        },
+                                        positionV: {
+                                            relativeFrom: 1,
+                                            posOffset: 0,
+                                        },
+                                        angle: 0,
+                                    },
+                                    behindDoc: 0,
+                                    title: '',
+                                    description: '',
+                                    layoutType: 0,
+                                    wrapText: 0,
+                                    distB: 0,
+                                    distL: 0,
+                                    distR: 0,
+                                    distT: 0,
+                                },
+                            },
+                            drawingsOrder: [
+                                'BYxg4d',
+                            ],
+                        },
+                    },
                     8: {
                         p: {
                             id: '__INTERNAL_EDITOR__DOCS_NORMAL',
@@ -14244,11 +14336,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                 },
                             },
                             body: {
-                                dataStream: '\u001Fhttps://univer.ai/\u001E\r\n',
+                                dataStream: 'https://univer.ai/\r\n',
                                 customRanges: [
                                     {
                                         startIndex: 0,
-                                        endIndex: 19,
+                                        endIndex: 17,
                                         rangeId: 'QY6zbQrxGw8IaLGXDgVVj',
                                         rangeType: 0,
                                         properties: {
@@ -24022,7 +24114,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             }),
         },
         {
-            name: 'SHEET_THREAD_COMMENT_PLUGIN',
+            name: 'SHEET_UNIVER_THREAD_COMMENT_PLUGIN',
             data: JSON.stringify({
                 'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
                 'dv-test': [
@@ -24135,6 +24227,24 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         'sF2ogx',
                         'UPBpL-A3RvKoOqPdd8VIq',
                     ],
+                },
+                'dv-test': {
+                    data: {
+                        'UPBpL-test': {
+                            unitId: 'workbook-01',
+                            subUnitId: 'dv-test',
+                            drawingId: 'UPBpL-test',
+                            drawingType: 8,
+                            componentKey: 'ImageDemo',
+                            sheetTransform: {
+                                from: { column: 2, columnOffset: 8, row: 9, rowOffset: 9 },
+                                to: { column: 4, columnOffset: 62, row: 23, rowOffset: 0 },
+                            },
+                            transform: { flipY: false, flipX: false, angle: 0, skewX: 0, skewY: 0, left: 200, top: 200, width: 200, height: 200 },
+                            data: { aa: '128' },
+                        },
+                    },
+                    order: ['UPBpL-test'],
                 },
             }),
         },

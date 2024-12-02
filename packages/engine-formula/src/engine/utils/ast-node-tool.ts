@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 
 export interface IExecuteAstNodeData {
-    node: BaseAstNode;
+    node: Nullable<BaseAstNode>;
     refOffsetX: number;
     refOffsetY: number;
 }

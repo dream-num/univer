@@ -17,6 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationStatus, Disposable, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
@@ -29,7 +30,8 @@ export class DataValidationAlertController extends Disposable {
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
     ) {
         super();
         this._init();
@@ -46,10 +48,11 @@ export class DataValidationAlertController extends Disposable {
                 const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
+                const rule = this._dataValidationModel.getRuleByLocation(cellPos.location.unitId, cellPos.location.subUnitId, cellPos.location.row, cellPos.location.col);
+                if (!rule) return;
 
-                const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
-
-                if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
+                const validStatus = this._dataValidationModel.validator(rule, cellPos.location);
+                if (validStatus === DataValidationStatus.INVALID) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (
@@ -61,15 +64,15 @@ export class DataValidationAlertController extends Disposable {
                     ) {
                         return;
                     }
-                    const validator = cellData.dataValidation.validator as BaseDataValidator;
-                    const rule = cellData.dataValidation.rule;
+
+                    const validator = this._dataValidationModel.getValidator(rule.type) as BaseDataValidator;
                     if (!validator) {
                         return;
                     }
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('dataValidation.error.title'),
-                        message: validator?.getRuleFinalError(rule),
+                        message: validator?.getRuleFinalError(rule, cellPos.location),
                         location: cellPos.location,
                         width: 200,
                         height: 74,

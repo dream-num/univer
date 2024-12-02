@@ -123,6 +123,11 @@ export class DataValidationModel extends Disposable {
                 Object.assign(rule, getRuleOptions(payload.payload));
                 break;
             }
+
+            case UpdateRuleType.ALL: {
+                Object.assign(rule, payload.payload);
+                break;
+            }
             default:
                 break;
         }

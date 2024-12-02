@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService } from '@univerjs/core';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDeleteDrawingCommandParams } from './interfaces';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { RemoveDocDrawingCommand } from './remove-doc-drawing.command';
-import type { IDeleteDrawingCommandParams } from './interfaces';
 
 export const DeleteDocDrawingsCommand: ICommand = {
     id: 'doc.command.delete-drawing',

@@ -15,23 +15,25 @@
  */
 
 import type { IRangeSelectorProps } from '../';
-import type { useFormulaToken } from './useFormulaToken';
+import type { INode } from './useFormulaToken';
 import { useEffect, useRef } from 'react';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { verifyRange } from '../utils/verifyRange';
 
-export const useVerify = (onVerify: IRangeSelectorProps['onVerify'], sequenceNodes: ReturnType<typeof useFormulaToken>['sequenceNodes']) => {
+export const useVerify = (isNeed: boolean, onVerify: IRangeSelectorProps['onVerify'], sequenceNodes: INode[]) => {
     const isInitRender = useRef(true);
 
     // No validation is performed during the initialization phase.
     useEffect(() => {
-        const time: any = setTimeout(() => {
-            isInitRender.current = false;
-        }, 500);
-        return () => {
-            clearTimeout(time);
-        };
-    });
+        if (isNeed) {
+            const time = setTimeout(() => {
+                isInitRender.current = false;
+            }, 500);
+            return () => {
+                clearTimeout(time);
+            };
+        }
+    }, [isNeed]);
 
     useEffect(() => {
         if (!isInitRender.current) {

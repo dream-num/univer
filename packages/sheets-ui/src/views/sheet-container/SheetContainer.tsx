@@ -82,9 +82,10 @@ export function RenderSheetContent() {
 function useHasWorkbook(): boolean {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
+    const hasWorkbook = !!workbook;
     return useMemo(
         () => univerInstanceService.getAllUnitsForType(UniverInstanceType.UNIVER_SHEET).length > 0,
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [univerInstanceService, workbook]
+        [univerInstanceService, hasWorkbook]
     );
 }

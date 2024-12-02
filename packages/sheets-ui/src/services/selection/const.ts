@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey } from '@univerjs/core';
+import type { ThemeService } from '@univerjs/core';
 import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISelectionStyle } from '@univerjs/sheets';
+import { ColorKit, createInterceptorKey } from '@univerjs/core';
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
@@ -24,3 +26,32 @@ export enum SELECTION_SHAPE_DEPTH {
     FORMULA_EDITOR_SHOW = 100, // see packages/sheets-formula/src/controllers/formula-editor-show.controller.ts
     MARK_SELECTION = 10000,
 };
+
+export function genNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
+    const styleSheet = themeService.getCurrentTheme();
+    const fill = new ColorKit(styleSheet.primaryColor).setAlpha(0.07).toRgbString();
+    return {
+        strokeWidth: 1,
+        stroke: styleSheet.primaryColor,
+        fill,
+        // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
+        widgets: {},
+        widgetSize: 6,
+        widgetStrokeWidth: 1,
+        widgetStroke: styleSheet.colorWhite,
+
+        autofillSize: 6,
+        autofillStrokeWidth: 1,
+        autofillStroke: styleSheet.colorWhite,
+
+        rowHeaderFill: fill,
+        rowHeaderStroke: styleSheet.primaryColor,
+        rowHeaderStrokeWidth: 1,
+
+        columnHeaderFill: fill,
+        columnHeaderStroke: styleSheet.primaryColor,
+        columnHeaderStrokeWidth: 1,
+
+        expandCornerSize: 40,
+    };
+}

@@ -35,7 +35,11 @@ export const ListTypePicker = (props: IListTypePickerProps) => {
                 return (
                     <img
                         key={item.value}
-                        className={styles.docListTypePickerItem + (value === item.value ? ` ${styles.docListTypePickerItemActive}` : '')}
+                        className={styles.docListTypePickerItem + (value === item.value
+                            ? `
+                              ${styles.docListTypePickerItemActive}
+                            `
+                            : '')}
                         onClick={() => {
                             onChange(item.value);
                         }}

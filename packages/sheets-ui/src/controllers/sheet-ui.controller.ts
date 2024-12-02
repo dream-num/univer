@@ -53,7 +53,7 @@ import {
 } from '../commands/commands/inline-format.command';
 import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
-import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
+import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
 import { RefillCommand } from '../commands/commands/refill.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
@@ -63,7 +63,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
@@ -78,7 +77,7 @@ import {
 import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
-import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
+import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../commands/commands/worksheet-protection.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
@@ -86,8 +85,8 @@ import {
     SetCellEditVisibleWithF2Operation,
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
@@ -108,7 +107,7 @@ import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-ite
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
@@ -202,7 +201,6 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register('HideGridlines', HideGridlines));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
             AddWorksheetMergeAllCommand,
@@ -251,7 +249,6 @@ export class SheetUIController extends Disposable {
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
             ScrollToRangeOperation,
-            CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
@@ -276,11 +273,7 @@ export class SheetUIController extends Disposable {
             ChangeSheetProtectionFromSheetBarCommand,
             DeleteRangeProtectionFromContextMenuCommand,
             SetRangeProtectionFromContextMenuCommand,
-            AddWorksheetProtectionCommand,
-            DeleteWorksheetProtectionCommand,
-            SetWorksheetProtectionCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
-            SetProtectionCommand,
             SetWorksheetColAutoWidthCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
@@ -354,7 +347,7 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
         if (config?.formulaBar !== false) {
             this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
         }

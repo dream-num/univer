@@ -80,13 +80,13 @@ export default {
         ],
         functionParameter: {
             logicalTest: { name: '布林表達式', detail: '要測試的條件。 ' },
-            valueIfTrue: { name: '如果值為 true', detail: 'logical_test 的結果為 TRUE 時，您希望傳回的值。 ' },
-            valueIfFalse: { name: '如果值為 false', detail: 'logical_test 的結果為 FALSE 時，您希望傳回的值。 ' },
+            valueIfTrue: { name: '如果值為 true', detail: 'logical_test 的結果為 TRUE 時，希望傳回的值。 ' },
+            valueIfFalse: { name: '如果值為 false', detail: 'logical_test 的結果為 FALSE 時，希望傳回的值。 ' },
         },
     },
     IFERROR: {
-        description: '如果公式的計算結果錯誤，則傳回您指定的值；否則傳回公式的結果',
-        abstract: '如果公式的計算結果錯誤，則傳回您指定的值；否則傳回公式的結果',
+        description: '如果公式的計算結果錯誤，則傳回指定的值；否則傳回公式的結果',
+        abstract: '如果公式的計算結果錯誤，則傳回指定的值；否則傳回公式的結果',
         links: [
             {
                 title: '教導',
@@ -209,7 +209,7 @@ export default {
             },
         ],
         functionParameter: {
-            logical: { name: '邏輯表達式', detail: '您要反轉邏輯的條件，可評估為 TRUE 或 FALSE。' },
+            logical: { name: '邏輯表達式', detail: '要反轉邏輯的條件，可評估為 TRUE 或 FALSE。' },
         },
     },
     OR: {

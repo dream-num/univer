@@ -32,6 +32,6 @@ export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
             .getRenderById(instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
             .with(SheetsScrollRenderController);
 
-        return scrollController.scrollToRange(params.range);
+        return scrollController.scrollToRange(params.range, params.forceTop, params.forceLeft);
     },
 };

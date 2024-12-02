@@ -17,15 +17,15 @@
 import type { Dependency, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
-import type { ISetSheetsFilterCriteriaCommandParams } from '../sheets-filter.command';
+import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { AuthzIoLocalService, IAuthzIoService, ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
 import { IMessageService } from '@univerjs/ui';
-import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';
 
+import { MockMessageService } from '@univerjs/ui/services/message/__testing__/mock-message.service.js';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../sheets-filter.command';
 
 function testWorkbookDataFactory(): IWorkbookData {
     return {

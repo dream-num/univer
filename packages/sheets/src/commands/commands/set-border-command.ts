@@ -37,7 +37,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

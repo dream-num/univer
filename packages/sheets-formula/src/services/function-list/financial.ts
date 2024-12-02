@@ -823,7 +823,7 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.FVSCHEDULE.functionParameter.schedule.name',
                 detail: 'formula.functionList.FVSCHEDULE.functionParameter.schedule.detail',
-                example: '{0.09,0.11,0.1}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
@@ -931,7 +931,7 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.IRR.functionParameter.values.name',
                 detail: 'formula.functionList.IRR.functionParameter.values.detail',
-                example: '{-700000,120000,150000,180000,210000,260000}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
@@ -1039,7 +1039,7 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MIRR.functionParameter.values.name',
                 detail: 'formula.functionList.MIRR.functionParameter.values.detail',
-                example: '{-120000,39000,30000,21000,37000,46000}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
@@ -1140,7 +1140,7 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.NPV.functionParameter.value1.name',
                 detail: 'formula.functionList.NPV.functionParameter.value1.detail',
-                example: '{-10000,3000,4200,6800}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
@@ -2078,14 +2078,14 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.XIRR.functionParameter.values.name',
                 detail: 'formula.functionList.XIRR.functionParameter.values.detail',
-                example: '{-10000,2750,4250,3250,2750}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
             {
                 name: 'formula.functionList.XIRR.functionParameter.dates.name',
                 detail: 'formula.functionList.XIRR.functionParameter.dates.detail',
-                example: '{39448,39508,39751,39859,39904}',
+                example: 'B1:B4',
                 require: 1,
                 repeat: 0,
             },
@@ -2114,14 +2114,14 @@ export const FUNCTION_LIST_FINANCIAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.XNPV.functionParameter.values.name',
                 detail: 'formula.functionList.XNPV.functionParameter.values.detail',
-                example: '{-10000,2750,4250,3250,2750}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },
             {
                 name: 'formula.functionList.XNPV.functionParameter.dates.name',
                 detail: 'formula.functionList.XNPV.functionParameter.dates.detail',
-                example: '{39448,39508,39751,39859,39904}',
+                example: 'B1:B4',
                 require: 1,
                 repeat: 0,
             },

@@ -44,7 +44,7 @@ export class ThreadCommentResourceController extends Disposable {
                         ...info.root,
                         children: info.children,
                     });
-                    resultMap[info.unitId] = subUnitComments;
+                    resultMap[info.subUnitId] = subUnitComments;
                 });
 
                 return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap, unitID));

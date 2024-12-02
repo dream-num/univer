@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
 import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from '../common/type';
 
-export const PLUGIN_CONFIG_KEY = 'watermark.config';
+export const WATERMARK_PLUGIN_CONFIG_KEY = 'watermark.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(WATERMARK_PLUGIN_CONFIG_KEY);
 
 export interface IUniverWatermarkConfig {
-    menu?: MenuConfig;
-    showMenu?: boolean;
     userWatermarkSettings?: Partial<IUserInfoWatermarkConfig>;
     textWatermarkSettings?: Partial<ITextWatermarkConfig>;
     imageWatermarkSettings?: Partial<IImageWatermarkConfig>;

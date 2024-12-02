@@ -17,6 +17,7 @@
 export * from './i-document-data';
 export * from './i-document-data-interceptor';
 export * from './i-image-properties';
+export * from './i-mention';
 export * from './i-need-check-disposable';
 export * from './i-placeholder';
 export * from './i-shape-properties';

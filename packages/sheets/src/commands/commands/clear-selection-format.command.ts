@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+
 import {
     CommandType,
     ICommandService,
@@ -23,12 +25,10 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { generateNullCellStyle } from '../../basics/utils';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 /**
  * The command to clear content in current selected ranges.
@@ -104,4 +104,3 @@ export const ClearSelectionFormatCommand: ICommand = {
         return false;
     },
 };
-

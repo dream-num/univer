@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
-import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Workbook } from '@univerjs/core';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IStyleEditorProps } from './type';
+import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+
+import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor } from '@univerjs/sheets-conditional-formatting';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
-import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
@@ -34,6 +36,15 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
     const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
+
     const _value = useRef(value);
     const config = useMemo(() => {
         if ([CFValueType.percentile, CFValueType.percent].includes(type)) {
@@ -49,19 +60,20 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     if (type === CFValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
-            <TextEditor
-                id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_data_bar_${id}`)}
-                value={v}
-                openForSheetSubUnitId={subUnitId}
-                openForSheetUnitId={unitId}
-                style={{ width: '47%', marginLeft: 14 }}
-                canvasStyle={{ fontSize: 10 }}
-                onlyInputFormula={true}
-                onChange={(v = '') => {
-                    const formula = v || '';
-                    onChange(formula);
-                }}
-            />
+            <div style={{ width: '100%', marginLeft: 12 }}>
+                <FormulaEditor
+                    initValue={v as any}
+                    unitId={unitId}
+                    subUnitId={subUnitId}
+                    isFocus={isFocusFormulaEditor}
+                    onChange={(v = '') => {
+                        const formula = v || '';
+                        onChange(formula);
+                    }}
+                    onFocus={() => isFocusFormulaEditorSet(true)}
+                    actions={formulaEditorActionsRef.current}
+                />
+            </div>
         );
     }
     return (
@@ -214,7 +226,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.title}>
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <div className={`${styles.cfPreviewWrap}`}>
+            <div className={`
+              ${styles.cfPreviewWrap}
+            `}
+            >
                 <Preview rule={getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue }) as IConditionalFormattingRuleConfig} />
             </div>
             <div>
@@ -222,7 +237,12 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t('sheet.cf.panel.fillType')}
                 </div>
 
-                <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs} ${stylesBase.labelContainer} `}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.mLXxs}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
@@ -237,7 +257,11 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             <span className={styles.text}>{localeService.t('sheet.cf.panel.gradient')}</span>
                         </Radio>
                     </RadioGroup>
-                    <div className={`${styles.utilItem} ${stylesBase.mLXl}`}>
+                    <div className={`
+                      ${styles.utilItem}
+                      ${stylesBase.mLXl}
+                    `}
+                    >
                         <Checkbox
                             checked={!isShowValue}
                             onChange={(v) => {
@@ -251,16 +275,38 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.colorSet')}</div>
-                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
-                    <div className={`${stylesBase.labelContainer}`}>
-                        <div className={`${styles.text}`}>{localeService.t('sheet.cf.panel.native')}</div>
+                <div className={`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                  ${stylesBase.mLXxs}
+                `}
+                >
+                    <div className={`
+                      ${stylesBase.labelContainer}
+                    `}
+                    >
+                        <div className={`
+                          ${styles.text}
+                        `}
+                        >
+                            {localeService.t('sheet.cf.panel.native')}
+                        </div>
                         <ColorPicker
                             color={nativeColor}
                             onChange={handleNativeColorChange}
                         />
                     </div>
-                    <div className={`${stylesBase.labelContainer} ${stylesBase.mLSm} `}>
-                        <div className={`${styles.text} `}>{localeService.t('sheet.cf.panel.positive')}</div>
+                    <div className={`
+                      ${stylesBase.labelContainer}
+                      ${stylesBase.mLSm}
+                    `}
+                    >
+                        <div className={`
+                          ${styles.text}
+                        `}
+                        >
+                            {localeService.t('sheet.cf.panel.positive')}
+                        </div>
                         <ColorPicker
                             color={positiveColor}
                             onChange={handlePositiveColorChange}
@@ -271,8 +317,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <Select
+                        style={{ width: '50%', flexShrink: 0 }}
                         options={minOptions}
                         value={minValueType}
                         onChange={(v) => {
@@ -296,8 +347,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                 </div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <Select
+                        style={{ width: '50%', flexShrink: 0 }}
                         options={maxOptions}
                         value={maxValueType}
                         onChange={(v) => {

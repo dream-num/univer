@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Rounddown } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test rounddown function', () => {
     const testFunction = new Rounddown(FUNCTION_NAMES_MATH.ROUNDDOWN);
@@ -108,7 +108,7 @@ describe('Test rounddown function', () => {
             });
             const result = testFunction.calculate(number, numDigits);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [2.1, 2.1, -1.57, 21, 620, 0, 0, ErrorType.NA, ErrorType.NA],
+                [2.1, 2.1, -1.57, 21, 620, 0, -0, ErrorType.NA, ErrorType.NA],
             ]);
         });
     });

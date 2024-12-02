@@ -24,6 +24,7 @@ import { Columns } from './columns';
 import { Drop } from './drop';
 import { Expand } from './expand';
 import { Filter } from './filter';
+import { Formulatext } from './formulatext';
 import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
@@ -59,6 +60,7 @@ export const functionLookup = [
     [Drop, FUNCTION_NAMES_LOOKUP.DROP],
     [Expand, FUNCTION_NAMES_LOOKUP.EXPAND],
     [Filter, FUNCTION_NAMES_LOOKUP.FILTER],
+    [Formulatext, FUNCTION_NAMES_LOOKUP.FORMULATEXT],
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Hstack, FUNCTION_NAMES_LOOKUP.HSTACK],
     [Index, FUNCTION_NAMES_LOOKUP.INDEX],

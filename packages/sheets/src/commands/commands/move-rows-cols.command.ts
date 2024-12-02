@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../basics';
+
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ErrorService,
@@ -25,9 +30,7 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     MoveColsMutation,
@@ -38,9 +41,6 @@ import {
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISelectionWithStyle } from '../../basics';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface IMoveRowsCommandParams {
     unitId?: string;

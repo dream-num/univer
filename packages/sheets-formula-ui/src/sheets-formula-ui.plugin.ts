@@ -16,11 +16,11 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
@@ -36,6 +36,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { FormulaEditor } from './views/formula-editor/index';
 import { RangeSelector } from './views/range-selector';
 
 /**
@@ -77,10 +78,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         dependencies.forEach((dependency) => j.add(dependency));
     }
 
-    override onReady(): void {
-        this._injector.get(FormulaUIController);
-    }
-
     override onRendered(): void {
         ([
             [RefSelectionsRenderService],
@@ -89,12 +86,16 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
         });
 
-        this._injector.get(FormulaClipboardController);
-        this._injector.get(FormulaRenderManagerController);
+        touchDependencies(this._injector, [
+            [FormulaUIController], // FormulaProgressBar relies on TriggerCalculationController, but it is necessary to ensure that the formula calculation is done after rendered.
+            [FormulaClipboardController],
+            [FormulaRenderManagerController],
+        ]);
 
         const componentManager = this._injector.get(ComponentManager);
 
         componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
+        componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
     }
 
     override onSteady(): void {

@@ -16,10 +16,10 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { ICommandInfo, JSONXActions, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
     Disposable,
     ICommandService,
@@ -198,6 +198,7 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _addDrawings(unitId: string, drawings: IDocDrawing[]) {
+        // console.log('=addDrawings', drawings);
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 

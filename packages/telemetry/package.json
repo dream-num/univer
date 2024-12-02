@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/telemetry",
-    "version": "0.4.2",
+    "version": "0.5.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -21,12 +21,11 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
@@ -53,27 +52,18 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
-    },
-    "peerDependencies": {
-        "@univerjs/core": "workspace:*"
+        "build": "univer-cli build"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "react": "18.3.1",
-        "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "typescript": "^5.7.2",
+        "vite": "^6.0.1",
+        "vitest": "^2.1.6"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
             "require": "./lib/cjs/index.js",

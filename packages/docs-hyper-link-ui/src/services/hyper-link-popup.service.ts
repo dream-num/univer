@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
-
-/**
- * A link will have a placeholder, and when it is a link at the beginning, the placeholder does not have a width or height, causing an evaluation error
- */
-const SKIT_PLACEHOLDER = 0;
 
 export interface ILinkInfo {
     unitId: string;
     linkId: string;
     segmentId?: string;
     segmentPage?: number;
+    startIndex: number;
+    endIndex: number;
 }
 
 export class DocHyperLinkPopupService extends Disposable {
@@ -69,25 +66,23 @@ export class DocHyperLinkPopupService extends Disposable {
             this._editPopup.dispose();
         }
         this._editingLink$.next(linkInfo);
-        let activeRange: Nullable<ITextRangeParam> = this._textSelectionManagerService.getActiveTextRange();
-        if (linkInfo) {
-            const { unitId, linkId, segmentId, segmentPage } = linkInfo;
-            const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-            const range = doc?.getSelfOrHeaderFooterModel(segmentId)?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
-            if (range) {
-                activeRange = {
-                    collapsed: false,
-                    startOffset: range.startIndex + SKIT_PLACEHOLDER,
-                    endOffset: range.endIndex + 1,
-                    segmentId,
-                    segmentPage,
-                };
+        const textRanges = this._textSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId });
+        let activeRange = textRanges?.[textRanges.length - 1];
 
-                this._textSelectionManagerService.replaceTextRanges([{
-                    startOffset: range.startIndex,
-                    endOffset: range.endIndex + 1,
-                }]);
-            }
+        if (linkInfo) {
+            const { segmentId, segmentPage, startIndex, endIndex } = linkInfo;
+            activeRange = {
+                collapsed: false,
+                startOffset: startIndex,
+                endOffset: endIndex + 1,
+                segmentId,
+                segmentPage,
+            };
+
+            this._textSelectionManagerService.replaceDocRanges([{
+                startOffset: startIndex,
+                endOffset: endIndex + 1,
+            }]);
         }
 
         if (activeRange) {
@@ -111,12 +106,14 @@ export class DocHyperLinkPopupService extends Disposable {
     }
 
     showInfoPopup(info: ILinkInfo): Nullable<IDisposable> {
-        const { linkId, unitId, segmentId, segmentPage } = info;
+        const { linkId, unitId, segmentId, segmentPage, startIndex, endIndex } = info;
         if (
             this.showing?.linkId === linkId &&
             this.showing?.unitId === unitId &&
             this.showing?.segmentId === segmentId &&
-            this.showing?.segmentPage === segmentPage
+            this.showing?.segmentPage === segmentPage &&
+            this.showing?.startIndex === startIndex &&
+            this.showing?.endIndex === endIndex
         ) {
             return;
         }
@@ -128,19 +125,15 @@ export class DocHyperLinkPopupService extends Disposable {
         if (!doc) {
             return;
         }
-        const range = doc.getSelfOrHeaderFooterModel(info.segmentId).getBody()?.customRanges?.find((i) => i.rangeId === linkId);
-        this._showingLink$.next({ unitId, linkId, segmentId, segmentPage });
-        if (!range) {
-            return;
-        }
+        this._showingLink$.next({ unitId, linkId, segmentId, segmentPage, startIndex, endIndex });
 
         this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
             {
                 collapsed: false,
-                startOffset: range.startIndex + SKIT_PLACEHOLDER,
-                endOffset: range.endIndex + 1,
-                segmentId: info.segmentId,
-                segmentPage: info.segmentPage,
+                startOffset: startIndex,
+                endOffset: endIndex + 1,
+                segmentId,
+                segmentPage,
             },
             {
                 componentKey: DocLinkPopup.componentKey,
@@ -150,7 +143,7 @@ export class DocHyperLinkPopupService extends Disposable {
                     this.hideInfoPopup();
                 },
             },
-            info.unitId
+            unitId
         );
         return this._infoPopup;
     }

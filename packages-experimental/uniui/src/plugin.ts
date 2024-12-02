@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
-import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -48,7 +48,6 @@ import {
     ILeftSidebarService,
     ILocalFileService,
     IMenuManagerService,
-    IMenuService,
     IMessageService,
     INotificationService,
     IPlatformService,
@@ -58,7 +57,6 @@ import {
     IUIPartsService,
     IZenZoneService,
     MenuManagerService,
-    MenuService,
     PlatformService,
     SharedController,
     ShortcutPanelController,
@@ -87,7 +85,8 @@ export class UniverUniUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -109,7 +108,6 @@ export class UniverUniUIPlugin extends Plugin {
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
@@ -137,11 +135,10 @@ export class UniverUniUIPlugin extends Plugin {
             [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
-
-        this._injector.get(IUIController);
     }
 
     override onReady(): void {
+        this._injector.get(IUIController); // Do not move it to onStarting, otherwise the univer instance may not be mounted.
         this._injector.get(UniuiFlowController);
         this._injector.get(UniuiLeftSidebarController);
         this._injector.get(UniuiToolbarController);

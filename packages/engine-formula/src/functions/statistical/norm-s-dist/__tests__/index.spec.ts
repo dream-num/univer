@@ -68,6 +68,11 @@ describe('Test normSDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(z, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const z2 = NumberValueObject.create(1.2069);
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(z2, cumulative2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

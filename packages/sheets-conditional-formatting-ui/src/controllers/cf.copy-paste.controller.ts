@@ -82,10 +82,6 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                 cfMap,
             },
         };
-        const model = this._conditionalFormattingViewModel.getMatrix(unitId, subUnitId);
-        if (!model) {
-            return;
-        }
 
         const discreteRange = this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
@@ -97,12 +93,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         const cfIdSet: Set<string> = new Set();
         rows.forEach((row, rowIndex) => {
             cols.forEach((col, colIndex) => {
-                const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
+                const cellCfList = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
                 if (!cellCfList) {
                     return;
                 }
-                cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
-                matrix.setValue(rowIndex, colIndex, cellCfList.cfList.map((item) => item.cfId));
+                cellCfList.forEach((item) => cfIdSet.add(item.cfId));
+                matrix.setValue(rowIndex, colIndex, cellCfList.map((item) => item.cfId));
             });
         });
         cfIdSet.forEach((cfId) => {
@@ -149,13 +145,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
 
         const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
         const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
-        const model = this._conditionalFormattingViewModel.getMatrix(unitId, subUnitId);
         const effectedConditionalFormattingRuleMatrix: Record<string, ObjectMatrix<1>> = {};
         Range.foreach(vPastedRange, (row, col) => {
             const { row: realRow, col: realCol } = mapFunc(row, col);
-            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, realRow, realCol, model!);
+            const cellCfList = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, realRow, realCol);
             if (cellCfList) {
-                cellCfList.cfList.forEach((item) => {
+                cellCfList.forEach((item) => {
                     if (!effectedConditionalFormattingRuleMatrix[item.cfId]) {
                         const ruleMatrix = new ObjectMatrix<1>();
                         effectedConditionalFormattingRuleMatrix[item.cfId] = ruleMatrix;

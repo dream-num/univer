@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '../../../../types/interfaces';
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber, HorizontalAlign } from '../../../../types/enum';
+import { CustomRangeType, type IDocumentBody } from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -72,6 +72,37 @@ function getDefaultDocWithParagraph() {
         paragraphs: [
             {
                 startIndex: 1,
+            },
+        ],
+    };
+
+    return doc;
+}
+
+function getDefaultDocWithCustomRange() {
+    const doc: IDocumentBody = {
+        dataStream: 'helloworld\r\n',
+        textRuns: [],
+        customRanges: [{
+            startIndex: 0,
+            endIndex: 4,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.baidu.com',
+            },
+        }, {
+            startIndex: 5,
+            endIndex: 9,
+            rangeId: 'rangeId',
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: 'http://www.yahoo.com',
+            },
+        }],
+        paragraphs: [
+            {
+                startIndex: 10,
             },
         ],
     };
@@ -613,6 +644,55 @@ describe('apply method', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should get the same result when one is undo actions and the other is cancel link', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 5,
+                body: {
+                    dataStream: '',
+                    customRanges: [],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 5,
+            },
+            {
+                t: TextXActionType.RETAIN,
+                len: 5,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customDecorations: [],
+                    customRanges: [],
+                },
+            },
+        ];
+
+        const doc1 = getDefaultDocWithCustomRange();
+        const doc2 = getDefaultDocWithCustomRange();
+        const doc3 = getDefaultDocWithCustomRange();
+        const doc4 = getDefaultDocWithCustomRange();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
         // console.log(JSON.stringify(resultA, null, 2));
         // console.log(JSON.stringify(resultB, null, 2));
 
@@ -620,6 +700,7 @@ describe('apply method', () => {
         // console.log('composedAction2', JSON.stringify(composedAction2, null, 2));
 
         // console.log(JSON.stringify(resultC, null, 2));
+        // console.log(JSON.stringify(resultD, null, 2));
 
         expect(resultA).toEqual(resultB);
         expect(resultC).toEqual(resultD);

@@ -15,6 +15,12 @@
  */
 
 import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type {
+    IInsertRangeMutationParams,
+    IInsertRowMutationParams,
+    IRemoveRowsMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     BooleanNumber,
     CommandType,
@@ -27,13 +33,7 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
-
-import type {
-    IInsertRangeMutationParams,
-    IInsertRowMutationParams,
-    IRemoveRowsMutationParams,
-} from '../../basics/interfaces/mutation-interface';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';

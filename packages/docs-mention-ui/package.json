@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-mention-ui",
-    "version": "0.4.2",
+    "version": "0.5.1",
     "private": true,
     "description": "Univer normal ui-plugin-docs",
     "author": "DreamNum <developer@univer.ai>",
@@ -24,12 +24,11 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
@@ -56,7 +55,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -64,24 +63,23 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.11",
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.0",
+        "less": "^4.2.1",
+        "postcss": "^8.4.49",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "tailwindcss": "^3.4.15",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.1",
+        "vitest": "^2.1.6"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
             "require": "./lib/cjs/index.js",

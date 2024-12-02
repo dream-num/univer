@@ -97,7 +97,7 @@ export class Border extends SheetExtension {
     renderBorderByCell(renderBorderContext: IRenderBorderContext, row: number, col: number, borderCacheItem: BorderCache) {
         const { ctx, precisionScale, overflowCache, spreadsheetSkeleton, diffRanges } = renderBorderContext;
 
-        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+        const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
 
         const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

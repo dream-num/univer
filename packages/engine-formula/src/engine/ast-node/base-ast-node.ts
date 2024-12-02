@@ -34,7 +34,7 @@ export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 export class BaseAstNode {
     private _children: BaseAstNode[] = [];
 
-    private _definedNames: Array<string> = [];
+    private _definedNames: Nullable<Array<string>>;
 
     private _parent: Nullable<BaseAstNode>;
 
@@ -57,6 +57,12 @@ export class BaseAstNode {
             node.dispose();
         });
         this._valueObject?.dispose();
+
+        this._valueObject = null;
+
+        this._children = [];
+
+        this._definedNames = null;
 
         this._parent = null;
     }
@@ -164,11 +170,15 @@ export class BaseAstNode {
     }
 
     hasDefinedName(definedName: string) {
-        return this._definedNames.includes(definedName);
+        return this._definedNames?.includes(definedName) || false;
     }
 
     setDefinedNames(definedNames: Array<string>) {
         this._definedNames = definedNames;
+    }
+
+    getDefinedNames() {
+        return this._definedNames;
     }
 }
 

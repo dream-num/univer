@@ -34,11 +34,12 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { DataValidationController } from './controllers/dv.controller';
+import { defaultPluginConfig, SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DataValidationFormulaRefRangeController } from './controllers/dv-formula-ref-range.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
+import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationModel } from './models/sheet-data-validation-model';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
@@ -60,7 +61,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         // Manage the plugin configuration..
         const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {
@@ -71,9 +72,10 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [SheetsDataValidationValidatorService],
             [SheetDataValidationModel],
             [DataValidationController],
-            [DataValidationRefRangeController],
             [DataValidationFormulaController],
             [SheetDataValidationSheetController],
+            [DataValidationRefRangeController],
+            [DataValidationFormulaRefRangeController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -92,6 +94,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         this._injector.get(DataValidationCacheService);
         this._injector.get(SheetsDataValidationValidatorService);
+        this._injector.get(DataValidationFormulaRefRangeController);
         this._injector.get(DataValidationRefRangeController);
     }
 

@@ -24,8 +24,8 @@ export function getSheetNameById(univerInstanceService: IUniverInstanceService, 
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() || '';
 }
 
-export const unitRangesToText = (ranges: IUnitRangeName[], isSupportAcrossSheet: boolean = false) => {
-    if (!isSupportAcrossSheet) {
+export const unitRangesToText = (ranges: IUnitRangeName[], isNeedSheetName: boolean = false) => {
+    if (!isNeedSheetName) {
         return ranges.map((item) => serializeRange(item.range));
     } else {
         return ranges.map((item) => {

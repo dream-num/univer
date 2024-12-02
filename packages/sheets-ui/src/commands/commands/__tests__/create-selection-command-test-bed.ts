@@ -17,14 +17,13 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
+import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,

@@ -296,5 +296,5 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

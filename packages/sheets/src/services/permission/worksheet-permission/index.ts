@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { WorksheetPermissionService } from './worksheet-permission.service';
 export { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
 export { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
-
+export { WorksheetPermissionService } from './worksheet-permission.service';

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { findFirstCursorOffset } from '../../basics/selection';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
@@ -256,6 +257,7 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const instanceService = accessor.get(IUniverInstanceService);
 
         const { unitId } = params;
 
@@ -283,6 +285,21 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
         viewModel.setEditArea(DocumentEditArea.BODY);
         skeleton.calculate();
         renderObject.mainComponent?.makeDirty(true);
+
+        queueMicrotask(() => {
+            const docDataModel = instanceService.getUnit<DocumentDataModel>(unitId);
+            const snapshot = docDataModel?.getSnapshot();
+            if (snapshot == null) {
+                return;
+            }
+            const offset = findFirstCursorOffset(snapshot);
+            docSelectionManagerService.replaceDocRanges([
+                {
+                    startOffset: offset,
+                    endOffset: offset,
+                },
+            ]);
+        });
 
         commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
 

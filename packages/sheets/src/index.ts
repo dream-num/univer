@@ -33,15 +33,13 @@ export {
 export {
     convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
-    getNormalSelectionStyle,
     type ISelectionStyle,
     type ISelectionWidgetConfig,
-    type ISelectionWithCoordAndStyle,
+    type ISelectionWithCoord,
     type ISelectionWithStyle,
     type ISheetRangeLocation,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-    transformCellDataToSelectionData,
 } from './basics/selection';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
 export { type IUniverSheetsConfig } from './controllers/config.schema';
@@ -52,12 +50,12 @@ export { WorksheetPermissionService } from './services/permission/worksheet-perm
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
     DISABLE_NORMAL_SELECTIONS,
+    IRefSelectionsService,
+    RefSelectionsService,
     SelectionMoveType,
     SheetsSelectionsService,
-    WorkbookSelections,
-} from './services/selections/selection-manager.service';
-export { IRefSelectionsService, RefSelectionsService } from './services/selections/ref-selections.service';
-
+    WorkbookSelectionModel,
+} from './services/selections';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
@@ -67,6 +65,7 @@ export type { EffectRefRangeParams, IOperator } from './services/ref-range/type'
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export {
+    getSeparateEffectedRangesOnCommand,
     handleBaseInsertRange,
     handleBaseMoveRowsCols,
     handleBaseRemoveRange,
@@ -89,7 +88,7 @@ export {
     runRefRangeMutations,
 } from './services/ref-range/util';
 export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
-export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+export { AFTER_CELL_EDIT, AFTER_CELL_EDIT_ASYNC, BEFORE_CELL_EDIT, SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
@@ -150,7 +149,7 @@ export { checkRangesEditablePermission } from './services/permission/util';
 
 // range-protection
 export { type ICellPermission, RangeProtectionRenderModel } from './model/range-protection-render.model';
-export { type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel } from './model/range-protection-rule.model';
+export { EditStateEnum, type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel, ViewStateEnum } from './model/range-protection-rule.model';
 export { RangeProtectionCache } from './model/range-protection.cache';
 export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
 
@@ -182,6 +181,9 @@ export { copyRangeStyles } from './commands/commands/utils/selection-utils';
 // #region - all commands
 
 export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
+export { AddWorksheetProtectionCommand } from './commands/commands/add-worksheet-protection.command';
+export { SetWorksheetProtectionCommand } from './commands/commands/set-worksheet-protection.command';
+export { DeleteWorksheetProtectionCommand } from './commands/commands/delete-worksheet-protection.command';
 export {
     addMergeCellsUtil,
     AddWorksheetMergeAllCommand,
@@ -249,10 +251,9 @@ export {
 } from './commands/commands/set-col-visible.command';
 
 export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
-export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
-export { SetFrozenCommand } from './commands/commands/set-frozen.command';
+export { type ICancelFrozenCommandParams, type ISetFrozenCommandParams } from './commands/commands/set-frozen.command';
+export { CancelFrozenCommand, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
-export { type ISetRangeProtectionCommandParams, SetRangeProtectionCommand } from './commands/commands/set-range-protection.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
     type ISetSpecificRowsVisibleCommandParams,
@@ -316,6 +317,7 @@ export {
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
+export { SetProtectionCommand } from './commands/commands/set-protection.command';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
 export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteRangeProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';

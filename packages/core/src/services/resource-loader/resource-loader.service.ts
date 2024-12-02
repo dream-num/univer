@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Inject } from '../../common/di';
+import type { DocumentDataModel } from '../../docs';
 import type { Workbook } from '../../sheets/workbook';
 import type { IResourceHook } from '../resource-manager/type';
-import { IResourceManagerService } from '../resource-manager/type';
-import { IUniverInstanceService } from '../instance/instance.service';
-import { Disposable } from '../../shared/lifecycle';
-import { UniverInstanceType } from '../../common/unit';
-import type { DocumentDataModel } from '../../docs';
-import { isInternalEditorID } from '../../common/const';
-import { Tools } from '../../shared';
 import type { IResourceLoaderService } from './type';
+import { isInternalEditorID } from '../../common/const';
+import { Inject } from '../../common/di';
+import { UniverInstanceType } from '../../common/unit';
+import { Tools } from '../../shared';
+import { Disposable } from '../../shared/lifecycle';
+import { IUniverInstanceService } from '../instance/instance.service';
+import { IResourceManagerService } from '../resource-manager/type';
 
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
     constructor(
@@ -103,9 +103,9 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         );
 
         this.disposeWithMe(
-            this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe(((doc) => {
+            this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((doc) => {
                 this._resourceManagerService.unloadResources(doc.getUnitId());
-            }))
+            })
         );
     }
 

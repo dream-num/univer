@@ -17,12 +17,10 @@
 import type { Dependency } from '@univerjs/core';
 import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { OpenWatermarkPanelOperation } from './commands/operations/open-watermark-panel.operation';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 import { IWatermarkTypeEnum } from './common/type';
-import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 import { WatermarkRenderController } from './controllers/watermark.render.controller';
 import { WatermarkService } from './services/watermark.service';
 
@@ -35,24 +33,17 @@ export class UniverWatermarkPlugin extends Plugin {
         private readonly _config: Partial<IUniverWatermarkConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @Inject(ILocalStorageService) private readonly _localStorageService: ILocalStorageService
     ) {
         super();
 
-        const { menu } = this._config;
-        if (menu) {
-            this._configService.setConfig('menu', menu, { merge: true });
-        }
-
         this._initWatermarkStorage();
         this._initDependencies();
-        this._initRegisterCommand();
     }
 
     private async _initWatermarkStorage() {
-        const { menu, ...rest } = this._config;
+        const { ...rest } = this._config;
         if (rest.userWatermarkSettings) {
             this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: { ...WatermarkUserInfoBaseConfig, ...rest.userWatermarkSettings } } });
         } else if (rest.textWatermarkSettings) {
@@ -68,27 +59,14 @@ export class UniverWatermarkPlugin extends Plugin {
     }
 
     private _initDependencies(): void {
-        ([[WatermarkService], [UniverWatermarkMenuController]] as Dependency[]).forEach((d) => {
+        ([[WatermarkService]] as Dependency[]).forEach((d) => {
             this._injector.add(d);
         });
-    }
-
-    private _initRegisterCommand(): void {
-        [
-            OpenWatermarkPanelOperation,
-        ].forEach((m) => this._commandService.registerCommand(m));
     }
 
     override onRendered(): void {
         const injector = this._injector;
         injector.get(WatermarkService);
-
-        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings, showMenu = true } = this._config;
-        const shouldDisplayUI = !(userWatermarkSettings || textWatermarkSettings || imageWatermarkSettings) && showMenu;
-        if (shouldDisplayUI) {
-            injector.get(UniverWatermarkMenuController);
-        }
-
         this._initRenderDependencies();
     }
 

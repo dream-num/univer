@@ -15,13 +15,14 @@
  */
 
 import type { ListValidator } from '@univerjs/sheets-data-validation';
-import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
+import { DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import { DataValidationFormulaController, deserializeListOptions, serializeListOptions } from '@univerjs/sheets-data-validation';
-import { useEvent, useObservable } from '@univerjs/ui';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+
+import { useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
@@ -77,6 +78,7 @@ const ColorSelect = (props: IColorSelectProps) => {
             open={open}
             onDropdownVisibleChange={setOpen}
             dropdownStyle={{ width: 112 }}
+            style={{ width: 96, cursor: 'pointer' }}
             className={styles.dataValidationFormulaColorSelect}
             value={value}
             onChange={onChange}
@@ -127,7 +129,6 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
                 onChange={(color) => {
                     onItemChange(item.id, item.label, color);
                 }}
-
             />
             <Input
                 disabled={item.isRef}
@@ -311,6 +312,14 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         [formula2, onChange]
     );
 
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
+
     return (
         <>
             <FormLayout label={localeService.t('dataValidation.list.options')}>
@@ -334,27 +343,26 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             {isFormulaStr === '1'
                 ? (
                     <>
-                        <FormLayout error={formula1Res || localError}>
-                            <TextEditor
-                                id={createInternalEditorID(`list-ref-range-${unitId}-${subUnitId}`)}
-                                value={formulaStr}
-                                openForSheetUnitId={unitId}
-                                openForSheetSubUnitId={subUnitId}
-                                onlyInputFormula
-                                onChange={async (newString) => {
-                                    const str = (newString ?? '').trim();
-                                    setFormulaStrCopy(str);
-                                    updateFormula(str);
-                                }}
-                            />
-                        </FormLayout>
-                        <FormLayout>
-                            <div ref={containerRef}>
-                                {refFinalList.map((item) => {
-                                    return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
-                                })}
-                            </div>
-                        </FormLayout>
+                        <FormulaEditor
+                            initValue={formulaStr as any}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            isFocus={isFocusFormulaEditor}
+                            onChange={(v = '') => {
+                                const str = (v ?? '').trim();
+                                setFormulaStrCopy(str);
+                                updateFormula(str);
+                            }}
+                            errorText={(formula1Res || localError) || undefined}
+                            onFocus={() => isFocusFormulaEditorSet(true)}
+                            actions={formulaEditorActionsRef.current}
+                            isSupportAcrossSheet
+                        />
+                        <div ref={containerRef} style={{ marginTop: '12px' }}>
+                            {refFinalList.map((item) => {
+                                return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
+                            })}
+                        </div>
                     </>
                 )
                 : (

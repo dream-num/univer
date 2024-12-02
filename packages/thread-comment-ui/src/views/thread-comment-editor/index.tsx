@@ -17,16 +17,15 @@
 import type { IDocumentBody } from '@univerjs/core';
 import type { MentionProps } from '@univerjs/design';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { ICommandService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, IMentionIOService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Mention, Mentions } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
-import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
+import { parseMentions, transformDocument2TextNodes, transformTextNode2Text, transformTextNodes2Document } from './util';
 
 export interface IThreadCommentEditorProps {
     id?: string;
@@ -55,8 +54,8 @@ const defaultRenderSuggestion: MentionProps['renderSuggestion'] = (mention, sear
 };
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
-    const { comment, onSave, id, onCancel, autoFocus, unitId, subUnitId } = props;
-    const mentionDataService = useDependency(IThreadCommentMentionDataService);
+    const { comment, onSave, id, onCancel, autoFocus, unitId } = props;
+    const mentionIOService = useDependency(IMentionIOService);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ ...comment });
@@ -114,13 +113,23 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 }}
             >
                 <Mention
-                    key={mentionDataService.trigger}
-                    trigger={mentionDataService.trigger}
-                    data={(query, callback) => mentionDataService.getMentions!(query, unitId, subUnitId)
-                        .then((res) => res.map(transformMention))
+                    key="@"
+                    trigger="@"
+                    data={(query, callback) => mentionIOService.list({ search: query, unitId })
+                        .then((res) => res.list.map(
+                            (typeMentions) => (
+                                typeMentions.mentions.map(
+                                    (mention) => ({
+                                        id: mention.objectId,
+                                        display: mention.label,
+                                        raw: mention,
+                                    })
+                                )
+                            )
+                        ).flat())
                         .then(callback) as any}
                     displayTransform={(id, label) => `@${label} `}
-                    renderSuggestion={mentionDataService.renderSuggestion ?? defaultRenderSuggestion}
+                    renderSuggestion={defaultRenderSuggestion}
 
                 />
             </Mentions>

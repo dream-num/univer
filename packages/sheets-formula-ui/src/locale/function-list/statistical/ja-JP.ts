@@ -43,6 +43,22 @@ export default {
             number2: { name: '数値 2', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
+    AVERAGE_WEIGHTED: {
+        description: '指定した値と対応するウェイトに基づいて、一連の値の加重平均値を求めます。',
+        abstract: '指定した値と対応するウェイトに基づいて、一連の値の加重平均値を求めます。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/9084098?hl=ja&ref_topic=3105600&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            values: { name: '値', detail: '平均化する値を指定します。' },
+            weights: { name: 'ウェイト', detail: '適用するウェイトの対応するリストを指定します。' },
+            additionalValues: { name: '追加の値', detail: '平均化する追加の値を指定します。' },
+            additionalWeights: { name: '追加のウェイト', detail: '適用する追加のウェイトを指定します。' },
+        },
+    },
     AVERAGEA: {
         description: '数値、文字列、および論理値を含む引数の平均値を返します。',
         abstract: '数値、文字列、および論理値を含む引数の平均値を返します',
@@ -611,8 +627,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataArray: { name: 'データ配列', detail: '頻度分布の計算対象となる値セットの配列、またはこのセットへの参照を指定します。 データ配列に値が含まれていない場合は、0 の配列が返されます。' },
+            binsArray: { name: '区間配列', detail: '区間配列の値をグループ化する間隔の配列、またはこの間隔への参照を指定します。 区間配列に値が含まれていない場合は、データ配列に指定した要素の数が返されます。' },
         },
     },
     GAMMA: {
@@ -625,8 +641,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'ガンマ関数の入力値。' },
         },
     },
     GAMMA_DIST: {
@@ -639,8 +654,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     GAMMA_INV: {
@@ -653,8 +670,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'ガンマ分布における確率を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
         },
     },
     GAMMALN: {
@@ -667,8 +685,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'GAMMALN 関数に代入する値を指定します。' },
         },
     },
     GAMMALN_PRECISE: {
@@ -681,8 +698,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'GAMMALN.PRECISE 関数に代入する値を指定します。' },
         },
     },
     GAUSS: {
@@ -695,8 +711,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '関数に代入する値を指定します。' },
         },
     },
     GEOMEAN: {
@@ -709,8 +724,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '相乗平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '相乗平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     GROWTH: {
@@ -723,8 +738,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            newXs: { name: '新しい x', detail: 'GROWTH 関数を利用して、対応する y の値を計算する新しい x の値を指定します。' },
+            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
         },
     },
     HARMEAN: {
@@ -737,8 +754,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '調和平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '調和平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     HYPGEOM_DIST: {
@@ -751,8 +768,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '標本の成功数', detail: '標本内で成功する数を指定します。' },
+            numberSample: { name: '標本数', detail: '標本数を指定します。' },
+            populationS: { name: '母集団の成功数', detail: '母集団内で成功する数を指定します。' },
+            numberPop: { name: '母集団の大きさ', detail: '母集団全体の数を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     INTERCEPT: {
@@ -779,8 +799,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '尖度を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '尖度を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     LARGE: {
@@ -793,8 +813,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '抽出の対象となるデータが入力されているセル範囲または配列を指定します。' },
+            k: { name: 'k', detail: '抽出する値の、大きい方から数えた順位を数値で指定します。' },
         },
     },
     LINEST: {
@@ -807,8 +827,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
+            stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
     LOGEST: {
@@ -821,8 +843,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
+            stats: { name: '補正', detail: '回帰直線の補正項を追加情報として返すかどうかを論理値で指定します。' },
         },
     },
     LOGNORM_DIST: {
@@ -835,13 +859,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     LOGNORM_INV: {
-        description: '対数正規型の累積分布関数の逆関数値を返します。',
-        abstract: '対数正規型の累積分布関数の逆関数値を返します。',
+        description: '対数正規分布の累積分布関数の逆関数値を返します。',
+        abstract: '対数正規分布の累積分布関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -849,8 +875,23 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: '対数正規分布における確率を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
+        },
+    },
+    MARGINOFERROR: {
+        description: 'この関数は、値の範囲と信頼レベルから誤差の範囲を計算します。',
+        abstract: 'この関数は、値の範囲と信頼レベルから誤差の範囲を計算します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/12487850?hl=ja&sjid=11250989209896695200-AP',
+            },
+        ],
+        functionParameter: {
+            range: { name: '範囲', detail: '許容誤差の計算に使用される値の範囲。' },
+            confidence: { name: '信頼レベル', detail: '0 ～ 1 の信頼レベル。' },
         },
     },
     MAX: {
@@ -908,8 +949,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '中央値を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '中央値を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     MIN: {
@@ -967,8 +1008,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '最頻値を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '最頻値を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     MODE_SNGL: {
@@ -981,8 +1022,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '最頻値を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '最頻値を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     NEGBINOM_DIST: {
@@ -995,8 +1036,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: '失敗数', detail: '試行が失敗する回数を指定します。' },
+            numberS: { name: '成功数', detail: '分析のしきい値となる、試行が成功する回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '試行が成功する確率を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     NORM_DIST: {
@@ -1067,13 +1110,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列 1', detail: '複数の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            array2: { name: '配列 2', detail: '複数の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     PERCENTILE_EXC: {
-        description: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。',
-        abstract: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します (k は 0 より大きく 1 より小さい値)。',
+        description: '配列内での第 k 百分位数に当たる値を返します (0と1は含まれません)。',
+        abstract: '配列内での第 k 百分位数に当たる値を返します (0と1は含まれません)。',
         links: [
             {
                 title: '指導',
@@ -1081,13 +1124,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            k: { name: 'k', detail: '0 から 1 (0と1は含まれません)までのパーセント値。' },
         },
     },
     PERCENTILE_INC: {
-        description: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
-        abstract: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
+        description: '配列内での第 k 百分位数に当たる値を返します (0と1が含まれています)。',
+        abstract: '配列内での第 k 百分位数に当たる値を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -1095,13 +1138,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            k: { name: 'k', detail: '0 から 1 (0と1が含まれています)までのパーセント値。' },
         },
     },
     PERCENTRANK_EXC: {
-        description: '配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。',
-        abstract: '配列内での値の順位を百分率 (0 より大きく 1 より小さい) で表した値を返します。',
+        description: '配列内での値の順位を百分率で表した値を返します (0と1は含まれません)。',
+        abstract: '配列内での値の順位を百分率で表した値を返します (0と1は含まれません)。',
         links: [
             {
                 title: '指導',
@@ -1109,13 +1152,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            x: { name: 'x', detail: 'ランクを調べる値を指定します。' },
+            significance: { name: '有効桁数', detail: '計算結果として返される百分率の有効桁数を指定します。 有効桁数を省略すると、小数点以下第 3 位 (0.xxx) まで計算されます。' },
         },
     },
     PERCENTRANK_INC: {
-        description: '配列内での値の順位を百分率で表した値を返します。',
-        abstract: '配列内での値の順位を百分率で表した値を返します。',
+        description: '配列内での値の順位を百分率で表した値を返します (0と1が含まれています)。',
+        abstract: '配列内での値の順位を百分率で表した値を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -1123,8 +1167,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            x: { name: 'x', detail: 'ランクを調べる値を指定します。' },
+            significance: { name: '有効桁数', detail: '計算結果として返される百分率の有効桁数を指定します。 有効桁数を省略すると、小数点以下第 3 位 (0.xxx) まで計算されます。' },
         },
     },
     PERMUT: {
@@ -1137,8 +1182,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る順列わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     PERMUTATIONA: {
@@ -1151,8 +1196,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る順列わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     PHI: {
@@ -1165,8 +1210,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '標準正規分布の密度を求める数値を指定します。' },
         },
     },
     POISSON_DIST: {
@@ -1179,8 +1223,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     PROB: {
@@ -1193,13 +1238,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xRange: { name: '数値', detail: 'それぞれの確率値を含む数値範囲。' },
+            probRange: { name: '確率', detail: '数値に関連付けられた確率値のセット。' },
+            lowerLimit: { name: '下限', detail: '確率が計算される数値の下限。' },
+            upperLimit: { name: '上限', detail: '確率が計算される数値の上限。' },
         },
     },
     QUARTILE_EXC: {
-        description: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
-        abstract: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
+        description: 'データセットの四分位数を返します (0と1は含まれません)。',
+        abstract: 'データセットの四分位数を返します (0と1は含まれません)。',
         links: [
             {
                 title: '指導',
@@ -1207,13 +1254,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '四分位値を必要とする配列またはデータ範囲。' },
+            quart: { name: '四分位値', detail: '返す四分位値。' },
         },
     },
     QUARTILE_INC: {
-        description: '配列に含まれるデータから四分位数を抽出します。',
-        abstract: '配列に含まれるデータから四分位数を抽出します。',
+        description: 'データセットの四分位数を返します (0と1が含まれています)。',
+        abstract: 'データセットの四分位数を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -1221,8 +1268,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '四分位値を必要とする配列またはデータ範囲。' },
+            quart: { name: '四分位値', detail: '返す四分位値。' },
         },
     },
     RANK_AVG: {
@@ -1265,8 +1312,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列 1', detail: '複数の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            array2: { name: '配列 2', detail: '複数の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     SKEW: {
@@ -1279,13 +1326,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '歪度を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '歪度を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     SKEW_P: {
-        description: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
-        abstract: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
+        description: 'サンプル母集団に基づいて分布の歪度を返します。',
+        abstract: 'サンプル母集団に基づいて分布の歪度を返します。',
         links: [
             {
                 title: '指導',
@@ -1293,8 +1340,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '歪度を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '歪度を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     SLOPE: {
@@ -1307,8 +1354,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     SMALL: {
@@ -1321,8 +1368,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '抽出の対象となるデータが入力されているセル範囲または配列を指定します。' },
+            k: { name: 'k', detail: '抽出する値の小さい方から数えた順位を数値で指定します。' },
         },
     },
     STANDARDIZE: {
@@ -1335,8 +1382,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
         },
     },
     STDEV_P: {
@@ -1405,13 +1453,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     T_DIST: {
-        description: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
-        abstract: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
+        description: 'スチューデントの t 確率分布を返します。',
+        abstract: 'スチューデントの t 確率分布を返します。',
         links: [
             {
                 title: '指導',
@@ -1419,13 +1467,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '分布の数値を計算する必要があります。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     T_DIST_2T: {
-        description: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
-        abstract: 'スチューデントの t 分布のパーセンテージ (確率) を返します。',
+        description: 'スチューデントの t 確率分布 (両側) を返します。',
+        abstract: 'スチューデントの t 確率分布 (両側) を返します。',
         links: [
             {
                 title: '指導',
@@ -1433,13 +1482,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '分布の数値を計算する必要があります。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
         },
     },
     T_DIST_RT: {
-        description: 'スチューデントの t 分布の値を返します。',
-        abstract: 'スチューデントの t 分布の値を返します。',
+        description: 'スチューデントの t 確率分布 (右側) を返します。',
+        abstract: 'スチューデントの t 確率分布 (右側) を返します。',
         links: [
             {
                 title: '指導',
@@ -1447,13 +1496,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '分布の数値を計算する必要があります。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
         },
     },
     T_INV: {
-        description: 'スチューデントの t 分布の t 値を、確率と自由度の関数として返します。',
-        abstract: 'スチューデントの t 分布の t 値を、確率と自由度の関数として返します。',
+        description: 'スチューデントの t 確率分布の逆関数値を返します。',
+        abstract: 'スチューデントの t 確率分布の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -1461,13 +1510,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'スチューデントの t 分布に従う確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
         },
     },
     T_INV_2T: {
-        description: 'スチューデントの t 分布の逆関数値を返します。',
-        abstract: 'スチューデントの t 分布の逆関数値を返します。',
+        description: 'スチューデントの t 確率分布 (両側) の逆関数値を返します。',
+        abstract: 'スチューデントの t 確率分布 (両側) の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -1475,8 +1524,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'スチューデントの t 分布に従う確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
         },
     },
     T_TEST: {
@@ -1489,8 +1538,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: '比較対象となる一方のデータを含む配列またはセル範囲を指定します。' },
+            array2: { name: '配列2', detail: '比較対象となるもう一方のデータを含む配列またはセル範囲を指定します。' },
+            tails: { name: '尾部の特性', detail: '片側分布を計算するか、両側分布を計算するかを、数値で指定します。 尾部に 1 を指定すると片側分布の値が計算されます。 尾部に 2 を指定すると両側分布の値が計算されます。' },
+            type: { name: '検定の種類', detail: '実行する t 検定の種類を数値で指定します。' },
         },
     },
     TREND: {
@@ -1503,8 +1554,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = m*x+b という関係が成り立ちます。' },
+            newXs: { name: '新しい x', detail: 'TREND 関数を利用して、対応する y の値を計算する新しい x の値を指定します。' },
+            constb: { name: 'b', detail: '定数 b を 0 にするかどうかを論理値で指定します。' },
         },
     },
     TRIMMEAN: {
@@ -1517,8 +1570,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '対象となる値の配列または範囲。' },
+            percent: { name: '割合', detail: '計算から排除する端数のデータ ポイント数。' },
         },
     },
     VAR_P: {
@@ -1587,8 +1640,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     Z_TEST: {
@@ -1601,8 +1656,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'x の検定対象となるデータを含む数値配列またはセル範囲を指定します。' },
+            x: { name: 'x', detail: '検定する値を指定します。' },
+            sigma: { name: '標準偏差', detail: '母集団全体に基づく標準偏差を指定します。 省略すると、標本に基づく標準偏差が使用されます。' },
         },
     },
 };

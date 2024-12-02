@@ -601,6 +601,7 @@ const locale: typeof zhCN = {
             setCellStyle: 'Thiết lập kiểu ô',
             copy: 'Sao chép',
             alert: 'Thông báo',
+            search: 'Tìm kiếm',
             alertContent: 'Phạm vi này đã được bảo vệ, hiện không có quyền chỉnh sửa. Nếu cần chỉnh sửa, vui lòng liên hệ với người tạo.',
             userEmpty: 'Không có người chỉ định, chia sẻ liên kết để mời người cụ thể.',
             listEmpty: 'Bạn chưa thiết lập bất kỳ phạm vi hoặc bảng tính nào ở trạng thái được bảo vệ.',

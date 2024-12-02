@@ -14,27 +14,40 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ITextRange, Workbook, Worksheet } from '@univerjs/core';
-import { BuildTextUtils, CustomRangeType, DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, Workbook, Worksheet } from '@univerjs/core';
+import { DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 
-export const getShouldDisableCellLink = (worksheet: Worksheet, row: number, col: number) => {
+export enum DisableLinkType {
+    ALLOWED = 0,
+    DISABLED_BY_CELL = 1,
+    ALLOW_ON_EDITING = 2,
+}
+const disables = new Set<string>([
+    DataValidationType.CHECKBOX,
+    DataValidationType.LIST,
+    DataValidationType.LIST_MULTIPLE,
+]);
+
+export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
-        return true;
+        return DisableLinkType.DISABLED_BY_CELL;
     }
-    const disables = [
-        DataValidationType.CHECKBOX,
-        DataValidationType.LIST,
-        DataValidationType.LIST_MULTIPLE,
-    ];
 
-    if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
+    const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
+    const rule = dataValidationModel?.getRuleByLocation(worksheet.getUnitId(), worksheet.getSheetId(), row, col);
+    if (rule && disables.has(rule.type)) {
         return true;
     }
 
-    return false;
+    if (cell?.p?.drawingsOrder?.length) {
+        return DisableLinkType.ALLOW_ON_EDITING;
+    }
+
+    return DisableLinkType.ALLOWED;
 };
 
 export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
@@ -49,41 +62,26 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
     }
     const row = selections[0].range.startRow;
     const col = selections[0].range.startColumn;
-    return getShouldDisableCellLink(worksheet, row, col);
+    return getShouldDisableCellLink(accessor, worksheet, row, col) === DisableLinkType.DISABLED_BY_CELL;
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getDocRanges();
-    if (!textRanges.length || textRanges.length > 1) {
+    const textRanges = textSelectionService.getTextRanges();
+    if (!textRanges?.length) {
         return true;
     }
 
-    const activeRange = textRanges[0];
     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    if (!doc || !activeRange || activeRange.collapsed) {
+    if (!doc || textRanges.every((range) => range.collapsed)) {
         return true;
     }
 
-    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
+    const body = doc.getSelfOrHeaderFooterModel(textRanges[0].segmentId).getBody();
     if (!body) {
         return true;
     }
-    const paragraphs = body?.paragraphs ?? [];
 
-    for (let i = 0, len = paragraphs.length; i < len; i++) {
-        const p = paragraphs[i];
-        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
-            return true;
-        }
-
-        if (p.startIndex > activeRange.endOffset!) {
-            break;
-        }
-    }
-
-    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(activeRange as ITextRange, body.customRanges ?? []);
-    // can't insert hyperlink in range contains other custom ranges
-    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
+    return false;
 };

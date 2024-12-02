@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomBlock, ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import { DataStreamTreeTokenType } from '../types';
+import { normalizeTextRuns } from './apply-utils/common';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 export enum SliceBodyType {
@@ -26,56 +26,57 @@ export enum SliceBodyType {
     cut,
 }
 
-// TODO: Support other properties like custom ranges, tables, etc.
 // eslint-disable-next-line max-lines-per-function, complexity
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
     endOffset: number,
-    returnEmptyTextRun = false,
+    returnEmptyArray = true,
     type = SliceBodyType.cut
 ): IDocumentBody {
-    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [], tables = [], sectionBreaks = [] } = body;
+    const { dataStream, textRuns, paragraphs = [], customBlocks = [], tables = [], sectionBreaks = [] } = body;
 
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
     };
 
-    const newTextRuns: ITextRun[] = [];
+    if (textRuns) {
+        const newTextRuns: ITextRun[] = [];
 
-    for (const textRun of textRuns) {
-        const clonedTextRun = Tools.deepClone(textRun);
-        const { st, ed } = clonedTextRun;
+        for (const textRun of textRuns) {
+            const clonedTextRun = Tools.deepClone(textRun);
+            const { st, ed } = clonedTextRun;
 
-        if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
-            if (startOffset >= st && startOffset <= ed) {
-                newTextRuns.push({
-                    ...clonedTextRun,
-                    st: startOffset,
-                    ed: Math.min(endOffset, ed),
-                });
-            } else if (endOffset >= st && endOffset <= ed) {
-                newTextRuns.push({
-                    ...clonedTextRun,
-                    st: Math.max(startOffset, st),
-                    ed: endOffset,
-                });
-            } else {
-                newTextRuns.push(clonedTextRun);
+            if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
+                if (startOffset >= st && startOffset <= ed) {
+                    newTextRuns.push({
+                        ...clonedTextRun,
+                        st: startOffset,
+                        ed: Math.min(endOffset, ed),
+                    });
+                } else if (endOffset >= st && endOffset <= ed) {
+                    newTextRuns.push({
+                        ...clonedTextRun,
+                        st: Math.max(startOffset, st),
+                        ed: endOffset,
+                    });
+                } else {
+                    newTextRuns.push(clonedTextRun);
+                }
             }
         }
-    }
 
-    if (newTextRuns.length) {
-        docBody.textRuns = newTextRuns.map((tr) => {
-            const { st, ed } = tr;
-            return {
-                ...tr,
-                st: st - startOffset,
-                ed: ed - startOffset,
-            };
-        });
-    } else if (returnEmptyTextRun) {
+        docBody.textRuns = normalizeTextRuns(
+            newTextRuns.map((tr) => {
+                const { st, ed } = tr;
+                return {
+                    ...tr,
+                    st: st - startOffset,
+                    ed: ed - startOffset,
+                };
+            })
+        );
+    } else if (returnEmptyArray) {
         // In the case of no style before, add the style, removeTextRuns will be empty,
         // in this case, you need to add an empty textRun for undo.
         docBody.textRuns = [{
@@ -137,10 +138,19 @@ export function getBodySlice(
     }
 
     if (type === SliceBodyType.cut) {
-        docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
+        const customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
+        if (customDecorations) {
+            docBody.customDecorations = customDecorations;
+        } else if (returnEmptyArray) {
+            docBody.customDecorations = [];
+        }
     }
     const { customRanges } = getCustomRangeSlice(body, startOffset, endOffset);
-    docBody.customRanges = customRanges;
+    if (customRanges) {
+        docBody.customRanges = customRanges;
+    } else if (returnEmptyArray) {
+        docBody.customRanges = [];
+    }
 
     const newCustomBlocks: ICustomBlock[] = [];
 
@@ -176,7 +186,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         }
     });
 
-    const newData = `${DataStreamTreeTokenType.CUSTOM_RANGE_START.repeat(leftOffset)}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END.repeat(rightOffset)}`;
+    const newData = `${dataStream}`;
 
     if (textRuns) {
         if (textRuns[0]) {
@@ -224,39 +234,20 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
 }
 
 export function getCustomRangeSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
-    const { customRanges = [] } = body;
-    let leftOffset = 0;
-    let rightOffset = 0;
+    if (body.customRanges == null) {
+        return {};
+    }
+
+    const { customRanges } = body;
+    const leftOffset = 0;
+    const rightOffset = 0;
     const relativeCustomRanges = customRanges
         .filter((customRange) => Math.max(customRange.startIndex, startOffset) <= Math.min(customRange.endIndex, endOffset - 1))
         .map((range) => ({
             ...range,
-            startIndex: range.startIndex,
-            endIndex: range.endIndex,
+            startIndex: Math.max(range.startIndex, startOffset),
+            endIndex: Math.min(range.endIndex, endOffset - 1),
         }));
-
-    if (relativeCustomRanges.length) {
-        relativeCustomRanges.forEach((customRange) => {
-            if (customRange.startIndex < startOffset) {
-                leftOffset += 1;
-            }
-            if (customRange.endIndex > (endOffset - 1)) {
-                rightOffset += 1;
-            }
-        });
-
-        for (let i = 0; i < leftOffset; i++) {
-            const range = relativeCustomRanges[i];
-            range.startIndex = startOffset - leftOffset + i;
-        }
-        if (rightOffset) {
-            const sorted = [...relativeCustomRanges].sort((pre, aft) => aft.endIndex - pre.endIndex);
-            for (let i = 0; i < rightOffset; i++) {
-                const range = sorted[i];
-                range.endIndex = endOffset + rightOffset - i - 1;
-            }
-        }
-    }
 
     return {
         customRanges: relativeCustomRanges.map((range) => ({
@@ -270,8 +261,11 @@ export function getCustomRangeSlice(body: IDocumentBody, startOffset: number, en
 }
 
 export function getCustomDecorationSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
-    const { customDecorations = [] } = body;
+    if (body.customDecorations == null) {
+        return;
+    }
 
+    const { customDecorations = [] } = body;
     const customDecorationSlice: ICustomDecoration[] = [];
     customDecorations.forEach((range) => {
         // 34 35
@@ -281,12 +275,76 @@ export function getCustomDecorationSlice(body: IDocumentBody, startOffset: numbe
             customDecorationSlice.push({
                 ...copy,
                 startIndex: Math.max(copy.startIndex - startOffset, 0),
-                endIndex: Math.min(copy.endIndex, endOffset) - startOffset,
+                endIndex: Math.min(copy.endIndex, endOffset - 1) - startOffset,
             });
         }
     });
 
     return customDecorationSlice;
+}
+
+function composeTextRuns(
+    updateDataTextRuns: ITextRun[] | undefined,
+    originTextRuns: ITextRun[] | undefined,
+    coverType: UpdateDocsAttributeType
+): ITextRun[] | undefined {
+    if (updateDataTextRuns == null || originTextRuns == null) {
+        return updateDataTextRuns ?? originTextRuns;
+    }
+
+    return coverTextRuns(updateDataTextRuns, originTextRuns, coverType);
+}
+
+function composeCustomRanges(
+    updateDataCustomRanges: ICustomRange[] | undefined,
+    originCustomRanges: ICustomRange[] | undefined,
+    coverType: UpdateDocsAttributeType
+): ICustomRange[] | undefined {
+    if (updateDataCustomRanges == null || originCustomRanges == null) {
+        return updateDataCustomRanges ?? originCustomRanges;
+    }
+
+    if (originCustomRanges.length === 0 || updateDataCustomRanges.length === 0) {
+        return updateDataCustomRanges;
+    }
+
+    if (originCustomRanges.length > 1 || updateDataCustomRanges.length > 1) {
+        throw new Error('Cannot cover multiple customRanges');
+    }
+
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        return [{
+            ...updateDataCustomRanges[0],
+        }];
+    } else {
+        return [{
+            ...originCustomRanges[0],
+            ...updateDataCustomRanges[0],
+        }];
+    }
+}
+
+function composeCustomDecorations(
+    updateDataCustomDecorations: ICustomDecoration[],
+    originCustomDecorations: ICustomDecoration[],
+    coverType: UpdateDocsAttributeType
+) {
+    if (originCustomDecorations.length === 0 || updateDataCustomDecorations.length === 0) {
+        return updateDataCustomDecorations;
+    }
+
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        return updateDataCustomDecorations;
+    } else {
+        return [
+            ...updateDataCustomDecorations,
+            ...originCustomDecorations.filter((originCustomDecoration) => {
+                return !updateDataCustomDecorations.some((updateDataCustomDecoration) => {
+                    return originCustomDecoration.id === updateDataCustomDecoration.id;
+                });
+            }),
+        ];
+    }
 }
 
 export function composeBody(
@@ -302,12 +360,26 @@ export function composeBody(
         dataStream: thisBody.dataStream,
     };
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [] } = otherBody;
+    const {
+        textRuns: thisTextRuns,
+        paragraphs: thisParagraphs = [],
+        customRanges: thisCustomRanges,
+        customDecorations: thisCustomDecorations = [],
+    } = thisBody;
+    const {
+        textRuns: otherTextRuns,
+        paragraphs: otherParagraphs = [],
+        customRanges: otherCustomRanges,
+        customDecorations: otherCustomDecorations = [],
+    } = otherBody;
 
-    const textRuns = coverTextRuns(otherTextRuns, thisTextRuns, coverType);
-    if (textRuns.length) {
-        retBody.textRuns = textRuns;
+    retBody.textRuns = composeTextRuns(otherTextRuns, thisTextRuns, coverType);
+
+    retBody.customRanges = composeCustomRanges(otherCustomRanges, thisCustomRanges, coverType);
+
+    const customDecorations = composeCustomDecorations(otherCustomDecorations, thisCustomDecorations, coverType);
+    if (customDecorations.length) {
+        retBody.customDecorations = customDecorations;
     }
 
     const paragraphs: IParagraph[] = [];
@@ -346,6 +418,7 @@ export function composeBody(
     if (paragraphs.length) {
         retBody.paragraphs = paragraphs;
     }
+
     return retBody;
 }
 
@@ -356,9 +429,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns = [], paragraphs = [], customRanges = [], customBlocks = [], customDecorations = [] } = body;
+    const { textRuns, paragraphs, customRanges, customBlocks, customDecorations, tables } = body;
 
-    if (textRuns.length === 0 && paragraphs.length === 0 && customRanges.length === 0 && customBlocks.length === 0 && customDecorations.length === 0) {
+    if (textRuns == null && paragraphs == null && customRanges == null && customBlocks == null && customDecorations == null && tables == null) {
         return true;
     }
 

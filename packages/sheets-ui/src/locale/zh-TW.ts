@@ -602,6 +602,7 @@ const locale: typeof zhCN = {
             setCellStyle: '設定儲存格樣式',
             copy: '複製',
             alert: '提示',
+            search: '搜索',
             alertContent: '該範圍已被保護，目前無編輯權限。如需編輯，請聯絡創建者。 ',
             userEmpty: '沒有指定的人員，分享連結以邀請特定的人。 ',
             listEmpty: '你還沒有設定任何範圍或工作表為受保護狀態。 ',

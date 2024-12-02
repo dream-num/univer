@@ -14,31 +14,7 @@
  * limitations under the License.
  */
 
-export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
+export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
+export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
+export type { ISheetThreadComment } from './types/interfaces/i-sheet-thread-comment';
 export { UniverSheetsThreadCommentPlugin } from './plugin';
-export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
-export { SHEETS_THREAD_COMMENT } from './types/const';
-
-export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
-export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
-
-// #region - all commands
-
-export {
-    AddCommentCommand,
-    DeleteCommentCommand,
-    DeleteCommentTreeCommand,
-    ResolveCommentCommand,
-    UpdateCommentCommand,
-} from '@univerjs/thread-comment';
-export type {
-    IAddCommentCommandParams,
-    IDeleteCommentCommandParams,
-    IDeleteCommentTreeCommandParams,
-    IResolveCommentCommandParams,
-    IUpdateCommentCommandParams,
-} from '@univerjs/thread-comment';
-export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
-
-// #endregion

@@ -84,7 +84,7 @@
 
             &-inner {
                 align-items: center;
-                padding: 0 2px 0 24px;
+                padding: 0 2px 0 20px;
                 line-height: 28px;
                 box-sizing: border-box;
                 border-radius: 6px;
@@ -180,6 +180,7 @@
 
         &-primary-buttons {
             display: flex;
+
             > .button {
                 margin-left: 12px;
             }
@@ -196,5 +197,39 @@
 
     .form-dual-column-layout {
         margin-bottom: 8px;
+    }
+}
+
+.sheets-filter {
+    &-tree-node {
+        // height: 28px;
+        padding-right: 8px;
+        max-width: 245px;
+
+        .sheets-filter-tree-node-filter-only {
+            display: none;
+            padding: 0 6px;
+            height: 16px;
+            background-color: rgb(var(--grey-50));
+        }
+
+        &:hover {
+            background-color: rgb(var(--grey-50));
+            border-radius: 6px;
+
+            .sheets-filter-tree-node-filter-only {
+                display: inline-block;
+            }
+        }
+
+        &-attach {
+            height: 20px;
+            flex: 1;
+            margin-left: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
     }
 }

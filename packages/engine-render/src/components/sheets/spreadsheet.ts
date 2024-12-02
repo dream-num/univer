@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellWithCoord, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
@@ -117,10 +117,10 @@ export class Spreadsheet extends SheetComponent {
         const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState && viewportInfo.diffBounds
-            ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
+            ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(bound))
             : [];
 
-        const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo.cacheBound)];
+        const viewRanges = [spreadsheetSkeleton.getRangeByViewBound(viewportInfo.cacheBound)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
@@ -205,7 +205,7 @@ export class Spreadsheet extends SheetComponent {
         const scene = this.getParent() as Scene;
         let x = 0;
         let y = 0;
-        const viewPort = scene.findViewportByPosToViewport(coord);
+        const viewPort = scene.findViewportByPosToScene(coord);
         if (viewPort) {
             const actualX = viewPort.viewportScrollX || 0;
             const actualY = viewPort.viewportScrollY || 0;
@@ -360,7 +360,7 @@ export class Spreadsheet extends SheetComponent {
         // The 'leftOrigin' is the offset of the viewport relative to the sheet corner, which is the position of cell(0, 0), and it does not consider scaling.
         // - (leftOrigin - bufferEdgeX)  ----> - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
-        // when extension drawing, sheet content corrdinate was used by sheet extension, not viewport corrdinate, that means ext does not take rowheader into consideration
+        // when extension drawing, sheet content coordinate was used by sheet extension, not viewport coordinate, that means ext does not take rowheader into consideration
         this.draw(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }
@@ -395,6 +395,8 @@ export class Spreadsheet extends SheetComponent {
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
+
+        this.getScene()?.updateTransformerZero(spreadsheetSkeleton.rowHeaderWidth, spreadsheetSkeleton.columnHeaderHeight);
 
         const { viewportKey } = viewportInfo;
         // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
@@ -667,7 +669,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext2D, backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>) {
+    private _clearBackground(ctx: UniverRenderingContext2D, backgroundPositions?: ObjectMatrix<ICellWithCoord>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

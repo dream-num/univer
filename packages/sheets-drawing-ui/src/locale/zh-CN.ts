@@ -52,7 +52,7 @@ const locale = {
             'drawing-move-down': '下移绘图',
             'drawing-move-up': '上移绘图',
             'drawing-move-left': '左移绘图',
-            'drawing-move-right': '下移绘图',
+            'drawing-move-right': '右移绘图',
             'drawing-delete': '删除绘图',
         },
     },

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign } from '@univerjs/core';
 import type { IParagraphStyle } from '@univerjs/core';
+import type { ISectionBreakConfig } from '../../../../../basics';
+import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { HorizontalAlign } from '@univerjs/core';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
 import { isLetter } from '../../line-breaker/enhancers/utils';
 import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
 import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
-import type { ISectionBreakConfig } from '../../../../../basics';
-import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -186,6 +186,9 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             divide.paddingLeft = width - glyphGroupWidth;
         }
+
+        // To fix https://github.com/dream-num/univer-pro/issues/2930
+        divide.paddingLeft = Math.max(divide.paddingLeft, 0);
     }
 }
 
@@ -273,7 +276,7 @@ export function lineAdjustment(
     sectionBreakConfig: ISectionBreakConfig
 ) {
     const { endIndex } = paragraphNode;
-    const paragraph = viewModel.getParagraph(endIndex, true) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     lineIterator(pages, (line) => {
         // Only need to adjust the current paragraph.

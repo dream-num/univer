@@ -69,22 +69,13 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 ids.current = rule.ranges.map((range) => markSelectionService.addShape({
                     range,
                     style: {
-                        hasAutoFill: false,
+                        // hasAutoFill: false,
                         fill: 'rgba(73, 184, 17, 0.05)',
                         strokeWidth: 1,
                         stroke: '#49B811',
                         widgets: {},
                     },
-                    primary: {
-                        startColumn: range.startColumn,
-                        endColumn: range.endColumn,
-                        startRow: range.startRow,
-                        endRow: range.endRow,
-                        actualRow: range.startRow,
-                        actualColumn: range.startColumn,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                    },
+                    primary: null,
                 }));
             }}
             onMouseLeave={() => {

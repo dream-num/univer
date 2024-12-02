@@ -262,6 +262,8 @@ describe('Test Reference', () => {
             "Sheet'",
             '!Sheet',
             '！Sheet',
+            'Sheet1（副本）',
+            'Sheet4(Copy)',
         ];
         const testFalseCase = ['Sheet1', '工作表1'];
 

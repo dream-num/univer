@@ -54,7 +54,7 @@ describe('Test chisqInvRt function', () => {
 
             const degFreedom2 = NumberValueObject.create(10 ** 10 + 1);
             const result2 = testFunction.calculate(probability, degFreedom2);
-            expect(getObjectValue(result2)).toBe(10000000002.186049);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
@@ -83,6 +83,11 @@ describe('Test chisqInvRt function', () => {
             const degFreedom = NumberValueObject.create(1);
             const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.5);
+            const degFreedom2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, degFreedom2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

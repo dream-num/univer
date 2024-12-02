@@ -27,6 +27,8 @@ import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-form
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 
@@ -58,14 +60,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(() => {
-        // 如果是自定义公式的话,则不自动聚焦在选区.
-        const { rule } = props;
-        if (rule?.rule.type === CFRuleType.highlightCell) {
-            return rule.rule.subType !== CFSubRuleType.formula;
-        }
-        return true;
-    });
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
     const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
     const [errorText, errorTextSet] = useState<string | undefined>(undefined);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
@@ -185,7 +180,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const onRangeSelectorChange = (rangeString: string) => {
-        const result = rangeString.split(',').map(deserializeRangeWithSheet).map((item) => item.range);
+        const result = rangeString.split(',').filter((e) => !!e).map(deserializeRangeWithSheet).map((item) => item.range);
         rangeResult.current = result;
     };
 
@@ -244,15 +239,18 @@ export const RuleEdit = (props: IRuleEditProps) => {
         }
     };
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
-    };
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
 
     return (
-        <div className={styles.cfRuleStyleEditor} onClick={handlePanelClick}>
+        <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div className={`${styleBase.mTBase}`}>
+            <div className={`
+              ${styleBase.mTBase}
+            `}
+            >
                 <RangeSelector
                     unitId={unitId}
                     errorText={errorText}
@@ -260,6 +258,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                     initValue={rangeString}
                     onChange={onRangeSelectorChange}
                     onVerify={handleVerify}
+                    onFocus={() => isFocusRangeSelectorSet(true)}
                     isFocus={isFocusRangeSelector}
                     actions={rangeSelectorActionsRef.current}
                 />
@@ -269,7 +268,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 <Select className={styles.width100} value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
-            <div className={`${styleBase.mTBase} ${styles.btnList}`}>
+            <div className={`
+              ${styleBase.mTBase}
+              ${styles.btnList}
+            `}
+            >
                 <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
                 <Button className={styleBase.mLSm} size="small" type="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
             </div>

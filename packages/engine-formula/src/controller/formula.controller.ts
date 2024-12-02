@@ -58,7 +58,7 @@ import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config.schema';
 
 export class FormulaController extends Disposable {
     constructor(
@@ -104,7 +104,7 @@ export class FormulaController extends Disposable {
     }
 
     private _registerFunctions() {
-        const config = this._configService.getConfig<IUniverEngineFormulaConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
         const functions: BaseFunction[] = (
             [

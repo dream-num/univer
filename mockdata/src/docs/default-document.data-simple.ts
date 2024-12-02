@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow } from '@univerjs/core';
-import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, HorizontalAlign, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableRowHeightRule, TableSizeType, TableTextWrapType, Tools, VerticalAlignmentType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 const TABLE_START = '\x1A'; // 表格开始
@@ -42,17 +42,25 @@ function createTableDataStream(tables: string[][]) {
 }
 
 const exampleTables = [
-    ['姓名\r这是一个段落\r这是二个段落\r这是三个段落\r这是四个段落', '语文', '数学', '英语', '总分'],
-    ['张三', '80', '90', '70', '240'],
-    ['李四', '80', '90', '70', '240'],
-    ['王五', '80', '90', '70', '240'],
-    ['赵六', '80', '90', '70', '240'],
+    ['Description', 'Date', 'Location'],
+    ['Academic Senate Meeting 1 Academic Senate Meeting 2 Academic Senate Meeting 3 Academic Senate Meeting 4 Academic Senate Meeting 5', 'May 25, 2205', 'Building 99 Room 1'],
+    ['Faculty Council', 'June 1, 2205', 'Building 35 Room 5'],
+    ['Faculty Council', 'June 15, 2205', 'Building 35 Room 5'],
+    ['Faculty Council', 'June 30, 2205', 'Building 35 Room 5'],
+    ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
+    ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
+    ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
 ];
 
-const dataStream = `这是一个表格的用例\r${createTableDataStream(exampleTables)}班级成绩统计\r\n`;
+const title = 'Examples of Accessible Data Tables\r';
+const description = 'Basic Data Table with Column Headings\r';
+const summary = 'These example tables contain captions and summaries. When you copy any of these tables into your page you must edit the caption and summary. The caption can be edited in the Design view but the summary text must be edited in Code view. Click inside the table, then select the table tag on the tag selector, then switch to Code view and edit the text in the summary attribute.\r';
+const tableStream = createTableDataStream(exampleTables);
+
+const dataStream = `${title}${description}${tableStream}${summary}\n`;
 
 const startIndex = dataStream.indexOf(TABLE_START);
-const endIndex = dataStream.indexOf(TABLE_END);
+const endIndex = tableStream.length + startIndex;
 
 function createParagraphAndSectionBreaks(dataStream: string) {
     const paragraphs: IParagraph[] = [];
@@ -81,11 +89,80 @@ function createParagraphAndSectionBreaks(dataStream: string) {
     return { paragraphs, sectionBreaks };
 }
 
+function createTextRuns() {
+    const textRuns = [];
+    let offset = 0;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + title.length,
+        ts: {
+            fs: 16,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#154734',
+            },
+            bl: BooleanNumber.TRUE,
+            ul: {
+                s: BooleanNumber.TRUE,
+            },
+        },
+    });
+
+    offset += title.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + description.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    offset += description.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + tableStream.length,
+        ts: {
+            fs: 11,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            bl: BooleanNumber.TRUE,
+        },
+    });
+
+    offset += tableStream.length;
+
+    textRuns.push({
+        st: offset,
+        ed: offset + summary.length,
+        ts: {
+            fs: 12,
+            ff: 'Helvetica Neue',
+            cl: {
+                rgb: '#54585a',
+            },
+            bl: BooleanNumber.FALSE,
+        },
+    });
+
+    return textRuns;
+}
+
 const { paragraphs, sectionBreaks } = createParagraphAndSectionBreaks(dataStream);
 
 const tableCell: ITableCell = {
     rowSpan: 1,
     columnSpan: 1,
+    vAlign: VerticalAlignmentType.TOP,
     margin: {
         start: {
             v: 10,
@@ -105,9 +182,10 @@ const tableCell: ITableCell = {
 const tableRow: ITableRow = {
     tableCells: [...new Array(exampleTables[0].length).fill(Tools.deepClone(tableCell))],
     trHeight: {
-        val: { v: 30 },
-        hRule: TableCellHeightRule.AUTO,
+        val: { v: 50 },
+        hRule: TableRowHeightRule.AUTO,
     },
+    cantSplit: BooleanNumber.TRUE,
 };
 
 const tableColumn: ITableColumn = {
@@ -119,7 +197,13 @@ const tableColumn: ITableColumn = {
     },
 };
 
-const tableRows = [...new Array(exampleTables.length).fill(null).map(() => Tools.deepClone(tableRow))];
+const tableRows: ITableRow[] = [...new Array(exampleTables.length).fill(null).map((_, i) => {
+    return {
+        ...Tools.deepClone(tableRow),
+        isFirstRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        repeatHeaderRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+    };
+})];
 const tableColumns = [...new Array(exampleTables[0].length).fill(null).map(() => Tools.deepClone(tableColumn))];
 
 tableColumns[0].size.width.v = 250;
@@ -132,22 +216,22 @@ const table: ITable = {
     indent: {
         v: 0,
     },
-    textWrap: TableTextWrapType.NONE,
+    textWrap: TableTextWrapType.WRAP,
     position: {
         positionH: {
             relativeFrom: ObjectRelativeFromH.PAGE,
-            posOffset: 0,
+            posOffset: 100,
         },
         positionV: {
             relativeFrom: ObjectRelativeFromV.PAGE,
-            posOffset: 0,
+            posOffset: 600,
         },
     },
     dist: {
-        distB: 0,
-        distL: 0,
-        distR: 0,
-        distT: 0,
+        distB: 5,
+        distL: 5,
+        distR: 10,
+        distT: 5,
     },
     cellMargin: {
         start: {
@@ -183,59 +267,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     body: {
         dataStream,
         customBlocks: [],
-        textRuns: [
-            {
-                st: 0,
-                ed: 9,
-                ts: {
-                    fs: 24,
-                    ff: 'Microsoft YaHei',
-                    cl: {
-                        rgb: 'rgb(0, 0, 0)',
-                    },
-                    bl: BooleanNumber.TRUE,
-                    ul: {
-                        s: BooleanNumber.TRUE,
-                    },
-                },
-            },
-            {
-                st: 9,
-                ed: 12,
-                ts: {
-                    fs: 14,
-                    ff: 'Times New Roman',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
-                },
-            },
-            {
-                st: 13,
-                ed: 15,
-                ts: {
-                    fs: 14,
-                    ff: 'Times New Roman',
-                    cl: {
-                        rgb: 'rgb(130, 30, 30)',
-                    },
-                    bl: BooleanNumber.TRUE,
-                },
-            },
-            {
-                st: 16,
-                ed: dataStream.length - 2,
-                ts: {
-                    fs: 14,
-                    ff: 'Times New Roman',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
-                },
-            },
-        ],
+        textRuns: createTextRuns(),
         paragraphs,
         tables: [{
             startIndex,
@@ -254,6 +286,9 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
         marginBottom: ptToPixel(50),
         marginRight: ptToPixel(50),
         marginLeft: ptToPixel(50),
+        autoHyphenation: BooleanNumber.TRUE,
+        consecutiveHyphenLimit: 3,
+        doNotHyphenateCaps: BooleanNumber.TRUE,
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,

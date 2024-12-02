@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            text: { name: 'tекст', detail: 'Строка для кодирования URL-адреса' },
         },
     },
     FILTERXML: {

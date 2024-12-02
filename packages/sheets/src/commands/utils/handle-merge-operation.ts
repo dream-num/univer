@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, IRange } from '@univerjs/core';
-import { Dimension } from '@univerjs/core';
 import type { IAddMergeCommandParams } from '../commands/add-worksheet-merge.command';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
+import { Dimension } from '@univerjs/core';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams, ranges: IRange[]) => {

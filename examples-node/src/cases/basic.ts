@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import process from 'node:process';
+import { awaitTime, FUniver } from '@univerjs/core';
 import { createUniverOnNode } from '../sdk';
 
-const univer = createUniverOnNode();
+// From now on, Univer is a full-stack SDK.
 
-univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {});
+async function run(): Promise<void> {
+    const API = FUniver.newAPI(createUniverOnNode());
+    const univerSheet = API.createUniverSheet({});
 
-// TODO: Facade API here
+    const a1 = univerSheet.getActiveSheet().getRange('A1');
+    await a1.setValue({ v: 123 });
+
+    const b1 = univerSheet.getActiveSheet().getRange('B1');
+    await b1.setValue({ f: '=SUM(A1) * 6' });
+
+    await awaitTime(500);
+
+    // eslint-disable-next-line no-console
+    console.log('Debug, formula value', b1.getCellData()?.v);
+
+    // eslint-disable-next-line no-console
+    console.log(univerSheet.save());
+
+    process.exit(0);
+}
+
+run();

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IParagraph } from '@univerjs/core';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getTextRunAtPosition } from '../../basics/paragraph';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { InsertCommand } from './core-editing.command';
 import { ToggleCheckListCommand } from './list.command';
 
@@ -55,11 +57,12 @@ export const BreakLineCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const rectRanges = docSelectionManagerService.getRectRanges();
         if (activeTextRange == null) {
@@ -87,7 +90,7 @@ export const BreakLineCommand: ICommand = {
 
         const unitId = docDataModel.getUnitId();
 
-        const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
+        const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
@@ -97,14 +100,26 @@ export const BreakLineCommand: ICommand = {
 
         const prevParagraphIndex = prevParagraph.startIndex;
 
-        const insertBody = {
+        const defaultTextStyle = docMenuStyleService.getDefaultStyle();
+        const styleCache = docMenuStyleService.getStyleCache();
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], endOffset, defaultTextStyle, styleCache);
+
+        const insertBody: IDocumentBody = {
             dataStream: DataStreamTreeTokenType.PARAGRAPH,
             paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+            textRuns: [{
+                st: 0,
+                ed: 1,
+                ts: {
+                    ...curTextRun.ts,
+                },
+            }],
         };
 
         const deleteRange = {
             startOffset,
             endOffset,
+            collapsed: startOffset === endOffset,
         };
 
         const result = await commandService.executeCommand(InsertCommand.id, {

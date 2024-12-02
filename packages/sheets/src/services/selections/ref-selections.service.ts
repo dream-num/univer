@@ -15,11 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { createIdentifier, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { WorkbookSelectionModel } from './selection-data-model';
+import { createIdentifier, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, map, merge, switchMap, takeUntil } from 'rxjs';
-import type { WorkbookSelections } from './selection-manager.service';
-import { SheetsSelectionsService } from './selection-manager.service';
+import { SheetsSelectionsService } from './selection.service';
 
 /**
  * Ref selections service reuses code of `SelectionManagerService`. And it only contains ref selections
@@ -47,7 +47,7 @@ export class RefSelectionsService extends SheetsSelectionsService {
         this.selectionMoveEnd$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveEnd$))));
     }
 
-    private _getAliveWorkbooks$(): Observable<WorkbookSelections[]> {
+    private _getAliveWorkbooks$(): Observable<WorkbookSelectionModel[]> {
         const aliveWorkbooks = this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         aliveWorkbooks.forEach((workbook) => this._ensureWorkbookSelection(workbook.getUnitId()));
 

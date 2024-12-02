@@ -173,8 +173,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     FINDB: {
@@ -187,8 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     FIXED: {
@@ -216,8 +218,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
+            numChars: { name: '字符数', detail: '指定希望 LEFT 提取的字符数。' },
         },
     },
     LEFTB: {
@@ -230,7 +232,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文本', detail: '包含要提取的字符的文本字符串。' },
+            text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
             numBytes: { name: '字节数', detail: '按字节指定要由 LEFTB 提取的字符的数量。' },
         },
     },
@@ -270,10 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: '文本',
-                detail: '要转换为小写字母的文本。 LOWER 不改变文本中的非字母字符。',
-            },
+            text: { name: '文本', detail: '要转换为小写字母的文本。' },
         },
     },
     MID: {
@@ -287,8 +286,8 @@ export default {
         ],
         functionParameter: {
             text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
-            startNum: { name: '开始位置', detail: '文本中要提取的第一个字符的位置。 文本中第一个字符的 start_num 为 1，以此类推。\n如果start_num大于文本长度，则 MID/MIDB 将返回“” (空文本) 。\n如果start_num小于文本长度，但start_num加num_chars超过文本长度，则 MID/MIDB 将返回字符到文本末尾。\n如果start_num小于 1，则 MID/MIDB 返回 #VALUE！ 。' },
-            numChars: { name: '字符数', detail: '指定希望 MID 从文本中返回字符的个数。\n如果num_chars为负数，则 MID 返回 #VALUE！ 。' },
+            startNum: { name: '开始位置', detail: '文本中要提取的第一个字符的位置。' },
+            numChars: { name: '字符数', detail: '指定希望 MID 提取的字符数。' },
         },
     },
     MIDB: {
@@ -301,8 +300,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
+            startNum: { name: '开始位置', detail: '文本中要提取的第一个字符的位置。' },
+            numBytes: { name: '字节数', detail: '按字节指定要由 MIDB 提取的字符的数量。' },
         },
     },
     NUMBERVALUE: {
@@ -400,8 +400,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '旧文本', detail: '要替换其部分字符的文本。' },
+            startNum: { name: '开始位置', detail: '文本中要替换的第一个字符的位置。' },
+            numChars: { name: '字符数', detail: '指定希望 REPLACE 替换的字符数。' },
+            newText: { name: '替换文本', detail: '将替换旧文本中字符的文本。' },
         },
     },
     REPLACEB: {
@@ -414,8 +416,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '旧文本', detail: '要替换其部分字符的文本。' },
+            startNum: { name: '开始位置', detail: '文本中要替换的第一个字符的位置。' },
+            numBytes: { name: '字节数', detail: '按字节指定要由 REPLACEB 替换的字符的数量。' },
+            newText: { name: '替换文本', detail: '将替换旧文本中字符的文本。' },
         },
     },
     REPT: {
@@ -470,8 +474,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     SEARCHB: {
@@ -484,8 +489,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     SUBSTITUTE: {
@@ -577,8 +583,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: '分隔符', detail: '文本字符串，或者为空，或用双引号引起来的一个或多个字符，或对有效文本字符串的引用。' },
+            ignoreEmpty: { name: '忽略空白', detail: '如果为 TRUE，则忽略空白单元格。' },
+            text1: { name: '文本1', detail: '要联接的文本项。 文本字符串或字符串数组，如单元格区域中。' },
+            text2: { name: '文本2', detail: '要联接的其他文本项。 文本项最多可以包含 252 个文本参数 text1。 每个参数可以是一个文本字符串或字符串数组，如单元格区域。' },
         },
     },
     TEXTSPLIT: {
@@ -600,7 +608,7 @@ export default {
         },
     },
     TRIM: {
-        description: '删除文本中的空格',
+        description: '除了单词之间的单个空格之外，删除文本中的所有空格。',
         abstract: '删除文本中的空格',
         links: [
             {
@@ -609,8 +617,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要从中删除空格的文本。' },
         },
     },
     UNICHAR: {
@@ -649,8 +656,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要转换为大写字母的文本。' },
         },
     },
     VALUE: {

@@ -24,6 +24,7 @@ export { ColorKit, COLORS, type IRgbColor, RGB_PAREN, RGBA_PAREN } from './color
 export * from './command-enum';
 export * from './common';
 export * from './compare';
+export * from './dayjs';
 export * from './doc-tool';
 export * from './generate';
 export * from './hash-algorithm';

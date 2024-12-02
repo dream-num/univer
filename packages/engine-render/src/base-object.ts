@@ -676,16 +676,6 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
-    // triggerKeyDown(evt: IKeyboardEvent) {
-    //     // this.onKeyDownObservable.notifyObservers(evt);
-    //     this._parent?.triggerKeyDown(evt);
-    // }
-
-    // triggerKeyUp(evt: IKeyboardEvent) {
-    //     // this.onKeyUpObservable.notifyObservers(evt);
-    //     this._parent?.triggerKeyUp(evt);
-    // }
-
     triggerPointerOut(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerOut$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerOut(evt);
@@ -713,6 +703,14 @@ export abstract class BaseObject extends Disposable {
     triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerEnter$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerPointerCancel(evt: IPointerEvent) {
+        if (!this.onPointerEnter$.emitEvent(evt)?.stopPropagation) {
+            this._parent?.triggerPointerCancel(evt);
             return false;
         }
         return true;
@@ -795,21 +793,14 @@ export abstract class BaseObject extends Disposable {
 
     getScene(): Nullable<Scene> {
         let parent: any = this.parent;
-
-        if (parent == null) {
-            return null;
-        }
-
-        if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-            return parent;
-        }
-
         while (parent) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 return parent;
             }
             parent = parent.getParent();
         }
+
+        return null;
     }
 
     resetCursor() {

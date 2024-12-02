@@ -89,6 +89,19 @@ describe('Test normDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, standardDev, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(15.2069);
+            const mean2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, mean2, standardDev, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const standardDev2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, mean, standardDev2, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(x2, mean, standardDev, cumulative2);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

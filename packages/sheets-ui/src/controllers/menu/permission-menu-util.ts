@@ -105,6 +105,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
                             const subUnitRuleList = rangeRuleModel.getSubunitRuleList(unitId, subUnitId);
                             const selectionRanges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range);
 
+                            const ruleRanges = subUnitRuleList.map((rule) => rule.ranges).flat();
                             if (!selectionRanges?.length) {
                                 return true;
                             }
@@ -216,7 +217,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
     return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(
-        switchMap(([workbook, __, visible, formulaEditorFocus]) => {
+        switchMap(([workbook, _, visible, formulaEditorFocus]) => {
             if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId()) || formulaEditorFocus) {
                 return of(true);
             }
@@ -306,7 +307,7 @@ export function getAddPermissionFromSheetBarDisable$(accessor: IAccessor) {
                             if (!permission) return true;
                             const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                             if (worksheetRule?.permissionId) return true;
-                            const subUnitRuleList = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)?.filter((item) => item?.permissionId && item?.name);
+                            const subUnitRuleList = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)?.filter((item) => item?.permissionId);
                             return subUnitRuleList.length > 0;
                         })
                     );
@@ -416,13 +417,14 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                     const sheetSelectionsService = accessor.get(SheetsSelectionsService);
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    // const permission$ = permissionService.composePermission$([new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
-                    return merge(
+
+                    const changes$ = merge(
                         selectionProtectionRuleModel.ruleChange$,
                         worksheetProtectionRuleModel.ruleChange$,
                         sheetSelectionsService.selectionMoveEnd$
-                    ).pipe(startWith(null)).pipe(
-                        map(() => {
+                    ).pipe(startWith(null));
+                    return combineLatest([changes$]).pipe(
+                        map(([_]) => {
                             const selections = accessor.get(SheetsSelectionsService).getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length || selectionRanges.length > 1) {
@@ -480,7 +482,7 @@ export function getViewPermissionDisable$(accessor: IAccessor) {
     const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
     return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(
-        switchMap(([workbook, __, visible, formulaEditorFocus]) => {
+        switchMap(([workbook, _, visible, formulaEditorFocus]) => {
             if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId()) || formulaEditorFocus) {
                 return of(true);
             }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -24,21 +24,21 @@ export class Lower extends BaseFunction {
 
     override maxParams = 1;
 
-    override calculate(text: BaseValueObject) {
-        if (text.isError()) {
-            return text;
-        }
-
+    override calculate(text: BaseValueObject): BaseValueObject {
         if (text.isArray()) {
-            return text.mapValue((textValue: BaseValueObject) => {
-                return this._handleSingleText(textValue);
-            });
+            const resultArray = text.mapValue((textObject) => this._handleSingleObject(textObject));
+
+            if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+                return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+            }
+
+            return resultArray;
         }
 
-        return this._handleSingleText(text);
+        return this._handleSingleObject(text);
     }
 
-    private _handleSingleText(text: BaseValueObject) {
+    private _handleSingleObject(text: BaseValueObject): BaseValueObject {
         if (text.isError()) {
             return text;
         }
@@ -47,11 +47,8 @@ export class Lower extends BaseFunction {
             return StringValueObject.create('');
         }
 
-        if (text.isString() || text.isBoolean() || text.isNumber()) {
-            const textValue = text.getValue().toString().toLowerCase();
-            return StringValueObject.create(textValue);
-        }
+        const result = `${text.getValue()}`.toLocaleLowerCase();
 
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return StringValueObject.create(result);
     }
 }

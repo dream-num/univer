@@ -37,6 +37,7 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
 
     updateSkeleton(spreadsheetSkeleton: SpreadsheetSkeleton) {
         this._skeleton = spreadsheetSkeleton;
+        this.getScene()?.updateTransformerZero(spreadsheetSkeleton.rowHeaderWidth, spreadsheetSkeleton.columnHeaderHeight);
     }
 
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {

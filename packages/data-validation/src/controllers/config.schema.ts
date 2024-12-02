@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'data-validation.config';
+export const DATA_VALIDATION_PLUGIN_CONFIG_KEY = 'data-validation.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DATA_VALIDATION_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDataValidationConfig {
 }

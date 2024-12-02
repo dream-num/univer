@@ -38,7 +38,6 @@ import {
 } from '@univerjs/docs';
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-
 import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
@@ -197,7 +196,7 @@ export class FormulaEditorController extends RxDisposable {
                 if (visibleState.visible === false) {
                     this._editorBridgeService.changeVisible({
                         visible: true,
-                        eventType: DeviceInputEventType.Dblclick,
+                        eventType: DeviceInputEventType.PointerDown,
                         unitId,
                     });
                     this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);

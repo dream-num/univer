@@ -218,8 +218,8 @@ export default {
         },
     },
     COMBIN: {
-        description: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
-        abstract: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
+        description: 'Trả về số tổ hợp cho số mục nhất định.',
+        abstract: 'Trả về số tổ hợp cho số mục nhất định.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -770,6 +770,20 @@ export default {
         functionParameter: {
             number: { name: 'số', detail: 'Số mà bạn muốn làm tròn.' },
             numDigits: { name: 'số chữ số', detail: 'Số chữ số mà bạn muốn làm tròn số tới đó.' },
+        },
+    },
+    ROUNDBANK: {
+        description: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
+        abstract: 'Làm tròn một số theo cách làm tròn của ngân hàng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: '',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số mà bạn muốn làm tròn theo cách làm tròn của ngân hàng.' },
+            numDigits: { name: 'số chữ số', detail: 'Số chữ số mà bạn muốn làm tròn theo cách làm tròn của ngân hàng.' },
         },
     },
     ROUNDDOWN: {

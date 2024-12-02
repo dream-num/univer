@@ -15,14 +15,14 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { distinctUntilChanged, Subject } from 'rxjs';
 import type { IDragEvent } from '@univerjs/engine-render';
+import type { IHoverCellPosition } from './hover-manager.service';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { distinctUntilChanged, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
-import type { IHoverCellPosition } from './hover-manager.service';
 
 export interface IDragCellPosition extends IHoverCellPosition {
     dataTransfer: DataTransfer;
@@ -30,14 +30,14 @@ export interface IDragCellPosition extends IHoverCellPosition {
 
 export class DragManagerService extends Disposable {
     private _currentCell$ = new Subject<Nullable<IDragCellPosition>>();
-    currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
+    currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged(
         (pre, aft) => (
             pre?.location?.unitId === aft?.location?.unitId
             && pre?.location?.subUnitId === aft?.location?.subUnitId
             && pre?.location?.row === aft?.location?.row
             && pre?.location?.col === aft?.location?.col
         )
-    )));
+    ));
 
     private _endCell$ = new Subject<Nullable<IDragCellPosition>>();
     endCell$ = this._endCell$.asObservable();

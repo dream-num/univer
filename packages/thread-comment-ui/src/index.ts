@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export { getDT } from './common/utils';
+import './global.css';
+
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/thread-comment-panel';
@@ -22,7 +23,6 @@ export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
 export { ThreadCommentTree } from './views/thread-comment-tree';
 export type { IThreadCommentTreeProps } from './views/thread-comment-tree';
 export { THREAD_COMMENT_PANEL } from './types/const';
-export { IThreadCommentMentionDataService, type IThreadCommentMentionDataSource } from './services/thread-comment-mention-data.service';
 
 // #region - all commands
 

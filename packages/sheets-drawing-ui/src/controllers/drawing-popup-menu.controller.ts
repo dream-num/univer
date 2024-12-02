@@ -16,14 +16,15 @@
 
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
+import { connectInjector, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
 
+import { takeUntil } from 'rxjs';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { UploadLoading } from '../views/upload-loading/UploadLoading';
@@ -119,13 +120,20 @@ export class DrawingPopupMenuController extends RxDisposable {
                     }
 
                     const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                    // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
+                    const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
+                    if (data && data.disablePopup) {
+                        return;
+                    }
+
                     singletonPopupDisposer?.dispose();
+                    const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
                     singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
                         direction: 'horizontal',
                         offset: [2, 0],
                         extraProps: {
-                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
+                            menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
                         },
                     }));
 

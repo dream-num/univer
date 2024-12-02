@@ -23,6 +23,7 @@
         margin: 0;
         padding: 0;
         list-style: none;
+        height: 100%;
 
         .tree-list {
             overflow: hidden;
@@ -36,6 +37,7 @@
         &-item {
             position: relative;
             padding-left: var(--padding-xl);
+            font-size: 13px;
 
             > a {
                 position: relative;
@@ -44,12 +46,26 @@
                 cursor: pointer;
             }
 
+            &-title {
+                display: inline-block;
+                height: 100%;
+                margin: 0 4px;
+                flex-shrink: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
             &-content {
-                margin-bottom: 8px;
+                margin: 4px 0;
+                width: 100%;
+                position: relative;
+                display: flex;
+                align-items: center;
 
                 &-selected {
                     // font-weight: 500;
-                    color: rgb(var(--primary-color));
+                    // color: rgb(var(--primary-color));
 
                     &-icon {
                         position: absolute;

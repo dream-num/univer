@@ -93,6 +93,8 @@ export class ListValidator extends BaseDataValidator {
     private _lexer = this.injector.get(LexerTreeBuilder);
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
+    override readonly offsetFormulaByRange = false;
+
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
     operators: DataValidationOperator[] = [];
@@ -146,24 +148,25 @@ export class ListValidator extends BaseDataValidator {
         return deserializeListOptions(cellString);
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
-        const { formula1 = '' } = rule;
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1));
 
         return {
-            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
+            formula1: undefined,
             formula2: undefined,
             isFormulaValid,
         };
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<string[] | undefined>, rule: IDataValidationRule): Promise<boolean> {
-        const { value } = cellInfo;
-        const { formula1 = [] } = formula;
+        const { value, unitId, subUnitId } = cellInfo;
+        const { formula1 = '' } = rule;
+        const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const formula1Result = isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
         const selected = this.parseCellValue(value!);
-        return selected.every((i) => formula1.includes(i));
+        return selected.every((i) => formula1Result.includes(i));
     }
 
     override generateRuleName() {
@@ -186,7 +189,7 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
     async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
@@ -201,7 +204,7 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[0][0]) : deserializeListOptions(formula1);
     }
 
     getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import { DataValidationOperator, DataValidationType, dayjs, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import dayjs from 'dayjs';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
-import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
-
-const FORMULA1 = '{FORMULA1}';
-const FORMULA2 = '{FORMULA2}';
+import { isLegalFormulaResult } from '../utils/formula';
+import { FORMULA1, FORMULA2 } from './const';
+import { getTransformedFormula } from './util';
 
 const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {
@@ -46,7 +46,7 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     return numfmt.parseDate(dayjs(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 
-export class DateValidator extends BaseDataValidator<number> {
+export class DateValidator extends BaseDataValidator {
     id: string = DataValidationType.DATE;
     title: string = 'dataValidation.date.title';
     operators: DataValidationOperator[] = [
@@ -61,29 +61,20 @@ export class DateValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    private _formulaService = this.injector.get(DataValidationFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {
-        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>> {
+        const formulaResult1 = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, rule.uid, row, column);
+        const formulaResult2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
+
         const { formula1, formula2 } = rule;
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result);
-        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1?.v)) && isLegalFormulaResult(String(formulaResult2?.v));
 
         return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1?.v : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2?.v : formula2),
             isFormulaValid,
-        };
-    }
-
-    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
-        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        const { formula1, formula2 } = rule;
-
-        return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
         };
     }
 
@@ -165,78 +156,6 @@ export class DateValidator extends BaseDataValidator<number> {
         };
     }
 
-    override async validatorIsEqual(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellValue === formula1;
-    }
-
-    override async validatorIsNotEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellInfo.value !== formula1;
-    }
-
-    override async validatorIsBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value >= start && cellInfo.value <= end;
-    }
-
-    override async validatorIsNotBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value < start || cellInfo.value > end;
-    }
-
-    override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value > formula1;
-    }
-
-    override async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value >= formula1;
-    }
-
-    override async validatorIsLessThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value < formula1;
-    }
-
-    override async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value <= formula1;
-    }
-
     override get operatorNames() {
         return this.operators.map((operator) => this.localeService.t(DateOperatorNameMap[operator]));
     }
@@ -250,12 +169,13 @@ export class DateValidator extends BaseDataValidator<number> {
         return `${this.titleStr} ${ruleName}`;
     }
 
-    override generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase, pos: ISheetLocationBase) {
         if (!rule.operator) {
             return this.titleStr;
         }
+        const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, pos);
 
-        const errorMsg = this.localeService.t(DateOperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const errorMsg = this.localeService.t(DateOperatorErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
         return `${errorMsg}`;
     }
 }

@@ -222,14 +222,14 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     // Only use in doc-selection-render.controller.ts
-    __replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam) {
+    __replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam, search: IDocSelectionManagerSearchParam) {
         if (this._currentSelection == null) {
             return;
         }
 
         const params = {
-            ...this._currentSelection,
             ...textSelectionInfo,
+            ...search,
         };
 
         // Store the textSelectionInfo.

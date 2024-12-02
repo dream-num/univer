@@ -18,7 +18,7 @@ import type { IStyleData } from '../types/interfaces';
 import type { IKeyValue, Nullable } from './types';
 
 import { customAlphabet, nanoid } from 'nanoid';
-import { isLegalUrl, normalizeUrl } from '../common/url';
+import { isLegalUrl, normalizeUrl, topLevelDomainSet } from '../common/url';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -456,6 +456,10 @@ export class Tools {
         return normalizeUrl(url);
     }
 
+    static topLevelDomainCombiningString() {
+        return [...topLevelDomainSet].join('|');
+    }
+
     static itCount(count: number): Function {
         return (callback: Function) => {
             for (let i = 0; i < count; i++) {
@@ -732,3 +736,8 @@ export function composeStyles(...styles: Nullable<IStyleData>[]): IStyleData {
     }
     return result;
 }
+
+export const isNodeEnv = () => {
+    // eslint-disable-next-line node/prefer-global/process
+    return typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+};

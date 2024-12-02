@@ -50,7 +50,7 @@ enum bracketType {
     LAMBDA,
 }
 
-const FORMULA_CACHE_LRU_COUNT = 100000;
+const FORMULA_CACHE_LRU_COUNT = 2000;
 
 export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_LRU_COUNT);
 

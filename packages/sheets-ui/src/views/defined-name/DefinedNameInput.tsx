@@ -16,15 +16,14 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 
-import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
 import styles from './index.module.less';
@@ -66,14 +65,14 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const componentManager = useDependency(ComponentManager);
 
     const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
-
+    const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
     if (workbook == null) {
         return;
     }
 
-    const unitId = workbook.getUnitId();
+    const unitId = useMemo(() => workbook.getUnitId(), []);
 
-    const subUnitId = workbook.getActiveSheet().getSheetId();
+    const subUnitId = useMemo(() => workbook.getActiveSheet().getSheetId(), []);
 
     const [nameValue, setNameValue] = useState(name);
 
@@ -192,23 +191,37 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const typeValueChange = (value: string | number | boolean) => {
         const type = value as string;
-        if (type === 'formula' && formulaOrRefStringValue.substring(0, 1) !== operatorToken.EQUALS) {
-            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
-            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
-        } else if (formulaOrRefStringValue.substring(0, 1) === operatorToken.EQUALS) {
-            setFormulaOrRefStringValue('');
-            setFormulaOrRefStringValue('');
+        if (type === 'formula') {
+            if (formulaOrRefString[0] === operatorToken.EQUALS) {
+                setFormulaOrRefStringValue(formulaOrRefString);
+            } else {
+                setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
+            }
+        } else {
+            if (formulaOrRefString[0] === operatorToken.EQUALS) {
+                setFormulaOrRefStringValue('');
+            } else {
+                setFormulaOrRefStringValue(formulaOrRefString);
+            }
         }
         setTypeValue(type);
     };
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const formulaEditorActionsRef = useRef<any>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
-    };
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
 
     return (
-        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }} onClick={handlePanelClick}>
+        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
             <div>
                 <Input placeholder={localeService.t('definedName.inputNamePlaceholder')} value={nameValue} allowClear onChange={setNameValue} affixWrapperStyle={widthStyle} />
             </div>
@@ -218,36 +231,40 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     <Radio value="formula">{localeService.t('definedName.ratioFormula')}</Radio>
                 </RadioGroup>
             </div>
-            {RangeSelector && typeValue === 'range' && (
-                <RangeSelector
-                    unitId={unitId}
-                    subUnitId={subUnitId}
-                    initValue={formulaOrRefStringValue}
-                    onChange={rangeSelectorChange}
-                    isFocus={isFocusRangeSelector}
-                    actions={rangeSelectorActionsRef.current}
-                    isSupportAcrossSheet
-                    onBlur={() => { isFocusRangeSelectorSet(false); }}
-                />
-            )}
-            {typeValue !== 'range' && (
-                <div className="univer-defined-name-input-formula-selector-text-wrap">
-                    <TextEditor
-                        key={`${inputId}-editor`}
-                        value={formulaOrRefStringValue}
-                        onValid={setValidFormulaOrRange}
-                        onChange={formulaEditorChange}
-                        id={createInternalEditorID(`${inputId}-editor`)}
-                        placeholder={localeService.t('definedName.inputFormulaPlaceholder')}
-                        openForSheetUnitId={unitId}
-                        onlyInputFormula={true}
-                        // style={{ width: '99%' }}
-                        className="univer-defined-name-input-text-editor-container"
-                        canvasStyle={{ fontSize: 10 }}
-                    />
-                </div>
-            )}
+            {typeValue === 'range'
+                ? (
+                    RangeSelector && (
+                        <RangeSelector
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            initValue={formulaOrRefStringValue}
+                            onChange={rangeSelectorChange}
+                            isFocus={isFocusRangeSelector}
+                            onFocus={() => isFocusRangeSelectorSet(true)}
+                            actions={rangeSelectorActionsRef.current}
+                            isSupportAcrossSheet
+                        />
+                    )
+                )
+                : (FormulaEditor && (
+                    <FormulaEditor
+                        initValue={formulaOrRefStringValue as any}
+                        unitId={unitId}
+                        subUnitId={subUnitId}
+                        isFocus={isFocusFormulaEditor}
+                        isSupportAcrossSheet
+                        onChange={(v = '') => {
+                            const formula = v || '';
+                            formulaEditorChange(formula);
+                        }}
+                        onVerify={(res: boolean) => {
+                            setValidFormulaOrRange(res);
+                        }}
 
+                        onFocus={() => isFocusFormulaEditorSet(true)}
+                        actions={formulaEditorActionsRef.current}
+                    />
+                ))}
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
             </div>

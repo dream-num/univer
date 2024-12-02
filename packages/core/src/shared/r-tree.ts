@@ -49,8 +49,6 @@ export class RTree {
 
     private _kdTree: Map<string, Map<string, { tree: KDBush; items: IRdTreeItem[] } | undefined>> = new Map();
 
-    private _kdTreeSearchState = false;
-
     constructor(private _enableOneCellCache = false) {
 
     }
@@ -103,6 +101,30 @@ export class RTree {
         cellCache.delete(id);
     }
 
+    private _removeCellCacheByRange(search: IRTreeItem) {
+        const { unitId, sheetId: subUnitId, range, id } = search;
+
+        const unitCache = this._oneCellCache.get(unitId);
+        if (!unitCache) return;
+
+        const subUnitCache = unitCache.get(subUnitId);
+        if (!subUnitCache) return;
+
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        for (let row = startRow; row <= endRow; row++) {
+            const rowCache = subUnitCache.get(row);
+            if (!rowCache) continue;
+
+            for (let column = startColumn; column <= endColumn; column++) {
+                const cellCache = rowCache.get(column);
+                if (!cellCache) continue;
+
+                cellCache.delete(id);
+            }
+        }
+    }
+
     private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
         this._getOneCellCache(unitId, subUnitId, row, column).add(id);
     }
@@ -150,7 +172,6 @@ export class RTree {
      * The kd-tree is used to search for data in a single cell.
      */
     openKdTree() {
-        this._kdTreeSearchState = true;
         for (const [unitId, map1] of this._oneCellCache) {
             if (!this._kdTree.has(unitId)) {
                 this._kdTree.set(unitId, new Map());
@@ -171,7 +192,6 @@ export class RTree {
     }
 
     closeKdTree() {
-        this._kdTreeSearchState = false;
         for (const [unitId, map1] of this._oneCellCache) {
             for (const [subUnitId, map2] of map1) {
                 this._kdTree.get(unitId)?.set(subUnitId, undefined);
@@ -223,21 +243,19 @@ export class RTree {
         }
     }
 
-    search(search: IUnitRange): StringOrNumber[] {
+    *searchGenerator(search: IUnitRange): IterableIterator<StringOrNumber> {
         const { unitId, sheetId: subUnitId, range } = search;
 
-        const results: StringOrNumber[] = [];
-
-        if (this._enableOneCellCache && this._enableOneCellCache) {
+        if (this._enableOneCellCache) {
             const oneCellResults = this._searchByOneCellCache(search);
             for (const result of oneCellResults) {
-                results.push(result);
+                yield result;
             }
         }
 
         const tree = this._tree.get(unitId)?.get(subUnitId);
         if (!tree) {
-            return results;
+            return;
         }
 
         const searchData = tree.search({
@@ -248,17 +266,17 @@ export class RTree {
         }) as unknown as IRTreeItem[];
 
         for (const item of searchData) {
-            results.push(item.id);
+            yield item.id;
         }
-
-        return results;
     }
 
-    bulkSearch(searchList: IUnitRange[]): Set<StringOrNumber> {
+    bulkSearch(searchList: IUnitRange[], exceptTreeIds?: Set<number>): Set<StringOrNumber> {
         const result = new Set<StringOrNumber>();
         for (const search of searchList) {
-            const items = this.search(search);
-            for (const item of items) {
+            for (const item of this.searchGenerator(search)) {
+                if (exceptTreeIds?.has(item as number) === true) {
+                    continue;
+                }
                 result.add(item);
             }
         }
@@ -275,17 +293,37 @@ export class RTree {
         }
     }
 
-    remove(search: IRTreeItem) {
+    private _removeRTreeItem(search: IRTreeItem) {
         const { unitId, sheetId: subUnitId, range, id } = search;
         const tree = this.getTree(unitId, subUnitId);
-        this._removeOneCellCache(unitId, subUnitId, range.startRow, range.startColumn, id);
-        tree.remove({
+
+        const items = tree.search({
             minX: range.startColumn,
             minY: range.startRow,
             maxX: range.endColumn,
             maxY: range.endRow,
-            id,
         });
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].id === id) {
+                tree.remove(items[i]);
+            }
+        }
+    }
+
+    remove(search: IRTreeItem) {
+        const { unitId, sheetId: subUnitId, range, id } = search;
+        const { startRow, startColumn, endRow, endColumn } = range;
+        if (this._enableOneCellCache) {
+            if (startRow === endRow && startColumn === endColumn) {
+                this._removeOneCellCache(unitId, subUnitId, range.startRow, range.startColumn, id);
+            } else {
+                this._removeCellCacheByRange(search);
+                this._removeRTreeItem(search);
+            }
+        } else {
+            this._removeRTreeItem(search);
+        }
     }
 
     bulkRemove(searchList: IRTreeItem[]) {
@@ -323,3 +361,5 @@ export class RTree {
         }
     }
 }
+
+export { type BBox, RBush };

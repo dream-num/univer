@@ -18,8 +18,10 @@
 
 import type { Dependency, IDisposable, IWorkbookData } from '@univerjs/core';
 import { DisposableCollection, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+
 import {
     BrowserClipboardService,
     DesktopMessageService,
@@ -28,14 +30,12 @@ import {
     INotificationService,
     IPlatformService,
 } from '@univerjs/ui';
-
-import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
-import { SheetSelectionRenderService } from '../../selection/selection-render.service';
-import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
-import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from '../../selection/base-selection-render.service';
+import { SheetSelectionRenderService } from '../../selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 
 const cellData = {
     0: {
@@ -560,7 +560,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
-            injector.add([CalculateFormulaService]);
+            injector.add([ICalculateFormulaService, { useClass: CalculateFormulaService }]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);

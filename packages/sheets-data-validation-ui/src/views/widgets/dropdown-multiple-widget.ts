@@ -20,9 +20,9 @@ import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, Univ
 import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
 import type { IShowDataValidationDropdownParams } from '../../commands/operations/data-validation.operation';
 import type { IDropdownInfo } from './dropdown-widget';
-import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
-import { getFontStyleString } from '@univerjs/engine-render';
-import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
+import { HorizontalAlign, ICommandService, Inject, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { CURSOR_TYPE, getFontStyleString, IRenderManagerService } from '@univerjs/engine-render';
+import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { CELL_PADDING_H, CELL_PADDING_V, Dropdown, ICON_PLACE, layoutDropdowns, MARGIN_V } from './shape';
 
@@ -33,7 +33,9 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
     ) {
         // empty
     }
@@ -79,14 +81,17 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
-        const fontRenderExtension = data.fontRenderExtension;
+        const fontRenderExtension = data?.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
-        const validation = data.dataValidation;
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
-
-        if (!validation) {
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as ListMultipleValidator;
+        if (!validator) {
             return;
         }
 
@@ -101,8 +106,6 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const { cl } = style || {};
         const color = (typeof cl === 'object' ? cl?.rgb : cl) ?? '#000';
         const fontStyle = getFontStyleString(style ?? undefined);
-        const { rule, validator: _validator } = validation;
-        const validator = _validator as ListMultipleValidator;
         const { vt: _vt, ht } = style || {};
         const vt = _vt ?? VerticalAlign.MIDDLE;
         const cellValue = getCellValueOrigin(data) ?? '';
@@ -169,8 +172,8 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     }
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
-        const { primaryWithCoord, style, data } = info;
-        const fontRenderExtension = data.fontRenderExtension;
+        const { primaryWithCoord, style, data, row, col } = info;
+        const fontRenderExtension = data?.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const cellBounding = {
@@ -179,15 +182,17 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
             startY: _cellBounding.startY + topOffset,
             endY: _cellBounding.endY - downOffset,
         };
-        const validation = data.dataValidation;
-        if (!validation) {
-            return undefined;
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as ListMultipleValidator;
+        if (!validator) {
+            return;
         }
         const cellWidth = cellBounding.endX - cellBounding.startX;
         const cellHeight = cellBounding.endY - cellBounding.startY;
         const cellValue = getCellValueOrigin(data) ?? '';
-        const { validator: _validator } = validation;
-        const validator = _validator as ListMultipleValidator;
         const items = validator.parseCellValue(cellValue);
         const fontStyle = getFontStyleString(style ?? undefined);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
@@ -195,8 +200,8 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     }
 
     calcCellAutoWidth(info: ICellRenderContext): number | undefined {
-        const { primaryWithCoord, style, data } = info;
-        const fontRenderExtension = data.fontRenderExtension;
+        const { primaryWithCoord, style, data, row, col } = info;
+        const fontRenderExtension = data?.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const cellBounding = {
@@ -205,15 +210,17 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
             startY: _cellBounding.startY + topOffset,
             endY: _cellBounding.endY - downOffset,
         };
-        const validation = data.dataValidation;
-        if (!validation) {
-            return undefined;
+        const rule = this._dataValidationModel.getRuleByLocation(info.unitId, info.subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as ListMultipleValidator;
+        if (!validator) {
+            return;
         }
         const cellWidth = cellBounding.endX - cellBounding.startX;
         const cellHeight = cellBounding.endY - cellBounding.startY;
         const cellValue = getCellValueOrigin(data) ?? '';
-        const { validator: _validator } = validation;
-        const validator = _validator as ListMultipleValidator;
         const items = validator.parseCellValue(cellValue);
         const fontStyle = getFontStyleString(style ?? undefined);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
@@ -245,5 +252,13 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         };
 
         this._commandService.executeCommand(ShowDataValidationDropdown.id, params);
+    }
+
+    onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+    }
+
+    onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
     }
 }

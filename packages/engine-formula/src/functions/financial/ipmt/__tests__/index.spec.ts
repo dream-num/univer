@@ -72,7 +72,7 @@ describe('Test ipmt function', () => {
             const fv = NumberValueObject.create(0);
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, per, nper, pv, fv, type);
-            expect(result.getValue()).toStrictEqual(-0 | 0);
+            expect(result.getValue()).toStrictEqual(-0);
         });
 
         it('Value is normal string', () => {
@@ -131,7 +131,7 @@ describe('Test ipmt function', () => {
             const result = testFunction.calculate(rate, per, nper, pv, fv, type);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, ErrorType.NA],
-                [-80000, 0, ErrorType.NAME, ErrorType.NA],
+                [-80000, -0, ErrorType.NAME, ErrorType.NA],
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);

@@ -105,6 +105,10 @@ export class InvertedIndexCache {
     }
 
     shouldContinueBuildingCache(unitId: string, sheetId: string, column: number, row: number) {
+        if (column === -1 || row === -1) {
+            return false;
+        }
+
         const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
 
         if (!columnMap) {
@@ -142,8 +146,8 @@ export class InvertedIndexCache {
 
         let _rangeStartRow = rangeStartRow;
 
-        for (const interval of result) {
-            const [start, end] = interval;
+        for (let i = 0; i < result.length; i++) {
+            const [start, end] = result[i];
 
             if (_rangeStartRow >= start) {
                 if (rangeEndRow <= end) {
@@ -153,11 +157,19 @@ export class InvertedIndexCache {
 
                 rowsInCache.push([_rangeStartRow, end]);
                 _rangeStartRow = end + 1;
+
+                if (i === result.length - 1 && _rangeStartRow <= rangeEndRow) {
+                    rowsNotInCache.push([_rangeStartRow, rangeEndRow]);
+                }
             } else {
                 if (rangeEndRow > end) {
                     rowsInCache.push([start, end]);
                     rowsNotInCache.push([_rangeStartRow, start - 1]);
                     _rangeStartRow = end + 1;
+
+                    if (i === result.length - 1 && _rangeStartRow <= rangeEndRow) {
+                        rowsNotInCache.push([_rangeStartRow, rangeEndRow]);
+                    }
                     continue;
                 }
 

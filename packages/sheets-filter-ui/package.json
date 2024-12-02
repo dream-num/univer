@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter-ui",
-    "version": "0.4.2",
+    "version": "0.5.1",
     "private": false,
     "description": "Univer Sheets Filter UI",
     "author": "DreamNum <developer@univer.ai>",
@@ -23,12 +23,11 @@
         "./*": "./src/*",
         "./locale/*": "./src/locale/*.ts"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
@@ -41,8 +40,12 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -56,36 +59,37 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "univer-cli build"
     },
     "peerDependencies": {
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.84",
+        "@univerjs/icons": "^0.2.8",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
-        "rc-virtual-list": "^3.14.5"
+        "rc-virtual-list": "^3.15.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "less": "^4.2.0",
+        "less": "^4.2.1",
+        "postcss": "^8.4.49",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "tailwindcss": "^3.4.15",
+        "typescript": "^5.7.2",
+        "vite": "^6.0.1",
+        "vitest": "^2.1.6"
     },
-    "univerSpace": {
+    "space": {
         ".": {
             "import": "./lib/es/index.js",
             "require": "./lib/cjs/index.js",
@@ -96,7 +100,11 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./locale/*": {
+            "import": "./lib/es/locale/*.js",
+            "require": "./lib/cjs/locale/*.js",
+            "types": "./lib/types/locale/*.d.ts"
+        },
+        "./lib/*": "./lib/*"
     }
 }

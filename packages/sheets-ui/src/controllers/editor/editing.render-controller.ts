@@ -19,9 +19,9 @@
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+import type { WorkbookSelectionModel } from '@univerjs/sheets';
 
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -36,7 +36,6 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
-    numfmt,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -56,8 +55,9 @@ import {
     DeviceInputEventType,
     IRenderManagerService,
 } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+
+import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -88,7 +88,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     /** If the corresponding unit is active and prepared for editing. */
     private _isUnitEditing = false;
 
-    private _workbookSelections: WorkbookSelections;
+    private _workbookSelections: WorkbookSelectionModel;
 
     private _d: Nullable<IDisposable>;
     _cursorTimeout: NodeJS.Timeout;
@@ -109,7 +109,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
@@ -292,7 +293,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
         */
     private _commandExecutedListener(d: DisposableCollection) {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
+        const updateCommandList = [RichTextEditingMutation.id];
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (updateCommandList.includes(command.id)) {
@@ -552,6 +553,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         worksheet = workbook.getActiveSheet();
 
         // If cross-sheet operation, switch current sheet first, then const cellData
+        // This should moved to after cell editor
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
             documentDataModel,
@@ -566,8 +568,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const finalCell = await this._editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, cellData);
-
+        const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,
             unitId,
@@ -714,8 +715,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            resetBodyStyle(snapshot.body!, removeStyle);
-
+            emptyBody(snapshot.body!, removeStyle);
+            snapshot.drawings = {};
+            snapshot.drawingsOrder = [];
             documentDataModel.reset(snapshot);
             documentViewModel.reset(documentDataModel);
         };
@@ -726,7 +728,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 }
 
-// eslint-disable-next-line
 export function getCellDataByInput(
     cellData: ICellData,
     documentDataModel: Nullable<DocumentDataModel>,
@@ -758,8 +759,15 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
+    if (snapshot.drawingsOrder?.length) {
+        cellData.v = '';
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = snapshot;
+        cellData.t = CellValueType.STRING;
+    }
     // Text format ('@@@') has the highest priority
-    if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
+    else if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
         // If the style is text format ('@@@'), the data should be set as a string.
         cellData.v = newDataStream;
         cellData.f = null;
@@ -799,13 +807,6 @@ export function getCellDataByInput(
             cellData.f = null;
             cellData.si = null;
         }
-    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.NUMBER;
     } else {
         // If the data is empty, the data is set to null.
         if (newDataStream === '' && cellData.v == null && cellData.p == null) {
@@ -866,7 +867,7 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
     return null;
 }
 
-function resetBodyStyle(body: IDocumentBody, removeStyle = false) {
+function emptyBody(body: IDocumentBody, removeStyle = false) {
     body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
     if (body.textRuns != null) {

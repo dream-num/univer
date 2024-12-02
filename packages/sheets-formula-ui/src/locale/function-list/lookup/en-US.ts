@@ -189,8 +189,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'A reference to a cell or range of cells.' },
         },
     },
     GETPIVOTDATA: {

@@ -15,9 +15,9 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IUniFormulaService, UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
+import { DependentOn, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 
+import { IUniFormulaService, UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { DOC_FORMULA_UI_PLUGIN_NAME } from './const';
 import { DocUniFormulaInputController } from './controllers/doc-formula-input.controller';
 import { SlideUniFormulaInputController } from './controllers/slide-formula-input.controller';
@@ -50,12 +50,16 @@ export class UniverDocUniFormulaUIPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(IUniFormulaService);
+        touchDependencies(this._injector, [
+            [IUniFormulaService],
+        ]);
     }
 
     override onSteady(): void {
-        this._injector.get(UniFormulaUniController);
-        this._injector.get(DocUniFormulaInputController);
-        this._injector.get(SlideUniFormulaInputController);
+        touchDependencies(this._injector, [
+            [UniFormulaUniController],
+            [DocUniFormulaInputController],
+            [SlideUniFormulaInputController],
+        ]);
     }
 }

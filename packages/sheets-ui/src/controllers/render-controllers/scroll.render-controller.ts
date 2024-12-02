@@ -30,7 +30,7 @@ import {
     Inject,
     Injector,
     RANGE_TYPE, toDisposable } from '@univerjs/core';
-import { IRenderManagerService, PointerInput, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -40,6 +40,7 @@ import { getSheetObject } from '../utils/component-tools';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
+const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 /**
  * This controller handles scroll logic in sheet interaction.
  */
@@ -61,7 +62,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._initSkeletonListener();
     }
 
-    scrollToRange(range: IRange): boolean {
+    scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
         let { endRow, endColumn, startColumn, startRow } = range;
         const bounding = this._getViewportBounding();
         if (range.rangeType === RANGE_TYPE.ROW) {
@@ -72,12 +73,12 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             endRow = 0;
         }
 
-        if (bounding) {
+        if (bounding && !forceTop && !forceLeft) {
             const row = bounding.startRow > endRow ? startRow : endRow;
             const col = bounding.startColumn > endColumn ? startColumn : endColumn;
             return this._scrollToCell(row, col);
         } else {
-            return this._scrollToCell(startRow, startColumn);
+            return this._scrollToCell(startRow, startColumn, forceTop, forceLeft);
         }
     }
 
@@ -163,7 +164,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (!viewMain) return;
 
         this.disposeWithMe(
-            // eslint-disable-next-line complexity
             scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
                     return;
@@ -171,62 +171,36 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 let offsetX = 0;
                 let offsetY = 0;
-
                 const isLimitedStore = viewMain.limitedScroll();
-                if (evt.inputIndex === PointerInput.MouseWheelX) {
-                    const deltaFactor = Math.abs(evt.deltaX);
-                    const scrollNum = deltaFactor;
-                    // show more content on the right，evt.deltaX > 0, more content on the left, evt.deltaX < 0
-                    offsetX = evt.deltaX > 0 ? scrollNum : -scrollNum;
-                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedX) {
-                            state.stopPropagation();
-                        }
-                    } else if (viewMain.isWheelPreventDefaultX) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedX) {
-                        evt.preventDefault();
-                    }
+                // what????
+                // const scrollNum = Math.abs(evt.deltaX);
+                // offsetX = evt.deltaX > 0 ? scrollNum : -scrollNum;
+                offsetX = evt.deltaX;
+
+                // with shift, scrollY will be scrollX
+                if (evt.shiftKey) {
+                    // mac is weird, when using track pad, scroll vertical with shift key, should get delta value from deltaY.
+                    // but when using with mousewheel, scroll with shift key, only deltaX has value.
+                    offsetX = (evt.deltaY || evt.deltaX) * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
+                } else {
+                    offsetY = evt.deltaY;
                 }
-                if (evt.inputIndex === PointerInput.MouseWheelY) {
-                    const deltaFactor = Math.abs(evt.deltaY);
-                    let scrollNum = deltaFactor;
-                    if (evt.shiftKey) {
-                        scrollNum *= 3;
-                        if (evt.deltaY > 0) {
-                            offsetX = scrollNum;
-                        } else {
-                            offsetX = -scrollNum;
-                        }
-                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                            if (!isLimitedStore?.isLimitedX) {
-                                state.stopPropagation();
-                            }
-                        } else if (viewMain.isWheelPreventDefaultX) {
-                            evt.preventDefault();
-                        } else if (!isLimitedStore?.isLimitedX) {
-                            evt.preventDefault();
-                        }
-                    } else {
-                        offsetY = evt.deltaY > 0 ? scrollNum : -scrollNum;
-                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
-
-                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                            if (!isLimitedStore?.isLimitedY) {
-                                state.stopPropagation();
-                            }
-                        } else if (viewMain.isWheelPreventDefaultY) {
-                            evt.preventDefault();
-                        } else if (!isLimitedStore?.isLimitedY) {
-                            evt.preventDefault();
-                        }
-                    }
-                }
+                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX, offsetY });
                 this._context.scene.makeDirty(true);
+
+                // if viewport still have space to scroll, prevent default event. (DO NOT move canvas element)
+                // if scrolling is reaching limit, let scrolling event do the default behavior.
+                if (isLimitedStore && !isLimitedStore.isLimitedX && !isLimitedStore.isLimitedY) {
+                    evt.preventDefault();
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        state.stopPropagation();
+                    }
+                }
+
+                if (viewMain.isWheelPreventDefaultX && viewMain.isWheelPreventDefaultY) {
+                    evt.preventDefault();
+                }
             })
         );
     }
@@ -257,9 +231,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     // prev scrolling state from rawScrollInfo$
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = rawScrollInfo;
 
-                    const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                    const { startX, startY } = skeleton.getCellWithCoordByIndex(
                         sheetViewStartRow,
-                        sheetViewStartColumn
+                        sheetViewStartColumn,
+                        false
                     );
 
                     const viewportScrollX = startX + offsetX;
@@ -475,11 +450,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
 
         const bounds = viewport.getBounding();
-        return skeleton.getRowColumnSegmentByViewBound(bounds.viewBound);
+        return skeleton.getRangeByViewBound(bounds.viewBound);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _scrollToCell(row: number, column: number): boolean {
+    private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
@@ -561,8 +536,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: startSheetViewRow,
-            sheetViewStartColumn: startSheetViewColumn,
+            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : startSheetViewRow,
+            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : startSheetViewColumn,
             offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });

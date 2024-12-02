@@ -21,7 +21,7 @@ import type { MenuConfig } from '@univerjs/ui';
 /**
  * Base configuration for the plugin.
  */
-export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula.base.config';
+export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula-ui.base.config';
 
 export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 

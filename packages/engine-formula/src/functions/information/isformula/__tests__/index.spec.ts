@@ -64,7 +64,7 @@ const getTestWorkbookData = (): IWorkbookData => {
                         2: {
                             v: 3,
                             t: CellValueType.NUMBER,
-                            f: 'SUM(A1:B1)',
+                            f: '=SUM(A1:B1)',
                         },
                         3: {
                             v: '#NAME?',

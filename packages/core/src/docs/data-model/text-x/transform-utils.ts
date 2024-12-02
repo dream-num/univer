@@ -17,9 +17,9 @@
 /* eslint-disable no-param-reassign */
 
 import type { Nullable } from '../../../shared';
-import type { ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
+import { CustomDecorationType, type ICustomDecoration, type ICustomRange, type IDocumentBody, type IParagraph, type IParagraphStyle, type ITextRun, type ITextStyle } from '../../../types/interfaces';
 import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {
@@ -30,9 +30,19 @@ enum TextXTransformType {
 }
 
 // eslint-disable-next-line max-lines-per-function, complexity
-function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[], transformType: TextXTransformType) {
-    if (originTextRuns.length === 0) {
+function transformTextRuns(
+    originTextRuns: ITextRun[] | undefined,
+    targetTextRuns: ITextRun[] | undefined,
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
+): ITextRun[] | undefined {
+    if (originTextRuns == null || targetTextRuns == null) {
         return targetTextRuns;
+    }
+
+    if (originTextRuns.length === 0 || targetTextRuns.length === 0) {
+        return [];
     }
 
     targetTextRuns = Tools.deepClone(targetTextRuns);
@@ -55,7 +65,6 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
         return false;
     }
 
-    // TODO: @JOCS, I think no need to iterate over the text runs and compare them! because the textRuns length is always 1.
     while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: targetStyle } = targetTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: originStyle, sId } = originTextRuns[removeIndex];
@@ -63,15 +72,52 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
 
         if (transformType === TextXTransformType.COVER) {
             newTs = { ...targetStyle };
+
+            if (originCoverType === UpdateDocsAttributeType.COVER && targetCoverType === UpdateDocsAttributeType.REPLACE && originStyle) {
+                newTs = Object.assign({}, originStyle, newTs);
+            }
         } else {
             newTs = { ...targetStyle };
 
-            if (originStyle) {
-                const keys = Object.keys(originStyle);
+            if (originCoverType === UpdateDocsAttributeType.REPLACE) {
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    // If they are all REPLACE types, the highest priority is retained when transforming.
+                    newTs = { ...originStyle };
+                } else {
+                    // If the target action is COVER and has a low priority, then the origin field should not be cover.
+                    if (targetStyle && originStyle) {
+                        const keys = Object.keys(targetStyle);
 
-                for (const key of keys) {
-                    if (newTs[key as keyof ITextStyle]) {
-                        delete newTs[key as keyof ITextStyle];
+                        for (const key of keys) {
+                            if (originStyle[key as keyof ITextStyle]) {
+                                delete newTs[key as keyof ITextStyle];
+                            }
+                        }
+                    }
+                }
+            } else {
+                // If the origin is of type Cover and the target action is of type REPLACE
+                // and has a low priority, then all fields in origin should be copied to the target
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (originStyle) {
+                        const keys = Object.keys(originStyle);
+
+                        for (const key of keys) {
+                            if (originStyle[key as keyof ITextStyle] !== undefined) {
+                                newTs[key as keyof ITextStyle] = originStyle[key as keyof ITextStyle] as any;
+                            }
+                        }
+                    }
+                } else {
+                    // If they are all of the Cover type, then the fields in the Origin need to be deleted.
+                    if (originStyle) {
+                        const keys = Object.keys(originStyle);
+
+                        for (const key of keys) {
+                            if (newTs[key as keyof ITextStyle] !== undefined) {
+                                delete newTs[key as keyof ITextStyle];
+                            }
+                        }
                     }
                 }
             }
@@ -147,62 +193,137 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
         }
     }
 
-    return normalizeTextRuns(newUpdateTextRuns);
+    return normalizeTextRuns(newUpdateTextRuns, true);
 }
 
 function transformCustomRanges(
-    originCustomRanges: ICustomRange[],
-    targetCustomRanges: ICustomRange[],
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
-): ICustomRange[] {
-    if (originCustomRanges.length === 0) {
-        return Tools.deepClone(targetCustomRanges);
+    originCustomRanges: ICustomRange[] | undefined,
+    targetCustomRanges: ICustomRange[] | undefined,
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
+): ICustomRange[] | undefined {
+    if (originCustomRanges == null || targetCustomRanges == null) {
+        return targetCustomRanges;
     }
 
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
+    if (originCustomRanges.length === 0 || targetCustomRanges.length === 0) {
+        return [];
+    }
+
+    if (originCustomRanges.length > 1 || targetCustomRanges.length > 1) {
+        throw new Error('CustomRanges is only supported transform for length one now.');
+    }
+
+    const originCustomRange = originCustomRanges[0];
+    const targetCustomRange = targetCustomRanges[0];
+
+    if (originCoverType === UpdateDocsAttributeType.REPLACE) {
         return transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-            ? Tools.deepClone(originCustomRanges)
-            : Tools.deepClone(targetCustomRanges);
+            ? [Tools.deepClone(originCustomRange)]
+            : [Tools.deepClone(targetCustomRange)];
     } else {
-        throw new Error('CustomRanges is only supported in replace mode.');
+        if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
+            }
+
+            return [customRange];
+        } else {
+            const customRange: ICustomRange = Tools.deepClone(targetCustomRange);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                Object.assign(customRange, Tools.deepClone(originCustomRange));
+
+                // Because customRange behavior like REPLACE.
+                // const keys = Object.keys(originCustomRange);
+
+                // for (const key of keys) {
+                //     // Should not delete `startIndex` and `endIndex`.
+                //     if (customRange[key as keyof ICustomRange] !== undefined) {
+                //         delete customRange[key as keyof ICustomRange];
+                //     }
+                // }
+            }
+
+            return [customRange];
+        }
     }
 }
 
 // At present, only the two properties of paragraphStyle and bullet are handled,
 // paragraphStyle is treated separately, while bullet is treated as a whole because
 // the properties in bullet are related
+
+// eslint-disable-next-line complexity, max-lines-per-function
 function transformParagraph(
     originParagraph: IParagraph,
     targetParagraph: IParagraph,
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+    originCoverType: UpdateDocsAttributeType,
+    targetCoverType: UpdateDocsAttributeType,
+    transformType: TextXTransformType
 ): IParagraph {
     const paragraph: IParagraph = {
         startIndex: targetParagraph.startIndex,
     };
 
     if (targetParagraph.paragraphStyle) {
-        if (originParagraph.paragraphStyle == null) {
-            paragraph.paragraphStyle = {
-                ...targetParagraph.paragraphStyle,
-            };
-        } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.paragraphStyle = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.paragraphStyle }
-                    : { ...targetParagraph.paragraphStyle };
+        paragraph.paragraphStyle = Tools.deepClone(targetParagraph.paragraphStyle);
+
+        if (originParagraph.paragraphStyle) {
+            if (originCoverType === UpdateDocsAttributeType.REPLACE) {
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        paragraph.paragraphStyle = {
+                            ...originParagraph.paragraphStyle,
+                        };
+                    }
+                } else {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    }
+                }
             } else {
-                paragraph.paragraphStyle = {
-                    ...targetParagraph.paragraphStyle,
-                };
+                if (targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
 
-                if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
-                    const keys = Object.keys(originParagraph.paragraphStyle);
+                        for (const key of keys) {
+                            if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
 
-                    for (const key of keys) {
-                        if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
-                            delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    }
+                } else {
+                    if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
+                                delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                            }
                         }
                     }
                 }
@@ -210,18 +331,22 @@ function transformParagraph(
         }
     }
 
-    if (targetParagraph.bullet) {
-        if (originParagraph.bullet == null) {
-            paragraph.bullet = {
-                ...targetParagraph.bullet,
-            };
+    if (originCoverType === UpdateDocsAttributeType.REPLACE && targetCoverType === UpdateDocsAttributeType.REPLACE) {
+        paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+            ? Tools.deepClone(originParagraph.bullet)
+            : Tools.deepClone(targetParagraph.bullet);
+    } else {
+        if (originParagraph.bullet === undefined) {
+            paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
         } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.bullet }
-                    : { ...targetParagraph.bullet };
+            if (originCoverType === UpdateDocsAttributeType.REPLACE || targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.bullet = transformType === TextXTransformType.COVER && targetParagraph.bullet
+                    ? Tools.deepClone(targetParagraph.bullet)
+                    : Tools.deepClone(originParagraph.bullet);
             } else {
-                throw new Error('Bullet is only supported in replace mode.');
+                if (transformType === TextXTransformType.COVER && targetParagraph.bullet !== undefined) {
+                    paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
+                }
             }
         }
     }
@@ -229,49 +354,115 @@ function transformParagraph(
     return paragraph;
 }
 
+function transformCustomDecorations(
+    originCustomDecorations: ICustomDecoration[] | undefined,
+    targetCustomDecorations: ICustomDecoration[] | undefined
+) {
+    if (originCustomDecorations == null || targetCustomDecorations == null) {
+        return targetCustomDecorations;
+    }
+
+    if (originCustomDecorations.length === 0 || targetCustomDecorations.length === 0) {
+        return Tools.deepClone(targetCustomDecorations);
+    }
+
+    const customDecorations: ICustomDecoration[] = [];
+
+    for (const decoration of targetCustomDecorations) {
+        const { id, type } = decoration;
+
+        let pushed = false;
+
+        for (const originDecoration of originCustomDecorations) {
+            if (originDecoration.id === id) {
+                if (originDecoration.type === CustomDecorationType.DELETED || type === CustomDecorationType.DELETED) {
+                    pushed = true;
+                    customDecorations.push({
+                        ...decoration,
+                        type: CustomDecorationType.DELETED,
+                    });
+                }
+                break;
+            }
+        }
+
+        if (!pushed) {
+            customDecorations.push(decoration);
+        }
+    }
+
+    return customDecorations;
+}
+
+interface ITransformBodyResult {
+    body: IDocumentBody;
+    coverType: UpdateDocsAttributeType;
+}
+
 // eslint-disable-next-line max-lines-per-function, complexity
 export function transformBody(
     thisAction: IRetainAction,
     otherAction: IRetainAction,
     priority: boolean = false
-): IDocumentBody {
-    const { body: thisBody, coverType: thisCoverType } = thisAction;
-    const { body: otherBody, coverType: otherCoverType } = otherAction;
+): ITransformBodyResult {
+    const { body: thisBody, coverType: thisCoverType = UpdateDocsAttributeType.COVER } = thisAction;
+    const { body: otherBody, coverType: otherCoverType = UpdateDocsAttributeType.COVER } = otherAction;
 
     if (thisBody == null || thisBody.dataStream !== '' || otherBody == null || otherBody.dataStream !== '') {
         throw new Error('Data stream is not supported in retain transform.');
-    }
-
-    if (thisCoverType !== otherCoverType) {
-        throw new Error('Cover type is not consistent.');
     }
 
     const retBody: IDocumentBody = {
         dataStream: '',
     };
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [] } = otherBody;
+    const coverType = otherCoverType;
 
-    let textRuns: ITextRun[] = [];
-    if (priority) {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, TextXTransformType.COVER_ONLY_NOT_EXISTED);
-    } else {
-        textRuns = transformTextRuns(thisTextRuns, otherTextRuns, TextXTransformType.COVER);
-    }
-    if (textRuns.length) {
+    const {
+        textRuns: thisTextRuns,
+        paragraphs: thisParagraphs = [],
+        customRanges: thisCustomRanges,
+        customDecorations: thisCustomDecorations,
+    } = thisBody;
+    const {
+        textRuns: otherTextRuns,
+        paragraphs: otherParagraphs = [],
+        customRanges: otherCustomRanges,
+        customDecorations: otherCustomDecorations,
+    } = otherBody;
+
+    const textRuns = transformTextRuns(
+        thisTextRuns,
+        otherTextRuns,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    if (textRuns) {
         retBody.textRuns = textRuns;
     }
 
-    let customRanges: ICustomRange[] = [];
-    if (priority) {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED, thisCoverType);
-    } else {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER, thisCoverType);
+    const customRanges = transformCustomRanges(
+        thisCustomRanges,
+        otherCustomRanges,
+        thisCoverType,
+        otherCoverType,
+        priority ? TextXTransformType.COVER_ONLY_NOT_EXISTED : TextXTransformType.COVER
+    );
+
+    if (customRanges) {
+        retBody.customRanges = customRanges;
     }
 
-    if (customRanges.length) {
-        retBody.customRanges = customRanges;
+    // Transform custom decorations.
+    const customDecorations = transformCustomDecorations(
+        thisCustomDecorations,
+        otherCustomDecorations
+    );
+
+    if (customDecorations) {
+        retBody.customDecorations = customDecorations;
     }
 
     const paragraphs: IParagraph[] = [];
@@ -295,11 +486,18 @@ export function transformBody(
                 paragraph = transformParagraph(
                     thisParagraph,
                     otherParagraph,
-                    TextXTransformType.COVER_ONLY_NOT_EXISTED,
-                    thisCoverType
+                    thisCoverType,
+                    otherCoverType,
+                    TextXTransformType.COVER_ONLY_NOT_EXISTED
                 );
             } else {
-                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER, thisCoverType);
+                paragraph = transformParagraph(
+                    thisParagraph,
+                    otherParagraph,
+                    thisCoverType,
+                    otherCoverType,
+                    TextXTransformType.COVER
+                );
             }
 
             paragraphs.push(paragraph);
@@ -322,5 +520,8 @@ export function transformBody(
         retBody.paragraphs = paragraphs;
     }
 
-    return retBody;
+    return {
+        coverType,
+        body: retBody,
+    };
 }

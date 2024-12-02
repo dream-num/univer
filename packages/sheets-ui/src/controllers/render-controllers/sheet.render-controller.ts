@@ -30,7 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import {
@@ -238,7 +238,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
-
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -368,29 +367,29 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const { id: commandId } = command;
 
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
+                const params = command.params;
+                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                // const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();
+
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
                 const workbookId = this._context.unitId;
                 const worksheetId = worksheet.getSheetId();
-                const params = command.params;
-                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
 
                 if (unitId !== workbookId || subUnitId !== worksheetId) {
                     return;
                 }
 
-                if (commandId !== SetWorksheetActiveOperation.id) {
-                    this._sheetSkeletonManagerService.makeDirty({
-                        sheetId: worksheetId,
-                        commandId,
-                    }, true);
-                }
+                // DO NOT judge if SetWorksheetActiveOperation is executed.
+                // issue #univer-pro/issues/2310
+                // if (commandId !== SetWorksheetActiveOperation.id) {
+                // }
+                this._sheetSkeletonManagerService.makeDirty({
+                    sheetId: worksheetId,
+                    commandId,
+                }, true);
 
-                // Change the skeleton to render when the sheet is changed.
-                // Should also check the init sheet.
-                // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
-                // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,

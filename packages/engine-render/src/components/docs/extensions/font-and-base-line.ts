@@ -21,7 +21,7 @@ import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { Vector2 } from '../../../basics/vector2';
-import { Checkbox } from '../../../shape';
+import { CheckboxShape } from '../../../shape';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -33,8 +33,6 @@ export class FontAndBaseLine extends docExtension {
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
-
-    private _preFontString = '';
 
     private _preFontColor = '';
 
@@ -57,8 +55,8 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        if (this._preFontString !== fontStyle?.fontString) {
-            ctx.font = this._preFontString = fontStyle?.fontString || '';
+        if (ctx.font !== fontStyle?.fontString) {
+            ctx.font = fontStyle?.fontString || '';
         }
 
         const { cl: colorStyle, va: baselineOffset } = textStyle;
@@ -113,7 +111,7 @@ export class FontAndBaseLine extends docExtension {
                 const leftOffset = left;
                 const BORDER_WIDTH = 1;
                 ctx.translate(leftOffset - BORDER_WIDTH / 2, topOffset - BORDER_WIDTH / 2);
-                Checkbox.drawWith(ctx, {
+                CheckboxShape.drawWith(ctx, {
                     width: size,
                     height: size,
                     checked: content === CHECKED_GLYPH,
@@ -126,7 +124,6 @@ export class FontAndBaseLine extends docExtension {
     }
 
     override clearCache() {
-        this._preFontString = '';
         this._preFontColor = '';
     }
 }

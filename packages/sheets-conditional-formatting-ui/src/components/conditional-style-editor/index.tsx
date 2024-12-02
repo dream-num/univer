@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, useDependency } from '@univerjs/core';
+import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
 import { ComponentManager } from '@univerjs/ui';
 import cl from 'clsx';
-import type { IHighlightCell } from '@univerjs/sheets-conditional-formatting';
-import { removeUndefinedAttr } from '@univerjs/sheets-conditional-formatting';
+import React, { useEffect, useState } from 'react';
 import { ColorPicker } from '../color-picker';
 import styles from './index.module.less';
 
@@ -103,7 +103,11 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
     return (
-        <div className={`${styles.cfStyleEdit} ${className}`}>
+        <div className={`
+          ${styles.cfStyleEdit}
+          ${className}
+        `}
+        >
             { BoldSingleIcon && (
                 <div className={cl({ [styles.isActive]: getBooleanFromNumber(isBold || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}>
                     <BoldSingleIcon />

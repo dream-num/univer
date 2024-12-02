@@ -15,6 +15,11 @@
  */
 
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
+import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
+
 import {
     Direction,
     Disposable,
@@ -24,16 +29,11 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
-import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../../utils/component-tools';
 
@@ -187,9 +187,10 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     // data source: scroll-manager.service.ts@_scrollInfo
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = rawScrollInfo;
 
-                    const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                    const { startX, startY } = skeleton.getCellWithCoordByIndex(
                         sheetViewStartRow,
-                        sheetViewStartColumn
+                        sheetViewStartColumn,
+                        false
                     );
 
                     // viewportScrollXByEvent is not same as viewportScrollX, by event, the value may be negative, or over max
@@ -498,7 +499,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         }
 
         const bounds = viewport.getBounding();
-        return skeleton.getRowColumnSegment(bounds);
+        return skeleton.getRangeByBounding(bounds);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

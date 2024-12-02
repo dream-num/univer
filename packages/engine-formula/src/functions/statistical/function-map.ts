@@ -16,6 +16,7 @@
 
 import { Avedev } from './avedev';
 import { Average } from './average';
+import { AverageWeighted } from './average-weighted';
 import { Averagea } from './averagea';
 import { Averageif } from './averageif';
 import { Averageifs } from './averageifs';
@@ -49,32 +50,83 @@ import { FTest } from './f-test';
 import { Fisher } from './fisher';
 import { Fisherinv } from './fisherinv';
 import { Forecast } from './forecast';
+import { Frequency } from './frequency';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
+import { Gamma } from './gamma';
+import { GammaDist } from './gamma-dist';
+import { GammaInv } from './gamma-inv';
+import { Gammaln } from './gammaln';
+import { Gauss } from './gauss';
+import { Geomean } from './geomean';
+import { Growth } from './growth';
+import { Harmean } from './harmean';
+import { HypgeomDist } from './hypgeom-dist';
 import { Intercept } from './intercept';
+import { Kurt } from './kurt';
+import { Large } from './large';
+import { Linest } from './linest';
+import { Logest } from './logest';
+import { LognormDist } from './lognorm-dist';
+import { LognormInv } from './lognorm-inv';
+import { Marginoferror } from './marginoferror';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
+import { Median } from './median';
 import { Min } from './min';
 import { Mina } from './mina';
 import { Minifs } from './minifs';
+import { ModeMult } from './mode-mult';
+import { ModeSngl } from './mode-sngl';
+import { NegbinomDist } from './negbinom-dist';
 import { NormDist } from './norm-dist';
 import { NormInv } from './norm-inv';
 import { NormSDist } from './norm-s-dist';
 import { NormSInv } from './norm-s-inv';
+import { Pearson } from './pearson';
+import { PercentileExc } from './percentile-exc';
+import { PercentileInc } from './percentile-inc';
+import { PercentrankExc } from './percentrank-exc';
+import { PercentrankInc } from './percentrank-inc';
+import { Permut } from './permut';
+import { Permutationa } from './permutationa';
+import { Phi } from './phi';
+import { PoissonDist } from './poisson-dist';
+import { Prob } from './prob';
+import { QuartileExc } from './quartile-exc';
+import { QuartileInc } from './quartile-inc';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
+import { Rsq } from './rsq';
+import { Skew } from './skew';
+import { SkewP } from './skew-p';
+import { Slope } from './slope';
+import { Small } from './small';
+import { Standardize } from './standardize';
 import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
 import { Stdevpa } from './stdevpa';
+import { Steyx } from './steyx';
+import { TDist } from './t-dist';
+import { TDist2t } from './t-dist-2t';
+import { TDistRt } from './t-dist-rt';
+import { TInv } from './t-inv';
+import { TInv2t } from './t-inv-2t';
+import { TTest } from './t-test';
+import { Trend } from './trend';
+import { Trimmean } from './trimmean';
 import { VarP } from './var-p';
 import { VarS } from './var-s';
 import { Vara } from './vara';
 import { Varpa } from './varpa';
+import { WeibullDist } from './weibull-dist';
+import { ZTest } from './z-test';
 
 export const functionStatistical = [
     [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
+    [AverageWeighted, FUNCTION_NAMES_STATISTICAL.AVERAGE_WEIGHTED],
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],
     [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
@@ -109,25 +161,76 @@ export const functionStatistical = [
     [Fisherinv, FUNCTION_NAMES_STATISTICAL.FISHERINV],
     [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST],
     [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST_LINEAR],
+    [Frequency, FUNCTION_NAMES_STATISTICAL.FREQUENCY],
+    [Gamma, FUNCTION_NAMES_STATISTICAL.GAMMA],
+    [GammaDist, FUNCTION_NAMES_STATISTICAL.GAMMA_DIST],
+    [GammaInv, FUNCTION_NAMES_STATISTICAL.GAMMA_INV],
+    [Gammaln, FUNCTION_NAMES_STATISTICAL.GAMMALN],
+    [Gammaln, FUNCTION_NAMES_STATISTICAL.GAMMALN_PRECISE],
+    [Gauss, FUNCTION_NAMES_STATISTICAL.GAUSS],
+    [Geomean, FUNCTION_NAMES_STATISTICAL.GEOMEAN],
+    [Growth, FUNCTION_NAMES_STATISTICAL.GROWTH],
+    [Harmean, FUNCTION_NAMES_STATISTICAL.HARMEAN],
+    [HypgeomDist, FUNCTION_NAMES_STATISTICAL.HYPGEOM_DIST],
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
+    [Kurt, FUNCTION_NAMES_STATISTICAL.KURT],
+    [Large, FUNCTION_NAMES_STATISTICAL.LARGE],
+    [Linest, FUNCTION_NAMES_STATISTICAL.LINEST],
+    [Logest, FUNCTION_NAMES_STATISTICAL.LOGEST],
+    [LognormDist, FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST],
+    [LognormInv, FUNCTION_NAMES_STATISTICAL.LOGNORM_INV],
+    [Marginoferror, FUNCTION_NAMES_STATISTICAL.MARGINOFERROR],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
+    [Median, FUNCTION_NAMES_STATISTICAL.MEDIAN],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Mina, FUNCTION_NAMES_STATISTICAL.MINA],
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
+    [ModeMult, FUNCTION_NAMES_STATISTICAL.MODE_MULT],
+    [ModeSngl, FUNCTION_NAMES_STATISTICAL.MODE_SNGL],
+    [NegbinomDist, FUNCTION_NAMES_STATISTICAL.NEGBINOM_DIST],
     [NormDist, FUNCTION_NAMES_STATISTICAL.NORM_DIST],
     [NormInv, FUNCTION_NAMES_STATISTICAL.NORM_INV],
     [NormSDist, FUNCTION_NAMES_STATISTICAL.NORM_S_DIST],
     [NormSInv, FUNCTION_NAMES_STATISTICAL.NORM_S_INV],
+    [Pearson, FUNCTION_NAMES_STATISTICAL.PEARSON],
+    [PercentileExc, FUNCTION_NAMES_STATISTICAL.PERCENTILE_EXC],
+    [PercentileInc, FUNCTION_NAMES_STATISTICAL.PERCENTILE_INC],
+    [PercentrankExc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_EXC],
+    [PercentrankInc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_INC],
+    [Permut, FUNCTION_NAMES_STATISTICAL.PERMUT],
+    [Permutationa, FUNCTION_NAMES_STATISTICAL.PERMUTATIONA],
+    [Phi, FUNCTION_NAMES_STATISTICAL.PHI],
+    [PoissonDist, FUNCTION_NAMES_STATISTICAL.POISSON_DIST],
+    [Prob, FUNCTION_NAMES_STATISTICAL.PROB],
+    [QuartileExc, FUNCTION_NAMES_STATISTICAL.QUARTILE_EXC],
+    [QuartileInc, FUNCTION_NAMES_STATISTICAL.QUARTILE_INC],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
+    [Rsq, FUNCTION_NAMES_STATISTICAL.RSQ],
+    [Skew, FUNCTION_NAMES_STATISTICAL.SKEW],
+    [SkewP, FUNCTION_NAMES_STATISTICAL.SKEW_P],
+    [Slope, FUNCTION_NAMES_STATISTICAL.SLOPE],
+    [Small, FUNCTION_NAMES_STATISTICAL.SMALL],
+    [Standardize, FUNCTION_NAMES_STATISTICAL.STANDARDIZE],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],
     [Stdevpa, FUNCTION_NAMES_STATISTICAL.STDEVPA],
+    [Steyx, FUNCTION_NAMES_STATISTICAL.STEYX],
+    [TDist, FUNCTION_NAMES_STATISTICAL.T_DIST],
+    [TDist2t, FUNCTION_NAMES_STATISTICAL.T_DIST_2T],
+    [TDistRt, FUNCTION_NAMES_STATISTICAL.T_DIST_RT],
+    [TInv, FUNCTION_NAMES_STATISTICAL.T_INV],
+    [TInv2t, FUNCTION_NAMES_STATISTICAL.T_INV_2T],
+    [TTest, FUNCTION_NAMES_STATISTICAL.T_TEST],
+    [Trend, FUNCTION_NAMES_STATISTICAL.TREND],
+    [Trimmean, FUNCTION_NAMES_STATISTICAL.TRIMMEAN],
     [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
     [Vara, FUNCTION_NAMES_STATISTICAL.VARA],
     [Varpa, FUNCTION_NAMES_STATISTICAL.VARPA],
+    [WeibullDist, FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST],
+    [ZTest, FUNCTION_NAMES_STATISTICAL.Z_TEST],
 ];

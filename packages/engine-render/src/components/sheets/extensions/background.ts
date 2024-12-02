@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale, ISelectionCellWithMergeInfo, ObjectMatrix } from '@univerjs/core';
+import type { ICellWithCoord, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -36,14 +36,14 @@ const PRINTING_Z_INDEX = 21;
 interface IRenderBGContext {
     ctx: UniverRenderingContext;
     spreadsheetSkeleton: SpreadsheetSkeleton;
-    backgroundPositions: ObjectMatrix<ISelectionCellWithMergeInfo>;
+    backgroundPositions: ObjectMatrix<ICellWithCoord>;
     checkOutOfViewBound: boolean;
     backgroundPaths: Path2D;
     scaleX: number;
     scaleY: number;
     viewRanges: IRange[];
     diffRanges: IRange[];
-    cellInfo: ISelectionCellWithMergeInfo;
+    cellInfo: ICellWithCoord;
 }
 
 export class Background extends SheetExtension {
@@ -100,28 +100,39 @@ export class Background extends SheetExtension {
 
         const renderBGCore = (rgb: string) => {
             const bgColorMatrix = bgMatrixCacheByColor[rgb];
+            const rangeForEachFn = (row: number, col: number, bgConfigParam?: string) => {
+                const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
+                if (index !== -1) {
+                    return;
+                }
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                if (!cellInfo) return;
+                const bgConfig = bgConfigParam || bgColorMatrix.getValue(row, col);
+                if (bgConfig) {
+                    renderBGContext.cellInfo = cellInfo;
+                    this.renderBGByCell(renderBGContext, row, col);
+                }
+            };
+
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
             const backgroundPaths = new Path2D();
-
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
 
-            // Currently, viewRanges has only one range.
-            viewRanges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
-                    if (index !== -1) {
-                        return;
-                    }
-                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
-                    if (!cellInfo) return;
-                    const bgConfig = bgColorMatrix.getValue(row, col);
-                    if (bgConfig) {
-                        renderBGContext.cellInfo = cellInfo;
-                        this.renderBGByCell(renderBGContext, row, col);
-                    }
+            const matrixSize = bgColorMatrix.getSizeOf();
+            const cellCountInRanges = viewRanges.reduce((sum, range) => {
+                return sum + (range.endRow - range.startRow) * (range.endColumn - range.startColumn);
+            }, 0);
+            // if number of cells in range is over than bg config in matrix, renderBackground by matrix.
+            // otherwise, renderBackground by cells in viewRange.
+            if (cellCountInRanges < matrixSize) {
+                // Currently, viewRanges has only one range.
+                viewRanges.forEach((range) => {
+                    Range.foreach(range, rangeForEachFn);
                 });
-            });
+            } else {
+                bgColorMatrix.forValue(rangeForEachFn);
+            }
             ctx.fill(backgroundPaths);
             ctx.closePath();
         };
@@ -133,10 +144,10 @@ export class Background extends SheetExtension {
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
             mergeRanges.forEach((range) => {
-                // bgConfig is requried to be checked in each color loop.
+                // bgConfig is required to be checked in each color loop.
                 const bgConfig = bgColorMatrix.getValue(range.startRow, range.startColumn);
                 if (bgConfig) {
-                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+                    const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(range.startRow, range.startColumn, false);
                     if (!cellInfo) return;
                     renderBGContext.cellInfo = cellInfo;
                     this.renderBGByCell(renderBGContext, range.startRow, range.startColumn);
@@ -145,10 +156,14 @@ export class Background extends SheetExtension {
             ctx.fill(backgroundPaths);
             ctx.closePath();
         };
-        Object.keys(bgMatrixCacheByColor).forEach((rgb) => {
+
+        const rgbList = Object.keys(bgMatrixCacheByColor);
+
+        for (let index = 0; index < rgbList.length; index++) {
+            const rgb = rgbList[index];
             renderBGCore(rgb);
             renderBGForMergedCells(rgb);
-        });
+        }
         ctx.restore();
     }
 

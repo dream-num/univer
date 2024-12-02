@@ -118,6 +118,18 @@ describe('Test binomDistRange function', () => {
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const trials2 = NumberValueObject.create(60);
+            const probabilityS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(trials2, probabilityS2, numberS, numberS2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const numberS3 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(trials2, probabilityS, numberS3, numberS2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const result4 = testFunction.calculate(trials2, probabilityS, numberS, numberS3);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

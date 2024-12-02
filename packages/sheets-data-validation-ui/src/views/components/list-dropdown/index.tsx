@@ -23,19 +23,19 @@ import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/c
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
 import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { RectPopup, Scrollbar } from '@univerjs/design';
+import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '@univerjs/sheets-data-validation';
+import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { KeyCode, useObservable } from '@univerjs/ui';
+import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import { OpenValidationPanelOperation } from '../../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../../const';
-import { PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
+import { SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY } from '../../../controllers/config.schema';
 import styles from './index.module.less';
 
 interface ISelectListProps {
@@ -57,7 +57,7 @@ const SelectList = (props: ISelectListProps) => {
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
-    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
     const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
     const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
         {
@@ -145,9 +145,10 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const instanceService = useDependency(IUniverInstanceService);
     const ruleChange$ = useMemo(() => dataValidationModel.ruleChange$.pipe(debounceTime(16)), []);
+    const sheetsDataValidationModel = useDependency(SheetDataValidationModel);
     useObservable(ruleChange$);
     const anchorRect = RectPopup.useContext();
-    const cellWidth = anchorRect.right - anchorRect.left;
+    const cellWidth = (anchorRect.current?.right ?? 0) - (anchorRect.current?.left ?? 0);
 
     useEffect(() => {
         const dispose = commandService.onCommandExecuted((command) => {
@@ -172,9 +173,17 @@ export function ListDropDown(props: IDropdownComponentProps) {
         return null;
     }
 
+    const rule = sheetsDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+    if (!rule) {
+        return null;
+    }
+    const validator = sheetsDataValidationModel.getValidator(rule.type) as ListMultipleValidator | undefined;
+    if (!validator) {
+        return null;
+    }
+
     const cellData = worksheet.getCell(row, col);
-    const rule = cellData?.dataValidation?.rule;
-    const validator = cellData?.dataValidation?.validator as ListMultipleValidator | undefined;
+
     const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
 
     if (!cellData || !rule || !validator || validator.id.indexOf(DataValidationType.LIST) !== 0) {
@@ -196,7 +205,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const options = list.map((item) => ({
         label: item.label,
         value: item.label,
-        color: showColor ? item.color : 'transparent',
+        color: (showColor || item.color) ? item.color : 'transparent',
     }));
 
     return (

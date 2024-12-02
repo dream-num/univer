@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '../../../sheets/typedef';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
@@ -40,6 +41,7 @@ export class TextX {
         return textXApply(doc, actions);
     }
 
+    // eslint-disable-next-line complexity
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -69,8 +71,14 @@ export class TextX {
                     if (thisAction.body == null && otherAction.body == null) {
                         textX.push(thisAction.len !== Number.POSITIVE_INFINITY ? thisAction : otherAction); // or otherAction
                     } else if (thisAction.body && otherAction.body) {
+                        const coverType = thisAction.coverType === UpdateDocsAttributeType.REPLACE || otherAction.coverType === UpdateDocsAttributeType.REPLACE
+                            ? UpdateDocsAttributeType.REPLACE
+                            : UpdateDocsAttributeType.COVER;
+
                         textX.push({
                             ...thisAction,
+                            t: TextXActionType.RETAIN,
+                            coverType,
                             body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
                         });
                     } else {
@@ -123,6 +131,7 @@ export class TextX {
         return this._transform(otherActions, thisActions, priority === 'left' ? 'right' : 'left');
     }
 
+    // otherActions is the actions to be transformed.
     static _transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
 
@@ -159,9 +168,12 @@ export class TextX {
                 if (thisAction.body == null || otherAction.body == null) {
                     textX.push(otherAction);
                 } else {
+                    const { coverType, body } = transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left');
                     textX.push({
                         ...otherAction,
-                        body: transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left'),
+                        t: TextXActionType.RETAIN,
+                        coverType,
+                        body,
                     });
                 }
             }
@@ -250,7 +262,7 @@ export class TextX {
         let index = 0;
 
         for (const action of actions) {
-            if (action.t === TextXActionType.DELETE && action.body == null) {
+            if (action.t === TextXActionType.DELETE && (action.body == null || (action.body && action.body.dataStream.length !== action.len))) {
                 const body = getBodySlice(doc, index, index + action.len, false);
                 action.len = body.dataStream.length;
                 action.body = body;
@@ -406,6 +418,10 @@ export class TextX {
         return this;
     }
 }
+
+export type TextXSelection = TextX & {
+    selections?: ITextRange[];
+};
 
 // FIXME: @Jocs, Use to avoid storybook error. and move the static name property to here.
 Object.defineProperty(TextX, 'name', {

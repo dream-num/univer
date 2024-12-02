@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: '這是用於評估函數的值。' },
-            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
+            x: { name: 'X', detail: '用於評估函數的值。' },
+            n: { name: 'N', detail: 'Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELJ: {
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: '這是用於評估函數的值。' },
-            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
+            x: { name: 'X', detail: '用於評估函數的值。' },
+            n: { name: 'N', detail: 'Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELK: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: '這是用於評估函數的值。' },
-            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
+            x: { name: 'X', detail: '用於評估函數的值。' },
+            n: { name: 'N', detail: 'Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BESSELY: {
@@ -67,8 +67,8 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: 'X', detail: '這是用於評估函數的值。' },
-            n: { name: 'N', detail: '這是Bessel函數的順序。如果n不是整數，則會取至整數。' },
+            x: { name: 'X', detail: '用於評估函數的值。' },
+            n: { name: 'N', detail: 'Bessel函數的順序。如果n不是整數，則會取至整數。' },
         },
     },
     BIN2DEC: {
@@ -81,7 +81,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
+            number: { name: '二進制數', detail: '要轉換的二進制數。' },
         },
     },
     BIN2HEX: {
@@ -94,8 +94,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '二進制數', detail: '要轉換的二進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     BIN2OCT: {
@@ -108,8 +108,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '二進制數', detail: '您要轉換的二進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '二進制數', detail: '要轉換的二進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     BITAND: {
@@ -192,9 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            realNum: { name: '實係數', detail: '這是複數的實係數。' },
-            iNum: { name: '虛係數', detail: '這是複數的虛係數。' },
-            suffix: { name: '字尾', detail: '這是複數虛數元件的字尾。如果省略，會將字尾假設為 "i"。' },
+            realNum: { name: '實係數', detail: '複數的實係數。' },
+            iNum: { name: '虛係數', detail: '複數的虛係數。' },
+            suffix: { name: '字尾', detail: '複數虛數元件的字尾。如果省略，會將字尾假設為 "i"。' },
         },
     },
     CONVERT: {
@@ -208,8 +208,8 @@ export default {
         ],
         functionParameter: {
             number: { name: '數值', detail: '要轉換的值。' },
-            fromUnit: { name: '轉換前單位', detail: '這是數值的單位。' },
-            toUnit: { name: '轉換后單位', detail: '這是結果的單位。' },
+            fromUnit: { name: '轉換前單位', detail: '數值的單位。' },
+            toUnit: { name: '轉換后單位', detail: '結果的單位。' },
         },
     },
     DEC2BIN: {
@@ -222,8 +222,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     DEC2HEX: {
@@ -236,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     DEC2OCT: {
@@ -250,8 +250,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十進制數', detail: '您要轉換的十進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '十進制數', detail: '要轉換的十進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     DELTA: {
@@ -264,8 +264,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '數值1', detail: '這是第一個數值。' },
-            number2: { name: '數值2', detail: '這是第二個數值。如果省略，會將數值2假設為零。' },
+            number1: { name: '數值1', detail: '第一個數值。' },
+            number2: { name: '數值2', detail: '第二個數值。如果省略，會將數值2假設為零。' },
         },
     },
     ERF: {
@@ -278,8 +278,8 @@ export default {
             },
         ],
         functionParameter: {
-            lowerLimit: { name: '下限', detail: '這是整合ERF的下限。' },
-            upperLimit: { name: '上限', detail: '這是整合ERF的上限。如果省略，ERF會在零和下限之間整合。' },
+            lowerLimit: { name: '下限', detail: '整合ERF的下限。' },
+            upperLimit: { name: '上限', detail: '整合ERF的上限。如果省略，ERF會在零和下限之間整合。' },
         },
     },
     ERF_PRECISE: {
@@ -292,7 +292,7 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: '下限', detail: '這是整合ERF.PRECISE的下限。' },
+            x: { name: '下限', detail: '整合ERF.PRECISE的下限。' },
         },
     },
     ERFC: {
@@ -305,7 +305,7 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: '下限', detail: '這是整合ERFC的下限。' },
+            x: { name: '下限', detail: '整合ERFC的下限。' },
         },
     },
     ERFC_PRECISE: {
@@ -318,7 +318,7 @@ export default {
             },
         ],
         functionParameter: {
-            x: { name: '下限', detail: '這是整合ERFC.PRECISE的下限。' },
+            x: { name: '下限', detail: '整合ERFC.PRECISE的下限。' },
         },
     },
     GESTEP: {
@@ -331,8 +331,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '數值', detail: '這是要檢定閾值的值。' },
-            step: { name: '閾值', detail: '這是閾值。如果您省略閾值的值，GESTEP 會使用零。' },
+            number: { name: '數值', detail: '要檢定閾值的值。' },
+            step: { name: '閾值', detail: '閾值。如果省略閾值的值，GESTEP 會使用零。' },
         },
     },
     HEX2BIN: {
@@ -345,8 +345,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '您要轉換的十六進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     HEX2DEC: {
@@ -359,7 +359,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '您要轉換的十六進制數。' },
+            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
         },
     },
     HEX2OCT: {
@@ -372,8 +372,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '十六進制數', detail: '您要轉換的十六進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '十六進制數', detail: '要轉換的十六進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     IMABS: {
@@ -386,7 +386,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得絕對值的複數。' },
+            inumber: { name: '複數', detail: '要求得絕對值的複數。' },
         },
     },
     IMAGINARY: {
@@ -399,7 +399,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得虛係數的複數。' },
+            inumber: { name: '複數', detail: '要求得虛係數的複數。' },
         },
     },
     IMARGUMENT: {
@@ -412,7 +412,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求自變數 theta 的複數。' },
+            inumber: { name: '複數', detail: '要求自變數 theta 的複數。' },
         },
     },
     IMCONJUGATE: {
@@ -425,7 +425,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得共軛的複數。' },
+            inumber: { name: '複數', detail: '要求得共軛的複數。' },
         },
     },
     IMCOS: {
@@ -438,7 +438,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得餘弦值的複數。' },
+            inumber: { name: '複數', detail: '要求得餘弦值的複數。' },
         },
     },
     IMCOSH: {
@@ -451,7 +451,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲餘弦值的複數。' },
+            inumber: { name: '複數', detail: '要求得雙曲餘弦值的複數。' },
         },
     },
     IMCOT: {
@@ -464,7 +464,20 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得餘切值的複數。' },
+            inumber: { name: '複數', detail: '要求得餘切值的複數。' },
+        },
+    },
+    IMCOTH: {
+        description: '傳回複數的雙曲餘切值',
+        abstract: '傳回複數的雙曲餘切值',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9366256?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得雙曲餘切值的複數。' },
         },
     },
     IMCSC: {
@@ -477,7 +490,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得餘割值的複數。' },
+            inumber: { name: '複數', detail: '要求得餘割值的複數。' },
         },
     },
     IMCSCH: {
@@ -490,7 +503,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲餘割值的複數。' },
+            inumber: { name: '複數', detail: '要求得雙曲餘割值的複數。' },
         },
     },
     IMDIV: {
@@ -503,8 +516,8 @@ export default {
             },
         ],
         functionParameter: {
-            inumber1: { name: '複數分子', detail: '這是複數分子或被除數。' },
-            inumber2: { name: '複數分母', detail: '這是複數分母或除數。' },
+            inumber1: { name: '複數分子', detail: '複數分子或被除數。' },
+            inumber2: { name: '複數分母', detail: '複數分母或除數。' },
         },
     },
     IMEXP: {
@@ -517,7 +530,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得指數的複數。' },
+            inumber: { name: '複數', detail: '要求得指數的複數。' },
         },
     },
     IMLN: {
@@ -530,7 +543,21 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得自然對數的複數。' },
+            inumber: { name: '複數', detail: '要求得自然對數的複數。' },
+        },
+    },
+    IMLOG: {
+        description: '傳回複數的以特定底數的對數',
+        abstract: '傳回複數的以特定底數的對數',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9366486?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得以特定底數的對數的複數。' },
+            base: { name: '底數', detail: '計算對數時所用的底數。' },
         },
     },
     IMLOG10: {
@@ -543,7 +570,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得常用對數的複數。' },
+            inumber: { name: '複數', detail: '要求得常用對數的複數。' },
         },
     },
     IMLOG2: {
@@ -556,7 +583,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得底數為 2 之對數的複數。' },
+            inumber: { name: '複數', detail: '要求得底數為 2 之對數的複數。' },
         },
     },
     IMPOWER: {
@@ -569,8 +596,8 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要遞增至乘冪的複數。' },
-            number: { name: '數值', detail: '這是要遞增至複數的乘冪。' },
+            inumber: { name: '複數', detail: '要遞增至乘冪的複數。' },
+            number: { name: '數值', detail: '要遞增至複數的乘冪。' },
         },
     },
     IMPRODUCT: {
@@ -583,8 +610,8 @@ export default {
             },
         ],
         functionParameter: {
-            inumber1: { name: '複數1', detail: '這是 1 到 255 個要乘以的複數。' },
-            inumber2: { name: '複數2', detail: '這是 1 到 255 個要乘以的複數。' },
+            inumber1: { name: '複數1', detail: '1 到 255 個要乘以的複數。' },
+            inumber2: { name: '複數2', detail: '1 到 255 個要乘以的複數。' },
         },
     },
     IMREAL: {
@@ -597,7 +624,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得實係數的複數。' },
+            inumber: { name: '複數', detail: '要求得實係數的複數。' },
         },
     },
     IMSEC: {
@@ -610,7 +637,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得正割值的複數。' },
+            inumber: { name: '複數', detail: '要求得正割值的複數。' },
         },
     },
     IMSECH: {
@@ -623,7 +650,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲正割值的複數。' },
+            inumber: { name: '複數', detail: '要求得雙曲正割值的複數。' },
         },
     },
     IMSIN: {
@@ -636,7 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得正弦值的複數。' },
+            inumber: { name: '複數', detail: '要求得正弦值的複數。' },
         },
     },
     IMSINH: {
@@ -649,7 +676,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得雙曲正弦值的複數。' },
+            inumber: { name: '複數', detail: '要求得雙曲正弦值的複數。' },
         },
     },
     IMSQRT: {
@@ -662,7 +689,7 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得平方根的複數。' },
+            inumber: { name: '複數', detail: '要求得平方根的複數。' },
         },
     },
     IMSUB: {
@@ -689,8 +716,8 @@ export default {
             },
         ],
         functionParameter: {
-            inumber1: { name: '複數1', detail: '這是 1 到 255 個要相加的複數。' },
-            inumber2: { name: '複數2', detail: '這是 1 到 255 個要相加的複數。' },
+            inumber1: { name: '複數1', detail: '1 到 255 個要相加的複數。' },
+            inumber2: { name: '複數2', detail: '1 到 255 個要相加的複數。' },
         },
     },
     IMTAN: {
@@ -703,7 +730,20 @@ export default {
             },
         ],
         functionParameter: {
-            inumber: { name: '複數', detail: '這是要求得正切值的複數。' },
+            inumber: { name: '複數', detail: '要求得正切值的複數。' },
+        },
+    },
+    IMTANH: {
+        description: '傳回複數的雙曲正切值',
+        abstract: '傳回複數的雙曲正切值',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/9366655?hl=zh-Hant&sjid=1719420110567985051-AP',
+            },
+        ],
+        functionParameter: {
+            inumber: { name: '複數', detail: '這是要求得雙曲正切值的複數。' },
         },
     },
     OCT2BIN: {
@@ -716,8 +756,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '八進制數', detail: '要轉換的八進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
     OCT2DEC: {
@@ -730,7 +770,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
+            number: { name: '八進制數', detail: '要轉換的八進制數。' },
         },
     },
     OCT2HEX: {
@@ -743,8 +783,8 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: '八進制數', detail: '您要轉換的八進制數。' },
-            places: { name: '字元數', detail: '這是要使用的字元數。' },
+            number: { name: '八進制數', detail: '要轉換的八進制數。' },
+            places: { name: '字元數', detail: '要使用的字元數。' },
         },
     },
 };

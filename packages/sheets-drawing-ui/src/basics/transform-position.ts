@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import type { ITransformState } from '@univerjs/drawing';
-import { precisionTo } from '@univerjs/engine-render';
+import type { ITransformState, Nullable } from '@univerjs/core';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import { precisionTo } from '@univerjs/engine-render';
 import { attachRangeWithCoord, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(
@@ -92,7 +91,7 @@ export function drawingPositionToTransform(
 export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISheetSelectionRenderService): Nullable<ISheetDrawingPosition> {
     const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
 
-    const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
+    const startSelectionCell = selectionRenderService.getCellWithCoordByOffset(left, top);
 
     if (startSelectionCell == null) {
         return;
@@ -105,7 +104,7 @@ export function transformToDrawingPosition(transform: ITransformState, selection
         rowOffset: precisionTo(top - startSelectionCell.startY, 1),
     };
 
-    const endSelectionCell = selectionRenderService.getSelectionCellByPosition(left + width, top + height);
+    const endSelectionCell = selectionRenderService.getCellWithCoordByOffset(left + width, top + height);
 
     if (endSelectionCell == null) {
         return;

@@ -18,21 +18,17 @@ import type { CellValue, Nullable } from '@univerjs/core';
 import type { DateValidator } from '@univerjs/sheets-data-validation';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
-import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
+import { CellValueType, DataValidationErrorStyle, dayjs, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
+import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import React, { useState } from 'react';
 import { DataValidationRejectInputController } from '../../../controllers/dv-reject-input.controller';
 import styles from './index.module.less';
-
-dayjs.extend(utc);
 
 const transformDate = (value: Nullable<CellValue>) => {
     if (value === undefined || value === null || typeof value === 'boolean') {
@@ -56,18 +52,24 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const commandService = useDependency(ICommandService);
     const rejectInputController = useDependency(DataValidationRejectInputController);
     const cellData = worksheet.getCell(row, col);
-    const rule = cellData?.dataValidation?.rule;
-    const validator = cellData?.dataValidation?.validator as DateValidator | undefined;
     const cellStr = getCellValueOrigin(worksheet.getCellRaw(row, col));
     const originDate = transformDate(cellStr);
     const [localDate, setLocalDate] = useState<dayjs.Dayjs | undefined>(originDate);
-    const showTime = Boolean(rule?.bizInfo?.showTime);
+
     const date = localDate && localDate.isValid() ? localDate : dayjs();
     const localeService = useDependency(LocaleService);
-    if (!cellData || !rule || !validator) {
+    const sheetsDataValidationModel = useDependency(SheetDataValidationModel);
+
+    const rule = sheetsDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+    if (!rule) {
+        return null;
+    }
+    const validator = sheetsDataValidationModel.getValidator(rule.type) as DateValidator | undefined;
+
+    if (!cellData || !validator) {
         return;
     }
-
+    const showTime = Boolean(rule.bizInfo?.showTime);
     const handleSave = async () => {
         if (!date) {
             return;
@@ -126,7 +128,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 },
             });
         } else {
-            rejectInputController.showReject(validator.getRuleFinalError(rule));
+            rejectInputController.showReject(validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }));
         }
     };
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { centralFINV } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class FInv extends BaseFunction {
     override minParams = 3;
@@ -52,6 +52,18 @@ export class FInv extends BaseFunction {
         const resultArray = probabilityArray.mapValue((probabilityObject, rowIndex, columnIndex) => {
             const degFreedom1Object = degFreedom1Array.get(rowIndex, columnIndex) as BaseValueObject;
             const degFreedom2Object = degFreedom2Array.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (probabilityObject.isError()) {
+                return probabilityObject;
+            }
+
+            if (degFreedom1Object.isError()) {
+                return degFreedom1Object;
+            }
+
+            if (degFreedom2Object.isError()) {
+                return degFreedom2Object;
+            }
 
             return this._handleSignleObject(probabilityObject, degFreedom1Object, degFreedom2Object);
         });

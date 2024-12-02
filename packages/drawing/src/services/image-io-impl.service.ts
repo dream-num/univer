@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
+import { Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE } from '../basics/config';
-import type { IImageIoService, IImageIoServiceParam } from './image-io.service';
 import { ImageSourceType, ImageUploadStatusType } from './image-io.service';
 
 export class ImageIoService implements IImageIoService {

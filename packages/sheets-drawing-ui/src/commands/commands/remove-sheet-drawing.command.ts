@@ -15,15 +15,17 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDeleteDrawingCommandParams } from './interfaces';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
+    sequenceExecute,
 } from '@univerjs/core';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { IDeleteDrawingCommandParams } from './interfaces';
 
 /**
  * The command to remove new sheet image
@@ -34,6 +36,7 @@ export const RemoveSheetDrawingCommand: ICommand = {
     handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
@@ -52,18 +55,27 @@ export const RemoveSheetDrawingCommand: ICommand = {
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
+        const intercepted = sheetInterceptorService.onCommandExecute({ id: RemoveSheetDrawingCommand.id, params });
+
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
+        const removeMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } };
+        const undoRemoveMutation = { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } };
+
+        const result = sequenceExecute([...(intercepted.preRedos ?? []), removeMutation, ...intercepted.redos], commandService);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } },
+                    ...(intercepted.preUndos ?? []),
+                    undoRemoveMutation,
+                    ...intercepted.undos,
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } },
+                    ...(intercepted.preRedos ?? []),
+                    removeMutation,
+                    ...intercepted.redos,
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });

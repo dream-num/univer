@@ -1,7 +1,8 @@
 packages:
     - common/*
     - examples
-    # - examples-node
+    - examples-node
     - mockdata
     - packages-experimental/*
     - packages/*
+    - tests/*

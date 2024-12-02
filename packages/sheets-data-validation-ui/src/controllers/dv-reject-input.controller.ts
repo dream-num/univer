@@ -17,14 +17,14 @@
 import { DataValidationErrorStyle, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
+import { AFTER_CELL_EDIT_ASYNC, SheetInterceptorService } from '@univerjs/sheets';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 
 export class DataValidationRejectInputController extends Disposable {
     constructor(
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IDialogService private readonly _dialogService: IDialogService,
@@ -35,8 +35,8 @@ export class DataValidationRejectInputController extends Disposable {
     }
 
     private _initEditorBridgeInterceptor() {
-        this._editorBridgeService.interceptor.intercept(
-            this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC,
+        this._sheetInterceptorService.writeCellInterceptor.intercept(
+            AFTER_CELL_EDIT_ASYNC,
             {
                 handler: async (cellPromise, context, next) => {
                     const cell = await cellPromise;
@@ -78,7 +78,7 @@ export class DataValidationRejectInputController extends Disposable {
                         },
                         id: 'reject-input-dialog',
                         children: {
-                            title: validator.getRuleFinalError(rule),
+                            title: validator.getRuleFinalError(rule, { row, col, unitId, subUnitId }),
                         },
                         footer: {
                             title: React.createElement(

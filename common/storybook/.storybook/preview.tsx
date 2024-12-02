@@ -47,6 +47,8 @@ import zhCN from '@univerjs/design/locale/zh-CN';
 import { DesktopLocalStorageService } from '@univerjs/ui';
 import React from 'react';
 
+import './global.css';
+
 export const themes: Record<string, Record<string, string>> = {
     default: defaultTheme,
     green: greenTheme,

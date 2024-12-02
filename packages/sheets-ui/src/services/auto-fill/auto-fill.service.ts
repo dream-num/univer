@@ -285,6 +285,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._showMenu$.next(show);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     fillData(triggerUnitId: string, triggerSubUnitId: string) {
         const { source, target,
                 unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
@@ -307,6 +308,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
         const applyType = this.applyType;
         const activeHooks = this.getActiveHooks();
+        const workbook = this._univerInstanceService.getUnit<Workbook>(triggerUnitId, UniverInstanceType.UNIVER_SHEET)!;
 
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
@@ -344,14 +346,15 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                     const { cellValue } = m.params as ISetRangeValuesMutationParams;
                     const matrix = new ObjectMatrix(cellValue);
                     matrix.forValue((row, col, value) => {
-                        const style = Object.keys(value?.s || {});
-                        if (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s))) {
+                        const style = Object.keys(workbook.getStyles().get(value?.s) || {});
+                        if (value?.p || (style.length && AFFECT_LAYOUT_STYLES.some((s) => style.includes(s)))) {
                             autoHeightRanges.push({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                         }
                     });
                 }
             });
         }
+
         const autoHeightUndoRedos = this._getAutoHeightUndoRedos(triggerUnitId, triggerSubUnitId, autoHeightRanges);
         const autoHeightResult = autoHeightUndoRedos.redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (autoHeightResult) {

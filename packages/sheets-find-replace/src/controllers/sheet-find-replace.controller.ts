@@ -16,7 +16,7 @@
 
 import type { ICellData, IDisposable, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
-import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams, WorkbookSelections } from '@univerjs/sheets';
+import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams, WorkbookSelectionModel } from '@univerjs/sheets';
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/commands/sheet-replace.command';
 import type { ISheetFindReplaceHighlightShapeProps } from '../views/shapes/find-replace-highlight.shape';
@@ -116,7 +116,7 @@ export class SheetFindModel extends FindModel {
     get matchesPosition(): number { return this._matchesPosition; }
     get currentMatch(): Nullable<ISheetCellMatch> { return this._matchesPosition > 0 ? this._matches[this._matchesPosition - 1] : null; }
 
-    private _workbookSelections: WorkbookSelections;
+    private _workbookSelections: WorkbookSelectionModel;
 
     constructor(
         private readonly _workbook: Workbook,
@@ -885,7 +885,7 @@ export class SheetFindModel extends FindModel {
         const isRichText = !!currentContent.p?.body;
         if (isRichText) {
             const clonedRichText = Tools.deepClone(currentContent.p!);
-            replaceInDocumentBody(clonedRichText.body!, findString, replaceString);
+            replaceInDocumentBody(clonedRichText.body!, findString, replaceString, this._query!.caseSensitive);
             return { p: clonedRichText };
         }
 

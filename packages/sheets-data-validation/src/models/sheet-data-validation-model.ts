@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationType, ISheetDataValidationRule } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload } from '@univerjs/data-validation';
 import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { DataValidationStatus, DataValidationType, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { RemoveSheetMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -142,10 +142,8 @@ export class SheetDataValidationModel extends Disposable {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(unitId, subUnitId, rule);
-        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
-        if (rule.type === DataValidationType.CUSTOM) {
-            this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
-        }
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
     }
 
     private _addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule | ISheetDataValidationRule[]): void {
@@ -158,36 +156,33 @@ export class SheetDataValidationModel extends Disposable {
 
     private _updateRule(unitId: string, subUnitId: string, ruleId: string, oldRule: ISheetDataValidationRule, payload: IUpdateRulePayload) {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
+        const newRule = {
+            ...oldRule,
+            ...payload.payload,
+        };
+
         if (payload.type === UpdateRuleType.RANGE) {
             ruleMatrix.updateRange(ruleId, payload.payload);
-            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
-            if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.updateRuleRanges(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload);
-            }
-        } else if (payload.type === UpdateRuleType.SETTING) {
-            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
-            this._dataValidationFormulaService.updateRuleFormulaText(unitId, subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2);
-            if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.updateRuleFormula(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
-            } else if (payload.payload.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
-                    ...oldRule,
-                    ...payload.payload,
-                });
-            }
+        } else if (payload.type === UpdateRuleType.ALL) {
+            ruleMatrix.updateRange(ruleId, payload.payload.ranges);
         }
+
+        this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
+        this._dataValidationCacheService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, newRule);
     }
 
     private _removeRule(unitId: string, subUnitId: string, oldRule: ISheetDataValidationRule): void {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.removeRule(oldRule);
         this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
-        if (oldRule.type === DataValidationType.CUSTOM) {
-            this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
-        }
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
     }
 
-    getValidator(type: DataValidationType) {
+    getValidator(type: DataValidationType | string) {
         return this._dataValidatorRegistryService.getValidatorItem(type);
     }
 
@@ -207,9 +202,6 @@ export class SheetDataValidationModel extends Disposable {
 
     validator(rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId, worksheet } = pos;
-        const ruleId = rule.uid;
-        const formula1 = rule.formula1;
-        const formula2 = rule.formula2;
         const onCompete = (status: DataValidationStatus, changed: boolean) => {
             if (_onCompete) {
                 _onCompete(status, changed);
@@ -230,20 +222,12 @@ export class SheetDataValidationModel extends Disposable {
         const validator = this.getValidator(rule.type);
         const cellRaw = worksheet.getCellRaw(row, col);
         const cellValue = getCellValueOrigin(cellRaw);
-        const interceptValue = getCellValueOrigin(cell);
 
         if (validator) {
             const cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
             const current = cache.getValue(row, col);
-            if (!current || current.value !== cellValue || current.interceptValue !== interceptValue || current.ruleId !== ruleId || current.formula1 !== formula1 || current.formula2 !== formula2) {
-                cache.setValue(row, col, {
-                    value: cellValue,
-                    interceptValue,
-                    status: DataValidationStatus.VALIDATING,
-                    ruleId,
-                    formula1: formula1 || '',
-                    formula2: formula2 || '',
-                });
+            if (current === null || current === undefined) {
+                cache.setValue(row, col, DataValidationStatus.VALIDATING);
                 validator.validator(
                     {
                         value: cellValue,
@@ -259,41 +243,23 @@ export class SheetDataValidationModel extends Disposable {
                     rule
                 ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
-                    cache.setValue(row, col, {
-                        value: cellValue,
-                        status: realStatus,
-                        ruleId,
-                        interceptValue,
-                        formula1: formula1 || '',
-                        formula2: formula2 || '',
-                    });
-                    onCompete(realStatus, true);
+                    if (realStatus === DataValidationStatus.VALID) {
+                        cache.realDeleteValue(row, col);
+                    } else {
+                        cache.setValue(row, col, realStatus);
+                    }
+                    const now = cache.getValue(row, col);
+                    onCompete(realStatus, current !== now);
                 });
                 return DataValidationStatus.VALIDATING;
             }
-            onCompete(current.status, false);
-            return current.status;
+
+            onCompete(current ?? DataValidationStatus.VALID, false);
+            return current ?? DataValidationStatus.VALID;
         } else {
             onCompete(DataValidationStatus.VALID, false);
             return DataValidationStatus.VALID;
         }
-    }
-
-    getRuleErrorMsg(unitId: string, subUnitId: string, ruleId: string) {
-        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        if (!rule) {
-            return '';
-        }
-        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-        if (rule.error) {
-            return rule.error;
-        }
-
-        if (validator) {
-            return validator.getRuleFinalError(rule);
-        }
-
-        return '';
     }
 
     getRuleObjectMatrix(unitId: string, subUnitId: string) {

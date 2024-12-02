@@ -274,18 +274,16 @@ export class ObjectMatrix<T> {
      */
     forValue(callback: (row: number, col: number, value: T) => Nullable<boolean>): ObjectMatrix<T> {
         const matrix = this._matrix;
-        const matrixRow = Object.keys(matrix);
 
-        for (const row of matrixRow) {
+        for (const row in matrix) {
             const rowNumber = Number(row);
             const columns = matrix[rowNumber];
 
             if (!columns) continue;
 
-            const columnKeys = Object.keys(columns);
-            for (const column of columnKeys) {
+            for (const column in columns) {
                 const colNumber = Number(column);
-                const value = columns[Number(column)];
+                const value = columns[colNumber];
 
                 const result = callback(rowNumber, colNumber, value);
                 if (result === false) {

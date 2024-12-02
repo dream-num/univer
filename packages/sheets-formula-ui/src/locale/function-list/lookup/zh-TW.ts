@@ -179,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '單元格或儲存格範圍的參照。' },
         },
     },
     GETPIVOTDATA: {
@@ -298,7 +297,7 @@ export default {
         },
     },
     LOOKUP: {
-        description: '當您需要查詢一行或一列並查找另一行或列中的相同位置的值時使用',
+        description: '當需要查詢一行或一列並查找另一行或列中的相同位置的值時使用',
         abstract: '在向量或陣列中找出值',
         links: [
             {

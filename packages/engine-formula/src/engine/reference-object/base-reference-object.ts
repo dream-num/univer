@@ -37,7 +37,7 @@ export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject 
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 
-const FORMULA_CACHE_LRU_COUNT = 100000;
+const FORMULA_CACHE_LRU_COUNT = 10000;
 
 export const FORMULA_REF_TO_ARRAY_CACHE = new FormulaAstLRU<ArrayValueObject>(FORMULA_CACHE_LRU_COUNT);
 export class BaseReferenceObject extends ObjectClassType {

@@ -17,10 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
+import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';
@@ -39,7 +40,7 @@ export class UniverDebuggerPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DEBUGGER_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -47,6 +48,7 @@ export class UniverDebuggerPlugin extends Plugin {
             [PerformanceMonitorController],
             [DebuggerController],
             [E2EController],
+            [UniverWatermarkMenuController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         this._injector.get(E2EController);
@@ -58,6 +60,7 @@ export class UniverDebuggerPlugin extends Plugin {
 
     override onRendered(): void {
         this._injector.get(PerformanceMonitorController);
+        this._injector.get(UniverWatermarkMenuController);
     }
 
     getDebuggerController() {

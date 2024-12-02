@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverUniscriptPlugin } from './plugin';
 export { ScriptEditorService } from './services/script-editor.service';
 export { IUniscriptExecutionService } from './services/script-execution.service';

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
@@ -29,10 +29,12 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
 import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
+import { UNIVER_WATERMARK_MENU } from './watermark.menu.controller';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -44,6 +46,10 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'English',
                 value: LocaleType.EN_US,
+            },
+            {
+                label: 'Français',
+                value: LocaleType.FR_FR,
             },
             {
                 label: '简体中文',
@@ -321,5 +327,15 @@ export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
             },
 
         ],
+    };
+}
+
+export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: OpenWatermarkPanelOperation.id,
+        title: 'univer-watermark.title',
+        tooltip: 'univer-watermark.title',
+        icon: UNIVER_WATERMARK_MENU,
+        type: MenuItemType.BUTTON,
     };
 }

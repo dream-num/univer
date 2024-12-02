@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocumentFlavor, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
@@ -216,17 +216,14 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            let { pageWidth, pageHeight, marginLeft, marginRight, marginTop, marginBottom } = page;
+            let { pageWidth, pageHeight } = page;
 
             // Mainly for modern mode, because pageHeight will be INFINITY in modern mode.
             if (documentFlavor === DocumentFlavor.MODERN) {
-                if (pageWidth === Number.POSITIVE_INFINITY) {
-                    pageWidth = page.width + marginLeft + marginRight;
-                }
+                const modernPageSize = getPageSizeInModernMode(page);
 
-                if (pageHeight === Number.POSITIVE_INFINITY) {
-                    pageHeight = page.height + marginTop + marginBottom;
-                }
+                pageWidth = modernPageSize.pageWidth;
+                pageHeight = modernPageSize.pageHeight;
             }
 
             if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
@@ -259,4 +256,29 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             scene.resize(width, height);
         }
     }
+}
+
+function getPageSizeInModernMode(page: IDocumentSkeletonPage) {
+    let { pageWidth, pageHeight } = page;
+    const { marginLeft, marginRight, marginTop, marginBottom, skeDrawings, skeTables } = page;
+
+    if (pageWidth === Number.POSITIVE_INFINITY) {
+        pageWidth = page.width + marginLeft + marginRight;
+    }
+
+    if (pageHeight === Number.POSITIVE_INFINITY) {
+        pageHeight = page.height + marginTop + marginBottom;
+    }
+
+    for (const drawing of skeDrawings.values()) {
+        pageWidth = Math.max(pageWidth, drawing.aLeft + drawing.width + marginLeft + marginRight);
+        pageHeight = Math.max(pageHeight, drawing.aTop + drawing.height + marginTop + marginBottom);
+    }
+
+    for (const table of skeTables.values()) {
+        pageWidth = Math.max(pageWidth, table.left + table.width + marginLeft + marginRight);
+        pageHeight = Math.max(pageHeight, table.top + table.height + marginTop + marginBottom);
+    }
+
+    return { pageWidth, pageHeight };
 }

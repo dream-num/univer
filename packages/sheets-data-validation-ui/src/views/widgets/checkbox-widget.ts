@@ -15,14 +15,14 @@
  */
 
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
-import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
+import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
-import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
-import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
+import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { CheckboxShape as Checkbox, CURSOR_TYPE, fixLineWidthByScale, IRenderManagerService, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, transformCheckboxValue } from '@univerjs/sheets-data-validation';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, SheetDataValidationModel, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 
 const MARGIN_H = 6;
 
@@ -70,9 +70,10 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
     ) {
-        // super
     }
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
@@ -88,29 +89,32 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0]?.[0]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[0]?.[0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0]?.[0]) : formula1,
             formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
             isFormulaValid,
         };
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
-        const { style, data, primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
+        const { style, primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
-        const rule = data.dataValidation?.rule;
-        const validator = data.dataValidation?.validator as CheckboxValidator;
-        if (!rule || !validator) {
+        const rule = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as CheckboxValidator;
+        if (!validator) {
             return;
         }
 
         const colors = this._themeService.getCurrentTheme();
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId, row, column: col })) {
             return;
         }
 
@@ -177,15 +181,18 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         if (evt.button === 2) {
             return;
         }
-        const { primaryWithCoord, unitId, subUnitId, data, worksheet, row, col } = info;
+        const { primaryWithCoord, unitId, subUnitId, worksheet, row, col } = info;
         const value = getCellValueOrigin(worksheet.getCellRaw(row, col));
-        const rule = data.dataValidation?.rule;
-        const validator = data.dataValidation?.validator as BaseDataValidator;
-        if (!rule || !validator) {
+        const rule = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidationModel.getValidator(rule.type) as CheckboxValidator;
+        if (!validator) {
             return;
         }
 
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId, row, column: col })) {
             return;
         }
 
@@ -208,4 +215,12 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             params
         );
     };
+
+    onPointerEnter(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.POINTER);
+    }
+
+    onPointerLeave(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)?.mainComponent?.setCursor(CURSOR_TYPE.DEFAULT);
+    }
 }

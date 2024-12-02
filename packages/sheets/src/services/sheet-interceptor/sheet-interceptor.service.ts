@@ -16,6 +16,7 @@
 
 import type {
     ICellData,
+    ICellDataForSheetInterceptor,
     ICellInterceptor,
     ICommandInfo,
     IDisposable,
@@ -26,17 +27,21 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
+import type { ISheetLocation } from './utils/interceptor';
+
 import {
     composeInterceptors,
+    createInterceptorKey,
     Disposable,
     DisposableCollection,
     InterceptorEffectEnum,
+    InterceptorManager,
     IUniverInstanceService,
     remove,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { INTERCEPTOR_POINT } from './interceptor-const';
 
 export interface IBeforeCommandInterceptor {
@@ -60,6 +65,14 @@ export interface IRangeInterceptors {
     getMutations(rangesInfo: IRangesInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
+interface ISheetLocationForEditor extends ISheetLocation {
+    origin: Nullable<ICellData>;
+}
+
+export const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
+export const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
+export const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocationForEditor>('AFTER_CELL_EDIT_ASYNC');
+
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
  */
@@ -69,9 +82,16 @@ export class SheetInterceptorService extends Disposable {
     private _rangeInterceptors: IRangeInterceptors[] = [];
 
     private _beforeCommandInterceptor: IBeforeCommandInterceptor[] = [];
+    private _afterCommandInterceptors: ICommandInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
+
+    readonly writeCellInterceptor = new InterceptorManager({
+        BEFORE_CELL_EDIT,
+        AFTER_CELL_EDIT,
+        AFTER_CELL_EDIT_ASYNC,
+    });
 
     /** @ignore */
     constructor(
@@ -102,6 +122,21 @@ export class SheetInterceptorService extends Disposable {
                 return rawData;
             },
         });
+
+        this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+
+        this.disposeWithMe(this.writeCellInterceptor.intercept(BEFORE_CELL_EDIT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
+
+        this.disposeWithMe(this.writeCellInterceptor.intercept(AFTER_CELL_EDIT_ASYNC, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
     }
 
     override dispose(): void {
@@ -112,6 +147,16 @@ export class SheetInterceptorService extends Disposable {
         this._worksheetDisposables.clear();
     }
 
+    // #region Intercept command execution
+
+    /**
+     * Add a listener function to a specific command to add affiliated mutations. It should be called in controllers.
+     *
+     * Pairs with {@link onCommandExecute}.
+     *
+     * @param interceptor
+     * @returns
+     */
     interceptCommand(interceptor: ICommandInterceptor): IDisposable {
         if (this._commandInterceptors.includes(interceptor)) {
             throw new Error('[SheetInterceptorService]: Interceptor already exists!');
@@ -123,7 +168,51 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
     }
 
-    // Add a listener function to the command, which will be run before the command is run to get whether it can be executed the command
+    /**
+     * When command is executing, call this method to gether undo redo mutations from upper features.
+     * @param command
+     * @returns
+     */
+    onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
+
+        return {
+            preUndos: infos.map((i) => i.preUndos ?? []).flat(),
+            undos: infos.map((i) => i.undos).flat(),
+            preRedos: infos.map((i) => i.preRedos ?? []).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
+    }
+
+    interceptAfterCommand(interceptor: ICommandInterceptor): IDisposable {
+        if (this._afterCommandInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._afterCommandInterceptors.push(interceptor);
+        this._afterCommandInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._afterCommandInterceptors, interceptor)));
+    }
+
+    afterCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
+        const infos = this._afterCommandInterceptors.map((i) => i.getMutations(info));
+
+        return {
+            undos: infos.map((i) => i.undos).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
+    }
+
+    /**
+     * Add a listener function to a specific command to deteminte if the command can execute mutations. It should be
+     * called in controllers.
+     *
+     * Pairs with {@link beforeCommandExecute}.
+     *
+     * @param interceptor
+     * @returns
+     */
     interceptBeforeCommand(interceptor: IBeforeCommandInterceptor): IDisposable {
         if (this._beforeCommandInterceptor.includes(interceptor)) {
             throw new Error('[SheetInterceptorService]: Interceptor already exists!');
@@ -145,6 +234,10 @@ export class SheetInterceptorService extends Disposable {
         return allPerformCheckRes.every((perform) => perform);
     }
 
+    // #endregion
+
+    // #region intercept ranges - mainly for pivot table currrently (2024/10/28).
+
     /**
      * By adding callbacks to some Ranges can get some additional mutations, such as clearing all plugin data in a certain area.
      * @param interceptor IRangeInterceptors
@@ -161,23 +254,6 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._rangeInterceptors, interceptor)));
     }
 
-    /**
-     * When command is executing, call this method to gether undo redo mutations from upper features.
-     * @param command
-     * @returns
-     */
-
-    onCommandExecute(info: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
-        const infos = this._commandInterceptors.map((i) => i.getMutations(info));
-
-        return {
-            preUndos: infos.map((i) => i.preUndos ?? []).flat(),
-            undos: infos.map((i) => i.undos).flat(),
-            preRedos: infos.map((i) => i.preRedos ?? []).flat(),
-            redos: infos.map((i) => i.redos).flat(),
-        };
-    }
-
     generateMutationsByRanges(info: IRangesInfo): IUndoRedoCommandInfosByInterceptor {
         const infos = this._rangeInterceptors.map((i) => i.getMutations(info));
 
@@ -188,6 +264,28 @@ export class SheetInterceptorService extends Disposable {
             redos: infos.map((i) => i.redos).flat(),
         };
     }
+
+    // #region write cell
+
+    async onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
+        const context = {
+            subUnitId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            workbook: workbook!,
+            worksheet,
+            row,
+            col,
+            origin: Tools.deepClone(cellData),
+        };
+
+        const cell = this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, context);
+        const finalCell = await this.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT_ASYNC)(Promise.resolve(cell), context);
+        return finalCell;
+    }
+
+    // #endregion
+
+    // #endregion
 
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;
@@ -203,14 +301,14 @@ export class SheetInterceptorService extends Disposable {
                 `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
                 sortedInterceptors
             );
-            // 3 means both style and value
+            const BOTH_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
             this._interceptorsByName.set(
                 `${key}-${(InterceptorEffectEnum.Style)}`,
-                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Style) > 0)
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || BOTH_EFFECT) & InterceptorEffectEnum.Style) > 0)
             );
             this._interceptorsByName.set(
                 `${key}-${(InterceptorEffectEnum.Value)}`,
-                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Value) > 0)
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || BOTH_EFFECT) & InterceptorEffectEnum.Value) > 0)
             );
         } else {
             this._interceptorsByName.set(

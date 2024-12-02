@@ -174,6 +174,19 @@ export default {
             ifEmpty: { name: 'trả về giá trị null', detail: 'Trả về nếu không có mục nào được giữ lại.' },
         },
     },
+    FORMULATEXT: {
+        description: 'Trả về công thức ở dạng chuỗi.',
+        abstract: 'Trả về công thức ở dạng chuỗi.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/formulatext-%E5%87%BD%E6%95%B0-0a786771-54fd-4ae2-96ee-09cda35439c8',
+            },
+        ],
+        functionParameter: {
+            reference: { name: 'tham khảo', detail: 'Tham chiếu đến một ô hoặc phạm vi ô.' },
+        },
+    },
     HLOOKUP: {
         description: 'Tìm kiếm một giá trị ở hàng đầu tiên của bảng hoặc trong một mảng số và trả về giá trị trong cột của hàng được chỉ định trong bảng hoặc mảng.',
         abstract: 'Tìm hàng đầu tiên của mảng và trả về giá trị của ô đã chỉ định',

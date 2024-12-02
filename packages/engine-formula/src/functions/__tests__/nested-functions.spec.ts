@@ -391,7 +391,7 @@ describe('Test nested functions', () => {
 
         it('Len gets length from formula result', () => {
             let result = calculate('=LEN(1/3)');
-            expect(result).toStrictEqual(17);
+            expect(result).toStrictEqual(14);
 
             result = calculate('=LEN(0.1+0.2)');
             expect(result).toStrictEqual(3);

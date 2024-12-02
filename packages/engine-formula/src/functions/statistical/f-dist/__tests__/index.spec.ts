@@ -105,6 +105,18 @@ describe('Test fDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(15.2069);
+            const degFreedom3 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, degFreedom3, degFreedom2, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const result3 = testFunction.calculate(x2, degFreedom1, degFreedom3, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(x2, degFreedom1, degFreedom2, cumulative2);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

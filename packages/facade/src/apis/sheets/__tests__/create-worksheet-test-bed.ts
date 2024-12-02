@@ -17,6 +17,7 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { IRender } from '@univerjs/engine-render';
 import {
     ILogService,
     Inject,
@@ -59,7 +60,7 @@ import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {
@@ -116,6 +117,13 @@ export interface ITestBed {
     injector: Injector;
 }
 
+class RenderManagerServiceTestBed extends RenderManagerService {
+    override createRender(unitId: string): IRender {
+        const renderer = this._createRender(unitId, new Engine(100, 100));
+        return renderer;
+    }
+}
+
 export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -146,7 +154,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
-            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
@@ -188,6 +196,10 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
             });
 
             dependencies?.forEach((d) => injector.add(d));
+        }
+
+        override onReady(): void {
+            this._injector.get(SheetsRenderService);
         }
     }
 

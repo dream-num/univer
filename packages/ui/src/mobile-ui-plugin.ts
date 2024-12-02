@@ -36,7 +36,6 @@ import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { IMenuService, MenuService } from './services/menu/menu.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
@@ -79,7 +78,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],

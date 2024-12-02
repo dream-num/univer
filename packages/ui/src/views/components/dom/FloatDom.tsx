@@ -39,6 +39,8 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const domRef = useRef<HTMLDivElement>(null);
     const innerDomRef = useRef<HTMLDivElement>(null);
     const transformRef = useRef<string>(`transform: rotate(${position?.rotate}deg) translate(${position?.startX}px, ${position?.startY}px)`);
+    const topRef = useRef<number>(position?.startY ?? 0);
+    const leftRef = useRef<number>(position?.startX ?? 0);
     const innerStyle = useRef<React.CSSProperties>({
 
     });
@@ -50,9 +52,13 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
 
     useEffect(() => {
         const subscription = layer.position$.subscribe((position) => {
-            transformRef.current = `rotate(${position.rotate}deg) translate(${position.startX}px, ${position.startY}px)`;
+            transformRef.current = `rotate(${position.rotate}deg)`;
+            topRef.current = position.startY;
+            leftRef.current = position.startX;
             if (domRef.current) {
                 domRef.current.style.transform = transformRef.current;
+                domRef.current.style.top = `${topRef.current}px`;
+                domRef.current.style.left = `${leftRef.current}px`;
             }
         });
 
@@ -100,12 +106,13 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
             className={styles.floatDomWrapper}
             style={{
                 position: 'absolute',
-                top: 0,
-                left: 0,
+                top: topRef.current,
+                left: leftRef.current,
                 width: Math.max(position.endX - position.startX - 2, 0),
                 height: Math.max(position.endY - position.startY - 2, 0),
                 transform: transformRef.current,
                 overflow: 'hidden',
+                transformOrigin: 'center center',
             }}
             onPointerMove={(e) => {
                 layer.onPointerMove(e.nativeEvent);

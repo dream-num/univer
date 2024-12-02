@@ -1,16 +1,30 @@
 @height: 4px;
+@bar-width: 160px;
+@label-width: 98px;
 
 .progress-bar {
-    width: 160px;
+    width: @bar-width;
     height: @height;
     background-color: rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
-    margin-right: 8px;
+    margin-right: var(--margin-xs);
 
     &-container {
         display: flex;
         align-items: center;
-        margin: 0 8px 0 8px;
+        margin: 0 var(--margin-xs) 0 var(--margin-xs);
+    }
+
+    &-label {
+        font-size: var(--font-size-xxs);
+        color: rgb(var(--text-color-secondary));
+        width: @label-width;
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: var(--margin-xs);
+        line-height: 17px;
     }
 
     &-inner {
@@ -22,7 +36,7 @@
     &-close-button {
         background: none;
         border: none;
-        font-size: 12px;
+        font-size: var(--font-size-xxs);
         color: rgb(var(--text-color));
         cursor: pointer;
         padding: 0;

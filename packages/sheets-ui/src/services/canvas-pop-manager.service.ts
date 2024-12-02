@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
@@ -31,10 +31,21 @@ import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
-    extraProps?: Record<string, any>;
+    extraProps?: Record<string, unknown>;
 }
 
+interface IPopupMenuItem {
+    label: string;
+    index: number;
+    commandId: string;
+    commandParams: ICommandInfo['params'];
+    disable: boolean;
+}
+type getPopupMenuItemCallback = (unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum) => IPopupMenuItem[];
+
 export class SheetCanvasPopManagerService extends Disposable {
+    // the DrawingTypeEnum should refer from drawing package, here we just use type, so no need to import the drawing package
+    private _popupMenuFeatureMap = new Map<DrawingTypeEnum, getPopupMenuItemCallback>();
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -43,6 +54,111 @@ export class SheetCanvasPopManagerService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+    }
+
+    /**
+     * Register a feature menu callback for a specific drawing type.such as image, chart, etc.
+     */
+    registerFeatureMenu(type: DrawingTypeEnum, getPopupMenuCallBack: getPopupMenuItemCallback) {
+        this._popupMenuFeatureMap.set(type, getPopupMenuCallBack);
+    }
+
+    /**
+     * Get the feature menu by drawing type, the function should be called when a drawing element need trigger popup menu, so the unitId, subUnitId, drawingId should be provided.
+     * @param {string} unitId the unit id
+     * @param {string} subUnitId the sub unit id
+     * @param {string} drawingId the drawing id
+     * @param {DrawingTypeEnum} drawingType the feature type
+     * @returns the feature menu if it exists, otherwise return undefined
+     */
+    getFeatureMenu(unitId: string, subUnitId: string, drawingId: string, drawingType: DrawingTypeEnum): Nullable<IPopupMenuItem[]> {
+        const callback = this._popupMenuFeatureMap.get(drawingType);
+        if (callback) {
+            return callback(unitId, subUnitId, drawingId, drawingType);
+        }
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this._popupMenuFeatureMap.clear();
+    }
+
+    private _createHiddenRectObserver(params: { row: number; column: number; worksheet: Worksheet; skeleton: SpreadsheetSkeleton; currentRender: IRender }) {
+        const { row, column, worksheet, skeleton, currentRender } = params;
+        const calc = () => {
+            const freeze = worksheet.getFreeze();
+            const { startRow: freezeStartRow, startColumn: freezeStartColumn, xSplit, ySplit } = freeze;
+            const startRow = freezeStartRow - ySplit;
+            const startColumn = freezeStartColumn - xSplit;
+            const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
+            const canvasFreezeWidth = rowHeaderWidth + (startColumn === -1 ? 0 : (columnWidthAccumulation[startColumn + xSplit - 1] - (columnWidthAccumulation[startColumn - 1] ?? 0)));
+            const canvasFreezeHeight = columnHeaderHeight + (startRow === -1 ? 0 : (rowHeightAccumulation[startRow + ySplit - 1] - (rowHeightAccumulation[startRow] ?? 0)));
+            const canvasElement = currentRender.engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
+
+            // We should take the scale into account when canvas is scaled by CSS.
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+            // const { top, left, width } = canvasClientRect; // real width affected by scale
+            const scaleAdjust = canvasClientRect.width / widthOfCanvas;
+            const canvasScale = currentRender.scene.getAncestorScale().scaleX;
+
+            const freezeWidth = canvasFreezeWidth * scaleAdjust * canvasScale;
+            const freezeHeight = canvasFreezeHeight * scaleAdjust * canvasScale;
+            const viewTopLeft = {
+                left: -Infinity,
+                top: -Infinity,
+                right: canvasClientRect.left + freezeWidth,
+                bottom: canvasClientRect.top + freezeHeight,
+            };
+
+            const viewTopRight = {
+                left: canvasClientRect.left + freezeWidth,
+                top: -Infinity,
+                right: Infinity,
+                bottom: canvasClientRect.top + freezeHeight,
+            };
+
+            const viewBottomLeft = {
+                left: -Infinity,
+                top: canvasClientRect.top + freezeHeight,
+                right: canvasClientRect.left + freezeWidth,
+                bottom: Infinity,
+            };
+            const position = [];
+            if (row < freezeStartRow) {
+                position.push(viewTopLeft);
+            }
+            if (column < freezeStartColumn) {
+                position.push(viewBottomLeft);
+            }
+            if (row < freezeStartRow && column < freezeStartColumn) {
+                return [];
+            } else if (row < freezeStartRow) {
+                return [viewTopLeft];
+            } else if (column < freezeStartColumn) {
+                return [viewTopLeft];
+            } else {
+                return [viewTopLeft, viewTopRight, viewBottomLeft];
+            }
+        };
+
+        const rects = calc();
+
+        const rects$ = new BehaviorSubject(rects);
+
+        const disposable = new DisposableCollection();
+
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetFrozenMutation.id) {
+                const newRects = calc();
+                rects$.next(newRects);
+            }
+        }));
+
+        return {
+            rects$,
+            disposable,
+        };
     }
 
     // #region attach to object
@@ -154,7 +270,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     // #endregion
 
     // #region attach to position
-    attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string): Nullable<INeedCheckDisposable> {
+    attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, location: ISheetLocationBase): Nullable<INeedCheckDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
@@ -163,7 +279,7 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        if ((_unitId && unitId !== _unitId) || (_subUnitId && _subUnitId !== subUnitId)) {
+        if ((unitId !== location.unitId) || (location.subUnitId !== subUnitId)) {
             return null;
         }
 
@@ -177,12 +293,20 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
 
         const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
+        const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
+            row: location.row,
+            column: location.col,
+            worksheet,
+            skeleton,
+            currentRender,
+        });
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
             anchorRect: position,
             anchorRect$: position$,
+            hiddenRects$: rects$,
             canvasElement: currentRender.engine.getCanvasElement(),
         });
 
@@ -191,6 +315,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 this._globalPopupManagerService.removePopup(id);
                 position$.complete();
                 disposable.dispose();
+                rectsObserverDisposable.dispose();
             },
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
@@ -285,6 +410,13 @@ export class SheetCanvasPopManagerService extends Disposable {
         }
 
         const { position, position$, disposable: positionObserverDisposable, updateRowCol } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
+        const { rects$, disposable: rectsObserverDisposable } = this._createHiddenRectObserver({
+            row,
+            column: col,
+            worksheet,
+            skeleton,
+            currentRender,
+        });
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -292,14 +424,15 @@ export class SheetCanvasPopManagerService extends Disposable {
             anchorRect: position,
             anchorRect$: position$,
             canvasElement: currentRender.engine.getCanvasElement(),
+            hiddenRects$: rects$,
         });
-
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(positionObserverDisposable);
         disposableCollection.add(toDisposable(() => {
             this._globalPopupManagerService.removePopup(id);
             position$.complete();
         }));
+        disposableCollection.add(rectsObserverDisposable);
 
         // If the range changes, the popup should change with it. And if the range vanished, the popup should be removed.
         const watchedRange: IRange = { startRow: row, endRow: row, startColumn: col, endColumn: col };
@@ -377,7 +510,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     ): IBoundRectNoAngle {
         const { scene, engine } = currentRender;
 
-        const primaryWithCoord = skeleton.getCellByIndex(row, col);
+        const primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();

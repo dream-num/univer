@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'engine-render.config';
+export const ENGINE_RENDER_PLUGIN_CONFIG_KEY = 'engine-render.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(ENGINE_RENDER_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEngineRenderConfig {
 }

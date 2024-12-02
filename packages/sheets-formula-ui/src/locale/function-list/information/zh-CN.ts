@@ -56,6 +56,23 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    ISBETWEEN: {
+        description: '检查所提供的数值是否介于其他两个数字之间',
+        abstract: '检查所提供的数值是否介于其他两个数字之间',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/10538337?hl=zh-Hans&sjid=7730820672019533290-AP',
+            },
+        ],
+        functionParameter: {
+            valueToCompare: { name: '比较值', detail: '要测试的值，看是否介于“最小值”和“最大值”之间。' },
+            lowerValue: { name: '最小值', detail: '范围的下限值，“比较值”的值可能落入这个范围内。' },
+            upperValue: { name: '最大值', detail: '范围的上限值，“比较值”的值可能落入这个范围内。' },
+            lowerValueIsInclusive: { name: '包括最小值', detail: '用于指定值的范围是否包含“最小值”。默认情况下为“TRUE”。' },
+            upperValueIsInclusive: { name: '包括最大值', detail: '用于指定值的范围是否包含“最大值”。默认情况下为“TRUE”。' },
+        },
+    },
     ISBLANK: {
         description: '如果值为空，则返回 TRUE',
         abstract: '如果值为空，则返回 TRUE',
@@ -67,6 +84,32 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+        },
+    },
+    ISDATE: {
+        description: '返回某个值是否为日期',
+        abstract: '返回某个值是否为日期',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/9061381?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要验证其是否为日期的值。' },
+        },
+    },
+    ISEMAIL: {
+        description: '检查输入的值是否为有效的电子邮件地址',
+        abstract: '检查输入的值是否为有效的电子邮件地址',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3256503?hl=zh-Hans&sjid=2155433538747546473-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要验证其是否为电子邮件地址的值。' },
         },
     },
     ISERR: {
@@ -224,6 +267,19 @@ export default {
         ],
         functionParameter: {
             value: { name: '值', detail: '指的是要测试的值。参数值可以是空白（空单元格）、错误值、逻辑值、文本、数字、引用值，或者引用要测试的以上任意值的名称。' },
+        },
+    },
+    ISURL: {
+        description: '检查某个值是否为有效网址',
+        abstract: '检查某个值是否为有效网址',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3256501?hl=zh-Hans&sjid=7312884847858065932-AP',
+            },
+        ],
+        functionParameter: {
+            value: { name: '值', detail: '要验证其是否为网址的值。' },
         },
     },
     N: {

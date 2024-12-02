@@ -419,7 +419,7 @@ export function needsQuoting(name: string) {
 
     // Check for spaces, punctuation and special characters
 
-    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(name)) {
+    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?（）]/.test(name)) {
         return true;
     }
 

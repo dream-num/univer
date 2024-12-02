@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
 import type { Meta } from '@storybook/react';
-import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, WorksheetProtectionPointModel } from '@univerjs/sheets';
-import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
-import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
+import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, WorksheetProtectionPointModel } from '@univerjs/sheets';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { IShortcutService, ShortcutService } from '@univerjs/ui';
+import React, { useState } from 'react';
+import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';
-import zhCN from '../../locale/zh-CN';
 import ruRU from '../../locale/ru-RU';
-import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
+import zhCN from '../../locale/zh-CN';
+import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { FilterPanel } from './SheetsFilterPanel';
 
 const meta: Meta<typeof FilterPanel> = {
@@ -62,7 +61,6 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
             const injector = this._injector;
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
-            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterPanelService]);

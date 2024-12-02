@@ -123,7 +123,7 @@ describe('test case in html and udm convert', () => {
     describe('test cases in udm-to-html', () => {
         it('should paste the case when convert udm to html', async () => {
             const convertor = new UDMToHtmlService();
-            const html = await convertor.convert([body!]);
+            const html = await convertor.convert([{ body: body!, id: '', documentStyle: {} }]);
 
             expect(html).toBe('<p class="UniverNormal" ><strong>hello</strong><strong><i>world</i></strong></p>');
         });

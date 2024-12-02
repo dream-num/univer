@@ -104,10 +104,14 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
-
                 const { unitId, subUnitId, row, col } = currentCell;
                 const renderer = this._renderManagerService.getRenderById(unitId);
                 if (!renderer) {
+                    return;
+                }
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
                     return;
                 }
                 const hoverRenderController = renderer.with(HoverRenderController);
@@ -136,7 +140,15 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
                 const { viewPermission, editPermission, copyPermission } = this._getLinkPermission(currentCell);
 
-                if (!viewPermission || !currentCell.customRange) {
+                if (!viewPermission) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                    return;
+                }
+                const cell = worksheet.getCellStyleOnly(targetRow, targetCol);
+                const style = workbook!.getStyles().getStyleByCell(cell);
+                const tr = style?.tr?.a;
+
+                if (!tr && !currentCell.customRange) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
@@ -151,6 +163,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     type: HyperLinkEditSourceType.VIEWING,
                     unitId,
                     subUnitId,
+                    showAll: Boolean(tr),
                 });
             })
         );

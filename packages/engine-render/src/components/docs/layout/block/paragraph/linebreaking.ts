@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
+import type { IBullet, IDocDrawingBase, IDrawings, IParagraph, Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable, IParagraphList } from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { ILayoutContext } from '../../tools';
+import type { IShapedText } from './shaping';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType, Tools } from '@univerjs/core';
-import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { getLastNotFullColumnInfo } from '../../tools';
 import { dealWithBullet } from './bullet';
 import { layoutParagraph } from './layout-ruler';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { ILayoutContext } from '../../tools';
-import type { IShapedText } from './shaping';
 
 function _getListLevelAncestors(
     bullet?: IBullet,
-    listLevel?: Map<string, IDocumentSkeletonBullet[]>
+    listLevel?: Map<string, IParagraphList[][]>
 ): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
     if (!bullet || !listLevel) {
         return;
@@ -50,17 +50,23 @@ function _getListLevelAncestors(
     const listLevelAncestors: Array<Nullable<IDocumentSkeletonBullet>> = [];
 
     for (let i = level; i >= 0; i--) {
-        const bs = sameList?.[i];
-        listLevelAncestors[i] = bs || null;
+        if (Array.isArray(sameList?.[i])) {
+            const len = sameList[i].length;
+
+            listLevelAncestors[i] = sameList[i][len - 1]?.bullet ?? null;
+        } else {
+            listLevelAncestors[i] = null;
+        }
     }
 
     return listLevelAncestors;
 }
 
 function _updateListLevelAncestors(
+    paragraph: IParagraph,
     bullet?: IBullet,
     bulletSkeleton?: IDocumentSkeletonBullet,
-    listLevel?: Map<string, IDocumentSkeletonBullet[]>
+    listLevel?: Map<string, IParagraphList[][]>
 ) {
     if (!bullet || !bulletSkeleton) {
         return;
@@ -68,11 +74,17 @@ function _updateListLevelAncestors(
 
     const { listId, nestingLevel } = bullet;
 
-    const cacheItem: IDocumentSkeletonBullet[] = [...(listLevel?.get(listId) || [])];
+    const cacheItem: IParagraphList[][] = [...(listLevel?.get(listId) || [])];
 
     // [[nestingLevel, bulletSkeleton]];
 
-    cacheItem[nestingLevel] = bulletSkeleton;
+    if (cacheItem[nestingLevel] == null) {
+        cacheItem[nestingLevel] = [];
+    }
+    cacheItem[nestingLevel].push({
+        bullet: bulletSkeleton,
+        paragraph,
+    });
 
     cacheItem.splice(nestingLevel + 1); // 文档自上而下渲染，如果一个level被更新，则它以下的level数据的startIndex就要重置
 
@@ -131,7 +143,7 @@ export function lineBreaking(
         localeService,
     } = sectionBreakConfig;
 
-    const { endIndex, blocks = [] } = paragraphNode;
+    const { endIndex, blocks = [], children } = paragraphNode;
     const { segmentId } = curPage;
 
     const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
@@ -140,7 +152,7 @@ export function lineBreaking(
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
-    const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphNonInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
     let segmentDrawingAnchorCache = drawingAnchor?.get(segmentId);
@@ -154,9 +166,19 @@ export function lineBreaking(
         paragraphIndex: endIndex,
         // TODO optimize this deepClone
         paragraphStyle: Tools.deepClone(paragraphStyle),
-        paragraphAffectSkeDrawings,
+        paragraphNonInlineSkeDrawings,
         paragraphInlineSkeDrawings,
-        skeTablesInParagraph: tableSkeleton ? [{ tableId: tableSkeleton.tableId, table: tableSkeleton, hasPositioned: false }] : undefined,
+        skeTablesInParagraph: tableSkeleton
+            ? [
+                {
+                    tableId: tableSkeleton.tableId,
+                    table: tableSkeleton,
+                    hasPositioned: false,
+                    isSlideTable: false,
+                    tableNode: children[0],
+                },
+            ]
+            : undefined,
         skeHeaders,
         skeFooters,
         pDrawingAnchor: segmentDrawingAnchorCache,
@@ -169,14 +191,18 @@ export function lineBreaking(
         ctx.paragraphConfigCache.set(segmentId, segmentParagraphCache);
     }
 
-    segmentParagraphCache.set(endIndex, paragraphConfig);
+    if (segmentParagraphCache.has(endIndex)) {
+        const bulletSkeleton = segmentParagraphCache.get(endIndex)?.bulletSkeleton;
 
-    const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
-    const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
+        paragraphConfig.bulletSkeleton = bulletSkeleton;
+    } else {
+        const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
+        const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
 
-    _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
+        _updateListLevelAncestors(paragraph, bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
 
-    paragraphConfig.bulletSkeleton = bulletSkeleton;
+        paragraphConfig.bulletSkeleton = bulletSkeleton;
+    }
 
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
@@ -192,9 +218,11 @@ export function lineBreaking(
         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
             paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         } else {
-            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+            paragraphNonInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
+
+    segmentParagraphCache.set(endIndex, paragraphConfig);
 
     let allPages = [curPage];
     let isParagraphFirstShapedText = true; // 第一个分词
@@ -228,7 +256,7 @@ export function lineBreaking(
                     BreakType.PAGE
                 )
             );
-            paragraphAffectSkeDrawings.clear();
+            paragraphNonInlineSkeDrawings.clear();
             paragraphInlineSkeDrawings.clear();
             continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {

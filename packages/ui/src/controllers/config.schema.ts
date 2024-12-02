@@ -18,9 +18,9 @@ import type { DependencyOverride } from '@univerjs/core';
 import type { MenuConfig } from '../services/menu/menu';
 import type { IWorkbenchOptions } from './ui/ui.controller';
 
-export const PLUGIN_CONFIG_KEY = 'ui.config';
+export const UI_PLUGIN_CONFIG_KEY = 'ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverUIConfig extends IWorkbenchOptions {
     /** Disable auto focus when Univer bootstraps. */

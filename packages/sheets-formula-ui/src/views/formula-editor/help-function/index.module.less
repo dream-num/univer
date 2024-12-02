@@ -1,0 +1,129 @@
+@width: 250px;
+@max-height: 350px;
+@icon-size: 24px;
+
+.formula-help-function {
+    user-select: none;
+
+    box-sizing: border-box;
+    width: @width;
+    margin: 0;
+
+    line-height: 20px;
+    list-style: none;
+
+    background-color: rgb(var(--bg-color-secondary));
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-lg);
+    outline: none;
+    box-shadow: var(--box-shadow-base);
+
+    &-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        box-sizing: border-box;
+        padding: var(--padding-base) var(--padding-lg);
+
+        font-size: var(--font-size-xxs);
+        font-weight: 500;
+        color: rgb(var(--text-color));
+        overflow-wrap: anywhere;
+
+        border-bottom: 1px solid rgb(var(--border-color));
+
+        &-icons {
+            display: flex;
+        }
+
+        &-icon {
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: @icon-size;
+            height: @icon-size;
+            margin-left: var(--margin-xs);
+            padding: 0;
+
+            font-size: var(--font-size-xs);
+            color: rgb(var(--text-color-secondary));
+
+            background-color: transparent;
+            border: none;
+            border-radius: var(--border-radius-base);
+            outline: none;
+
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+    }
+
+    &-content {
+        overflow-y: auto;
+        box-sizing: border-box;
+        max-height: @max-height;
+        padding: 0 var(--padding-lg) var(--padding-base) var(--padding-lg);
+
+        &-inner {
+            margin-top: var(--margin-sm);
+        }
+
+        &-params {
+            margin: var(--margin-xs) 0;
+
+            &-title {
+                margin-bottom: var(--margin-xs);
+                font-size: var(--font-size-xs);
+                font-weight: 500;
+                color: rgb(var(--text-color));
+            }
+
+            &-detail {
+                font-size: var(--font-size-xxs);
+                font-weight: 400;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                color: rgb(var(--text-color-secondary));
+            }
+        }
+    }
+
+    &-active {
+        color: rgb(var(--primary-color));
+    }
+}
+
+.formula-help-decorator {
+    cursor: pointer;
+
+    position: fixed;
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: var(--padding-xs);
+}
+
+.formula-help-param {
+    z-index: 1;
+    &-prefix {
+        z-index: 1;
+    }
+
+    &-item {
+        z-index: 1;
+    }
+
+    &-active {
+        z-index: 1;
+    }
+}

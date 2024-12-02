@@ -19,7 +19,6 @@ import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } 
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
-import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
 import { type BooleanNumber, CellValueType } from '../types/enum';
 
@@ -272,7 +271,6 @@ export interface ICellMarks {
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
-    dataValidation?: Nullable<ICellValidationData>;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;
@@ -594,11 +592,75 @@ export interface ISingleCell {
 
 export interface IRangeWithCoord extends IPosition, IRange { }
 
-export interface ISelectionCell extends IRange, ISingleCell { }
-
+/**
+ * @deprecated use ICellWithCoord instead.
+ */
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
+
+/**
+ * SingleCell & coordinate and mergeRange.
+ */
+// Original name: ISelectionCellWithMergeInfo
+export interface ICellWithCoord extends IPosition, ISingleCell {
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
+
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startY: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endY: number;
+
+    // part of singleCell
+    /**
+     * The raw row index calculated by the offsetX (Without considering merged cells, this value is simply the row index.If there are merged cells, this value refers to the cell where the mouse was clicked.)
+     */
+    actualRow: number;
+
+    /**
+     * The raw col index calculated by the offsetX (Without considering merged cells)
+     */
+    actualColumn: number;
+    /**
+     * Whether the cell is merged. But main merged cell is false.
+     */
+    isMerged: boolean;
+    /**
+     * if Merged and is main merged cell.
+     */
+    isMergedMainCell: boolean;
+}
+
+/**
+ * Range & SingleCell & isMerged.
+ * startRow: number;
+ * startColumn: number;
+ * endRow: number;
+ * endColumn: number;
+ *
+ * actualRow: number;
+ * actualColumn: number;
+ * isMerged: boolean;
+ * isMergedMainCell: boolean;
+ */
+export interface ISelectionCell extends IRange, ISingleCell { }
+
+/**
+ * ICellInfo has the same properties as ISelectionCell, but the name ICellInfo might be more semantically appropriate in some contexts.
+ */
+export interface ICellInfo extends ISelectionCell {}
 
 export interface ISelection {
     /**
@@ -608,19 +670,11 @@ export interface ISelection {
 
     /**
      * The highlighted cell in the selection range. If there are several selections, only one selection would have a primary cell.
+     *
+     * This cell range should consider the merged cells.
      */
     primary: Nullable<ISelectionCell>;
 }
-
-/**
- * Selection range Info, contains selection range & primary range
- * primary range is the range of the highlighted cell.
- */
-export interface ISelectionWithCoord {
-    rangeWithCoord: IRangeWithCoord;
-    primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;
-}
-
 export interface ITextRangeStart {
     startOffset: number;
 }

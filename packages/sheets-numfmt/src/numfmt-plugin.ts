@@ -14,57 +14,56 @@
  * limitations under the License.
  */
 
-import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
-
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { SheetsNumfmtCellContentController } from './controllers/numfmt.cell-content.controller';
-import { NumfmtController } from './controllers/numfmt.controller';
-import { NumfmtCurrencyController } from './controllers/numfmt.currency.controller';
-import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
-import { NumfmtMenuController } from './controllers/numfmt.menu.controller';
-import { INumfmtController } from './controllers/type';
-import { UserHabitController } from './controllers/user-habit.controller';
+import { AddDecimalCommand } from './commands/commands/add-decimal.command';
+import { SetCurrencyCommand } from './commands/commands/set-currency.command';
+import { SetNumfmtCommand } from './commands/commands/set-numfmt.command';
+import { SetPercentCommand } from './commands/commands/set-percent.command';
+import { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
+import { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
+import { NumfmtCurrencyController } from './controllers/numfmt-currency.controller';
 import { MenuCurrencyService } from './service/menu.currency.service';
 
-@DependentOn(UniverSheetsPlugin, UniverSheetsUIPlugin)
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
     static override pluginName = SHEET_NUMFMT_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsNumfmtConfig> = defaultPluginConfig,
+        private readonly _config: undefined = undefined,
         @Inject(Injector) override readonly _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
-        // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
-        if (menu) {
-            this._configService.setConfig('menu', menu, { merge: true });
-        }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
-        this._injector.add([INumfmtController, { useClass: NumfmtController, lazy: false }]);
-        this._injector.add([NumfmtEditorController]);
-        this._injector.add([UserHabitController]);
-        this._injector.add([SheetsNumfmtCellContentController]);
-        this._injector.add([MenuCurrencyService]);
-        this._injector.add([NumfmtCurrencyController]);
-        this._injector.add([NumfmtMenuController]);
+        registerDependencies(this._injector, [
+            [SheetsNumfmtCellContentController],
+            [MenuCurrencyService],
+            [NumfmtCurrencyController],
+        ]);
+
+        touchDependencies(this._injector, [
+            [SheetsNumfmtCellContentController],
+        ]);
     }
 
     override onRendered(): void {
-        this._injector.get(INumfmtController);
-        this._injector.get(SheetsNumfmtCellContentController);
-        this._injector.get(NumfmtCurrencyController);
-        this._injector.get(NumfmtEditorController);
-        this._injector.get(NumfmtMenuController);
+        touchDependencies(this._injector, [
+            [NumfmtCurrencyController],
+        ]);
+
+        [
+            AddDecimalCommand,
+            SubtractDecimalCommand,
+            SetCurrencyCommand,
+            SetPercentCommand,
+            SetNumfmtCommand,
+        ].forEach((config) => {
+            this.disposeWithMe(this._commandService.registerCommand(config));
+        });
     }
 }

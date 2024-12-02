@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, Injector, IParagraph, ISelectionCellWithMergeInfo, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { ICellWithCoord, ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IFontCacheItem } from '@univerjs/engine-render';
 import { CustomRangeType, HorizontalAlign, IUniverInstanceService, PresetListType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
@@ -25,7 +25,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
     const pageIndex = -1;
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, pageIndex);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const skeletonData = skeleton.getSkeletonData();
     let end = range.endOffset;
     if (range.segmentId) {
@@ -34,7 +34,7 @@ const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleto
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -137,14 +137,25 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
-
+    const drawings = docSkeleton.getSkeletonData()?.pages[0].skeDrawings;
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),
         checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list, paddingLeft, paddingTop)!).filter(Boolean),
+        drawings: drawings
+            ? Array.from(drawings.keys()).map((key) => ({
+                drawingId: key,
+                rect: {
+                    top: drawings!.get(key)!.aTop,
+                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.width,
+                    left: drawings!.get(key)!.aLeft,
+                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
+                },
+            }))
+            : [],
     };
 };
 
-export function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
+export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
     const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
     const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
@@ -213,7 +224,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
 
     const PADDING = DOC_VERTICAL_PADDING;
 
-    const cellIndex = skeleton.getCellByIndex(row, col);
+    const cellIndex = skeleton.getCellWithCoordByIndex(row, col);
     let { actualColumn, actualRow } = cellIndex;
 
     skeleton.overflowCache.forValue((r, c, range) => {
@@ -223,7 +234,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualColumn);
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
     const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
     const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
     const { paddingLeft, paddingTop } = calcPadding(actualCell, font);
@@ -237,7 +248,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
             right: rect.right + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };
 
@@ -288,6 +299,6 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
             right: rect.right + canvasClientRect.left,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };

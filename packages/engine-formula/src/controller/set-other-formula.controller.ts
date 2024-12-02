@@ -15,8 +15,9 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
+import type { IOtherFormulaData } from '../basics/common';
 
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
@@ -47,7 +48,7 @@ export class SetOtherFormulaController extends Disposable {
                     if (params == null) {
                         return;
                     }
-                    const config = { [params.unitId]: { [params.subUnitId]: params.formulaMap } };
+                    const config: IOtherFormulaData = { [params.unitId]: { [params.subUnitId]: params.formulaMap } };
                     this._otherFormulaManagerService.batchRegister(config);
                 } else if (command.id === RemoveOtherFormulaMutation.id) {
                     const params = command.params as IRemoveOtherFormulaMutationParams;

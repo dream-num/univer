@@ -52,7 +52,7 @@ pnpm dev
 
 ### Architecture
 
-Please refer to the [architecture doc](https://github.com/dream-num/univer/wiki/Univer-Architecture).
+Please refer to [Architecture](https://univer.ai/guides/sheet/architecture/univer), and also [ISOMORPHIC.md](./docs/ISOMORPHIC.md) for more guidance on how to set up plugins.
 
 ### Source code organization
 
@@ -173,9 +173,9 @@ To ensure the quality of the code and move with confidence, we require that all 
 pnpm test
 ```
 
-With the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the codelens.
+Also, with the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the side bar. In addition, if you add a new plugin, you should update `vitest.workspace.js` to include the new plugin.
 
-![](./docs/img/debug-unit-test.png)
+![vitest](./docs/img/vitest.png)
 
 ### E2E test
 

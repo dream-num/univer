@@ -432,27 +432,15 @@ export class BooleanValueObject extends BaseValueObject {
     }
 }
 
-const NUMBER_CACHE_LRU_COUNT = 200000;
-
-export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBER_CACHE_LRU_COUNT);
-
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
 
     static create(value: number, pattern: string = '') {
-        // The same number may have different number formats
-        const key = `${value}-${pattern}`;
-        const cached = NumberValueObjectCache.get(key);
-        if (cached) {
-            return cached;
-        }
-
         const instance = new NumberValueObject(value);
         if (pattern) {
             instance.setPattern(pattern);
         }
 
-        NumberValueObjectCache.set(key, instance);
         return instance;
     }
 
@@ -1307,7 +1295,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
-const STRING_CACHE_LRU_COUNT = 200000;
+const STRING_CACHE_LRU_COUNT = 100000;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {

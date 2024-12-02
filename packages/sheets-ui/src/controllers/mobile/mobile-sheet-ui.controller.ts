@@ -48,7 +48,7 @@ import {
 } from '../../commands/commands/inline-format.command';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
-import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
+import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -58,7 +58,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
@@ -72,7 +71,7 @@ import {
 } from '../../commands/commands/set-selection.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
-import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../../commands/commands/worksheet-protection.command';
+import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
@@ -235,7 +234,6 @@ export class SheetUIMobileController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
-            CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
@@ -260,11 +258,7 @@ export class SheetUIMobileController extends Disposable {
             ChangeSheetProtectionFromSheetBarCommand,
             DeleteRangeProtectionFromContextMenuCommand,
             SetRangeProtectionFromContextMenuCommand,
-            AddWorksheetProtectionCommand,
-            DeleteWorksheetProtectionCommand,
-            SetWorksheetProtectionCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
-            SetProtectionCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

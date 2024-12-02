@@ -16,6 +16,7 @@
 
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
+import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -142,8 +143,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }, {
@@ -189,8 +188,6 @@ describe('compose test cases', () => {
             len: 1,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
         }];
 
@@ -234,8 +231,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];
@@ -325,6 +320,7 @@ describe('compose test cases', () => {
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
+            coverType: UpdateDocsAttributeType.COVER,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -416,8 +412,6 @@ describe('compose test cases', () => {
                         it: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];
@@ -458,8 +452,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'ab',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 2,
         }];
@@ -487,8 +479,6 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'c',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];

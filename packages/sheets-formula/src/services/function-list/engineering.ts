@@ -674,6 +674,21 @@ export const FUNCTION_LIST_ENGINEERING: IFunctionInfo[] = [
         ],
     },
     {
+        functionName: FUNCTION_NAMES_ENGINEERING.IMCOTH,
+        functionType: FunctionType.Engineering,
+        description: 'formula.functionList.IMCOTH.description',
+        abstract: 'formula.functionList.IMCOTH.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IMCOTH.functionParameter.inumber.name',
+                detail: 'formula.functionList.IMCOTH.functionParameter.inumber.detail',
+                example: '"4+3i"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
         functionName: FUNCTION_NAMES_ENGINEERING.IMCSC,
         functionType: FunctionType.Engineering,
         description: 'formula.functionList.IMCSC.description',
@@ -751,6 +766,28 @@ export const FUNCTION_LIST_ENGINEERING: IFunctionInfo[] = [
                 detail: 'formula.functionList.IMLN.functionParameter.inumber.detail',
                 example: '"3+4i"',
                 require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_ENGINEERING.IMLOG,
+        functionType: FunctionType.Engineering,
+        description: 'formula.functionList.IMLOG.description',
+        abstract: 'formula.functionList.IMLOG.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IMLOG.functionParameter.inumber.name',
+                detail: 'formula.functionList.IMLOG.functionParameter.inumber.detail',
+                example: '"3+4i"',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.IMLOG.functionParameter.base.name',
+                detail: 'formula.functionList.IMLOG.functionParameter.base.detail',
+                example: '10',
+                require: 0,
                 repeat: 0,
             },
         ],
@@ -972,6 +1009,21 @@ export const FUNCTION_LIST_ENGINEERING: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.IMTAN.functionParameter.inumber.name',
                 detail: 'formula.functionList.IMTAN.functionParameter.inumber.detail',
+                example: '"4+3i"',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_ENGINEERING.IMTANH,
+        functionType: FunctionType.Engineering,
+        description: 'formula.functionList.IMTANH.description',
+        abstract: 'formula.functionList.IMTANH.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.IMTANH.functionParameter.inumber.name',
+                detail: 'formula.functionList.IMTANH.functionParameter.inumber.detail',
                 example: '"4+3i"',
                 require: 1,
                 repeat: 0,

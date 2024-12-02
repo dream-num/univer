@@ -95,13 +95,12 @@ export function getClearContentMutationParamForRange(worksheet: Worksheet, range
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && row >= startRow && col >= startColumn) {
-            if (!leftTopCellValue && worksheet.cellHasValue(cellData)) {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData) && (cellData.v !== '' || (cellData.p?.body?.dataStream?.length ?? 0) > 2)) {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);
         }
     });
-
     redoMatrix.setValue(startRow, startColumn, leftTopCellValue);
 
     return redoMatrix;
@@ -123,20 +122,20 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
         y: activeViewport.viewportScrollY,
     };
 
-    const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+    const cellIndex = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
     // const mergeCell = skeleton.mergeData.find((range) => {
     //     const { startColumn, startRow, endColumn, endRow } = range;
     //     return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
     // });
-    const mergeCell = skeleton.worksheet.getMergedCell(cellPos.row, cellPos.column);
+    const mergeCell = skeleton.worksheet.getMergedCell(cellIndex.row, cellIndex.column);
 
     const params = {
-        actualRow: mergeCell ? mergeCell.startRow : cellPos.row,
-        actualCol: mergeCell ? mergeCell.startColumn : cellPos.column,
+        actualRow: mergeCell ? mergeCell.startRow : cellIndex.row,
+        actualCol: mergeCell ? mergeCell.startColumn : cellIndex.column,
         mergeCell,
-        row: cellPos.row,
-        col: cellPos.column,
+        row: cellIndex.row,
+        col: cellIndex.column,
     };
 
     return params;
@@ -148,19 +147,19 @@ export function getViewportByCell(row: number, column: number, scene: Scene, wor
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row > freeze.startRow && column > freeze.startColumn) {
+    if (row >= freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
-    if (row <= freeze.startRow && column <= freeze.startColumn) {
+    if (row < freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
     }
 
-    if (row <= freeze.startRow && column > freeze.startColumn) {
+    if (row < freeze.startRow && column >= freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
     }
 
-    if (row > freeze.startRow && column <= freeze.startColumn) {
+    if (row >= freeze.startRow && column < freeze.startColumn) {
         return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
     }
 }
@@ -229,7 +228,7 @@ export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skele
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualCol);
 
     const location: ISheetLocation = {
         unitId: workbook.getUnitId(),
@@ -256,6 +255,14 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     }
 
     let { actualCol, actualRow } = cellIndex;
+    const originLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: actualRow,
+        col: actualCol,
+    };
 
     skeleton.overflowCache.forValue((r, c, range) => {
         if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
@@ -264,16 +271,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
         }
     });
 
-    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
-    const originLocation = {
-        unitId,
-        subUnitId: sheetId,
-        workbook,
-        worksheet,
-        row: actualCell.actualRow,
-        col: actualCell.actualColumn,
-    };
-
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualCol);
     const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);
     let anchorCell: IRange;
     if (actualCell.mergeInfo) {

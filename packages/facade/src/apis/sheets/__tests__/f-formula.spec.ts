@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
-import type { FUniver } from '../../facade';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import type { FUniver, ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
+import type { IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
+import { ICommandService, IConfigService, IUniverInstanceService } from '@univerjs/core';
 
+import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { CalculationMode, PLUGIN_CONFIG_KEY_BASE } from '@univerjs/sheets-formula';
 import { beforeEach, describe, expect, it } from 'vitest';
+
 import { createFormulaTestBed } from './create-formula-test-bed';
+import '../../everything';
 
 describe('Test FFormula', () => {
     let get: Injector['get'];
@@ -101,5 +104,21 @@ describe('Test FFormula', () => {
 
         formula.executeCalculation();
         formula.stopCalculation();
+    });
+
+    it('FFormula setInitialFormulaComputing', () => {
+        const formula = univerAPI.getFormula();
+
+        const configService = get(IConfigService);
+
+        configService.setConfig(PLUGIN_CONFIG_KEY_BASE, {});
+
+        const config = configService.getConfig<Partial<IUniverSheetsFormulaBaseConfig>>(PLUGIN_CONFIG_KEY_BASE);
+
+        expect(config?.initialFormulaComputing).toBeUndefined();
+
+        formula.setInitialFormulaComputing(CalculationMode.FORCED);
+
+        expect(config?.initialFormulaComputing).toBe(CalculationMode.FORCED);
     });
 });

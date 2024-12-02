@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRuleBase, IDataValidationRuleOptions } from '@univerjs/core';
+import type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions } from '@univerjs/core';
 import type { UpdateRuleType } from '../enum/update-rule-type';
 
 export interface IUpdateRuleRangePayload {
@@ -32,7 +32,13 @@ export interface IUpdateRuleOptionsPayload {
     payload: Partial<IDataValidationRuleOptions>;
 }
 
+export interface IUpdateRuleAllPayload {
+    type: UpdateRuleType.ALL;
+    payload: Omit<IDataValidationRule, 'uid'>;
+}
+
 export type IUpdateRulePayload =
     IUpdateRuleRangePayload
     | IUpdateRuleSettingPayload
-    | IUpdateRuleOptionsPayload;
+    | IUpdateRuleOptionsPayload
+    | IUpdateRuleAllPayload;

@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { ILogService, Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 
 import { takeUntil } from 'rxjs/operators';
@@ -38,7 +38,8 @@ export class WorksheetPermissionService extends RxDisposable {
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel
+        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
+        @Inject(ILogService) private _logService: ILogService
     ) {
         super();
         this._init();
@@ -56,6 +57,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.addPermissionPoint(instance);
                 });
+                this._logService.log('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
             };
             workbook.getSheets().forEach((worksheet) => {
                 handleWorksheet(worksheet);

@@ -15,11 +15,14 @@
  */
 
 import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
+import type {
+    IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    DEFAULT_STYLES,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     HorizontalAlign,
@@ -31,20 +34,20 @@ import {
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    RichTextEditingMutation,
     SetTextSelectionsOperation,
 } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
-    getHeaderFooterMenuHiddenObservable,
     getMenuHiddenObservable,
     MenuItemType,
 } from '@univerjs/ui';
 
 import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
-import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
+import { getStyleInTextRange, ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
 import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
@@ -98,43 +101,49 @@ function getInsertTableHiddenObservable(
     });
 }
 
-function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<boolean> {
+function getHeaderFooterMenuHiddenObservable(
+    accessor: IAccessor
+): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
 
     return new Observable((subscriber) => {
         const subscription0 = commandService.onCommandExecuted((command) => {
-            if (command.id === SwitchDocModeCommand.id) {
-                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+            if (command.id === RichTextEditingMutation.id) {
+                const { unitId } = command.params as IRichTextEditingMutationParams;
+                const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
                 if (docDataModel == null) {
                     subscriber.next(true);
                     return;
                 }
+                const { documentStyle } = docDataModel.getSnapshot();
 
-                const documentStyle = docDataModel.getSnapshot().documentStyle;
                 subscriber.next(documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
             }
         });
 
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
             if (unitId == null) {
-                subscriber.next(true);
-                return;
+                return subscriber.next(true);
             }
+            const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+            const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
 
-            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-
-            if (docDataModel == null) {
-                subscriber.next(true);
-                return;
-            }
-
-            return subscriber.next(docDataModel.getSnapshot().documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
+            subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (docDataModel == null) {
+            return subscriber.next(true);
+        }
+
+        const documentFlavor = docDataModel?.getSnapshot().documentStyle.documentFlavor;
+        subscriber.next(documentFlavor !== DocumentFlavor.TRADITIONAL);
+
         return () => {
-            subscription.unsubscribe();
             subscription0.dispose();
+            subscription.unsubscribe();
         };
     });
 }
@@ -461,7 +470,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         })),
         // disabled$: getCurrentSheetDisabled$(accessor),
         value$: new Observable((subscriber) => {
-            const defaultValue = FONT_FAMILY_LIST[0].value;
+            const defaultValue = DEFAULT_STYLES.ff;
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -506,7 +515,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         selections: FONT_SIZE_LIST,
         // disabled$,
         value$: new Observable((subscriber) => {
-            const DEFAULT_SIZE = 14;
+            const DEFAULT_SIZE = DEFAULT_STYLES.fs;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
 
@@ -573,8 +582,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
-        disabled$: getHeaderFooterDisabledObservable(accessor),
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
     };
@@ -591,8 +599,8 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
         // Do not show header footer menu and insert table at zen mode.
-        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getInsertTableHiddenObservable(accessor), getHeaderFooterMenuHiddenObservable(accessor), (one, two, three) => {
-            return one || two || three;
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY), getInsertTableHiddenObservable(accessor), (one, two) => {
+            return one || two;
         }),
     };
 }
@@ -636,7 +644,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -670,7 +678,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -704,7 +712,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -738,7 +746,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             return disposable.dispose;
         }),
         disabled$: disableMenuWhenNoDocRange(accessor),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
     };
 }
 
@@ -759,7 +767,9 @@ const listValueFactory$ = (accessor: IAccessor) => {
             }
 
             textSubscription = docSelectionManagerService.textSelection$.subscribe(() => {
-                const range = docSelectionManagerService.getActiveTextRange();
+                const docRanges = docSelectionManagerService.getDocRanges();
+                const range = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
                 if (range) {
                     const doc = docDataModel.getSelfOrHeaderFooterModel(range?.segmentId);
                     const paragraphs = getParagraphsInRange(range, doc.getBody()?.paragraphs ?? []);
@@ -852,7 +862,7 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
         activated$: new Observable<boolean>((subscriber) => {
             const subscription = commandService.onCommandExecuted((c) => {
-                if (c.id === SwitchDocModeCommand.id) {
+                if (c.id === RichTextEditingMutation.id) {
                     const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
 
                     subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
@@ -916,41 +926,39 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const docMenuStyleService = accessor.get(DocMenuStyleService);
 
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveTextRange();
+    const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const docRanges = textSelectionService.getDocRanges();
+    const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
+    const defaultTextStyle = docMenuStyleService.getDefaultStyle();
     const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
 
-    if (docDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeRange == null) {
         return {
-            ts: cacheStyle,
+            ts: {
+                ...defaultTextStyle,
+                ...cacheStyle,
+            },
         };
     }
 
-    const { startOffset, segmentId } = activeTextRange;
+    const { segmentId } = activeRange;
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
-    const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
-
-    if (textRuns == null) {
+    if (body == null) {
         return {
-            ts: cacheStyle,
+            ts: {
+                ...defaultTextStyle,
+                ...cacheStyle,
+            },
         };
     }
 
-    let textRun;
-
-    for (let i = textRuns.length - 1; i >= 0; i--) {
-        const curTextRun = textRuns[i];
-
-        if (curTextRun.st <= startOffset && startOffset <= curTextRun.ed) {
-            textRun = curTextRun;
-            break;
-        }
-    }
+    const curTextStyle = getStyleInTextRange(body, activeRange, defaultTextStyle);
 
     return {
-        ...textRun,
         ts: {
-            ...textRun?.ts,
+            ...curTextStyle,
             ...cacheStyle,
         },
     };
@@ -959,14 +967,17 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
-    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-    const activeTextRange = textSelectionService.getActiveTextRange();
 
-    if (docDataModel == null || activeTextRange == null) {
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+    const docRanges = textSelectionService.getDocRanges();
+    const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
+
+    if (docDataModel == null || activeRange == null) {
         return;
     }
 
-    const { startOffset, segmentId } = activeTextRange;
+    const { startOffset, segmentId } = activeRange;
 
     const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
 

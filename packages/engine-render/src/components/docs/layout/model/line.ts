@@ -513,6 +513,12 @@ function __getSplitWidthNoAngle(
     layoutType: PositionedObjectLayoutType = PositionedObjectLayoutType.WRAP_SQUARE,
     wrapText: WrapTextType = WrapTextType.BOTH_SIDES
 ) {
+    const page = column.parent?.parent;
+
+    if (page == null) {
+        return;
+    }
+    const { marginTop, marginLeft } = page;
     const {
         distL = 0,
         distR = 0,
@@ -520,9 +526,9 @@ function __getSplitWidthNoAngle(
         distB = 0,
     } = dist;
     const columnWidth = column.width;
-    const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
+    const newAtop = top - marginTop - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
     const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB + distT : 0);
-    const newALeft = left - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distL : 0);
+    const newALeft = left - marginLeft - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distL : 0);
     const newWidth = width + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distL + distR : 0);
 
     if (
@@ -534,7 +540,7 @@ function __getSplitWidthNoAngle(
         return;
     }
 
-    let resultLeft = left - distL - column.left;
+    let resultLeft = left - marginLeft - distL - column.left;
     let resultWidth = width + distL + distR;
     const ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
 
@@ -542,7 +548,7 @@ function __getSplitWidthNoAngle(
         resultWidth = columnWidth - resultLeft;
     } else if (ruler === WrapTextRuler.RIGHT) {
         resultLeft = 0;
-        resultWidth = left + width + distR - column.left;
+        resultWidth = left - marginLeft + width + distR - column.left;
     }
 
     return {

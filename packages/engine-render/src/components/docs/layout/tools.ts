@@ -633,7 +633,7 @@ export function getPositionHorizon(
 
         let absoluteLeft = 0;
         if (relativeFrom === ObjectRelativeFromH.COLUMN) {
-            absoluteLeft = (isPageBreak ? 0 : column?.left || 0) + posOffset;
+            absoluteLeft = marginLeft + (isPageBreak ? 0 : column?.left || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
@@ -717,11 +717,11 @@ export function getPositionVertical(
         const { marginTop } = page;
 
         if (relativeFrom === ObjectRelativeFromV.LINE) {
-            absoluteTop = (lineTop || 0) + posOffset;
+            absoluteTop = marginTop + (lineTop || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
-            absoluteTop = posOffset;
+            absoluteTop = posOffset + marginTop;
         } else if (relativeFrom === ObjectRelativeFromV.BOTTOM_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.INSIDE_MARGIN) {
@@ -729,9 +729,9 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.OUTSIDE_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            absoluteTop = posOffset - marginTop;
+            absoluteTop = posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
+            absoluteTop = marginTop + (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }
         return absoluteTop;
     } else if (percent != null) {

@@ -1044,11 +1044,25 @@ export interface IObjectPositionV {
 
 // 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
 export enum ObjectRelativeFromH {
+    // Specifies that the horizontal positioning shall be
+    // relative to the edge of the page.
     PAGE,
+    // Specifies that the horizontal positioning shall be
+    // relative to the extents of the column which contains its anchor.
     COLUMN,
+    // Specifies that the horizontal positioning shall be
+    // relative to the position of the anchor within its run content.
     CHARACTER,
-    MARGIN,
+    // Specifies that the horizontal positioning shall be
+    // relative to the inside margin of the current page (the
+    // left margin on odd pages, right on even pages)
     INSIDE_MARGIN,
+    // Specifies that the horizontal positioning shall be
+    // relative to the page margins.
+    MARGIN,
+    // Specifies that the horizontal positioning shall be
+    // relative to the outside margin of the current page (the
+    // right margin on odd pages, left on even pages).
     OUTSIDE_MARGIN,
     LEFT_MARGIN,
     RIGHT_MARGIN,
@@ -1056,11 +1070,23 @@ export enum ObjectRelativeFromH {
 
 // 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
 export enum ObjectRelativeFromV {
+    // Specifies that the vertical positioning shall be relative
+    // to the edge of the page.
     PAGE,
+    // Specifies that the vertical positioning shall be relative
+    // to the paragraph which contains the drawing anchor.
     PARAGRAPH,
+    // Specifies that the vertical positioning shall be relative
+    // to the page margins.
     LINE,
+    // Specifies that the vertical positioning shall be relative
+    // to the page margins.
     MARGIN,
+   // Specifies that the vertical positioning shall be relative
+    // to the top margin of the current page.
     TOP_MARGIN,
+    // Specifies that the vertical positioning shall be relative
+    // to the bottom margin of the current page.
     BOTTOM_MARGIN,
     INSIDE_MARGIN,
     OUTSIDE_MARGIN,

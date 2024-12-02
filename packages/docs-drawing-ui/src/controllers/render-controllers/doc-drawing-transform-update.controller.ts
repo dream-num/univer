@@ -140,6 +140,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _refreshDrawing(skeleton: DocumentSkeleton) {
         const skeletonData = skeleton?.getSkeletonData();
         const { mainComponent, unitId } = this._context;
@@ -169,9 +170,13 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (headerPage) {
                     this._calculateDrawingPosition(
-                        unitId, headerPage, docsLeft, docsTop, updateDrawingMap,
-                        headerPage.marginTop,
-                        page.marginLeft
+                        unitId,
+                        headerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        0,
+                        0
                     );
                 }
             }
@@ -181,14 +186,26 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
                 if (footerPage) {
                     this._calculateDrawingPosition(
-                        unitId, footerPage, docsLeft, docsTop, updateDrawingMap,
-                        page.pageHeight - page.marginBottom + footerPage.marginTop,
-                        page.marginLeft
+                        unitId,
+                        footerPage,
+                        docsLeft,
+                        docsTop,
+                        updateDrawingMap,
+                        0,
+                        page.pageHeight - page.marginBottom
                     );
                 }
             }
 
-            this._calculateDrawingPosition(unitId, page, docsLeft, docsTop, updateDrawingMap, page.marginTop, page.marginLeft);
+            this._calculateDrawingPosition(
+                unitId,
+                page,
+                docsLeft,
+                docsTop,
+                updateDrawingMap,
+                0,
+                0
+            );
 
             this._liquid.translateRestore();
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
@@ -250,14 +267,12 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
         docsLeft: number,
         docsTop: number,
         updateDrawingMap: Record<string, IDrawingParamsWithBehindText>,
-        marginTop: number,
-        marginLeft: number
+        xOffset: number,
+        yOffset: number
     ) {
         const { skeDrawings } = page;
-        this._liquid.translatePagePadding({
-            marginTop,
-            marginLeft,
-        } as IDocumentSkeletonPage);
+        this._liquid.translateSave();
+        this._liquid.translate(xOffset, yOffset);
 
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
@@ -285,10 +300,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             }
         });
 
-        this._liquid.restorePagePadding({
-            marginTop,
-            marginLeft,
-        } as IDocumentSkeletonPage);
+        this._liquid.translateRestore();
     }
 
     private _drawingInitializeListener() {

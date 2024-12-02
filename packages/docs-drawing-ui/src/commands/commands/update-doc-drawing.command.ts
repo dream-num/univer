@@ -332,7 +332,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                 if (oldPositionH.relativeFrom === ObjectRelativeFromH.MARGIN) {
                     posOffsetH -= pageMarginLeft;
                 } else if (oldPositionH.relativeFrom === ObjectRelativeFromH.COLUMN) {
-                    posOffsetH -= skeDrawing.columnLeft;
+                    posOffsetH = posOffsetH - skeDrawing.columnLeft - pageMarginLeft;
                 }
 
                 const newPositionH = {
@@ -349,12 +349,12 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                 const oldPositionV = oldDrawings[drawingId].docTransform.positionV;
                 let posOffsetV = aTop;
 
-                if (oldPositionV.relativeFrom === ObjectRelativeFromV.PAGE) {
-                    posOffsetV += pageMarginTop;
+                if (oldPositionV.relativeFrom === ObjectRelativeFromV.MARGIN) {
+                    posOffsetV = posOffsetV - pageMarginTop;
                 } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.LINE) {
-                    posOffsetV -= skeDrawing.lineTop;
+                    posOffsetV = posOffsetV - pageMarginTop - skeDrawing.lineTop;
                 } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-                    posOffsetV -= skeDrawing.blockAnchorTop;
+                    posOffsetV = posOffsetV - pageMarginTop - skeDrawing.blockAnchorTop;
                 }
 
                 const newPositionV = {

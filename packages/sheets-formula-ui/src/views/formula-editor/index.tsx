@@ -121,7 +121,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
     const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
-    const isFormula = useRef(false);
     const highTextRef = useRef('');
 
     useEffect(() => {
@@ -145,8 +144,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
         const preText = highTextRef.current;
         highTextRef.current = text;
-        const formulaBody = text.slice(1);
-        const sequenceNodes = getFormulaToken(text[0] === '=' ? formulaBody : '');
+        const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
             editor,
             sequenceNodes,
@@ -158,9 +156,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     });
 
     useEffect(() => {
-        highligh(formulaText, false, isFormula.current && !formulaWithoutEqualSymbol);
-        isFormula.current = Boolean(formulaWithoutEqualSymbol);
-    }, [highligh, formulaText, isFocus, formulaWithoutEqualSymbol]);
+        highligh(formulaText, false);
+    }, [highligh, formulaText, isFocus]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);

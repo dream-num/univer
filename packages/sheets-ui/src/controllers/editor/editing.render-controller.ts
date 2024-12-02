@@ -198,7 +198,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const param = this._editorBridgeService.getEditCellState();
                 const editorId = this._editorBridgeService.getCurrentEditorId();
 
-                if (!param || !editorId || !this._editorService.isSheetEditor(editorId)) {
+                if (!param || !editorId) {
                     return;
                 }
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IPosition, Nullable, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
 import { convertTextRotation, FIX_ONE_PIXEL_BLUR_OFFSET, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
@@ -43,7 +43,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }
@@ -54,7 +55,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
         const { startX, startY, endX, endY } = position;
-        const documentDataModel = documentLayoutObject.documentModel;
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         if (documentDataModel == null) {
             return;

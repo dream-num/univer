@@ -188,9 +188,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         needEmit();
-        if (refString !== formulaText) {
-            highligh(refString);
-        }
+        highligh(refString);
         if (isEnd) {
             focus();
             if (offset !== -1) {

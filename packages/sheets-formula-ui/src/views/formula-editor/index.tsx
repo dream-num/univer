@@ -211,8 +211,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
 
-    // useFirstHighlightDoc(formulaWithoutEqualSymbol, '=', isFocus, highlightDoc, highlightSheet, editor);
-
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (formulaEditorContainerRef.current) {

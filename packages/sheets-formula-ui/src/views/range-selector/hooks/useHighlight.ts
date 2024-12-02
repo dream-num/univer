@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { ICommandService, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -123,7 +123,7 @@ export function useDocHight(_leadingCharacter: string = '') {
                 // editor.setDocumentData(cloneData);
                 commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                     unitId: editorId,
-                    body: cloneBody,
+                    body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
                 });
             }
             return [];
@@ -159,7 +159,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             // editor.setDocumentData(cloneData, selections);
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
-                body: cloneBody,
+                body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
                 textRanges: selections,
             });
             return refSelections;

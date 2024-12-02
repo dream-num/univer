@@ -293,10 +293,6 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
         }
     });
 
-    if (actions.every((action) => action.t === TextXActionType.RETAIN && !action.body)) {
-        return false;
-    }
-
     const textX = new TextX();
     textX.push({
         t: TextXActionType.RETAIN,
@@ -366,6 +362,10 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) =
             }
         }
     });
+
+    if (actions.every((action) => action.t === TextXActionType.RETAIN && !action.body)) {
+        return false;
+    }
 
     const textX = new TextX();
     textX.push({

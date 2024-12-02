@@ -24,7 +24,7 @@ import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useEmitChange } from '../range-selector/hooks/useEmitChange';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
@@ -122,6 +122,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
     const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
     const isFormula = useRef(false);
+    const highTextRef = useRef('');
 
     useEffect(() => {
         if (isSelecting === FormulaSelectingType.NEED_ADD) {
@@ -138,19 +139,28 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
-    const highligh = useCallback((text: string, isNeedResetSelection: boolean = true, resetTextRun = true) => {
+    const highligh = useEvent((text: string, isNeedResetSelection: boolean = true) => {
         if (!editor) {
             return;
         }
-        const sequenceNodes = getFormulaToken(text);
-        const ranges = highlightDoc(editor, sequenceNodes, isNeedResetSelection, resetTextRun);
+        const preText = highTextRef.current;
+        highTextRef.current = text;
+        const formulaBody = text.slice(1);
+        const sequenceNodes = getFormulaToken(text[0] === '=' ? formulaBody : '');
+        const ranges = highlightDoc(
+            editor,
+            sequenceNodes,
+            isNeedResetSelection,
+            // remove equals need to remove highlight style
+            preText.slice(1) === text && preText[0] === '='
+        );
         highlightSheet(isFocus ? ranges : []);
-    }, [editor, getFormulaToken, highlightDoc, highlightSheet, isFocus]);
+    });
 
     useEffect(() => {
-        highligh(formulaWithoutEqualSymbol, false, isFormula.current && !formulaWithoutEqualSymbol);
+        highligh(formulaText, false, isFormula.current && !formulaWithoutEqualSymbol);
         isFormula.current = Boolean(formulaWithoutEqualSymbol);
-    }, [highligh, formulaWithoutEqualSymbol, isFocus]);
+    }, [highligh, formulaText, isFocus, formulaWithoutEqualSymbol]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -188,7 +198,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         needEmit();
-        highligh(refString);
+        highligh(`=${refString}`);
         if (isEnd) {
             focus();
             if (offset !== -1) {
@@ -248,7 +258,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             }
             resetFormulaSearch();
             focus();
-            highligh(res.text);
+            highligh(`=${res.text}`);
         }
     };
 

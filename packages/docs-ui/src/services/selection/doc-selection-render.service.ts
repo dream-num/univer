@@ -103,6 +103,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
 
+    get isFocusing() {
+        return this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
+    }
+
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,
@@ -305,12 +309,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        if (isFocusing || force) {
+        if (this.isFocusing || force) {
             this.focus();
         }
     }

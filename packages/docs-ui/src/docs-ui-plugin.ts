@@ -43,7 +43,7 @@ import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
 import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
+import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
@@ -62,7 +62,6 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
@@ -71,6 +70,7 @@ import { DocIMEInputController } from './controllers/render-controllers/doc-ime-
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
+import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -215,6 +215,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocParagraphSettingPanelOperation,
             MoveCursorOperation,
             MoveSelectionOperation,
+            ReplaceTextRunsCommand,
         ].forEach((e) => {
             this._commandService.registerCommand(e);
         });

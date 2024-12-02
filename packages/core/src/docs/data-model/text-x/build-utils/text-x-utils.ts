@@ -293,6 +293,80 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
         }
     });
 
+    if (actions.every((action) => action.t === TextXActionType.RETAIN && !action.body)) {
+        return false;
+    }
+
+    const textX = new TextX();
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len: selection.startOffset,
+    });
+    textX.push(...actions);
+    return textX;
+};
+
+function isTextRunsEqual(body: IDocumentBody, oldBody: IDocumentBody) {
+    const { textRuns } = body;
+    const { textRuns: oldTextRuns } = oldBody;
+
+    if (textRuns?.length === oldTextRuns?.length && textRuns?.every((textRun, index) => JSON.stringify(textRun) === JSON.stringify(oldTextRuns?.[index]))) {
+        return true;
+    }
+
+    return false;
+}
+
+export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) => {
+    const { selection, body: insertBody, doc } = params;
+    const segmentId = selection.segmentId;
+    const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    if (!body) return false;
+
+    const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
+    const diffs = textDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
+    let cursor = 0;
+    const actions = diffs.map(([type, text]) => {
+        switch (type) {
+            // retain
+            case 0: {
+                const sliceBody = getBodySlice(insertBody, cursor, cursor + text.length, false);
+                const oldBodySlice = getBodySlice(oldBody!, cursor, cursor + text.length, false);
+
+                const action: TextXAction = {
+                    t: TextXActionType.RETAIN,
+                    body: isTextRunsEqual(sliceBody, oldBodySlice)
+                        ? {
+                            ...sliceBody,
+                            dataStream: '',
+                        }
+                        : undefined,
+                    len: text.length,
+                };
+                cursor += text.length;
+                return action;
+            }
+            // insert
+            case 1: {
+                const action: TextXAction = {
+                    t: TextXActionType.INSERT,
+                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    len: text.length,
+                };
+                cursor += text.length;
+                return action;
+            }
+            // delete
+            default: {
+                const action: TextXAction = {
+                    t: TextXActionType.DELETE,
+                    len: text.length,
+                };
+                return action;
+            }
+        }
+    });
+
     const textX = new TextX();
     textX.push({
         t: TextXActionType.RETAIN,

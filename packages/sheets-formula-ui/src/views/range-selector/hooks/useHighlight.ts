@@ -19,7 +19,8 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
@@ -101,10 +102,12 @@ export function useSheetHighlight(unitId: string) {
 export function useDocHight(_leadingCharacter: string = '') {
     const descriptionService = useDependency(IDescriptionService);
     const colorMap = useColor();
+    const commandService = useDependency(ICommandService);
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
     const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true, clearTextRun = true) => {
         const data = editor.getDocumentData();
+        const editorId = editor.getEditorId();
         if (!data) {
             return [];
         }
@@ -116,8 +119,12 @@ export function useDocHight(_leadingCharacter: string = '') {
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             if (clearTextRun) {
                 cloneBody.textRuns = [];
-                const cloneData = { ...data, body: cloneBody };
-                editor.setDocumentData(cloneData);
+                // const cloneData = { ...data, body: cloneBody };
+                // editor.setDocumentData(cloneData);
+                commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
+                    unitId: editorId,
+                    body: cloneBody,
+                });
             }
             return [];
         } else {
@@ -148,11 +155,16 @@ export function useDocHight(_leadingCharacter: string = '') {
                 });
             }
 
-            const cloneData = { ...data, body: cloneBody };
-            editor.setDocumentData(cloneData, selections);
+            // const cloneData = { ...data, body: cloneBody };
+            // editor.setDocumentData(cloneData, selections);
+            commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
+                unitId: editorId,
+                body: cloneBody,
+                textRanges: selections,
+            });
             return refSelections;
         }
-    }, [descriptionService, colorMap, leadingCharacterLength, _leadingCharacter]);
+    }, [commandService, descriptionService, colorMap, leadingCharacterLength, _leadingCharacter]);
     return highlightDoc;
 }
 

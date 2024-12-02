@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
 import { useMemo } from 'react';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -43,4 +44,20 @@ export function useKeyEventConfig(isRefSelecting: React.MutableRefObject<0 | 1 |
     }), [editorBridgeService, unitId]);
 
     return keyCodeConfig;
+}
+
+export function useIsFocusing(editorId: string) {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const docSelectionRenderService = renderManagerService.getRenderById(editorId)?.with(DocSelectionRenderService);
+    useObservable(docSelectionRenderService?.onBlur$);
+    useObservable(docSelectionRenderService?.onFocus$);
+
+    // useEffect(() => {
+    //     if (docSelectionRenderService?.isFocusing) {
+    //         univerInstanceService.focusUnit(editorId);
+    //     }
+    // }, [docSelectionRenderService?.isFocusing, editorId, univerInstanceService]);
+
+    return docSelectionRenderService?.isFocusing;
 }

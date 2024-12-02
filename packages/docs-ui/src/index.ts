@@ -112,7 +112,7 @@ export {
     AlignOperationCommand,
     AlignRightCommand,
 } from './commands/commands/paragraph-align.command';
-export { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
+export { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';

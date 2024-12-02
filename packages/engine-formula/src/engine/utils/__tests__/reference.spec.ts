@@ -110,6 +110,19 @@ describe('Test Reference', () => {
                     endRow: 10,
                     rangeType: RANGE_TYPE.COLUMN,
                 },
+                sheetName: '',
+                unitId: '',
+            })
+        ).toEqual('A:K');
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: 0,
+                    endColumn: 10,
+                    startRow: 5,
+                    endRow: 10,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
                 sheetName: 'sheet1',
                 unitId: 'workbook1',
             })
@@ -140,6 +153,45 @@ describe('Test Reference', () => {
                 unitId: 'workbook-1',
             })
         ).toEqual("'[workbook-1]sheet1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet'1",
+                unitId: '',
+            })
+        ).toEqual("'sheet''1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet''1",
+                unitId: '',
+            })
+        ).toEqual("'sheet''''1'!16:16");
+        expect(
+            serializeRangeToRefString({
+                range: {
+                    startColumn: Number.NaN,
+                    endColumn: Number.NaN,
+                    startRow: 15,
+                    endRow: 15,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+                sheetName: "sheet'1",
+                unitId: 'workbook-1',
+            })
+        ).toEqual("'[workbook-1]sheet''1'!16:16");
     });
 
     it('deserializeRangeWithSheet', () => {

@@ -180,10 +180,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
+        const currentSheetName = workbook.getActiveSheet().getName();
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL, currentSheetName),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });

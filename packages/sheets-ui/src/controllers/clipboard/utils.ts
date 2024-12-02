@@ -93,6 +93,7 @@ export function getDefaultOnPasteCellMutations(
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getMoveRangeMutations(
     from: {
         unitId: string;

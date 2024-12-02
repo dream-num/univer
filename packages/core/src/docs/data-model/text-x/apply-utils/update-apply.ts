@@ -351,8 +351,7 @@ function updateCustomBlocks(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
-    const { customBlocks } = body;
-
+    const { customBlocks = [] } = body;
     const { customBlocks: updateDataCustomBlocks } = updateBody;
 
     if (customBlocks == null || updateDataCustomBlocks == null) {
@@ -389,6 +388,9 @@ function updateCustomBlocks(
     }
     insertCustomBlocks(body, updateBody, textLength, currentIndex);
 
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
+    }
     return removeCustomBlocks;
 }
 

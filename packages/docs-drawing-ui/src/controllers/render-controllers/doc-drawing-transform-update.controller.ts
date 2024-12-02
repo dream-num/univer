@@ -20,6 +20,7 @@ import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocum
 import {
     BooleanNumber,
     Disposable,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     fromEventSubject,
     ICommandService,
     Inject,
@@ -112,7 +113,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
-                    if (this._editorService.isEditor(unitId)) {
+                    // TODO: @JOCS, Do not use unitId to check if it's need to render images or isEditor. maybe need a config?
+                    if (this._editorService.isEditor(unitId) && unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
                         mainComponent?.makeDirty();
                         return;
                     }
@@ -251,6 +253,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginTop,
             marginLeft,
         } as IDocumentSkeletonPage);
+
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
             const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;

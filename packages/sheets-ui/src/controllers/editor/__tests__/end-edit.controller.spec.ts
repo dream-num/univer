@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
 import type { IFunctionService } from '@univerjs/engine-formula';
-import { CellValueType, IConfigService, IContextService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, Injector, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -62,6 +62,7 @@ const richTextDemo: IDocumentData = {
             vertexAngle: 0,
             verticalAlign: 0,
             wrapStrategy: 0,
+            zeroWidthParagraphBreak: 1,
         },
         marginTop: 0,
         marginBottom: 2,
@@ -108,6 +109,7 @@ describe('Test EndEditController', () => {
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
         configService = get(IConfigService);
+        const injector = get(Injector);
 
         const worksheet = workbook.getActiveSheet()!;
         const config = worksheet.getConfig();
@@ -118,7 +120,8 @@ describe('Test EndEditController', () => {
             workbook.getStyles(),
             localeService,
             contextService,
-            configService
+            configService,
+            injector
         );
 
         getCellDataByInputCell = (cell: ICellData, inputCell: ICellData) => {
@@ -270,7 +273,7 @@ describe('Test EndEditController', () => {
             };
 
             const cellData = getCellDataByInputCell(cell, inputCell);
-            const target = { v: null, f: null, si: null, p: richTextDemo };
+            const target = { v: null, f: null, si: null, p: richTextDemo, t: undefined };
             expect(cellData).toEqual({
                 ...target,
             });
@@ -391,6 +394,9 @@ describe('Test EndEditController', () => {
             expect(normalizeStringByLexer('１００％＋２－×＝＜＞％＄＠＆＊＃')).toEqual('１００％＋２－×＝＜＞％＄＠＆＊＃');
             expect(normalizeStringByLexer('＄ｗ')).toEqual('＄ｗ');
             expect(normalizeStringByLexer('ｔｒｕｅ＋１')).toEqual('ｔｒｕｅ＋１');
+
+            // sheet name
+            expect(normalizeStringByLexer("='Sheet1（副本）'!F20:H29")).toEqual("='Sheet1（副本）'!F20:H29");
 
             // TODO@Dushusir: Differences from Excel, pending,
             // '＝＠＠ｉｆ＠ｓ'
@@ -599,6 +605,10 @@ describe('Test EndEditController', () => {
 
             it('should handle escaped quotes in strings', () => {
                 expect(normalizeStringByLexer('="He said, ""Hello, .5!"""')).toBe('="He said, ""Hello, .5!"""');
+            });
+            it('Illegal strings should not be modified', () => {
+                expect(normalizeStringByLexer('=SUM(11, 2 2, 33)')).toBe('=SUM(11, 2 2, 33)');
+                expect(normalizeStringByLexer('=SUM(11, 123 123, 33)')).toBe('=SUM(11, 123 123, 33)');
             });
         });
     });

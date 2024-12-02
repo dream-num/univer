@@ -19,6 +19,7 @@ import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerS
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -54,6 +55,8 @@ import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
+
+import '../global.css';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -93,6 +96,7 @@ univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
 univer.registerPlugin(UniverDocsUIPlugin);
+univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });

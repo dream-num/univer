@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'docs-drawing.config';
+export const DOCS_DRAWING_PLUGIN_CONFIG_KEY = 'docs-drawing.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_DRAWING_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsDrawingConfig {
 }

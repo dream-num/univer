@@ -383,7 +383,7 @@ export class ScrollBar extends BaseScrollBar {
             });
 
             this._lastY = e.offsetY;
-            mainScene.getEngine()?.setRemainCapture();
+            mainScene.getEngine()?.setCapture();
         });
 
         this._verticalPointerUpSub = mainScene.onPointerUp$.subscribeEvent((_evt: unknown, _state: EventState) => {
@@ -480,7 +480,7 @@ export class ScrollBar extends BaseScrollBar {
                 x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;
-            mainScene.getEngine()?.setRemainCapture();
+            mainScene.getEngine()?.setCapture();
         });
         this._horizonPointerUpSub = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             const srcElement = this.horizonThumbRect;

@@ -148,7 +148,6 @@ export class NumfmtEditorController extends Disposable {
                         handler: (value, context, next) => {
                             // clear the effect
                             this._collectEffectMutation.clean();
-                            const { worksheet, row, col } = context;
                             const currentNumfmtValue = this._numfmtService.getValue(
                                 context.unitId,
                                 context.subUnitId,
@@ -204,9 +203,7 @@ export class NumfmtEditorController extends Disposable {
                                     );
                                 }
                                 const v = Number(numfmtInfo.v);
-                                // The format needs to discard the current style settings
-                                const originStyle = worksheet.getCellStyleOnly(row, col)?.s;
-                                return { ...value, v, p: null, s: originStyle, t: CellValueType.NUMBER };
+                                return next({ ...value, p: undefined, v, t: CellValueType.NUMBER });
                             } else if (['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) || !isNumeric(content)) {
                                 clean();
                             }

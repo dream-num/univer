@@ -54,7 +54,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { AppUIController } from './controllers';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
@@ -118,7 +118,7 @@ export class UniverDocsUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, rest);
 
         this._initDependencies(_injector);
         this._initializeShortcut();

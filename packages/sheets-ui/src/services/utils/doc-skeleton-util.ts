@@ -137,10 +137,21 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
-
+    const drawings = docSkeleton.getSkeletonData()?.pages[0].skeDrawings;
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),
         checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list, paddingLeft, paddingTop)!).filter(Boolean),
+        drawings: drawings
+            ? Array.from(drawings.keys()).map((key) => ({
+                drawingId: key,
+                rect: {
+                    top: drawings!.get(key)!.aTop,
+                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.width,
+                    left: drawings!.get(key)!.aLeft,
+                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
+                },
+            }))
+            : [],
     };
 };
 

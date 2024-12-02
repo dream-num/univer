@@ -15,8 +15,8 @@
  */
 
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import { FRange } from '@univerjs/sheets/facade';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { FRange } from '@univerjs/sheets/facade';
 
 export interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two
@@ -39,6 +39,7 @@ export class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
         return this._commandService.executeCommand(SetNumfmtCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
+            values,
         } as ISetNumfmtCommandParams);
     }
 }

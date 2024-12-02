@@ -57,7 +57,7 @@ import {
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
 import { DocFooter } from '../views/doc-footer';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { DOCS_UI_PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 
 export class DocUIController extends Disposable {
@@ -92,7 +92,7 @@ export class DocUIController extends Disposable {
     // TODO: @zhangwei, why add workbook to docs-ui?
     private _initUiParts() {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
-        const config = this._configService.getConfig<IUniverDocsUIConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverDocsUIConfig>(DOCS_UI_PLUGIN_CONFIG_KEY);
         if (config?.layout?.docContainerConfig?.footer && !workbook) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         }

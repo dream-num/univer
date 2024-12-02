@@ -77,8 +77,8 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
             return `'${str.slice(1)}`;
         }
 
-        // covert all full width characters to normal characters
-        normalStr = str.split('').map(toHalfWidth).join('');
+        // Handle quoted parts separately (e.g., sheet names)
+        normalStr = handleQuotedParts(normalStr);
     }
 
     // Check if it is a formula
@@ -96,6 +96,29 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     const parsedValue = numfmt.parseValue(normalStr);
 
     return parsedValue == null ? str : normalStr;
+}
+
+// Helper function to handle sheet names with quotes
+function handleQuotedParts(str: string): string {
+    const sheetNamePattern = /['"].*?['"]/g; // Pattern to match quoted parts (sheet names)
+    const quotedParts: string[] = [];
+    const parts = str.split(sheetNamePattern);
+
+    // Save quoted parts and remove them from the string temporarily
+    str.replace(sheetNamePattern, (match) => {
+        quotedParts.push(match);
+        return ''; // Remove quoted parts for now
+    });
+
+    // Convert all full-width characters to half-width characters in non-quoted parts
+    let normalStr = parts.join('').split('').map(toHalfWidth).join('');
+
+    // Reinserting the quoted parts into the final string
+    quotedParts.forEach((part, idx) => {
+        normalStr = normalStr.slice(0, idx * 2) + part + normalStr.slice((idx + 1) * 2);
+    });
+
+    return normalStr;
 }
 
 function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
@@ -145,7 +168,7 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
                 }
                 // Entering =.07/0.1 in a cell will automatically convert to =0.07/0.1
                 // Entering =1.0+2.00 in a cell will automatically convert to =1+2
-                else if (typeof parsedValue.v === 'number') {
+                else if (typeof parsedValue.v === 'number' && (parsedValue.z === undefined || !numfmt.isDate(parsedValue.z))) {
                     const v = `${parsedValue.v}`;
                     const startIndex = node.startIndex + totalOffset + 1;
                     const endIndex = node.endIndex + totalOffset + 2;

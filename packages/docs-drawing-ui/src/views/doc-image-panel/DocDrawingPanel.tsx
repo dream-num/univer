@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/drawing';
+import type { IDrawingParam } from '@univerjs/core';
 import { useDependency } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';

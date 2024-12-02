@@ -24,7 +24,7 @@ import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
-import { useIsFocusing, useKeyEventConfig } from './hooks';
+import { useKeyEventConfig } from './hooks';
 import styles from './index.module.less';
 
 interface ICellIEditorProps { }
@@ -62,7 +62,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     );
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const editState = editorBridgeService.getEditLocation();
-    const isFocusing = useIsFocusing(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
     useEffect(() => {
         const sub = cellEditorManagerService.state$.subscribe((param) => {
@@ -140,7 +139,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 <FormulaEditor
                     editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                     className={styles.editorInput}
-                    isSingle={false}
+                    isSingle
                     initValue=""
                     onChange={() => {}}
                     isFocus={visible?.visible}

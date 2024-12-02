@@ -111,7 +111,6 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onReady(): void {
             this._formulaDataModel = get(FormulaDataModel);
-            this._formulaDataModel.initFormulaData();
         }
     }
 

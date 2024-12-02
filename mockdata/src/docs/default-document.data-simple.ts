@@ -43,14 +43,10 @@ function createTableDataStream(tables: string[][]) {
 
 const exampleTables = [
     ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
-    ['Description', 'Date', 'Location'],
     ['Academic Senate Meeting 1 Academic Senate Meeting 2 Academic Senate Meeting 3 Academic Senate Meeting 4 Academic Senate Meeting 5', 'May 25, 2205', 'Building 99 Room 1'],
+    ['Faculty Council', 'June 1, 2205', 'Building 35 Room 5'],
+    ['Faculty Council', 'June 15, 2205', 'Building 35 Room 5'],
+    ['Faculty Council', 'June 30, 2205', 'Building 35 Room 5'],
     ['Commencement Meeting	', 'December 15, 2205', 'Building 42 Room 10'],
     ['Dean\'s Council', 'February 1, 2206', 'Building 35 Room 5'],
     ['Faculty Council', 'March 1, 2206', 'Building 35 Room 5'],
@@ -201,7 +197,13 @@ const tableColumn: ITableColumn = {
     },
 };
 
-const tableRows = [...new Array(exampleTables.length).fill(null).map(() => Tools.deepClone(tableRow))];
+const tableRows: ITableRow[] = [...new Array(exampleTables.length).fill(null).map((_, i) => {
+    return {
+        ...Tools.deepClone(tableRow),
+        isFirstRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+        repeatHeaderRow: i === 0 ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+    };
+})];
 const tableColumns = [...new Array(exampleTables[0].length).fill(null).map(() => Tools.deepClone(tableColumn))];
 
 tableColumns[0].size.width.v = 250;

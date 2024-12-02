@@ -41,8 +41,7 @@ import type {
     Nullable,
     Styles,
     VerticalAlign,
-    Worksheet,
-} from '@univerjs/core';
+    Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import {
@@ -57,7 +56,9 @@ import {
     HorizontalAlign,
     IConfigService,
     IContextService,
+    ImageCacheMap,
     Inject,
+    Injector,
     IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     isCellCoverable,
     isNullCell,
@@ -66,8 +67,7 @@ import {
     ObjectMatrix,
     searchArray,
     Tools,
-    WrapStrategy,
-} from '@univerjs/core';
+    WrapStrategy } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -242,6 +242,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
 
+    private _imageCacheMap: ImageCacheMap;
     /**
      * Whether the row style precedes the column style.
      */
@@ -261,10 +262,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(Injector) private _injector: Injector
     ) {
         super(_localeService);
 
+        this._imageCacheMap = new ImageCacheMap(this._injector);
         this._updateLayout();
         this._initContextListener();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
@@ -292,6 +295,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     get columnHeaderHeight(): number {
         return this._columnHeaderHeight;
+    }
+
+    get imageCacheMap(): ImageCacheMap {
+        return this._imageCacheMap;
     }
 
     /**
@@ -1475,6 +1482,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    zeroWidthParagraphBreak: 1,
                 }
             );
         } else if (cell.v != null) {
@@ -1960,7 +1968,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellData>) {
+    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellDataForSheetInterceptor>) {
         if (isNullCell(cell)) return;
 
         this._handleFontMatrix.setValue(row, col, true);
@@ -1988,6 +1996,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
+                imageCacheMap: this._imageCacheMap,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
@@ -2076,7 +2085,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             height: Number.POSITIVE_INFINITY,
         };
 
-        documentData.documentStyle.renderConfig = renderConfig;
+        documentData.documentStyle.renderConfig = {
+            ...documentData.documentStyle.renderConfig,
+            ...renderConfig,
+        };
 
         const paragraphs = documentData.body.paragraphs || [];
 

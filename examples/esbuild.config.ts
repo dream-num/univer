@@ -25,6 +25,7 @@ import copyPlugin from 'esbuild-plugin-copy';
 import vue from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
+import tailwindcss from 'tailwindcss';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -62,7 +63,7 @@ const define = {
     'process.env.IS_E2E': isE2E ? 'true' : 'false',
 };
 
-if (!args.watch && !isE2E) {
+if (!args.watch) {
     const gitCommitHash = isE2E ? 'E2E' : execSync('git rev-parse --short HEAD').toString().trim();
     const gitRefName = isE2E ? 'E2E' : execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
 
@@ -70,6 +71,39 @@ if (!args.watch && !isE2E) {
     define['process.env.GIT_REF_NAME'] = `"${gitRefName}"`;
     define['process.env.BUILD_TIME'] = `"${new Date().toISOString()}"`;
 }
+
+const entryPoints = [
+    // homepage
+    './src/main.tsx',
+
+    // sheets
+    './src/sheets/main.ts',
+    './src/sheets/worker.ts',
+
+    // sheets-multi
+    './src/sheets-multi/main.tsx',
+
+    // sheets-uniscript
+    './src/sheets-uniscript/main.ts',
+
+    // docs
+    './src/docs/main.ts',
+
+    // docs-uniscript
+    './src/docs-uniscript/main.ts',
+
+    // slides
+    './src/slides/main.ts',
+
+    // uni
+    './src/uni/main.ts',
+    './src/uni/worker.ts',
+    './src/uni/lazy.ts',
+
+    // mobile sheet
+    './src/mobile-s/main.ts',
+    './src/mobile-s/worker.ts',
+];
 
 const config: SameShape<BuildOptions, BuildOptions> = {
     bundle: true,
@@ -80,61 +114,50 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     sourcemap: args.watch,
     minify: false,
     target: 'chrome70',
-    plugins: [
-        copyPlugin({
-            assets: {
-                from: ['./public/**/*'],
-                to: ['./'],
+    plugins: [{
+        name: 'ignore-global-css',
+        setup(build) {
+            build.onResolve({ filter: /\/global\.css$/ }, (args) => {
+                if (args.importer.includes('packages')) {
+                    return {
+                        path: args.path,
+                        namespace: 'ignore-global-css',
+                        pluginData: {
+                            importer: args.importer,
+                        },
+                    };
+                }
+            });
+
+            build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
+                return { contents: '' };
+            });
+        },
+    },
+    copyPlugin({
+        assets: {
+            from: ['./public/**/*'],
+            to: ['./'],
+        },
+    }),
+    stylePlugin({
+        postcss: {
+            plugins: [tailwindcss],
+        },
+        cssModulesOptions: {
+            localsConvention: 'camelCaseOnly',
+            generateScopedName: 'univer-[local]',
+        },
+        renderOptions: {
+            lessOptions: {
+                paths: [nodeModules],
             },
-        }),
-        stylePlugin({
-            cssModulesOptions: {
-                localsConvention: 'camelCaseOnly',
-                generateScopedName: 'univer-[local]',
-            },
-            renderOptions: {
-                lessOptions: {
-                    paths: [nodeModules],
-                },
-            },
-        }),
-        vue() as unknown as Plugin,
+        },
+    }),
+    vue() as unknown as Plugin,
     ],
-    entryPoints: [
-        // homepage
-        './src/main.tsx',
-
-        // sheets
-        './src/sheets/main.ts',
-        './src/sheets/worker.ts',
-
-        // sheets-multi
-        './src/sheets-multi/main.tsx',
-
-        // sheets-uniscript
-        './src/sheets-uniscript/main.ts',
-
-        // docs
-        './src/docs/main.ts',
-
-        // docs-uniscript
-        './src/docs-uniscript/main.ts',
-
-        // slides
-        './src/slides/main.ts',
-
-        // uni
-        './src/uni/main.ts',
-        './src/uni/worker.ts',
-        './src/uni/lazy.ts',
-
-        // mobile sheet
-        './src/mobile-s/main.ts',
-        './src/mobile-s/worker.ts',
-    ],
-
+    entryPoints,
     outdir: './local',
-
     define,
 };
 

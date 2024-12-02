@@ -226,7 +226,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.title}>
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
-            <div className={`${styles.cfPreviewWrap}`}>
+            <div className={`
+              ${styles.cfPreviewWrap}
+            `}
+            >
                 <Preview rule={getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue }) as IConditionalFormattingRuleConfig} />
             </div>
             <div>
@@ -234,7 +237,12 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t('sheet.cf.panel.fillType')}
                 </div>
 
-                <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs} ${stylesBase.labelContainer} `}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.mLXxs}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
@@ -249,7 +257,11 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             <span className={styles.text}>{localeService.t('sheet.cf.panel.gradient')}</span>
                         </Radio>
                     </RadioGroup>
-                    <div className={`${styles.utilItem} ${stylesBase.mLXl}`}>
+                    <div className={`
+                      ${styles.utilItem}
+                      ${stylesBase.mLXl}
+                    `}
+                    >
                         <Checkbox
                             checked={!isShowValue}
                             onChange={(v) => {
@@ -263,16 +275,38 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.colorSet')}</div>
-                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
-                    <div className={`${stylesBase.labelContainer}`}>
-                        <div className={`${styles.text}`}>{localeService.t('sheet.cf.panel.native')}</div>
+                <div className={`
+                  ${stylesBase.labelContainer}
+                  ${stylesBase.mTSm}
+                  ${stylesBase.mLXxs}
+                `}
+                >
+                    <div className={`
+                      ${stylesBase.labelContainer}
+                    `}
+                    >
+                        <div className={`
+                          ${styles.text}
+                        `}
+                        >
+                            {localeService.t('sheet.cf.panel.native')}
+                        </div>
                         <ColorPicker
                             color={nativeColor}
                             onChange={handleNativeColorChange}
                         />
                     </div>
-                    <div className={`${stylesBase.labelContainer} ${stylesBase.mLSm} `}>
-                        <div className={`${styles.text} `}>{localeService.t('sheet.cf.panel.positive')}</div>
+                    <div className={`
+                      ${stylesBase.labelContainer}
+                      ${stylesBase.mLSm}
+                    `}
+                    >
+                        <div className={`
+                          ${styles.text}
+                        `}
+                        >
+                            {localeService.t('sheet.cf.panel.positive')}
+                        </div>
                         <ColorPicker
                             color={positiveColor}
                             onChange={handlePositiveColorChange}
@@ -283,7 +317,11 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <Select
                         style={{ width: '50%', flexShrink: 0 }}
                         options={minOptions}
@@ -309,7 +347,11 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                 </div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                <div className={`
+                  ${stylesBase.mTSm}
+                  ${stylesBase.labelContainer}
+                `}
+                >
                     <Select
                         style={{ width: '50%', flexShrink: 0 }}
                         options={maxOptions}

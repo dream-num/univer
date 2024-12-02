@@ -247,7 +247,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div className={`${styleBase.mTBase}`}>
+            <div className={`
+              ${styleBase.mTBase}
+            `}
+            >
                 <RangeSelector
                     unitId={unitId}
                     errorText={errorText}
@@ -265,7 +268,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 <Select className={styles.width100} value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
-            <div className={`${styleBase.mTBase} ${styles.btnList}`}>
+            <div className={`
+              ${styleBase.mTBase}
+              ${styles.btnList}
+            `}
+            >
                 <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
                 <Button className={styleBase.mLSm} size="small" type="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
             </div>

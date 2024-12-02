@@ -17,8 +17,8 @@
 import type { IDocumentBody, IDocumentData, IParagraph, ITextRun } from '@univerjs/core';
 import type { IDocImage } from '@univerjs/docs-drawing';
 import type { DataStreamTreeNode } from '@univerjs/engine-render';
-import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
+import { BaselineOffset, BooleanNumber, CustomRangeType, DataStreamTreeNodeType, DrawingTypeEnum, Tools } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/drawing';
 import { parseDataStreamToTree } from '@univerjs/engine-render';
 
 function covertImageToHtml(item: IDocImage) {

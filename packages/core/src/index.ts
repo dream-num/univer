@@ -147,7 +147,7 @@ export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
 export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
-export { awaitTime } from './shared/timer';
+export { awaitTime, delayAnimationFrame } from './shared/timer';
 export { Range } from './sheets/range';
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
@@ -168,7 +168,9 @@ export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
 export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
-
+export { createDocumentModelWithStyle } from './sheets/util';
+export { ImageCacheMap } from './shared/cache/image-cache';
+export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io/image-io.service';
 // #endregion
 
 export { getWorksheetUID, Workbook } from './sheets/workbook';
@@ -176,9 +178,7 @@ export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets
 
 export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
-export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';
-export * from './types/enum';
 export * from './types/enum';
 export { DataValidationErrorStyle } from './types/enum/data-validation-error-style';
 export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
@@ -186,7 +186,6 @@ export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
-export * from './types/interfaces';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';

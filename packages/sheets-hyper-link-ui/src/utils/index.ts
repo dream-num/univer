@@ -20,6 +20,11 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 
+export enum DisableLinkType {
+    ALLOWED = 0,
+    DISABLED_BY_CELL = 1,
+    ALLOW_ON_EDITING = 2,
+}
 const disables = new Set<string>([
     DataValidationType.CHECKBOX,
     DataValidationType.LIST,
@@ -29,7 +34,7 @@ const disables = new Set<string>([
 export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
     if (cell?.f || cell?.si) {
-        return true;
+        return DisableLinkType.DISABLED_BY_CELL;
     }
 
     const dataValidationModel = accessor.has(SheetDataValidationModel) ? accessor.get(SheetDataValidationModel) : null;
@@ -38,7 +43,11 @@ export const getShouldDisableCellLink = (accessor: IAccessor, worksheet: Workshe
         return true;
     }
 
-    return false;
+    if (cell?.p?.drawingsOrder?.length) {
+        return DisableLinkType.ALLOW_ON_EDITING;
+    }
+
+    return DisableLinkType.ALLOWED;
 };
 
 export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
@@ -53,7 +62,7 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
     }
     const row = selections[0].range.startRow;
     const col = selections[0].range.startColumn;
-    return getShouldDisableCellLink(accessor, worksheet, row, col);
+    return getShouldDisableCellLink(accessor, worksheet, row, col) === DisableLinkType.DISABLED_BY_CELL;
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {

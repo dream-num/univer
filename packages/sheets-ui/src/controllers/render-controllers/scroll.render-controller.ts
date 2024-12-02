@@ -180,7 +180,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 // with shift, scrollY will be scrollX
                 if (evt.shiftKey) {
-                    offsetX = evt.deltaY * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
+                    // mac is weird, when using track pad, scroll vertical with shift key, should get delta value from deltaY.
+                    // but when using with mousewheel, scroll with shift key, only deltaX has value.
+                    offsetX = (evt.deltaY || evt.deltaX) * MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR;
                 } else {
                     offsetY = evt.deltaY;
                 }

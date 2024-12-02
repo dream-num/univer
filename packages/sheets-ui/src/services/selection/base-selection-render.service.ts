@@ -654,10 +654,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             unitId,
             sheetId,
         };
-        this._scene.getEngine()?.setRemainCapture();
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
-
         const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
         const scrollXY = scene.getScrollXYInfoByViewport(

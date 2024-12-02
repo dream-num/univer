@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { connectInjector, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
-import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
+import { SHEETS_IMAGE_MENU_ID } from '@univerjs/sheets-drawing-ui';
 import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
@@ -69,7 +69,7 @@ export class UniSheetsUIController extends SheetUIController {
             [BuiltinUniToolbarItemId.FONT_SIZE, SetRangeFontSizeCommand.id],
             [BuiltinUniToolbarItemId.COLOR, SetRangeTextColorCommand.id],
             [BuiltinUniToolbarItemId.BACKGROUND, SetBackgroundColorCommand.id],
-            [BuiltinUniToolbarItemId.IMAGE, SheetsImageMenuId],
+            [BuiltinUniToolbarItemId.IMAGE, SHEETS_IMAGE_MENU_ID],
         ]).forEach(([id, menuId]) => {
             this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SHEET });
         });

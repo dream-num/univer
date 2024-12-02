@@ -49,6 +49,7 @@ export function FormulaBar() {
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
     const [disable, setDisable] = useState<boolean>(false);
+    const [imageDisable, setImageDisable] = useState<boolean>(false);
     const currentWorkbook = useActiveWorkbook();
     const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
@@ -119,6 +120,18 @@ export function FormulaBar() {
         return () => subscription.unsubscribe();
     }, [editorBridgeService.visible$]);
 
+    useEffect(() => {
+        const subscription = editorBridgeService.currentEditCellState$.subscribe((state) => {
+            if (state?.documentLayoutObject.documentModel?.getBody()?.customBlocks?.length) {
+                setImageDisable(true);
+            } else {
+                setImageDisable(false);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [editorBridgeService.currentEditCellState$]);
+
     function resizeCallBack(editor: Nullable<HTMLDivElement>) {
         if (editor == null) {
             return;
@@ -167,6 +180,7 @@ export function FormulaBar() {
         formulaEditorManagerService.handleFxBtnClick(true);
     }
 
+    const disabled = disable || imageDisable;
     return (
         <div
             className={styles.formulaBox}
@@ -180,7 +194,7 @@ export function FormulaBar() {
             </div>
 
             <div className={styles.formulaBar}>
-                <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
+                <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disabled })}>
                     <div className={styles.formulaIconWrapper}>
                         <span
                             className={clsx(styles.iconContainer, styles.iconContainerError, iconStyle)}
@@ -206,7 +220,7 @@ export function FormulaBar() {
                     {FormulaEditor && (
                         <FormulaEditor
                             editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                            isSingle={false}
+                            isSingle
                             initValue=""
                             onChange={() => {}}
                             isFocus={isFocusFxBar}

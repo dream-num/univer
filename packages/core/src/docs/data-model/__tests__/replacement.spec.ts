@@ -95,6 +95,7 @@ describe('test case in replaceInDocumentBody utils', () => {
         const expectedBody = {
             customRanges: [],
             customDecorations: [],
+            customBlocks: [],
             dataStream: '荷塘Jocs\r作者：朱Jocs\r\n',
             textRuns: [
                 {
@@ -154,6 +155,7 @@ describe('test case in replaceInDocumentBody utils', () => {
         const documentBody = getTestDocumentBody();
         const expectedBody = {
             dataStream: '荷塘\r作者：朱\r\n',
+            customBlocks: [],
             textRuns: [
                 {
                     st: 0,

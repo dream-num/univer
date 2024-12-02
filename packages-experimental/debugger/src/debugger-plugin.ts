@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
@@ -40,7 +40,7 @@ export class UniverDebuggerPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DEBUGGER_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

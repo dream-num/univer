@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
-import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
+import type { ICommandInfo, IDrawingSearch, Nullable } from '@univerjs/core';
+import type { IImageData } from '@univerjs/drawing';
 import type { Image, Scene } from '@univerjs/engine-render';
 import {
     Disposable,
+    DrawingTypeEnum,
     ICommandService,
     Inject,
     IUniverInstanceService,
     toDisposable,
 } from '@univerjs/core';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService } from '../services/drawing-render.service';
-import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { getCurrentUnitInfo } from './utils';
-
-const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 export class ImageUpdateController extends Disposable {
     constructor(
@@ -262,57 +260,9 @@ export class ImageUpdateController extends Disposable {
             toDisposable(
                 o.onDblclick$.subscribeEvent(() => {
                     const dialogId = `${o.oKey}-viewer-dialog`;
-
-                    const nativeSize = o.getNativeSize();
-                    const screenWidth = window.innerWidth - IMAGE_VIEWER_DROPDOWN_PADDING;
-                    const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
-
-                    const adjustSize = this._adjustImageSize(nativeSize.width, nativeSize.height, screenWidth, screenHeight);
-
-                    const dialog = this._dialogService.open({
-                        width: adjustSize.width,
-                        id: dialogId,
-                        style: { margin: '0', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
-                        children: {
-                            label: {
-                                name: COMPONENT_IMAGE_VIEWER,
-                                props: {
-                                    src: o.getNative()?.src,
-                                    width: adjustSize.width,
-                                    height: adjustSize.height,
-                                },
-                            },
-                        },
-                        destroyOnClose: true,
-                        draggable: false,
-                        onClose: () => {
-                            this._dialogService.close(dialogId);
-                            dialog.dispose();
-                        },
-                    });
+                    this._drawingRenderService.previewImage(dialogId, o.getNative()!.src, o.getNativeSize().width, o.getNativeSize().height);
                 })
             )
         );
-    }
-
-    private _adjustImageSize(nativeWidth: number, nativeHeight: number, screenWidth: number, screenHeight: number) {
-        // Use native size if the image is smaller than the screen
-        if (nativeWidth <= screenWidth && nativeHeight <= screenHeight) {
-            return {
-                width: nativeWidth,
-                height: nativeHeight,
-            };
-        }
-
-        // Calculate scale ratios
-        const widthRatio = screenWidth / nativeWidth;
-        const heightRatio = screenHeight / nativeHeight;
-        const scale = Math.min(widthRatio, heightRatio); // Choose the smaller ratio to ensure the image fits within the screen
-
-        // Return new dimensions
-        return {
-            width: Math.floor(nativeWidth * scale),
-            height: Math.floor(nativeHeight * scale),
-        };
     }
 }

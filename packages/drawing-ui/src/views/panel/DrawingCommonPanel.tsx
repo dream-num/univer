@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
+import { type IDrawingParam, LocaleService, useDependency } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import React, { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';

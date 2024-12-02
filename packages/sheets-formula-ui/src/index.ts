@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
 export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
@@ -27,7 +29,6 @@ export { RefSelectionsRenderService } from './services/render-services/ref-selec
 
 // #region - all commands
 
-export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
 export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
 

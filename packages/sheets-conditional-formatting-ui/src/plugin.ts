@@ -55,7 +55,8 @@ import { ConditionalFormattingPanelController } from './controllers/cf.panel.con
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ConditionalFormattingViewportController } from './controllers/cf.viewport.controller';
+import { defaultPluginConfig, SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
@@ -75,7 +76,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_CONDITIONAL_FORMATTING_UI_PLUGIN_CONFIG_KEY, rest);
 
         this._initCommand();
     }
@@ -93,6 +94,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingEditorController],
             [ConditionalFormattingClearController],
             [ConditionalFormattingPainterController],
+            [ConditionalFormattingViewportController],
         ]);
 
         touchDependencies(this._injector, [
@@ -117,6 +119,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             [ConditionalFormattingPainterController],
             [ConditionalFormattingPermissionController],
             [SheetsCfRefRangeController],
+            [ConditionalFormattingViewportController],
         ]);
     }
 

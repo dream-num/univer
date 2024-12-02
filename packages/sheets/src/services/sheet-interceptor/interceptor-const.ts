@@ -30,4 +30,5 @@ export const INTERCEPTOR_POINT = {
 export enum InterceptCellContentPriority {
     DATA_VALIDATION = 9,
     NUMFMT = 10,
+    CELL_IMAGE = 11,
 }

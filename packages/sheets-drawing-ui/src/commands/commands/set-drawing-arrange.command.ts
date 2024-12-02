@@ -15,13 +15,12 @@
  */
 
 import type { IAccessor, ICommand, Nullable } from '@univerjs/core';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
+    ArrangeTypeEnum,
     CommandType,
     ICommandService,
-    IUndoRedoService,
-} from '@univerjs/core';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
-import { ArrangeTypeEnum } from '@univerjs/drawing';
+    IUndoRedoService } from '@univerjs/core';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {

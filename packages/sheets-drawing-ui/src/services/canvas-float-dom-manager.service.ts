@@ -21,13 +21,13 @@ import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, Subject, switchMap, take } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -275,7 +275,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
 
-                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId)!;
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
                     if (!workbook) {
                         return;
                     }
@@ -459,7 +459,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 }),
                 filter((render) => !!render),
                 switchMap((render) =>
-                    fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
+                    fromEventSubject(render.render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
                         .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
                 )
             ).subscribe(({ unitId, subUnitId }) => {

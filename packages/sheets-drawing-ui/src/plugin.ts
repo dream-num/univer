@@ -26,24 +26,28 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
-import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
+import { SheetCellImageAutofillController } from './controllers/sheet-cell-image-autofill.controller';
+import { SheetCellImageController } from './controllers/sheet-cell-image.controller';
+import { SheetCellImageHoverController } from './controllers/sheet-celll-image-hover.controller';
 import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
 import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
+import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
-@DependentOn(UniverDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
+@DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = PLUGIN_NAME;
@@ -61,7 +65,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_DRAWING_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -72,6 +76,9 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
+            [SheetCellImageController],
+            [SheetCellImageHoverController],
+            [SheetCellImageAutofillController],
         ]);
 
         touchDependencies(this._injector, [
@@ -92,6 +99,9 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
+            [SheetCellImageController],
+            [SheetCellImageHoverController],
+            [SheetCellImageAutofillController],
         ]);
     }
 

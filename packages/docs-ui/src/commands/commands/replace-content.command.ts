@@ -21,7 +21,7 @@ import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniver
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
-interface IReplaceSnapshotCommandParams {
+export interface IReplaceSnapshotCommandParams {
     unitId: string;
     snapshot: IDocumentData;
     textRanges: ITextRangeWithStyle[];

@@ -17,8 +17,8 @@
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
-import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, ImageSourceType } from '@univerjs/drawing';
+import { CustomRangeType, DataStreamTreeTokenType, DrawingTypeEnum, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';

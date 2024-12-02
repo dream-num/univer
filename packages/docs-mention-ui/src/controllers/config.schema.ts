@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'docs-mention-ui.config';
+export const DOCS_MENTION_UI_PLUGIN_CONFIG_KEY = 'docs-mention-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_MENTION_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsMentionUIConfig {
     menu?: MenuConfig;

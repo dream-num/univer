@@ -336,11 +336,11 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) =
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
                     body: isTextRunsEqual(sliceBody, oldBodySlice)
-                        ? {
+                        ? undefined
+                        : {
                             ...sliceBody,
                             dataStream: '',
-                        }
-                        : undefined,
+                        },
                     len: text.length,
                 };
                 cursor += text.length;

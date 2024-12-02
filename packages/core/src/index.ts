@@ -67,8 +67,19 @@ export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/de
 export { updateAttributeByInsert } from './docs/data-model/text-x/apply-utils/insert-apply';
 export { TextX } from './docs/data-model/text-x/text-x';
 export type { TPriority } from './docs/data-model/text-x/text-x';
-export { composeBody, getBodySlice, SliceBodyType } from './docs/data-model/text-x/utils';
-export { getCustomDecorationSlice, getCustomRangeSlice, normalizeBody } from './docs/data-model/text-x/utils';
+export {
+    composeBody,
+    getBodySlice,
+    getCustomBlockSlice,
+    getCustomDecorationSlice,
+    getCustomRangeSlice,
+    getParagraphsSlice,
+    getSectionBreakSlice,
+    getTableSlice,
+    getTextRunSlice,
+    normalizeBody,
+    SliceBodyType,
+} from './docs/data-model/text-x/utils';
 export { EventState, EventSubject, fromEventSubject, type IEventObserver } from './observer/observable';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

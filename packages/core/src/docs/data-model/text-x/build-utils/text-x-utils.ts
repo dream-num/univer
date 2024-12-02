@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
-import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
+import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
@@ -24,7 +24,7 @@ import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
-import { getBodySlice } from '../utils';
+import { getBodySlice, getTextRunSlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
 
 export interface IDeleteCustomRangeParam {
@@ -302,10 +302,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     return textX;
 };
 
-function isTextRunsEqual(body: IDocumentBody, oldBody: IDocumentBody) {
-    const { textRuns } = body;
-    const { textRuns: oldTextRuns } = oldBody;
-
+function isTextRunsEqual(textRuns: ITextRun[] | undefined, oldTextRuns: ITextRun[] | undefined) {
     if (textRuns?.length === oldTextRuns?.length && textRuns?.every((textRun, index) => JSON.stringify(textRun) === JSON.stringify(oldTextRuns?.[index]))) {
         return true;
     }
@@ -326,15 +323,14 @@ export const replaceSelectionTextRuns = (params: IReplaceSelectionTextXParams) =
         switch (type) {
             // retain
             case 0: {
-                const sliceBody = getBodySlice(insertBody, cursor, cursor + text.length, false);
-                const oldBodySlice = getBodySlice(oldBody!, cursor, cursor + text.length, false);
-
+                const textRunsSlice = getTextRunSlice(insertBody, cursor, cursor + text.length, false);
+                const oldTextRunsSlice = getTextRunSlice(oldBody!, cursor, cursor + text.length, false);
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
-                    body: isTextRunsEqual(sliceBody, oldBodySlice)
+                    body: isTextRunsEqual(textRunsSlice, oldTextRunsSlice)
                         ? undefined
                         : {
-                            ...sliceBody,
+                            textRuns: textRunsSlice,
                             dataStream: '',
                         },
                     len: text.length,

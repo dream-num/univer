@@ -132,7 +132,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
-        docSelectionRenderManager?.blurEditor();
+        docSelectionRenderManager?.blur();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

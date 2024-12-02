@@ -333,22 +333,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.blur();
     }
 
-    /**
-     * @deprecated
-     */
-    focusEditor(): void {
-        this._editorFocusing = true;
-        this.focus();
-    }
-
-    /**
-     * @deprecated
-     */
-    blurEditor(): void {
-        this._editorFocusing = false;
-        this.blur();
-    }
-
     // FIXME: for editor cell editor we don't need to blur the input element
     /**
      * @deprecated

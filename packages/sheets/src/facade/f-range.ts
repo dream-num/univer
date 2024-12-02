@@ -319,13 +319,12 @@ export class FRange extends FBase {
     ) {
         const { sync } = options;
         const realValue = covertCellValues(value, this._range);
-        const params = {
+        return this._commandService.syncableExecuteCommand<ISetRangeValuesCommandParams, boolean, S>(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
-        } as ISetRangeValuesCommandParams;
-        return this._commandService.syncableExecuteCommand<ISetRangeValuesCommandParams, boolean, S>(SetRangeValuesCommand.id, params, { sync });
+        }, { sync });
     }
 
     /**

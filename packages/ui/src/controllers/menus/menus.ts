@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '../../services/menu/menu';
-import { FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR, IContextService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, IContextService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 
 import { combineLatest } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -34,16 +34,16 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.undo',
         disabled$: combineLatest([
             undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
-            contextService.contextChanged$.pipe(filter((key) => Object.hasOwnProperty.call(key, FOCUSING_UNIVER_EDITOR) || Object.hasOwnProperty.call(key, FOCUSING_FX_BAR_EDITOR))),
+            contextService.contextChanged$.pipe(filter((key) => Object.hasOwnProperty.call(key, EDITOR_ACTIVATED) || Object.hasOwnProperty.call(key, FOCUSING_FX_BAR_EDITOR))),
         ]).pipe(map(([undoDisable]) => {
-            // console.log('===undo', undoDisable, contextService, contextService.getContextValue(FOCUSING_UNIVER_EDITOR), contextService.getContextValue(FOCUSING_FX_BAR_EDITOR));
-            return undoDisable || contextService.getContextValue(FOCUSING_UNIVER_EDITOR) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+            return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
         })),
     };
 }
 
 export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
+    const contextService = accessor.get(IContextService);
 
     return {
         id: RedoCommand.id,
@@ -51,6 +51,11 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'RedoSingle',
         title: 'Redo',
         tooltip: 'toolbar.redo',
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
+        disabled$: combineLatest([
+            undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+            contextService.contextChanged$.pipe(filter((key) => Object.hasOwnProperty.call(key, EDITOR_ACTIVATED) || Object.hasOwnProperty.call(key, FOCUSING_FX_BAR_EDITOR))),
+        ]).pipe(map(([undoDisable]) => {
+            return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+        })),
     };
 }

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
-import { map } from 'rxjs/operators';
-
 import type { IMenuButtonItem } from '../../services/menu/menu';
+import { FOCUSING_FX_BAR_EDITOR, FOCUSING_UNIVER_EDITOR, IContextService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+
+import { combineLatest } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { MenuItemType } from '../../services/menu/menu';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
+    const contextService = accessor.get(IContextService);
 
     return {
         id: UndoCommand.id,
@@ -30,7 +32,13 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'UndoSingle',
         title: 'Undo',
         tooltip: 'toolbar.undo',
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+        disabled$: combineLatest([
+            undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+            contextService.contextChanged$.pipe(filter((key) => Object.hasOwnProperty.call(key, FOCUSING_UNIVER_EDITOR) || Object.hasOwnProperty.call(key, FOCUSING_FX_BAR_EDITOR))),
+        ]).pipe(map(([undoDisable]) => {
+            // console.log('===undo', undoDisable, contextService, contextService.getContextValue(FOCUSING_UNIVER_EDITOR), contextService.getContextValue(FOCUSING_FX_BAR_EDITOR));
+            return undoDisable || contextService.getContextValue(FOCUSING_UNIVER_EDITOR) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+        })),
     };
 }
 

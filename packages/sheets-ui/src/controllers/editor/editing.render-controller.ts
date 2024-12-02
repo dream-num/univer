@@ -28,7 +28,6 @@ import {
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FX_BAR_EDITOR,
-    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     ICommandService,
     IContextService,
     Inject,
@@ -254,8 +253,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             const { position, documentLayoutObject, scaleX, editorUnitId } = state;
 
             if (
-                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
-                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
+                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE)
             ) {
                 return;
             }

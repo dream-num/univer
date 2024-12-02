@@ -250,7 +250,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
              */
             this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
-            // this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
         }
 
         const editCellState = this.getLatestEditCellState();

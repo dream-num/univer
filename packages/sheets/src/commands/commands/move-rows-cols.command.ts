@@ -31,6 +31,7 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     MoveColsMutation,
@@ -65,7 +66,7 @@ export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
 export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     id: MoveRowsCommandId,
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
@@ -161,13 +162,17 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             const setSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
-                selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
+                type: SelectionMoveType.MOVE_END,
+                selections: [{
+                    range: destSelection,
+                    primary: getPrimaryForRange(destSelection, worksheet),
+                    style: null,
+                }],
             };
             const undoSetSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
             };
 
@@ -206,7 +211,7 @@ export const MoveColsCommandId = 'sheet.command.move-cols' as const;
 export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     id: MoveColsCommandId,
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
@@ -301,13 +306,13 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             const setSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
             };
             const undoSetSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
             };
 

@@ -34,6 +34,7 @@ import {
     MoveRangeMutation,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
+    SelectionMoveType,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
@@ -256,8 +257,8 @@ export function getMoveRangeMutations(
                     params: {
                         unitId,
                         subUnitId: toSubUnitId,
-
                         selections: [{ range: toRange }],
+                        type: SelectionMoveType.MOVE_END,
                     } as ISetSelectionsOperationParams,
                 },
             ];
@@ -270,7 +271,7 @@ export function getMoveRangeMutations(
                     params: {
                         unitId,
                         subUnitId: fromSubUnitId,
-
+                        type: SelectionMoveType.MOVE_END,
                         selections: [{ range: fromRange }],
                     },
                 },

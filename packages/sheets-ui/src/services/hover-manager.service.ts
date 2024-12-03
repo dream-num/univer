@@ -30,7 +30,7 @@ export interface IHoverCellPosition {
     /**
      * location of cell
      */
-    location: ISheetLocation;
+    location: ISheetLocationBase;
 }
 
 export interface IHoverRichTextInfo extends IHoverCellPosition {
@@ -65,6 +65,11 @@ export interface IHoverRichTextPosition extends ISheetLocationBase {
     rect?: Nullable<IBoundRectNoAngle>;
 
     drawing?: Nullable<string>;
+}
+
+export function getLocationBase(location: ISheetLocation) {
+    const { workbook, worksheet, ...locBase } = location;
+    return locBase;
 }
 
 export class HoverManagerService extends Disposable {
@@ -218,20 +223,23 @@ export class HoverManagerService extends Disposable {
     triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
         this._currentCell$.next(activeCell && {
-            location: activeCell.location,
+            location: getLocationBase(activeCell.location),
             position: activeCell.position,
         });
 
         this._currentRichText$.next(activeCell && {
             ...activeCell,
-            location: activeCell.overflowLocation,
+            location: getLocationBase(activeCell.overflowLocation),
         });
     }
 
     triggerClick(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
         if (activeCell) {
-            this._currentClickedCell$.next(activeCell);
+            this._currentClickedCell$.next({
+                ...activeCell,
+                location: getLocationBase(activeCell.location),
+            });
         }
     }
 

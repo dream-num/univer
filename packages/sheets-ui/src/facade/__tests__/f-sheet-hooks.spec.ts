@@ -164,43 +164,43 @@ describe('Test FSheetHooks', () => {
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        hoverCurrentPosition$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+        hoverCurrentPosition$.next({ location: { unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
     });
 
     it('Test onCellPointerOver', () => {
         sheetHooks.onCellPointerOver((cellPos) => {
-            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+            expect(cellPos).toEqual({ location: { unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
         });
 
         // Trigger the Observable to emit a new value
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        hoverCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+        hoverCurrentCell$.next({ location: { unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
     });
 
     it('Test onCellDragOver', () => {
         sheetHooks.onCellDragOver((cellPos) => {
-            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+            expect(cellPos).toEqual({ location: { unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
         });
 
         // Trigger the Observable to emit a new value
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        dragCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+        dragCurrentCell$.next({ location: { unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
     });
 
     it('Test onCellDrop', () => {
         sheetHooks.onCellDrop((cellPos) => {
-            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+            expect(cellPos).toEqual({ location: { unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
         });
 
         // Trigger the Observable to emit a new value
         const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        dragEndCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+        dragEndCell$.next({ location: { unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
     });
 
     it('Test onCellRender', () => {

@@ -690,21 +690,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private _emptyDocumentDataModel(removeStyle: boolean) {
-        const editCellState = this._editorBridgeService.getEditCellState();
-        if (editCellState == null) {
-            return;
-        }
-
-        const { documentLayoutObject } = editCellState;
-        const documentDataModel = documentLayoutObject.documentModel;
-        if (documentDataModel == null) {
-            return;
-        }
-
         const empty = (documentDataModel: DocumentDataModel) => {
             const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
             const documentViewModel = this._getEditorViewModel(documentDataModel.getUnitId());
-
             if (documentViewModel == null) {
                 return;
             }
@@ -716,7 +704,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             documentViewModel.reset(documentDataModel);
         };
 
-        empty(documentDataModel);
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+        documentDataModel && empty(documentDataModel);
         const formulaDocument = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
         formulaDocument && empty(formulaDocument);
     }

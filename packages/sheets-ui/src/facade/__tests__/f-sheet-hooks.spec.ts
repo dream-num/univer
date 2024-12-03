@@ -157,7 +157,7 @@ describe('Test FSheetHooks', () => {
 
     it('Test onCellPointerMove', () => {
         sheetHooks.onCellPointerMove((cellPos) => {
-            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+            expect(cellPos).toEqual({ location: { unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
         });
 
         // Trigger the Observable to emit a new value

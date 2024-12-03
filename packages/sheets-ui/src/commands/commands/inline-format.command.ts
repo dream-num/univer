@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService } from '@univerjs/core';
+import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService, ThemeService } from '@univerjs/core';
 import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import {
     SetBoldCommand,
@@ -184,11 +184,12 @@ export const ResetRangeTextColorCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
         const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
+        const themeService = accessor.get(ThemeService);
 
         if (isCellEditorFocus) {
             return commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: null });
         }
 
-        return commandService.executeCommand(SetTextColorCommand.id, { value: null });
+        return commandService.executeCommand(SetTextColorCommand.id, { value: themeService.getCurrentTheme().textColor });
     },
 };

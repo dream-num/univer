@@ -167,66 +167,71 @@ test('diff set force string cell', async () => {
     });
     const page = await context.newPage();
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
 
     await page.evaluate(async () => {
-        const activeWorkbook = window.univerAPI.getActiveWorkbook();
-        const activeSheet = activeWorkbook.getActiveSheet();
+        return new Promise((resolve) => {
+            window.univerAPI.getHooks().onSteady(async () => {
+                const activeWorkbook = window.univerAPI.getActiveWorkbook();
+                const activeSheet = activeWorkbook.getActiveSheet();
 
-        const sheetId = activeSheet.getSheetId();
-        const unitId = activeWorkbook.getId();
+                const sheetId = activeSheet.getSheetId();
+                const unitId = activeWorkbook.getId();
 
-        await window.univerAPI.executeCommand('sheet.operation.set-selections', {
-            selections: [
-                {
-                    range: {
-                        startRow: 0,
-                        startColumn: 7,
-                        endRow: 0,
-                        endColumn: 7,
-                        rangeType: 0,
-                        unitId,
-                        sheetId,
-                    },
-                    primary: {
-                        actualRow: 0,
-                        actualColumn: 7,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                        startRow: 0,
-                        startColumn: 7,
-                        endRow: 0,
-                        endColumn: 7,
-                    },
-                    style: {
-                        strokeWidth: 1,
-                        stroke: '#274fee',
-                        fill: 'rgba(39,79,238,0.07)',
-                        widgets: {},
-                        widgetSize: 6,
-                        widgetStrokeWidth: 1,
-                        widgetStroke: '#ffffff',
-                        autofillSize: 6,
-                        autofillStrokeWidth: 1,
-                        autofillStroke: '#ffffff',
-                        rowHeaderFill: 'rgba(39,79,238,0.07)',
-                        rowHeaderStroke: '#274fee',
-                        rowHeaderStrokeWidth: 1,
-                        columnHeaderFill: 'rgba(39,79,238,0.07)',
-                        columnHeaderStroke: '#274fee',
-                        columnHeaderStrokeWidth: 1,
-                        expandCornerSize: 40,
-                    },
-                },
-            ],
-            unitId,
-            subUnitId: sheetId,
-            type: 2,
+                await window.univerAPI.executeCommand('sheet.operation.set-selections', {
+                    selections: [
+                        {
+                            range: {
+                                startRow: 0,
+                                startColumn: 7,
+                                endRow: 0,
+                                endColumn: 7,
+                                rangeType: 0,
+                                unitId,
+                                sheetId,
+                            },
+                            primary: {
+                                actualRow: 0,
+                                actualColumn: 7,
+                                isMerged: false,
+                                isMergedMainCell: false,
+                                startRow: 0,
+                                startColumn: 7,
+                                endRow: 0,
+                                endColumn: 7,
+                            },
+                            style: {
+                                strokeWidth: 1,
+                                stroke: '#274fee',
+                                fill: 'rgba(39,79,238,0.07)',
+                                widgets: {},
+                                widgetSize: 6,
+                                widgetStrokeWidth: 1,
+                                widgetStroke: '#ffffff',
+                                autofillSize: 6,
+                                autofillStrokeWidth: 1,
+                                autofillStroke: '#ffffff',
+                                rowHeaderFill: 'rgba(39,79,238,0.07)',
+                                rowHeaderStroke: '#274fee',
+                                rowHeaderStrokeWidth: 1,
+                                columnHeaderFill: 'rgba(39,79,238,0.07)',
+                                columnHeaderStroke: '#274fee',
+                                columnHeaderStrokeWidth: 1,
+                                expandCornerSize: 40,
+                            },
+                        },
+                    ],
+                    unitId,
+                    subUnitId: sheetId,
+                    type: 2,
+                });
+
+                activeWorkbook.startEditing();
+                await window.univerAPI.getActiveDocument().appendText("'1");
+                activeWorkbook.endEditing(true);
+
+                resolve(1);
+            });
         });
-
-        activeWorkbook.startEditing();
-        await window.univerAPI.getActiveDocument().appendText("'1");
-        activeWorkbook.endEditing(true);
     });
 
     const filename = generateSnapshotName('set-force-string-cell');
@@ -247,33 +252,38 @@ test('diff set text format number cell', async () => {
     });
     const page = await context.newPage();
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
 
     await page.evaluate(async () => {
-        await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
-            values: [
-                {
-                    row: 0,
-                    col: 7,
-                    pattern: '@@@',
-                    type: 'text',
-                },
-            ],
-        });
+        return new Promise((resolve) => {
+            window.univerAPI.getHooks().onSteady(async () => {
+                await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
+                    values: [
+                        {
+                            row: 0,
+                            col: 7,
+                            pattern: '@@@',
+                            type: 'text',
+                        },
+                    ],
+                });
 
-        await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('H1').setValue(2);
+                await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('H1').setValue(2);
 
-        await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('I1').setValue(3);
+                await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('I1').setValue(3);
 
-        await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
-            values: [
-                {
-                    row: 0,
-                    col: 8,
-                    pattern: '@@@',
-                    type: 'text',
-                },
-            ],
+                await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
+                    values: [
+                        {
+                            row: 0,
+                            col: 8,
+                            pattern: '@@@',
+                            type: 'text',
+                        },
+                    ],
+                });
+
+                resolve(1);
+            });
         });
     });
 

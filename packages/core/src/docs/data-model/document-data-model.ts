@@ -25,7 +25,7 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import type { JSONXActions } from './json-x/json-x';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { Tools } from '../../shared/tools';
 import { getEmptySnapshot } from './empty-snapshot';
@@ -228,7 +228,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     headerModelMap: Map<string, DocumentDataModel> = new Map();
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
-    change$ = new Subject<number>();
+    change$ = new BehaviorSubject<number>(0);
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
@@ -282,7 +282,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this._initializeHeaderFooterModel();
-        this.change$.next(Date.now());
+        this.change$.next(this.change$.value + 1);
     }
 
     getSelfOrHeaderFooterModel(segmentId?: string) {
@@ -317,7 +317,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             this._initializeHeaderFooterModel();
         }
 
-        this.change$.next(Date.now());
+        this.change$.next(this.change$.value + 1);
         return this.snapshot;
     }
 

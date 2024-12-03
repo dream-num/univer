@@ -65,7 +65,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 selection: {
                     startOffset: 0,
                     endOffset: body.dataStream.length - 2,
-                    collapsed: true,
+                    collapsed: body.dataStream.length - 2 === 0,
                 },
                 body: {
                     dataStream: `${display}`,

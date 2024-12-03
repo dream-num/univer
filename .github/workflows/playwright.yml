@@ -4,11 +4,6 @@ on:
     pull_request:
         branches:
             - dev
-    workflow_run:
-        workflows:
-            - 📸 Manually Update Snapshots
-        types:
-            - completed
 
 jobs:
     e2e-test:

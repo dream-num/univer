@@ -141,6 +141,16 @@ export class HoverManagerService extends Disposable {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (!workbook) this._currentCell$.next(null);
         }));
+
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+            if (this._currentCell$.getValue()?.location.unitId === unit.getUnitId()) {
+                this._currentCell$.next(null);
+            }
+
+            if (this._currentRichText$.getValue()?.location.unitId === unit.getUnitId()) {
+                this._currentRichText$.next(null);
+            }
+        }));
     }
 
     // eslint-disable-next-line complexity

@@ -58,10 +58,10 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "rxjs": ">=7.0.0"
+        "rxjs": ">=7"
     },
     "dependencies": {
-        "@floating-ui/dom": "^1.6.11",
+        "@floating-ui/dom": "^1.6.12",
         "@floating-ui/utils": "^0.2.8",
         "@univerjs/core": "workspace:*",
         "cjk-regex": "^3.1.0",
@@ -73,8 +73,8 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.2",
-        "vite": "^6.0.1",
-        "vitest": "^2.1.6"
+        "vite": "^6.0.2",
+        "vitest": "^2.1.8"
     },
     "browser": {
         "fs": false

@@ -70,9 +70,9 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "rxjs": ">=7.0.0"
+        "react": ">=16.9",
+        "react-dom": ">=16.9",
+        "rxjs": ">=7"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -85,7 +85,7 @@
         "rc-util": "^5.43.0"
     },
     "optionalDependencies": {
-        "vue": ">=3.0.0"
+        "vue": ">=3"
     },
     "devDependencies": {
         "@testing-library/react": "^16.0.1",
@@ -99,9 +99,9 @@
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.15",
         "typescript": "^5.7.2",
-        "vite": "^6.0.1",
-        "vitest": "^2.1.6",
-        "vue": "^3.5.12"
+        "vite": "^6.0.2",
+        "vitest": "^2.1.8",
+        "vue": "^3.5.13"
     },
     "space": {
         ".": {

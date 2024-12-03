@@ -64,8 +64,8 @@
         "build": "univer-cli build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "rxjs": ">=7.0.0"
+        "react": ">=16.9",
+        "rxjs": ">=7"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -82,8 +82,8 @@
         "rxjs": "^7.8.1",
         "tailwindcss": "^3.4.15",
         "typescript": "^5.7.2",
-        "vite": "^6.0.1",
-        "vitest": "^2.1.6"
+        "vite": "^6.0.2",
+        "vitest": "^2.1.8"
     },
     "space": {
         ".": {

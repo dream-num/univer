@@ -18,17 +18,17 @@ export const peerDepsMap = {
     react: {
         global: 'React',
         name: 'react',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9',
     },
     'react-dom': {
         global: 'ReactDOM',
         name: 'react-dom',
-        version: '^16.9.0 || ^17.0.0 || ^18.0.0',
+        version: '>=16.9',
     },
     rxjs: {
         global: 'rxjs',
         name: 'rxjs',
-        version: '>=7.0.0',
+        version: '>=7',
     },
     'rxjs/operators': {
         global: 'rxjs.operators',
@@ -38,7 +38,7 @@ export const peerDepsMap = {
     vue: {
         global: 'Vue',
         name: 'vue',
-        version: '>=3.0.0',
+        version: '>=3',
         optional: true,
     },
 };

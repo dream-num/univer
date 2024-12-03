@@ -642,8 +642,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * The logic here predicts the user's first cursor movement behavior based on this rule
      */
     private _cursorStateListener(d: DisposableCollection) {
-        const editorObject = this._getEditorObject()!;
-        if (!editorObject.document) return;
+        const editorObject = this._getEditorObject();
+        if (!editorObject?.document) return;
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {

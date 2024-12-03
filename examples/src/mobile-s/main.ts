@@ -15,7 +15,6 @@
  */
 
 import type { FUniver } from '@univerjs/core';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -56,9 +55,10 @@ univer.registerPlugin(UniverMobileUIPlugin, {
     container: 'app',
     contextMenu: true,
 });
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-} as IUniverRPCMainThreadConfig);
+
+const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
+univer.onDispose(() => worker.terminate());
 
 univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverSheetsPlugin);

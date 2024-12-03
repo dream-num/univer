@@ -152,7 +152,7 @@ export function calculateLineTopByDrawings(
     if (headerPage && headersDrawings) {
         headersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, headerPage, page, true);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column, page);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -162,7 +162,7 @@ export function calculateLineTopByDrawings(
     if (footerPage && footersDrawings) {
         footersDrawings.forEach((drawing) => {
             const transformedDrawing = translateHeaderFooterDrawingPosition(drawing, footerPage, page, false);
-            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column);
+            const top = _getLineTopWidthWrapTopBottom(transformedDrawing, lineHeight, lineTop, column, page);
             if (top) {
                 maxTop = Math.max(maxTop, top);
             }
@@ -170,7 +170,7 @@ export function calculateLineTopByDrawings(
     }
 
     pageSkeDrawings?.forEach((drawing) => {
-        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop, column);
+        const top = _getLineTopWidthWrapTopBottom(drawing, lineHeight, lineTop, column, page);
         if (top) {
             maxTop = Math.max(maxTop, top);
         }
@@ -188,7 +188,8 @@ export function calculateLineTopByDrawings(
 
 function _getLineTopWidthWrapNone(
     table: IDocumentSkeletonTable,
-    lineHeight: number, lineTop: number,
+    lineHeight: number,
+    lineTop: number,
     column: IDocumentSkeletonColumn
 ) {
     const { top, height, left, width } = table;
@@ -206,11 +207,13 @@ function _getLineTopWidthWrapTopBottom(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,
-    column: IDocumentSkeletonColumn
+    column: IDocumentSkeletonColumn,
+    page: IDocumentSkeletonPage
 ) {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
     const { layoutType, distT = 0, distB = 0, distL = 0, distR = 0 } = drawingOrigin;
     const { left: colLeft, width: colWidth } = column;
+    const { marginTop, marginLeft } = page;
 
     if (layoutType !== PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
         return;
@@ -223,9 +226,9 @@ function _getLineTopWidthWrapTopBottom(
     // }
 
     if (angle === 0) {
-        const newAtop = aTop - distT;
+        const newAtop = aTop - distT - marginTop;
         const newHeight = distT + height + distB;
-        const newALeft = aLeft - distL;
+        const newALeft = aLeft - distL - marginLeft;
         const newWidth = distL + width + distR;
 
         if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop || colLeft + colWidth < newALeft || colLeft > newALeft + newWidth) {
@@ -237,9 +240,9 @@ function _getLineTopWidthWrapTopBottom(
     // 旋转的情况，要考虑行首位与 drawing 旋转后得到的最大区域
     let { top: sTop = 0, height: sHeight = 0, width: sWidth = 0, left: sLeft = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
 
-    sTop -= distT;
+    sTop = sTop - distT - marginTop;
     sHeight += distT + distB;
-    sLeft = sLeft - distL;
+    sLeft = sLeft - distL - marginLeft;
     sWidth += distL + distR;
 
     if (sTop + sHeight < lineTop || sTop > lineHeight + lineTop || colLeft + colWidth < sLeft || colLeft > sLeft + sWidth) {

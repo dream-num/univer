@@ -242,9 +242,11 @@ function _createSkeletonHeaderFooter(
         footerTreeMap,
         headerTreeMap,
         pageSize: {
-            width: pageWidth - marginLeft - marginRight,
+            width: pageWidth,
             height: getHeaderFooterMaxHeight(pageHeight) - (isHeader ? marginHeader : marginFooter) - 5,
         },
+        marginLeft,
+        marginRight,
         localeService,
         drawings,
     };

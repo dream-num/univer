@@ -30,7 +30,7 @@ import type {
     IFloatObject,
     ILayoutContext,
 } from '../../tools';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType, Tools } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import { BreakPointType } from '../../line-breaker/break';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
@@ -1246,19 +1246,20 @@ export function updateInlineDrawingPosition(
                 const { size, angle } = docTransform;
                 const { width = 0, height = 0 } = size;
                 const glyphHeight = glyph.bBox.bd + glyph.bBox.ba;
+                const copyDrawing = Tools.deepClone(drawing);
 
-                drawing.aLeft = page.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
-                drawing.aTop = page.marginTop + top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
-                drawing.width = width;
-                drawing.height = height;
-                drawing.angle = angle;
-                drawing.isPageBreak = isPageBreak;
-                drawing.lineTop = top;
-                drawing.columnLeft = column.left;
-                drawing.blockAnchorTop = blockAnchorTop ?? top;
-                drawing.lineHeight = line.lineHeight;
+                copyDrawing.aLeft = page.marginLeft + column.left + divide.left + divide.paddingLeft + glyph.left + 0.5 * glyph.width - 0.5 * width || 0;
+                copyDrawing.aTop = page.marginTop + top + lineHeight - 0.5 * glyphHeight - 0.5 * height - marginBottom;
+                copyDrawing.width = width;
+                copyDrawing.height = height;
+                copyDrawing.angle = angle;
+                copyDrawing.isPageBreak = isPageBreak;
+                copyDrawing.lineTop = top;
+                copyDrawing.columnLeft = column.left;
+                copyDrawing.blockAnchorTop = blockAnchorTop ?? top;
+                copyDrawing.lineHeight = line.lineHeight;
 
-                drawings.set(drawing.drawingId, drawing);
+                drawings.set(copyDrawing.drawingId, copyDrawing);
             }
         }
     }

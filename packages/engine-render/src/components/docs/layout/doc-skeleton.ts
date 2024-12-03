@@ -1167,7 +1167,11 @@ export class DocumentSkeleton extends Skeleton {
                     spaceBetweenEqualWidthColumns
                 );
                 isContinuous = true;
-            } else if (layoutAnchor == null || curSkeletonPage == null) {
+            } else if (
+                layoutAnchor == null ||
+                curSkeletonPage == null ||
+                (sectionType === SectionType.NEXT_PAGE && layoutAnchor && startSectionIndex !== i)
+            ) {
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
@@ -1217,6 +1221,8 @@ export class DocumentSkeleton extends Skeleton {
             updatePagesLeft(skeleton.pages);
             // Calculate inline drawing position and update.
             updateInlineDrawingCoords(ctx, skeleton.pages);
+
+            // Update the position of inline drawing in header and footer.
             for (const hSkeMap of skeleton.skeHeaders.values()) {
                 for (const page of hSkeMap.values()) {
                     updateInlineDrawingCoords(ctx, [page]);
@@ -1227,6 +1233,7 @@ export class DocumentSkeleton extends Skeleton {
                     updateInlineDrawingCoords(ctx, [page]);
                 }
             }
+
             setPageParent(skeleton.pages, skeleton);
 
             return skeleton;

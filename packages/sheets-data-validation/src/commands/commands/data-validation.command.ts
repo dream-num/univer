@@ -80,7 +80,7 @@ export function getDataValidationDiffMutations(
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);
                 const value = getStringCellValue(cellData);
-                if (isBlankCell(cellData) || value === defaultValue) {
+                if ((isBlankCell(cellData) || value === defaultValue) && !cellData?.p) {
                     setRangeValue = true;
                     redoMatrix.setValue(row, column, {
                         v: defaultValue,
@@ -447,39 +447,44 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
                 const { worksheet } = target;
                 const { formula2: oldFormula2 = CHECKBOX_FORMULA_2, formula1: oldFormula1 = CHECKBOX_FORMULA_1 } = rule;
                 const { formula2 = CHECKBOX_FORMULA_2, formula1 = CHECKBOX_FORMULA_1 } = setting;
+                let setted = false;
                 ranges.forEach((range) => {
                     Range.foreach(range, (row, column) => {
                         const cellData = worksheet.getCellRaw(row, column);
                         const value = getStringCellValue(cellData);
-                        if (isBlankCell(cellData) || value === String(oldFormula2)) {
+                        if ((isBlankCell(cellData) || value === String(oldFormula2)) && !cellData?.p) {
                             redoMatrix.setValue(row, column, {
                                 v: formula2,
                                 p: null,
                             });
-                        } else if (value === String(oldFormula1)) {
+                            setted = true;
+                        } else if (value === String(oldFormula1) && !cellData?.p) {
                             redoMatrix.setValue(row, column, {
                                 v: formula1,
                                 p: null,
                             });
+                            setted = true;
                         }
                     });
                 });
 
-                const redoSetRangeValues = {
-                    id: SetRangeValuesMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        cellValue: redoMatrix.getData(),
-                    } as ISetRangeValuesMutationParams,
-                };
+                if (setted) {
+                    const redoSetRangeValues = {
+                        id: SetRangeValuesMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            cellValue: redoMatrix.getData(),
+                        } as ISetRangeValuesMutationParams,
+                    };
 
-                const undoSetRangeValues = {
-                    id: SetRangeValuesMutation.id,
-                    params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
-                };
-                redoMutations.push(redoSetRangeValues);
-                undoMutations.push(undoSetRangeValues);
+                    const undoSetRangeValues = {
+                        id: SetRangeValuesMutation.id,
+                        params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
+                    };
+                    redoMutations.push(redoSetRangeValues);
+                    undoMutations.push(undoSetRangeValues);
+                }
             }
         }
         const res = sequenceExecute(redoMutations, commandService);

@@ -311,7 +311,7 @@ describe('Test Reference', () => {
             '12a',
             '💩a',
             '❤️b',
-            "Sheet'",
+            "Sheet'1",
             '!Sheet',
             '！Sheet',
             'Sheet1（副本）',
@@ -357,11 +357,40 @@ describe('Test Reference', () => {
             unitId: '',
         });
 
+        // with single quote
+        expect(handleRefStringInfo("'sheet''1'!A1")).toStrictEqual({
+            refBody: 'A1',
+            sheetName: "sheet'1",
+            unitId: '',
+        });
+
+        // with double quote
+        expect(handleRefStringInfo("'sheet''''1'!A1")).toStrictEqual({
+            refBody: 'A1',
+            sheetName: "sheet''1",
+            unitId: '',
+        });
+
         expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'Sheet1',
             unitId: 'Book-1.xlsx',
         });
+
+        // with single quote
+        expect(handleRefStringInfo("'[Book''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
+            refBody: '$A$4',
+            sheetName: 'Sheet1',
+            unitId: "Book'1.xlsx",
+        });
+
+        // with double quote
+        expect(handleRefStringInfo("'[Book''''1.xlsx]Sheet1'!$A$4")).toStrictEqual({
+            refBody: '$A$4',
+            sheetName: 'Sheet1',
+            unitId: "Book''1.xlsx",
+        });
+
         expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
             refBody: '$A$4',
             sheetName: 'sheet-1',

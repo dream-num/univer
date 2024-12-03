@@ -153,10 +153,7 @@ export function serializeRange(range: IRange): string {
  * @param range
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
-    if (needsQuoting(sheetName)) {
-        return `'${quoteSheetName(sheetName)}'!${serializeRange(range)}`;
-    }
-    return `${sheetName}!${serializeRange(range)}`;
+    return `${addQuotesBothSides(sheetName)}!${serializeRange(range)}`;
 }
 
 /**
@@ -206,7 +203,7 @@ export function handleRefStringInfo(refString: string) {
 
     if (unitIdMatch != null) {
         unitId = unitIdMatch[0].trim();
-        unitId = unitId.slice(1, unitId.length - 1);
+        unitId = unquoteSheetName(unitId.slice(1, unitId.length - 1));
         refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 
@@ -218,6 +215,8 @@ export function handleRefStringInfo(refString: string) {
         if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
             sheetName = sheetName.substring(1, sheetName.length - 1);
         }
+
+        sheetName = unquoteSheetName(sheetName);
         refBody = refString.substring(sheetNameIndex + 1);
     } else {
         refBody = refString;
@@ -426,6 +425,31 @@ export function needsQuoting(name: string) {
     return false;
 }
 
+/**
+ * Add quotes to the sheet name
+ */
+export function addQuotesBothSides(name: string) {
+    return needsQuoting(name) ? `'${quoteSheetName(name)}'` : name;
+}
+
+/**
+ * Add a single quote before the single quote
+ * @param name
+ * @returns Quoted name
+ */
+function quoteSheetName(name: string) {
+    return name.replace(/'/g, "''");
+}
+
+/**
+ * Replace double single quotes with single quotes
+ * @param name
+ * @returns Unquoted name
+ */
+function unquoteSheetName(name: string) {
+    return name.replace(/''/g, "'");
+}
+
 function isA1Notation(name: string) {
     const match = name.match(/[1-9][0-9]{0,6}/);
     // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
@@ -439,13 +463,4 @@ function isR1C1Notation(name: string) {
 function startsWithNonAlphabetic(name: string) {
     // Check if the first character is not a letter (including non-English characters)
     return !/^\p{Letter}/u.test(name.charAt(0));
-}
-
-/**
- * Add a single quote before the single quote
- * @param name
- * @returns
- */
-export function quoteSheetName(name: string) {
-    return name.replace(/'/g, "''");
 }

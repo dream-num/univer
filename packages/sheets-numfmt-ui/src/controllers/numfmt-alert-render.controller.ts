@@ -16,20 +16,25 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { CellValueType, Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import { Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import { INumfmtService } from '@univerjs/sheets';
+import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
-import { HoverManagerService } from '../services/hover-manager.service';
+import { debounceTime } from 'rxjs';
 
-const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
+const ALERT_KEY = 'SHEET_NUMFMT_ALERT';
 
-export class ForceStringAlertRenderController extends Disposable implements IRenderModule {
+export class NumfmtAlertRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
+        @Inject(INumfmtService) private _numfmtService: INumfmtService
     ) {
         super();
         this._init();
@@ -41,24 +46,45 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
     }
 
     private _initCellAlertPopup() {
-        this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
+        this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
             if (cellPos) {
+                const location = cellPos.location;
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
-
                 if (!worksheet) return;
 
-                const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
+                const unitId = location.unitId;
+                const sheetId = location.subUnitId;
+                let numfmtValue;
 
-                if (cellData?.t === CellValueType.FORCE_STRING && cellData.v && isRealNum(cellData.v)) {
+                const cellData = worksheet.getCell(location.row, location.col);
+
+                if (cellData?.s) {
+                    const style = workbook.getStyles().get(cellData.s);
+                    if (style?.n) {
+                        numfmtValue = style.n;
+                    }
+                }
+
+                if (!numfmtValue) {
+                    numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
+                }
+
+                if (!numfmtValue) {
+                    this._hideAlert();
+                    return;
+                }
+
+                // Preventing blank object
+                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && cellData?.v && isRealNum(cellData.v)) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (
                         currentLoc &&
-                        currentLoc.row === cellPos.location.row &&
-                        currentLoc.col === cellPos.location.col &&
-                        currentLoc.subUnitId === cellPos.location.subUnitId &&
-                        currentLoc.unitId === cellPos.location.unitId
+                        currentLoc.row === location.row &&
+                        currentLoc.col === location.col &&
+                        currentLoc.subUnitId === location.subUnitId &&
+                        currentLoc.unitId === location.unitId
                     ) {
                         return;
                     }
@@ -67,7 +93,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('info.error'),
                         message: this._localeService.t('info.forceStringInfo'),
-                        location: cellPos.location,
+                        location,
                         width: 200,
                         height: 74,
                         key: ALERT_KEY,

@@ -693,11 +693,11 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1
     optionalDependencies:
       vue:
-        specifier: '>=3.0.0'
+        specifier: '>=3'
         version: 3.4.38(typescript@5.7.2)
     devDependencies:
       '@univerjs-infra/shared':
@@ -832,7 +832,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1
     devDependencies:
       '@univerjs-infra/shared':
@@ -893,7 +893,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1
     devDependencies:
       '@univerjs-infra/shared':
@@ -1079,7 +1079,7 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1
     devDependencies:
       '@types/lodash-es':
@@ -2064,7 +2064,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       react-dom:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1(react@18.3.1)
       react-grid-layout:
         specifier: ^1.4.4
@@ -3294,7 +3294,7 @@ importers:
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       vue:
-        specifier: '>=3.0.0'
+        specifier: '>=3'
         version: 3.4.38(typescript@5.7.2)
     devDependencies:
       '@testing-library/react':
@@ -3358,7 +3358,7 @@ importers:
         specifier: 0.52.0
         version: 0.52.0
       react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: '>=16.9'
         version: 18.3.1
     devDependencies:
       '@univerjs-infra/shared':
@@ -12780,7 +12780,7 @@ snapshots:
       '@vue/compiler-ssr': 3.4.38
       '@vue/shared': 3.4.38
       estree-walker: 2.0.2
-      magic-string: 0.30.12
+      magic-string: 0.30.14
       postcss: 8.4.49
       source-map-js: 1.2.1
 

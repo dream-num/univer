@@ -150,8 +150,8 @@ export class Line extends docExtension {
         );
 
         ctx.beginPath();
-        ctx.moveToByPrecision(start.x, start.y);
-        ctx.lineToByPrecision(end.x, end.y);
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
         ctx.stroke();
         ctx.restore();
     }

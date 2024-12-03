@@ -215,8 +215,8 @@ export function Ribbon(props: IRibbonProps) {
                 style={{
                     position: 'absolute',
                     top: -9999,
-                    left: -9999,
-                    opacity: 0,
+                    left: 0,
+                    right: 0,
                     // top: 0,
                     // left: 0,
                     // opacity: 1,

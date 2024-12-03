@@ -138,5 +138,12 @@ describe('Test epochtodate function', () => {
             const result8 = testFunction.calculate(timestamp, unit8);
             expect(getObjectValue(result8)).toBe(ErrorType.NUM);
         });
+
+        it('More test', () => {
+            const timestamp = NumberValueObject.create(1656356678000410);
+            const unit = NumberValueObject.create(1);
+            const result = testFunction.calculate(timestamp, unit);
+            expect(getObjectValue(result)).toBe(19170820453.264008);
+        });
     });
 });

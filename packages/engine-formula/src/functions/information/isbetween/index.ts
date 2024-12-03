@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { compareToken } from '../../../basics/token';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArray } from '../../../engine/utils/check-variant-error';
@@ -44,29 +45,34 @@ export class Isbetween extends BaseFunction {
 
         const [valueToCompareObject, lowerValueObject, upperValueObject, lowerValueIsInclusiveObject, upperValueIsInclusiveObject] = variants as BaseValueObject[];
 
-        if (
-            valueToCompareObject.isString() ||
-            lowerValueObject.isString() ||
-            upperValueObject.isString() ||
-            lowerValueIsInclusiveObject.isString() ||
-            upperValueIsInclusiveObject.isString()
-        ) {
+        if (lowerValueIsInclusiveObject.isString() || upperValueIsInclusiveObject.isString()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const valueToCompareValue = +valueToCompareObject.getValue();
-        const lowerValueValue = +lowerValueObject.getValue();
-        const upperValueValue = +upperValueObject.getValue();
-        const lowerValueIsInclusiveValue = +lowerValueIsInclusiveObject.getValue();
-        const upperValueIsInclusiveValue = +upperValueIsInclusiveObject.getValue();
+        const lowGreaterThanUpper = lowerValueObject.compare(upperValueObject, '>' as compareToken);
 
-        if (lowerValueValue > upperValueValue) {
+        if (lowGreaterThanUpper.getValue() === true) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const lowerComparison = lowerValueIsInclusiveValue ? valueToCompareValue >= lowerValueValue : valueToCompareValue > lowerValueValue;
-        const upperComparison = upperValueIsInclusiveValue ? valueToCompareValue <= upperValueValue : valueToCompareValue < upperValueValue;
+        const lowerValueIsInclusiveValue = +lowerValueIsInclusiveObject.getValue();
+        const upperValueIsInclusiveValue = +upperValueIsInclusiveObject.getValue();
 
-        return BooleanValueObject.create(lowerComparison && upperComparison);
+        const lowerComparisonOperator = lowerValueIsInclusiveValue ? '>=' : '>';
+        const upperComparisonOperator = upperValueIsInclusiveValue ? '<=' : '<';
+
+        const lowerComparison = valueToCompareObject.compare(lowerValueObject, lowerComparisonOperator as compareToken);
+
+        if (lowerComparison.getValue() === false) {
+            return BooleanValueObject.create(false);
+        }
+
+        const upperComparison = valueToCompareObject.compare(upperValueObject, upperComparisonOperator as compareToken);
+
+        if (upperComparison.getValue() === false) {
+            return BooleanValueObject.create(false);
+        }
+
+        return BooleanValueObject.create(true);
     }
 }

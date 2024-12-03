@@ -20,6 +20,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { Isbetween } from '../index';
 
@@ -32,7 +33,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(true);
+            expect(getObjectValue(result)).toBe(true);
         });
 
         it('LowerValue > upperValue', () => {
@@ -40,7 +41,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(-12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
@@ -48,7 +49,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(false);
         });
 
         it('Value is normal string', () => {
@@ -56,7 +57,11 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(false);
+
+            const lowerValueIsInclusive = StringValueObject.create('test');
+            const result2 = testFunction.calculate(valueToCompare, lowerValue, upperValue, lowerValueIsInclusive);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
 
         it('Value is blank cell', () => {
@@ -64,7 +69,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(false);
+            expect(getObjectValue(result)).toBe(false);
         });
 
         it('Value is boolean', () => {
@@ -72,7 +77,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(false);
+            expect(getObjectValue(result)).toBe(false);
         });
 
         it('Value is error', () => {
@@ -80,7 +85,7 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(ErrorType.NAME);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -98,7 +103,31 @@ describe('Test isbetween function', () => {
             const lowerValue = NumberValueObject.create(1.2);
             const upperValue = NumberValueObject.create(12.45);
             const result = testFunction.calculate(valueToCompare, lowerValue, upperValue);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+
+        it('More test', () => {
+            const valueToCompare = NumberValueObject.create(0);
+            const lowerValue = StringValueObject.create('AA');
+            const upperValue = NumberValueObject.create(1);
+            const lowerValueIsInclusive = NumberValueObject.create(1);
+            const upperValueIsInclusive = BooleanValueObject.create(false);
+            const result = testFunction.calculate(valueToCompare, lowerValue, upperValue, lowerValueIsInclusive, upperValueIsInclusive);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const valueToCompare2 = NumberValueObject.create(0);
+            const lowerValue2 = StringValueObject.create('AA');
+            const upperValue2 = StringValueObject.create('BB');
+            const lowerValueIsInclusive2 = NumberValueObject.create(1);
+            const upperValueIsInclusive2 = BooleanValueObject.create(false);
+            const result2 = testFunction.calculate(valueToCompare2, lowerValue2, upperValue2, lowerValueIsInclusive2, upperValueIsInclusive2);
+            expect(getObjectValue(result2)).toBe(false);
+
+            const valueToCompare3 = NumberValueObject.create(0);
+            const lowerValue3 = NumberValueObject.create(1);
+            const upperValue3 = BooleanValueObject.create(false);
+            const result3 = testFunction.calculate(valueToCompare3, lowerValue3, upperValue3);
+            expect(getObjectValue(result3)).toBe(false);
         });
     });
 });

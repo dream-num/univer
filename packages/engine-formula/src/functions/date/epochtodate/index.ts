@@ -72,9 +72,16 @@ export class Epochtodate extends BaseFunction {
         }
 
         const date = new Date(Date.UTC(1970, 0, 1, 0, 0, 0, 0) + timestampValue);
-        const dateSerialNumber = excelDateTimeSerial(date);
 
-        return NumberValueObject.create(dateSerialNumber, 'yyyy-MM-dd hh:mm:ss AM/PM');
+        if (!Number.isNaN(date.getTime())) {
+            const dateSerialNumber = excelDateTimeSerial(date);
+
+            return NumberValueObject.create(dateSerialNumber, 'yyyy-MM-dd AM/PM hh:mm:ss');
+        } else {
+            const result = 25569 + timestampValue / 86400000;
+
+            return NumberValueObject.create(result);
+        }
     }
 
     private _checkVariants(timestamp: FunctionVariantType, unit: FunctionVariantType) {

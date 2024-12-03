@@ -186,7 +186,7 @@ export class Linest extends BaseFunction {
         let result: Array<Array<number | string>> = [];
 
         if (stats) {
-            const n = knownYsValues.length;
+            const n = knownYsValuesFlat.length;
 
             let meanY = 0;
             let meanX = 0;
@@ -217,12 +217,11 @@ export class Linest extends BaseFunction {
             }
 
             const ssreg = sstotal - ssresid;
-            const r2 = sstotal === 0 ? 0 : ssreg / sstotal;
+            const r2 = ssreg === sstotal ? 1 : ssreg / sstotal;
 
             let se = 0;
             let seb: number | ErrorType = 0;
             let sey = 0;
-            let F = 0;
 
             if (df > 0) {
                 if (ssx > 0) {
@@ -231,8 +230,9 @@ export class Linest extends BaseFunction {
                 }
 
                 sey = Math.sqrt(ssresid / df);
-                F = (ssreg / 1) / (ssresid / df);
             }
+
+            const F = df > 0 ? (ssreg / 1) / (ssresid / df) : ErrorType.NUM;
 
             // seb = #N/A when const is FALSE
             if (!constb) {

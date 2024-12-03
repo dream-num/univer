@@ -15,14 +15,17 @@
  */
 
 import type { Direction, ICommand, IRange } from '@univerjs/core';
+import type {
+    ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     expandToContinuousRange,
     getCellAtRowCol,
     getSelectionsService,
     getSheetCommandTarget,
+    SelectionMoveType,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -64,7 +67,7 @@ export interface IMoveSelectionEnterAndTabCommandParams {
 }
 
 /**
- * Move selection (Mainly by keyboard arrow keys, Tab and Enter key see MoveSelectionEnterAndTabCommand)
+ * Move selection (Mainly by keyboard arrow keys, For Tab and Enter key, check @MoveSelectionEnterAndTabCommand)
  */
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
@@ -122,17 +125,12 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
                 },
             },
         ];
-
-        const rs = accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
+        const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
             selections,
-            extra,
-        });
-
-        const renderManagerService = accessor.get(IRenderManagerService);
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
-        selectionService?.refreshSelectionMoveEnd();
+            type: SelectionMoveType.MOVE_END,
+        } as ISetSelectionsOperationParams);
         return rs;
     },
 };
@@ -274,6 +272,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         const rs = accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
+            type: SelectionMoveType.MOVE_END,
             selections: [resultRange],
             extra,
         });
@@ -323,6 +322,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     worksheet
                 )
                 : shrinkToNextCell(startRange, direction, worksheet);
+        destRange.rangeType = selection.range.rangeType;
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
@@ -331,6 +331,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         return accessor.get(ICommandService).syncExecuteCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
+            type: SelectionMoveType.ONLY_SET,
             selections: [
                 {
                     range: destRange,

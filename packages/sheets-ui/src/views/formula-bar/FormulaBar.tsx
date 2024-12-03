@@ -78,7 +78,8 @@ export function FormulaBar() {
                 return merge(
                     worksheetProtectionRuleModel.ruleChange$,
                     rangeProtectionRuleModel.ruleChange$,
-                    selectionManager.selectionMoveEnd$
+                    selectionManager.selectionMoveEnd$,
+                    selectionManager.selectionSet$
                 ).pipe(
                     switchMap(() => {
                         const unitId = workbook.getUnitId();

@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
 import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -66,7 +66,7 @@ export const AutoClearContentCommand: ICommand = {
             clearMutationParams
         );
         const { startColumn, startRow } = selectionRange;
-        commandService.executeCommand(SetSelectionsOperation.id, {
+        const param: ISetSelectionsOperationParams = {
             selections: [
                 {
                     primary: {
@@ -76,7 +76,7 @@ export const AutoClearContentCommand: ICommand = {
                         endRow: startRow,
                         actualRow: startRow,
                         actualColumn: startColumn,
-                        isMerge: false,
+                        isMerged: false,
                         isMergedMainCell: false,
                     },
                     range: {
@@ -86,7 +86,8 @@ export const AutoClearContentCommand: ICommand = {
             ],
             unitId,
             subUnitId,
-        });
+        };
+        commandService.executeCommand(SetSelectionsOperation.id, param);
 
         const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {

@@ -154,16 +154,21 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     /**
-     * Mainly emit by pointerup (pointerup is handled in _onPointerdown)
+     * Mainly emit by pointerup in spreadsheet. (pointerup is handled in _onPointerdown)
      */
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoord[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
-    readonly selectionMoving$ = this._selectionMoving$.asObservable();
-
     /**
-     * Mainly emit by pointerdown
+     * Pointerup in spreadsheet
      */
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+    /**
+     * Mainly emit by pointermove in spreadsheet
+     */
+    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
+    /**
+     * Pointermove in spreadsheet
+     */
+    readonly selectionMoving$ = this._selectionMoving$.asObservable();
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoord[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 

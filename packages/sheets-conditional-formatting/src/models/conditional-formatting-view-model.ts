@@ -132,7 +132,7 @@ export class ConditionalFormattingViewModel extends Disposable {
      */
     public markRuleDirty = (() => {
         const rxItem = new Subject<{ unitId: string; subUnitId: string; cfId: string; isNeedResetPreComputingCache: boolean }>();
-        rxItem.pipe(bufferTime(100), filter((e) => !!e.length), map((list) => {
+        this.disposeWithMe(rxItem.pipe(bufferTime(100), filter((e) => !!e.length), map((list) => {
             const set = new Set();
             const result: typeof list = [];
             list.forEach((item) => {
@@ -152,7 +152,7 @@ export class ConditionalFormattingViewModel extends Disposable {
             list.forEach((item) => {
                 this._markRuleDirtyAtOnce(item.unitId, item.subUnitId, item.cfId, item.isNeedResetPreComputingCache);
             });
-        });
+        }));
         return (unitId: string, subUnitId: string, cfId: string, isNeedResetPreComputingCache: boolean = true) => {
             rxItem.next({ unitId, subUnitId, cfId, isNeedResetPreComputingCache });
         };

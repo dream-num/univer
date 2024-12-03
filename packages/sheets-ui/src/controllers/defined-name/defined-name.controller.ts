@@ -39,7 +39,8 @@ export class SheetsDefinedNameController extends Disposable {
         this.disposeWithMe(merge(
             this._selectionManagerService.selectionMoveStart$,
             this._selectionManagerService.selectionMoving$,
-            this._selectionManagerService.selectionMoveEnd$
+            this._selectionManagerService.selectionMoveEnd$,
+            this._selectionManagerService.selectionSet$
         )
             .pipe(filter((params) => !!params))
             .subscribe((params) => {

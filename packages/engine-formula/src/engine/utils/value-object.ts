@@ -199,11 +199,9 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
             // range must be an ArrayValueObject, criteria must be a BaseValueObject
             let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
 
-            const [, criteriaStringObject] = findCompareToken(`${criteriaValueObject.getValue()}`);
-
             // When comparing non-numbers and numbers, countifs does not take the result
             if (isNumberSensitive) {
-                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaValueObject);
             }
 
             if (booleanResults[rowIndex] === undefined) {
@@ -230,11 +228,34 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
  * @returns
  */
 export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
+    const [operator, criteriaObject] = findCompareToken(`${criteria.getValue()}`);
+
     return array.mapValue((valueObject, r, c) => {
         const rangeValueObject = range.get(r, c);
-        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
+
+        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
             return valueObject;
-        } else if (rangeValueObject?.isError() && criteria.isError() && rangeValueObject.getValue() === criteria.getValue()) {
+        } else if (rangeValueObject?.isNumber()) {
+            if (criteriaObject.isString()) {
+                const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+
+                if (criteriaNumber.isNumber()) {
+                    return rangeValueObject.compare(criteriaNumber, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (criteriaObject.isNumber()) {
+            if (rangeValueObject?.isString()) {
+                const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+
+                if (rangeNumber.isNumber()) {
+                    return rangeNumber.compare(criteriaObject, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
             return BooleanValueObject.create(true);
         } else {
             return BooleanValueObject.create(false);

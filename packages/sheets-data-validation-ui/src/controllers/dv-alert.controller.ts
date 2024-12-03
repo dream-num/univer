@@ -45,8 +45,8 @@ export class DataValidationAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
+                const workbook = this._univerInstanceService.getUnit<Workbook>(cellPos.location.unitId, UniverInstanceType.UNIVER_SHEET)!;
+                const worksheet = workbook.getSheetBySheetId(cellPos.location.subUnitId);
                 if (!worksheet) return;
                 const rule = this._dataValidationModel.getRuleByLocation(cellPos.location.unitId, cellPos.location.subUnitId, cellPos.location.row, cellPos.location.col);
                 if (!rule) {
@@ -54,7 +54,7 @@ export class DataValidationAlertController extends Disposable {
                     return;
                 }
 
-                const validStatus = this._dataValidationModel.validator(rule, cellPos.location);
+                const validStatus = this._dataValidationModel.validator(rule, { ...cellPos.location, workbook, worksheet });
                 if (validStatus === DataValidationStatus.INVALID) {
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;

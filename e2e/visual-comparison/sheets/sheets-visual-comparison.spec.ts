@@ -236,3 +236,51 @@ test('diff set force string cell', async () => {
     await page.waitForTimeout(2000);
     await browser.close();
 });
+
+test('diff set text format number cell', async () => {
+    const browser = await chromium.launch({
+        headless: !!isCI, // Set to false to see the browser window
+    });
+    const context = await browser.newContext({
+        viewport: { width: 1280, height: 1280 },
+        deviceScaleFactor: 2, // Set your desired DPR
+    });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(async () => {
+        await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
+            values: [
+                {
+                    row: 0,
+                    col: 7,
+                    pattern: '@@@',
+                    type: 'text',
+                },
+            ],
+        });
+
+        await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('H1').setValue(2);
+
+        await window.univerAPI.getActiveWorkbook().getActiveSheet().getRange('I1').setValue(3);
+
+        await window.univerAPI.executeCommand('sheet.command.numfmt.set.numfmt', {
+            values: [
+                {
+                    row: 0,
+                    col: 8,
+                    pattern: '@@@',
+                    type: 'text',
+                },
+            ],
+        });
+    });
+
+    const filename = generateSnapshotName('set-text-format-number-cell');
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+
+    await page.waitForTimeout(2000);
+    await browser.close();
+});

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { createNewArray } from '../../../engine/utils/array-object';
-import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { createNewArray } from '../../../engine/utils/array-object';
+import { valueObjectCompare } from '../../../engine/utils/object-compare';
+import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -75,9 +75,8 @@ export class Averageif extends BaseFunction {
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {
         let resultArrayObject = valueObjectCompare(range, criteria);
 
-        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteria);
 
         // averageRange has the same dimensions as range
         let averageRangeArray = averageRange

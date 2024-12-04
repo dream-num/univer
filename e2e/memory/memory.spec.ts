@@ -41,6 +41,7 @@ test('memory', async ({ page }) => {
     await page.evaluate(() => window.univer.dispose());
     await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
+    console.log('Memory after disposing univer:', memoryAfterDisposingUniver);
 
     const notLeaking = (memoryAfterDisposingUniver <= memoryAfterFirstLoad) && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();

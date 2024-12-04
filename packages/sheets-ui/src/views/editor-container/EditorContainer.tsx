@@ -114,11 +114,13 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, [disableAutoFocus, state]);
 
     const handleClickSideBar = useEvent(() => {
-        editorBridgeService.changeVisible({
-            visible: false,
-            eventType: DeviceInputEventType.PointerUp,
-            unitId: editState!.unitId,
-        });
+        if (editorBridgeService.isVisible().visible) {
+            editorBridgeService.changeVisible({
+                visible: false,
+                eventType: DeviceInputEventType.PointerUp,
+                unitId: editState!.unitId,
+            });
+        }
     });
 
     useSidebarClick(handleClickSideBar);

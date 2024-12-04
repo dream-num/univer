@@ -227,7 +227,13 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 isSingle: true,
                 initialSnapshot: {
                     id: editorId,
-                    body: { dataStream: `${initValue}\r\n` },
+                    body: {
+                        dataStream: `${initValue}\r\n`,
+                        textRuns: [],
+                        customBlocks: [],
+                        customDecorations: [],
+                        customRanges: [],
+                    },
                     documentStyle: {},
                 },
             }, formulaEditorContainerRef.current);

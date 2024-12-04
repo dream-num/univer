@@ -119,6 +119,8 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
     }
 
     public clearExclusiveRangesByGroupId(unitId: string, sheetId: string, feature: string, groupId: string) {
+        const ranges = this.getExclusiveRanges(unitId, sheetId, feature);
+        this._exclusiveRangesChange$.next({ unitId, subUnitId: sheetId, ranges: ranges?.map((item) => item.range) || [] });
         const featureMap = this.getExclusiveRanges(unitId, sheetId, feature);
         if (featureMap) {
             const newFeatureMap = featureMap.filter((item) => item.groupId !== groupId);

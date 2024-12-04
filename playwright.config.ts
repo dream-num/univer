@@ -22,6 +22,7 @@ export default defineConfig({
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
+    timeout: 60_000,
     /* Retry on CI only */
     retries: process.env.CI ? 2 : 0,
     /* Opt out of parallel tests on CI. */
@@ -82,7 +83,7 @@ export default defineConfig({
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000',
         reuseExistingServer: !isCI,
-        timeout: 60_000,
+        timeout: 10_000,
         stdout: 'ignore',
         stderr: 'pipe',
     },

@@ -82,7 +82,7 @@ export default defineConfig({
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000',
         reuseExistingServer: !isCI,
-        timeout: 10_000,
+        timeout: 60_000,
         stdout: 'ignore',
         stderr: 'pipe',
     },

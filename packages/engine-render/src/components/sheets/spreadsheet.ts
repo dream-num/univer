@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellWithCoord, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
@@ -256,7 +256,7 @@ export class Spreadsheet extends SheetComponent {
         this._dirtyBounds = dirtyBounds;
     }
 
-    renderByViewport(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    renderByViewports(mainCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty } = viewportInfo as Required<IViewportInfo>;
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
@@ -265,9 +265,7 @@ export class Spreadsheet extends SheetComponent {
 
         const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
-        const { left, top, right, bottom } = viewPortPosition;
-        const dw = right - left + rowHeaderWidth;
-        const dh = bottom - top + columnHeaderHeight;
+
         const isForceDirty = isViewportForceDirty || this.isForceDirty();
         const isDirty = isViewportDirty || this.isDirty();
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty || isDirty) {
@@ -285,6 +283,9 @@ export class Spreadsheet extends SheetComponent {
         // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
         const sourceTop = bufferEdgeSizeY * Math.min(1, window.devicePixelRatio);
+        const { left, top, right, bottom } = viewPortPosition;
+        const dw = right - left + rowHeaderWidth;
+        const dh = bottom - top + columnHeaderHeight;
         this._applyCache(cacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
     }
@@ -412,7 +413,7 @@ export class Spreadsheet extends SheetComponent {
         // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
         if (sheetContentViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {
             if (viewportInfo && viewportInfo.cacheCanvas) {
-                this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
+                this.renderByViewports(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
                 this._draw(mainCtx, viewportInfo);
             }
@@ -422,7 +423,7 @@ export class Spreadsheet extends SheetComponent {
             // embed in doc & slide
             // now there are bugs in embed mode with cache on, 3f12ad80188a83283bcd95c65e6c5dcc2d23ad72
             if (viewportInfo && viewportInfo.cacheCanvas) {
-                this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
+                this.renderByViewports(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
                 this._draw(mainCtx, viewportInfo);
             }
@@ -466,20 +467,16 @@ export class Spreadsheet extends SheetComponent {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-        const fn = (num: number, scale: number) => {
-            return Math.round(num * scale);
-        };
+
         ctx.imageSmoothingEnabled = false;
-        // ctx.imageSmoothingEnabled = true;
-        // ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(
             cacheCanvas.getCanvasEle(),
-            fn(sx, pixelRatio),
-            fn(sy, pixelRatio),
+            sx * pixelRatio,
+            sy * pixelRatio,
             sw * pixelRatio,
             sh * pixelRatio,
-            fn(dx, pixelRatio),
-            fn(dy, pixelRatio),
+            dx * pixelRatio,
+            dy * pixelRatio,
             dw * pixelRatio,
             dh * pixelRatio
         );
@@ -528,7 +525,6 @@ export class Spreadsheet extends SheetComponent {
             .forEach((Extension) => {
                 this.register(new Extension());
             });
-        // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
         this._borderExtension = this.getExtensionByKey('DefaultBorderExtension') as Border;
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
@@ -669,25 +665,6 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext2D, backgroundPositions?: ObjectMatrix<ICellWithCoord>) {
-        backgroundPositions?.forValue((row, column, cellInfo) => {
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-            if (isMerged) {
-                return true;
-            }
-
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
-
-            ctx.clearRectForTexture(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
-        });
-    }
-
     testShowRuler(cacheCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): void {
         const { cacheBound } = viewportInfo;
         const spreadsheetSkeleton = this.getSkeleton()!;
@@ -753,7 +730,7 @@ export class Spreadsheet extends SheetComponent {
         const g = Number.parseInt(color.substring(3, 5), 16);
         const b = Number.parseInt(color.substring(5, 7), 16);
         if (r + g + b < 610) {
-            return this.testGetRandomLightColor(); // 递归调用直到生成足够亮的颜色
+            return this.testGetRandomLightColor();
         }
 
         return color;

@@ -82,6 +82,7 @@ import {
     DISABLE_NORMAL_SELECTIONS,
     getPrimaryForRange,
     IRefSelectionsService,
+    SelectionMoveType,
     setEndForRange,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -464,7 +465,7 @@ export class PromptController extends Disposable {
                     }
                     this._onSelectionControlChange(toRange, c);
                 }));
-                d.add(merge(c.selectionMoved$, c.selectionScaled$).subscribe(() => {
+                d.add(merge(c.selectionMoveEnd$, c.selectionScaled$).subscribe(() => {
                     this._formulaPromptService.disableLockedSelectionChange();
                 }));
             });
@@ -906,7 +907,7 @@ export class PromptController extends Disposable {
 
         const bodyList = this._getFormulaAndCellEditorBody(unitIds).filter((b) => !!b);
 
-        this._refSelectionsService.clear();
+        // this._refSelectionsService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             this._existsSequenceNode = false;
@@ -1004,9 +1005,9 @@ export class PromptController extends Disposable {
     private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
         // const [unitId, sheetId] = refSelectionRenderService.getLocation();
         const { unitId, sheetId } = this._editorBridgeService.getEditCellState()!;
-        const { unitId: selfUnitId, sheetId: selfSheetId } = this._getCurrentUnitIdAndSheetId();
+        const { unitId: selfUnitId, sheetId: currSheetId } = this._getCurrentUnitIdAndSheetId();
 
-        const isSelfSheet = sheetId === selfSheetId;
+        const isSelfSheet = sheetId === currSheetId;
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
         const worksheet = workbook.getSheetBySheetId(sheetId)!;
@@ -1033,7 +1034,7 @@ export class PromptController extends Disposable {
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
 
             // Cross sheet operation
-            if (!isSelfSheet && refSheetId !== selfSheetId) continue;
+            if (!isSelfSheet && refSheetId !== currSheetId) continue;
 
             // Current sheet operation
             if (isSelfSheet && sheetName.length !== 0 && refSheetId !== sheetId) continue;
@@ -1071,9 +1072,8 @@ export class PromptController extends Disposable {
         // if (lastRange) {
         // selectionWithStyle.push(lastRange);
         // }
-
         if (selectionWithStyle.length) {
-            this._refSelectionsService.addSelections(unitId, sheetId, selectionWithStyle);
+            this._refSelectionsService.setSelections(unitId, currSheetId, selectionWithStyle, SelectionMoveType.ONLY_SET);
         }
     }
 
@@ -1242,7 +1242,7 @@ export class PromptController extends Disposable {
      * @param sequenceNodes
      * @param textSelectionOffset
      */
-    // eslint-disable-next-line max-lines-per-function
+
     private _syncToEditor(
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
@@ -1405,6 +1405,12 @@ export class PromptController extends Disposable {
             return;
         }
 
+        const { skeleton } = this._getCurrentUnitIdAndSheetId();
+        const unitId = skeleton?.worksheet.getUnitId();
+        const sheetId = skeleton?.worksheet.getSheetId();
+        currentSelection.range.sheetId = sheetId;
+        currentSelection.range.unitId = unitId;
+
         const refString = this._generateRefString(currentSelection);
         this._formulaPromptService.setSequenceNodes(insertNodes);
         this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
@@ -1542,7 +1548,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionControl) {
         // FIXME: change here
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
@@ -1759,7 +1764,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];
@@ -1832,7 +1836,7 @@ export class PromptController extends Disposable {
                         const selectionData = this._sheetsSelectionsService.getCurrentLastSelection();
                         if (selectionData != null) {
                             const selectionDataNew = Tools.deepClone(selectionData);
-                            this._refSelectionsService.addSelections([selectionDataNew]);
+                            this._refSelectionsService.setSelections([selectionDataNew]);
                         }
                     }
 
@@ -2010,7 +2014,9 @@ export class PromptController extends Disposable {
     }
 
     private _getEditorObject() {
-        const editorUnitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
+        const docInstance = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!docInstance) return;
+        const editorUnitId = docInstance.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
         return editor?.render;
     }

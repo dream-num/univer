@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -71,7 +71,7 @@
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.5",
         "@types/react-mentions": "^4.4.0",
-        "@univerjs/icons": "^0.2.7",
+        "@univerjs/icons": "^0.2.8",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",
@@ -103,7 +103,7 @@
         "react-dom": "18.3.1",
         "tailwindcss": "^3.4.15",
         "typescript": "^5.7.2",
-        "vite": "^6.0.0",
+        "vite": "^6.0.1",
         "vitest": "^2.1.6"
     },
     "space": {

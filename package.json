@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "private": true,
     "packageManager": "pnpm@9.14.1",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -57,7 +57,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.3.4",
-        "eslint": "9.15.0",
+        "eslint": "9.16.0",
         "eslint-plugin-format": "^0.1.2",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",

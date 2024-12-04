@@ -157,7 +157,7 @@ export interface ISelectionWithStyle extends ISelection {
      * if primary is not defined, means not keep current primary cell.
      */
     primary: Nullable<ISelectionCell>;
-    style: Nullable<Partial<ISelectionStyle>>;
+    style?: Nullable<Partial<ISelectionStyle>>;
 }
 
 export interface ISheetRangeLocation {

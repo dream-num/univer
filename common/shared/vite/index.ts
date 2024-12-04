@@ -137,10 +137,33 @@ export interface IBuildOptions {
      * @description If true, UMD build will be skipped. Useful for packages that run in Node.js environment.
      */
     skipUMD?: boolean;
+
+    /**
+     * Cleanup all compiled files
+     * @default false
+     */
+    cleanup?: boolean;
+}
+
+export function remove() {
+    const __dirname = process.cwd();
+
+    [
+        path.resolve(__dirname, './lib'),
+        path.resolve(__dirname, './coverage'),
+    ].forEach((dir) => {
+        if (fs.existsSync(dir)) {
+            fs.removeSync(dir);
+        }
+    });
 }
 
 export async function build(options?: IBuildOptions) {
-    const { skipUMD = false } = options ?? {};
+    const { skipUMD = false, cleanup = false } = options ?? {};
+
+    if (cleanup) {
+        remove();
+    }
 
     const __dirname = process.cwd();
 

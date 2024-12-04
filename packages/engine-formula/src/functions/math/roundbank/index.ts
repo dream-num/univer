@@ -75,6 +75,14 @@ export class Roundbank extends BaseFunction {
     }
 
     private _roundBank(number: number, numDigits: number): number {
+        if (numDigits > 16) {
+            return number;
+        }
+
+        if (numDigits < -16) {
+            return 0;
+        }
+
         // logic is:
         // If the digit to be rounded is 4 or less than, it is discarded.
         // If the digit to be rounded is 6 or greater, it rounds up.

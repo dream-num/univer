@@ -26,8 +26,8 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import styles from './index.module.less';
 
@@ -72,7 +72,8 @@ export function FormulaBar() {
                 return merge(
                     worksheetProtectionRuleModel.ruleChange$,
                     rangeProtectionRuleModel.ruleChange$,
-                    selectionManager.selectionMoveEnd$
+                    selectionManager.selectionMoveEnd$,
+                    selectionManager.selectionSet$
                 ).pipe(
                     switchMap(() => {
                         const unitId = workbook.getUnitId();

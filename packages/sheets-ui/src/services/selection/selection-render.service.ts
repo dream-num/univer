@@ -23,7 +23,7 @@ import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -66,7 +66,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         const sheetObject = this._getSheetObject();
 
         this._initEventListeners(sheetObject);
-        this._initSelectionChangeListener();
+        this._initSelectionModelChangeListener();
         this._initThemeChangeListener();
         this._initSkeletonChangeListener();
         this._initUserActionSyncListener();
@@ -144,13 +144,21 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
     }
 
-    private _initSelectionChangeListener(): void {
-        // normal selection: after dragging selection(move end)
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionWithStyleList) => {
+    /**
+     * Response for selection model changing.
+     */
+    private _initSelectionModelChangeListener(): void {
+        this.disposeWithMe(merge(
+            this._workbookSelections.selectionMoveEnd$, // triggered by keyboard(e.g. arrow key tab enter)
+            this._workbookSelections.selectionSet$ // shift + arrow key
+        ).subscribe((selectionWithStyleList) => {
             this.resetSelectionsByModelData(selectionWithStyleList);
         }));
     }
 
+    /**
+     * Handle events in spreadsheet. (e.g. drag and move to make a selection)
+     */
     private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
@@ -164,7 +172,9 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                     this._reset();
                 } else {
                     this._renderDisposable = toDisposable(
-                        this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_END))
+                        this.selectionMoveEnd$.subscribe((params) => {
+                            this._updateSelections(params, SelectionMoveType.MOVE_END);
+                        })
                     );
                 }
             }));
@@ -184,13 +194,15 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             return;
         }
 
+        const selectionWithStyles = selectionDataWithStyleList.map((selectionDataWithStyle) =>
+            convertSelectionDataToRange(selectionDataWithStyle)
+        );
+
         this._commandService.executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
             type,
-            selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
-                convertSelectionDataToRange(selectionDataWithStyle)
-            ),
+            selections: selectionWithStyles,
         });
     }
 
@@ -253,7 +265,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line complexity
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

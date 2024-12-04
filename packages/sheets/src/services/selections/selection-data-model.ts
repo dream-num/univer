@@ -62,16 +62,10 @@ export class WorkbookSelectionModel extends Disposable {
         this._selectionSet$.complete();
     }
 
-    /** Clear all selections in this workbook. */
-    clear(): void {
-        this._worksheetSelections.clear();
-        this._emitOnEnd([]);
-    }
-
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]): void {
         const selections = this.getSelectionsOfWorksheet(sheetId);
         selections.push(...selectionDatas);
-        this._emitOnEnd(selections);
+        this._selectionSet$.next(selections);
     }
 
     /**
@@ -84,8 +78,8 @@ export class WorkbookSelectionModel extends Disposable {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909
-        this.deleteSheetSelection(sheetId);
-        this.getSelectionsOfWorksheet(sheetId).push(...selectionDatas);
+        // this.deleteSheetSelection(sheetId);
+        this.setSelectionsOfWorksheet(sheetId, selectionDatas);
 
         switch (type) {
             case SelectionMoveType.MOVE_START:
@@ -97,14 +91,13 @@ export class WorkbookSelectionModel extends Disposable {
             case SelectionMoveType.MOVE_END:
                 this._beforeSelectionMoveEnd$.next(selectionDatas);
                 this._selectionMoveEnd$.next(selectionDatas);
-                // this._emitOnEnd(selectionDatas);
                 break;
             case SelectionMoveType.ONLY_SET: {
                 this._selectionSet$.next(selectionDatas);
                 break;
             }
             default:
-                this._emitOnEnd(selectionDatas);
+                this._selectionSet$.next(selectionDatas);
                 break;
         }
     }
@@ -130,6 +123,20 @@ export class WorkbookSelectionModel extends Disposable {
         return this._worksheetSelections.get(sheetId)!;
     }
 
+    setSelectionsOfWorksheet(sheetId: string, selections: ISelectionWithStyle[]): void {
+        this._worksheetSelections.set(sheetId, [...selections]);
+    }
+
+    deleteSheetSelection(sheetId: string) {
+        this._worksheetSelections.set(sheetId, []);
+    }
+
+    /** Clear all selections in this workbook. */
+    clear(): void {
+        this._worksheetSelections.clear();
+        this._eventAfterSetSelections([]);
+    }
+
     private _getCurrentSelections(): ISelectionWithStyle[] {
         return this.getSelectionsOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
     }
@@ -139,24 +146,7 @@ export class WorkbookSelectionModel extends Disposable {
         return selectionData[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
 
-    /**
-     * Same method as getSelectionsOfWorksheet.
-     * @param sheetId
-     * @returns this._worksheetSelections
-     */
-    private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
-        if (!this._worksheetSelections.get(sheetId)) {
-            this._worksheetSelections.set(sheetId, []);
-        }
-
-        return this._worksheetSelections.get(sheetId)!;
-    }
-
-    deleteSheetSelection(sheetId: string) {
-        this._worksheetSelections.set(sheetId, []);
-    }
-
-    private _emitOnEnd(selections: ISelectionWithStyle[]): void {
+    private _eventAfterSetSelections(selections: ISelectionWithStyle[]): void {
         this._selectionSet$.next(selections);
     }
 }

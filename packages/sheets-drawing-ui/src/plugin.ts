@@ -26,6 +26,7 @@ import {
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -46,7 +47,7 @@ import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-m
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
-@DependentOn(UniverDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
+@DependentOn(UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = PLUGIN_NAME;
@@ -82,7 +83,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
         touchDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
-            [SheetCellImageController],
         ]);
     }
 
@@ -99,6 +99,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetDrawingPrintingController],
             [SheetDrawingUIController],
+            [SheetCellImageController],
             [SheetCellImageHoverController],
             [SheetCellImageAutofillController],
         ]);

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
-/* eslint-disable max-lines-per-function */
 import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
+
 import type { SelectionControl } from './selection-control';
+import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
+
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -192,7 +192,7 @@ export class SelectionShapeExtension {
                 control.resetCursor();
             });
 
-            control.onPointerDown$.subscribeEvent(this._controlEvent.bind(this));
+            control.onPointerDown$.subscribeEvent(this._controlPointerDownHandler.bind(this));
         });
     }
 
@@ -267,7 +267,7 @@ export class SelectionShapeExtension {
      * Drag move whole selectionControl when cursor turns to crosshair. Not for dragging 8 control points.
      * @param evt
      */
-    private _controlEvent(evt: IMouseEvent | IPointerEvent) {
+    private _controlPointerDownHandler(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;
@@ -370,10 +370,9 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableObjectsEvent();
             this._scrollTimer?.dispose();
-            this._control.selectionMoved$.next(this._targetSelection);
+            this._control.selectionMoveEnd$.next(this._targetSelection);
 
-            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
-            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoveEnd$
             this._selectionHooks.selectionMoveEnd?.();
         });
     }
@@ -504,8 +503,7 @@ export class SelectionShapeExtension {
             this._scrollTimer?.dispose();
             this._control.selectionScaled$.next(this._targetSelection);
 
-            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
-            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoveEnd$,
             this._selectionHooks.selectionMoveEnd?.();
         });
     }

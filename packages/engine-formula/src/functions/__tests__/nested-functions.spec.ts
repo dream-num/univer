@@ -41,6 +41,7 @@ import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { FUNCTION_NAMES_MATH } from '../math/function-names';
 import { Sum } from '../math/sum';
+import { Sumif } from '../math/sumif';
 import { Sumifs } from '../math/sumifs';
 import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
@@ -246,6 +247,26 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             t: 2,
                         },
                     },
+                    10: {
+                        0: {
+                            v: 1,
+                            t: 2,
+                        },
+                        1: {
+                            v: 2,
+                            t: 2,
+                        },
+                        2: {
+                            v: 3,
+                            t: 2,
+                        },
+                    },
+                    11: {
+                        0: {
+                            v: '2',
+                            t: 4,
+                        },
+                    },
                 },
             },
         },
@@ -308,6 +329,7 @@ describe('Test nested functions', () => {
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
+            new Sumif(FUNCTION_NAMES_MATH.SUMIF),
             new Sumifs(FUNCTION_NAMES_MATH.SUMIFS),
             new Edate(FUNCTION_NAMES_DATE.EDATE),
             new Today(FUNCTION_NAMES_DATE.TODAY),
@@ -395,6 +417,37 @@ describe('Test nested functions', () => {
 
             result = calculate('=LEN(0.1+0.2)');
             expect(result).toStrictEqual(3);
+        });
+
+        it('Sumifs test, range is number, criteria is number string', () => {
+            let result = calculate('=SUMIFS(A11:C11,A11:C11,"2")');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,A12)');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,3)');
+            expect(result).toStrictEqual([
+                [0],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,2)');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIF(A11:C11,"1",A11:C11)');
+            expect(result).toBe(1);
+
+            result = calculate('=SUMIF(A11:C11,3,A11:C11)');
+            expect(result).toBe(3);
+
+            result = calculate('=SUMIF(A11:C11,A12,A11:C11)');
+            expect(result).toBe(2);
         });
     });
 });

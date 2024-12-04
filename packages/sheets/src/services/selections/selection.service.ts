@@ -37,9 +37,25 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._currentSelectionPos;
     }
 
+    /**
+     * Selection Events, usually triggered when pointerdown in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
+
+    /**
+     * Selection Events, usually triggered when pointermove in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
+
+    /**
+     * Selection Events, usually triggered when pointerup in spreadsheet by selection render service after selectionModel has updated.
+     */
     selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
+
+    /**
+     * Selection Events, usually triggered when changing unit.(focus in formula editor)
+     */
+    selectionSet$: Observable<Nullable<ISelectionWithStyle[]>>;
 
     constructor(
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
@@ -54,6 +70,7 @@ export class SheetsSelectionsService extends RxDisposable {
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
+        this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$));
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._removeWorkbookSelection(workbook.getUnitId());
@@ -95,7 +112,7 @@ export class SheetsSelectionsService extends RxDisposable {
 
     /**
      * Set selection data to WorkbookSelectionModel.
-     * If type is not specified, this method would clear all existing selections.
+     *
      * @param unitIdOrSelections
      * @param worksheetIdOrType
      * @param selectionDatas
@@ -110,7 +127,12 @@ export class SheetsSelectionsService extends RxDisposable {
         type?: SelectionMoveType
     ): void {
         if (typeof unitIdOrSelections === 'string' && typeof worksheetIdOrType === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
+            const unitId = unitIdOrSelections as string;
+            this._ensureWorkbookSelection(unitId).setSelections(
+                worksheetIdOrType,
+                selectionDatas || [],
+                type ?? SelectionMoveType.ONLY_SET
+            );
             return;
         }
 

@@ -154,16 +154,21 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // #endregion
 
     /**
-     * Mainly emit by pointerup (pointerup is handled in _onPointerdown)
+     * Mainly emit by pointerup in spreadsheet. (pointerup is handled in _onPointerdown)
      */
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoord[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
-    readonly selectionMoving$ = this._selectionMoving$.asObservable();
-
     /**
-     * Mainly emit by pointerdown
+     * Pointerup in spreadsheet
      */
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+    /**
+     * Mainly emit by pointermove in spreadsheet
+     */
+    protected readonly _selectionMoving$ = new Subject<ISelectionWithCoord[]>();
+    /**
+     * Pointermove in spreadsheet
+     */
+    readonly selectionMoving$ = this._selectionMoving$.asObservable();
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoord[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
@@ -425,13 +430,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._downObserver = null;
     }
 
-    // resetAndEndSelection(): void {
-    //     this.endSelection();
-    //     this._reset();
-    // }
-
-    // TODO: @wzhudev: refactor the method to make it more readable
-
     /**
      * Init pointer move listener in each pointer down, unbind in each pointer up.
      * Both cell selections and row-column selections are supported by this method.
@@ -442,7 +440,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param moveStartPosX
      * @param moveStartPosY
      */
-    // eslint-disable-next-line max-lines-per-function
+
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,
@@ -462,7 +460,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveStartPosX, moveStartPosY]));
 
         // #region onPointerMove$
-        // eslint-disable-next-line max-lines-per-function, complexity
+        // eslint-disable-next-line complexity
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 

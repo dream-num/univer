@@ -87,11 +87,7 @@ export class FormulaAutoFillController extends Disposable {
                     d.p = null;
                     d.t = null;
 
-                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                        applyData.push(d);
-                    } else {
-                        applyData.unshift(d);
-                    }
+                    applyData.push(d);
                 } else if (checkFormula) {
                     // The first position setting formula and formulaId
                     let formulaId = formulaIdMap.get(index);
@@ -100,7 +96,7 @@ export class FormulaAutoFillController extends Disposable {
                         formulaId = Tools.generateRandomId(6);
                         formulaIdMap.set(index, formulaId);
 
-                        const { offsetX, offsetY } = directionToOffset(step, direction);
+                        const { offsetX, offsetY } = directionToOffset(step, len, direction);
                         const shiftedFormula = this._lexerTreeBuilder.moveFormulaRefOffset(
                             originalFormula,
                             offsetX,
@@ -121,11 +117,7 @@ export class FormulaAutoFillController extends Disposable {
                         d.t = null;
                     }
 
-                    if (direction === Direction.DOWN || direction === Direction.RIGHT) {
-                        applyData.push(d);
-                    } else {
-                        applyData.unshift(d);
-                    }
+                    applyData.push(d);
                 }
             }
         }
@@ -134,13 +126,13 @@ export class FormulaAutoFillController extends Disposable {
     }
 }
 
-function directionToOffset(step: number, direction: Direction) {
+function directionToOffset(step: number, len: number, direction: Direction) {
     let offsetX = 0;
     let offsetY = 0;
 
     switch (direction) {
         case Direction.UP:
-            offsetY = -step;
+            offsetY = -step * len;
             break;
         case Direction.RIGHT:
             offsetX = step;
@@ -149,7 +141,7 @@ function directionToOffset(step: number, direction: Direction) {
             offsetY = step;
             break;
         case Direction.LEFT:
-            offsetX = -step;
+            offsetX = -step * len;
             break;
     }
 

@@ -19,7 +19,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-const MAX_MEMORY_OVERFLOW = 1_000_000; // 5MB
+const MAX_MEMORY_OVERFLOW = 1_000_000; // 1MB
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');

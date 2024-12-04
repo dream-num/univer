@@ -19,7 +19,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-const MAX_MEMORY_OVERFLOW = 5_000_000; // 5MB
+const MAX_MEMORY_OVERFLOW = 1_000_000; // 5MB
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
@@ -34,11 +34,15 @@ test('memory', async ({ page }) => {
     console.log('Memory after first load:', memoryAfterFirstLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
+    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load:', memoryAfterSecondLoad);
 
-    const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad)
-        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
+    await page.evaluate(() => window.univer.dispose());
+    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
+    const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
+
+    const notLeaking = (memoryAfterDisposingUniver <= memoryAfterFirstLoad) && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();
 });
 

@@ -21,7 +21,7 @@ import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
-// import { UniverUniscriptPlugin } from '@univerjs/uniscript';
+import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 import { UniverWatermarkPlugin } from '@univerjs/watermark';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -29,23 +29,23 @@ const IS_E2E: boolean = !!process.env.IS_E2E;
 
 export default function getVeryLazyPlugins() {
     const plugins: Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> = [
-        // [UniverUniscriptPlugin, {
-        //     getWorkerUrl(_: string, label: string) {
-        //         if (label === 'json') {
-        //             return '/vs/language/json/json.worker.js';
-        //         }
-        //         if (label === 'css' || label === 'scss' || label === 'less') {
-        //             return '/vs/language/css/css.worker.js';
-        //         }
-        //         if (label === 'html' || label === 'handlebars' || label === 'razor') {
-        //             return '/vs/language/html/html.worker.js';
-        //         }
-        //         if (label === 'typescript' || label === 'javascript') {
-        //             return '/vs/language/typescript/ts.worker.js';
-        //         }
-        //         return '/vs/editor/editor.worker.js';
-        //     },
-        // }],
+        [UniverUniscriptPlugin, {
+            getWorkerUrl(_: string, label: string) {
+                if (label === 'json') {
+                    return '/vs/language/json/json.worker.js';
+                }
+                if (label === 'css' || label === 'scss' || label === 'less') {
+                    return '/vs/language/css/css.worker.js';
+                }
+                if (label === 'html' || label === 'handlebars' || label === 'razor') {
+                    return '/vs/language/html/html.worker.js';
+                }
+                if (label === 'typescript' || label === 'javascript') {
+                    return '/vs/language/typescript/ts.worker.js';
+                }
+                return '/vs/editor/editor.worker.js';
+            },
+        }],
         [UniverActionRecorderPlugin],
         [UniverSheetsHyperLinkUIPlugin],
         [UniverSheetsSortUIPlugin],

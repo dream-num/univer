@@ -440,7 +440,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param moveStartPosX
      * @param moveStartPosY
      */
-
     protected _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
         activeSelectionControl: SelectionControl,

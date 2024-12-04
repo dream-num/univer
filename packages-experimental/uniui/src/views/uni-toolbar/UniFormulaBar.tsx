@@ -96,6 +96,7 @@ export function FormulaBar() {
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$,
             selectionManager.selectionMoveEnd$,
+            selectionManager.selectionSet$,
             workbook.activeSheet$
         ).pipe(
             switchMap(() => {
@@ -207,13 +208,13 @@ export function FormulaBar() {
         <div className={styles.uniFormulaBox}>
             <TextEditor
                 id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                isSheetEditor={true}
+                isSheetEditor
                 resizeCallBack={resizeCallBack}
-                cancelDefaultResizeListener={true}
+                cancelDefaultResizeListener
                 onContextMenu={(e) => e.preventDefault()}
                 className={clsx(styles.uniFormulaInput, styles.formulaContent)}
                 snapshot={INITIAL_SNAPSHOT}
-                isSingle={true}
+                isSingle
             />
             <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
                 <span

@@ -132,7 +132,7 @@ function directionToOffset(step: number, len: number, direction: Direction) {
 
     switch (direction) {
         case Direction.UP:
-            offsetY = -step * len;
+            offsetY = -step * len; // The formula fills upwards, and the cell containing f and si must be at the top.
             break;
         case Direction.RIGHT:
             offsetX = step;
@@ -141,7 +141,7 @@ function directionToOffset(step: number, len: number, direction: Direction) {
             offsetY = step;
             break;
         case Direction.LEFT:
-            offsetX = -step * len;
+            offsetX = -step * len; // The formula fills leftwards, and the cell containing f and si must be at the left.
             break;
     }
 

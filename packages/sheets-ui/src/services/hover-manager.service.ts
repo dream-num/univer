@@ -201,9 +201,8 @@ export class HoverManagerService extends Disposable {
         const cell = skeleton.getCellWithCoordByIndex(overflowLocation.row, overflowLocation.col);
         const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
         const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
-
         if (font) {
-            const { paddingLeft, paddingTop } = calcPadding(cell, font);
+            const { paddingLeft, paddingTop } = calcPadding(cell, font, (cellData?.v !== null && cellData?.v !== undefined) ? !Number.isNaN(+cellData.v) : false);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
 
             const innerX = offsetX - position.startX - leftOffset;

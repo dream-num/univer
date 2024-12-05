@@ -105,7 +105,7 @@ export function SheetBarTabs() {
 
     useEffect(() => {
         updateSheetItems();
-        const slideTabBar = setupSlideTabBarInit();
+        const { slideTabBar, disconnectResizeObserver } = setupSlideTabBarInit();
         const disposable = setupStatusUpdate();
         const subscribeList = [
             setupSubscribeScroll(),
@@ -118,6 +118,7 @@ export function SheetBarTabs() {
             disposable.dispose();
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
+            disconnectResizeObserver && disconnectResizeObserver();
         };
     }, [resetOrder, workbook]);
 
@@ -199,9 +200,9 @@ export function SheetBarTabs() {
         slideTabBarRef.current.slideTabBar = slideTabBar;
 
         // FIXME@Dushusir: First time asynchronous rendering will cause flickering problems
-        resizeInit(slideTabBar);
+        const disconnectResizeObserver = resizeInit(slideTabBar);
 
-        return slideTabBar;
+        return { slideTabBar, disconnectResizeObserver };
     };
 
     const config = configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
@@ -385,6 +386,9 @@ export function SheetBarTabs() {
 
         // Start the observer
         observer.observe(slideTabBarContainer);
+
+        // Return the cleanup function that disconnects the observer
+        return () => observer.disconnect();
     };
 
     const onVisibleChange = (visible: boolean) => {

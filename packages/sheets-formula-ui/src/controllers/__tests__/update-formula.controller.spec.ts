@@ -17,9 +17,10 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
+import type { ISetRowHiddenCommandParams } from '@univerjs/sheets/commands/commands/set-row-visible.command.js';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveDefinedNameCommand, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveDefinedNameCommand, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -276,10 +277,82 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
             },
             name: 'Sheet2',
         },
+        sheet3: {
+            id: 'sheet3',
+            cellData: {
+                0: {
+                    0: {
+                        v: 1,
+                        t: 2,
+                    },
+                    3: {
+                        f: '=A1:A5',
+                        v: 1,
+                        t: 2,
+                    },
+                },
+                1: {
+                    0: {
+                        v: 2,
+                        t: 2,
+                    },
+                },
+                2: {
+                    0: {
+                        v: 3,
+                        t: 2,
+                    },
+                },
+                3: {
+                    0: {
+                        v: 4,
+                        t: 2,
+                    },
+                },
+                4: {
+                    0: {
+                        v: 5,
+                        t: 2,
+                    },
+                },
+                5: {
+                    0: {
+                        f: '=SUBTOTAL(109,A1:A5)',
+                        v: 15,
+                        t: 2,
+                    },
+                    1: {
+                        f: '=SUBTOTAL(109,A3)',
+                        v: 3,
+                        t: 2,
+                    },
+                    2: {
+                        f: '=A3',
+                        v: 3,
+                        t: 2,
+                    },
+                },
+            },
+            name: 'Sheet3',
+        },
+        sheet4: {
+            id: 'sheet4',
+            cellData: {
+                0: {
+                    0: {
+                        f: '=SUBTOTAL(109,Sheet3!A1:A5)',
+                        v: 15,
+                        t: 2,
+                    },
+                },
+            },
+            name: 'Sheet4',
+        },
+
     },
     locale: LocaleType.ZH_CN,
     name: '',
-    sheetOrder: ['sheet1', 'sheet2'],
+    sheetOrder: ['sheet1', 'sheet2', 'sheet3', 'sheet4'],
     styles: {},
     resources: [
         {
@@ -361,6 +434,15 @@ describe('Test update formula ', () => {
         ].forEach((command) => {
             commandService.registerCommand(command);
         });
+        // hide row/column
+        commandService.registerCommand(SetRowHiddenCommand);
+        commandService.registerCommand(SetRowHiddenMutation);
+        commandService.registerCommand(SetSpecificRowsVisibleCommand);
+        commandService.registerCommand(SetRowVisibleMutation);
+        commandService.registerCommand(SetColHiddenCommand);
+        commandService.registerCommand(SetColHiddenMutation);
+        commandService.registerCommand(SetSpecificColsVisibleCommand);
+        commandService.registerCommand(SetColVisibleMutation);
 
         getValues = (
             startRow: number,
@@ -1626,6 +1708,28 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
             const values = getValues(7, 8, 7, 9);
             expect(values).toStrictEqual([[{ }, { f: '=SUM(C8:E10)', si: 'CarNau' }]]);
+        });
+
+        it('hide row and show row', async () => {
+            const params: ISetRowHiddenCommandParams = {
+                unitId: 'test',
+                subUnitId: 'sheet3',
+                ranges: [{
+                    startRow: 2,
+                    startColumn: 0,
+                    endRow: 2,
+                    endColumn: 19,
+                    rangeType: RANGE_TYPE.ROW,
+                }],
+            };
+
+            expect(await commandService.executeCommand(SetRowHiddenCommand.id, params)).toBeTruthy();
+            const values = getValues(5, 0, 5, 2, 'sheet3');
+
+            // No change in the formula
+            expect(values?.[0][0]?.f).toStrictEqual('=SUBTOTAL(109,A1:A5)');
+            expect(values?.[0][1]?.f).toStrictEqual('=SUBTOTAL(109,A3)');
+            expect(values?.[0][2]?.f).toStrictEqual('=A3');
         });
     });
 });

@@ -1,8 +1,8 @@
 {
-    "name": "@univerjs/graphics",
+    "name": "@univerjs/sheets-graphics",
     "version": "0.5.0-alpha.0",
     "private": false,
-    "description": "",
+    "description": "Drawing graphics for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -61,8 +61,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.5",
-        "@univerjs/sheets-ui": "workspace:*"
+        "@univerjs/icons": "^0.2.5"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

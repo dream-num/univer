@@ -1902,9 +1902,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.2.5
         version: 0.2.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

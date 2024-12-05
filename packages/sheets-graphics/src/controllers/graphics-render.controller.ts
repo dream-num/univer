@@ -16,8 +16,7 @@
 
 import type { ISelectionCellWithMergeInfo } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { Disposable, Inject } from '@univerjs/core';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { Disposable } from '@univerjs/core';
 import { UNIQUE_KEY } from '../common/const';
 import { Graphics } from '../views/extensions/graphics.extension';
 
@@ -25,8 +24,7 @@ export class SheetGraphicsRenderController extends Disposable implements IRender
     private _graphicsExtensionInstance: Graphics | null = null;
 
     constructor(
-        private readonly _context: IRenderContext,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        private readonly _context: IRenderContext
     ) {
         super();
         this._initRender();

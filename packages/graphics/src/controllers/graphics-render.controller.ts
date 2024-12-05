@@ -43,22 +43,4 @@ export class SheetGraphicsRenderController extends Disposable implements IRender
     registerRenderer(key: string, renderer: (ctx: UniverRenderingContext, skeleton: SpreadsheetSkeleton, coordInfo: ISelectionCellWithMergeInfo) => void) {
         this._graphicsExtensionInstance?.registerRenderer(key, renderer);
     }
-
-    // private _initResetCache() {
-    //     this.disposeWithMe(
-    //         this._sheetSkeletonManagerService.currentSkeleton$.pipe(
-    //             switchMap(skeletonManager => {
-    //                 if (!skeletonManager?.skeleton) {
-    //                     return of(null);
-    //                 }
-    //                 return of(skeletonManager.skeleton.resetCache$);
-    //             })
-    //         ).subscribe(version => {
-    //             if (version) {
-    //                 console.log('debugger graphics')
-    //                 // this._graphicsExtensionInstance?.clearCache();
-    //             }
-    //         })
-    //     )
-    // }
 }

@@ -193,6 +193,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
+            SetRowHiddenMutation, // formula SUBTOTAL
+            SetRowVisibleMutation,
+            SetColHiddenMutation,
+            SetColVisibleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -240,8 +244,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetBorderPositionCommand,
                 SetBorderStyleCommand,
                 SetColHiddenCommand,
-                SetColHiddenMutation,
-                SetColVisibleMutation,
                 SetColWidthCommand,
                 SetColDataCommand,
                 SetColDataMutation,
@@ -252,8 +254,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRangeValuesCommand,
                 SetRowHeightCommand,
                 SetRowHiddenCommand,
-                SetRowHiddenMutation,
-                SetRowVisibleMutation,
                 SetRowDataCommand,
                 SetRowDataMutation,
                 SetSelectedColsVisibleCommand,

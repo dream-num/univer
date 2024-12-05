@@ -35,7 +35,6 @@ export class UniverSheetGraphicsPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration.
         const { ...rest } = this._config;
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }

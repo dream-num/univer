@@ -1891,34 +1891,6 @@ importers:
         specifier: ^2.1.6
         version: 2.1.6(@types/node@22.10.1)(happy-dom@15.0.0)(jiti@1.21.6)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1)
 
-  packages/graphics:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^0.2.5
-        version: 0.2.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.6.3
-        version: 5.7.2
-      vite:
-        specifier: ^5.4.10
-        version: 5.4.11(@types/node@22.10.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.4
-        version: 2.1.6(@types/node@22.10.1)(happy-dom@15.0.0)(jiti@1.21.6)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1)
-
   packages/network:
     dependencies:
       '@univerjs/core':
@@ -2614,6 +2586,34 @@ importers:
         version: 6.0.1(@types/node@22.10.1)(jiti@1.21.6)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1)
       vitest:
         specifier: ^2.1.6
+        version: 2.1.6(@types/node@22.10.1)(happy-dom@15.0.0)(jiti@1.21.6)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1)
+
+  packages/sheets-graphics:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.2.5
+        version: 0.2.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.7.2
+      vite:
+        specifier: ^5.4.10
+        version: 5.4.11(@types/node@22.10.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.4
         version: 2.1.6(@types/node@22.10.1)(happy-dom@15.0.0)(jiti@1.21.6)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1)
 
   packages/sheets-hyper-link:

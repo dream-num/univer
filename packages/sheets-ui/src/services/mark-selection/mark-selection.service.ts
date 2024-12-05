@@ -47,7 +47,7 @@ export const IMarkSelectionService = createIdentifier<IMarkSelectionService>('un
 /**
  * For copy and cut selection.
  * also for selection when hover on conditional format items in the cf panel on the right.
- * but hover on panel if data validation, uses another method to draw selection.
+ * NOT FOR hovering on panel in data validation.
  */
 export class MarkSelectionService extends Disposable implements IMarkSelectionService {
     private _shapeMap: Map<string, IMarkSelectionInfo> = new Map();

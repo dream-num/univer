@@ -49,6 +49,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     getPrimaryForRange,
     SetSelectionsOperation,
+    SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
@@ -673,6 +674,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
         undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
+        undoMutationsInfo.push({ id: SetWorksheetActiveOperation.id, params: { unitId: target.unitId, subUnitId: target.subUnitId } });
 
         this._logService.log('[SheetClipboardService]', 'pasting mutations', {
             undoMutationsInfo,

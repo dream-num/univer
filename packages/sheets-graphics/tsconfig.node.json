@@ -1,0 +1,4 @@
+{
+    "extends": "@univerjs-infra/shared/tsconfigs/node",
+    "include": ["vitest.config.ts", "build.ts"]
+}

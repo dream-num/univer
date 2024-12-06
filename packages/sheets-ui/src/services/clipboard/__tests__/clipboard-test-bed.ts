@@ -487,6 +487,10 @@ export class testMarkSelectionService {
         return null;
     }
 
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
     removeShape(id: string): void {
         // empty
     }

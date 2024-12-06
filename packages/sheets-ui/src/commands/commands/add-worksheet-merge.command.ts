@@ -16,6 +16,8 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
     CommandType,
     Dimension,
@@ -34,11 +36,9 @@ import {
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation, SheetsSelectionsService,
+    RemoveWorksheetMergeMutation, SheetInterceptorService, SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
-import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';
@@ -126,6 +126,15 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         const addMergeUndoSelectionsMutation = AddMergeUndoSelectionsOperationFactory(accessor, params);
         addMergeUndoSelectionsMutation && undoMutations.push(addMergeUndoSelectionsMutation);
+
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptor = sheetInterceptorService.onCommandExecute({
+            id: AddWorksheetMergeCommand.id,
+            params: { unitId, subUnitId, ranges },
+        });
+
+        redoMutations.push(...interceptor.redos);
+        undoMutations.push(...interceptor.undos);
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {

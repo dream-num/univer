@@ -26,6 +26,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
+    addShapeWithNoFresh(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
     removeShape(id: string): void;
     removeAllShapes(): void;
     refreshShapes(): void;
@@ -77,6 +78,23 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         this._shapeMap.set(id, markSelectionInfo);
 
         this.refreshShapes();
+        return id;
+    }
+
+    addShapeWithNoFresh(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
+        const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!subUnitId) return null;
+        const id = Tools.generateRandomId();
+        this._shapeMap.set(id, {
+            selection,
+            subUnitId,
+            unitId: workbook.getUnitId(),
+            zIndex,
+            control: null,
+            exits,
+        });
+
         return id;
     }
 

@@ -66,6 +66,7 @@ export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export {
     getSeparateEffectedRangesOnCommand,
+    adjustRangeOnMutation,
     handleBaseInsertRange,
     handleBaseMoveRowsCols,
     handleBaseRemoveRange,
@@ -87,6 +88,7 @@ export {
     rotateRange,
     runRefRangeMutations,
 } from './services/ref-range/util';
+export type { MutationsAffectRange } from './services/ref-range/util';
 export { InterceptCellContentPriority, INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { AFTER_CELL_EDIT, AFTER_CELL_EDIT_ASYNC, BEFORE_CELL_EDIT, SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';

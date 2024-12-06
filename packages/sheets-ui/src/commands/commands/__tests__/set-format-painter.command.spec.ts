@@ -181,6 +181,10 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
         return null;
     }
 
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
     refreshShapes() { /* TODO document why this method 'refreshShapes' is empty */ }
 
     removeShape(id: string): void { /* TODO document why this method 'removeShape' is empty */ }
@@ -344,7 +348,7 @@ describe('Test format painter rules in controller', () => {
         });
 
         describe('format painter to single cell', () => {
-            it ('will copy whole original styles', async () => {
+            it('will copy whole original styles', async () => {
                 expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
@@ -380,7 +384,7 @@ describe('Test format painter rules in controller', () => {
             });
 
             describe('format painter from non-style cell to styled cell', () => {
-                it ('will clear styles', async () => {
+                it('will clear styles', async () => {
                     expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                         unitId: 'workbook-01',
                         subUnitId: 'sheet-0011',

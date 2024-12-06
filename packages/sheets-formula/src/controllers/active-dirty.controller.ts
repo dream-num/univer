@@ -28,8 +28,6 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
     IReorderRangeMutationParams,
-    ISetColHiddenMutationParams,
-    ISetColVisibleMutationParams,
     ISetRangeValuesMutationParams,
     ISetRowHiddenMutationParams,
     ISetRowVisibleMutationParams,
@@ -53,8 +51,6 @@ import {
     RemoveRowMutation,
     RemoveSheetMutation,
     ReorderRangeMutation,
-    SetColHiddenMutation,
-    SetColVisibleMutation,
     SetRangeValuesMutation,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
@@ -99,7 +95,7 @@ export class ActiveDirtyController extends Disposable {
 
         this._initialRowAndColumn();
 
-        this._initialHideRowAndColumn();
+        this._initialHideRow();
 
         this._initialSheet();
 
@@ -229,7 +225,7 @@ export class ActiveDirtyController extends Disposable {
         });
     }
 
-    private _initialHideRowAndColumn() {
+    private _initialHideRow() {
         this._activeDirtyManagerService.register(SetRowHiddenMutation.id, {
             commandId: SetRowHiddenMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -248,34 +244,6 @@ export class ActiveDirtyController extends Disposable {
             commandId: SetRowVisibleMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetRowVisibleMutationParams;
-                return {
-                    dirtyRanges: this._getHideRowOrColumnMutation(params),
-                    clearDependencyTreeCache: {
-                        [params.unitId]: {
-                            [params.subUnitId]: '1',
-                        },
-                    },
-                };
-            },
-        });
-        this._activeDirtyManagerService.register(SetColHiddenMutation.id, {
-            commandId: SetColHiddenMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as ISetColHiddenMutationParams;
-                return {
-                    dirtyRanges: this._getHideRowOrColumnMutation(params),
-                    clearDependencyTreeCache: {
-                        [params.unitId]: {
-                            [params.subUnitId]: '1',
-                        },
-                    },
-                };
-            },
-        });
-        this._activeDirtyManagerService.register(SetColVisibleMutation.id, {
-            commandId: SetColVisibleMutation.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as ISetColVisibleMutationParams;
                 return {
                     dirtyRanges: this._getHideRowOrColumnMutation(params),
                     clearDependencyTreeCache: {

@@ -728,6 +728,13 @@ export class FormulaDependencyGenerator extends Disposable {
             const item = children[i];
             if (this._isPreCalculateNode(item)) {
                 result.push(item as PreCalculateNodeType);
+                if (item.nodeType === NodeType.UNION) {
+                    for (const unionChildItem of item.getChildren()) {
+                        if (unionChildItem.nodeType !== NodeType.REFERENCE) {
+                            this._nodeTraversalRef(unionChildItem, result);
+                        }
+                    }
+                }
                 continue;
             } else if (item.nodeType === NodeType.REFERENCE) {
                 result.push(item as PreCalculateNodeType);

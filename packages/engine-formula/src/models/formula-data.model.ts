@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, IRange, IRowData, IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -24,10 +24,12 @@ import type {
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
+    IUnitRowData,
     IUnitSheetNameMap,
+    IUnitStylesData,
 } from '../basics/common';
 
-import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -258,6 +260,8 @@ export class FormulaDataModel extends Disposable {
 
         const allUnitData: IUnitData = {};
 
+        const unitStylesData: IUnitStylesData = {};
+
         const unitSheetNameMap: IUnitSheetNameMap = {};
 
         for (const workbook of unitAllSheet) {
@@ -287,13 +291,53 @@ export class FormulaDataModel extends Disposable {
 
             allUnitData[unitId] = sheetData;
 
+            unitStylesData[unitId] = workbook.getStyles();
+
             unitSheetNameMap[unitId] = sheetNameMap;
         }
 
         return {
             allUnitData,
+            unitStylesData,
             unitSheetNameMap,
         };
+    }
+
+    /**
+     * Get the hidden rows that are filtered or manually hidden.
+     *
+     * For formulas that are sensitive to hidden rows.
+     */
+    getHiddenRowsFiltered() {
+        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const rowData: IUnitRowData = {};
+
+        for (const workbook of unitAllSheet) {
+            const unitId = workbook.getUnitId();
+            const sheets = workbook.getSheets();
+            rowData[unitId] = {};
+
+            for (const sheet of sheets) {
+                const sheetId = sheet.getSheetId();
+                rowData[unitId][sheetId] = {};
+
+                const startRow = 0;
+                const endRow = sheet.getRowCount() - 1;
+                const sheetRowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
+
+                for (let i = startRow; i <= endRow; i++) {
+                    if (!sheet.getRowVisible(i)) {
+                        sheetRowData[i] = {
+                            hd: BooleanNumber.TRUE,
+                        };
+                    }
+                }
+
+                rowData[unitId][sheetId] = sheetRowData;
+            }
+        }
+
+        return rowData;
     }
 
     updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {

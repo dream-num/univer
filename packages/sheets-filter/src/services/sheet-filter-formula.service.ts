@@ -72,7 +72,7 @@ export class SheetsFilterFormulaService extends Disposable {
 
         const { startRow, endRow } = range;
 
-        // covert range to dirtyRanges
+        // covert hidden rows to dirtyRanges
         const dirtyRanges = [{
             unitId,
             sheetId: subUnitId,

@@ -32,7 +32,7 @@ const nodeModules = path.resolve(process.cwd(), './node_modules');
 const args = minimist(process.argv.slice(2));
 const isE2E = !!args.e2e;
 
-// User should also config their bunlder to build monaco editor's resources for web worker.
+// User should also config their bundler to build monaco editor's resources for web worker.
 const monacoEditorEntryPoints = [
     'vs/language/json/json.worker.js',
     'vs/language/css/css.worker.js',

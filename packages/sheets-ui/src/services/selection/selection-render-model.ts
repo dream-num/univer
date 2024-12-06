@@ -173,9 +173,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
      * @param currentCell
      */
     setCurrentCell(currentCell: Nullable<ICellWithCoord>) {
-        if (currentCell) {
-            this._primary = currentCell;
-        }
+        this._primary = currentCell;
     }
 
     clearCurrentCell() {

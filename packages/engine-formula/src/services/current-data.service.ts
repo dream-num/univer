@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IObjectArrayPrimitiveType, IRowData, IUnitRange, LocaleType, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
@@ -24,16 +24,17 @@ import type {
     IFormulaData,
     IFormulaDatasetConfig,
     IRuntimeUnitDataType,
-    ISheetData,
     IUnitData,
     IUnitExcludedCell,
+    IUnitRowData,
     IUnitSheetIdToNameMap,
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
 
-import { BooleanNumber, createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
+import { FormulaDataModel } from '../models/formula-data.model';
 
 export interface IFormulaDirtyData {
     forceCalculation: boolean;
@@ -44,6 +45,7 @@ export interface IFormulaDirtyData {
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
     maxIteration?: number;
+    rowData?: IUnitRowData; // Include rows hidden by filters
 }
 
 export interface IFormulaCurrentConfigService {
@@ -144,7 +146,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
     }
@@ -288,6 +291,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             this._unitStylesData = unitStylesData;
 
             this._sheetNameMap = unitSheetNameMap;
+        }
+
+        // apply row data, including rows hidden by filters
+        if (config.rowData) {
+            this._applyUnitRowData(config.rowData);
         }
 
         this._formulaData = config.formulaData;
@@ -452,81 +460,50 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     private _loadSheetData() {
-        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
 
         this._executeUnitId = workbook?.getUnitId();
         this._executeSubUnitId = worksheet?.getSheetId();
 
-        const allUnitData: IUnitData = {};
+        return this._formulaDataModel.getCalculateData();
+    }
 
-        const unitStylesData: IUnitStylesData = {};
-
-        const unitSheetNameMap: IUnitSheetNameMap = {};
-
-        for (const workbook of unitAllSheet) {
-            const unitId = workbook.getUnitId();
-
-            const sheets = workbook.getSheets();
-
-            const sheetData: ISheetData = {};
-
-            const sheetNameMap: { [sheetName: string]: string } = {};
-
-            for (const sheet of sheets) {
-                const sheetId = sheet.getSheetId();
-
-                const sheetConfig = sheet.getConfig();
-                sheetData[sheetId] = {
-                    cellData: new ObjectMatrix(sheetConfig.cellData),
-                    rowCount: sheetConfig.rowCount,
-                    columnCount: sheetConfig.columnCount,
-                    rowData: getHiddenRowsFiltered(sheet),
-                    columnData: sheetConfig.columnData,
-                    defaultRowHeight: sheetConfig.defaultRowHeight,
-                    defaultColumnWidth: sheetConfig.defaultColumnWidth,
-                };
-                sheetNameMap[sheet.getName()] = sheet.getSheetId();
+    /**
+     * There is no filter information in the worker, it must be passed in from the main thread after it is ready
+     * @param rowData
+     */
+    private _applyUnitRowData(rowData: IUnitRowData) {
+        for (const unitId in rowData) {
+            if (rowData[unitId] == null) {
+                continue;
             }
 
-            allUnitData[unitId] = sheetData;
+            for (const sheetId in rowData[unitId]) {
+                if (rowData[unitId][sheetId] == null) {
+                    continue;
+                }
 
-            unitStylesData[unitId] = workbook.getStyles();
+                if (this._unitData[unitId] == null) {
+                    this._unitData[unitId] = {};
+                }
 
-            unitSheetNameMap[unitId] = sheetNameMap;
+                if (this._unitData[unitId][sheetId] == null) {
+                    this._unitData[unitId][sheetId] = {
+                        cellData: new ObjectMatrix({}),
+                        rowCount: 0,
+                        columnCount: 0,
+                        rowData: {},
+                        columnData: {},
+                    };
+                }
+
+                this._unitData[unitId][sheetId].rowData = rowData[unitId][sheetId];
+            }
         }
-
-        return {
-            allUnitData,
-            unitStylesData,
-            unitSheetNameMap,
-        };
     }
 }
 
 export const IFormulaCurrentConfigService = createIdentifier<FormulaCurrentConfigService>(
     'univer.formula.current-data.service'
 );
-
-/**
- * Get the hidden rows that are filtered or manually hidden.
- *
- * For formulas that are sensitive to hidden rows.
- */
-function getHiddenRowsFiltered(sheet: Worksheet): IObjectArrayPrimitiveType<Partial<IRowData>> {
-    const startRow = 0;
-    const endRow = sheet.getRowCount() - 1;
-    const rowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
-
-    for (let i = startRow; i <= endRow; i++) {
-        if (!sheet.getRowVisible(i)) {
-            rowData[i] = {
-                hd: BooleanNumber.TRUE,
-            };
-        }
-    }
-
-    return rowData;
-}

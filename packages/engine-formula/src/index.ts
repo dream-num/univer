@@ -172,3 +172,4 @@ export { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY,
 export { generateRandomDependencyTreeId } from './engine/dependency/formula-dependency';
 export { DependencyManagerBaseService } from './services/dependency-manager.service';
 export { LambdaValueObjectObject } from './engine/value-object/lambda-value-object';
+export { type IUnitRowData } from './basics/common';

@@ -270,7 +270,10 @@ export class AstTreeBuilder extends Disposable {
             if (item instanceof LexerNode) {
                 if (item.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER && item.getChildren().length === 0) {
                     // =trim(      ) is #NAME?
-                    return ErrorNode.create(ErrorType.NAME);
+                    const children = item.getParent()?.getChildren();
+                    if (children && children.length === 1) {
+                        return ErrorNode.create(ErrorType.NAME);
+                    }
                 }
 
                 astNode = this._parse(item, currentAstNode);

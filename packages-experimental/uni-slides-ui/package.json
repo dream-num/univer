@@ -74,10 +74,10 @@
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "tailwindcss": "^3.4.15",
+        "tailwindcss": "^3.4.16",
         "typescript": "^5.7.2",
-        "vite": "^6.0.1",
-        "vitest": "^2.1.6"
+        "vite": "^6.0.3",
+        "vitest": "^2.1.8"
     },
     "space": {
         ".": {

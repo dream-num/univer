@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
+import type { IObjectArrayPrimitiveType, IRowData, IUnitRange, LocaleType, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
@@ -32,7 +32,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
@@ -483,7 +483,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
                     cellData: new ObjectMatrix(sheetConfig.cellData),
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
-                    rowData: sheetConfig.rowData,
+                    rowData: getHiddenRowsFiltered(sheet),
                     columnData: sheetConfig.columnData,
                     defaultRowHeight: sheetConfig.defaultRowHeight,
                     defaultColumnWidth: sheetConfig.defaultColumnWidth,
@@ -509,3 +509,24 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 export const IFormulaCurrentConfigService = createIdentifier<FormulaCurrentConfigService>(
     'univer.formula.current-data.service'
 );
+
+/**
+ * Get the hidden rows that are filtered or manually hidden.
+ *
+ * For formulas that are sensitive to hidden rows.
+ */
+function getHiddenRowsFiltered(sheet: Worksheet): IObjectArrayPrimitiveType<Partial<IRowData>> {
+    const startRow = 0;
+    const endRow = sheet.getRowCount() - 1;
+    const rowData: IObjectArrayPrimitiveType<Partial<IRowData>> = {};
+
+    for (let i = startRow; i <= endRow; i++) {
+        if (!sheet.getRowVisible(i)) {
+            rowData[i] = {
+                hd: BooleanNumber.TRUE,
+            };
+        }
+    }
+
+    return rowData;
+}

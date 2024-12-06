@@ -19,7 +19,8 @@ import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheet
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
 import type { FilterColumn } from '../models/filter-model';
 
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Optional, Rectangle } from '@univerjs/core';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -32,7 +33,8 @@ export class SheetsFilterController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
+        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
@@ -49,7 +51,12 @@ export class SheetsFilterController extends Disposable {
             SetSheetsFilterRangeMutation,
             ReCalcSheetsFilterMutation,
             RemoveSheetsFilterMutation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        ].forEach((command) => {
+            this.disposeWithMe(this._commandService.registerCommand(command));
+
+            // Hidden rows after filtering affect formula calculation
+            this._dataSyncPrimaryController?.registerSyncingMutations(command);
+        });
     }
 
     private _initInterceptors(): void {

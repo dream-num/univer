@@ -2300,6 +2300,12 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../rpc
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

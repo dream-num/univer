@@ -229,7 +229,7 @@ export class ActiveDirtyController extends Disposable {
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetRowHiddenMutationParams;
                 return {
-                    dirtyRanges: this._getHideRowOrColumnMutation(params),
+                    dirtyRanges: this._getHideRowMutation(params),
                     clearDependencyTreeCache: {
                         [params.unitId]: {
                             [params.subUnitId]: '1',
@@ -243,7 +243,7 @@ export class ActiveDirtyController extends Disposable {
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetRowVisibleMutationParams;
                 return {
-                    dirtyRanges: this._getHideRowOrColumnMutation(params),
+                    dirtyRanges: this._getHideRowMutation(params),
                     clearDependencyTreeCache: {
                         [params.unitId]: {
                             [params.subUnitId]: '1',
@@ -411,7 +411,7 @@ export class ActiveDirtyController extends Disposable {
         return dirtyRanges;
     }
 
-    private _getHideRowOrColumnMutation(params: ISetRowHiddenMutationParams) {
+    private _getHideRowMutation(params: ISetRowHiddenMutationParams) {
         const { subUnitId, unitId, ranges } = params;
 
         const dirtyRanges: IUnitRange[] = [];

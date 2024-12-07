@@ -147,6 +147,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._copyContentCache = new CopyContentCache();
 
         this.disposeWithMe(this._htmlToUSM);
+        this._initUnitDisposed();
     }
 
     copyContentCache(): CopyContentCache {
@@ -1076,6 +1077,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             this._markSelectionService.removeShape(this._copyMarkId);
             this._copyMarkId = null;
         }
+    }
+
+    private _initUnitDisposed() {
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                if (workbook) {
+                    const copyCache = this.copyContentCache();
+                    copyCache.clearWithUnitId(workbook.getUnitId());
+                }
+            })
+        );
     }
 }
 

@@ -29,7 +29,9 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
+        "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {

@@ -527,9 +527,15 @@ importers:
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../packages/sheets-hyper-link
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../packages/sheets-numfmt
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../packages/thread-comment

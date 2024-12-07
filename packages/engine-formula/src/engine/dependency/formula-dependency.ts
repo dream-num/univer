@@ -730,7 +730,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 result.push(item as PreCalculateNodeType);
                 if (item.nodeType === NodeType.UNION) {
                     for (const unionChildItem of item.getChildren()) {
-                        if (unionChildItem.nodeType !== NodeType.REFERENCE) {
+                        if (unionChildItem.nodeType === NodeType.FUNCTION && (unionChildItem as FunctionNode).isAddress()) {
                             this._nodeTraversalRef(unionChildItem, result);
                         }
                     }

@@ -134,6 +134,8 @@ export class FormulaDependencyGenerator extends Disposable {
             this._runtimeService.enableCycleDependency();
         }
 
+        this._dependencyRTreeCacheForAddressFunction.clear();
+
         return Promise.resolve(finalTreeList);
     }
 
@@ -324,8 +326,6 @@ export class FormulaDependencyGenerator extends Disposable {
         const formulaDataKeys = Object.keys(formulaData);
 
         const otherFormulaDataKeys = Object.keys(otherFormulaData);
-
-        this._dependencyRTreeCacheForAddressFunction.clear();
 
         const treeList: IFormulaDependencyTree[] = [];
 

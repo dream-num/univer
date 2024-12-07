@@ -528,6 +528,9 @@ export class FRange extends FBase {
 
     /**
      * Merge cells in a range into one merged cell
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
     async merge(defaultMerge: boolean = true): Promise<FRange> {
@@ -541,6 +544,9 @@ export class FRange extends FBase {
 
     /**
      * Merges cells in a range horizontally.
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
     async mergeAcross(defaultMerge: boolean = true): Promise<FRange> {
@@ -555,6 +561,9 @@ export class FRange extends FBase {
 
     /**
      * Merges cells in a range vertically.
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
     async mergeVertically(defaultMerge: boolean = true): Promise<FRange> {

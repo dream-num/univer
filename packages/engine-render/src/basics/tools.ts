@@ -725,7 +725,6 @@ export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: numbe
  * 在非下方区域中
  * @param ranges
  * @param rowIndex
- * @returns
  */
 export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) {
     for (const range of ranges) {
@@ -740,7 +739,6 @@ export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) 
  * row 在任意一个 Range 中
  * @param ranges
  * @param rowIndex
- * @returns
  */
 export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
     let flag = false;

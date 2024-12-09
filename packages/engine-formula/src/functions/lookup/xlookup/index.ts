@@ -38,6 +38,21 @@ export class Xlookup extends BaseFunction {
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
+        let _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+        if (ifNotFound?.isNull()) {
+            _ifNotFound = ErrorValueObject.create(ErrorType.NA);
+        }
+
+        let _matchMode = matchMode ?? NumberValueObject.create(0);
+        if (matchMode?.isNull()) {
+            _matchMode = NumberValueObject.create(0);
+        }
+
+        let _searchMode = searchMode ?? NumberValueObject.create(1);
+        if (searchMode?.isNull()) {
+            _searchMode = NumberValueObject.create(1);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }
@@ -63,19 +78,21 @@ export class Xlookup extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (ifNotFound?.isError() || matchMode?.isError() || searchMode?.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+        if (_matchMode.isError()) {
+            return _matchMode;
         }
 
-        const _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+        if (_searchMode.isError()) {
+            return _searchMode;
+        }
 
-        const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
+        const matchModeValue = this.getIndexNumValue(_matchMode);
 
         if (matchModeValue instanceof ErrorValueObject) {
             return matchModeValue;
         }
 
-        const searchModeValue = this.getIndexNumValue(searchMode || NumberValueObject.create(1));
+        const searchModeValue = this.getIndexNumValue(_searchMode);
 
         if (searchModeValue instanceof ErrorValueObject) {
             return searchModeValue;

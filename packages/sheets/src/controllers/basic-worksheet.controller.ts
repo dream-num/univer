@@ -62,6 +62,7 @@ import {
 } from '../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetGridlinesColorCommand } from '../commands/commands/set-gridlines-color.command';
 import { SetProtectionCommand } from '../commands/commands/set-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
@@ -112,12 +113,12 @@ import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-r
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
-import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 
+import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
-import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 
+import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetGridlinesColorMutation } from '../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
@@ -277,6 +278,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
                 ToggleGridlinesCommand,
                 ToggleGridlinesMutation,
+                SetGridlinesColorCommand,
                 SetGridlinesColorMutation,
 
                 // permissions range protection

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable complexity */
+
 import type { ICellData, ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActiveOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '../commands/mutations/sheets-filter.mutation';
@@ -415,6 +417,15 @@ export class SheetsFilterController extends Disposable {
         )) {
             return this._handleNull();
         }
+
+        if (fromRange.startColumn > startColumn && fromRange.startColumn < endColumn) {
+            if (toRange.startColumn > fromRange.startColumn) {
+                if (toRange.startColumn === endColumn + 1) {
+                    return this._handleNull();
+                }
+            }
+        }
+
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         const filterCol: IObjectArrayPrimitiveType<{ colIndex: number; filter: Nullable<FilterColumn> }> = {};
@@ -519,6 +530,15 @@ export class SheetsFilterController extends Disposable {
         )) {
             return this._handleNull();
         }
+
+        if (fromRange.startRow > startRow && fromRange.startRow < endRow) {
+            if (toRange.startRow > fromRange.startRow) {
+                if (toRange.startRow === endRow + 1) {
+                    return this._handleNull();
+                }
+            }
+        }
+
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         const filterRow: IObjectArrayPrimitiveType<{ oldIndex: number }> = {};

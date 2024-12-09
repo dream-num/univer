@@ -96,6 +96,7 @@ export { HeaderFreezeRenderController } from './controllers/render-controllers/f
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
+export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
 export { SheetBar } from './views/sheet-bar/SheetBar';

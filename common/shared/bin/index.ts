@@ -18,6 +18,9 @@ if (command === 'build') {
     if (args.includes('--cleanup')) {
         options.cleanup = true;
     }
+    if (args.includes('--nodeFirst')) {
+        options.nodeFirst = true;
+    }
 
     build(options);
 }

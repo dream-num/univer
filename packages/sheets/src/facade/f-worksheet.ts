@@ -24,6 +24,9 @@ import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
 
+/**
+ * Represents a worksheet facade api instance. Which provides a set of methods to interact with the worksheet.
+ */
 export class FWorksheet extends FBase {
     constructor(
         protected readonly _fWorkbook: FWorkbook,
@@ -46,28 +49,32 @@ export class FWorksheet extends FBase {
 
     /**
      * Returns the workbook
-     * @returns The workbook
+     * @returns {Workbook} The workbook instance.
      */
     getWorkbook(): Workbook {
         return this._workbook;
     }
 
     /**
-     * Returns the worksheet id
-     * @returns The id of the worksheet
+     * Returns the worksheet id.
+     * @returns {string} The id of the worksheet.
      */
     getSheetId(): string {
         return this._worksheet.getSheetId();
     }
 
     /**
-     * Returns the worksheet name
-     * @returns The name of the worksheet
+     * Returns the worksheet name.
+     * @returns {string} The name of the worksheet.
      */
     getSheetName(): string {
         return this._worksheet.getName();
     }
 
+    /**
+     * Represents the selection ranges info of the worksheet.
+     * @returns {FSelection} return the current selections of the worksheet or null if there is no selection.
+     */
     getSelection(): FSelection | null {
         const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections) {

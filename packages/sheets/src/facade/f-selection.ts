@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Inject, Injector } from '@univerjs/core';
 
 import { FRange } from './f-range';
 
+/**
+ * @description Represents the active selection in the sheet.
+ * @typedef FSelection
+ *
+ * @public
+ * @class
+ * @example
+ * ```ts
+ * const fWorkbook = univerAPI.getActiveWorkbook()
+ * const fWorksheet = fWorkbook.getActiveSheet()
+ * const fSelection = fWorksheet.getSelection();
+ * const activeRange = fSelection.getActiveRange();
+ * console.log(activeRange);
+ * ```
+ */
 export class FSelection {
     constructor(
         private readonly _workbook: Workbook,
@@ -30,6 +45,10 @@ export class FSelection {
         // empty
     }
 
+    /**
+     * Represents the active selection in the sheet. Which means the selection contains the active cell.
+     * @returns {FRange | null} The active selection.
+     */
     getActiveRange(): FRange | null {
         const active = this._selections.find((selection) => !!selection.primary);
         if (!active) {
@@ -37,6 +56,38 @@ export class FSelection {
         }
 
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, active.range);
+    }
+
+    /**
+     * Represents the active selection list in the sheet.
+     * @returns {FRange[]} The active selection list.
+     */
+    getActiveRangeList(): FRange[] {
+        return this._selections.map((selection) => {
+            return this._injector.createInstance(FRange, this._workbook, this._worksheet, selection.range);
+        });
+    }
+
+    /**
+     * Represents the current select cell in the sheet.
+     * @typedef {object} PrimaryInfo -Represents the current select cell info.Please consider of the cell maybe a merged cell.
+     * @property {number} actualColumn The actual column index of the cell.
+     * @property {number} actualRow The actual row index of the cell.
+     * @property {number} endColumn The end column index of the cell.
+     * @property {number} endRow The end row index of the cell.
+     * @property {boolean} isMerged Whether the cell is a merged cell.
+     * @property {boolean} isMergedMainCell Whether the cell is a main cell of a merged cell. Only the cell row and col is the start row and col of the merged cell, this value is true.
+     * @property {number} startColumn The start column index of the cell.
+     * @property {number} startRow The start row index of the cell.
+     * @returns {PrimaryInfo} The current select cell info.
+     */
+    getCurrentCell(): Nullable<ISelectionCell> {
+        const current = this._selections.find((selection) => !!selection.primary);
+        if (!current) {
+            return null;
+        }
+
+        return current.primary;
     }
 }
 

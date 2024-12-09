@@ -33,7 +33,7 @@ test('diff default sheet toolbar', async () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(2000);
 
     const filename = generateSnapshotName('default-sheet-fullpage');
     const screenshot = await page.screenshot({
@@ -75,7 +75,6 @@ test('diff demo sheet content', async ({ page }) => {
     const filename = generateSnapshotName('demo-sheet');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-    await page.waitForTimeout(2000);
     expect(errored).toBeFalsy();
 });
 
@@ -100,9 +99,6 @@ test('diff merged cells rendering', async () => {
     const filename = generateSnapshotName('mergedCellsRendering');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-
-    await page.waitForTimeout(2000);
-    await browser.close();
 });
 test('diff merged cells rendering after scrolling', async () => {
     const browser = await chromium.launch({
@@ -164,9 +160,6 @@ test('diff merged cells rendering after scrolling', async () => {
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-
-    await page.waitForTimeout(2000);
-    await browser.close();
 });
 
 /**
@@ -190,9 +183,6 @@ test('diff sheet default style rendering', async () => {
     const filename = generateSnapshotName('defaultstyle');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-
-    await page.waitForTimeout(2000);
-    await browser.close();
 });
 
 test('diff facade sheet hooks', async () => {
@@ -226,7 +216,4 @@ test('diff facade sheet hooks', async () => {
     const filename = generateSnapshotName('facade-sheet-hooks');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-
-    await page.waitForTimeout(2000);
-    await browser.close();
 });

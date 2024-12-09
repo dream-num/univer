@@ -48,7 +48,7 @@ export interface IFUniverSheetsMixin {
     getPermission(): FPermission;
 }
 
-export class FUniverSheetsMixin extends FUniver {
+export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const instanceService = this._injector.get(IUniverInstanceService);
         const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
@@ -57,6 +57,15 @@ export class FUniverSheetsMixin extends FUniver {
 
     override getActiveWorkbook(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return null;
+        }
+
+        return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getUniverSheet(id: string): FWorkbook | null {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(id, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }

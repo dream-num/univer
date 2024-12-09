@@ -109,6 +109,9 @@ import {
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
+
+const shouldRemoveShapeIds = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
+
 export class SheetClipboardController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -872,6 +875,8 @@ export class SheetClipboardController extends RxDisposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddWorksheetMergeCommand.id) {
+                    this._sheetClipboardService.removeMarkSelection();
+                } else if (shouldRemoveShapeIds.includes(command.id)) {
                     this._sheetClipboardService.removeMarkSelection();
                 }
             })

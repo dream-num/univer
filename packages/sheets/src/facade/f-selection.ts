@@ -22,10 +22,6 @@ import { FRange } from './f-range';
 
 /**
  * @description Represents the active selection in the sheet.
- * @typedef FSelection
- *
- * @public
- * @class
  * @example
  * ```ts
  * const fWorkbook = univerAPI.getActiveWorkbook()
@@ -70,16 +66,7 @@ export class FSelection {
 
     /**
      * Represents the current select cell in the sheet.
-     * @typedef {object} PrimaryInfo -Represents the current select cell info.Please consider of the cell maybe a merged cell.
-     * @property {number} actualColumn The actual column index of the cell.
-     * @property {number} actualRow The actual row index of the cell.
-     * @property {number} endColumn The end column index of the cell.
-     * @property {number} endRow The end row index of the cell.
-     * @property {boolean} isMerged Whether the cell is a merged cell.
-     * @property {boolean} isMergedMainCell Whether the cell is a main cell of a merged cell. Only the cell row and col is the start row and col of the merged cell, this value is true.
-     * @property {number} startColumn The start column index of the cell.
-     * @property {number} startRow The start row index of the cell.
-     * @returns {PrimaryInfo} The current select cell info.
+     * @returns {PrimaryInfo} The current select cell info.Pay attention to the type of the return value.
      */
     getCurrentCell(): Nullable<ISelectionCell> {
         const current = this._selections.find((selection) => !!selection.primary);

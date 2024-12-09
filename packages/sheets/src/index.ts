@@ -65,8 +65,8 @@ export type { EffectRefRangeParams, IOperator } from './services/ref-range/type'
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export {
-    getSeparateEffectedRangesOnCommand,
     adjustRangeOnMutation,
+    getSeparateEffectedRangesOnCommand,
     handleBaseInsertRange,
     handleBaseMoveRowsCols,
     handleBaseRemoveRange,
@@ -256,6 +256,7 @@ export { SetDefinedNameCommand } from './commands/commands/set-defined-name.comm
 export { type ICancelFrozenCommandParams, type ISetFrozenCommandParams } from './commands/commands/set-frozen.command';
 export { CancelFrozenCommand, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
+export { type ISetGridlinesColorCommandParams, SetGridlinesColorCommand } from './commands/commands/set-gridlines-color.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
     type ISetSpecificRowsVisibleCommandParams,
@@ -368,6 +369,7 @@ export {
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
 export { type IToggleGridlinesMutationParams, ToggleGridlinesMutation } from './commands/mutations/toggle-gridlines.mutation';
+export { type ISetGridlinesColorMutationParams, SetGridlinesColorMutation } from './commands/mutations/set-gridlines-color.mutation';
 export { FactorySetRangeProtectionMutation, type ISetRangeProtectionMutationParams, SetRangeProtectionMutation } from './commands/mutations/set-range-protection.mutation';
 export {
     type ISetRangeValuesMutationParams,

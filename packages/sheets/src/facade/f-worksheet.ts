@@ -15,11 +15,11 @@
  */
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
@@ -90,7 +90,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Get the default style of the worksheet
-     * @returns Default style
+     * @returns {StyleDataInfo} Default style of the worksheet.
      */
     getDefaultStyle(): Nullable<IStyleData> | string {
         return this._worksheet.getDefaultCellStyle();
@@ -118,8 +118,8 @@ export class FWorksheet extends FBase {
 
     /**
      * Set the default style of the worksheet
-     * @param style default style
-     * @returns this worksheet
+     * @param {StyleDataInfo} style default style
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setDefaultStyle(style: string): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -137,6 +137,7 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet row
      * @param {number} index The row index
      * @param {string | Nullable<IStyleData>} style The style name or style data
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -160,6 +161,7 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet column
      * @param {number} index The column index
      * @param {string | Nullable<IStyleData>} style The style name or style data
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -1113,6 +1115,19 @@ export class FWorksheet extends FBase {
             subUnitId: this._worksheet.getSheetId(),
             showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
         } as IToggleGridlinesCommandParams);
+    }
+
+    /**
+     * Set the color of the gridlines in the sheet.
+     * @param {string|undefined} color The color to set for the gridlines.Undefined to reset to the default color.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     */
+    setGridLinesColor(color: string | undefined): Promise<boolean> {
+        return this._commandService.executeCommand(SetGridlinesColorCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            color,
+        } as ISetGridlinesColorCommandParams);
     }
 
     /**

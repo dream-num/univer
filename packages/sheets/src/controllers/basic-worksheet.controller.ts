@@ -119,6 +119,7 @@ import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation'
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { SetGridlinesColorMutation } from '../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
@@ -276,6 +277,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
                 ToggleGridlinesCommand,
                 ToggleGridlinesMutation,
+                SetGridlinesColorMutation,
 
                 // permissions range protection
                 SetWorksheetPermissionPointsCommand,

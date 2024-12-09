@@ -240,6 +240,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _handleFontMatrix = new ObjectMatrix<boolean>();
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
+    private _gridlinesColor: string | undefined = undefined;
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
 
@@ -327,6 +328,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     get showGridlines(): BooleanNumber {
         return this._showGridlines;
+    }
+
+    get gridlinesColor(): string | undefined {
+        return this._gridlinesColor;
     }
 
     get mergeData(): IRange[] {
@@ -837,6 +842,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             rowHeader,
             columnHeader,
             showGridlines,
+            gridlinesColor,
         } = this._worksheetData;
 
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
@@ -859,6 +865,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._columnTotalWidth = columnTotalWidth;
         this._columnWidthAccumulation = columnWidthAccumulation;
         this._showGridlines = showGridlines;
+        this._gridlinesColor = gridlinesColor;
 
         this.makeDirty(false);
     }

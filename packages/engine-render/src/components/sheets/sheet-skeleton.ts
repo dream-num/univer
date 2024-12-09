@@ -426,7 +426,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Get range in visible area (range in viewbounds) and set into this._rowColumnSegment.
+     * Get range in visible area (range in view bounds) and set into this._rowColumnSegment.
      * @param bounds
      * @returns boolean
      */
@@ -2169,23 +2169,22 @@ export class SpreadsheetSkeleton extends Skeleton {
                     color: rgb,
                 });
             } else {
-                isAddBorders = false;
+                // if one cell has no border, then clear others cells which have border? why do this?
+                // isAddBorders = false;
             }
         }
 
-        if (isAddBorders) {
-            borders.forEach((border) => {
-                const { r, c, style, color } = border;
-                if (!cache.border!.getValue(r, c)) {
-                    cache.border!.setValue(r, c, {});
-                }
-                cache.border!.getValue(r, c)![type] = {
-                    type,
-                    style,
-                    color,
-                };
-            });
-        }
+        borders.forEach((border) => {
+            const { r, c, style, color } = border;
+            if (!cache.border!.getValue(r, c)) {
+                cache.border!.setValue(r, c, {});
+            }
+            cache.border!.getValue(r, c)![type] = {
+                type,
+                style,
+                color,
+            };
+        });
     }
 
     private _setBorderProps(r: number, c: number, type: BORDER_LTRB, style: IStyleData, cache: IStylesCache): void {

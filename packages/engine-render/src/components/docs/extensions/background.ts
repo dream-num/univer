@@ -56,7 +56,7 @@ export class Background extends docExtension {
 
         if (background && content !== '\r') {
             ctx.fillStyle = background;
-            ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
+            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
         }
     }
 

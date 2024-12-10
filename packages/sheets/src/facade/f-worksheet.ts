@@ -19,7 +19,7 @@ import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRan
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
@@ -1119,7 +1119,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Set the color of the gridlines in the sheet.
-     * @param {string|undefined} color The color to set for the gridlines.Undefined to reset to the default color.
+     * @param {string|undefined} color The color to set for the gridlines.Undefined or null to reset to the default color.
      * @returns {Promise<boolean>} True if the command was successful, false otherwise.
      */
     setGridLinesColor(color: string | undefined): Promise<boolean> {
@@ -1128,6 +1128,27 @@ export class FWorksheet extends FBase {
             subUnitId: this._worksheet.getSheetId(),
             color,
         } as ISetGridlinesColorCommandParams);
+    }
+
+    /**
+     * Sets the sheet tab color.
+     * @param {string|null|undefined} color A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     */
+    setTabColor(color: string): Promise<boolean> {
+        return this._commandService.executeCommand(SetTabColorCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            color,
+        });
+    }
+
+    /**
+     * Get the tab color of the sheet.
+     * @returns {string} The tab color of the sheet or undefined.
+     */
+    getTabColor(): string {
+        return this._worksheet.getConfig().tabColor;
     }
 
     /**

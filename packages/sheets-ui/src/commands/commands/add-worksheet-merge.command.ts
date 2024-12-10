@@ -48,6 +48,7 @@ export interface IAddMergeCommandParams {
     selections: IRange[];
     unitId: string;
     subUnitId: string;
+    defaultMerge?: boolean;
 }
 
 export const AddWorksheetMergeCommand: ICommand = {
@@ -72,7 +73,7 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         // First we should check if there are values in the going-to-be-merged cells.
         const willClearSomeCell = checkCellContentInRanges(worksheet, ranges);
-        if (willClearSomeCell) {
+        if (willClearSomeCell && !params.defaultMerge) {
             const result = await confirmService.confirm({
                 id: 'merge.confirm.add-worksheet-merge',
                 title: {

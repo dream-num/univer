@@ -265,7 +265,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     },
 };
 
-export async function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[]) {
+export async function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean) {
     const univerInstanceService = injector.get(IUniverInstanceService);
     const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
     if (!target) return;
@@ -284,5 +284,6 @@ export async function addMergeCellsUtil(injector: Injector, unitId: string, subU
         unitId,
         subUnitId,
         selections: ranges,
+        defaultMerge,
     });
 }

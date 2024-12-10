@@ -1871,7 +1871,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * get the current row and column segment visible merge data
+     * Get the current row and column segment visible merge data.
      * @returns {IRange} The visible merge data
      */
     public getCurrentRowColumnSegmentMergeData(range?: IRange): IRange[] {
@@ -1882,9 +1882,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         } else {
             range = {
                 startRow: range.startRow,
+                startColumn: 0,
                 endRow: range.endRow,
                 endColumn: endColumnLast,
-                startColumn: 0,
             };
         }
 

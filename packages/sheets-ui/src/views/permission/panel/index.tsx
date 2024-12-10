@@ -51,6 +51,7 @@ export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }
                     fromSheetBar={fromSheetBar}
                     rule={rule}
                     oldRule={oldRule}
+                    key={fromSheetBar ? 'sheet-bar' : 'normal'}
                 />
             )
             : <SheetPermissionPanelList key={key} />

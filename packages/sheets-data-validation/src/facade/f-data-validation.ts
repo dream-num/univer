@@ -55,7 +55,7 @@ export class FDataValidation {
      *
      * @returns An array containing the operator, formula1, and formula2 values
      */
-    getCriteriaValues(): (string | undefined)[] {
+    getCriteriaValues(): [string | undefined, string | undefined, string | undefined] {
         return [this.rule.operator, this.rule.formula1, this.rule.formula2];
     }
 

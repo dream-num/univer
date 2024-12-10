@@ -40,6 +40,7 @@ import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
 import { Xlookup } from '../lookup/xlookup';
 import { Xmatch } from '../lookup/xmatch';
 import { FUNCTION_NAMES_MATH } from '../math/function-names';
+import { Product } from '../math/product';
 import { Sum } from '../math/sum';
 import { Sumif } from '../math/sumif';
 import { Sumifs } from '../math/sumifs';
@@ -343,8 +344,8 @@ describe('Test nested functions', () => {
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
             new Len(FUNCTION_NAMES_TEXT.LEN),
-            new Divided(FUNCTION_NAMES_META.DIVIDED)
-
+            new Divided(FUNCTION_NAMES_META.DIVIDED),
+            new Product(FUNCTION_NAMES_MATH.PRODUCT)
         );
 
         calculate = (formula: string) => {
@@ -447,6 +448,14 @@ describe('Test nested functions', () => {
             expect(result).toBe(3);
 
             result = calculate('=SUMIF(A11:C11,A12,A11:C11)');
+            expect(result).toBe(2);
+        });
+
+        it('Product test, cell number string ignore, param number string can be calculated', () => {
+            let result = calculate('=PRODUCT(A12)');
+            expect(result).toBe(0);
+
+            result = calculate('=PRODUCT("2")');
             expect(result).toBe(2);
         });
     });

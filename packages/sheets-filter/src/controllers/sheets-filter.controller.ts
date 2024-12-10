@@ -418,7 +418,7 @@ export class SheetsFilterController extends Disposable {
             return this._handleNull();
         }
 
-        if (fromRange.startColumn > startColumn && fromRange.startColumn < endColumn) {
+        if (fromRange.startColumn >= startColumn && fromRange.startColumn < endColumn) {
             if (toRange.startColumn > fromRange.startColumn) {
                 if (toRange.startColumn === endColumn + 1) {
                     return this._handleNull();

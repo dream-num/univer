@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Dependency, IWorkbookData, LocaleType } from '@univerjs/core';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { Direction, ICommandService, Inject, Injector, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 
-import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
+import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 
 describe('Test "Filter Interceptor"', () => {
     let univer: Univer;
@@ -139,8 +139,8 @@ describe('Test "Filter Interceptor"', () => {
             } as IMoveColsCommandParams;
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
-            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 1, startRow: 1, endRow: 2 });
-            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getAllFilterColumns().map((x) => x[0])).toStrictEqual([1]);
+            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 1, endRow: 2 });
+            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getAllFilterColumns().map((x) => x[0])).toStrictEqual([2]);
         });
         it('move col command, filter column move to right', async () => {
             const moveColCommandParams = {

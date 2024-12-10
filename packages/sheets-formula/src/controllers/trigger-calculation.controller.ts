@@ -28,6 +28,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IUniverSheetsFormulaBaseConfig } from './config.schema';
 import { Disposable, ICommandService, IConfigService, ILogService, Inject, LocaleService } from '@univerjs/core';
 import {
+    ENGINE_FORMULA_CYCLE_REFERENCE_COUNT,
     FormulaDataModel,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -258,6 +259,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: false,
             clearDependencyTreeCache: allClearDependencyTreeCache,
+            maxIteration: (this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT)) as number | undefined,
             // numfmtItemMap,
         };
     }
@@ -276,6 +278,8 @@ export class TriggerCalculationController extends Disposable {
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
         this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
+        const maxIteration = dirtyData1.maxIteration || dirtyData2.maxIteration;
+
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
@@ -284,6 +288,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: !!this._forceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
+            maxIteration,
         };
     }
 
@@ -512,13 +517,13 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _initialExecuteFormula() {
-        const params = this._getDiryDataByCalculationMode(this._calculationMode);
+        const params = this._getDirtyDataByCalculationMode(this._calculationMode);
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, params, lo);
 
         this._registerOtherFormulaService.calculateStarted$.next(true);
     }
 
-    private _getDiryDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
+    private _getDirtyDataByCalculationMode(calculationMode: CalculationMode): IFormulaDirtyData {
         const forceCalculation = calculationMode === CalculationMode.FORCED;
 
         // loop all sheets cell data, and get the dirty data
@@ -538,6 +543,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
+            maxIteration: this._configService.getConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT) as number | undefined,
         };
     }
 }

@@ -48,8 +48,6 @@ import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
-export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
-
 export const DEFAULT_INTERVAL_COUNT = 500;
 
 export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
@@ -124,8 +122,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._runtimeService.reset();
 
-        const cycleReferenceCount = (this._configService.getConfig('CYCLE_REFERENCE_COUNT') ||
-            DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+        const cycleReferenceCount = (formulaDatasetConfig.maxIteration) as number;
 
         for (let i = 0; i < cycleReferenceCount; i++) {
             this._runtimeService.setFormulaCycleIndex(i);

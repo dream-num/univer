@@ -43,6 +43,7 @@ export interface IFormulaDirtyData {
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
+    maxIteration?: number;
 }
 
 export interface IFormulaCurrentConfigService {

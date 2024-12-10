@@ -31,6 +31,7 @@ import {
 import { FormulaDataModel } from '../models/formula-data.model';
 import { ICalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
+import { DEFAULT_CYCLE_REFERENCE_COUNT } from './config.schema';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -76,7 +77,7 @@ export class CalculateController extends Disposable {
     private async _calculate(
         formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
-        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
@@ -96,6 +97,7 @@ export class CalculateController extends Disposable {
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             clearDependencyTreeCache,
+            maxIteration,
         });
     }
 

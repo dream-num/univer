@@ -36,8 +36,8 @@ export interface IMessageProtocol {
  * event sources are usually provided by the same service or controller.
  */
 export interface IChannel {
-    call<T>(method: string, ...args: any[]): Promise<T>;
-    subscribe<T>(event: string, ...args: any[]): Observable<T>;
+    call<T>(method: string, args?: any): Promise<T>;
+    subscribe<T>(event: string, args?: any): Observable<T>;
 }
 
 /**
@@ -55,7 +55,7 @@ export function fromModule(module: unknown): IChannel {
     // const observables = new Map<string, Observable<any>>();
 
     return new (class implements IChannel {
-        call<T>(method: string, args: any[]): Promise<T> {
+        call<T>(method: string, args?: any): Promise<T> {
             const target = handler[method];
             if (typeof target === 'function') {
                 let res = args ? target.apply(handler, args) : target.call(handler);
@@ -68,10 +68,10 @@ export function fromModule(module: unknown): IChannel {
             throw new Error(`[RPC]: method not found for ${method}!`);
         }
 
-        subscribe<T>(eventMethod: string, ...args: any[]): Observable<T> {
+        subscribe<T>(eventMethod: string, args?: any): Observable<T> {
             const target = handler[eventMethod];
             if (typeof target === 'function') {
-                const res = args ? target.call(handler, ...args) : target.call(handler);
+                const res = args ? target.apply(handler, args) : target.call(handler);
                 if (!isObservable(res)) {
                     return of(res);
                 }
@@ -102,11 +102,11 @@ export function toModule<T extends object>(channel: IChannel): T {
             return function (...args: any[]) {
                 const isObservable = propertyIsEventSource(propKey);
                 if (isObservable) {
-                    const observable = channel.subscribe(propKey, ...args);
+                    const observable = channel.subscribe(propKey, args);
                     return observable;
                 }
 
-                return channel.call(propKey, ...args);
+                return channel.call(propKey, args);
             };
         },
     });
@@ -206,7 +206,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         const self = this;
 
         return {
-            call(method: string, ...args: any[]) {
+            call(method: string, args?: any) {
                 if (self._disposed) {
                     return Promise.reject();
                 }
@@ -232,7 +232,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         );
     }
 
-    private async _remoteCall(channelName: string, method: string, args: any[]): Promise<any> {
+    private async _remoteCall(channelName: string, method: string, args?: any): Promise<any> {
         await this._whenReady();
 
         const sequence = ++this._lastRequestCounter;
@@ -265,7 +265,7 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
         });
     }
 
-    private _remoteSubscribe(channelName: string, method: string, args: any[]): Observable<any> {
+    private _remoteSubscribe(channelName: string, method: string, args?: any): Observable<any> {
         return new Observable((subscriber) => {
             let sequence: number = -1;
             this._whenReady().then(() => {

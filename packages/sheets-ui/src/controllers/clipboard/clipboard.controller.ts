@@ -73,6 +73,9 @@ import {
     InsertColMutation,
     InsertRowMutation,
     MAX_CELL_PER_SHEET_KEY,
+    MoveColsMutation,
+    MoveRangeMutation,
+    MoveRowsMutation,
     RemoveColMutation,
     RemoveRowMutation,
     SetRangeValuesMutation,
@@ -110,7 +113,15 @@ import {
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
 
-const shouldRemoveShapeIds = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
+const shouldRemoveShapeIds = [
+    InsertColMutation.id,
+    InsertRowMutation.id,
+    RemoveColMutation.id,
+    RemoveRowMutation.id,
+    MoveRangeMutation.id,
+    MoveRowsMutation.id,
+    MoveColsMutation.id,
+];
 
 export class SheetClipboardController extends RxDisposable {
     constructor(

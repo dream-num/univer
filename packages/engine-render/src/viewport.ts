@@ -208,6 +208,10 @@ export class Viewport {
      *  In future, viewMain dirty would not affect other viewports.
      */
     private _isDirty = true;
+
+    /**
+     * Canvas for cache if allowCache is true.
+     */
     private _cacheCanvas: UniverCanvas | null = null;
 
     /**

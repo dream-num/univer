@@ -18,7 +18,6 @@ import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
 import { IEditorService, TextEditor } from '@univerjs/docs-ui';
 
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -97,10 +96,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             } else {
                 setState({
-                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
-                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
-                    left: startX + FIX_ONE_PIXEL_BLUR_OFFSET,
-                    top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
+                    width: endX - startX,
+                    height: endY - startY,
+                    left: startX,
+                    top: startY,
                 });
 
                 const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);

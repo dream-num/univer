@@ -19,7 +19,7 @@ import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderMo
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
-import { convertTextRotation, FIX_ONE_PIXEL_BLUR_OFFSET, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
+import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import styles from '../../views/sheet-container/index.module.less';
@@ -107,6 +107,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
+        editorWidth -= 1;
+        editorHeight -= 1;
         this._editAreaProcessing(editorWidth, editorHeight, position, canvasOffset, fill, scaleX, scaleY, callback);
     }
 
@@ -264,8 +266,9 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             editorWidth = clientWidth;
         }
 
-        startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
-        startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
+        // move to fitTextSize
+        // startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
+        // startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
         this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 

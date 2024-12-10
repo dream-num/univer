@@ -320,9 +320,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         selectionWithStyle.range.rangeType = rangeType;
         const selectionCellWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
         this._startRangeWhenPointerDown = { ...selectionCellWithCoord.rangeWithCoord };
-        // const selectionCellWithCoord: Nullable<ISelectionWithCoord> = this._getSelectionWithCoordByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-        // if (!selectionCellWithCoord) return;
-        // const { rangeWithCoord: cursorCellRange, primaryWithCoord: _primaryCursorCellRange } = selectionCellWithCoord;
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const cursorRangeWidthCoord: IRangeWithCoord = { ...selectionCellWithCoord.rangeWithCoord, rangeType };
@@ -362,14 +359,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             );
         } else if (remainLastEnable && activeSelectionControl) {
             // Supports the formula ref text selection feature,
-            // under the condition of preserving all previous selections, it modifies the position of the latest selection.
 
             activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord);// (cursorRangeWidthCoord, primaryCursorCellRange);
         } else {
             // In normal situation, pointerdown ---> Create new SelectionControl,
             activeSelectionControl = this.newSelectionControl(scene, skeleton, selectionWithStyle);
-
-            // activeSelectionControl.updateRangeBySelectionWithCoord(selectionCellWithCoord); //(cursorRangeWidthCoord, primaryCursorCellRange);
         }
         // clear highlight except last one.
         for (let i = 0; i < this.getSelectionControls().length - 1; i++) {

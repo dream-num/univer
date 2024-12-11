@@ -38,7 +38,7 @@ import {
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
+import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
@@ -122,7 +122,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._runtimeService.reset();
 
-        const cycleReferenceCount = (formulaDatasetConfig.maxIteration) as number;
+        const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
         for (let i = 0; i < cycleReferenceCount; i++) {
             this._runtimeService.setFormulaCycleIndex(i);

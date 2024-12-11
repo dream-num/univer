@@ -190,7 +190,7 @@ export interface IFormulaDatasetConfig {
     allUnitData?: IUnitData;
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
-    maxIteration: number;
+    maxIteration?: number;
 }
 
 export enum ConcatenateType {

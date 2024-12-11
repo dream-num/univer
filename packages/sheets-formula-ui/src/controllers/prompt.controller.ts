@@ -446,7 +446,7 @@ export class PromptController extends Disposable {
             d.dispose();
 
             if (selections.length === 0) return;
-            // Theme color should be set when SelectionControl is created, it's too late to set theme color at selecitonEnd(pointerup).
+            // Theme color should be set when SelectionControl is created, it's too late to set theme color at selection End(pointerup).
             // The logic below has been moved to syncToEditor.
             // this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
             const docID = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
@@ -1072,8 +1072,10 @@ export class PromptController extends Disposable {
         // if (lastRange) {
         // selectionWithStyle.push(lastRange);
         // }
+
+        // why use sheetId not currSheetId ???
         if (selectionWithStyle.length) {
-            this._refSelectionsService.setSelections(unitId, currSheetId, selectionWithStyle, SelectionMoveType.ONLY_SET);
+            this._refSelectionsService.setSelections(unitId, sheetId, selectionWithStyle, SelectionMoveType.ONLY_SET);
         }
     }
 

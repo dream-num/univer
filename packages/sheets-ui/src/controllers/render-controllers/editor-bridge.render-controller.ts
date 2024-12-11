@@ -86,6 +86,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _initSelectionChangeListener(d: DisposableCollection) {
         d.add(merge(
             this._selectionManagerService.selectionMoveEnd$,
+            this._selectionManagerService.selectionSet$,
             this._selectionManagerService.selectionMoveStart$
         ).subscribe((params) => this._updateEditorPosition(params)));
     }

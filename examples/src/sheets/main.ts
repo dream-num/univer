@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -88,9 +87,8 @@ const univer = new Univer({
     logLevel: LogLevel.VERBOSE,
 });
 
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-} as IUniverRPCMainThreadConfig);
+const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
 
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
@@ -143,6 +141,12 @@ setTimeout(() => {
         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
     });
 }, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
+
+univer.onDispose(() => {
+    worker.terminate();
+    window.univer = undefined;
+    window.univerAPI = undefined;
+});
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);

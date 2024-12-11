@@ -153,6 +153,13 @@ export class DrawingPopupMenuController extends RxDisposable {
             })
         );
         this.disposeWithMe(
+            this._contextService.contextChanged$.subscribe((event) => {
+                if (event[FOCUSING_COMMON_DRAWINGS] === false) {
+                    singletonPopupDisposer?.dispose();
+                }
+            })
+        );
+        this.disposeWithMe(
             transformer.changing$.subscribe(() => {
                 singletonPopupDisposer?.dispose();
             })

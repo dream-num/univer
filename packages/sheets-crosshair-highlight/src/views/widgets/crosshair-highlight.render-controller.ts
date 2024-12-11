@@ -15,16 +15,16 @@
  */
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
-
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
 import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
+import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { combineLatest, map, merge, startWith, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
-import { CrossHairRangeCollection } from '../../util';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
+import { CrossHairRangeCollection } from '../../util';
 import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 
 export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
@@ -80,12 +80,14 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
                 this._sheetsSelectionsService.selectionMoveStart$,
                 this._sheetsSelectionsService.selectionMoving$,
                 this._sheetsSelectionsService.selectionMoveEnd$,
+                this._sheetsSelectionsService.selectionSet$,
                 workbook.activeSheet$.pipe(map(() => this._sheetsSelectionsService.getCurrentSelections()))
             ),
             merge(
                 this._refSelectionsService.selectionMoveStart$,
                 this._refSelectionsService.selectionMoving$,
                 this._refSelectionsService.selectionMoveEnd$,
+                this._sheetsSelectionsService.selectionSet$,
                 workbook.activeSheet$.pipe(map(() => this._refSelectionsService.getCurrentSelections()))
             ),
         ]).subscribe(([normalSelDisabled, _, enabled, _color, normalSelections, refSelection]) => {

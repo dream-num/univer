@@ -20,6 +20,8 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+type ValueType = number | string | boolean;
+
 export class AverageWeighted extends BaseFunction {
     override minParams = 2;
 
@@ -35,8 +37,8 @@ export class AverageWeighted extends BaseFunction {
             otherErrorObject = ErrorValueObject.create(ErrorType.NA);
         }
 
-        const values: number[] = [];
-        const weights: number[] = [];
+        const values: ValueType[] = [];
+        const weights: ValueType[] = [];
 
         for (let i = 0; i < variants.length; i += 2) {
             const valueObject = variants[i];
@@ -55,13 +57,9 @@ export class AverageWeighted extends BaseFunction {
                         continue;
                     }
 
-                    if (obj.isNull() || obj.isBoolean() || obj.isString()) {
-                        isOtherError = true;
-                        otherErrorObject = ErrorValueObject.create(ErrorType.VALUE);
-                        continue;
-                    }
+                    const value = obj.isNull() ? '' : obj.getValue();
 
-                    values.push(+obj.getValue());
+                    values.push(value);
                 }
             }
 
@@ -90,19 +88,7 @@ export class AverageWeighted extends BaseFunction {
                         continue;
                     }
 
-                    if (obj.isNull() || obj.isBoolean() || obj.isString()) {
-                        isOtherError = true;
-                        otherErrorObject = ErrorValueObject.create(ErrorType.VALUE);
-                        continue;
-                    }
-
-                    const weight = +obj.getValue();
-
-                    if (weight < 0) {
-                        isOtherError = true;
-                        otherErrorObject = ErrorValueObject.create(ErrorType.VALUE);
-                        continue;
-                    }
+                    const weight = obj.isNull() ? '' : obj.getValue();
 
                     weights.push(weight);
                 }
@@ -116,15 +102,32 @@ export class AverageWeighted extends BaseFunction {
         return this._getResult(values, weights);
     }
 
-    private _getResult(values: number[], weights: number[]): BaseValueObject {
+    private _getResult(values: ValueType[], weights: ValueType[]): BaseValueObject {
         const n = values.length;
 
         let sum = 0;
         let sumWeight = 0;
 
         for (let i = 0; i < n; i++) {
-            sum += values[i] * weights[i];
-            sumWeight += weights[i];
+            const value = values[i];
+            const weight = weights[i];
+
+            // If value and weight are not numbers, skip
+            if (typeof value !== 'number' && typeof weight !== 'number') {
+                continue;
+            }
+
+            // If value and weight only one is number, return error
+            if (typeof value !== 'number' || typeof weight !== 'number' || weight < 0) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            sum += value * weight;
+            sumWeight += weight;
+        }
+
+        if (sumWeight === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         const result = sum / sumWeight;

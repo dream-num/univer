@@ -1411,12 +1411,12 @@ export class FWorksheet extends FBase {
 
     /**
      * Returns a Range corresponding to the dimensions in which data is present.
-     *  This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumn(), Sheet.getLastRow()).
+     *  This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
      * @returns {FRange} The range of the data in the sheet.
      */
     getDataRange() {
-        const lastRow = this.getLastRow();
-        const lastColumn = this.getLastColumn();
+        const lastRow = this.getLastRows();
+        const lastColumn = this.getLastColumns();
         return this.getRange(0, 0, lastRow + 1, lastColumn + 1);
     }
 
@@ -1428,10 +1428,10 @@ export class FWorksheet extends FBase {
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorkSheet = fWorkbook.getActiveSheet();
      * const fRange = fWorkSheet.getRange(100, 20, 1, 1);
-     * console.log(fWorkSheet.getLastColumn()); // 20
+     * console.log(fWorkSheet.getLastColumns()); // 20
      * ```
      */
-    getLastColumn(): number {
+    getLastColumns(): number {
         return this._worksheet.getLastColumnWithContent();
     }
 
@@ -1444,9 +1444,9 @@ export class FWorksheet extends FBase {
      * const fWorkSheet = fWorkbook.getActiveSheet();
      * const fRange = fWorkSheet.getRange(100,1,1,1);
      * fRange.setValue('Hello World');
-     * console.log(fWorkSheet.getLastRow()); // 100
+     * console.log(fWorkSheet.getLastRows()); // 100
      */
-    getLastRow(): number {
+    getLastRows(): number {
         return this._worksheet.getLastRowWithContent();
     }
 }

@@ -276,10 +276,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 snapshot: Tools.deepClone(documentModel!.getSnapshot()),
             });
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-            this._textSelectionManagerService.replaceTextRanges([{
-                startOffset: 0,
-                endOffset: 0,
-            }]);
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
+                    startOffset: 0,
+                    endOffset: 0,
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            )
+            ;
 
             const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 

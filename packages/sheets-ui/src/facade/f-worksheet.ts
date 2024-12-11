@@ -48,6 +48,7 @@ export interface IFWorksheetSkeletonMixin {
      * const fWorksheet = fWorkbook.getActiveSheet();
      * const zoomRatio = fWorksheet.getZoom();
      * console.log(zoomRatio);
+     * ```
      */
     getZoom(): number;
 }

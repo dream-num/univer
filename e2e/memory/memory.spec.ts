@@ -19,7 +19,12 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-const MAX_MEMORY_OVERFLOW = 1_000_000; // 1MB
+const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
+
+// There are some compiled code and global cache, so we make some room
+// for this. But we need to make sure that a Univer object cannot fit
+// in this size.
+const MAX_UNIVER_MEMORY_OVERFLOW = 5_000_000;
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
@@ -43,7 +48,8 @@ test('memory', async ({ page }) => {
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after disposing univer (B):', memoryAfterDisposingUniver);
 
-    const notLeaking = (memoryAfterDisposingUniver <= memoryBeforeLoad) && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
+    const notLeaking = (memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW)
+        && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_UNIT_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();
 });
 

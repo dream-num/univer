@@ -18,6 +18,7 @@ import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData,
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
@@ -614,5 +615,14 @@ export class FWorkbook extends FBase {
     async moveActiveSheet(index: number) {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
+    }
+
+    /**
+     * Get the PermissionInstance.
+     *
+     * @returns {FPermission} - The PermissionInstance.
+     */
+    getPermission() {
+        return this._injector.createInstance(FPermission);
     }
 }

@@ -42,7 +42,8 @@ export interface IFUniverSheetsMixin {
     getUniverSheet(id: string): FWorkbook | null;
     /**
      * Get the PermissionInstance.
-     *
+     * @deprecated This function is deprecated and will be removed in version 0.6.0.
+     *             Please use the function with the same name on the `FWorkbook` instance instead.
      * @returns {FPermission} - The PermissionInstance.
      */
     getPermission(): FPermission;

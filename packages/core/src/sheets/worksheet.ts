@@ -679,7 +679,7 @@ export class Worksheet {
 
     /**
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
-     * @returns Gridlines Hidden Status
+     * @returns {boolean} Gridlines Hidden Status.
      */
     hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
@@ -689,6 +689,14 @@ export class Worksheet {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the color of the gridlines, or undefined if the gridlines are not colored.
+     * @returns {string | undefined} returns the color of the gridlines, or undefined if the gridlines are default.
+     */
+    getGridlinesColor(): string | undefined {
+        return this.getConfig().gridlinesColor;
     }
 
     /**

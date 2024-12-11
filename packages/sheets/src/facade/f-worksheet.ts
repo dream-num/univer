@@ -1150,6 +1150,14 @@ export class FWorksheet extends FBase {
     }
 
     /**
+     * Get the color of the gridlines in the sheet.
+     * @returns {string | undefined} The color of the gridlines in the sheet or undefined. The default color is 'rgb(214, 216, 219)'.
+     */
+    getGridLinesColor(): string | undefined {
+        return this._worksheet.getGridlinesColor() as string | undefined;
+    }
+
+    /**
      * Sets the sheet tab color.
      * @param {string|null|undefined} color A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
      * @returns {Promise<boolean>} True if the command was successful, false otherwise.

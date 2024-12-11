@@ -141,6 +141,7 @@ export interface IWorksheetData {
      * Color of the gridlines.
      */
     gridlinesColor?: string;
+
     rightToLeft: BooleanNumber;
 }
 

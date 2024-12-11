@@ -90,6 +90,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
 
     return (
         <button
+            type="button"
             className={_className}
             style={style}
             disabled={disabled}

@@ -24,11 +24,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { IDescriptionService } from '../services/description.service';
-
-export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
 
 /**
  * header highlight
@@ -106,7 +104,7 @@ export class DefinedNameController extends Disposable {
         }
 
         const { name, comment, formulaOrRefString, localSheetId } = param;
-        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE || localSheetId === sheetId)) {
+        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === sheetId)) {
             this._descriptionService.registerDescriptions([{
                 functionName: name,
                 description: formulaOrRefString + (comment || ''),
@@ -178,7 +176,7 @@ export class DefinedNameController extends Disposable {
 
         Array.from(Object.values(definedNames)).forEach((value) => {
             const { name, comment, formulaOrRefString, localSheetId } = value;
-            if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE || localSheetId === sheetId)) {
+            if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || localSheetId === sheetId)) {
                 functionList.push({
                     functionName: name,
                     description: formulaOrRefString + (comment || ''),
@@ -208,7 +206,7 @@ export class DefinedNameController extends Disposable {
 
         Array.from(Object.values(definedNames)).forEach((value) => {
             const { name, localSheetId } = value;
-            if (localSheetId !== SCOPE_WORKBOOK_VALUE && localSheetId !== sheetId) {
+            if (localSheetId !== SCOPE_WORKBOOK_VALUE_DEFINED_NAME && localSheetId !== sheetId) {
                 functionList.push(name);
             }
         });

@@ -15,9 +15,12 @@
  */
 
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
@@ -34,7 +37,8 @@ export class FWorkbook extends FBase {
         @ICommandService protected readonly _commandService: ICommandService,
         @IPermissionService protected readonly _permissionService: IPermissionService,
         @ILogService protected readonly _logService: ILogService,
-        @Inject(LocaleService) protected readonly _localeService: LocaleService
+        @Inject(LocaleService) protected readonly _localeService: LocaleService,
+        @IDefinedNamesService protected readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
@@ -624,5 +628,120 @@ export class FWorkbook extends FBase {
      */
     getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+
+    /**
+     * Get the defined name by name.
+     * @param {string} name The name of the defined name to get
+     * @returns {FDefinedName | null} The defined name with the given name
+     * @example
+     * ```ts
+     * // The code below gets the defined name by name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const definedName = activeSpreadsheet.getDefinedName('MyDefinedName');
+     * ```
+     */
+    getDefinedName(name: string): FDefinedName | null {
+        const definedName = this._definedNamesService.getValueByName(this.id, name);
+        if (!definedName) {
+            return null;
+        }
+
+        return this._injector.createInstance(FDefinedName, { ...definedName, unitId: this.id });
+    }
+
+    /**
+     * Get all the defined names in the workbook.
+     * @returns {FDefinedName[]} All the defined names in the workbook
+     * @example
+     * ```ts
+     * // The code below gets all the defined names in the workbook
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const definedNames = activeSpreadsheet.getDefinedNames();
+     * ```
+     */
+    getDefinedNames(): FDefinedName[] {
+        const definedNames = this._definedNamesService.getDefinedNameMap(this.id);
+        if (!definedNames) {
+            return [];
+        }
+        return Object.values(definedNames).map((definedName) => {
+            return this._injector.createInstance(FDefinedName, { ...definedName, unitId: this.id });
+        });
+    }
+
+    /**
+     * Insert a defined name.
+     * @param {string} name The name of the defined name to insert
+     * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
+     * @example
+     * ```ts
+     * // The code below inserts a defined name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * activeSpreadsheet.insertDefinedName('MyDefinedName', 'Sheet1!A1');
+     * ```
+     */
+    insertDefinedName(name: string, formulaOrRefString: string): void {
+        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
+        const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
+        param.unitId = this.getId();
+        param.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
+        this.insertDefinedNameBuilder(param);
+    }
+
+    /**
+     * Delete the defined name with the given name.
+     * @param {string} name The name of the defined name to delete
+     * @returns {boolean} true if the defined name was deleted, false otherwise
+     * @example
+     * ```ts
+     * // The code below deletes the defined name with the given name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const deleted = activeSpreadsheet.deleteDefinedName('MyDefinedName');
+     * ```
+     */
+    deleteDefinedName(name: string): boolean {
+        const definedName = this.getDefinedName(name);
+        if (definedName) {
+            definedName.delete();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * insert a defined name by builder param
+     * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @example
+     * ```ts
+     * // The code below inserts a defined name by builder param
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const builder = univerAPI.newDefinedName();
+     * const param = builder.setName('MyDefinedName').setRef('Sheet1!A1').build();
+     * activeSpreadsheet.insertDefinedNameBuilder(param);
+     * ```
+     */
+    insertDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
+        const definedName = this._injector.createInstance(FDefinedName, param);
+        definedName.insert();
+    }
+
+    /**
+     * Update the defined name with the given name.
+     * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @example
+     * ```ts
+     * // The code below updates the defined name with the given name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const builder = activeSpreadsheet.getDefinedName('MyDefinedName').toBuilder();
+     * builder.setRef('Sheet1!A2').setName('MyDefinedName1').build();
+     * activeSpreadsheet.updateDefinedNameBuilder(param);
+     *
+     * ```
+     */
+    updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
+        const definedName = this._injector.createInstance(FDefinedName, param);
+        definedName.update();
     }
 }

@@ -16,10 +16,12 @@
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
@@ -1531,5 +1533,41 @@ export class FWorksheet extends FBase {
             return this._worksheet.getSheetId() === other.getSheetId() && this._workbook.getUnitId() === other.getWorkbook().getUnitId();
         }
         return false;
+    }
+
+    /*
+    * Insert a defined name for worksheet.
+     * @param {string} name The name of the defined name to insert
+     * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
+     * @example
+     * ```ts
+     * // The code below inserts a defined name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
+     * sheet1.insertDefinedName('MyDefinedName', 'Sheet1!A1');
+     * ```
+     */
+    insertDefinedName(name: string, formulaOrRefString: string): void {
+        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
+        const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
+        param.unitId = this._workbook.getUnitId();
+        param.localSheetId = this.getSheetId();
+        this._fWorkbook.insertDefinedNameBuilder(param);
+    }
+
+     /**
+      * Get all the defined names in the worksheet.
+      * @returns {FDefinedName[]} All the defined names in the worksheet
+      * @example
+      * ```ts
+      * // The code below gets all the defined names in the worksheet
+      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+      * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
+      * const definedNames = sheet1.getDefinedNames();
+      * ```
+      */
+    getDefinedNames(): FDefinedName[] {
+        const names = this._fWorkbook.getDefinedNames();
+        return names.filter((name) => name.getLocalSheetId() === this.getSheetId());
     }
 }

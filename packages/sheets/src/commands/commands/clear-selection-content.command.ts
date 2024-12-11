@@ -54,12 +54,12 @@ export const ClearSelectionContentCommand: ICommand = {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
-        const unitId = params.unitId || workbook.getUnitId();
+        const unitId = params?.unitId || workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
-        const subUnitId = params.subUnitId || worksheet.getSheetId();
-        const ranges = params.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        const subUnitId = params?.subUnitId || worksheet.getSheetId();
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) {
             return false;
         }

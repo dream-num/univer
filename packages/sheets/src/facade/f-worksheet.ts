@@ -483,7 +483,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Unhides the row in the given range.
+     * Un hides the row in the given range.
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */

@@ -815,6 +815,10 @@ export class Worksheet {
         return this._cellData.getRange().endColumn;
     }
 
+    getDataRangeScope(): IRange {
+        return this._cellData.getStartEndScope();
+    }
+
     cellHasValue(value: ICellData) {
         return value && (value.v !== undefined || value.f !== undefined || value.p !== undefined);
     }

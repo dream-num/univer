@@ -858,13 +858,14 @@ export class SlideTabBar {
     }
 
     destroy() {
+        this.removeListener();
+
         this._downActionX = 0;
         this._moveActionX = 0;
         this._compareDirection = 0;
         this._compareIndex = 0;
         this._slideTabItems = [];
         this._activeTabItem = null;
-        this.removeListener();
 
         // TODO@Dushusir: If set to null, the types in other places need to be judged
         // this._slideTabBar = null;

@@ -26,8 +26,8 @@ import type {
 } from '@univerjs/engine-render';
 import { FUniver, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FSheetHooks } from '@univerjs/sheets/facade';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { FSheetHooks } from '@univerjs/sheets/facade';
 
 export interface IFUniverSheetsUIMixin {
     /**

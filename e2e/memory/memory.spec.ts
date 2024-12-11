@@ -23,27 +23,27 @@ const MAX_MEMORY_OVERFLOW = 1_000_000; // 1MB
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(10000);
 
     const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory before load:', memoryBeforeLoad);
+    console.log('Memory before load (B):', memoryBeforeLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(10000); // wait for long enough to let the GC do its job
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory after first load:', memoryAfterFirstLoad);
+    console.log('Memory after first load (B):', memoryAfterFirstLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(10000); // wait for long enough to let the GC do its job
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory after second load:', memoryAfterSecondLoad);
+    console.log('Memory after second load (B):', memoryAfterSecondLoad);
 
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(10000); // wait for long enough to let the GC do its job
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory after disposing univer:', memoryAfterDisposingUniver);
+    console.log('Memory after disposing univer (B):', memoryAfterDisposingUniver);
 
-    const notLeaking = (memoryAfterDisposingUniver <= memoryAfterFirstLoad) && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
+    const notLeaking = (memoryAfterDisposingUniver <= memoryBeforeLoad) && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();
 });
 

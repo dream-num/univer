@@ -16,8 +16,8 @@
 
 /* eslint-disable no-console */
 
-import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { getMetrics } from './util';
 
 const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
 
@@ -27,53 +27,33 @@ const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
 const MAX_UNIVER_MEMORY_OVERFLOW = 5_000_000;
 
 test('memory', async ({ page }) => {
+    test.setTimeout(60_000);
+
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
 
     const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory before load (B):', memoryBeforeLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(10000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(5000);
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after first load (B):', memoryAfterFirstLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(10000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(5000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load (B):', memoryAfterSecondLoad);
 
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(20000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(5000);
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after disposing univer (B):', memoryAfterDisposingUniver);
 
-    const notLeaking = (memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW)
-        && (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_UNIT_MEMORY_OVERFLOW);
-    expect(notLeaking).toBeTruthy();
+    const noUnitLeaking = memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_UNIT_MEMORY_OVERFLOW;
+    expect(noUnitLeaking).toBeTruthy();
+
+    const noUniverLeaking = memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW;
+    expect(noUniverLeaking).toBeTruthy();
 });
-
-interface IMetrics {
-    JSHeapUsedSize: number;
-}
-
-/**
- * Return a performance metric from the chrome cdp session.
- * Chrome only.
- * @param {Page} page page to attach cdpClient
- * @return {IMetrics}
- * @see {@link https://github.com/microsoft/playwright/issues/18071}
- */
-async function getMetrics(page: Page): Promise<IMetrics> {
-    const client = await page.context().newCDPSession(page);
-    await client.send('Performance.enable');
-    const perfMetricObject = await client.send('Performance.getMetrics');
-    const extractedMetric = perfMetricObject?.metrics;
-    const metricObject = extractedMetric.reduce((acc, { name, value }) => {
-        acc[name] = value;
-        return acc;
-    }, {});
-
-    return metricObject as unknown as IMetrics;
-}
 

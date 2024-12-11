@@ -66,7 +66,7 @@ export class FSelection {
 
     /**
      * Represents the current select cell in the sheet.
-     * @returns {PrimaryInfo} The current select cell info.Pay attention to the type of the return value.
+     * @returns {ISelectionCell} The current select cell info.Pay attention to the type of the return value.
      */
     getCurrentCell(): Nullable<ISelectionCell> {
         const current = this._selections.find((selection) => !!selection.primary);

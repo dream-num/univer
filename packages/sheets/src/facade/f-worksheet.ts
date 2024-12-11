@@ -95,7 +95,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Get the default style of the worksheet
-     * @returns {StyleDataInfo} Default style of the worksheet.
+     * @returns {IStyleData} Default style of the worksheet.
      */
     getDefaultStyle(): Nullable<IStyleData> | string {
         return this._worksheet.getDefaultCellStyle();

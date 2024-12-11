@@ -14,16 +14,43 @@
  * limitations under the License.
  */
 
+import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FWorksheet } from '@univerjs/sheets/facade';
+import { ChangeZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface IFWorksheetSkeletonMixin {
-
     /**
      * Refresh the canvas.
      */
     refreshCanvas(): void;
+    /**
+     * Set zoom ratio of the worksheet.
+     * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 10 to 400.
+     * @returns True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.zoom(200);
+     * const zoomRatio = fWorksheet.getZoom();
+     * console.log(zoomRatio); // 200
+     * ```
+     */
+    zoom(zoomRatio: number): Promise<boolean>;
+    /**
+     * Get the zoom ratio of the worksheet.
+     * @returns The zoom ratio of the worksheet.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const zoomRatio = fWorksheet.getZoom();
+     * console.log(zoomRatio);
+     * ```
+     */
+    getZoom(): number;
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -45,6 +72,19 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         }
 
         mainComponent.makeDirty();
+    }
+
+    override zoom(zoomRatio: number): Promise<boolean> {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.executeCommand(ChangeZoomRatioCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            zoomRatio,
+        });
+    }
+
+    override getZoom(): number {
+        return this._worksheet.getZoomRatio();
     }
 }
 

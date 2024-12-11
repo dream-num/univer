@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
-import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
+
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import {
     SetWorksheetActiveOperation,
     // SetWorksheetUnActivateMutationFactory,
@@ -29,7 +29,6 @@ import { getSheetCommandTarget } from './utils/target-util';
 export interface ISetWorksheetShowCommandParams {
     unitId: string;
     subUnitId: string;
-    value?: string;
 }
 
 export const SetWorksheetShowCommand: ICommand = {

@@ -15,15 +15,23 @@
  */
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
 
+interface IFacadeClearOptions {
+    contentsOnly?: boolean;
+    formatOnly?: boolean;
+}
+
+/**
+ * Represents a worksheet facade api instance. Which provides a set of methods to interact with the worksheet.
+ */
 export class FWorksheet extends FBase {
     constructor(
         protected readonly _fWorkbook: FWorkbook,
@@ -46,28 +54,32 @@ export class FWorksheet extends FBase {
 
     /**
      * Returns the workbook
-     * @returns The workbook
+     * @returns {Workbook} The workbook instance.
      */
     getWorkbook(): Workbook {
         return this._workbook;
     }
 
     /**
-     * Returns the worksheet id
-     * @returns The id of the worksheet
+     * Returns the worksheet id.
+     * @returns {string} The id of the worksheet.
      */
     getSheetId(): string {
         return this._worksheet.getSheetId();
     }
 
     /**
-     * Returns the worksheet name
-     * @returns The name of the worksheet
+     * Returns the worksheet name.
+     * @returns {string} The name of the worksheet.
      */
     getSheetName(): string {
         return this._worksheet.getName();
     }
 
+    /**
+     * Represents the selection ranges info of the worksheet.
+     * @returns {FSelection} return the current selections of the worksheet or null if there is no selection.
+     */
     getSelection(): FSelection | null {
         const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections) {
@@ -83,7 +95,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Get the default style of the worksheet
-     * @returns Default style
+     * @returns {IStyleData} Default style of the worksheet.
      */
     getDefaultStyle(): Nullable<IStyleData> | string {
         return this._worksheet.getDefaultCellStyle();
@@ -111,8 +123,8 @@ export class FWorksheet extends FBase {
 
     /**
      * Set the default style of the worksheet
-     * @param style default style
-     * @returns this worksheet
+     * @param {StyleDataInfo} style default style
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setDefaultStyle(style: string): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -130,6 +142,7 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet row
      * @param {number} index The row index
      * @param {string | Nullable<IStyleData>} style The style name or style data
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -153,6 +166,7 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet column
      * @param {number} index The column index
      * @param {string | Nullable<IStyleData>} style The style name or style data
+     * @returns {Promise<FWorksheet>} This sheet, for chaining.
      */
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
@@ -1099,6 +1113,13 @@ export class FWorksheet extends FBase {
     /**
      * Hides or reveals the sheet gridlines.
      * @param {boolean} hidden If `true`, hide gridlines in this sheet; otherwise show the gridlines.
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // hide the gridlines
+     * fWorkSheet.setHiddenGridlines(true);
+     * ```
      */
     setHiddenGridlines(hidden: boolean): Promise<boolean> {
         return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
@@ -1106,6 +1127,62 @@ export class FWorksheet extends FBase {
             subUnitId: this._worksheet.getSheetId(),
             showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
         } as IToggleGridlinesCommandParams);
+    }
+
+    /**
+     * Set the color of the gridlines in the sheet.
+     * @param {string|undefined} color The color to set for the gridlines.Undefined or null to reset to the default color.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // set the gridlines color to red
+     * fWorkSheet.setGridLinesColor('#ff0000');
+     * ```
+     */
+    setGridLinesColor(color: string | undefined): Promise<boolean> {
+        return this._commandService.executeCommand(SetGridlinesColorCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            color,
+        } as ISetGridlinesColorCommandParams);
+    }
+
+    /**
+     * Get the color of the gridlines in the sheet.
+     * @returns {string | undefined} The color of the gridlines in the sheet or undefined. The default color is 'rgb(214, 216, 219)'.
+     */
+    getGridLinesColor(): string | undefined {
+        return this._worksheet.getGridlinesColor() as string | undefined;
+    }
+
+    /**
+     * Sets the sheet tab color.
+     * @param {string|null|undefined} color A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // set the tab color to red
+     * fWorkSheet.setTabColor('#ff0000');
+     * ```
+     */
+    setTabColor(color: string): Promise<boolean> {
+        return this._commandService.executeCommand(SetTabColorCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            color,
+        });
+    }
+
+    /**
+     * Get the tab color of the sheet.
+     * @returns {string} The tab color of the sheet or undefined.
+     */
+    getTabColor(): string | undefined {
+        return this._worksheet.getTabColor() as string | undefined;
     }
 
     /**
@@ -1144,5 +1221,232 @@ export class FWorksheet extends FBase {
                 }
             }
         });
+    }
+
+    /**
+     * Hides this sheet. Has no effect if the sheet is already hidden. If this method is called on the only visible sheet, it throws an exception.
+     */
+    hideSheet(): void {
+        const commandService = this._injector.get(ICommandService);
+        const workbook = this._workbook;
+        const sheets = workbook.getSheets();
+        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() === BooleanNumber.TRUE);
+        if (visibleSheets.length <= 1) {
+            throw new Error('Cannot hide the only visible sheet');
+        }
+
+        commandService.executeCommand(SetWorksheetHideCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        });
+    }
+
+    /**
+     * Shows this sheet. Has no effect if the sheet is already visible.
+     */
+    showSheet(): Promise<boolean> {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.executeCommand(SetWorksheetShowCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        });
+    }
+
+    /**
+     * Returns true if the sheet is currently hidden.
+     * @returns {boolean} True if the sheet is hidden; otherwise, false.
+     */
+    isSheetHidden(): boolean {
+        return Boolean(this._worksheet.isSheetHidden() === BooleanNumber.TRUE);
+    }
+
+    /**
+     * Sets the sheet name.
+     * @param {string} name The new name for the sheet.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // set the sheet name to 'Sheet1'
+     * fWorkSheet.setName('Sheet1');
+     * ```
+     */
+    setName(name: string): Promise<boolean> {
+        return this._commandService.executeCommand(SetWorksheetNameCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            name,
+        });
+    }
+
+    /**
+     * Activates this sheet. Does not alter the sheet itself, only the parent's notion of the active sheet.
+     * @returns Current sheet, for chaining.
+     */
+    activate(): FWorksheet {
+        this._fWorkbook.setActiveSheet(this);
+        return this;
+    }
+
+    /**
+     * Gets the position of the sheet in its parent spreadsheet. Starts at 0.
+     * @returns {number} The position of the sheet in its parent spreadsheet.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // get the position of the active sheet
+     * const position = fWorkSheet.getIndex();
+     * console.log(position); // 0
+     * ```
+     */
+    getIndex(): number {
+        return this._workbook.getSheetIndex(this._worksheet);
+    }
+
+    /**
+     * Clears the sheet of content and formatting information.Or Optionally clears only the contents or only the formatting.
+     * @param {IFacadeClearOptions} [options] Options for clearing the sheet. If not provided, the contents and formatting are cleared both.
+     * @param {boolean} [options.contentsOnly] If true, the contents of the sheet are cleared. If false, the contents and formatting are cleared. Default is false.
+     * @param {boolean} [options.formatOnly] If true, the formatting of the sheet is cleared. If false, the contents and formatting are cleared. Default is false.
+     * @returns  {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // clear the sheet of content and formatting information
+     * fWorkSheet.clear();
+     * // clear the sheet of content only
+     * fWorkSheet.clear({ contentsOnly: true });
+     * ```
+     */
+    clear(options?: IFacadeClearOptions): Promise<boolean> {
+        if (options && options.contentsOnly && !options.formatOnly) {
+            return this.clearContents();
+        }
+
+        if (options && options.formatOnly && !options.contentsOnly) {
+            return this.clearFormats();
+        }
+
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const commandService = this._injector.get(ICommandService);
+
+        const range = {
+            startRow: 0,
+            endRow: this._worksheet.getRowCount() - 1,
+            startColumn: 0,
+            endColumn: this._worksheet.getColumnCount() - 1,
+        };
+
+        return commandService.executeCommand(ClearSelectionAllCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: [range],
+            options,
+        });
+    }
+
+    /**
+     * Clears the sheet of contents, while preserving formatting information.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // clear the sheet of content only
+     * fWorkSheet.clearContents();
+     * ```
+     */
+    clearContents(): Promise<boolean> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const commandService = this._injector.get(ICommandService);
+
+        const range = {
+            startRow: 0,
+            endRow: this._worksheet.getRowCount() - 1,
+            startColumn: 0,
+            endColumn: this._worksheet.getColumnCount() - 1,
+        };
+
+        return commandService.executeCommand(ClearSelectionContentCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: [range],
+        });
+    }
+
+    /**
+     * Clears the sheet of formatting, while preserving contents.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // clear the sheet of formatting only
+     * fWorkSheet.clearFormats();
+     * ```
+     */
+    clearFormats(): Promise<boolean> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const commandService = this._injector.get(ICommandService);
+
+        const range = {
+            startRow: 0,
+            endRow: this._worksheet.getRowCount() - 1,
+            startColumn: 0,
+            endColumn: this._worksheet.getColumnCount() - 1,
+        };
+
+        return commandService.executeCommand(ClearSelectionFormatCommand.id, {
+            unitId,
+            subUnitId,
+            ranges: [range],
+        });
+    }
+
+    /**
+     * Returns a Range corresponding to the dimensions in which data is present.
+     *  This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
+     * @returns {FRange} The range of the data in the sheet.
+     */
+    getDataRange() {
+        const lastRow = this.getLastRows();
+        const lastColumn = this.getLastColumns();
+        return this.getRange(0, 0, lastRow + 1, lastColumn + 1);
+    }
+
+    /**
+     * Returns the position of the last column that has content.
+     * @returns {number} the last column of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100, 20, 1, 1);
+     * console.log(fWorkSheet.getLastColumns()); // 20
+     * ```
+     */
+    getLastColumns(): number {
+        return this._worksheet.getLastColumnWithContent();
+    }
+
+    /**
+     * Returns the position of the last row that has content.
+     * @returns {number} the last row of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100,1,1,1);
+     * fRange.setValue('Hello World');
+     * console.log(fWorkSheet.getLastRows()); // 100
+     */
+    getLastRows(): number {
+        return this._worksheet.getLastRowWithContent();
     }
 }

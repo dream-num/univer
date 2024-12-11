@@ -15,43 +15,52 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetTabColorMutationParams } from '../mutations/set-tab-color.mutation';
-
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-import { SetTabColorMutation, SetTabColorUndoMutationFactory } from '../mutations/set-tab-color.mutation';
+import { type ISetGridlinesColorMutationParams, SetGridlinesColorMutation } from '../mutations/set-gridlines-color.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface ISetTabColorCommandParams {
-    value: string;
+export interface ISetGridlinesColorCommandParams {
+    color: string | undefined;
+    unitId?: string;
+    subUnitId?: string;
 }
 
-export const SetTabColorCommand: ICommand = {
+export const SetGridlinesColorCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-tab-color',
-
-    handler: async (accessor: IAccessor, params: ISetTabColorCommandParams) => {
+    id: 'sheet.command.set-gridlines-color',
+    handler: async (accessor: IAccessor, params?: ISetGridlinesColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
+        const { worksheet } = target;
+        const currentlyColor = worksheet.getConfig().gridlinesColor;
+        if (currentlyColor === params?.color) return false;
+
         const { unitId, subUnitId } = target;
-        const setTabColorMutationParams: ISetTabColorMutationParams = {
-            color: params.value,
+        const doParams: ISetGridlinesColorMutationParams = {
+            color: params?.color,
             unitId,
             subUnitId,
         };
 
-        const undoMutationParams = SetTabColorUndoMutationFactory(accessor, setTabColorMutationParams);
-        const result = commandService.syncExecuteCommand(SetTabColorMutation.id, setTabColorMutationParams);
+        const undoMutationParams: ISetGridlinesColorMutationParams = {
+            color: currentlyColor,
+            unitId,
+            subUnitId,
+        };
 
+        const result = commandService.syncExecuteCommand(SetGridlinesColorMutation.id, doParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetTabColorMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: SetTabColorMutation.id, params: setTabColorMutationParams }],
+                undoMutations: [{ id: SetGridlinesColorMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetGridlinesColorMutation.id, params: doParams }],
             });
+
             return true;
         }
 

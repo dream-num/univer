@@ -219,12 +219,12 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     private _buildSkeleton(worksheet: Worksheet) {
-        const config = worksheet.getConfig();
+        // const config = worksheet.getConfig();
+        const scene = this._context.scene;
         const spreadsheetSkeleton = this._injector.createInstance(
             SpreadsheetSkeleton,
+            scene,
             worksheet,
-            config,
-            worksheet.getCellMatrix(),
             this._context.unit.getStyles()
         );
 

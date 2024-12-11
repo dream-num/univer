@@ -480,7 +480,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Unhides the row in the given range.
+     * Un hides the row in the given range.
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
@@ -868,7 +868,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Unhides one or more consecutive columns starting at the given index. Use 0-index for this method.
+     * Un hides one or more consecutive columns starting at the given index. Use 0-index for this method.
      * @param columnIndex The starting index of the columns to unhide.
      * @param numColumns The number of columns to unhide.
      * @returns This sheet, for chaining.

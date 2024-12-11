@@ -43,7 +43,8 @@ import type {
     VerticalAlign,
     Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -222,6 +223,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         endColumn: -1,
     };
 
+    private _cacheRangeMap: Map<SHEET_VIEWPORT_KEY, IRowColumnRange> = new Map();
     private _visibleRangeMap: Map<SHEET_VIEWPORT_KEY, IRowColumnRange> = new Map();
 
     // private _dataMergeCache: IRange[] = [];
@@ -252,15 +254,27 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _renderRawFormula = false;
 
-    constructor(
-        readonly worksheet: Worksheet,
+    /**
+     * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
+     * `ViewModel` will be not working.
+     */
+    private _worksheetData: IWorksheetData;
+    private _cellData: ObjectMatrix<Nullable<ICellData>>;
 
-        /**
-         * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
-         * `ViewModel` will be not working.
-         */
-        private _worksheetData: IWorksheetData,
-        private _cellData: ObjectMatrix<Nullable<ICellData>>,
+    /**
+     * created by SheetSkeletonManagerService@_buildSkeleton
+     * @param worksheet
+     * @param _worksheetData
+     * @param _cellData
+     * @param _styles
+     * @param _localeService
+     * @param _contextService
+     * @param _configService
+     * @param _injector
+     */
+    constructor(
+        readonly scene: Scene,
+        readonly worksheet: Worksheet,
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
@@ -268,11 +282,18 @@ export class SpreadsheetSkeleton extends Skeleton {
         @Inject(Injector) private _injector: Injector
     ) {
         super(_localeService);
+        this._worksheetData = this.worksheet.getConfig();
+        this._cellData = this.worksheet.getCellMatrix();
 
         this._imageCacheMap = new ImageCacheMap(this._injector);
         this._updateLayout();
         this._initContextListener();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+
+        if (!window.sk) {
+            window.sk = {};
+        }
+        window.sk[this.worksheet.getSheetId()] = this;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -311,7 +332,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     visibleRangeByViewportKey(viewportKey: SHEET_VIEWPORT_KEY): Nullable<IRowColumnRange> {
-        return this._visibleRangeMap.get(viewportKey);
+        return this._cacheRangeMap.get(viewportKey);
     }
 
     // get dataMergeCache(): IRange[] {
@@ -436,20 +457,17 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns boolean
      */
     updateVisibleRange(bounds?: IViewportInfo): boolean {
-        if (!this._worksheetData) {
+        if (!this._worksheetData || !this._rowHeightAccumulation || !this._columnWidthAccumulation) {
             return false;
         }
 
-        this._updateLayout();
-
-        if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) {
-            return false;
-        }
-
-        if (bounds != null) {
-            const range = this.getRangeByBounding(bounds);
+        if (bounds) {
+            const range = this.getRangeByViewport(bounds);
             this._visibleRange = range;
             this._visibleRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, range);
+
+            const cacheRange = this.getCacheRangeByViewport(bounds);
+            this._cacheRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, cacheRange);
         }
 
         return true;
@@ -460,9 +478,10 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param bounds viewBounds
      */
     setStylesCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
-        if (!this.updateVisibleRange(bounds)) {
-            return;
-        }
+        if (!this._worksheetData) return;
+        if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) return;
+
+        this.updateVisibleRange(bounds);
 
         const rowColumnSegment = this._visibleRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
@@ -502,10 +521,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculate(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
+    /**
+     * Refresh cache after markDirty by SheetSkeletonManagerService.reCalculate()
+     * @param bounds
+     */
+    calculate(): Nullable<SpreadsheetSkeleton> {
         this._resetCache();
-
-        this.setStylesCache(bounds);
+        this._updateLayout();
+        // this.setStylesCache();
 
         return this;
     }
@@ -825,7 +848,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     //#endregion
 
     /**
-     * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
+     * Calculate data for row col & cell position.
+     * This method should be called whenever a sheet is dirty.
+     * Update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
      */
     private _updateLayout(): void {
         if (!this.dirty) {
@@ -876,8 +901,16 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(rowHeader.width, widthByComputation);
     }
 
-    getRangeByBounding(bounds?: IViewportInfo): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
+    getRangeByViewport(vpInfo?: IViewportInfo): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, vpInfo?.viewBound);
+    }
+
+    getCacheRangeByViewport(vpInfo?: IViewportInfo): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, vpInfo?.cacheBound);
+    }
+
+    getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
     /**
@@ -886,10 +919,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     getWorksheetConfig(): IWorksheetData {
         return this._worksheetData;
-    }
-
-    getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
-        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
     getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
@@ -2240,5 +2269,40 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     private _getCellMergeInfo(row: number, column: number): ISelectionCell {
         return this.worksheet.getCellInfoInMergeData(row, column);
+    }
+
+    scrollToRow(row: number, viewportKey: SHEET_VIEWPORT_KEY) {
+        const distanceY = this._offsetYToRow(row);
+        const viewport = this.scene.getViewport(viewportKey);
+        if (viewport) {
+            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: distanceY });
+        }
+    }
+
+    getDistanceFromTopLeft(row: number, col: number): IPoint {
+        return {
+            x: this._offsetXToCol(col),
+            y: this._offsetYToRow(row),
+        };
+    }
+
+    /**
+     * Distance from top left to row
+     * @param row
+     */
+    private _offsetYToRow(row: number): number {
+        const arr = this._rowHeightAccumulation;
+        const i = Math.max(0, row - 1);
+        return arr[i];
+    }
+
+    /**
+     * Distance from top left to col
+     * @param col
+     */
+    private _offsetXToCol(col: number): number {
+        const arr = this._columnWidthAccumulation;
+        const i = Math.max(0, col - 1);
+        return arr[i];
     }
 }

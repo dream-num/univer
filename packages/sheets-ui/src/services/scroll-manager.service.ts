@@ -126,23 +126,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     /**
-     * call by set frozen
-     * @param scrollInfo
-     */
-    setScrollStateToCurrSheetAndEmitEvent(scrollInfo: IScrollState) {
-        if (this._searchParamForScroll == null) {
-            return;
-        }
-
-        this._setScrollState({
-            ...this._searchParamForScroll,
-            ...scrollInfo,
-        });
-        this._scrollStateNext(this._searchParamForScroll);
-    }
-
-    /**
-     * set _scrollStateMap but no _scrollInfo$.next
+     * Set _scrollStateMap but no _scrollInfo$.next
      * @param scroll
      */
     setScrollStateToCurrSheet(scroll: IScrollState) {

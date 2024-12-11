@@ -247,7 +247,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
     private get _editPopup() {
         const popup: ICanvasPopup = {
             componentKey: CellLinkEdit.componentKey,
-            direction: 'bottom',
+            direction: 'vertical',
             onClickOutside: () => {
                 if (!this.getIsKeepVisible()) {
                     this.endEditing();

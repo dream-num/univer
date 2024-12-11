@@ -49,6 +49,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     getPrimaryForRange,
     SetSelectionsOperation,
+    SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
@@ -146,6 +147,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._copyContentCache = new CopyContentCache();
 
         this.disposeWithMe(this._htmlToUSM);
+        this._initUnitDisposed();
     }
 
     copyContentCache(): CopyContentCache {
@@ -666,13 +668,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
 
         // setting the selection should be done separately, regardless of the pasting type.
-        const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix);
+        const setSelectionOperation = this._getSetSelectionOperation(unitId, subUnitId, pastedRange, cellMatrix, pasteType);
         if (setSelectionOperation) {
             redoMutationsInfo.push(setSelectionOperation);
         }
 
         redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
         undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
+        undoMutationsInfo.push({ id: SetWorksheetActiveOperation.id, params: { unitId: target.unitId, subUnitId: target.subUnitId } });
 
         this._logService.log('[SheetClipboardService]', 'pasting mutations', {
             undoMutationsInfo,
@@ -696,7 +699,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         unitId: string,
         subUnitId: string,
         range: IDiscreteRange,
-        cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>
+        cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>,
+        pasteType?: string
     ) {
         const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
@@ -721,7 +725,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const rowSpan = mainCell?.rowSpan || 1;
         const colSpan = mainCell?.colSpan || 1;
 
-        if (rowSpan > 1 || colSpan > 1) {
+        const shouldExpandPrimary = pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE
+            || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER
+            || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT;
+
+        if (shouldExpandPrimary && (rowSpan > 1 || colSpan > 1)) {
             const mergeRange = {
                 startRow,
                 endRow: startRow + rowSpan - 1,
@@ -1074,6 +1082,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             this._markSelectionService.removeShape(this._copyMarkId);
             this._copyMarkId = null;
         }
+    }
+
+    private _initUnitDisposed() {
+        this.disposeWithMe(
+            this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+                if (workbook) {
+                    const copyCache = this.copyContentCache();
+                    copyCache.clearWithUnitId(workbook.getUnitId());
+                }
+            })
+        );
     }
 }
 

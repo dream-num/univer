@@ -143,6 +143,12 @@ export interface IBuildOptions {
      * @default false
      */
     cleanup?: boolean;
+
+    /**
+     * Condition to build node first
+     * @default false
+     */
+    nodeFirst?: boolean;
 }
 
 export function remove() {
@@ -159,7 +165,7 @@ export function remove() {
 }
 
 export async function build(options?: IBuildOptions) {
-    const { skipUMD = false, cleanup = false } = options ?? {};
+    const { skipUMD = false, cleanup = false, nodeFirst = false } = options ?? {};
 
     if (cleanup) {
         remove();
@@ -194,6 +200,9 @@ export async function build(options?: IBuildOptions) {
         configFile: false,
         build: {
             target: 'chrome70',
+        },
+        resolve: {
+            conditions: nodeFirst ? ['node', 'default'] : undefined,
         },
         define: {
             'process.env.NODE_ENV': JSON.stringify('production'),

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
+import type { IMessageProtocol } from '../rpc.service';
 import { awaitTime } from '@univerjs/core';
 import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { Observable } from 'rxjs';
 import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
-import type { IMessageProtocol } from '../rpc.service';
 
 describe('Test ChannelClient & ChannelServer', () => {
     let clientProtocol: TestMessageProtocolForClient;

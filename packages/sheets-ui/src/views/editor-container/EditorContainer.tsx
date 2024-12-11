@@ -17,10 +17,11 @@
 import type { KeyCode } from '@univerjs/ui';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IContextService, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType, FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ComponentManager, DISABLE_AUTO_FOCUS_KEY, MetaKeys, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
+
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -83,10 +84,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             } else {
                 setState({
-                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
-                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
-                    left: startX + FIX_ONE_PIXEL_BLUR_OFFSET,
-                    top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
+                    width: endX - startX,
+                    height: endY - startY,
+                    left: startX,
+                    top: startY,
                 });
 
                 const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);

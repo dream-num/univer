@@ -22,3 +22,6 @@ import '@univerjs/sheets-data-validation/facade';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets-filter/facade';
 import '@univerjs/sheets-formula/facade';
+import '@univerjs/sheets-numfmt/facade';
+import '@univerjs/sheets-hyper-link/facade';
+import '@univerjs/sheets-thread-comment/facade';

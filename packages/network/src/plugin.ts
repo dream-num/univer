@@ -17,10 +17,16 @@
 import type { DependencyOverride } from '@univerjs/core';
 import { Inject, Injector, mergeOverrideWithDependencies, Plugin, registerDependencies } from '@univerjs/core';
 import { HTTPService } from './services/http/http.service';
+import { FetchHTTPImplementation } from './services/http/implementations/fetch';
 import { IHTTPImplementation } from './services/http/implementations/implementation';
 import { XHRHTTPImplementation } from './services/http/implementations/xhr';
 
 export interface IUniverNetworkPluginConfig {
+    /**
+     * Use fetch instead of XMLHttpRequest. By default, Univer will use fetch on Node.js and XMLHttpRequest in browser.
+     */
+    useFetchImpl?: boolean;
+
     /**
      * Build in dependencies that can be overridden:
      *
@@ -44,9 +50,15 @@ export class UniverNetworkPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        const impl = this._config?.useFetchImpl
+            ? FetchHTTPImplementation
+            : typeof window !== 'undefined'
+                ? XHRHTTPImplementation
+                : FetchHTTPImplementation;
+
         registerDependencies(this._injector, mergeOverrideWithDependencies([
             [HTTPService],
-            [IHTTPImplementation, { useClass: XHRHTTPImplementation }],
+            [IHTTPImplementation, { useClass: impl }],
         ], this._config?.override));
     }
 }

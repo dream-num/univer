@@ -16,8 +16,8 @@
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { FBase, ICommandService, Inject, Injector } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { FBase, ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
@@ -25,7 +25,8 @@ import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMu
 export class FFormula extends FBase {
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
     }
@@ -103,5 +104,20 @@ export class FFormula extends FBase {
                 callback(params.stageInfo);
             }
         });
+    }
+
+    /**
+     * Set the maximum number of iterations for the formula calculation.
+     * @param maxIteration The maximum number of iterations. The default value is 1.
+     * @example
+     * @example
+     * ```ts
+     * // The code below moves the active sheet to the specified index
+     * const formulaEngine = univerAPI.getFormula();
+     * formulaEngine.maxIteration(5);
+     * ```
+     */
+    setMaxIteration(maxIteration: number): void {
+        this._configService.setConfig(ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, maxIteration);
     }
 }

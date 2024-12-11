@@ -20,6 +20,10 @@ import type { BaseFunction } from '../functions/base-function';
 
 export const ENGINE_FORMULA_PLUGIN_CONFIG_KEY = 'engine-formula.config';
 
+export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
+
+export const ENGINE_FORMULA_CYCLE_REFERENCE_COUNT = 'CYCLE_REFERENCE_COUNT';
+
 export const configSymbol = Symbol(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
 export interface IUniverEngineFormulaConfig {

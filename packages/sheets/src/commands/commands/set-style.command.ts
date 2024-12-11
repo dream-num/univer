@@ -371,7 +371,7 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-color',
     handler: async (accessor, params) => {
-        if (!params || !params.value) {
+        if (!params) {
             return false;
         }
 

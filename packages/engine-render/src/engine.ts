@@ -336,15 +336,18 @@ export class Engine extends Disposable {
         }
 
         const { width, height } = getSizeForDom(this._container);
-
         if (width === this._previousWidth && height === this._previousHeight) {
             return;
         }
 
         this._previousWidth = width;
-
         this._previousHeight = height;
+        this.resizeBySize(width, height);
+    }
 
+    dprChange() {
+        const width = this._previousWidth;
+        const height = this._previousHeight;
         this.resizeBySize(width, height);
     }
 
@@ -998,7 +1001,7 @@ export class Engine extends Disposable {
         const mediaQueryList = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
 
         const _handleMediaChange = () => {
-            this.resize();
+            this.dprChange();
         };
 
         mediaQueryList.addEventListener('change', _handleMediaChange);

@@ -16,17 +16,18 @@
 
 import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IFeatureDirtyRangeType, IFormulaData, IFormulaDataItem, IOtherFormulaData, IUnitData } from '../../basics/common';
-
 import type { IFormulaDirtyData } from '../../services/current-data.service';
+
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import type { IFormulaDependencyTree } from './dependency-tree';
-import { createIdentifier, Disposable, Inject, ObjectMatrix } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, ObjectMatrix, RTree } from '@univerjs/core';
+
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDependencyManagerService } from '../../services/dependency-manager.service';
@@ -62,6 +63,8 @@ export const IFormulaDependencyGenerator = createIdentifier<IFormulaDependencyGe
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
+    protected _dependencyRTreeCacheForAddressFunction: RTree = new RTree();
+
     constructor(
         @IFormulaCurrentConfigService protected readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService protected readonly _runtimeService: IFormulaRuntimeService,
@@ -78,6 +81,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
     override dispose(): void {
         this._updateRangeFlattenCache.clear();
+        this._dependencyRTreeCacheForAddressFunction.clear();
     }
 
     async generate() {
@@ -129,6 +133,8 @@ export class FormulaDependencyGenerator extends Disposable {
         if (isCycleDependency) {
             this._runtimeService.enableCycleDependency();
         }
+
+        this._dependencyRTreeCacheForAddressFunction.clear();
 
         return Promise.resolve(finalTreeList);
     }
@@ -338,13 +344,13 @@ export class FormulaDependencyGenerator extends Disposable {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            const node = tree.node;
-
-            if (node == null) {
-                continue;
-            }
-
+            const node = this._getTreeNode(tree);
             tree.isDirty = this._includeTree(tree, node);
+
+            const addressFunctionNodes = this._getAddressFunctionNodeList(node);
+            if (addressFunctionNodes.length > 0) {
+                tree.addressFunctionNodes = addressFunctionNodes;
+            }
 
             if (tree.isVirtual) {
                 continue;
@@ -374,6 +380,8 @@ export class FormulaDependencyGenerator extends Disposable {
             }
             this._dependencyManagerService.addDependencyRTreeCache(tree);
         }
+
+        await this._calculateListByFunctionRefNode(treeList);
 
         return treeList;
     }
@@ -720,6 +728,13 @@ export class FormulaDependencyGenerator extends Disposable {
             const item = children[i];
             if (this._isPreCalculateNode(item)) {
                 result.push(item as PreCalculateNodeType);
+                if (item.nodeType === NodeType.UNION) {
+                    for (const unionChildItem of item.getChildren()) {
+                        if (unionChildItem.nodeType === NodeType.FUNCTION && (unionChildItem as FunctionNode).isAddress()) {
+                            this._nodeTraversalRef(unionChildItem, result);
+                        }
+                    }
+                }
                 continue;
             } else if (item.nodeType === NodeType.REFERENCE) {
                 result.push(item as PreCalculateNodeType);
@@ -764,7 +779,6 @@ export class FormulaDependencyGenerator extends Disposable {
     protected async _getRangeListByNode(nodeData: IExecuteAstNodeData) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
-        const referenceFunctionList: FunctionNode[] = [];
 
         const refOffsetX = nodeData.refOffsetX;
         const refOffsetY = nodeData.refOffsetY;
@@ -775,9 +789,6 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         this._nodeTraversalRef(node, preCalculateNodeList);
-
-        this._nodeTraversalReferenceFunction(node, referenceFunctionList);
-
         const rangeList: IUnitRange[] = [];
 
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
@@ -793,6 +804,237 @@ export class FormulaDependencyGenerator extends Disposable {
 
             node.setValue(null);
         }
+
+        return rangeList;
+    }
+
+    protected _getAddressFunctionNodeList(node: Nullable<BaseAstNode>) {
+        const referenceFunctionList: FunctionNode[] = [];
+
+        if (node == null) {
+            return [];
+        }
+
+        this._nodeTraversalReferenceFunction(node, referenceFunctionList);
+
+        return referenceFunctionList;
+    }
+
+    protected _getTreeNode(tree: IFormulaDependencyTree) {
+        return tree.node!;
+    }
+
+    protected async _buildDirtyRangesByAddressFunction(treeDependencyCache: RTree, tree: IFormulaDependencyTree) {
+        const addressFunctionNodes = tree.addressFunctionNodes;
+
+        if (addressFunctionNodes.length === 0) {
+            return;
+        }
+
+        const refOffsetX = tree.refOffsetX;
+        const refOffsetY = tree.refOffsetY;
+
+        const addressFunctionRangeList = await this._getRangeListByFunctionRefNode(addressFunctionNodes, refOffsetX, refOffsetY);
+
+        tree.addressFunctionNodes = [];
+
+        this._addDependencyTreeByAddressFunction(tree, addressFunctionRangeList);
+
+        const newSearchResults = treeDependencyCache.bulkSearch(addressFunctionRangeList) as Set<number>;
+
+        const preCalculateTreeList = this._buildTreeNodeById(newSearchResults);
+
+        if (preCalculateTreeList.length === 0) {
+            return;
+        }
+
+        await this._calculateAddressFunctionRuntimeData(treeDependencyCache, preCalculateTreeList);
+    }
+
+    private _executedAddressFunctionNodeIds: Set<number> = new Set();
+
+    protected async _calculateListByFunctionRefNode(treeList: IFormulaDependencyTree[]) {
+        const treeDependencyCache = new RTree();
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+
+            treeDependencyCache.insert({
+                unitId: tree.unitId,
+                sheetId: tree.subUnitId,
+                range: {
+                    startRow: tree.row,
+                    startColumn: tree.column,
+                    endRow: tree.row,
+                    endColumn: tree.column,
+                },
+                id: tree.treeId,
+            });
+        }
+
+        this._executedAddressFunctionNodeIds.clear();
+
+        for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            await this._calculateAddressFunction(treeDependencyCache, tree);
+        }
+    }
+
+    private async _calculateAddressFunction(treeDependencyCache: RTree, tree: IFormulaDependencyTree) {
+        const addressFunctionNodes = tree.addressFunctionNodes;
+
+        if (addressFunctionNodes.length === 0) {
+            return;
+        }
+
+        const refOffsetX = tree.refOffsetX;
+        const refOffsetY = tree.refOffsetY;
+
+        this._runtimeService.setCurrent(
+            tree.row,
+            tree.column,
+            tree.rowCount,
+            tree.columnCount,
+            tree.subUnitId,
+            tree.unitId
+        );
+
+        const dirtyRanges: IUnitRange[] = [];
+        for (let j = 0, len = addressFunctionNodes.length; j < len; j++) {
+            const rangeList = await this._getRangeListByNode({
+                node: addressFunctionNodes[j],
+                refOffsetX,
+                refOffsetY,
+            });
+
+            dirtyRanges.push(...rangeList);
+        }
+
+        const newSearchResults = new Set<number>();
+        this._searchDependencyByAddressFunction(treeDependencyCache, dirtyRanges, newSearchResults);
+
+        const preCalculateTreeList: IFormulaDependencyTree[] = this._buildTreeNodeById(newSearchResults);
+
+        if (preCalculateTreeList.length === 0) {
+            await this._buildDirtyRangesByAddressFunction(treeDependencyCache, tree);
+            return;
+        }
+
+        // const finalTreeList = this._calculateRunList(preCalculateTreeList);
+
+        // for(const tree of finalTreeList){
+        //     tree.resetState();
+        // }
+
+        await this._calculateAddressFunctionRuntimeData(treeDependencyCache, preCalculateTreeList);
+
+        await this._buildDirtyRangesByAddressFunction(treeDependencyCache, tree);
+    }
+
+    private async _calculateAddressFunctionRuntimeData(treeDependencyCache: RTree, preCalculateTreeList: IFormulaDependencyTree[]) {
+        while (preCalculateTreeList.length > 0) {
+            const tree = preCalculateTreeList.pop()!;
+            const node = this._getTreeNode(tree);
+            const nodeData = {
+                node,
+                refOffsetX: tree.refOffsetX,
+                refOffsetY: tree.refOffsetY,
+            };
+
+            await this._calculateAddressFunction(treeDependencyCache, tree);
+
+            this._runtimeService.setCurrent(
+                tree.row,
+                tree.column,
+                tree.rowCount,
+                tree.columnCount,
+                tree.subUnitId,
+                tree.unitId
+            );
+
+            let value: FunctionVariantType;
+            if (this._interpreter.checkAsyncNode(nodeData.node)) {
+                value = await this._interpreter.executeAsync(nodeData);
+            } else {
+                value = this._interpreter.execute(nodeData);
+            }
+
+            if (tree.formulaId != null) {
+                this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
+            } else {
+                this._runtimeService.setRuntimeData(value);
+            }
+        }
+    }
+
+    private _buildTreeNodeById(treeIds: Set<number>) {
+        const preCalculateTreeList: IFormulaDependencyTree[] = [];
+        for (const treeId of treeIds) {
+            const tree = this._getTreeById(treeId);
+            if (!tree || this._executedAddressFunctionNodeIds.has(treeId)) {
+                continue;
+            }
+
+            this._executedAddressFunctionNodeIds.add(treeId);
+
+            preCalculateTreeList.push(tree);
+        }
+        return preCalculateTreeList;
+    }
+
+    private _searchDependencyByAddressFunction(treeDependencyCache: RTree, dirtyRanges: IUnitRange[], searchResults: Set<number>) {
+        const newSearchResults = treeDependencyCache.bulkSearch(dirtyRanges) as Set<number>;
+        const addressFunctionNodes = this._dependencyRTreeCacheForAddressFunction.bulkSearch(dirtyRanges) as Set<number>;
+        for (const treeId of addressFunctionNodes) {
+            if (!searchResults.has(treeId)) {
+                searchResults.add(treeId);
+            }
+        }
+
+        const newDirtyRanges: IUnitRange[] = [];
+        for (const treeId of newSearchResults) {
+            const tree = this._getTreeById(treeId);
+            if (tree && !searchResults.has(treeId)) {
+                newDirtyRanges.push(...tree.rangeList);
+
+                searchResults.add(treeId);
+            }
+        }
+
+        if (newDirtyRanges.length > 0) {
+            this._searchDependencyByAddressFunction(treeDependencyCache, newDirtyRanges, searchResults);
+        }
+
+        return searchResults;
+    }
+
+    protected _getTreeById(treeId: number) {
+        return this._dependencyManagerService.getTreeById(treeId);
+    }
+
+    private _addDependencyTreeByAddressFunction(tree: IFormulaDependencyTree, addressFunctionRangeList: IUnitRange[]) {
+        const searchRanges = [];
+        for (let i = 0; i < addressFunctionRangeList.length; i++) {
+            const unitRangeWithNum = addressFunctionRangeList[i];
+            const { unitId, sheetId, range } = unitRangeWithNum;
+
+            searchRanges.push({
+                unitId,
+                sheetId,
+                range,
+                id: tree.treeId,
+            });
+        }
+
+        this._dependencyRTreeCacheForAddressFunction.bulkInsert(searchRanges);
+    }
+
+    /**
+     * Calculate the range required for collection in advance,
+     * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
+     * @param node
+     */
+    protected async _getRangeListByFunctionRefNode(referenceFunctionList: FunctionNode[], refOffsetX: number, refOffsetY: number) {
+        const rangeList: IUnitRange[] = [];
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
@@ -823,6 +1065,10 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
+        const addressSearchResults = this._dependencyRTreeCacheForAddressFunction.bulkSearch(dirtyRanges) as Set<number>;
+        for (const addressSearchResult of addressSearchResults) {
+            treeIds.add(addressSearchResult);
+        }
 
         const allTree: IFormulaDependencyTree[] = this._dependencyManagerService.buildDependencyTree(treeList);
 
@@ -1009,6 +1255,18 @@ export class FormulaDependencyGenerator extends Disposable {
             cacheStack.length = 0;
 
             for (const parentTreeId of tree.parents) {
+                const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
+                if (!parentTree) {
+                    throw new Error('ParentDependencyTree object is null');
+                }
+                if (parentTree.isAdded() || tree.isSkip()) {
+                    continue;
+                }
+                cacheStack.push(parentTree);
+            }
+
+            const addressSearchResults = this._dependencyRTreeCacheForAddressFunction.bulkSearch(tree.toRTreeItem()) as Set<number>;
+            for (const parentTreeId of addressSearchResults) {
                 const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
                     throw new Error('ParentDependencyTree object is null');

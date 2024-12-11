@@ -63,6 +63,11 @@ export function getDefaultOnPasteCellMutations(
         redoMutationsInfo.push(...clearStyleRedos);
         undoMutationsInfo.push(...clearStyleUndos);
 
+        // clear value
+        const { undos: clearValueUndos, redos: clearValueRedos } = getClearCellValueMutations(pasteTo, data, accessor);
+        redoMutationsInfo.push(...clearValueRedos);
+        undoMutationsInfo.push(...clearValueUndos);
+
         // set values
         const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
         redoMutationsInfo.push(...setValuesRedos);
@@ -309,7 +314,11 @@ export function getSetCellValueMutations(
         const { row: realRow, col: realCol } = mapFunc(row, col);
 
         if (value.p?.body) {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v }));
+            const newValue = Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v });
+            if (newValue.p.body?.textRuns) {
+                newValue.p.body.textRuns = [];
+            }
+            valueMatrix.setValue(realRow, realCol, newValue);
         } else {
             valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v, t: value.t }));
         }
@@ -485,6 +494,47 @@ export function getClearCellStyleMutations(
             subUnitId,
             unitId,
             cellValue: Tools.deepClone(clearStyleMatrix.getMatrix()),
+        };
+        redoMutationsInfo.push({
+            id: SetRangeValuesMutation.id,
+            params: clearMutation,
+        });
+
+        // undo
+        const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            clearMutation
+        );
+
+        undoMutationsInfo.push({
+            id: SetRangeValuesMutation.id,
+            params: undoClearMutation,
+        });
+    }
+
+    return { undos: undoMutationsInfo, redos: redoMutationsInfo };
+}
+
+export function getClearCellValueMutations(
+    pasteTo: ISheetDiscreteRangeLocation,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    accessor: IAccessor
+) {
+    const redoMutationsInfo: IMutationInfo[] = [];
+    const undoMutationsInfo: IMutationInfo[] = [];
+    const clearValueMatrix = new ObjectMatrix<ICellData>();
+    const { unitId, subUnitId, range } = pasteTo;
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
+
+    matrix.forValue((row, col, _value) => {
+        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+        clearValueMatrix.setValue(actualRow, actualCol, { v: null, p: null });
+    });
+    if (clearValueMatrix.getLength() > 0) {
+        const clearMutation: ISetRangeValuesMutationParams = {
+            subUnitId,
+            unitId,
+            cellValue: Tools.deepClone(clearValueMatrix.getMatrix()),
         };
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,

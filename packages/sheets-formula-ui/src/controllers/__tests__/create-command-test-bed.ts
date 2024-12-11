@@ -43,6 +43,21 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 1,
                     },
                 },
+                9: {
+                    0: {
+                        f: '=B10',
+                    },
+                },
+                19: {
+                    0: {
+                        v: 20,
+                    },
+                },
+                20: {
+                    0: {
+                        f: '=B21',
+                    },
+                },
             },
         },
     },

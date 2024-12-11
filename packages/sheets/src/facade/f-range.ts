@@ -528,41 +528,50 @@ export class FRange extends FBase {
 
     /**
      * Merge cells in a range into one merged cell
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
-    async merge(): Promise<FRange> {
+    async merge(defaultMerge: boolean = true): Promise<FRange> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range]);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
 
         return this;
     }
 
     /**
      * Merges cells in a range horizontally.
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
-    async mergeAcross(): Promise<FRange> {
+    async mergeAcross(defaultMerge: boolean = true): Promise<FRange> {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }
 
     /**
      * Merges cells in a range vertically.
+     *
+     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
+     *
      * @returns This range, for chaining
      */
-    async mergeVertically(): Promise<FRange> {
+    async mergeVertically(defaultMerge: boolean = true): Promise<FRange> {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }

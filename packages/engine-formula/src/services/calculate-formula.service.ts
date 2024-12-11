@@ -38,7 +38,7 @@ import {
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
-import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
+import { DEFAULT_CYCLE_REFERENCE_COUNT, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from '../controller/config.schema';
 import { Lexer } from '../engine/analysis/lexer';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
@@ -47,8 +47,6 @@ import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
-
-export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
 export const DEFAULT_INTERVAL_COUNT = 500;
 
@@ -124,8 +122,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._runtimeService.reset();
 
-        const cycleReferenceCount = (this._configService.getConfig('CYCLE_REFERENCE_COUNT') ||
-            DEFAULT_CYCLE_REFERENCE_COUNT) as number;
+        const cycleReferenceCount = (formulaDatasetConfig.maxIteration || DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
         for (let i = 0; i < cycleReferenceCount; i++) {
             this._runtimeService.setFormulaCycleIndex(i);

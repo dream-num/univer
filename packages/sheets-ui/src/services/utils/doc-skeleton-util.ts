@@ -155,7 +155,7 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     };
 };
 
-export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
+export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem, isNum: boolean) {
     const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
     const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
     const vt = font.verticalAlign;
@@ -182,6 +182,12 @@ export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem) {
         case HorizontalAlign.CENTER:
             paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
             break;
+        case HorizontalAlign.UNSPECIFIED:{
+            if (isNum) {
+                paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            }
+            break;
+        }
         default:
             break;
     }
@@ -237,7 +243,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
     const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
     const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
     const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
-    const { paddingLeft, paddingTop } = calcPadding(actualCell, font);
+    const { paddingLeft, paddingTop } = calcPadding(actualCell, font, false);
     const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, docSkeleton);
 
     return {

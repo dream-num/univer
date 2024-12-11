@@ -80,9 +80,9 @@ export class FDataValidationBuilder {
     /**
      * Gets the values used for criteria evaluation
      *
-     * @returns {any[]} An array containing the operator, formula1, and formula2 values
+     * @returns {[string, string, string]} An array containing the operator, formula1, and formula2 values
      */
-    getCriteriaValues(): any[] {
+    getCriteriaValues(): [string | undefined, string | undefined, string | undefined] {
         return [this._rule.operator, this._rule.formula1, this._rule.formula2];
     }
 

@@ -83,7 +83,7 @@ export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canv
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { type IHoverCellPosition } from './services/hover-manager.service';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
@@ -96,6 +96,7 @@ export { HeaderFreezeRenderController } from './controllers/render-controllers/f
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
+export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
 export { SheetBar } from './views/sheet-bar/SheetBar';

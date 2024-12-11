@@ -67,7 +67,8 @@ import {
     ObjectMatrix,
     searchArray,
     Tools,
-    WrapStrategy } from '@univerjs/core';
+    WrapStrategy,
+} from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT, MIN_COL_WIDTH } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';

@@ -426,6 +426,12 @@ export class SheetsFilterController extends Disposable {
             }
         }
 
+        if (fromRange.startColumn > startColumn && fromRange.startColumn < endColumn && fromRange.endColumn < endColumn) {
+            if (toRange.startColumn === startColumn) {
+                return this._handleNull();
+            }
+        }
+
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         const filterCol: IObjectArrayPrimitiveType<{ colIndex: number; filter: Nullable<FilterColumn> }> = {};

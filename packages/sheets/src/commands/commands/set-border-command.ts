@@ -430,11 +430,12 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
         !ml_tr &&
         !bc_tr
     ) {
-        // eslint-disable-next-line max-lines-per-function, complexity
+        // eslint-disable-next-line complexity
         forEach(range, (row, column) => {
             const mergedRange = worksheet.getMergedCell(row, column);
+            // If this cell has border setting before merge, then we need clear settings of edge border.
             if (mergedRange) {
-                // Clear the right border of all columns except the last column
+                // Remove the right border from all cells except for the right border of the rightmost cell.
                 if (mergedRange.endColumn !== range.endColumn) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -443,7 +444,7 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear the left border of all columns except the first column
+                // Remove the left border from all cells except for the left border of the leftmost cell.
                 if (mergedRange.startColumn !== range.startColumn) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -452,11 +453,8 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear all the bottom border except the last line
                 // see https://github.com/dream-num/univer/pull/3506
-                // this is not right!! why set not last row to topleft cell border? why?
-                // topleft border doesn't have { right: null }
-                // after exec this, the endColumn lost { right: null } when clear border.
+                // Remove the top border from all cells except for the top border of the topmost cell.
                 if (mergedRange.endRow !== range.endRow) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {
@@ -465,7 +463,7 @@ const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
                         },
                     });
                 }
-                // Clear the top border of all lines except the first line
+                // Remove the bottom border from all cells except for the bottom border of the bottommost cell.
                 if (mergedRange.startRow !== range.startRow) {
                     const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
                     mr.setValue(row, column, {

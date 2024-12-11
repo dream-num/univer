@@ -16,8 +16,7 @@
 
 /* eslint-disable dot-notation */
 import type { ISelectionCell, IWorkbookData, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { BorderType, ICommandService, IConfigService, IContextService, Injector, IUniverInstanceService, LocaleService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { BorderType, ICommandService, IConfigService, IContextService, Injector, LocaleService, RANGE_TYPE } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import {
     SetBorderPositionCommand,
@@ -39,26 +38,7 @@ describe('Test commands used for change selections', () => {
     let spreadsheetSkeleton: SpreadsheetSkeleton;
     let localeService: LocaleService;
     let contextService: IContextService;
-    let lexerTreeBuilder: LexerTreeBuilder;
     let configService: IConfigService;
-    function selectTopLeft() {
-        selectionManagerService.setSelections([
-            {
-                range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
-                primary: {
-                    startRow: 0,
-                    startColumn: 0,
-                    endRow: 0,
-                    endColumn: 0,
-                    actualRow: 0,
-                    actualColumn: 0,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
-    }
 
     function select(selection: ISelectionCell) {
         const { startRow, startColumn, endRow, endColumn } = selection;
@@ -71,90 +51,23 @@ describe('Test commands used for change selections', () => {
         ]);
     }
 
-    function expectSelectionToBe(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
-            rangeType: RANGE_TYPE.NORMAL,
-        });
-    }
-
-    function getRowCount(): number {
-        const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet()!;
-        return worksheet.getRowCount();
-    }
-
-    function getColCount(): number {
-        const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet()!;
-        return worksheet.getColumnCount();
-    }
-
-    function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionsService);
-        const endColumn = getColCount() - 1;
-        selectionManagerService.addSelections([
-            {
-                range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
-                primary: {
-                    startRow: rowStart,
-                    endRow: rowEnd,
-                    startColumn: 0,
-                    endColumn,
-                    actualColumn: 0,
-                    actualRow: rowStart,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
-    }
-
-    function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionsService);
-        const endRow = getRowCount() - 1;
-        selectionManagerService.addSelections([
-            {
-                range: {
-                    startRow: 0,
-                    startColumn: columnStart,
-                    endColumn: columnEnd,
-                    endRow,
-                    rangeType: RANGE_TYPE.COLUMN,
-                },
-                primary: {
-                    startRow: 0,
-                    endRow,
-                    startColumn: columnStart,
-                    endColumn: columnEnd,
-                    actualColumn: columnStart,
-                    actualRow: 0,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
-    }
-
     function disposeTestBed() {
         univer?.dispose();
         univer = null;
     }
 
-    const borderLenEqual = (arr1: string[], arr2: string[]) => {
-            // 首先检查数组长度
-        if (arr1.length !== arr2.length) return false;
+    /**
+     * Compare whether all the props of the two border configurations exist in each other.
+     *
+     * @param border1
+     * @param border2
+     * @returns
+     */
+    const borderLenEqual = (border1: string[], border2: string[]) => {
+        if (border1.length !== border2.length) return false;
 
-            // 使用排序比较
-        const sortedArr1 = arr1.slice().sort();
-        const sortedArr2 = arr2.slice().sort();
+        const sortedArr1 = border1.slice().sort();
+        const sortedArr2 = border2.slice().sort();
 
         for (let i = 0; i < sortedArr1.length; i++) {
             if (sortedArr1[i] !== sortedArr2[i]) {
@@ -175,7 +88,6 @@ describe('Test commands used for change selections', () => {
 
         localeService = get(LocaleService);
         contextService = get(IContextService);
-        lexerTreeBuilder = new LexerTreeBuilder();
         configService = get(IConfigService);
         const injector = get(Injector);
 

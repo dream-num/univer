@@ -376,6 +376,8 @@ export class Worksheet {
 
     /**
      * Get the merged cell Range of the sheet cell.
+     * If (row, col) is not in a merged cell, return null
+     *
      * @param {number} row The row index of test cell
      * @param {number} col The column index of test cell
      * @returns {Nullable<IRange>} The merged cell range of the cell, if the cell is not in a merged cell, return null

@@ -275,6 +275,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 unitId: editorUnitId,
                 snapshot: Tools.deepClone(documentModel!.getSnapshot()),
             });
+
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
             this._textSelectionManagerService.replaceDocRanges(
                 [{
@@ -285,9 +286,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
                     unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                 }
-            )
-            ;
+            );
 
+            this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
             if (docSelectionRenderManager) {

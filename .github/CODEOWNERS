@@ -1,6 +1,7 @@
 # project
 .github @jikkai @wzhudev @hexf00
 common @jikkai
+**/package.json @jikkai
 
 # documents
 docs @wzhudev

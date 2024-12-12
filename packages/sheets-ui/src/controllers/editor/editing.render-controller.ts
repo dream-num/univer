@@ -288,11 +288,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 }
             );
 
-            const docSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-
-            if (docSelectionRenderManager?.isFocusing) {
+            const cellSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            const formulaSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+            if (cellSelectionRenderManager?.isFocusing || formulaSelectionRenderManager?.isFocusing) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-                docSelectionRenderManager.activate(
+                cellSelectionRenderManager?.activate(
                     HIDDEN_EDITOR_POSITION,
                     HIDDEN_EDITOR_POSITION,
                     true

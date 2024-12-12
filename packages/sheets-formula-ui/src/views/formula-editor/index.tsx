@@ -20,7 +20,8 @@ import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
-import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
@@ -122,6 +123,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
     const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
     const highTextRef = useRef('');
+    const renderManagerService = useDependency(IRenderManagerService);
+    const renderer = renderManagerService.getRenderById(editorId);
+    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const isFocusing = docSelectionRenderService?.isFocusing;
 
     useEffect(() => {
         if (isSelecting === FormulaSelectingType.NEED_ADD) {
@@ -194,6 +199,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
+        if (!isFocusing) {
+            return;
+        }
         needEmit();
         highligh(`=${refString}`);
         if (isEnd) {

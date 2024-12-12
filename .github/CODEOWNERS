@@ -1,15 +1,19 @@
 # project
-.github @jikkai
-docs @wzhudev
+.github @jikkai @wzhudev @hexf00
+common @jikkai
 
-# core
+# documents
+docs @wzhudev
+CONTRIBUTING.md @wzhudev
+
+# core & fundamental
 packages/core @wzhudev
 packages/core/src/services/resource-loader @Gggpound
 packages/core/src/services/resource-manager @Gggpound
 packages/core/src/services/permission @Gggpound
-
-# fundamental
 packages/design @jikkai
+packages/drawing @weird94
+packages/drawing-ui @weird94
 packages/engine-formula @Dushusir @wzhudev
 packages/engine-numfmt @Gggpound
 packages/engine-render @lumixraku
@@ -17,48 +21,53 @@ packages/find-replace @siam-ese
 packages/network @wzhudev
 packages/rpc @wzhudev
 packages/rpc-node @wzhudev
+packages/thread-comment @weird94
+packages/thread-comment-ui @weird94
 packages/ui @jikkai @Jocs
 packages/ui/src/services/clipboard @ybzky
 packages/ui/src/services/popup/canvas-popup.service.ts @weird94
 packages/uniscript @wzhudev
-packages/drawing @weird94
-packages/drawing-ui @weird94
-
-# docs
-packages/docs @Jocs
-packages/docs-ui @jikkai @Jocs
-packages/docs-hyper-link @weird94
-packages/docs-hyper-link-ui @weird94
-packages/docs-mention-ui @weird94
-packages/docs-thread-comment-ui @weird94
-packages/docs-drawing-ui @weird94
-packages/docs-drawing @weird94
+packages/watermark @ybzky
 
 # sheets
+packages/data-validation @weird94
+packages/sheets-data-validation @weird94
 packages/sheets @wzhudev @VicKun4937
+packages/sheets-conditional-formatting @Gggpound
+packages/sheets-conditional-formatting-ui @Gggpound
+packages/sheets-filter @ybzky @yuhongz
+packages/sheets-filter-ui @ybzky @yuhongz
+packages/sheets-find-replace @siam-ese
+packages/sheets-formula @DR-Univer @wzhudev @Dushusir
+packages/sheets-formula-ui @DR-Univer @wzhudev @Dushusir
 packages/sheets-graphics @ybzky
+packages/sheets-hyper-link @weird94
+packages/sheets-hyper-link-ui @weird94
+packages/sheets-numfmt @Gggpound
+packages/sheets-numfmt-ui @Gggpound
+packages/sheets-thread-comment @weird94
+packages/sheets-thread-comment-ui @weird94
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs
 packages/sheets-ui/src/services/clipboard @yuhongz
 packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
+packages/sheets-zen-editor @Jocs
 packages/sheets/src/services/numfmt @Gggpound
 packages/sheets/src/services/ref-range @Gggpound
 packages/sheets/src/services/ref-range @weird94
 packages/sheets/src/services/sheet-interceptor @Gggpound
-packages/sheets-find-replace @siam-ese
-packages/sheets-numfmt @Gggpound
-packages/sheets-formula @wzhudev @Dushusir
-packages/sheets-conditional-formatting @Gggpound
-packages/sheets-conditional-formatting-ui @Gggpound
-packages/data-validation @weird94
-packages/sheet-data-validation @weird94
-packages/sheets-filter @ybzky @yuhongz
-packages/sheets-filter-ui @ybzky @yuhongz
-packages/sheets-zen-editor @Jocs
+
+# docs
+packages/docs @Jocs
+packages/docs-drawing @weird94
+packages/docs-drawing-ui @weird94
 packages/docs-hyper-link @weird94
 packages/docs-hyper-link-ui @weird94
+packages/docs-mention-ui @weird94
+packages/docs-thread-comment-ui @weird94
+packages/docs-ui @jikkai @Jocs
 
 # slides
 packages/slides @jikkai

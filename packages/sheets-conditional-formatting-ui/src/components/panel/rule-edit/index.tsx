@@ -240,9 +240,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     useSidebarClick((e: MouseEvent) => {
-        if ((e.target as HTMLElement).tagName.toLocaleLowerCase() === 'canvas') {
-            return;
-        }
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     });

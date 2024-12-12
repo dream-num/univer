@@ -211,17 +211,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        if ((e.target as HTMLElement).tagName.toLocaleLowerCase() === 'canvas') {
-            return;
-        }
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     });
 
     useSidebarClick((e: MouseEvent) => {
-        if ((e.target as HTMLElement).tagName.toLocaleLowerCase() === 'canvas') {
-            return;
-        }
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });

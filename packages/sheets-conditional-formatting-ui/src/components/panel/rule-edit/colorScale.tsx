@@ -57,9 +57,6 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
 
     useSidebarClick((e: MouseEvent) => {
-        if ((e.target as HTMLElement).tagName.toLocaleLowerCase() === 'canvas') {
-            return;
-        }
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });

@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+export { type ISetDrawingArrangeCommandParams, SetDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export { RemoveSheetDrawingCommand } from './commands/commands/remove-sheet-drawing.command';
+export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-drawing.command';
+export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
+export { DeleteDrawingsCommand } from './commands/commands/delete-drawings.command';
+export { GroupSheetDrawingCommand } from './commands/commands/group-sheet-drawing.command';
+
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
 export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from './services/sheet-drawing.service';
 
 // #region - all commands
-
+export { SetSheetDrawingCommand } from './commands/commands/set-sheet-drawing.command';
 export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
-
+export type { IDeleteDrawingCommandParam, IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from './commands/commands/interfaces';
 // #endregion
+

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '@univerjs/core';
+import type { ITransformState } from '../types/interfaces/i-document-data';
 import { offsetRotationAxis } from './offset-rotation-axis';
-import { Vector2 } from './vector2';
+import { Vector2 } from './vector';
 
 export function getGroupState(parentLeft: number, parentTop: number, objectStates: ITransformState[]) {
     let groupLeft = Number.MAX_SAFE_INTEGER;

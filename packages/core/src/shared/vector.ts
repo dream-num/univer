@@ -14,21 +14,77 @@
  * limitations under the License.
  */
 
-import type { Canvas } from '../canvas';
-import type { SHEET_VIEWPORT_KEY } from '../components/sheets/interfaces';
-import type { DeepImmutable, FloatArray } from './i-events';
-import type { Transform } from './transform';
+/**
+ * Alias type for number that are floats
+ */
+export type float = number;
+
+/**
+ * Alias type for number that are doubles.
+ */
+export type double = number;
+
+/* *
+ * Alias type for number that are integer
+ */
+export type int = number;
+
+/**
+ * Alias type for number array or Float32Array
+ */
+export type FloatArray = number[] | Float32Array;
+
+/**
+ * Alias type for number array or Float32Array or Int32 Array or Uint32Array or Uint16Array
+ */
+export type IndicesArray = number[] | Int32Array | Uint32Array | Uint16Array;
+
+/**
+ * Alias for types that can be used by a Buffer or  VertexBuffer.
+ */
+export type DataArray = number[] | ArrayBuffer | ArrayBufferView;
+
+/**
+ * Alias type for primitive types
+ */
+type Primitive = undefined | null | boolean | string | number | Function;
+
+/**
+ * Type modifier to make all the properties of an object Readonly
+ */
+export type Immutable<T> = T extends Primitive
+    ? T
+    : T extends Array<infer U>
+        ? readonly U[]
+        : DeepImmutable<T>; /* T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : // es2015+ only */
+
+/**
+ * Type modifier to make all the properties of an object Readonly recursively
+ */
+export type DeepImmutable<T> = T extends Primitive
+    ? T
+    : T extends Array<infer U>
+        ? IDeepImmutableArray<U>
+        : /* T extends Map<infer K, infer V> ? DeepImmutableMap<K, V> : // es2015+ only */
+        DeepImmutableObject<T>;
+
+/**
+ * Type modifier to make object properties readonly.
+ */
+export type DeepImmutableObject<T> = {
+    readonly [K in keyof T]: DeepImmutable<T[K]>;
+};
+
+/** @hidden */
+interface IDeepImmutableArray<T> extends ReadonlyArray<DeepImmutable<T>> {}
+/** @hidden */
+/* interface DeepImmutableMap<K, V> extends ReadonlyMap<DeepImmutable<K>,  DeepImmutable<V>> {} // es2015+ only */
 
 export interface IPoint {
     x: number;
     y: number;
 }
 
-/**
- * @deprecated
- * move to Core package
- * import { Vector2 } from '@univerjs/core';
- */
 export class Vector2 implements IPoint {
     /**
      * Creates a new Vector2 from the given x and y coordinates
@@ -833,79 +889,4 @@ export class Vector2 implements IPoint {
     clone(): Vector2 {
         return new Vector2(this.x, this.y);
     }
-}
-
-export interface IBounds {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
-export interface IBoundRect {
-    tl: Vector2;
-    tr: Vector2;
-    bl: Vector2;
-    br: Vector2;
-    dx: number;
-    dy: number;
-}
-
-export interface IBoundRectNoAngle {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-}
-
-export interface IViewportInfo {
-    viewBound: IBoundRectNoAngle;
-    diffBounds: IBoundRectNoAngle[];
-
-    /**
-     * scroll right further diffX < 0
-     * previewBound.x - viewbound.x
-     */
-    diffX: number;
-    diffY: number;
-
-    /**
-     * The physical position of the frozen rows and columns on the canvas, used for drawImage.
-     * For example, if the freezing starts from the fourth column, the left position would be 4 * column + rowHeaderWidth.
-     * The physical position means the top and left values have already considered the scaling factor.
-     */
-    viewPortPosition: IBoundRectNoAngle;
-    viewportKey: string | SHEET_VIEWPORT_KEY;
-    /**
-     * In the future, a number will be used to indicate the reason for the "dirty" status
-     * Here, a binary value is used to facilitate computation.
-     */
-    isDirty?: number;
-    isForceDirty?: boolean;
-
-    allowCache?: boolean;
-    cacheBound: IBoundRectNoAngle;
-    diffCacheBounds: IBoundRectNoAngle[];
-    cacheViewPortPosition: IBoundRectNoAngle;
-
-    shouldCacheUpdate: number;
-    sceneTrans: Transform;
-    cacheCanvas?: Canvas;
-
-    leftOrigin: number;
-    topOrigin: number;
-
-    bufferEdgeX: number;
-    bufferEdgeY: number;
-
-    updatePrevCacheBounds?: (viewbound: IBoundRectNoAngle) => void;
-}
-
-export interface IViewportInfos {
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-    width: number;
-    height: number;
 }

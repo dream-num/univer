@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import { degToRad } from './tools';
-import type { Vector2 } from './vector2';
+import type { Vector2 } from './vector';
+
+const DEG180 = 180;
+const PI_OVER_DEG180 = Math.PI / DEG180;
+// degree is °
+export const degToRad = (deg: number) => deg * PI_OVER_DEG180;
 
 export function offsetRotationAxis(referenceCoords: Vector2, angleDegree: number, vertexCoords: Vector2, centerCoords: Vector2): Vector2 {
     const angleRad = degToRad(angleDegree);

@@ -21,10 +21,10 @@ import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Radio, RadioGroup } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { SetSheetDrawingCommand, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
-import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
+
 import styles from './index.module.less';
 
 export interface ISheetDrawingAnchorProps {

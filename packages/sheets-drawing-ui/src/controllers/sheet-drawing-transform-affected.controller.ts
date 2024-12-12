@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, IMutationInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, IDrawingSearch, IMutationInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import type { ISetDrawingApplyMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, Rectangle } from '@univerjs/core';
-import { type IDrawingJsonUndo1, IDrawingManagerService } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
@@ -1144,6 +1145,34 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                         this._drawingManagerService.removeNotification(removeDrawings);
                         this._drawingManagerService.addNotification(insertDrawings);
                     }, 0);
+                } else if (command.id === SetDrawingApplyMutation.id) {
+                    const params = command.params as ISetDrawingApplyMutationParams;
+                    const { type, objects } = params;
+                    const unitIds = new Set<string>();
+                    switch (type) {
+                        case DrawingApplyType.INSERT:
+                        case DrawingApplyType.REMOVE:
+                        case DrawingApplyType.UPDATE:
+                            (objects as IDrawingSearch[])?.forEach((drawing) => {
+                                const { unitId } = drawing;
+                                unitIds.add(unitId);
+                            });
+                            break;
+                        case DrawingApplyType.ARRANGE:
+                            unitIds.add((objects as IDrawingOrderMapParam).unitId);
+                            break;
+                        case DrawingApplyType.GROUP:
+                        case DrawingApplyType.UNGROUP:
+                            (objects as IDrawingGroupUpdateParam[]).forEach(({ parent, children }) => {
+                                unitIds.add(parent.unitId);
+                                children.forEach((child) => {
+                                    unitIds.add(child.unitId);
+                                });
+                            });
+                            break;
+                    }
+
+                    this._commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, Array.from(unitIds));
                 }
             })
         );

@@ -15,8 +15,8 @@
  */
 
 import type { IDrawingSearch, IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
 import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam } from '@univerjs/drawing';
+import { CommandType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 

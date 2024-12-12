@@ -18,15 +18,8 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { AddImageSingle } from '@univerjs/icons';
 
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
@@ -62,17 +55,10 @@ export class SheetDrawingUIController extends Disposable {
         [
             InsertFloatImageCommand,
             InsertCellImageCommand,
-            InsertSheetDrawingCommand,
-            RemoveSheetDrawingCommand,
-            SetSheetDrawingCommand,
             SidebarSheetDrawingOperation,
             ClearSheetDrawingTransformerOperation,
             EditSheetDrawingOperation,
-            GroupSheetDrawingCommand,
-            UngroupSheetDrawingCommand,
             MoveDrawingsCommand,
-            DeleteDrawingsCommand,
-            SetDrawingArrangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

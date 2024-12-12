@@ -21,11 +21,10 @@ import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import { Disposable, MOVE_BUFFER_VALUE, offsetRotationAxis, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 import { Subject, type Subscription } from 'rxjs';
 import { type BaseObject, ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
-import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { degToRad, precisionTo, radToDeg } from './basics/tools';

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 
 import type { UniverRenderingContext } from '../context';
-import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
-import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
-import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import type { Scene } from '../scene';
-import { ObjectType } from '../base-object';
 import type { IShapeProps } from './shape';
+import { type ISrcRect, type Nullable, offsetRotationAxis, type PresetGeometryType } from '@univerjs/core';
+import { ObjectType } from '../base-object';
+import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { Shape } from './shape';
 
 export interface IImageProps extends IShapeProps {

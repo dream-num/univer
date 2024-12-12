@@ -1082,6 +1082,16 @@ export enum PageOrientType {
     LANDSCAPE,
 }
 
+export interface IRotationSkewFlipTransform {
+    angle?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
+}
+
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+
 // #region - tech dept
 
 // TODO@Jocs: these types are here because of drawing coupled into the core of the document's model, which
@@ -1122,18 +1132,6 @@ export interface IDrawingSpace {
 export interface IDrawingSearch extends IDrawingSpace {
     drawingId: string;
 }
-
-/** @deprecated */
-export interface IRotationSkewFlipTransform {
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
-
-/** @deprecated */
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
 
 /** @deprecated */
 export interface IDrawingParam extends IDrawingSearch {

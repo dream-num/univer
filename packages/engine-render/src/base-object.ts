@@ -255,7 +255,7 @@ export abstract class BaseObject extends Disposable {
             if (parent.classType === RENDER_CLASS_TYPE.GROUP) {
                 group = parent;
             }
-            parent = parent.getParent();
+            parent = parent.getParent && parent.getParent();
         }
         return group;
     }

@@ -15,17 +15,16 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { ISetDrawingCommandParams } from './interfaces';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { ISetDrawingCommandParams } from './interfaces';
 
 /**
  * The command to update defined name
@@ -57,11 +56,9 @@ export const SetSheetDrawingCommand: ICommand = {
                 unitID: unitId,
                 undoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
                 redoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
             });
 

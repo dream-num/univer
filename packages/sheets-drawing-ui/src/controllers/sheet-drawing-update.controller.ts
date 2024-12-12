@@ -17,24 +17,18 @@
 import type { IAccessor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import type { ISheetLocationBase, WorkbookSelectionModel } from '@univerjs/sheets';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
+import type { IInsertDrawingCommandParams, ISetDrawingArrangeCommandParams, ISetDrawingCommandParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+
 import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { GroupSheetDrawingCommand, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingArrangeCommand, SetSheetDrawingCommand, UngroupSheetDrawingCommand } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
     const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度

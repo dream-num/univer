@@ -15,10 +15,10 @@
  */
 
 import type { IDrawingGroupUpdateParam } from '@univerjs/drawing';
-import { DrawingTypeEnum, type IDrawingParam, LocaleService, Tools, useDependency } from '@univerjs/core';
+import { DrawingTypeEnum, getGroupState, type IDrawingParam, LocaleService, Tools, transformObjectOutOfGroup, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';

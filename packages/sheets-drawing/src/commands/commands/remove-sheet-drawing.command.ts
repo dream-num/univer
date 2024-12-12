@@ -25,8 +25,6 @@ import {
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-
 /**
  * The command to remove new sheet image
  */
@@ -43,13 +41,6 @@ export const RemoveSheetDrawingCommand: ICommand = {
         if (!params) return false;
 
         const { drawings } = params;
-
-        const unitIds: string[] = [];
-
-        drawings.forEach((param) => {
-            const { unitId } = param;
-            unitIds.push(unitId);
-        });
 
         const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
 
@@ -70,13 +61,11 @@ export const RemoveSheetDrawingCommand: ICommand = {
                     ...(intercepted.preUndos ?? []),
                     undoRemoveMutation,
                     ...intercepted.undos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     removeMutation,
                     ...intercepted.redos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

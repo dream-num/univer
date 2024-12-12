@@ -25,8 +25,9 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 
 /**
  * The command to insert new defined name
@@ -45,9 +46,6 @@ export const InsertSheetDrawingCommand: ICommand = {
         // const { drawingParam, imageParam } = params;
 
         const drawings = params.drawings;
-
-        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        const unitIds: string[] = drawings.map((param) => param.unitId);
 
         // execute do mutations and add undo mutations to undo stack if completed
         const jsonOp = sheetDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
@@ -68,13 +66,11 @@ export const InsertSheetDrawingCommand: ICommand = {
                     ...(intercepted.preUndos ?? []),
                     undoInsertMutation,
                     ...(intercepted.undos),
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     insertMutation,
                     ...intercepted.redos,
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

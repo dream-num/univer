@@ -15,15 +15,13 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { ISetDrawingCommandParams } from './interfaces';
+import type { ISetDrawingCommandParams, ISheetDrawing } from '@univerjs/sheets-drawing';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
-import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService, SetSheetDrawingCommand } from '@univerjs/sheets-drawing';
 
 import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { transformToDrawingPosition } from '../../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction ;

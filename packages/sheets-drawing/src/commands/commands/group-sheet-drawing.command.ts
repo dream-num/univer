@@ -15,15 +15,15 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
+
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
+import { DrawingApplyType, SetDrawingApplyMutation } from '../mutations/set-drawing-apply.mutation';
 import { groupToUngroup } from './utils';
 
 /**
@@ -39,14 +39,6 @@ export const GroupSheetDrawingCommand: ICommand = {
 
         if (!params) return false;
 
-        const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
-            unitIds.push(parent.unitId);
-            children.forEach((child) => {
-                unitIds.push(child.unitId);
-            });
-        });
-
         // execute do mutations and add undo mutations to undo stack if completed
         const jsonOp = sheetDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
 
@@ -59,11 +51,9 @@ export const GroupSheetDrawingCommand: ICommand = {
                 unitID: unitId,
                 undoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DrawingApplyType.UNGROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.GROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

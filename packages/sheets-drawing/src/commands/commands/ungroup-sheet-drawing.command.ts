@@ -15,15 +15,14 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
+
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import { ungroupToGroup } from './utils';
 
 /**
@@ -39,14 +38,6 @@ export const UngroupSheetDrawingCommand: ICommand = {
 
         if (!params) return false;
 
-        const unitIds: string[] = [];
-        params.forEach(({ parent, children }) => {
-            unitIds.push(parent.unitId);
-            children.forEach((child) => {
-                unitIds.push(child.unitId);
-            });
-        });
-
         // execute do mutations and add undo mutations to undo stack if completed
         const jsonOp = sheetDrawingService.getUngroupDrawingOp(params) as IDrawingJsonUndo1;
 
@@ -59,11 +50,9 @@ export const UngroupSheetDrawingCommand: ICommand = {
                 unitID: unitId,
                 undoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: ungroupToGroup(objects as IDrawingGroupUpdateParam[]), type: DrawingApplyType.GROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.UNGROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

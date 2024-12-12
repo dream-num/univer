@@ -19,10 +19,9 @@ import type { CURSOR_TYPE } from './basics/const';
 
 import type { IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
-import { sortRules } from '@univerjs/core';
+import { getGroupState, sortRules, transformObjectOutOfGroup } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { getGroupState, transformObjectOutOfGroup } from './basics/group-transform';
 import { isString } from './basics/tools';
 
 export class Group extends BaseObject {

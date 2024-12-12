@@ -18,6 +18,13 @@ import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { Disposable, ICommandService, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
+import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
+import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
@@ -32,7 +39,20 @@ export class SheetsDrawingLoadController extends Disposable {
     ) {
         super();
         this._initSnapshot();
-        this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
+        this._initCommands();
+    }
+
+    private _initCommands() {
+        [
+            SetDrawingApplyMutation,
+            DeleteDrawingsCommand,
+            GroupSheetDrawingCommand,
+            InsertSheetDrawingCommand,
+            RemoveSheetDrawingCommand,
+            SetDrawingArrangeCommand,
+            SetSheetDrawingCommand,
+            UngroupSheetDrawingCommand,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initSnapshot() {

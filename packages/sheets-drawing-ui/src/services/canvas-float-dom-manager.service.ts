@@ -18,19 +18,18 @@ import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, W
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type { IFloatDomData, IInsertDrawingCommandParams, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
+
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, InsertSheetDrawingCommand, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, filter, map, Subject, switchMap, take } from 'rxjs';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
     /**

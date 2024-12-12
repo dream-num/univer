@@ -17,8 +17,8 @@
 import type { IContextService } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { Direction, EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, FOCUSING_PANEL_EDITOR } from '@univerjs/core';
+import { DeleteDrawingsCommand } from '@univerjs/sheets-drawing';
 import { KeyCode } from '@univerjs/ui';
-import { DeleteDrawingsCommand } from '../../commands/commands/delete-drawings.command';
 import { type IMoveDrawingsCommandParams, MoveDrawingsCommand } from '../../commands/commands/move-drawings.command';
 
 export function whenSheetDrawingFocused(contextService: IContextService): boolean {

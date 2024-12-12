@@ -17,41 +17,49 @@
 import type { Nullable } from '@univerjs/core';
 
 /**
+ * @deprecated
  * Alias type for number that are floats
  */
 export type float = number;
 
 /**
+ * @deprecated
  * Alias type for number that are doubles.
  */
 export type double = number;
 
-/* *
+/**
+ * @deprecated
  * Alias type for number that are integer
  */
 export type int = number;
 
 /**
+ * @deprecated
  * Alias type for number array or Float32Array
  */
 export type FloatArray = number[] | Float32Array;
 
 /**
+ * @deprecated
  * Alias type for number array or Float32Array or Int32 Array or Uint32Array or Uint16Array
  */
 export type IndicesArray = number[] | Int32Array | Uint32Array | Uint16Array;
 
 /**
+ * @deprecated
  * Alias for types that can be used by a Buffer or  VertexBuffer.
  */
 export type DataArray = number[] | ArrayBuffer | ArrayBufferView;
 
 /**
+ * @deprecated
  * Alias type for primitive types
  */
 type Primitive = undefined | null | boolean | string | number | Function;
 
 /**
+ * @deprecated
  * Type modifier to make all the properties of an object Readonly
  */
 export type Immutable<T> = T extends Primitive
@@ -61,6 +69,7 @@ export type Immutable<T> = T extends Primitive
         : DeepImmutable<T>; /* T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : // es2015+ only */
 
 /**
+ * @deprecated
  * Type modifier to make all the properties of an object Readonly recursively
  */
 export type DeepImmutable<T> = T extends Primitive
@@ -71,13 +80,17 @@ export type DeepImmutable<T> = T extends Primitive
         DeepImmutableObject<T>;
 
 /**
+ * @deprecated
  * Type modifier to make object properties readonly.
  */
 export type DeepImmutableObject<T> = {
     readonly [K in keyof T]: DeepImmutable<T[K]>;
 };
 
-/** @hidden */
+/**
+ * @deprecated
+ * @hidden
+ */
 interface IDeepImmutableArray<T> extends ReadonlyArray<DeepImmutable<T>> {}
 /** @hidden */
 /* interface DeepImmutableMap<K, V> extends ReadonlyMap<DeepImmutable<K>,  DeepImmutable<V>> {} // es2015+ only */

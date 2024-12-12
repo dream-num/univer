@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import type { IRange, Nullable } from '@univerjs/core';
+import type { IScrollState } from '../services/scroll-manager.service';
 import { ICommandService } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
 import { FWorksheet } from '@univerjs/sheets/facade';
+import { ChangeZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
+import { SheetScrollManagerService } from '../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface IFWorksheetSkeletonMixin {
     /**
@@ -84,6 +89,70 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
 
     override getZoom(): number {
         return this._worksheet.getZoomRatio();
+    }
+
+    /**
+     * Scroll spreadsheet to cell position.
+     * @param row
+     * @param column
+     * @returns void
+     */
+    scrollToCell(row: number, column: number): void {
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const commandService = this._injector.get(ICommandService);
+
+        return commandService.syncExecuteCommand(SetScrollOperation.id, {
+            unitId,
+            sheetId,
+            sheetViewStartRow: row,
+            sheetViewStartColumn: column,
+            offsetX: 0,
+            offsetY: 0,
+        });
+    }
+
+    /**
+     * Return visible range.
+     * @returns IRange
+     */
+    getVisibleRange(): IRange {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        let range: IRange = {
+            startColumn: 0,
+            startRow: 0,
+            endColumn: 0,
+            endRow: 0,
+        };
+        if (!render) return range;
+        const skm = render.with(SheetSkeletonManagerService);
+        const sk = skm.getCurrentSkeleton();
+        if (!sk) return range;
+        const visibleRangeMap = sk?.getVisibleRanges();
+        if (!visibleRangeMap) return range;
+
+        range = sk.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN) as IRange;
+        for (const [k, r] of visibleRangeMap) {
+            if (sheetContentViewportKeys.indexOf(k) === -1) continue;
+            range.startColumn = Math.min(range.startColumn, r.startColumn);
+            range.startRow = Math.min(range.startRow, r.startRow);
+            range.endColumn = Math.max(range.endColumn, r.endColumn);
+            range.endRow = Math.max(range.endRow, r.endRow);
+        }
+
+        return range;
+    }
+
+    getScrollState(): Nullable<IScrollState> {
+        const unitId = this._workbook.getUnitId();
+        const sheetId = this._worksheet.getSheetId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return null;
+        const scm = render.with(SheetScrollManagerService);
+        return scm.getScrollStateByParam({ unitId, sheetId });
     }
 }
 

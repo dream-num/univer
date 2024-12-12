@@ -1018,7 +1018,10 @@ export class FWorksheet extends FBase {
 
     /**
      * Sets the frozen state of the current sheet.
-     * @param freeze - The freeze object containing the parameters for freezing the sheet.
+     * @param freeze - the scrolling viewport start range and count of freezed rows and columns.
+     * that means if you want to freeze the first 3 rows and 2 columns, you should set freeze as { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
+     *
+     * @deprecated use `freezeColumn` and `freezeRow` instead.
      * @returns True if the command was successful, false otherwise.
      */
     setFreeze(freeze: IFreeze): boolean {
@@ -1044,6 +1047,8 @@ export class FWorksheet extends FBase {
     /**
      * Get the freeze state of the current sheet.
      * @returns The freeze state of the current sheet.
+     *
+     * @deprecated use `getRowFreezeStatus` and `getColumnFreezeStatus` instead.
      */
     getFreeze(): IFreeze {
         return this._worksheet.getFreeze();
@@ -1101,6 +1106,60 @@ export class FWorksheet extends FBase {
             return 0;
         }
         return freeze.startRow;
+    }
+
+    /**
+     * Set freeze column, then the column range in startColumn to endColumn will be fixed.
+     * e.g. freezeColumn(0, 2) will fix the column range at 0 to 2.
+     * e.g. freezeColumn(2, 3) will fix the column range at 2 to 3, And column at 0 to 1 will be invisible.
+     * @param startColumn
+     * @param endColumn
+     */
+    freezeColumn(startColumn: number, endColumn: number): void {
+        const freezeCfg = this.getFreeze();
+        this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+            startColumn: endColumn + 1,
+            xSplit: endColumn - startColumn + 1,
+            startRow: freezeCfg.startRow,
+            ySplit: freezeCfg.ySplit,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
+
+    /**
+     * Set freeze row, then the range in startRow to endRow will be fixed.
+     * e.g. freezeRow(0, 2) will fix the row range at 0 to 2.
+     * e.g. freezeRow(2, 3) will fix the row range at 2 to 3, And row at 0 to 1 will be invisible.
+     * @param startRow
+     * @param endRow
+     */
+    freezeRow(startRow: number, endRow: number): void {
+        const freezeCfg = this.getFreeze();
+        this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+            startRow: endRow + 1,
+            ySplit: endRow - startRow + 1,
+            startColumn: freezeCfg.startColumn,
+            xSplit: freezeCfg.xSplit,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
+
+    getRowFreezeStatus(): { startRow: number; endRow: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startRow: cfg.startRow - cfg.ySplit,
+            endRow: cfg.startRow - 1,
+        };
+    }
+
+    getColumnFreezeStatus(): { startColumn: number; endColumn: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startColumn: cfg.startColumn - cfg.xSplit,
+            endColumn: cfg.startColumn - 1,
+        };
     }
 
     /**

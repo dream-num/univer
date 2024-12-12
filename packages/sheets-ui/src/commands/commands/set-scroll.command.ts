@@ -70,8 +70,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             unitId,
             sheetId: subUnitId,
             // why + ySplit? receiver - ySplit in scroll.operation.ts
-            sheetViewStartRow: sheetViewStartRow + ySplit,
-            sheetViewStartColumn: sheetViewStartColumn + xSplit,
+            sheetViewStartRow,
+            sheetViewStartColumn,
             offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max
             offsetY: currentOffsetY + offsetY,
         });
@@ -113,15 +113,15 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetY: currentOffsetY,
         } = currentScroll || {};
 
-        const { xSplit, ySplit } = worksheet.getConfig().freeze;
+        // const { xSplit, ySplit } = worksheet.getConfig().freeze;
 
         const commandService = accessor.get(ICommandService);
         return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
-            // why + ySplit? receiver in scroll.operation.ts,  - ySplit
-            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0) + ySplit,
-            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
+            // why + ySplit? receiver in scroll.operation.ts - ySplit again.
+            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0),
+            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0),
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
         });

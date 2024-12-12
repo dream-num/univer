@@ -44,7 +44,6 @@ import type {
     Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import type { Scene } from '../../scene';
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -273,7 +272,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param _injector
      */
     constructor(
-        readonly scene: Scene,
         readonly worksheet: Worksheet,
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
@@ -289,11 +287,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._updateLayout();
         this._initContextListener();
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
-
-        if (!window.sk) {
-            window.sk = {};
-        }
-        window.sk[this.worksheet.getSheetId()] = this;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -453,35 +446,43 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * Get range in visible area (range in view bounds) and set into this._rowColumnSegment.
-     * @param bounds
+     * @param vpInfo
      * @returns boolean
      */
-    updateVisibleRange(bounds?: IViewportInfo): boolean {
+    updateVisibleRange(vpInfo?: IViewportInfo): boolean {
         if (!this._worksheetData || !this._rowHeightAccumulation || !this._columnWidthAccumulation) {
             return false;
         }
 
-        if (bounds) {
-            const range = this.getRangeByViewport(bounds);
+        if (vpInfo) {
+            const range = this.getRangeByViewport(vpInfo);
             this._visibleRange = range;
-            this._visibleRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, range);
+            this._visibleRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, range);
 
-            const cacheRange = this.getCacheRangeByViewport(bounds);
-            this._cacheRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, cacheRange);
+            const cacheRange = this.getCacheRangeByViewport(vpInfo);
+            this._cacheRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, cacheRange);
         }
 
         return true;
     }
 
+    getVisibleRangeByViewport(viewportKey: SHEET_VIEWPORT_KEY) {
+        return this._visibleRangeMap.get(viewportKey);
+    }
+
+    getVisibleRanges() {
+        return this._visibleRangeMap;
+    }
+
     /**
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
-     * @param bounds viewBounds
+     * @param vpInfo viewBounds
      */
-    setStylesCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
+    setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) return;
 
-        this.updateVisibleRange(bounds);
+        this.updateVisibleRange(vpInfo);
 
         const rowColumnSegment = this._visibleRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
@@ -528,7 +529,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     calculate(): Nullable<SpreadsheetSkeleton> {
         this._resetCache();
         this._updateLayout();
-        // this.setStylesCache();
 
         return this;
     }
@@ -899,6 +899,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         const SIZE_BY_EACH_CHARACTER = 8;
         const widthByComputation = (`${this.worksheet.getRowCount()}`.length * SIZE_BY_EACH_CHARACTER);
         return Math.max(rowHeader.width, widthByComputation);
+    }
+
+    /**
+     * @deprecated use `getRangeByViewport` instead.
+     * @param bounds
+     */
+    getRangeByBounding(bounds?: IViewportInfo): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
     }
 
     getRangeByViewport(vpInfo?: IViewportInfo): IRange {
@@ -2269,14 +2277,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     private _getCellMergeInfo(row: number, column: number): ISelectionCell {
         return this.worksheet.getCellInfoInMergeData(row, column);
-    }
-
-    scrollToRow(row: number, viewportKey: SHEET_VIEWPORT_KEY) {
-        const distanceY = this._offsetYToRow(row);
-        const viewport = this.scene.getViewport(viewportKey);
-        if (viewport) {
-            viewport.scrollToViewportPos({ viewportScrollX: 0, viewportScrollY: distanceY });
-        }
     }
 
     getDistanceFromTopLeft(row: number, col: number): IPoint {

@@ -74,7 +74,7 @@ export interface IFWorkbookSheetsUIMixin {
     endEditing(save?: boolean): Promise<boolean>;
 }
 
-export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
+export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         this._logDeprecation('openSiderbar');
 
@@ -144,7 +144,7 @@ export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookShee
     }
 }
 
-FWorkbook.extend(FWorokbookSheetsUIMixin);
+FWorkbook.extend(FWorkbookSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}

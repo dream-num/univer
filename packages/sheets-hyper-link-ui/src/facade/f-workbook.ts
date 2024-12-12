@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { FWorkbook } from '@univerjs/sheets/facade';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
-import { FWorkbookHyperLinkMixin } from '@univerjs/sheets-hyper-link/facade';
 import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
+import { FWorkbookHyperLinkMixin } from '@univerjs/sheets-hyper-link/facade';
+import { FWorkbook } from '@univerjs/sheets/facade';
 
 interface IFWorkbookHyperlinkUIMixin {
     /**

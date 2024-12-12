@@ -103,7 +103,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _reserveRanges = false;
 
     get isFocusing() {
-        return this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
+        return this._input === document.activeElement || document.activeElement === document.body;
     }
 
     constructor(
@@ -312,7 +312,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        if (this.isFocusing || force) {
+        if (this.isFocusing || document.activeElement === null || force) {
             this.focus();
         }
     }
@@ -682,6 +682,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.contentEditable = 'true';
 
         this._input.classList.add('univer-editor');
+        this._input.id = `__editor_${this._context.unitId}`;
         this._input.style.cssText = `
             position: absolute;
             overflow: hidden;

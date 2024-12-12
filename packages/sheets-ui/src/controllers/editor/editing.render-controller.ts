@@ -288,11 +288,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 }
             );
 
-            this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+            const docSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
-            if (docSelectionRenderManager) {
-                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION, !document.activeElement || document.activeElement.classList.contains('univer-editor'));
+            if (docSelectionRenderManager?.isFocusing) {
+                this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                docSelectionRenderManager.activate(
+                    HIDDEN_EDITOR_POSITION,
+                    HIDDEN_EDITOR_POSITION,
+                    true
+                );
             }
         }));
     }

@@ -63,7 +63,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!doc?.documentModel) return false;
 
         const snapshot = doc.documentModel.getSnapshot();
-        const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
+        const range = snapshot.body?.customRanges?.find((range) => `${range.rangeId}_${range.startIndex}_${range.endIndex}` === id);
         if (!range) return false;
 
         const newId = generateRandomId();

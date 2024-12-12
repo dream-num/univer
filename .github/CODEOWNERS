@@ -8,7 +8,7 @@ packages/core/src/services/resource-loader @Gggpound
 packages/core/src/services/resource-manager @Gggpound
 packages/core/src/services/permission @Gggpound
 
-# basics
+# fundamental
 packages/design @jikkai
 packages/engine-formula @Dushusir @wzhudev
 packages/engine-numfmt @Gggpound
@@ -16,20 +16,27 @@ packages/engine-render @lumixraku
 packages/find-replace @siam-ese
 packages/network @wzhudev
 packages/rpc @wzhudev
+packages/rpc-node @wzhudev
 packages/ui @jikkai @Jocs
 packages/ui/src/services/clipboard @ybzky
 packages/ui/src/services/popup/canvas-popup.service.ts @weird94
 packages/uniscript @wzhudev
+packages/drawing @weird94
+packages/drawing-ui @weird94
 
-# facade
-packages/facade @dushusir @hexf00
-
-# business - docs
+# docs
 packages/docs @Jocs
 packages/docs-ui @jikkai @Jocs
+packages/docs-hyper-link @weird94
+packages/docs-hyper-link-ui @weird94
+packages/docs-mention-ui @weird94
+packages/docs-thread-comment-ui @weird94
+packages/docs-drawing-ui @weird94
+packages/docs-drawing @weird94
 
-# business - sheets
+# sheets
 packages/sheets @wzhudev @VicKun4937
+packages/sheets-graphics @ybzky
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs
@@ -40,27 +47,20 @@ packages/sheets/src/services/numfmt @Gggpound
 packages/sheets/src/services/ref-range @Gggpound
 packages/sheets/src/services/ref-range @weird94
 packages/sheets/src/services/sheet-interceptor @Gggpound
-## find-replace
 packages/sheets-find-replace @siam-ese
-## number-format
 packages/sheets-numfmt @Gggpound
-## formula
 packages/sheets-formula @wzhudev @Dushusir
-## conditional-formatting
 packages/sheets-conditional-formatting @Gggpound
 packages/sheets-conditional-formatting-ui @Gggpound
-## data validation
 packages/data-validation @weird94
 packages/sheet-data-validation @weird94
-## filter
 packages/sheets-filter @ybzky @yuhongz
 packages/sheets-filter-ui @ybzky @yuhongz
-## misc
 packages/sheets-zen-editor @Jocs
+packages/docs-hyper-link @weird94
+packages/docs-hyper-link-ui @weird94
 
-# business - slides
+# slides
 packages/slides @jikkai
 packages/slides-ui @jikkai
 
-# collaboration
-**/mutations/** @yuhongz

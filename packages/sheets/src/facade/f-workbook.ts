@@ -19,7 +19,7 @@ import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
@@ -292,10 +292,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.deleteSheet(sheet);
      * ```
      */
-    deleteSheet(sheet: FWorksheet): void {
+    deleteSheet(sheet: FWorksheet): Promise<boolean> {
         const unitId = this.id;
         const subUnitId = sheet.getSheetId();
-        this._commandService.executeCommand(RemoveSheetCommand.id, {
+        return this._commandService.executeCommand(RemoveSheetCommand.id, {
             unitId,
             subUnitId,
         });
@@ -484,14 +484,15 @@ export class FWorkbook extends FBase {
      * const sheet = univerAPI.getActiveWorkbook().deleteActiveSheet();
      * ```
      */
-    deleteActiveSheet(): void {
+    deleteActiveSheet(): Promise<boolean> {
         const sheet = this.getActiveSheet();
-        this.deleteSheet(sheet);
+        return this.deleteSheet(sheet);
     }
 
     /**
      * Duplicates the given worksheet.
      * @param {FWorksheet} sheet The worksheet to duplicate.
+     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
      * @example
      * ```ts
      * // The code below duplicates the given worksheet
@@ -500,8 +501,8 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.duplicateSheet(activeSheet);
      * ```
      */
-    duplicateSheet(sheet: FWorksheet): void {
-        this._commandService.syncExecuteCommand(CopySheetCommand.id, {
+    duplicateSheet(sheet: FWorksheet): Promise<boolean> {
+        return this._commandService.executeCommand(CopySheetCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             subUnitId: sheet.getSheetId(),
         });
@@ -509,6 +510,7 @@ export class FWorkbook extends FBase {
 
     /**
      * Duplicates the active sheet.
+     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
      * @example
      * ```ts
      * // The code below duplicates the active sheet
@@ -516,9 +518,9 @@ export class FWorkbook extends FBase {
      *  activeSpreadsheet.duplicateActiveSheet();
      * ```
      */
-    duplicateActiveSheet(): void {
+    duplicateActiveSheet(): Promise<boolean> {
         const sheet = this.getActiveSheet();
-        this.duplicateSheet(sheet);
+        return this.duplicateSheet(sheet);
     }
 
     /**
@@ -591,7 +593,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveSheet(sheet, 1);
      * ```
      */
-    async moveSheet(sheet: FWorksheet, index: number): Promise<boolean> {
+    moveSheet(sheet: FWorksheet, index: number): Promise<boolean> {
         let sheetIndexVal = index;
         if (sheetIndexVal < 0) {
             sheetIndexVal = 0;
@@ -616,7 +618,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveActiveSheet(1);
      * ```
      */
-    async moveActiveSheet(index: number): Promise<boolean> {
+    moveActiveSheet(index: number): Promise<boolean> {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
     }
@@ -684,7 +686,6 @@ export class FWorkbook extends FBase {
     insertDefinedName(name: string, formulaOrRefString: string): void {
         const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
         const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
-        param.unitId = this.getId();
         param.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
         this.insertDefinedNameBuilder(param);
     }
@@ -723,8 +724,8 @@ export class FWorkbook extends FBase {
      * ```
      */
     insertDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
-        const definedName = this._injector.createInstance(FDefinedName, param);
-        definedName.insert();
+        param.unitId = this.getId();
+        this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
     }
 
     /**
@@ -741,7 +742,6 @@ export class FWorkbook extends FBase {
      * ```
      */
     updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
-        const definedName = this._injector.createInstance(FDefinedName, param);
-        definedName.update();
+        this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
     }
 }

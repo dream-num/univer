@@ -1550,7 +1550,6 @@ export class FWorksheet extends FBase {
     insertDefinedName(name: string, formulaOrRefString: string): void {
         const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
         const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
-        param.unitId = this._workbook.getUnitId();
         param.localSheetId = this.getSheetId();
         this._fWorkbook.insertDefinedNameBuilder(param);
     }

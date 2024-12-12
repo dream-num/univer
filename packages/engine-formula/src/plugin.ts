@@ -20,7 +20,6 @@ import { IConfigService, Inject, Injector, Plugin, touchDependencies } from '@un
 import { CalculateController } from './controller/calculate.controller';
 import { defaultPluginConfig, ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
-import { SetDefinedNameController } from './controller/set-defined-name.controller';
 import { SetDependencyController } from './controller/set-dependency.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
@@ -80,7 +79,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
     override onReady(): void {
         touchDependencies(this._injector, [
             [FormulaController],
-            [SetDefinedNameController],
             [SetSuperTableController],
         ]);
 
@@ -120,7 +118,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
             //Controllers
             [FormulaController],
-            [SetDefinedNameController],
             [SetSuperTableController],
         ];
 

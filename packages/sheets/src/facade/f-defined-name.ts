@@ -16,8 +16,8 @@
 
 import type { FWorksheet } from './f-worksheet';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, LocaleService } from '@univerjs/core';
-import { IDefinedNamesService, type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, serializeRange } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { IDefinedNamesService, type ISetDefinedNameMutationParam, serializeRange } from '@univerjs/engine-formula';
+import { RangeProtectionRuleModel, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 
 function getDefinedNameFieldName(unitId: string, localeService: LocaleService, definedNamesService: IDefinedNamesService): string {
     const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
@@ -220,6 +220,20 @@ export class FDefinedName extends FBase {
     }
 
     /**
+     * Gets the name of the defined name.
+     * @returns The name of the defined name.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * console.log(definedName.getName());
+     * ```
+     */
+    getName() {
+        return this._definedNameParam.name;
+    }
+
+    /**
      * Sets the name of the defined name.
      * @param name The name of the defined name.
      * @example
@@ -265,6 +279,20 @@ export class FDefinedName extends FBase {
     }
 
     /**
+     * Gets the reference of the defined name.
+     * @returns The reference of the defined name.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * console.log(definedName.getFormulaOrRefString());
+     * ```
+     */
+    getFormulaOrRefString() {
+        return this._definedNameParam.formulaOrRefString;
+    }
+
+    /**
      * Sets the reference of the defined name by range.
      * @param row The start row of the range.
      * @param column The start column of the range.
@@ -285,6 +313,20 @@ export class FDefinedName extends FBase {
             endColumn: column + (numColumns ?? 1) - 1,
         });
         this._apply();
+    }
+
+    /**
+     * Gets the comment of the defined name.
+     * @returns The comment of the defined name.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * console.log(definedName.getComment());
+     * ```
+     */
+    getComment() {
+        return this._definedNameParam.comment;
     }
 
     /**
@@ -357,28 +399,52 @@ export class FDefinedName extends FBase {
      * ```
      */
     delete() {
-        this._commandService.syncExecuteCommand(RemoveDefinedNameMutation.id, this._definedNameParam);
+        this._commandService.syncExecuteCommand(RemoveDefinedNameCommand.id, this._definedNameParam);
     }
 
-    insert() {
-        this._apply();
-    }
-
-    update() {
-        this._apply();
-    }
-
-    toBuilder() {
-        const builder = this._injector.createInstance(FDefinedNameBuilder);
-        builder.load(this._definedNameParam);
-        return builder;
-    }
-
+    /**
+     * Gets the local sheet id of the defined name.
+     * @returns The local sheet id of the defined name.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * console.log(definedName.getLocalSheetId());
+     * ```
+     */
     getLocalSheetId() {
         return this._definedNameParam.localSheetId;
     }
 
+    /**
+     * Checks if the defined name is in the workbook scope.
+     * @returns True if the defined name is in the workbook scope, false otherwise.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * console.log(definedName.isWorkbookScope());
+     * ```
+     */
     isWorkbookScope() {
         return this._definedNameParam.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
+    }
+
+    /**
+     * Converts the defined name to a defined name builder.
+     * @returns The defined name builder.
+     * @example
+     * ```ts
+     * const workbook = UniverAPI.getActiveWorkbook();
+     * const definedName = workbook.getDefinedNames[0];
+     * const definedNameBuilder = definedName.toBuilder();
+     * const param definedNameBuilder.setName('NewDefinedName').setFormula('SUM(Sheet1!$A$1)').build();
+     * workbook.updateDefinedNameBuilder(param);
+     * ```
+     */
+    toBuilder() {
+        const builder = this._injector.createInstance(FDefinedNameBuilder);
+        builder.load(this._definedNameParam);
+        return builder;
     }
 }

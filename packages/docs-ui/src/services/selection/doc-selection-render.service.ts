@@ -99,7 +99,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _isIMEInputApply = false;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
-    private _editorFocusing = true;
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
 
@@ -323,9 +322,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     focus(): void {
-        if (!this._editorFocusing) {
-            return;
-        }
         this._input.focus();
     }
 
@@ -435,7 +431,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     // Handle pointer down.
     // eslint-disable-next-line max-lines-per-function, complexity
     __onPointDown(evt: IPointerEvent | IMouseEvent) {
-        this._editorFocusing = true;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 

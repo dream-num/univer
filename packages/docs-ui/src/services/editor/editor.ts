@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_STYLES, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
 import { merge, type Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -471,7 +471,7 @@ export class Editor extends Disposable implements IEditor {
 
     /** @deprecated */
     isSheetEditor() {
-        return this._param.isSheetEditor === true;
+        return isInternalEditorID(this._getEditorId());
     }
 
     /** @deprecated */

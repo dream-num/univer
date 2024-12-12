@@ -33,7 +33,6 @@ import { FormulaClipboardController } from './controllers/formula-clipboard.cont
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
-import { PromptController } from './controllers/prompt.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 import { FormulaEditor } from './views/formula-editor/index';
@@ -72,7 +71,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaEditorShowController],
             [FormulaRenderManagerController],
-            [PromptController],
         ];
 
         dependencies.forEach((dependency) => j.add(dependency));
@@ -100,6 +98,5 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
     override onSteady(): void {
         this._injector.get(FormulaAutoFillController);
-        this._injector.get(PromptController);
     }
 }

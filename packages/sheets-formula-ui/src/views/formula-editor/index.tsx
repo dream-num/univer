@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
-import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
@@ -127,6 +127,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const isFocusing = docSelectionRenderService?.isFocusing;
+    const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
+    const currentDoc = useObservable(currentDoc$);
+    const docFocusing = currentDoc?.getUnitId() === editorId;
 
     useEffect(() => {
         if (isSelecting === FormulaSelectingType.NEED_ADD) {
@@ -195,7 +198,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, focus, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor);
-    useRefactorEffect(isFocus, Boolean(isSelecting), unitId);
+    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId);
     useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
@@ -218,6 +221,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             checkScrollBar();
         }
     });
+
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
 
     useRefocus();

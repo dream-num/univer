@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import { createInternalEditorID, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { createInternalEditorID, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
@@ -109,6 +109,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const editorId = useMemo(() => createInternalEditorID(`${RANGE_SELECTOR_SYMBOLS}-${generateRandomId(4)}`), []);
     const [editor, editorSet] = useState<Editor>();
     const containerRef = useRef<HTMLDivElement>(null);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const isNeed = useMemo(() => !rangeDialogVisible && isFocus, [rangeDialogVisible, isFocus]);
     const [rangeString, rangeStringSet] = useState(() => {
         if (typeof initValue === 'string') {
@@ -117,6 +118,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return unitRangesToText(initValue, isSupportAcrossSheet).join(matchToken.COMMA);
         }
     });
+    const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
+    const currentDoc = useObservable(currentDoc$);
+    const docFocusing = currentDoc?.getUnitId() === editorId;
 
     // init actions
     if (actions) {
@@ -229,7 +233,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useSheetSelectionChange(isNeed, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
 
-    useRefactorEffect(isNeed, isNeed, unitId);
+    useRefactorEffect(isNeed, isNeed && docFocusing, unitId);
 
     useOnlyOneRange(unitId, isOnlyOneRange);
 
@@ -479,7 +483,7 @@ function RangeSelectorDialog(props: {
 
     const highlightSheet = useSheetHighlight(unitId);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
-    useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId);
+    useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId, editorId);
     useOnlyOneRange(unitId, isOnlyOneRange);
     useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, () => highlightSheet(refSelections));
 

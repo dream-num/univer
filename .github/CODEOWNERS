@@ -17,6 +17,7 @@ packages/drawing-ui @weird94
 packages/engine-formula @Dushusir @wzhudev
 packages/engine-numfmt @Gggpound
 packages/engine-render @lumixraku
+packages/engine-render/components/docs @lumixraku @Jocs
 packages/find-replace @siam-ese
 packages/network @wzhudev
 packages/rpc @wzhudev

@@ -16,13 +16,13 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
-import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import { render, unmount } from 'rc-util/lib/React/render';
 import type { CSSProperties, ReactElement } from 'react';
+import type { IDisposable } from '../../type';
+import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { render, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-import type { IDisposable } from '../../type';
 
 import styles from './index.module.less';
 
@@ -121,14 +121,19 @@ export class Message implements IDisposable {
     }
 
     append(type: MessageType, options: IMessageOptions): IDisposable {
-        const { content, duration = 3000 } = options;
-        const key = `${Date.now()}`;
+        const { content, duration = 3000, key = `${Date.now()}` } = options;
 
-        this._messages.push({
-            key,
-            type,
-            content,
-        });
+        const existingMessage = this._messages.findIndex((message) => message.key === options.key);
+        if (existingMessage !== -1) {
+            this._messages[existingMessage].content = content;
+            this._messages[existingMessage].type = type;
+        } else {
+            this._messages.push({
+                key,
+                type,
+                content,
+            });
+        }
 
         this.render();
 

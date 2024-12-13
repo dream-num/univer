@@ -18,6 +18,9 @@ import { FUniver } from '@univerjs/core';
 import { FNetwork } from './f-network';
 
 interface IFUniverNetworkMixin {
+    /**
+     * Get the network API of Univer, with the help of which you can send HTTP requests.
+     */
     getNetwork(): FNetwork;
 }
 

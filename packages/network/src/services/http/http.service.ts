@@ -116,27 +116,27 @@ export class HTTPService extends Disposable {
         return this._request<T>('DELETE', url, params);
     }
 
-    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPEvent<T>> {
-        return this._request<T>('PATCH', url, options);
+    patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
+        return this._request<T>('PATCH', url, params);
     }
 
     getSSE<T>(
         method: HTTPRequestMethod,
         url: string,
-        options?: IPostRequestParams
+        _params?: IPostRequestParams
     ): Observable<HTTPEvent<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
-        const headers = new HTTPHeaders(options?.headers);
-        const params = new HTTPParams(options?.params);
+        const headers = new HTTPHeaders(_params?.headers);
+        const params = new HTTPParams(_params?.params);
         const request = new HTTPRequest(method, url, {
             headers,
             params,
-            withCredentials: options?.withCredentials ?? false,
+            withCredentials: _params?.withCredentials ?? false,
             reportProgress: true,
-            responseType: options?.responseType ?? 'json',
-            body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
+            responseType: _params?.responseType ?? 'json',
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (_params as IPostRequestParams)?.body,
         });
 
         return of(request).pipe(concatMap((request) => this._runInterceptorsAndImplementation(request)));

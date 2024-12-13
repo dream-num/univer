@@ -27,31 +27,69 @@ export class FNetwork extends FBase {
         super();
     }
 
+    /**
+     * Send GET request to the server.
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns Network response
+     */
     get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.get(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
+    /**
+     * Send POST request to the server.
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns Network response
+     */
     post<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.post(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
+    /**
+     * Send PUT request to the server.
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns Network response
+     */
     put<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.put(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
+    /**
+     * Send DELETE request to the server.
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns Network response
+     */
     delete<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.delete(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
-    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this._httpService.patch(url, options) as Promise<HTTPResponse<T>>;
+    /**
+     * Send PATCH request to the server.
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns Network response
+     */
+    patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this._httpService.patch(url, params) as Promise<HTTPResponse<T>>;
     }
 
+    /**
+     * Request for a stream of server-sent events. Instead of a single response, the server sends a stream of responses,
+     * Univer wraps the stream in an [`Observable`](https://rxjs.dev/guide/observable) which you can call `subscribe` on.
+     * @param method HTTP request method
+     * @param url The requested URL
+     * @param params Query parameters
+     * @returns An observable that emits the network response
+     */
     getSSE<T>(
         method: HTTPRequestMethod,
         url: string,
-        options?: IPostRequestParams
+        params?: IPostRequestParams
     ): Observable<HTTPEvent<T>> {
-        return this._httpService.getSSE(method, url, options);
+        return this._httpService.getSSE(method, url, params);
     }
 }

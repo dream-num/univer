@@ -16,9 +16,8 @@
 
 import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { ChangeZoomRatioCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { ChangeZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface IFWorksheetSkeletonMixin {
     /**

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import type { IHoverRichTextInfo, IHoverRichTextPosition } from '../services/hover-manager.service';
+import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, type IDisposable, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { FWorkbook } from '@univerjs/sheets/facade';
 import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 

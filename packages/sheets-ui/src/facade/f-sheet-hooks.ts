@@ -15,7 +15,6 @@
  */
 
 import type { ICellCustomRender, IDisposable, Nullable } from '@univerjs/core';
-import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { ICommandService, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -50,13 +49,6 @@ export interface IFSheetHooksUIMixin {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void): IDisposable;
-
-    /**
-     * The onCellClick event is fired when a cell is click.
-     * @param callback Callback function that will receive the position of the cell when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
-    onCellClick(callback: (cellPos: Nullable<ISheetLocationBase>) => void): IDisposable;
 
     /**
      * The onCellRender event is fired when a cell is rendered.

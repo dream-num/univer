@@ -1,7 +1,5 @@
 const path = require('node:path');
 
-const PACKAGE_PREFIXES = ['@univerjs/', '@univerjs-pro/'];
-
 const rule = {
     meta: {
         type: 'problem',
@@ -24,6 +22,21 @@ const rule = {
             return {};
         }
 
+        // get parent dir
+        const parentDirMatch = normalizedPath.match(/\/([^/]+)\/packages\//);
+        if (!parentDirMatch) {
+            return {};
+        }
+
+        const parentDir = parentDirMatch[1];
+        const packagePrefix = parentDir === 'univer' ? '@univerjs/' : 
+                            parentDir === 'univer-pro' ? '@univerjs-pro/' : 
+                            null;
+
+        if (!packagePrefix) {
+            return {};
+        }
+
         // get package name
         const packageMatch = normalizedPath.match(/\/packages\/([^/]+)/);
         if (!packageMatch) {
@@ -31,13 +44,13 @@ const rule = {
         }
 
         const packageName = packageMatch[1];
-        const possiblePackageNames = PACKAGE_PREFIXES.map((prefix) => `${prefix}${packageName}`);
+        const possiblePackageName = `${packagePrefix}${packageName}`;
 
         return {
             ImportDeclaration(node) {
                 const importPath = node.source.value;
 
-                if (possiblePackageNames.includes(importPath)) {
+                if (importPath === possiblePackageName) {
                     context.report({
                         node,
                         messageId: 'noSelfImport',

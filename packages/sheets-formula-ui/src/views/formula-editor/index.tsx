@@ -170,7 +170,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
-    const resetSelection = useResetSelection(isFocus);
+    const resetSelection = useResetSelection(isFocus, unitId, subUnitId);
 
     useEffect(() => {
         onFormulaSelectingChange(isSelecting);

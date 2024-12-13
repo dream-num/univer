@@ -138,7 +138,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
-    const resetSelection = useResetSelection(!rangeDialogVisible && isFocus);
+    const resetSelection = useResetSelection(!rangeDialogVisible && isFocus, unitId, subUnitId);
 
     const handleInput = useMemo(() => (text: string) => {
         const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
@@ -483,7 +483,7 @@ function RangeSelectorDialog(props: {
 
     const highlightSheet = useSheetHighlight(unitId);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
-    useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId, editorId);
+    useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId);
     useOnlyOneRange(unitId, isOnlyOneRange);
     useSwitchSheet(focusIndex >= 0, unitId, isSupportAcrossSheet, noop, noop, () => highlightSheet(refSelections));
 

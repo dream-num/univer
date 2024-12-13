@@ -20,6 +20,7 @@ import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, Tools, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
@@ -645,5 +646,42 @@ export class FRange extends FBase {
 
         if (start === end) return `${start}`;
         return `${start}:${end}`;
+    }
+
+    /**
+     * Sets the specified range as the active range, with the top left cell in the range as the current cell.
+     * @returns {FRange}  This range, for chaining.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.activate(); // the active cell will be A1
+     * ```
+     */
+    activate() {
+        const fWorkbook = this._injector.createInstance(FWorkbook, this._workbook);
+        fWorkbook.setActiveRange(this);
+        return this;
+    }
+
+    /**
+     * Sets the specified cell as the current cell.
+     * If the specified cell is present in an existing range, then that range becomes the active range with the cell as the current cell.
+     * If the specified cell is not part of an existing range, then a new range is created with the cell as the active range and the current cell.
+     * @returns {FRange}  This range, for chaining.
+     * @description If the range is not a single cell, an error will be thrown.
+     */
+    activateAsCurrentCell() {
+        const mergeInfo = this._worksheet.getMergedCell(this._range.startRow, this._range.startColumn);
+        // the range is a merge cell or single cell
+        const valid = (mergeInfo && Rectangle.equals(mergeInfo, this._range)) ||
+        (!mergeInfo && this._range.startRow === this._range.endRow && this._range.startColumn === this._range.endColumn);
+
+        if (valid) {
+            return this.activate();
+        } else {
+            throw new Error('The range is not a single cell');
+        }
     }
 }

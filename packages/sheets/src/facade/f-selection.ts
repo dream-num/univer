@@ -17,9 +17,8 @@
 import type { Direction, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { ICommandService, Inject, Injector, Rectangle } from '@univerjs/core';
-import { getPrimaryForRange, SetSelectionsOperation } from '@univerjs/sheets';
+import { getNextPrimaryCell, getPrimaryForRange, SetSelectionsOperation } from '@univerjs/sheets';
 
-import { getNextPrimaryCell } from '../services/selections/move-active-cell-util';
 import { FRange } from './f-range';
 import { FWorkbook } from './f-workbook';
 import { FWorksheet } from './f-worksheet';

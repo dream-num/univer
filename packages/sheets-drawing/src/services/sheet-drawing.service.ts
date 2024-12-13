@@ -26,9 +26,9 @@ interface ICellPosition {
 }
 
 export enum SheetDrawingAnchorType {
-    Position = '0',
-    Both = '1',
-    None = '2',
+    Position = 0,
+    Both = 1,
+    None = 2,
 }
 
 export interface ISheetDrawingPosition extends IRotationSkewFlipTransform {

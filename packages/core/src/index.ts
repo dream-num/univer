@@ -193,3 +193,4 @@ export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 
 export { type IUniverConfig, Univer } from './univer';
 export { isNodeEnv } from './shared/tools';
+export { FBlob, type IFBlobSource } from './facade/f-blob';

@@ -34,15 +34,17 @@ export class FFormula extends FBase {
     /**
      * Start the calculation of the formula.
      */
-    executeCalculation(): void {
+    executeCalculation(): Promise<void> {
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
+        return this.onCalculationEnd();
     }
 
      /**
       * Stop the calculation of the formula.
       */
-    stopCalculation(): void {
+    stopCalculation(): Promise<void> {
         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
+        return this.onCalculationEnd();
     }
 
     /**

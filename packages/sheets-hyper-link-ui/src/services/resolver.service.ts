@@ -141,6 +141,7 @@ export class SheetsHyperLinkResolverService {
 
                     selections: [{
                         range: realRange,
+                        primary: null,
                     }],
                 } as ISetSelectionsOperationParams
             );

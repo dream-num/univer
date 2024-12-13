@@ -20,6 +20,7 @@ import { type IFBlobSource, ImageSourceType } from '@univerjs/core';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
@@ -35,6 +36,10 @@ export interface IFWorksheetDrawing {
     insertImages(sheetImages: ISheetImage[]): void;
 
     getImages(): FOverGridImage[];
+
+    deleteImages(sheetImages: FOverGridImage[]): void;
+
+    updateImages(sheetImages: ISheetImage[]): void;
 
 }
 
@@ -69,7 +74,7 @@ export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing 
         param.unitId = this._fWorkbook.getId();
         param.subUnitId = this.getSheetId();
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
+        this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }
 
     override insertImages(sheetImages: ISheetImage[]): void {
@@ -79,10 +84,10 @@ export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing 
             return image;
         });
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: param });
+        this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: param });
     }
 
-    deleteImages(sheetImages: FOverGridImage[]): void {
+    override deleteImages(sheetImages: FOverGridImage[]): void {
         const drawings = sheetImages.map((image) => {
             return {
                 unitId: this._fWorkbook.getId(),
@@ -91,7 +96,7 @@ export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing 
                 drawingType: image.getType(),
             };
         }) as IDeleteDrawingCommandParam[];
-        this._commandService.executeCommand(RemoveSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings });
+        this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings });
     }
 
     override getImages(): FOverGridImage[] {
@@ -103,6 +108,10 @@ export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing 
             images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
         }
         return images;
+    }
+
+    override updateImages(sheetImages: ISheetImage[]): void {
+        this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), sheetImages });
     }
 }
 

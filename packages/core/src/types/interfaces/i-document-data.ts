@@ -1097,7 +1097,6 @@ export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTr
 // TODO@Jocs: these types are here because of drawing coupled into the core of the document's model, which
 // is an anti-pattern. After fixing the problem, these types should be removed.
 
-/** @deprecated */
 export enum ArrangeTypeEnum {
     forward,
     backward,
@@ -1105,7 +1104,6 @@ export enum ArrangeTypeEnum {
     back,
 }
 
-/** @deprecated */
 export enum DrawingTypeEnum {
     UNRECOGNIZED = -1,
     DRAWING_IMAGE = 0,
@@ -1119,21 +1117,17 @@ export enum DrawingTypeEnum {
     DRAWING_DOM = 8,
 }
 
-/** @deprecated */
 export type DrawingType = DrawingTypeEnum | number;
 
-/** @deprecated */
 export interface IDrawingSpace {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
 
-/** @deprecated */
 export interface IDrawingSearch extends IDrawingSpace {
     drawingId: string;
 }
 
-/** @deprecated */
 export interface IDrawingParam extends IDrawingSearch {
     drawingType: DrawingType;
     transform?: Nullable<ITransformState>;

@@ -659,7 +659,7 @@ export class FRange extends FBase {
      * fRange.activate(); // the active cell will be A1
      * ```
      */
-    activate() {
+    activate(): FRange {
         const fWorkbook = this._injector.createInstance(FWorkbook, this._workbook);
         fWorkbook.setActiveRange(this);
         return this;
@@ -672,7 +672,7 @@ export class FRange extends FBase {
      * @returns {FRange}  This range, for chaining.
      * @description If the range is not a single cell, an error will be thrown.
      */
-    activateAsCurrentCell() {
+    activateAsCurrentCell(): FRange {
         const mergeInfo = this._worksheet.getMergedCell(this._range.startRow, this._range.startColumn);
         // the range is a merge cell or single cell
         const valid = (mergeInfo && Rectangle.equals(mergeInfo, this._range)) ||

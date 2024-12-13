@@ -24,7 +24,7 @@ export class ConditionalFormattingPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionCheckController) private readonly _SheetPermissionCheckController: SheetPermissionCheckController
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
 
     ) {
         super();
@@ -36,13 +36,13 @@ export class ConditionalFormattingPermissionController extends Disposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddCfCommand.id) {
-                    const permission = this._SheetPermissionCheckController.permissionCheckWithRanges({
+                    const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, (command.params as IAddCfCommandParams).rule.ranges);
                     if (!permission) {
-                        this._SheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }
                 }
             })

@@ -54,6 +54,7 @@ import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
 import '@univerjs/sheets-thread-comment/facade';
+import '@univerjs/sheets-conditional-formatting/facade';
 
 import '../global.css';
 

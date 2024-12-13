@@ -183,6 +183,16 @@ describe('Test FUniver', () => {
                 [function (...variants) {
                     let sum = 0;
 
+                    const last = variants[variants.length - 1];
+                    // @ts-ignore
+                    if (last.isLambda()) {
+                        variants.pop();
+
+                        const variantsList = variants.map((variant) => Array.isArray(variant) ? variant[0][0] : variant);
+                        // @ts-ignore
+                        sum += last.executeCustom(...variantsList).getValue();
+                    }
+
                     for (const variant of variants) {
                         sum += Number(variant) || 0;
                     }

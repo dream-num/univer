@@ -240,6 +240,11 @@ export class FunctionNode extends BaseAstNode {
             if (variant.isArray()) {
                 return (variant as ArrayValueObject).toValue();
             }
+
+            if (variant.isLambda()) {
+                return variant;
+            }
+
             return variant.getValue();
         });
     }

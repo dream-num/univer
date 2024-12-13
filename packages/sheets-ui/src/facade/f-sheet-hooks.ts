@@ -18,8 +18,8 @@ import type { ICellCustomRender, IDisposable, Nullable } from '@univerjs/core';
 import type { IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { ICommandService, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { FSheetHooks } from '@univerjs/sheets/facade';
 import { DragManagerService, HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { FSheetHooks } from '@univerjs/sheets/facade';
 
 export interface IFSheetHooksUIMixin {
     /**
@@ -129,5 +129,5 @@ export class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMix
 FSheetHooks.extend(FSheetHooksUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FSheetHooks extends IFSheetHooksUIMixin {}
+    interface FSheetHooks extends IFSheetHooksUIMixin { }
 }

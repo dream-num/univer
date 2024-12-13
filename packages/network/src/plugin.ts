@@ -15,11 +15,11 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { Inject, Injector, mergeOverrideWithDependencies, Plugin, registerDependencies } from '@univerjs/core';
+import { ILogService, Inject, Injector, LookUp, mergeOverrideWithDependencies, Plugin, Quantity, registerDependencies } from '@univerjs/core';
 import { HTTPService } from './services/http/http.service';
+import { FetchHTTPImplementation } from './services/http/implementations/fetch';
 import { IHTTPImplementation } from './services/http/implementations/implementation';
 import { XHRHTTPImplementation } from './services/http/implementations/xhr';
-import { FetchHTTPImplementation } from './services/http/implementations/fetch';
 
 export interface IUniverNetworkPluginConfig {
     /**
@@ -34,6 +34,12 @@ export interface IUniverNetworkPluginConfig {
      * - {@link IHTTPImplementation}
      */
     override?: DependencyOverride;
+
+    /**
+     * Force to use a new instance of {@link HTTPService} and {@link IHTTPImplementation} even if
+     * an ancestor injector already has them registered.
+     */
+    forceUseNewInstance?: boolean;
 }
 
 /**
@@ -44,12 +50,23 @@ export class UniverNetworkPlugin extends Plugin {
 
     constructor(
         private readonly _config: Partial<IUniverNetworkPluginConfig> | undefined = undefined,
+        @ILogService private readonly _logger: ILogService,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }
 
     override onStarting(): void {
+        const parent = this._injector.get(HTTPService, Quantity.OPTIONAL, LookUp.SKIP_SELF);
+        if (parent && !this._config?.forceUseNewInstance) {
+            this._logger.warn(
+                '[UniverNetworkPlugin]',
+                'HTTPService is already registered in an ancestor interceptor. Skipping registration. ' +
+                'If you want to force a new instance, set "forceUseNewInstance" to true in the plugin configuration.'
+            );
+            return;
+        }
+
         const impl = this._config?.useFetchImpl
             ? FetchHTTPImplementation
             : typeof window !== 'undefined'

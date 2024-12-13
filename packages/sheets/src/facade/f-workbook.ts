@@ -79,7 +79,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.setName('MyWorkbook');
      * ```
      */
-    setName(name: string) {
+    setName(name: string): void {
         this._workbook.setName(name);
     }
 
@@ -496,7 +496,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.duplicateSheet(activeSheet);
      * ```
      */
-    duplicateSheet(sheet: FWorksheet) {
+    duplicateSheet(sheet: FWorksheet): void {
         this._commandService.syncExecuteCommand(CopySheetCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             subUnitId: sheet.getSheetId(),
@@ -612,7 +612,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveActiveSheet(1);
      * ```
      */
-    async moveActiveSheet(index: number) {
+    async moveActiveSheet(index: number): Promise<boolean> {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
     }
@@ -622,7 +622,7 @@ export class FWorkbook extends FBase {
      *
      * @returns {FPermission} - The PermissionInstance.
      */
-    getPermission() {
+    getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
     }
 }

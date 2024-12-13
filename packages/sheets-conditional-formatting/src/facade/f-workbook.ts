@@ -22,7 +22,7 @@ export interface IFWorkbookConditionalFormattingMixin {
 }
 
 export class FWorkbookConditionalFormattingMixin extends FWorkbook implements IFWorkbookConditionalFormattingMixin {
-    override newColor() {
+    override newColor(): ColorBuilder {
         return new ColorBuilder();
     }
 }

@@ -85,27 +85,27 @@ export interface IFWorksheetConditionalFormattingMixin {
 }
 
 export class FWorksheetConditionalFormattingMixin extends FWorksheet implements IFWorksheetConditionalFormattingMixin {
-    private _getConditionalFormattingRuleModel() {
+    private _getConditionalFormattingRuleModel(): ConditionalFormattingRuleModel {
         return this._injector.get(ConditionalFormattingRuleModel);
     }
 
-    override getConditionalFormattingRules() {
+    override getConditionalFormattingRules(): IConditionFormattingRule[] {
         const rules = this._getConditionalFormattingRuleModel().getSubunitRules(this._workbook.getUnitId(), this._worksheet.getSheetId()) || [];
         return [...rules];
     }
 
-    override createConditionalFormattingRule() {
+    override createConditionalFormattingRule(): ConditionalFormattingBuilder {
         return new ConditionalFormattingBuilder();
     }
 
-    override addConditionalFormattingRule(rule: IConditionFormattingRule) {
+    override addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean> {
         const params: IAddConditionalRuleMutationParams = {
             rule, unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
         };
         return this._commandService.executeCommand(AddConditionalRuleMutation.id, params);
     }
 
-    override deleteConditionalFormattingRule(cfId: string) {
+    override deleteConditionalFormattingRule(cfId: string): Promise<boolean> {
         const params: IDeleteConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             cfId,
@@ -113,7 +113,7 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
         return this._commandService.executeCommand(DeleteConditionalRuleMutation.id, params);
     }
 
-    override moveConditionalFormattingRule(cfId: string, toCfId: string, type: IAnchor['type'] = 'after') {
+    override moveConditionalFormattingRule(cfId: string, toCfId: string, type: IAnchor['type'] = 'after'): Promise<boolean> {
         const params: IMoveConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             start: { id: cfId, type: 'self' }, end: { id: toCfId, type },
@@ -121,7 +121,7 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
         return this._commandService.executeCommand(MoveConditionalRuleMutation.id, params);
     }
 
-    override setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule) {
+    override setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): Promise<boolean> {
         const params: ISetConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             rule,

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/explicit-function-return-type */
+
 import type { IRange } from '@univerjs/core';
 import type { CFTimePeriodOperator, IAverageHighlightCell, IColorScale, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDataBar, IDuplicateValuesHighlightCell, IFormulaHighlightCell, IIconSet, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell, IUniqueValuesHighlightCell, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';

@@ -110,13 +110,6 @@ exports.baseRules = {
 exports.typescriptPreset = () => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
-        plugins: {
-            univer: {
-                rules: {
-                    'no-external-imports-in-facade': noExternalImportsInFacade,
-                },
-            },
-        },
         rules: {
             'ts/naming-convention': [
                 'warn',
@@ -137,7 +130,6 @@ exports.typescriptPreset = () => {
                     leadingUnderscore: 'require',
                 },
             ],
-            'univer/no-external-imports-in-facade': 'error',
         },
         languageOptions: {
             parser: require('@typescript-eslint/parser'),
@@ -147,9 +139,18 @@ exports.typescriptPreset = () => {
 
 exports.facadePreset = () => {
     return {
-        files: ['**/facade/src/**/*.ts'],
+        files: ['**/src/facade/**/*.ts'],
+        ignores: ['**/core/src/**/*.ts'],
+        plugins: {
+            univer: {
+                rules: {
+                    'no-external-imports-in-facade': noExternalImportsInFacade,
+                },
+            },
+        },
         rules: {
             'ts/explicit-function-return-type': 'error',
+            'univer/no-external-imports-in-facade': 'error',
         },
     };
 };

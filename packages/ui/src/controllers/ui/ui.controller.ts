@@ -19,11 +19,26 @@ import { createIdentifier } from '@univerjs/core';
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;
 
+    /**
+     * If Univer should make the header bar visible.
+     */
     header?: boolean;
+
+    /**
+     * If Univer should make the toolbar bar visible.
+     */
     toolbar?: boolean;
+
+    /**
+     * If Univer should make the footer bar visible.
+     */
     footer?: boolean;
+
+    /**
+     * If Univer should make the context menu usable.
+     */
     contextMenu?: boolean;
 }
 
-export interface IUIController {}
+export interface IUIController { }
 export const IUIController = createIdentifier<IUIController>('univer.ui.ui-controller');

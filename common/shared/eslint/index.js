@@ -1,4 +1,5 @@
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
+const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
 
 exports.baseRules = {
     curly: ['error', 'multi-line'],
@@ -109,6 +110,13 @@ exports.baseRules = {
 exports.typescriptPreset = () => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
+        plugins: {
+            univer: {
+                rules: {
+                    'no-external-imports-in-facade': noExternalImportsInFacade,
+                },
+            },
+        },
         rules: {
             'ts/naming-convention': [
                 'warn',
@@ -129,6 +137,7 @@ exports.typescriptPreset = () => {
                     leadingUnderscore: 'require',
                 },
             ],
+            'univer/no-external-imports-in-facade': 'error',
         },
         languageOptions: {
             parser: require('@typescript-eslint/parser'),

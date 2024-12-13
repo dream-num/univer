@@ -1,5 +1,6 @@
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
+const noSelfPackageImports = require('./plugins/no-self-package-imports');
 
 exports.baseRules = {
     curly: ['error', 'multi-line'],
@@ -110,6 +111,14 @@ exports.baseRules = {
 exports.typescriptPreset = () => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
+        plugins: {
+            univer: {
+                rules: {
+                    'no-external-imports-in-facade': noExternalImportsInFacade,
+                    'no-self-package-imports': noSelfPackageImports,
+                },
+            },
+        },
         rules: {
             'ts/naming-convention': [
                 'warn',
@@ -137,6 +146,23 @@ exports.typescriptPreset = () => {
     };
 };
 
+exports.univerSourcePreset = () => {
+    return {
+        files: ['**/*.ts', '**/*.tsx'],
+        ignores: [
+            '**/__tests__/**/*',
+            '**/*.spec.ts',
+            '**/*.test.ts',
+        ],
+        rules: {
+            'univer/no-self-package-imports': 'error',
+        },
+        languageOptions: {
+            parser: require('@typescript-eslint/parser'),
+        },
+    };
+};
+
 exports.facadePreset = () => {
     return {
         files: ['**/src/facade/**/*.ts'],
@@ -146,13 +172,6 @@ exports.facadePreset = () => {
             '**/*.spec.ts',
             '**/*.test.ts',
         ],
-        plugins: {
-            univer: {
-                rules: {
-                    'no-external-imports-in-facade': noExternalImportsInFacade,
-                },
-            },
-        },
         rules: {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',

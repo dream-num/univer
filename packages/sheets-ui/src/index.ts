@@ -84,7 +84,7 @@ export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { discreteRangeToRange, rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
-export { type IHoverCellPosition } from './services/hover-manager.service';
+export type { IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
 export { AutoWidthController } from './controllers/auto-width.controller';
 export { type IDragCellPosition } from './services/drag-manager.service';

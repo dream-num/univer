@@ -516,6 +516,10 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: -1, startColumn: 2, xSplit: 2, ySplit: 0 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.freezeColumn(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: -1, startColumn: 4, xSplit: 2, ySplit: 0 });
     });
 
     it('Worksheet setFrozenRows and getFrozenRows', () => {
@@ -526,6 +530,10 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: 3, startColumn: -1, xSplit: 0, ySplit: 3 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.freezeRow(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: 4, startColumn: -1, xSplit: 0, ySplit: 2 });
     });
 
     it('Worksheet combined frozen rows and columns', () => {

@@ -40,9 +40,13 @@ export interface IScrollState {
 }
 
 export interface IViewportScrollState extends IScrollState {
+    /** scroll value in scrollbar */
     scrollX: number;
+    /** scroll value in scrollbar */
     scrollY: number;
+    /** scroll value on viewport */
     viewportScrollX: number;
+    /** scroll value on viewport */
     viewportScrollY: number;
 }
 

@@ -1112,6 +1112,14 @@ export class FWorksheet extends FBase {
      * Set freeze column, then the column range in startColumn to endColumn will be fixed.
      * e.g. freezeColumn(0, 2) will fix the column range at 0 to 2.
      * e.g. freezeColumn(2, 3) will fix the column range at 2 to 3, And column at 0 to 1 will be invisible.
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too columns.
+     * fWorkSheet.freezeColumn(0, 2);
+     * ```
      * @param startColumn
      * @param endColumn
      */
@@ -1133,6 +1141,14 @@ export class FWorksheet extends FBase {
      * e.g. freezeRow(2, 3) will fix the row range at 2 to 3, And row at 0 to 1 will be invisible.
      * @param startRow
      * @param endRow
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too rows.
+     * fWorkSheet.freezeRow(0, 2);
+     * ```
      */
     freezeRow(startRow: number, endRow: number): void {
         const freezeCfg = this.getFreeze();
@@ -1146,6 +1162,9 @@ export class FWorksheet extends FBase {
         });
     }
 
+    /**
+     * Get freezed rows.
+     */
     getRowFreezeStatus(): { startRow: number; endRow: number } {
         const cfg = this._worksheet.getFreeze();
         return {
@@ -1154,6 +1173,9 @@ export class FWorksheet extends FBase {
         };
     }
 
+    /**
+     * Get freezed columns
+     */
     getColumnFreezeStatus(): { startColumn: number; endColumn: number } {
         const cfg = this._worksheet.getFreeze();
         return {

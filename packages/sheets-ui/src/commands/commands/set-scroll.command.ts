@@ -54,8 +54,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const { unitId, subUnitId, worksheet } = target;
-        const { xSplit, ySplit } = worksheet.getConfig().freeze;
+        const { unitId, subUnitId } = target;
         const scrollManagerService = renderManagerSrv.getRenderById(unitId)!.with(SheetScrollManagerService);
         const currentScroll = scrollManagerService.getCurrentScrollState();
         const { offsetX = 0, offsetY = 0 } = params || {};
@@ -69,7 +68,6 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
-            // why + ySplit? receiver - ySplit in scroll.operation.ts
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max
@@ -113,13 +111,10 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetY: currentOffsetY,
         } = currentScroll || {};
 
-        // const { xSplit, ySplit } = worksheet.getConfig().freeze;
-
         const commandService = accessor.get(ICommandService);
         return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
-            // why + ySplit? receiver in scroll.operation.ts - ySplit again.
             sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0),
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0),
             offsetX: offsetX ?? currentOffsetX,
@@ -135,7 +130,7 @@ export interface IScrollToCellCommandParams {
 }
 
 /**
- * The command is used to scroll to the specific cell if the target cell is not in the viewport.
+ * Scroll to make the range at top left edge of viewport.
  */
 export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
     id: 'sheet.command.scroll-to-cell',

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
-import { awaitTime, ICommandService, type IDisposable, ILogService, toDisposable } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import type { awaitTime, ICommandService, type IDisposable, ILogService, Nullable, toDisposable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { IHoverRichTextInfo, IHoverRichTextPosition } from '../services/hover-manager.service';
+import type { IScrollState } from '../services/scroll-manager.service';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -141,6 +143,23 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         // wait for the async cell edit operation to complete
         await awaitTime(0);
         return true;
+    }
+
+    /**
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
+    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return null;
+        const scm = render.with(SheetScrollManagerService);
+        return scm.getScrollStateByParam({ unitId, sheetId });
     }
 }
 

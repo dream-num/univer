@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import type { IScrollState } from '../services/scroll-manager.service';
-import { ICommandService } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { RenderManagerService } from '@univerjs/engine-render';
+import type { IScrollState, IViewportScrollState } from '../services/scroll-manager.service';
+import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ChangeZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
+import { SheetsScrollRenderController } from '../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -92,27 +93,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     /**
-     * Scroll spreadsheet to cell position.
-     * @param row
-     * @param column
-     * @returns void
-     */
-    scrollToCell(row: number, column: number): void {
-        const unitId = this._workbook.getUnitId();
-        const sheetId = this._worksheet.getSheetId();
-        const commandService = this._injector.get(ICommandService);
-
-        return commandService.syncExecuteCommand(SetScrollOperation.id, {
-            unitId,
-            sheetId,
-            sheetViewStartRow: row,
-            sheetViewStartColumn: column,
-            offsetX: 0,
-            offsetY: 0,
-        });
-    }
-
-    /**
      * Return visible range.
      * @returns IRange
      */
@@ -145,6 +125,29 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return range;
     }
 
+    /**
+     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     * @param row
+     * @param column
+     */
+    scrollToCell(row: number, column: number): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            const scrollRenderController = render?.with(SheetsScrollRenderController);
+            scrollRenderController.scrollToCell(row, column);
+        }
+    }
+
+    /**
+     * Get scroll state of current sheet.
+     * @returns {IScrollState} curr scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
+     * ```
+     */
     getScrollState(): Nullable<IScrollState> {
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
@@ -153,6 +156,27 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         if (!render) return null;
         const scm = render.with(SheetScrollManagerService);
         return scm.getScrollStateByParam({ unitId, sheetId });
+    }
+
+    /**
+     * Invoked when scrolling the sheet.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
+     * ```
+     */
+    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
+        if (scrollManagerService) {
+            const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                callback(params);
+            });
+            return toDisposable(sub);
+        }
+        return toDisposable(() => {});
     }
 }
 

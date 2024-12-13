@@ -1414,7 +1414,7 @@ export class FWorksheet extends FBase {
      *  This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
      * @returns {FRange} The range of the data in the sheet.
      */
-    getDataRange() {
+    getDataRange(): FRange {
         const lastRow = this.getLastRows();
         const lastColumn = this.getLastColumns();
         return this.getRange(0, 0, lastRow + 1, lastColumn + 1);

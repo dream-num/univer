@@ -17,7 +17,7 @@
 import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, Tools, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
@@ -586,7 +586,7 @@ export class FRange extends FBase {
     }
 
     /**
-     * Unmerge cells in the range
+     * Break all horizontally- or vertically-merged cells contained within the range list into individual cells again.
      * @returns This range, for chaining
      */
     breakApart(): FRange {
@@ -598,7 +598,18 @@ export class FRange extends FBase {
 
     /**
      * Iterate cells in this range. Merged cells will be respected.
-     * @param callback
+     * @param callback the callback function to be called for each cell in the range
+     * @param {number} callback.row the row number of the cell
+     * @param {number} callback.col the column number of the cell
+     * @param {ICellData} callback.cell the cell data
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * fRange.forEach((row, col, cell) => {
+     *    console.log(row, col, cell);
+     * });
+     * ```
      */
     forEach(callback: (row: number, col: number, cell: ICellData) => void): void {
         // Iterate each cell in this range.
@@ -608,5 +619,31 @@ export class FRange extends FBase {
             .forValue((row, col, value) => {
                 callback(row, col, value);
             });
+    }
+
+    /**
+     * Returns a string description of the range, in A1 notation.
+     * @returns {string} The A1 notation of the range.
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:B2');
+     * console.log(fRange.getA1Notation()); // A1:B2
+     * ```
+     */
+    getA1Notation(): string {
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        let start;
+        let end;
+        if (startColumn < endColumn) {
+            start = Tools.numToWord(startColumn + 1) + (startRow + 1);
+            end = Tools.numToWord(endColumn + 1) + (endRow + 1);
+        } else {
+            start = Tools.numToWord(endColumn + 1) + (endRow + 1);
+            end = Tools.numToWord(startColumn + 1) + (startRow + 1);
+        }
+
+        if (start === end) return `${start}`;
+        return `${start}:${end}`;
     }
 }

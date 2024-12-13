@@ -17,8 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { CFTimePeriodOperator, IAverageHighlightCell, IColorScale, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDataBar, IDuplicateValuesHighlightCell, IFormulaHighlightCell, IIconSet, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell, IUniqueValuesHighlightCell, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';
-import { createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType } from '../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
 
 class ConditionalFormatRuleBaseBuilder {
     protected _rule: Partial<IConditionFormattingRule> = {};

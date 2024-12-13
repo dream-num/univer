@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { FUniver, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import { FUniver, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
@@ -47,6 +47,10 @@ export interface IFUniverSheetsMixin {
      * @returns {FPermission} - The PermissionInstance.
      */
     getPermission(): FPermission;
+    /**
+     * Register a callback that will be triggered when a Univer Sheet is created.
+     */
+    onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
@@ -76,6 +80,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 
     override getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+
+    override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {
+        return toDisposable(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            this._injector.createInstance(FWorkbook, workbook);
+        }));
     }
 }
 

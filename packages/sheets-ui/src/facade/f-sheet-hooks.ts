@@ -15,11 +15,12 @@
  */
 
 import type { ICellCustomRender, IDisposable, Nullable } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { ICommandService, InterceptorEffectEnum, toDisposable } from '@univerjs/core';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { FSheetHooks } from '@univerjs/sheets/facade';
 import { DragManagerService, HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { FSheetHooks } from '@univerjs/sheets/facade';
 
 export interface IFSheetHooksUIMixin {
     /**
@@ -49,6 +50,13 @@ export interface IFSheetHooksUIMixin {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void): IDisposable;
+
+    /**
+     * The onCellClick event is fired when a cell is click.
+     * @param callback Callback function that will receive the position of the cell when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellClick(callback: (cellPos: Nullable<ISheetLocationBase>) => void): IDisposable;
 
     /**
      * The onCellRender event is fired when a cell is rendered.
@@ -129,5 +137,5 @@ export class FSheetHooksUIMixin extends FSheetHooks implements IFSheetHooksUIMix
 FSheetHooks.extend(FSheetHooksUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FSheetHooks extends IFSheetHooksUIMixin {}
+    interface FSheetHooks extends IFSheetHooksUIMixin { }
 }

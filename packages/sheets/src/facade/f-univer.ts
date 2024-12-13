@@ -83,9 +83,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     }
 
     override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {
-        return toDisposable(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            this._injector.createInstance(FWorkbook, workbook);
-        }));
+        const subscription = this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            const fworkbook = this._injector.createInstance(FWorkbook, workbook);
+            callback(fworkbook);
+        });
+
+        return toDisposable(subscription);
     }
 }
 

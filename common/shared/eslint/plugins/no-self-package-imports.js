@@ -29,9 +29,11 @@ const rule = {
         }
 
         const parentDir = parentDirMatch[1];
-        const packagePrefix = parentDir === 'univer' ? '@univerjs/' : 
-                            parentDir === 'univer-pro' ? '@univerjs-pro/' : 
-                            null;
+        const packagePrefix = parentDir === 'univer'
+            ? '@univerjs/' :
+            parentDir === 'univer-pro'
+                ? '@univerjs-pro/' :
+                null;
 
         if (!packagePrefix) {
             return {};

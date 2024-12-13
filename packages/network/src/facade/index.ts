@@ -15,3 +15,6 @@
  */
 
 import './f-univer';
+import './f-network';
+
+export type { FNetwork } from './f-network';

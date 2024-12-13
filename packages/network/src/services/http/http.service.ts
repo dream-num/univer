@@ -15,19 +15,18 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { HTTPResponseType } from './http';
+import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
+import type { HTTPRequestMethod } from './request';
+import type { HTTPEvent } from './response';
+import { Disposable, remove, toDisposable } from '@univerjs/core';
 import { firstValueFrom, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
-
 import { HTTPHeaders } from './headers';
-import type { HTTPResponseType } from './http';
 import { IHTTPImplementation } from './implementations/implementation';
 import { HTTPParams } from './params';
-import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
-import type { HTTPEvent } from './response';
-import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
     /** Query params. These params would be append to the url before the request is sent. */

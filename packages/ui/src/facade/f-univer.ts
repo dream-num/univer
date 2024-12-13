@@ -63,6 +63,13 @@ export interface IFUniverUIMixin {
 
     /**
      * Show a message.
+     *
+     * @example
+     * ```ts
+     * const message = univerAPI.showMessage({ key: 'my-message', content: 'Warning', duration: 0 });
+     *
+     * someAction().then(() => message.dispose());
+     * ```
      */
     showMessage(options: IMessageOptions): IDisposable;
 }

@@ -17,10 +17,9 @@
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetPermissionCheckController, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
-import { SheetPermissionInterceptorBaseController } from './sheet-permission-interceptor-base.controller';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
@@ -33,7 +32,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
     ) {
         super();
         this._initClipboardHook();
@@ -77,7 +76,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                     }
 
                     if (!hasPermission) {
-                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localService.t('permission.dialog.pasteErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localService.t('permission.dialog.pasteErr'));
                     }
 
                     return hasPermission;

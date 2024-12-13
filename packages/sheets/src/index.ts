@@ -101,6 +101,7 @@ export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclus
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
 export type { IWorksheetProtectionRule } from './services/permission/type';
+export { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 export { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
 export { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from './services/permission/workbook-permission';
 export {

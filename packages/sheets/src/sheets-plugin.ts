@@ -25,7 +25,11 @@ import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/con
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
+import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
+
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
 import { SheetRangeThemeModel } from './model/range-theme-model';
@@ -99,6 +103,9 @@ export class UniverSheetsPlugin extends Plugin {
             [WorksheetPermissionService],
             [WorksheetProtectionRuleModel],
             [WorksheetProtectionPointModel],
+            [SheetPermissionViewModelController],
+            [SheetPermissionInitController],
+            [SheetPermissionCheckController],
 
             // range theme
             [SheetRangeThemeModel],
@@ -134,12 +141,14 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [WorkbookPermissionService],
             [WorksheetPermissionService],
+            [SheetPermissionViewModelController],
         ]);
     }
 
     override onRendered(): void {
         touchDependencies(this._injector, [
             [INumfmtService],
+            [SheetPermissionInitController],
         ]);
     }
 
@@ -152,6 +161,7 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionRenderModel],
             [RangeProtectionRefRangeService],
             [RefRangeService],
+            [SheetPermissionCheckController],
         ]);
     }
 }

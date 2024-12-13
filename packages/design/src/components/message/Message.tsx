@@ -124,7 +124,7 @@ export class Message implements IDisposable {
         const { content, duration = 3000, key = `${Date.now()}` } = options;
 
         const existingMessage = this._messages.findIndex((message) => message.key === options.key);
-        if (existingMessage) {
+        if (existingMessage !== -1) {
             this._messages[existingMessage].content = content;
             this._messages[existingMessage].type = type;
         } else {

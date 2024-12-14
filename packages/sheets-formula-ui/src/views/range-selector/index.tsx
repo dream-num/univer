@@ -31,6 +31,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { filter, noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 
+import { useStateRef } from '../formula-editor/hooks/useStateRef';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useEmitChange } from './hooks/useEmitChange';
 import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
@@ -117,6 +118,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return unitRangesToText(initValue, isSupportAcrossSheet).join(matchToken.COMMA);
         }
     });
+    const rangeStringRef = useStateRef(rangeString);
 
     // init actions
     if (actions) {
@@ -243,7 +245,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useSwitchSheet(isNeed, unitId, isSupportAcrossSheet, isFocusSet, onBlur, () => {
         if (isNeed) {
-            highligh(rangeString);
+            highligh(rangeStringRef.current);
         }
     });
 

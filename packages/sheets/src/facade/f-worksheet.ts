@@ -1105,6 +1105,16 @@ export class FWorksheet extends FBase {
 
     /**
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
+     * @returns {boolean} True if the sheet's gridlines are hidden; otherwise false.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // check if the gridlines are hidden
+     * if (fWorkSheet.hasHiddenGridLines()) {
+     *    console.log('Gridlines are hidden');
+     * }
+     * ```
      */
     hasHiddenGridLines(): boolean {
         return this._worksheet.getConfig().showGridlines === BooleanNumber.FALSE;
@@ -1180,6 +1190,14 @@ export class FWorksheet extends FBase {
     /**
      * Get the tab color of the sheet.
      * @returns {string} The tab color of the sheet or undefined.
+     * The default color is css style property 'unset'.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // get the tab color of the sheet
+     * console.log(fWorkSheet.getTabColor());
+     * ```
      */
     getTabColor(): string | undefined {
         return this._worksheet.getTabColor() as string | undefined;
@@ -1189,6 +1207,17 @@ export class FWorksheet extends FBase {
      * Subscribe to the cell data change event.
      * @param callback - The callback function to be executed when the cell data changes.
      * @returns - A disposable object to unsubscribe from the event.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // subscribe to the cell data change event
+     * const disposable = fWorkSheet.onCellDataChange((cellValue) => {
+     *  console.log(cellValue.toArray());
+     * });
+     * // unsubscribe from the event
+     * disposable.dispose();
+     * ```
      */
     onCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
@@ -1210,6 +1239,17 @@ export class FWorksheet extends FBase {
      * Subscribe to the cell data change event.
      * @param callback - The callback function to be executed before the cell data changes.
      * @returns - A disposable object to unsubscribe from the event.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // subscribe to the cell data change event
+     * const disposable = fWorkSheet.onBeforeCellDataChange((cellValue) => {
+     *   console.log(cellValue.toArray());
+     * });
+     * // unsubscribe from the event
+     * disposable.dispose();
+     * ```
      */
     onBeforeCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
@@ -1225,6 +1265,13 @@ export class FWorksheet extends FBase {
 
     /**
      * Hides this sheet. Has no effect if the sheet is already hidden. If this method is called on the only visible sheet, it throws an exception.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // hide the active sheet
+     * fWorkSheet.hideSheet();
+     * ``
      */
     hideSheet(): void {
         const commandService = this._injector.get(ICommandService);
@@ -1243,6 +1290,14 @@ export class FWorksheet extends FBase {
 
     /**
      * Shows this sheet. Has no effect if the sheet is already visible.
+     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheets = fWorkbook.getSheets();
+     * // show the last sheet
+     * fWorkSheets[fWorkSheets.length - 1].showSheet();
+     * ```
      */
     showSheet(): Promise<boolean> {
         const commandService = this._injector.get(ICommandService);
@@ -1411,8 +1466,17 @@ export class FWorksheet extends FBase {
 
     /**
      * Returns a Range corresponding to the dimensions in which data is present.
-     *  This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
+     * This is functionally equivalent to creating a Range bounded by A1 and (Sheet.getLastColumns(), Sheet.getLastRows()).
      * @returns {FRange} The range of the data in the sheet.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // the sheet is a empty sheet
+     * const cellRange = fWorkSheet.getRange(200, 10, 1, 1);
+     * cellRange.setValue('Hello World');
+     * console.log(fWorkSheet.getDataRange().getA1Notation()); // A1:J200
+     * ```
      */
     getDataRange(): FRange {
         const lastRow = this.getLastRows();
@@ -1448,5 +1512,24 @@ export class FWorksheet extends FBase {
      */
     getLastRows(): number {
         return this._worksheet.getLastRowWithContent();
+    }
+
+    /**
+     * Judge whether provided FWorksheet is equal to current.
+     * @param {FWorksheet} other the FWorksheet to compare with.
+     * @returns {boolean} true if the FWorksheet is equal to the current FWorksheet, false otherwise.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fWorkSheet2 = fWorkbook.getSheetByName('Sheet1');
+     * console.log(fWorkSheet.equals(fWorkSheet2)); // true, if the active sheet is 'Sheet1'
+     * ```
+     */
+    equalTo(other: FWorksheet): boolean {
+        if (other instanceof FWorksheet) {
+            return this._worksheet.getSheetId() === other.getSheetId() && this._workbook.getUnitId() === other.getWorkbook().getUnitId();
+        }
+        return false;
     }
 }

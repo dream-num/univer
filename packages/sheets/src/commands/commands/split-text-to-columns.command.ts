@@ -34,7 +34,7 @@ export interface ISplitTextToColumnsCommandParams {
     treatMultipleDelimitersAsOne?: boolean;
 }
 
-export const splitTextToColumnsCommand = {
+export const SplitTextToColumnsCommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.split-text-to-columns',
     // eslint-disable-next-line max-lines-per-function

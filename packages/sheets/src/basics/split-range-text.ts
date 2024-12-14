@@ -14,14 +14,32 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IDocumentData, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ICellData, IDocumentData, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CellValueType, Range } from '@univerjs/core';
 
+/**
+ * The default delimiter to split the text.
+ */
 export enum SplitDelimiterEnum {
+    /**
+     * The tab character
+     */
     Tab = 1,
+    /**
+     * The comma character
+     */
     Comma = 2,
+    /**
+     * The semicolon character
+     */
     Semicolon = 4,
+    /**
+     * The space character
+     */
     Space = 8,
+    /**
+     * The custom delimiter
+     */
     Custom = 16,
 }
 
@@ -50,18 +68,18 @@ class DelimiterCounter {
         }
     }
 
-    update(cellValue: Nullable<CellValue>) {
-        if (cellValue && typeof cellValue === 'string') {
-            if (cellValue.includes('\t')) {
+    update(cellText: string | undefined) {
+        if (cellText && typeof cellText === 'string') {
+            if (cellText.includes('\t')) {
                 this._tabCount++;
             }
-            if (cellValue.includes(',')) {
+            if (cellText.includes(',')) {
                 this._commaCount++;
             }
-            if (cellValue.includes(';')) {
+            if (cellText.includes(';')) {
                 this._semicolonCount++;
             }
-            if (cellValue.trim().includes(' ')) {
+            if (cellText.trim().includes(' ')) {
                 this._spaceCount++;
             }
         }
@@ -173,6 +191,10 @@ export function splitRangeText(sheet: Worksheet, range: IRange, delimiter?: Spli
         throw new Error('The range must be in the same column.');
     }
 
+    if ((delimiter && (delimiter & SplitDelimiterEnum.Custom) > 0) && (customDelimiter === undefined || customDelimiter.length !== 1)) {
+        throw new Error('The custom delimiter must a character.');
+    }
+
     const needAutoDelimiter = delimiter === undefined;
     const delimiterCounter = needAutoDelimiter ? new DelimiterCounter() : null;
     const textList = [];
@@ -180,12 +202,10 @@ export function splitRangeText(sheet: Worksheet, range: IRange, delimiter?: Spli
     // collect delimiter and text values
     for (let i = startRow; i <= endRow; i++) {
         const cell = sheet.getCell(i, startColumn);
-        textList.push(cellValueToString(cell));
-        if (!cell) {
-            continue;
-        }
+        const cellString = cellValueToString(cell);
+        textList.push(cellString);
         if (delimiterCounter) {
-            delimiterCounter.update(cell.v);
+            delimiterCounter.update(cellString);
         }
     }
 

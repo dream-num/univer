@@ -98,7 +98,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { splitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
+import { SplitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
@@ -303,7 +303,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetDefaultStyleCommand,
 
                 // split text to columns
-                splitTextToColumnsCommand,
+                SplitTextToColumnsCommand,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

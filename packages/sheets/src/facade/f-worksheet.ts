@@ -480,7 +480,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Un hides the row in the given range.
+     * Unhides the row in the given range.
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
@@ -868,7 +868,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Un hides one or more consecutive columns starting at the given index. Use 0-index for this method.
+     * Unhides one or more consecutive columns starting at the given index. Use 0-index for this method.
      * @param columnIndex The starting index of the columns to unhide.
      * @param numColumns The number of columns to unhide.
      * @returns This sheet, for chaining.
@@ -1109,9 +1109,9 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Set freeze column, then the column range in startColumn to endColumn will be fixed.
-     * e.g. freezeColumn(0, 2) will fix the column range at 0 to 2.
-     * e.g. freezeColumn(2, 3) will fix the column range at 2 to 3, And column at 0 to 1 will be invisible.
+     * Set freeze column, then the range from startColumn to endColumn will be fixed.
+     * e.g. freezeColumn(0, 2) will fix the column range from 0 to 2.
+     * e.g. freezeColumn(2, 3) will fix the column range from 2 to 3, And column from 0 to 1 will be invisible.
      *
      * @example
      * ``` ts
@@ -1136,9 +1136,9 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Set freeze row, then the range in startRow to endRow will be fixed.
-     * e.g. freezeRow(0, 2) will fix the row range at 0 to 2.
-     * e.g. freezeRow(2, 3) will fix the row range at 2 to 3, And row at 0 to 1 will be invisible.
+     * Set freeze row, then the range from startRow to endRow will be fixed.
+     * e.g. freezeRow(0, 2) will fix the row range from 0 to 2.
+     * e.g. freezeRow(2, 3) will fix the row range from 2 to 3, And row from 0 to 1 will be invisible.
      * @param startRow
      * @param endRow
      *

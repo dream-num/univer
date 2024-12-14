@@ -130,7 +130,7 @@ export interface IScrollToCellCommandParams {
 }
 
 /**
- * Scroll to make the range at top left edge of viewport.
+ * The command is used to scroll to the specific cell if the target cell is not in the viewport.
  */
 export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
     id: 'sheet.command.scroll-to-cell',

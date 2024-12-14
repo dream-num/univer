@@ -443,7 +443,7 @@ export class PromptController extends Disposable {
         const d = new DisposableCollection();
 
         // response events from selection control, when selection control is created
-        // this is so weird !!!
+        // this is so weird !!! why didn't selection control handle move event itself ???
 
         this.disposeWithMe(merge(this._refSelectionsService.selectionSet$, this._refSelectionsService.selectionMoveEnd$).subscribe((selections) => {
             d.dispose();

@@ -62,8 +62,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._wheelEventListener();
         this._scrollBarEventListener();
         this._initSkeletonListener();
-
-        window.src = this;
     }
 
     private _wheelEventListener() {
@@ -472,7 +470,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return skeleton.getRangeByViewBound(vpInfo.viewBound);
     }
 
-    // why so complicated?  scrollToCell do the same thing
+    // why so complicated?  ScrollRenderController@scrollToCell do the same thing, including the scenario of freezing.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};

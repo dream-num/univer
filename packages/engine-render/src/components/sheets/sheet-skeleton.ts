@@ -324,6 +324,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._visibleRange;
     }
 
+    /**
+     * Get range needs to render.
+     * @param viewportKey
+     * @returns
+     */
     visibleRangeByViewportKey(viewportKey: SHEET_VIEWPORT_KEY): Nullable<IRowColumnRange> {
         return this._cacheRangeMap.get(viewportKey);
     }

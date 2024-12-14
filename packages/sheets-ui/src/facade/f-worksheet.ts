@@ -16,14 +16,11 @@
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
-import type { IScrollState, IViewportScrollState } from '../services/scroll-manager.service';
+import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
+import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { ChangeZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
-import { SheetsScrollRenderController } from '../controllers/render-controllers/scroll.render-controller';
-import { SheetScrollManagerService } from '../services/scroll-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export interface IFWorksheetSkeletonMixin {
     /**
@@ -93,7 +90,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     /**
-     * Return visible range.
+     * Return visible range, sum view range of 4 viewports.
      * @returns IRange
      */
     getVisibleRange(): IRange {
@@ -160,7 +157,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
 
     /**
      * Invoked when scrolling the sheet.
-     * @param callback
+     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
      * @example
      * ``` ts
      * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})

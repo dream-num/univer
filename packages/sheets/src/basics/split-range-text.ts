@@ -153,6 +153,7 @@ function cellValueToString(cellData: Nullable<ICellData>) {
 interface ISplitRangeTextResult {
     rs: (string[] | undefined)[];
     maxLength: number;
+    lastRow: number;
 }
 
 /**
@@ -192,6 +193,8 @@ export function splitRangeText(sheet: Worksheet, range: IRange, delimiter?: Spli
     const useDelimiterRegex = getDelimiterRegexItem(useDelimiter, treatMultipleDelimitersAsOne, customDelimiter);
 
     let maxLength = -1;
+    let lastRow = 0;
+    let index = 0;
     const rs = [];
 
     for (const text of textList) {
@@ -203,13 +206,16 @@ export function splitRangeText(sheet: Worksheet, range: IRange, delimiter?: Spli
                 maxLength = Math.max(maxLength, cols.length);
             }
             rs.push(cols);
+            lastRow = index;
         } else {
             rs.push(undefined);
         }
+        index++;
     }
 
     return {
         rs,
-        maxLength,
+        maxLength: maxLength === -1 ? 0 : maxLength,
+        lastRow,
     };
 }

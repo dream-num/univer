@@ -231,6 +231,8 @@ export function getMoveRangeUndoRedoMutations(
     };
 }
 
+// Before moveRange is executed, the target area has no merge cell yet.
+// So need to get the merge info of the start cell and then transform it
 function getPrimaryAfterMove(fromRange: IRange, toRange: IRange, worksheet: Worksheet): ISelectionCell {
     const startRow = fromRange.startRow;
     const startColumn = fromRange.startColumn;

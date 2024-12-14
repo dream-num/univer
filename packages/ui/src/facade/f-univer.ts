@@ -17,8 +17,10 @@
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageOptions } from '@univerjs/design';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, PasteCommand } from '@univerjs/ui';
+import { FMenu, FSubmenu } from './f-menu-builder';
 
 export interface IFUniverUIMixin {
     /**
@@ -30,6 +32,42 @@ export interface IFUniverUIMixin {
      * Paste into the current selected position of the currently focused unit from your system clipboard.
      */
     paste(): Promise<boolean>;
+
+    /**
+     * Create a menu build object. You can insert new menus into the UI.
+     * @param {IFacadeMenuItem} menuItem the menu item
+     *
+     * @example
+     * ```ts
+     * univerAPI.createMenu({
+     *   id: 'custom-menu',
+     *   title: 'Custom Menu',
+     *   action: () => {},
+     * }).appendTo('ribbon.start.others');
+     * ```
+     *
+     * @returns the {@link FMenu} object
+     */
+    createMenu(menuItem: IFacadeMenuItem): FMenu;
+
+    /**
+     * Create a menu that contains submenus, and later you can append this menu and its submenus to the UI.
+     * @param submenuItem the submenu item
+     *
+     * @example
+     * ```ts
+     * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
+     *   .addSubmenu(univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
+     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-1', title: 'Item 1', action: () => {} }))
+     *     .addSeparator()
+     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-2', title: 'Item 2', action: () => {} }))
+     *   )
+     *   .appendTo('contextMenu.others');
+     * ```
+     *
+     * @returns the {@link FSubmenu} object
+     */
+    createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
 
     /**
      * Open a sidebar.
@@ -81,6 +119,14 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
 
     override paste(): Promise<boolean> {
         return this._commandService.executeCommand(PasteCommand.id);
+    }
+
+    override createMenu(menuItem: IFacadeMenuItem): FMenu {
+        return this._injector.createInstance(FMenu, menuItem);
+    }
+
+    override createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu {
+        return this._injector.createInstance(FSubmenu, submenuItem);
     }
 
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {

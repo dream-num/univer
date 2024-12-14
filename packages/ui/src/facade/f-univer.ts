@@ -43,7 +43,7 @@ export interface IFUniverUIMixin {
      *   id: 'custom-menu',
      *   title: 'Custom Menu',
      *   action: () => {},
-     * }).appendTo(RibbonStartGroup.OTHERS);
+     * }).appendTo('ribbon.start.others');
      * ```
      *
      * @returns the {@link FMenu} object
@@ -62,7 +62,7 @@ export interface IFUniverUIMixin {
      *     .addSeparator()
      *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-2', title: 'Item 2', action: () => {} }))
      *   )
-     *   .appendTo(ContextMenuGroup.OTHERS);
+     *   .appendTo('contextMenu.others');
      * ```
      *
      * @returns the {@link FSubmenu} object

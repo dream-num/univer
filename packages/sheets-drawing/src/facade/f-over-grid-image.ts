@@ -16,12 +16,17 @@
 
 import type { PresetGeometryType } from '@univerjs/core';
 import type { ISheetImage, SheetDrawingAnchorType } from '../services/sheet-drawing.service';
-import { DrawingTypeEnum, FBase, generateRandomId, ImageSourceType } from '@univerjs/core';
+import { DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 
 export class FOverGridImageBuilder {
     private _image: ISheetImage;
 
-    constructor() {
+    constructor(image?: ISheetImage) {
+        if (image) {
+            this._image = image;
+            return;
+        }
         this._image = {
             drawingId: generateRandomId(6),
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
@@ -46,10 +51,24 @@ export class FOverGridImageBuilder {
         };
     }
 
+    /**
+     * Set the unit id of the image
+     * @param unitId The unit id of the image
+     * @returns The builder
+     * @example
+     * ```ts
+     * // create a new image builder.
+     * const imageBuilder = univerAPI.newOverGridImage();
+     * const param = imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setFromColumn(5).setFromRow(5).setFromColumn(8).setFromRow(8).build();
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * activeSheet.insertImages([param]);
+     * ```
+     */
     setSource(source: string): this;
     setSource(source: string, sourceType?: ImageSourceType): this;
     setSource(source: string, sourceType?: ImageSourceType): this {
-        const sourceTypeVal = sourceType ?? ImageSourceType.BASE64;
+        const sourceTypeVal = sourceType ?? ImageSourceType.URL;
         this._image.source = source;
         this._image.imageSourceType = sourceTypeVal;
         return this;
@@ -154,7 +173,11 @@ export class FOverGridImageBuilder {
 }
 
 export class FOverGridImage extends FBase {
-    constructor(private _image: ISheetImage) {
+    constructor(
+        private _image: ISheetImage,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @Inject(Injector) protected readonly _injector: Injector
+    ) {
         super();
     }
 
@@ -164,5 +187,13 @@ export class FOverGridImage extends FBase {
 
     getType(): DrawingTypeEnum {
         return this._image.drawingType;
+    }
+
+    remove(): boolean {
+        return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+    }
+
+    toBuilder(): FOverGridImageBuilder {
+        return this._injector.createInstance(FOverGridImageBuilder, this._image);
     }
 }

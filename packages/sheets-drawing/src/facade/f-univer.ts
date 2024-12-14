@@ -18,7 +18,15 @@ import { FUniver } from '@univerjs/core';
 import { FOverGridImageBuilder } from './f-over-grid-image';
 
 export interface IFUniverSheetsDrawingMixin {
-
+    /**
+     * Create a new over grid image builder.
+     * @returns The builder
+     * @example
+     * ```ts
+     * // create a new over grid image builder.
+     * const builder = UniverApi.newOverGridImage();
+     * ```
+     */
     newOverGridImage(): FOverGridImageBuilder;
 
 }

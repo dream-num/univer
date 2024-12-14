@@ -41,6 +41,13 @@ export interface IFWorksheetDrawing {
 
     updateImages(sheetImages: ISheetImage[]): void;
 
+    getActiveImages(): FOverGridImage[];
+
+    onImageInserted(callback: (images: FOverGridImage[]) => void): void;
+
+    onImageDeleted(callback: (images: FOverGridImage[]) => void): void;
+
+    onImageChanged(callback: (images: FOverGridImage[]) => void): void;
 }
 
 export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing {
@@ -110,8 +117,49 @@ export class FWorksheetDrawing extends FWorksheet implements IFWorksheetDrawing 
         return images;
     }
 
+    override getActiveImages(): FOverGridImage[] {
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const drawingData = sheetDrawingService.getFocusDrawings();
+        const images: FOverGridImage[] = [];
+        for (const drawingId in drawingData) {
+            const drawing = drawingData[drawingId];
+            images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
+        }
+        return images;
+    }
+
     override updateImages(sheetImages: ISheetImage[]): void {
-        this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), sheetImages });
+        this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: sheetImages });
+    }
+
+    override onImageInserted(callback: (images: FOverGridImage[]) => void) {
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        sheetDrawingService.add$.subscribe((drawingSearches) => {
+            const drawings = drawingSearches.map(
+                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
+            );
+            callback(drawings);
+        });
+    }
+
+    override onImageDeleted(callback: (images: FOverGridImage[]) => void) {
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        sheetDrawingService.remove$.subscribe((drawingSearches) => {
+            const drawings = drawingSearches.map(
+                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
+            );
+            callback(drawings);
+        });
+    }
+
+    override onImageChanged(callback: (images: FOverGridImage[]) => void) {
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        sheetDrawingService.update$.subscribe((drawingSearches) => {
+            const drawings = drawingSearches.map(
+                (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
+            );
+            callback(drawings);
+        });
     }
 }
 

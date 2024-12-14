@@ -635,7 +635,7 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
     }
 }
 
-export class ConditionalFormattingBuilder {
+export class FConditionalFormattingBuilder {
     constructor(private _initConfig: { ranges?: IRange[] } = {}) {
 
     }

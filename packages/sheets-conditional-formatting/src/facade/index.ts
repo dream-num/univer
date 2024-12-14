@@ -18,7 +18,7 @@ import './f-range';
 import './f-workbook';
 import './f-worksheet';
 
-export { ConditionalFormattingBuilder } from './conditional-formatting-builder';
+export { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 export type { IFRangeConditionalFormattingMixin } from './f-range';
 export type { FWorkbookConditionalFormattingMixin } from './f-workbook';
 

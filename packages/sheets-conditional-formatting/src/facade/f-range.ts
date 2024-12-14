@@ -32,7 +32,7 @@ import {
 } from '@univerjs/sheets-conditional-formatting';
 
 import { FRange } from '@univerjs/sheets/facade';
-import { ConditionalFormattingBuilder } from './conditional-formatting-builder';
+import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 
 export interface IFRangeConditionalFormattingMixin {
 
@@ -40,15 +40,36 @@ export interface IFRangeConditionalFormattingMixin {
      * Gets all the conditional formatting for the current range
      * @return {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  workbook?.setActiveRange(worksheet?.getRange(5, 5, 3, 3)!);
+     *  const rules = univerAPI.getActiveWorkbook()?.getActiveRange()?.getConditionalFormattingRules();
+     * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
     /**
      * Creates a constructor for conditional formatting
      * @return {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rule = worksheet?.createConditionalFormattingRule()
+     *       .whenCellNotEmpty()
+     *       .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
+     *       .setItalic(true)
+     *       .setItalic(true)
+     *       .setBackground('red')
+     *       .setFontColor('green')
+     *       .build();
+     *  worksheet?.addConditionalFormattingRule(rule!);
+     * ```
      */
 
-    createConditionalFormattingRule(): ConditionalFormattingBuilder;
+    createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Add a new conditional format
@@ -64,6 +85,13 @@ export interface IFRangeConditionalFormattingMixin {
      * @param {string} cfId
      * @return {*}  {Promise<boolean>}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rules = worksheet?.getConditionalFormattingRules();
+     *  worksheet?.deleteConditionalFormattingRule(rules![0].cfId);
+     * ```
      */
     deleteConditionalFormattingRule(cfId: string): Promise<boolean>;
 
@@ -73,6 +101,15 @@ export interface IFRangeConditionalFormattingMixin {
      * @param {string} toCfId Target rule
      * @param {IAnchor['type']} [type] After the default move to the destination rule, if type = before moves to the front, the default value is after
      * @memberof FWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook?.getActiveSheet();
+     * const rules = worksheet?.getConditionalFormattingRules()!;
+     * const rule = rules[2];
+     * const targetRule = rules[0];
+     * worksheet?.moveConditionalFormattingRule(rule.cfId, targetRule.cfId, 'before');
+     * ```
      */
     moveConditionalFormattingRule(cfId: string, toCfId: string, type?: IAnchor['type']): Promise<boolean>;
 
@@ -82,6 +119,14 @@ export interface IFRangeConditionalFormattingMixin {
      * @param {IConditionFormattingRule} rule
      * @return {*}  {Promise<boolean>}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *   const workbook = univerAPI.getActiveWorkbook();
+     *   const worksheet = workbook?.getActiveSheet();
+     *   const rules = worksheet?.getConditionalFormattingRules()!;
+     *   const rule = rules[0];
+     *   worksheet?.setConditionalFormattingRule(rule.cfId, { ...rule, ranges: [] });
+     * ```
      */
     setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): Promise<boolean>;
 }
@@ -96,8 +141,8 @@ export class FRangeConditionalFormattingMixin extends FRange implements IFRangeC
         return [...rules].filter((rule) => rule.ranges.some((range) => Rectangle.intersects(range, this._range)));
     }
 
-    override createConditionalFormattingRule(): ConditionalFormattingBuilder {
-        return new ConditionalFormattingBuilder({ ranges: [this._range] });
+    override createConditionalFormattingRule(): FConditionalFormattingBuilder {
+        return new FConditionalFormattingBuilder({ ranges: [this._range] });
     }
 
     override addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean> {

@@ -77,6 +77,10 @@ function getTestWorkbookDataDemo(): IWorkbookData {
                             f: '=SUM(A1)',
                             si: '3e4r5t',
                         },
+                        4: {
+                            v: 123,
+                            t: 2,
+                        },
                     },
                     1: {
                         3: {
@@ -106,7 +110,7 @@ function getTestWorkbookDataDemo(): IWorkbookData {
         resources: [
             {
                 name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-                data: '{"sheet-0011":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":2,"startColumn":1,"endRow":11,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
+                data: '{"sheet1":[{"cfId":"AEGZdW8C","ranges":[{"startRow":2,"startColumn":1,"endRow":5,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"4ICEXdJj","ranges":[{"startRow":4,"startColumn":1,"endRow":7,"endColumn":7,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false},{"cfId":"geCv018z","ranges":[{"startRow":11,"startColumn":1,"endRow":12,"endColumn":5,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"type":"highlightCell","subType":"text","operator":"containsText","style":{"cl":{"rgb":"#2f56ef"},"bg":{"rgb":"#e8ecfc"}},"value":""},"stopIfTrue":false}]}',
             },
         ],
     };
@@ -208,6 +212,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
             this._injector.get(ConditionalFormattingService);
+            this._injector.get(ConditionalFormattingViewModel);
         }
 
         override onReady(): void {

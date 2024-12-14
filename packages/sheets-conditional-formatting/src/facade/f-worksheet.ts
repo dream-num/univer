@@ -30,7 +30,7 @@ import {
     SetConditionalRuleMutation,
 } from '@univerjs/sheets-conditional-formatting';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { ConditionalFormattingBuilder } from './conditional-formatting-builder';
+import { FConditionalFormattingBuilder } from './conditional-formatting-builder';
 
 export interface IFWorksheetConditionalFormattingMixin {
 
@@ -38,21 +38,51 @@ export interface IFWorksheetConditionalFormattingMixin {
      * Gets all the conditional formatting for the current sheet
      * @return {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()?.getActiveSheet().getConditionalFormattingRules();
+     * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
     /**
      * Creates a constructor for conditional formatting
      * @return {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rule = worksheet?.createConditionalFormattingRule()
+     *      .whenCellNotEmpty()
+     *      .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
+     *      .setItalic(true)
+     *      .setItalic(true)
+     *      .setBackground('red')
+     *      .setFontColor('green')
+     *      .build();
+     * ```
      */
-
-    createConditionalFormattingRule(): ConditionalFormattingBuilder;
+    createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Add a new conditional format
      * @param {IConditionFormattingRule} rule
      * @return {*}  {Promise<boolean>}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rule = worksheet?.createConditionalFormattingRule()
+     *       .whenCellNotEmpty()
+     *       .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
+     *       .setItalic(true)
+     *       .setItalic(true)
+     *       .setBackground('red')
+     *       .setFontColor('green')
+     *       .build();
+     *  worksheet?.addConditionalFormattingRule(rule!);
+     * ```
      */
     addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean>;
 
@@ -62,6 +92,13 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @param {string} cfId
      * @return {*}  {Promise<boolean>}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rules = worksheet?.getConditionalFormattingRules();
+     *  worksheet?.deleteConditionalFormattingRule(rules![0].cfId);
+     * ```
      */
     deleteConditionalFormattingRule(cfId: string): Promise<boolean>;
 
@@ -71,6 +108,15 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @param {string} toCfId Target rule
      * @param {IAnchor['type']} [type] After the default move to the destination rule, if type = before moves to the front, the default value is after
      * @memberof FWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook?.getActiveSheet();
+     * const rules = worksheet?.getConditionalFormattingRules()!;
+     * const rule = rules[2];
+     * const targetRule = rules[0];
+     * worksheet?.moveConditionalFormattingRule(rule.cfId, targetRule.cfId, 'before');
+     * ```
      */
     moveConditionalFormattingRule(cfId: string, toCfId: string, type?: IAnchor['type']): Promise<boolean>;
 
@@ -80,6 +126,14 @@ export interface IFWorksheetConditionalFormattingMixin {
      * @param {IConditionFormattingRule} rule
      * @return {*}  {Promise<boolean>}
      * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *   const workbook = univerAPI.getActiveWorkbook();
+     *   const worksheet = workbook?.getActiveSheet();
+     *   const rules = worksheet?.getConditionalFormattingRules()!;
+     *   const rule = rules[0];
+     *   worksheet?.setConditionalFormattingRule(rule.cfId, { ...rule, ranges: [] });
+     * ```
      */
     setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): Promise<boolean>;
 }
@@ -94,8 +148,8 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
         return [...rules];
     }
 
-    override createConditionalFormattingRule(): ConditionalFormattingBuilder {
-        return new ConditionalFormattingBuilder();
+    override createConditionalFormattingRule(): FConditionalFormattingBuilder {
+        return new FConditionalFormattingBuilder();
     }
 
     override addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean> {

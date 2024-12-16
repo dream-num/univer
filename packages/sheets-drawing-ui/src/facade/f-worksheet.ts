@@ -15,12 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { FWorksheet } from '@univerjs/sheets/facade';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
+import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
-export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
+export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey { }
 
 export interface IFWorksheetLegacy {
     /**
@@ -42,6 +44,25 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     }> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+
+        if (render) {
+            const sheetSkeletonService = render.with(SheetSkeletonManagerService);
+            sheetSkeletonService.reCalculate();
+            const sk = sheetSkeletonService.getCurrentSkeleton();
+            if (sk) {
+                const domHeight = layer.initPosition.endY - layer.initPosition.startY;
+                const domWidth = layer.initPosition.endX - layer.initPosition.startX;
+                const maxStartY = sk.rowHeightAccumulation[sk.rowHeightAccumulation.length - 1] - (layer.initPosition.endY - layer.initPosition.startY);
+                const maxStartX = sk.columnWidthAccumulation[sk.columnWidthAccumulation.length - 1] - (layer.initPosition.endX - layer.initPosition.startX);
+                layer.initPosition.startY = maxStartY;
+                layer.initPosition.startX = maxStartX;
+                layer.initPosition.endY = maxStartY + domHeight;
+                layer.initPosition.endX = maxStartX + domWidth;
+            }
+        }
+
         const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const res = floatDomService.addFloatDomToPosition({ ...layer, componentKey: key, unitId, subUnitId }, id);
@@ -65,5 +86,5 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
 FWorksheet.extend(FWorksheetLegacy);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetLegacy {}
+    interface FWorksheet extends IFWorksheetLegacy { }
 }

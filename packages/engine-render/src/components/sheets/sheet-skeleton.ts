@@ -89,7 +89,7 @@ import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPOR
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
 /**
- * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+ * For rendering, Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
  * @param documentSkeleton Data of the document's ViewModel
  * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
  */
@@ -245,6 +245,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
 
+    /** For rendering */
     private _imageCacheMap: ImageCacheMap;
     /**
      * Whether the row style precedes the column style.
@@ -261,10 +262,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _cellData: ObjectMatrix<Nullable<ICellData>>;
 
     /**
-     * created by SheetSkeletonManagerService@_buildSkeleton
      * @param worksheet
-     * @param _worksheetData
-     * @param _cellData
      * @param _styles
      * @param _localeService
      * @param _contextService
@@ -425,9 +423,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         );
     }
 
-    setOverflowCache(value: ObjectMatrix<IRange>): void {
-        this._overflowCache = value;
-    }
+    /**@deprecated NO one is using this */
+    // setOverflowCache(value: ObjectMatrix<IRange>): void {
+    //     this._overflowCache = value;
+    // }
 
     setMarginLeft(left: number): void {
         this._marginLeft = left;

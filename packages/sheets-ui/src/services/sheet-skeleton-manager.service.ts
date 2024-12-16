@@ -140,6 +140,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._currentSkeleton$.next(sheetSkeletonManagerParam);
     }
 
+    /**
+     * invoke whenever COMMAND_LISTENER_VALUE_CHANGE is executed by
+     * @returns
+     */
     reCalculate() {
         const param = this.getCurrent();
         if (param == null) {

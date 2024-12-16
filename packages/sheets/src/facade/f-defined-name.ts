@@ -65,7 +65,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setName(name: string) {
+    setName(name: string): FDefinedNameBuilder {
         this._definedNameParam.name = name;
         return this;
     }
@@ -84,7 +84,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setFormula(formula: string) {
+    setFormula(formula: string): FDefinedNameBuilder {
         this._definedNameParam.formulaOrRefString = `=${formula}`;
         return this;
     }
@@ -102,7 +102,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setRef(a1Notation: string) {
+    setRef(a1Notation: string): FDefinedNameBuilder {
         this._definedNameParam.formulaOrRefString = a1Notation;
         return this;
     }
@@ -123,7 +123,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setRefByRange(row: number, column: number, numRows: number, numColumns: number) {
+    setRefByRange(row: number, column: number, numRows: number, numColumns: number): FDefinedNameBuilder {
         this._definedNameParam.formulaOrRefString = serializeRange({
             startRow: row,
             endRow: row + (numRows ?? 1) - 1,
@@ -131,10 +131,6 @@ export class FDefinedNameBuilder {
             endColumn: column + (numColumns ?? 1) - 1,
         });
         return this;
-    }
-
-    setFormulaOrRefString() {
-
     }
 
     /**
@@ -150,7 +146,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setComment(comment: string) {
+    setComment(comment: string): FDefinedNameBuilder {
         this._definedNameParam.comment = comment;
         return this;
     }
@@ -168,7 +164,7 @@ export class FDefinedNameBuilder {
      * workbook.insertDefinedNameBuilder(definedNameBuilder);
      * ```
      */
-    setHidden(hidden: boolean) {
+    setHidden(hidden: boolean): FDefinedNameBuilder {
         this._definedNameParam.hidden = hidden;
         return this;
     }
@@ -190,7 +186,7 @@ export class FDefinedNameBuilder {
         return this._definedNameParam;
     }
 
-    load(param: ISetDefinedNameMutationParam) {
+    load(param: ISetDefinedNameMutationParam): FDefinedNameBuilder {
         this._definedNameParam = param;
         return this;
     }
@@ -212,7 +208,7 @@ export class FDefinedName extends FBase {
         super();
     }
 
-    private _apply() {
+    private _apply(): void {
         if (this._definedNameParam.name === '') {
             this._definedNameParam.name = getDefinedNameFieldName(this._definedNameParam.unitId, this._localeService, this._definedNamesService);
         }
@@ -229,7 +225,7 @@ export class FDefinedName extends FBase {
      * console.log(definedName.getName());
      * ```
      */
-    getName() {
+    getName(): string {
         return this._definedNameParam.name;
     }
 
@@ -243,7 +239,7 @@ export class FDefinedName extends FBase {
      * definedName.setName('NewDefinedName');
      * ```
      */
-    setName(name: string) {
+    setName(name: string): void {
         this._definedNameParam.name = name;
         this._apply();
     }
@@ -258,7 +254,7 @@ export class FDefinedName extends FBase {
      * definedName.setFormula('SUM(Sheet1!$A$1)');
      * ```
      */
-    setFormula(formula: string) {
+    setFormula(formula: string): void {
         this._definedNameParam.formulaOrRefString = `=${formula}`;
         this._apply();
     }
@@ -273,7 +269,7 @@ export class FDefinedName extends FBase {
      * definedName.setRef('Sheet1!$A$1');
      * ```
      */
-    setRef(refString: string) {
+    setRef(refString: string): void {
         this._definedNameParam.formulaOrRefString = refString;
         this._apply();
     }
@@ -288,7 +284,7 @@ export class FDefinedName extends FBase {
      * console.log(definedName.getFormulaOrRefString());
      * ```
      */
-    getFormulaOrRefString() {
+    getFormulaOrRefString(): string {
         return this._definedNameParam.formulaOrRefString;
     }
 
@@ -305,7 +301,7 @@ export class FDefinedName extends FBase {
      * definedName.setRefByRange(1, 3, 2, 5);
      * ```
      */
-    setRefByRange(row: number, column: number, numRows: number, numColumns: number) {
+    setRefByRange(row: number, column: number, numRows: number, numColumns: number): void {
         this._definedNameParam.formulaOrRefString = serializeRange({
             startRow: row,
             endRow: row + (numRows ?? 1) - 1,
@@ -325,7 +321,7 @@ export class FDefinedName extends FBase {
      * console.log(definedName.getComment());
      * ```
      */
-    getComment() {
+    getComment(): string | undefined {
         return this._definedNameParam.comment;
     }
 
@@ -339,7 +335,7 @@ export class FDefinedName extends FBase {
      * definedName.setComment('This is a comment');
      * ```
      */
-    setComment(comment: string) {
+    setComment(comment: string): void {
         this._definedNameParam.comment = comment;
         this._apply();
     }
@@ -355,7 +351,7 @@ export class FDefinedName extends FBase {
      * definedName.setScopeToWorksheet(worksheet);
      * ```
      */
-    setScopeToWorksheet(worksheet: FWorksheet) {
+    setScopeToWorksheet(worksheet: FWorksheet): void {
         this._definedNameParam.localSheetId = worksheet.getSheetId();
         this._apply();
     }
@@ -369,7 +365,7 @@ export class FDefinedName extends FBase {
      * definedName.setScopeToWorkbook();
      * ```
      */
-    setScopeToWorkbook() {
+    setScopeToWorkbook(): void {
         this._definedNameParam.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
         this._apply();
     }
@@ -384,7 +380,7 @@ export class FDefinedName extends FBase {
      * definedName.setHidden(true);
      * ```
      */
-    setHidden(hidden: boolean) {
+    setHidden(hidden: boolean): void {
         this._definedNameParam.hidden = hidden;
         this._apply();
     }
@@ -398,7 +394,7 @@ export class FDefinedName extends FBase {
      * definedName.delete();
      * ```
      */
-    delete() {
+    delete(): void {
         this._commandService.syncExecuteCommand(RemoveDefinedNameCommand.id, this._definedNameParam);
     }
 
@@ -412,7 +408,7 @@ export class FDefinedName extends FBase {
      * console.log(definedName.getLocalSheetId());
      * ```
      */
-    getLocalSheetId() {
+    getLocalSheetId(): string | undefined {
         return this._definedNameParam.localSheetId;
     }
 
@@ -426,7 +422,7 @@ export class FDefinedName extends FBase {
      * console.log(definedName.isWorkbookScope());
      * ```
      */
-    isWorkbookScope() {
+    isWorkbookScope(): boolean {
         return this._definedNameParam.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
     }
 
@@ -442,7 +438,7 @@ export class FDefinedName extends FBase {
      * workbook.updateDefinedNameBuilder(param);
      * ```
      */
-    toBuilder() {
+    toBuilder(): FDefinedNameBuilder {
         const builder = this._injector.createInstance(FDefinedNameBuilder);
         builder.load(this._definedNameParam);
         return builder;

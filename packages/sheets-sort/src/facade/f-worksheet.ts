@@ -21,6 +21,15 @@ import { SortRangeCommand, SortType } from '@univerjs/sheets-sort';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 export interface IFWorksheetSort {
+    /**
+     * Sort the worksheet by the specified column.
+     *
+     * @async
+     *
+     * @param colIndex The column index to sort by.
+     * @param asc Whether to sort in ascending order. Default is `true`.
+     * @returns The worksheet itself to chain calls.
+     */
     sort(colIndex: number, asc?: boolean): Promise<FWorksheet>;
 }
 

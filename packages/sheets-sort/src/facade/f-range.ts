@@ -21,6 +21,13 @@ import { FRange } from '@univerjs/sheets/facade';
 export type SortColumnSpec = { column: number; ascending: boolean } | number;
 
 export interface IFRangeSort {
+    /**
+     * Sort the range by the specified column(s) with specified order.
+     *
+     * @async
+     *
+     * @return The range itself to chain other operations.
+     */
     sort(column: SortColumnSpec | SortColumnSpec[]): Promise<FRange>;
 }
 

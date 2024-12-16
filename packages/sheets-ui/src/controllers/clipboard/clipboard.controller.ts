@@ -233,37 +233,8 @@ export class SheetClipboardController extends RxDisposable {
                 const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
 
                 const textStyle = range.getTextStyle();
-                // const color = range.getFontColor();
-                // const backgroundColor = range.getBackground();
 
                 let style = '';
-                // if (color) {
-                //     style += `color: ${color};`;
-                // }
-                // if (backgroundColor) {
-                //     style += `background-color: ${backgroundColor};`;
-                // }
-                // if (textStyle?.bl) {
-                //     style += 'font-weight: bold;';
-                // }
-                // if (textStyle?.fs) {
-                //     style += `font-size: ${textStyle.fs}px;`;
-                // }
-                // if (textStyle?.tb === WrapStrategy.WRAP) {
-                //     style += 'word-wrap: break-word;';
-                // }
-                // if (textStyle?.it) {
-                //     style += 'font-style: italic;';
-                // }
-                // if (textStyle?.ff) {
-                //     style += `font-family: ${textStyle.ff};`;
-                // }
-                // if (textStyle?.st) {
-                //     style += 'text-decoration: line-through;';
-                // }
-                // if (textStyle?.ul) {
-                //     style += 'text-decoration: underline';
-                // }
 
                 if (textStyle) {
                     style = handleStyleToString(textStyle);
@@ -288,7 +259,7 @@ export class SheetClipboardController extends RxDisposable {
                     properties.style = style;
                 }
 
-                return properties;
+                return Object.keys(properties).length ? properties : null;
             },
             onCopyColumn(col: number) {
                 const sheet = currentSheet!;

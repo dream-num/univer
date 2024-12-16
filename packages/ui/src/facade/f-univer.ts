@@ -24,15 +24,18 @@ import { FMenu, FSubmenu } from './f-menu-builder';
 
 export interface IFUniverUIMixin {
     /**
+     * Return the URL of the current page.
+     * @returns the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
+     */
+    getURL(): URL;
+    /**
      * Copy the current selected content of the currently focused unit into your system clipboard.
      */
     copy(): Promise<boolean>;
-
     /**
      * Paste into the current selected position of the currently focused unit from your system clipboard.
      */
     paste(): Promise<boolean>;
-
     /**
      * Create a menu build object. You can insert new menus into the UI.
      * @param {IFacadeMenuItem} menuItem the menu item
@@ -49,7 +52,6 @@ export interface IFUniverUIMixin {
      * @returns the {@link FMenu} object
      */
     createMenu(menuItem: IFacadeMenuItem): FMenu;
-
     /**
      * Create a menu that contains submenus, and later you can append this menu and its submenus to the UI.
      * @param submenuItem the submenu item
@@ -68,7 +70,6 @@ export interface IFUniverUIMixin {
      * @returns the {@link FSubmenu} object
      */
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
-
     /**
      * Open a sidebar.
      *
@@ -85,20 +86,17 @@ export interface IFUniverUIMixin {
      * @returns the disposable object
      */
     openSidebar(params: ISidebarMethodOptions): IDisposable;
-
     /**
      * Open a dialog.
      * @param dialog the dialog options
      * @returns the disposable object
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
-
     /**
      * Get the component manager
      * @returns The component manager
      */
     getComponentManager(): ComponentManager;
-
     /**
      * Show a message.
      *
@@ -113,6 +111,10 @@ export interface IFUniverUIMixin {
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
+    override getURL(): URL {
+        return new URL(window.location.href);
+    }
+
     override copy(): Promise<boolean> {
         return this._commandService.executeCommand(CopyCommand.id);
     }

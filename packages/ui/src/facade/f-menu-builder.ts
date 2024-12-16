@@ -208,6 +208,7 @@ export class FSubmenu extends FBase {
         });
     }
 
+    /** @ignore */
     __getSchema(): { [key: string]: MenuSchemaType } {
         const schema: { [key: string]: MenuSchemaType } = {};
         this.addSeparator();

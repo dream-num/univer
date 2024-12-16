@@ -233,6 +233,18 @@ export interface ICommandService {
      * @param listener
      */
     beforeCommandExecuted(listener: CommandListener): IDisposable;
+    /**
+     * Execute a command with the given id and parameters syncable.
+     * @param id Identifier of the command.
+     * @param params Parameters of this execution.
+     * @param options Options of this execution.
+     * @returns The result of the execution. It is a boolean value by default which indicates the command is executed.
+     */
+    syncableExecuteCommand<P extends object = object, R = boolean, S extends boolean = false>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions & ISyncableCommandExecutionOptions<S>
+    ): S extends true ? R : Promise<R>;
 }
 
 class CommandRegistry {
@@ -271,6 +283,10 @@ class CommandRegistry {
 }
 
 interface ICommandExecutionStackItem extends ICommandInfo { }
+
+export interface ISyncableCommandExecutionOptions<Sync extends boolean = boolean> {
+    sync?: Sync;
+}
 
 export const NilCommand: ICommand = {
     id: 'nil',
@@ -429,6 +445,12 @@ export class CommandService extends Disposable implements ICommandService {
                 throw error;
             }
         }
+    }
+
+    syncableExecuteCommand<P extends object = object, R = boolean, S extends boolean = false>(id: string, params?: P, options?: IExecutionOptions & ISyncableCommandExecutionOptions<S>): S extends true ? R : Promise<R> {
+        const sync = options?.sync || false;
+      // @ts-expect-error types
+        return sync ? this.syncExecuteCommand(id, params, options) : this.executeCommand<P, R>(id, params, options);
     }
 
     private _pushCommandExecutionStack(stackItem: ICommandExecutionStackItem): IDisposable {

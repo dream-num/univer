@@ -302,7 +302,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetDefaultStyleMutation,
                 SetWorksheetDefaultStyleCommand,
 
-                // split text to columns
                 SplitTextToColumnsCommand,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }

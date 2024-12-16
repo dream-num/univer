@@ -98,6 +98,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { SplitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
@@ -112,12 +113,12 @@ import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
-import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 
+import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
-import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 
+import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetGridlinesColorMutation } from '../commands/mutations/set-gridlines-color.mutation';
@@ -300,6 +301,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 ToggleCellCheckboxCommand,
                 SetWorksheetDefaultStyleMutation,
                 SetWorksheetDefaultStyleCommand,
+
+                SplitTextToColumnsCommand,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

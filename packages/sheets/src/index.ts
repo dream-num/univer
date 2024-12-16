@@ -420,5 +420,5 @@ export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.oper
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
-
+export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
 // #endregion

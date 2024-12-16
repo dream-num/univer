@@ -32,7 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, DefinedNamesService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -175,6 +175,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionPointModel]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);

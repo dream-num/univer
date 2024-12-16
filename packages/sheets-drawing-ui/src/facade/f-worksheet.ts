@@ -134,6 +134,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             imageBuilder.setRowOffset(0);
         }
 
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+
+        imageBuilder.setUnitId(unitId);
+        imageBuilder.setSubUnitId(subUnitId);
+
         const param = imageBuilder.build();
         param.unitId = this._fWorkbook.getId();
         param.subUnitId = this.getSheetId();

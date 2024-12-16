@@ -17,7 +17,7 @@
 import type { PresetGeometryType } from '@univerjs/core';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
-import { precisionTo } from '@univerjs/engine-render';
+import { IRenderManagerService, precisionTo } from '@univerjs/engine-render';
 import { SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
@@ -182,13 +182,13 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
     };
 }
 
-export class FOverGridImageBuilder extends FBase {
+export class FOverGridImageBuilder {
     private _image: IFOverGridImage;
     constructor(
-        @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService,
-        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
+        @Inject(Injector) protected readonly _injector: Injector
+        // @Inject(SheetSkeletonManagerService) protected readonly _skeletonManagerService: SheetSkeletonManagerService,
+        // @ISheetSelectionRenderService protected readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
-        super();
         this._image = {
             drawingId: generateRandomId(6),
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
@@ -206,7 +206,14 @@ export class FOverGridImageBuilder extends FBase {
     }
 
     setImage(image: ISheetImage): FOverGridImageBuilder {
-        this._image = convertSheetImageToFOverGridImage(image, this._skeletonManagerService);
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(image.unitId);
+        if (!render) {
+            throw new Error(`Render Unit with unitId ${image.unitId} not found`);
+        }
+        const skeletonManagerService = render.with(SheetSkeletonManagerService);
+
+        this._image = convertSheetImageToFOverGridImage(image, skeletonManagerService);
         return this;
     }
 
@@ -218,7 +225,7 @@ export class FOverGridImageBuilder extends FBase {
      * ```ts
      * // create a new image builder.
      * const imageBuilder = univerAPI.newOverGridImage();
-     * const param = imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setFromColumn(5).setFromRow(5).setFromColumn(8).setFromRow(8).build();
+     * const param = imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).build();
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
      * activeSheet.insertImages([param]);
@@ -321,8 +328,25 @@ export class FOverGridImageBuilder extends FBase {
         return this;
     }
 
+    setUnitId(unitId: string): FOverGridImageBuilder {
+        this._image.unitId = unitId;
+        return this;
+    }
+
+    setSubUnitId(subUnitId: string): FOverGridImageBuilder {
+        this._image.subUnitId = subUnitId;
+        return this;
+    }
+
     build(): ISheetImage {
-        return convertFOverGridImageToSheetImage(this._image, this._selectionRenderService, this._skeletonManagerService);
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(this._image.unitId);
+        if (!render) {
+            throw new Error(`Render Unit with unitId ${this._image.unitId} not found`);
+        }
+        const selectionRenderService = render.with(ISheetSelectionRenderService);
+        const skeletonManagerService = render.with(SheetSkeletonManagerService);
+        return convertFOverGridImageToSheetImage(this._image, selectionRenderService, skeletonManagerService);
     }
 }
 

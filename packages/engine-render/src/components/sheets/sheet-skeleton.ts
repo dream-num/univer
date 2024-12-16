@@ -260,17 +260,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _worksheetData: IWorksheetData;
     private _cellData: ObjectMatrix<Nullable<ICellData>>;
 
-    /**
-     * created by SheetSkeletonManagerService@_buildSkeleton
-     * @param worksheet
-     * @param _worksheetData
-     * @param _cellData
-     * @param _styles
-     * @param _localeService
-     * @param _contextService
-     * @param _configService
-     * @param _injector
-     */
     constructor(
         readonly worksheet: Worksheet,
         private _styles: Styles,

@@ -97,6 +97,8 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
+export { splitRangeText } from './basics/split-range-text';
+export type { SplitDelimiterEnum } from './basics/split-range-text';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
 
 export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
@@ -319,6 +321,10 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+
+export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
+export type { ISplitTextToColumnsCommandParams } from './commands/commands/split-text-to-columns.command';
+
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { SetProtectionCommand } from './commands/commands/set-protection.command';

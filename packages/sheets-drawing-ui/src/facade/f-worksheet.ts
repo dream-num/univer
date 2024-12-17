@@ -36,6 +36,21 @@ export interface IFWorksheetLegacy {
         dispose: () => void;
     }>;
 
+    /**
+     * Insert an image to the sheet
+     * @param url The image url
+     * @param column The column to insert the image
+     * @param row The row to insert the image
+     * @param offsetX The offset x of the image
+     * @param offsetY The offset y of the image
+     * @returns true if the image is inserted successfully
+     * @example
+     * ```ts
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * activeSheet.insertImage('https://avatars.githubusercontent.com/u/61444807?s=48&v=4', 5, 5, 0, 0);
+     * ```
+     */
     insertImage(url: string): Promise<boolean>;
     insertImage(url: string, column: number, row: number): Promise<boolean>;
     insertImage(url: string, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
@@ -44,12 +59,58 @@ export interface IFWorksheetLegacy {
     insertImage(url: IFBlobSource, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
     insertImage(url: IFBlobSource | string, column: number, row: number, offsetX: number, offsetY: number): Promise<boolean>;
 
+    /**
+     * Insert images to the sheet
+     * @param sheetImages The images to insert
+     * @returns true if the image is inserted successfully
+     * @example
+     * ```ts
+     *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     *  const activeSheet = activeSpreadsheet.getActiveSheet();
+     *  const imageBuilder = activeSheet.newOverGridImage();
+     *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
+     *  activeSheet.insertImages([param]);
+     *
+     *
+     *  const image = activeSheet.getImageById(param.drawingId);
+     *  console.log(image);
+
+     *  setTimeout(async ()=>{
+     *   const builder = image.toBuilder();
+     *   const param = await builder.setHeight(50).setWidth(100).build();
+     *   activeSheet.updateImages([param]);
+     *  }, 4000);
+     */
     insertImages(sheetImages: ISheetImage[]): void;
 
     getImages(): FOverGridImage[];
 
+    getImageById(id: string): FOverGridImage | null;
+
     deleteImages(sheetImages: FOverGridImage[]): void;
 
+    /**
+     * Update images to the sheet
+     * @param sheetImages The images to insert
+     * @returns true if the image is inserted successfully
+     * @example
+     * ```ts
+     *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     *  const activeSheet = activeSpreadsheet.getActiveSheet();
+     *  const imageBuilder = activeSheet.newOverGridImage();
+     *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
+     *  activeSheet.insertImages([param]);
+     *
+     *
+     *  const image = activeSheet.getImageById(param.drawingId);
+     *  console.log(image);
+
+     *  setTimeout(async ()=>{
+     *   const builder = image.toBuilder();
+     *   const param = await builder.setHeight(50).setWidth(100).build();
+     *   activeSheet.updateImages([param]);
+     *  }, 4000);
+     */
     updateImages(sheetImages: ISheetImage[]): void;
 
     getActiveImages(): FOverGridImage[];
@@ -168,6 +229,15 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
         }
         return images;
+    }
+
+    override getImageById(id: string): FOverGridImage | null {
+        const sheetDrawingService = this._injector.get(ISheetDrawingService);
+        const drawing = sheetDrawingService.getDrawingByParam({ unitId: this._fWorkbook.getId(), subUnitId: this.getSheetId(), drawingId: id });
+        if (drawing) {
+            return this._injector.createInstance(FOverGridImage, drawing as ISheetImage);
+        }
+        return null;
     }
 
     override getActiveImages(): FOverGridImage[] {

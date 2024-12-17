@@ -29,7 +29,9 @@ import {
     IContextService,
     Inject,
     Injector,
-    RANGE_TYPE, toDisposable } from '@univerjs/core';
+    RANGE_TYPE, toDisposable,
+    Tools,
+} from '@univerjs/core';
 import { IRenderManagerService, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
@@ -60,100 +62,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this._wheelEventListener();
         this._scrollBarEventListener();
         this._initSkeletonListener();
-    }
-
-    scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
-        let { endRow, endColumn, startColumn, startRow } = range;
-        const bounding = this._getViewportBounding();
-        if (range.rangeType === RANGE_TYPE.ROW) {
-            startColumn = 0;
-            endColumn = 0;
-        } else if (range.rangeType === RANGE_TYPE.COLUMN) {
-            startRow = 0;
-            endRow = 0;
-        }
-
-        if (bounding && !forceTop && !forceLeft) {
-            const row = bounding.startRow > endRow ? startRow : endRow;
-            const col = bounding.startColumn > endColumn ? startColumn : endColumn;
-            return this._scrollToCell(row, col);
-        } else {
-            return this._scrollToCell(startRow, startColumn, forceTop, forceLeft);
-        }
-    }
-
-    private _initCommandListener(): void {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
-            if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
-                this._scrollToSelection();
-            } else if (command.id === ScrollToCellOperation.id) {
-                const param = command.params as IRange;
-                this.scrollToRange(param);
-            } else if (command.id === ExpandSelectionCommand.id) {
-                const param = command.params as IExpandSelectionCommandParams;
-                this._scrollToSelectionForExpand(param);
-            } else if (command.id === SetSelectionsOperation.id && (command.params as ISetSelectionsOperationParams).reveal) {
-                this._scrollToSelection();
-            }
-        }));
-    }
-
-    private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
-        setTimeout(() => {
-            const selection = this._getSelectionsService().getCurrentLastSelection();
-            if (selection == null) {
-                return;
-            }
-
-            const { startRow, startColumn, endRow, endColumn } = selection.range;
-
-            const bounds = this._getViewportBounding();
-            if (bounds == null) {
-                return;
-            }
-
-            const { startRow: viewportStartRow, startColumn: viewportStartColumn, endRow: viewportEndRow, endColumn: viewportEndColumn } = bounds;
-
-            let row = 0;
-            let column = 0;
-
-            if (startRow > viewportStartRow) {
-                row = endRow;
-            } else if (endRow < viewportEndRow) {
-                row = startRow;
-            } else {
-                row = viewportStartRow;
-            }
-
-            if (startColumn > viewportStartColumn) {
-                column = endColumn;
-            } else if (endColumn < viewportEndColumn) {
-                column = startColumn;
-            } else {
-                column = viewportStartColumn;
-            }
-
-            if (param.direction === Direction.DOWN) {
-                row = endRow;
-            } else if (param.direction === Direction.UP) {
-                row = startRow;
-            } else if (param.direction === Direction.RIGHT) {
-                column = endColumn;
-            } else if (param.direction === Direction.LEFT) {
-                column = startColumn;
-            }
-
-            this._scrollToCell(row, column);
-        }, 0);
-    }
-
-    private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
-        if (snapshot == null) {
-            return;
-        }
-
-        return snapshot.freeze;
     }
 
     private _wheelEventListener() {
@@ -352,6 +260,115 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             })));
     }
 
+    scrollToRange(range: IRange, forceTop?: boolean, forceLeft?: boolean): boolean {
+        let { endRow, endColumn, startColumn, startRow } = range;
+        const bounding = this._getViewportBounding();
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            startColumn = 0;
+            endColumn = 0;
+        } else if (range.rangeType === RANGE_TYPE.COLUMN) {
+            startRow = 0;
+            endRow = 0;
+        }
+
+        if (bounding && !forceTop && !forceLeft) {
+            const row = bounding.startRow > endRow ? startRow : endRow;
+            const col = bounding.startColumn > endColumn ? startColumn : endColumn;
+            return this._scrollToCell(row, col);
+        } else {
+            return this._scrollToCell(startRow, startColumn, forceTop, forceLeft);
+        }
+    }
+
+    /**
+     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     * @param row
+     * @param column
+     * @returns
+     */
+    scrollToCell(row: number, column: number) {
+        return this._commandService.syncExecuteCommand(ScrollCommand.id, {
+            sheetViewStartRow: row,
+            sheetViewStartColumn: column,
+            offsetX: 0,
+            offsetY: 0,
+        });
+    }
+
+    private _initCommandListener(): void {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
+                this._scrollToSelection();
+            } else if (command.id === ScrollToCellOperation.id) {
+                const param = command.params as IRange;
+                this.scrollToRange(param);
+            } else if (command.id === ExpandSelectionCommand.id) {
+                const param = command.params as IExpandSelectionCommandParams;
+                this._scrollToSelectionForExpand(param);
+            } else if (command.id === SetSelectionsOperation.id && (command.params as ISetSelectionsOperationParams).reveal) {
+                this._scrollToSelection();
+            }
+        }));
+    }
+
+    private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
+        setTimeout(() => {
+            const selection = this._getSelectionsService().getCurrentLastSelection();
+            if (selection == null) {
+                return;
+            }
+
+            const { startRow, startColumn, endRow, endColumn } = selection.range;
+
+            const bounds = this._getViewportBounding();
+            if (bounds == null) {
+                return;
+            }
+
+            const { startRow: viewportStartRow, startColumn: viewportStartColumn, endRow: viewportEndRow, endColumn: viewportEndColumn } = bounds;
+
+            let row = 0;
+            let column = 0;
+
+            if (startRow > viewportStartRow) {
+                row = endRow;
+            } else if (endRow < viewportEndRow) {
+                row = startRow;
+            } else {
+                row = viewportStartRow;
+            }
+
+            if (startColumn > viewportStartColumn) {
+                column = endColumn;
+            } else if (endColumn < viewportEndColumn) {
+                column = startColumn;
+            } else {
+                column = viewportStartColumn;
+            }
+
+            if (param.direction === Direction.DOWN) {
+                row = endRow;
+            } else if (param.direction === Direction.UP) {
+                row = startRow;
+            } else if (param.direction === Direction.RIGHT) {
+                column = endColumn;
+            } else if (param.direction === Direction.LEFT) {
+                column = startColumn;
+            }
+
+            this._scrollToCell(row, column);
+        }, 0);
+    }
+
+    private _getFreeze(): Nullable<IFreeze> {
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+        if (snapshot == null) {
+            return;
+        }
+
+        return snapshot.freeze;
+    }
+
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {
         if (param == null) {
             return;
@@ -449,10 +466,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const bounds = viewport.getBounding();
-        return skeleton.getRangeByViewBound(bounds.viewBound);
+        const vpInfo = viewport.calcViewportInfo();
+        return skeleton.getRangeByViewBound(vpInfo.viewBound);
     }
 
+    // why so complicated?  ScrollRenderController@scrollToCell do the same thing, including the scenario of freezing.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
@@ -470,6 +488,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         const worksheet = this._context.unit.getActiveSheet();
         if (!worksheet) return false;
+
+        row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
+        column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
 
         const {
             startColumn: freezeStartColumn,
@@ -502,8 +523,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             if (row >= viewportEndRow) {
                 const minRowAccumulation = rowHeightAccumulation[row] - viewport.height!;
                 for (let r = viewportStartRow; r <= row; r++) {
+                    startSheetViewRow = r + 1;
                     if (rowHeightAccumulation[r] >= minRowAccumulation) {
-                        startSheetViewRow = r + 1;
                         break;
                     }
                 }
@@ -520,8 +541,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             if (column >= viewportEndColumn) {
                 const minColumnAccumulation = columnWidthAccumulation[column] - viewport.width!;
                 for (let c = viewportStartColumn; c <= column; c++) {
+                    startSheetViewColumn = c + 1;
                     if (columnWidthAccumulation[c] >= minColumnAccumulation) {
-                        startSheetViewColumn = c + 1;
                         break;
                     }
                 }

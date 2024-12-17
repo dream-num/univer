@@ -15,6 +15,7 @@
  */
 
 export * from './column-header';
+export * from './constants';
 export * from './extensions';
 export * from './interfaces';
 export * from './row-header';

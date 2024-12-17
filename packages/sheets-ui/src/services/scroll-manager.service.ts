@@ -40,9 +40,13 @@ export interface IScrollState {
 }
 
 export interface IViewportScrollState extends IScrollState {
+    /** scroll value in scrollbar */
     scrollX: number;
+    /** scroll value in scrollbar */
     scrollY: number;
+    /** scroll value on viewport */
     viewportScrollX: number;
+    /** scroll value on viewport */
     viewportScrollY: number;
 }
 
@@ -126,23 +130,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     /**
-     * call by set frozen
-     * @param scrollInfo
-     */
-    setScrollStateToCurrSheetAndEmitEvent(scrollInfo: IScrollState) {
-        if (this._searchParamForScroll == null) {
-            return;
-        }
-
-        this._setScrollState({
-            ...this._searchParamForScroll,
-            ...scrollInfo,
-        });
-        this._scrollStateNext(this._searchParamForScroll);
-    }
-
-    /**
-     * set _scrollStateMap but no _scrollInfo$.next
+     * Set _scrollStateMap but no _scrollInfo$.next
      * @param scroll
      */
     setScrollStateToCurrSheet(scroll: IScrollState) {

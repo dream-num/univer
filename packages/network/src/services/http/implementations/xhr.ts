@@ -19,14 +19,14 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
-import { Observable } from 'rxjs';
+import type { HTTPRequest } from '../request';
 
+import type { HTTPEvent } from '../response';
+import type { IHTTPImplementation } from './implementation';
+import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
-import type { HTTPRequest } from '../request';
-import type { HTTPEvent } from '../response';
 import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
-import type { IHTTPImplementation } from './implementation';
 
 /**
  * An HTTP implementation using XHR. HTTP service provided by this service could only be async (we do not support sync XHR now).
@@ -105,6 +105,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                 } else {
                     observer.error(
                         new HTTPResponseError({
+                            request,
                             error,
                             headers,
                             status,
@@ -117,6 +118,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
 
             const onErrorHandler = (error: ProgressEvent) => {
                 const res = new HTTPResponseError({
+                    request,
                     error,
                     status: xhr.status || 0,
                     statusText: xhr.statusText || 'Unknown Error',

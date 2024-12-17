@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { normalizeTextRuns, Tools } from '@univerjs/core';
 import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
+import { normalizeTextRuns, Tools } from '@univerjs/core';
 
 export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
     // use null to clear style
@@ -36,6 +36,13 @@ export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData
     // then remove null
     if (merge) {
         Tools.removeNull(merge);
+
+        // remove empty object
+        Object.entries(merge).forEach(([key, val]) => {
+            if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) {
+                delete merge[key as keyof IStyleData];
+            }
+        });
     }
 
     if (Tools.isEmptyObject(merge)) {

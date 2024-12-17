@@ -35,21 +35,14 @@ export interface ISheetSkeletonManagerSearch {
 }
 
 /**
- * This service manages the drawing of the sheet's viewModel (skeleton).
- *
- * Each time there is a content change, it will trigger the viewModel of the render to recalculate.
- *
- * Each application and sub-table has its own viewModel (skeleton).
- *
- * The viewModel is also a temporary storage variable, which does not need to be persisted,
- * so it is managed uniformly through the service.
+ * SheetSkeletonManagerService is registered in a render unit
  */
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
         sheetId: '',
     };
 
-    private _sheetSkeletonParam: ISheetSkeletonManagerParam[] = [];
+    private _sheetSkeletonStore: Map<string, ISheetSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
@@ -70,17 +63,16 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this.disposeWithMe(() => {
             this._currentSkeletonBefore$.complete();
             this._currentSkeleton$.complete();
-            this._sheetSkeletonParam = [];
+            this._sheetSkeletonStore = new Map();
         });
 
         this._initRemoveSheet();
+        window.sks = this;
     }
 
     private _initRemoveSheet() {
         this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
-            this.disposeSkeleton({
-                sheetId: sheet.getSheetId(),
-            });
+            this.disposeSkeleton(sheet.getSheetId());
         }));
     }
 
@@ -89,19 +81,20 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton(this._currentSkeletonSearchParam);
+        return this._getSkeleton(this._currentSkeletonSearchParam.sheetId);
     }
 
     getWorksheetSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton({ sheetId });
+        return this._getSkeleton(sheetId);
     }
 
     /**
      * unitId is never read?
+     * why ?? what does unitId for ???
      */
     getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        const param = this._getSkeleton({ sheetId });
-        if (param != null) {
+        const param = this._getSkeleton(sheetId);
+        if (param) {
             param.unitId = unitId;
         }
         return param;
@@ -112,10 +105,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        const param = this._getSkeleton(searchParam);
+        const skParam = this._getSkeleton(searchParam.sheetId);
         const unitId = this._context.unitId;
-        if (param != null) {
-            this._reCalculate(param);
+        if (skParam != null) {
+            this._reCalculate(skParam);
         } else {
             const { sheetId } = searchParam;
             const workbook = this._context.unit;
@@ -125,7 +118,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             }
 
             const skeleton = this._buildSkeleton(worksheet);
-            this._sheetSkeletonParam.push({
+            this._sheetSkeletonStore.set(sheetId, {
                 unitId,
                 sheetId,
                 skeleton,
@@ -148,12 +141,12 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._reCalculate(param);
     }
 
-    private _reCalculate(param: ISheetSkeletonManagerParam) {
-        if (param.dirty) {
-            param.skeleton.makeDirty(true);
-            param.dirty = false;
+    private _reCalculate(skParam: ISheetSkeletonManagerParam) {
+        if (skParam.dirty) {
+            skParam.skeleton.makeDirty(true);
+            skParam.dirty = false;
         }
-        param.skeleton.calculate();
+        skParam.skeleton.calculate();
     }
 
     /**
@@ -162,29 +155,37 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
      * @param state
      */
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {
-        const param = this._getSkeleton(searchParm);
+        const param = this._getSkeleton(searchParm.sheetId);
         if (param == null) {
             return;
         }
         param.dirty = state;
     }
 
+    /**
+     * @deprecated Use function `ensureSkeleton` instead.
+     * @param searchParam
+     */
     getOrCreateSkeleton(searchParam: ISheetSkeletonManagerSearch) {
-        const skeleton = this._getSkeleton(searchParam);
+        this.ensureSkeleton(searchParam.sheetId);
+    }
+
+    ensureSkeleton(sheetId: string) {
+        const skeleton = this._getSkeleton(sheetId);
         if (skeleton) {
             return skeleton.skeleton;
         }
 
         const workbook = this._context.unit;
-        const worksheet = workbook.getSheetBySheetId(searchParam.sheetId);
+        const worksheet = workbook.getSheetBySheetId(sheetId);
         if (!worksheet) {
             return;
         }
 
         const newSkeleton = this._buildSkeleton(worksheet);
-        this._sheetSkeletonParam.push({
+        this._sheetSkeletonStore.set(sheetId, {
             unitId: this._context.unitId,
-            sheetId: searchParam.sheetId,
+            sheetId,
             skeleton: newSkeleton,
             dirty: false,
         });
@@ -192,13 +193,18 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return newSkeleton;
     }
 
-    disposeSkeleton(searchParm: ISheetSkeletonManagerSearch) {
-        const index = this._sheetSkeletonParam.findIndex((param) => param.sheetId === searchParm.sheetId);
-        if (index > -1) {
-            const skeleton = this._sheetSkeletonParam[index];
-            skeleton.skeleton.dispose();
-            this._sheetSkeletonParam.splice(index, 1);
+    disposeSkeleton(sheetId: string) {
+        const skParam = this.getWorksheetSkeleton(sheetId);
+        if (skParam) {
+            skParam.skeleton.dispose();
+            this._sheetSkeletonStore.delete(sheetId);
         }
+        // const index = this._sheetSkeletonStore.findIndex((param) => param.sheetId === searchParm.sheetId);
+        // if (index > -1) {
+        //     const skeleton = this._sheetSkeletonStore[index];
+        //     skeleton.skeleton.dispose();
+        //     this._sheetSkeletonStore.splice(index, 1);
+        // }
     }
 
     /** @deprecated Use function `attachRangeWithCoord` instead.  */
@@ -209,11 +215,12 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return attachRangeWithCoord(skeleton, range);
     }
 
-    private _getSkeleton(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        const item = this._sheetSkeletonParam.find((param) => param.sheetId === searchParm.sheetId);
-        if (item != null) {
-            item.commandId = searchParm.commandId;
-        }
+    private _getSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        // const item = this._sheetSkeletonStore.find((param) => param.sheetId === searchParm.sheetId);
+        const item = this._sheetSkeletonStore.get(sheetId);
+        // if (item) {
+        //     item.commandId = searchParm.commandId;
+        // }
 
         return item;
     }

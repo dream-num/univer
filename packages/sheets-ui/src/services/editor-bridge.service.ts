@@ -36,7 +36,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
-import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { convertTextRotation, convertTransformToOffsetX, convertTransformToOffsetY, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { BEFORE_CELL_EDIT, IRefSelectionsService, SheetInterceptorService } from '@univerjs/sheets';
 import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
@@ -207,10 +207,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
-        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         if (resetSizeOnly && this._currentEditCellLayout) {
             endX = endX - startX + this._currentEditCellLayout.position.startX;
@@ -322,10 +322,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
-        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
-        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
-        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
-        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+        startX = convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();

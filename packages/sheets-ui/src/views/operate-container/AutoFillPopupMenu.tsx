@@ -161,10 +161,10 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const scaleY = scene?.scaleY;
     const scrollXY = scene?.getViewportScrollXY(viewport);
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
-    const x = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endX || 0;
-    const y = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endY || 0;
-    const relativeX = skeleton?.convertTransformToOffsetX(x, scaleX, scrollXY);
-    const relativeY = skeleton?.convertTransformToOffsetY(y, scaleY, scrollXY);
+    const x = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endX || 0;
+    const y = skeleton?.getNoMergeCellWithCoordByIndex(anchor.row, anchor.col).endY || 0;
+    const relativeX = convertTransformToOffsetX(x, scaleX, scrollXY);
+    const relativeY = convertTransformToOffsetY(y, scaleY, scrollXY);
 
     if (relativeX == null || relativeY == null) return null;
     const onVisibleChange = (visible: boolean) => {

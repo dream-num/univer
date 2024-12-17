@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export const DEFINED_NAME_CONTAINER = 'DefinedNameContainer';
+import './f-range';
+import './f-worksheet';
+
+export type * from './f-range';
+export type * from './f-worksheet';

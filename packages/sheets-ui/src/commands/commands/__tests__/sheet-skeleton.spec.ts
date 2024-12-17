@@ -92,11 +92,8 @@ describe('Test commands used for change selections', () => {
         const injector = get(Injector);
 
         worksheet = workbook.getActiveSheet()!;
-        const config = worksheet.getConfig();
         spreadsheetSkeleton = new SpreadsheetSkeleton(
             worksheet,
-            config,
-            worksheet.getCellMatrix(),
             workbook.getStyles(),
             localeService,
             contextService,

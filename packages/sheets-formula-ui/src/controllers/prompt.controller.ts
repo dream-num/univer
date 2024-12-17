@@ -442,10 +442,13 @@ export class PromptController extends Disposable {
     private _initSelectionsEndListener() {
         const d = new DisposableCollection();
 
-        this.disposeWithMe(this._refSelectionsService.selectionMoveEnd$.subscribe((selections) => {
+        // response events from selection control, when selection control is created
+        // this is so weird !!! why didn't selection control handle move event itself ???
+
+        this.disposeWithMe(merge(this._refSelectionsService.selectionSet$, this._refSelectionsService.selectionMoveEnd$).subscribe((selections) => {
             d.dispose();
 
-            if (selections.length === 0) return;
+            if (!selections || selections.length === 0) return;
             // Theme color should be set when SelectionControl is created, it's too late to set theme color at selection End(pointerup).
             // The logic below has been moved to syncToEditor.
             // this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));

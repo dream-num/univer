@@ -16,6 +16,7 @@
 
 import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import { FUniver, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
@@ -51,6 +52,12 @@ export interface IFUniverSheetsMixin {
      * Register a callback that will be triggered when a Univer Sheet is created.
      */
     onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
+
+    /**
+     * Create a new defined name builder.
+     * @returns {FDefinedNameBuilder} - The defined name builder.
+     */
+    newDefinedName(): FDefinedNameBuilder;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
@@ -89,6 +96,10 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         });
 
         return toDisposable(subscription);
+    }
+
+    override newDefinedName(): FDefinedNameBuilder {
+        return this._injector.createInstance(FDefinedNameBuilder);
     }
 }
 

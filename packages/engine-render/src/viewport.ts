@@ -719,7 +719,7 @@ export class Viewport {
 
         // set scrolling state for mainCtx,
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
-        const viewPortInfo = this._calcViewportInfo();
+        const viewPortInfo = this.calcViewportInfo();
 
         for (let i = 0, length = objects.length; i < length; i++) {
             objects[i].render(mainCtx, viewPortInfo);
@@ -789,7 +789,7 @@ export class Viewport {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _calcViewportInfo(): IViewportInfo {
+    calcViewportInfo(): IViewportInfo {
         if (this.isActive === false) {
             return this._makeDefaultViewport();
         }
@@ -895,8 +895,12 @@ export class Viewport {
         } satisfies IViewportInfo;
     }
 
+    /**
+     * Get viewport info
+     * @deprecated use `calcViewportInfo`
+     */
     getBounding() {
-        return this._calcViewportInfo();
+        return this.calcViewportInfo();
     }
 
     /**

@@ -21,10 +21,9 @@ import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverIn
 import { Confirm, Tooltip } from '@univerjs/design';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
-import { SCOPE_WORKBOOK_VALUE } from './component-name';
 import { DefinedNameInput } from './DefinedNameInput';
 import styles from './index.module.less';
 
@@ -188,7 +187,7 @@ export const DefinedNameContainer = () => {
                                     <div className={styles.definedNameContainerItemName}>
                                         {definedName.name}
                                         <span className={styles.definedNameContainerItemNameForSheet}>
-                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
+                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
                                     </div>
                                     <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>

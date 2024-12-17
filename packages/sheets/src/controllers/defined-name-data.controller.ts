@@ -24,6 +24,8 @@ import { IDefinedNamesService } from '@univerjs/engine-formula';
 
 const SHEET_DEFINED_NAME_PLUGIN = 'SHEET_DEFINED_NAME_PLUGIN';
 
+export const SCOPE_WORKBOOK_VALUE_DEFINED_NAME = 'AllDefaultWorkbook';
+
 export class DefinedNameDataController extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,

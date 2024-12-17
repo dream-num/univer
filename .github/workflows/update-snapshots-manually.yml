@@ -5,7 +5,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    udpate-snapshots:
+    update-snapshots:
         runs-on: ubuntu-latest
         env:
             GH_TOKEN: ${{ github.token }}

@@ -33,6 +33,11 @@ export interface IInterceptor<M, C> {
 }
 
 export interface ICellInterceptor<M, C> extends IInterceptor<M, C> {
+    /**
+     * The effect of the interceptor handler.
+     * If the effect is 'Style', the worksheet@getCellValueOnly will bypass this interceptor.
+     * If the effect is 'Value', the worksheet@getStyleOnly will bypass this interceptor.
+     */
     effect?: InterceptorEffectEnum;
 }
 

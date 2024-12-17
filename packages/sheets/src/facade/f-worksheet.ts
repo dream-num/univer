@@ -18,7 +18,7 @@ import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectA
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, FBase, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -41,6 +41,7 @@ export class FWorksheet extends FBase {
         protected readonly _worksheet: Worksheet,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(SheetsSelectionsService) protected readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(ILogService) protected readonly _logService: ILogService,
         @ICommandService protected readonly _commandService: ICommandService
     ) {
         super();
@@ -1020,10 +1021,14 @@ export class FWorksheet extends FBase {
 
     /**
      * Sets the frozen state of the current sheet.
-     * @param freeze - The freeze object containing the parameters for freezing the sheet.
+     * @param freeze - the scrolling viewport start range and count of freezed rows and columns.
+     * that means if you want to freeze the first 3 rows and 2 columns, you should set freeze as { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
+     *
+     * @deprecated use `setFrozenRows` and `setFrozenColumns` instead.
      * @returns True if the command was successful, false otherwise.
      */
     setFreeze(freeze: IFreeze): boolean {
+        this._logService.warn('setFreeze is deprecated, use setFrozenRows and setFrozenColumns instead');
         return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
             ...freeze,
             unitId: this._workbook.getUnitId(),
@@ -1046,6 +1051,8 @@ export class FWorksheet extends FBase {
     /**
      * Get the freeze state of the current sheet.
      * @returns The freeze state of the current sheet.
+     *
+     * @deprecated use `getRowFreezeStatus` and `getColumnFreezeStatus` instead.
      */
     getFreeze(): IFreeze {
         return this._worksheet.getFreeze();
@@ -1056,13 +1063,46 @@ export class FWorksheet extends FBase {
      * @param columns The number of columns to freeze.
      * To unfreeze all columns, set this value to 0.
      */
-    setFrozenColumns(columns: number): void {
-        const currentFreeze = this.getFreeze();
-        this.setFreeze({
-            ...currentFreeze,
-            startColumn: columns > 0 ? columns : -1,
-            xSplit: columns,
-        });
+    setFrozenColumns(columns: number): void;
+    /**
+     * Set freeze column, then the range from startColumn to endColumn will be fixed.
+     * e.g. setFrozenColumns(0, 2) will fix the column range from 0 to 2.
+     * e.g. setFrozenColumns(2, 3) will fix the column range from 2 to 3, And column from 0 to 1 will be invisible.
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too columns.
+     * fWorkSheet.setFrozenColumns(0, 2);
+     * ```
+     * @param startColumn
+     * @param endColumn
+     */
+    setFrozenColumns(startColumn: number, endColumn: number): void;
+    setFrozenColumns(...args: [number] | [number, number]): void {
+        const freezeCfg = this.getFreeze();
+        if (arguments.length === 1) {
+            const columns = args[0];
+            this.setFreeze({
+                ...freezeCfg,
+                startColumn: columns > 0 ? columns : -1,
+                xSplit: columns,
+            });
+        } else if (arguments.length === 2) {
+            let [startColumn = 0, endColumn = 0] = args;
+            if (startColumn > endColumn) {
+                [startColumn, endColumn] = [endColumn, startColumn];
+            }
+            this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+                startColumn: endColumn + 1,
+                xSplit: endColumn - startColumn + 1,
+                startRow: freezeCfg.startRow,
+                ySplit: freezeCfg.ySplit,
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this.getSheetId(),
+            });
+        }
     }
 
     /**
@@ -1070,13 +1110,48 @@ export class FWorksheet extends FBase {
      * @param rows The number of rows to freeze.
      * To unfreeze all rows, set this value to 0.
      */
-    setFrozenRows(rows: number): void {
-        const currentFreeze = this.getFreeze();
-        this.setFreeze({
-            ...currentFreeze,
-            startRow: rows > 0 ? rows : -1,
-            ySplit: rows,
-        });
+    setFrozenRows(rows: number): void;
+
+    /**
+     * Set freeze row, then the range from startRow to endRow will be fixed.
+     * e.g. setFrozenRows(0, 2) will fix the row range from 0 to 2.
+     * e.g. setFrozenRows(2, 3) will fix the row range from 2 to 3, And row from 0 to 1 will be invisible.
+     * @param startRow
+     * @param endRow
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too rows.
+     * fWorkSheet.setFrozenRows(0, 2);
+     * ```
+     */
+    setFrozenRows(startColumn: number, endColumn: number): void;
+    setFrozenRows(...args: [number] | [number, number]): void {
+        const freezeCfg = this.getFreeze();
+        if (arguments.length === 1) {
+            const rows = args[0];
+            this.setFreeze({
+                ...freezeCfg,
+                startRow: rows > 0 ? rows : -1,
+                ySplit: rows,
+            });
+        } else if (arguments.length === 2) {
+            let [startRow = 0, endRow = 0] = args;
+            if (startRow > endRow) {
+                [startRow, endRow] = [endRow, startRow];
+            }
+            this._commandService.syncExecuteCommand;
+            this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+                startRow: endRow + 1,
+                ySplit: endRow - startRow + 1,
+                startColumn: freezeCfg.startColumn,
+                xSplit: freezeCfg.xSplit,
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this.getSheetId(),
+            });
+        }
     }
 
     /**
@@ -1103,6 +1178,28 @@ export class FWorksheet extends FBase {
             return 0;
         }
         return freeze.startRow;
+    }
+
+    /**
+     * Get freezed rows.
+     */
+    getFrozenRowRange(): { startRow: number; endRow: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startRow: cfg.startRow - cfg.ySplit,
+            endRow: cfg.startRow - 1,
+        };
+    }
+
+    /**
+     * Get freezed columns
+     */
+    getFrozenColumnRange(): { startColumn: number; endColumn: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startColumn: cfg.startColumn - cfg.xSplit,
+            endColumn: cfg.startColumn - 1,
+        };
     }
 
     /**

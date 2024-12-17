@@ -538,6 +538,8 @@ export function getCellWithCoordByIndexCore(
     columnWidthAccumulation: number[],
     mergeDataInfo: ICellInfo
 ): ICellWithCoord {
+    row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
+    column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,
@@ -561,7 +563,6 @@ export function getCellWithCoordByIndexCore(
     };
 
     const rowAccumulationCount = rowHeightAccumulation.length - 1;
-
     const columnAccumulationCount = columnWidthAccumulation.length - 1;
 
     if (isMerged && startRow !== -1 && startColumn !== -1) {

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
-import { awaitTime, ICommandService, type IDisposable, ILogService, toDisposable } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
+import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -74,7 +75,7 @@ export interface IFWorkbookSheetsUIMixin {
     endEditing(save?: boolean): Promise<boolean>;
 }
 
-export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
+export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         this._logDeprecation('openSiderbar');
 
@@ -142,9 +143,26 @@ export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookShee
         await awaitTime(0);
         return true;
     }
+
+    /**
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
+    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return null;
+        const scm = render.with(SheetScrollManagerService);
+        return scm.getScrollStateByParam({ unitId, sheetId });
+    }
 }
 
-FWorkbook.extend(FWorokbookSheetsUIMixin);
+FWorkbook.extend(FWorkbookSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}

@@ -17,7 +17,7 @@
 import type { IOperation } from '@univerjs/core';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
@@ -32,20 +32,16 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
 
         // freeze is handled by set-scroll.command.ts
         const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = params;
-        const currentService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const workbook = currentService.getUniverSheetInstance(unitId);
-        const worksheet = workbook!.getSheetBySheetId(sheetId);
         const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
-        const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
         scrollManagerService.setScrollInfoAndEmitEvent({
             unitId,
             sheetId,
             offsetX,
             offsetY,
-            sheetViewStartRow: sheetViewStartRow - ySplit,
-            sheetViewStartColumn: sheetViewStartColumn - xSplit,
+            sheetViewStartRow,
+            sheetViewStartColumn,
         });
 
         return true;

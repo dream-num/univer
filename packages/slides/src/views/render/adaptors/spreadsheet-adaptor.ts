@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, ICellData, IPageElement } from '@univerjs/core';
+import type { EventState, IPageElement } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import { IConfigService, IContextService, Inject, Injector, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
+import { IConfigService, IContextService, Inject, Injector, LocaleService, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import {
     getColor,
     Rect,
@@ -66,7 +66,6 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return this;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
         const {
             id,
@@ -91,14 +90,9 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const { worksheet, styles } = spreadsheetModel;
 
-        const { cellData } = worksheet;
-
-        const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
         const styleModel = new Styles(styles);
         const spreadsheetSkeleton = new SpreadsheetSkeleton(
             new Worksheet(id, worksheet, styleModel), // FIXME: worksheet in slide doesn't has a Worksheet object
-            worksheet,
-            cellDataMatrix,
             styleModel,
             this._localeService,
             this._contextService,
@@ -107,9 +101,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         );
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
         const allWidth = columnTotalWidth + worksheet.rowHeader.width || 0;
-
         const allHeight = rowTotalHeight + worksheet.columnHeader.height || 0;
 
         const sv = new SceneViewer(SHEET_VIEW_KEY.SCENE_VIEWER + id, {

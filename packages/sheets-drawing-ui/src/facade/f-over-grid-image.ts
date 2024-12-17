@@ -291,17 +291,61 @@ export class FOverGridImage extends FBase {
         return this._image.drawingType;
     }
 
+    /**
+     * Remove the image from the sheet
+     * @returns success or not
+     * @example
+     * ```ts
+     * // remove the image from the sheet
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Delete state is ', image?.remove());
+     * ```
+     */
     remove(): boolean {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
+    /**
+     * Convert the image to a FOverGridImageBuilder
+     * @returns The builder FOverGridImageBuilder
+     * @example
+     * ```ts
+     * // convert the image to a builder
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * const builder = image.toBuilder();
+     * builder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).build();
+     * activeSheet.updateImages([builder.build()]);
+     * ```
+     */
     toBuilder(): FOverGridImageBuilder {
         const builder = this._injector.createInstance(FOverGridImageBuilder);
         builder.setImage(this._image);
         return builder;
     }
 
+    /**
+     * Set the source of the image
+     * @param source The source of the image
+     * @returns success or not
+     * @example
+     * ```ts
+     * // set the source of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set source state is ', image.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4'));
+     */
     setSource(source: string): boolean;
+    /**
+     * Set the source of the image, change image display.
+     * @param source  The source of the image
+     * @param sourceType The source type of the image
+     * @returns success or not
+     */
     setSource(source: string, sourceType?: ImageSourceType): boolean;
     setSource(source: string, sourceType?: ImageSourceType): boolean {
         const sourceTypeVal = sourceType ?? ImageSourceType.URL;
@@ -310,9 +354,30 @@ export class FOverGridImage extends FBase {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
-    setPosition(column: number, row: number): boolean;
-    setPosition(column: number, row: number, rowOffset?: number, columnOffset?: number): boolean;
-    setPosition(column: number, row: number, rowOffset?: number, columnOffset?: number): boolean {
+    /**
+     * Set the position of the image
+     * @param row  The sheet start row of the image
+     * @param column The sheet start column of the image
+     * @returns success or not
+     * @example
+     * ```ts
+     *  // set the position of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set position state is ', image.setPosition(5, 5));
+     * ```
+     */
+    setPosition(row: number, column: number): boolean;
+    /**
+     *
+     * @param column  The sheet start column of the image
+     * @param row  The sheet start row of the image
+     * @param rowOffset  The offset of the start row
+     * @param columnOffset  The offset of the start column
+     */
+    setPosition(row: number, column: number, rowOffset?: number, columnOffset?: number): boolean;
+    setPosition(row: number, column: number, rowOffset?: number, columnOffset?: number): boolean {
         const builder = this.toBuilder();
         builder.setColumn(column);
         builder.setRow(row);
@@ -325,6 +390,12 @@ export class FOverGridImage extends FBase {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [builder.build()] });
     }
 
+    /**
+     * Set the size of the image
+     * @param width  The width of the image
+     * @param height  The height of the image
+     * @returns success or not
+     */
     setSize(width: number, height: number): boolean {
         const builder = this.toBuilder();
         builder.setWidth(width);
@@ -332,6 +403,22 @@ export class FOverGridImage extends FBase {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [builder.build()] });
     }
 
+    /**
+     * Set the cropping region of the image by defining the top, bottom, left, and right edges, thereby displaying the specific part of the image you want.
+     * @param top  The number of pixels to crop from the top of the image.
+     * @param left  The number of pixels to crop from the left side of the image.
+     * @param bottom  The number of pixels to crop from the bottom of the image.
+     * @param right  The number of pixels to crop from the right side of the image.
+     * @returns success or not
+     * @example
+     * ```ts
+     * // set the crop of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set crop state is ', image.setCrop(0, 0, 0, 0));
+     * ```
+     */
     setCrop(top?: number, left?: number, bottom?: number, right?: number): boolean {
         if (this._image.srcRect == null) {
             this._image.srcRect = {
@@ -366,7 +453,12 @@ export class FOverGridImage extends FBase {
     //     return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     // }
 
-    setRotate(angle: number): FOverGridImageBuilder {
+    /**
+     * Set the rotation angle of the image
+     * @param angle Degree of rotation of the image, for example, 90, 180, 270, etc.
+     * @returns success or not
+     */
+    setRotate(angle: number): boolean {
         this._image.sheetTransform.angle = angle;
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }

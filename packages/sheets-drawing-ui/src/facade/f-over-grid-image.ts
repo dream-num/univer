@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
+import type { ICellOverGridPosition } from '@univerjs/sheets';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
 import { getImageSize } from '@univerjs/drawing';
@@ -21,19 +23,8 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'> {
-    column: number;
-    columnOffset: number;
-    row: number;
-    rowOffset: number;
-    width: number;
-    height: number;
+export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
 
-    flipY?: boolean;
-    flipX?: boolean;
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
 }
 
 function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeletonManagerService: SheetSkeletonManagerService): IFOverGridImage {
@@ -231,6 +222,11 @@ export class FOverGridImageBuilder {
         }
     }
 
+    /**
+     * Set the rotation angle of the image
+     * @param angle Degree of rotation of the image, for example, 90, 180, 270, etc.
+     * @returns The builder
+     */
     setRotate(angle: number): FOverGridImageBuilder {
         this._image.angle = angle;
         return this;

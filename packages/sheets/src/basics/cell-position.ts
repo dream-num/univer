@@ -16,12 +16,12 @@
 
 export interface ICellOverGridPosition {
     column: number; // column number
-    columnOffset: number; // column offset, unit is EMUs
+    columnOffset: number; // column offset, pixel unit
     row: number; // row number
-    rowOffset: number; // row offset, unit is EMUs
+    rowOffset: number; // row offset, pixel unit
 }
 
 export interface ISheetOverGridPosition {
-    from: ICellOverGridPosition;
-    to: ICellOverGridPosition;
+    from: ICellOverGridPosition; // Start position in its own sheet.
+    to: ICellOverGridPosition; // End position in its own sheet.
 }

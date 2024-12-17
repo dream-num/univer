@@ -169,25 +169,25 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             imageBuilder.setSource(base64, ImageSourceType.BASE64);
         }
 
-        if (column != null) {
+        if (column !== undefined) {
             imageBuilder.setColumn(column);
         } else {
             imageBuilder.setColumn(0);
         }
 
-        if (row != null) {
+        if (row !== undefined) {
             imageBuilder.setRow(row);
         } else {
             imageBuilder.setRow(0);
         }
 
-        if (offsetX != null) {
+        if (offsetX !== undefined) {
             imageBuilder.setColumnOffset(offsetX);
         } else {
             imageBuilder.setColumnOffset(0);
         }
 
-        if (offsetY != null) {
+        if (offsetY !== undefined) {
             imageBuilder.setRowOffset(offsetY);
         } else {
             imageBuilder.setRowOffset(0);

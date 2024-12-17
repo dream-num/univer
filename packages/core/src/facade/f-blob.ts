@@ -41,11 +41,12 @@ export class FBlob extends FBase {
 
     /**
      * Returns a copy of this blob.
-     * @returns a new blob
+     * @returns a new blob by copying the current blob
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
      * const newBlob = blob.copyBlob();
+     * console.log(newBlob);
      * ```
      */
     copyBlob() {
@@ -55,7 +56,7 @@ export class FBlob extends FBase {
     /**
      * Return the data inside this object as a blob converted to the specified content type.
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
-     * @returns a blob
+     * @returns a new blob by converting the current blob to the specified content type
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
@@ -70,7 +71,7 @@ export class FBlob extends FBase {
 
     /**
      * get the blob as a string
-     * @returns a string
+     * @returns
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
@@ -82,7 +83,7 @@ export class FBlob extends FBase {
     /**
      * get the blob as a string
      * @param charset the charset
-     * @returns a string
+     * @returns the blob content as a string
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
@@ -111,7 +112,7 @@ export class FBlob extends FBase {
 
     /**
      * Gets the data stored in this blob.
-     * @returns a byte array
+     * @returns the blob content as a byte array
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
@@ -129,6 +130,7 @@ export class FBlob extends FBase {
     /**
      * Sets the data stored in this blob.
      * @param bytes a byte array
+     * @returns the blob object
      * @example
      * ```ts
      * const blob = UniverApi.newBlob();
@@ -136,35 +138,39 @@ export class FBlob extends FBase {
      * blob.setBytes(bytes);
      * ```
      */
-    setBytes(bytes: Uint8Array): void {
+    setBytes(bytes: Uint8Array): FBlob {
         this._blob = new Blob([bytes]);
+        return this;
     }
 
     /**
      * Sets the data stored in this blob.
-     * @param data a string
+     * @param data blob data string
+     * @returns the blob object
      * @example
      * ```ts
      * const blob = UniverApi.newBlob();
      * blob.setDataFromString('Hello, World!');
      * ```
      */
-    setDataFromString(data: string): void;
+    setDataFromString(data: string): FBlob;
     /**
      * Sets the data stored in this blob.
      * @param data a string
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
+     * @returns the blob object
      * @example
      * ```ts
      * const blob = UniverApi.newBlob();
      * blob.setDataFromString('Hello, World!', 'text/plain');
      * ```
      */
-    setDataFromString(data: string, contentType?: string): void;
-    setDataFromString(data: string, contentType?: string): void {
+    setDataFromString(data: string, contentType?: string): FBlob;
+    setDataFromString(data: string, contentType?: string): FBlob {
         const contentTypeVal = contentType ?? 'text/plain';
         const blob = new Blob([data], { type: contentTypeVal });
         this._blob = blob;
+        return this;
     }
 
     /**
@@ -184,6 +190,7 @@ export class FBlob extends FBase {
     /**
      * Sets the content type of the data stored in this blob.
      * @param contentType the content type refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
+     * @returns the blob object
      * @example
      * ```ts
      * const blob = UniverApi.newBlob(blob);
@@ -191,7 +198,8 @@ export class FBlob extends FBase {
      * console.log(newBlob);
      * ```
      */
-    setContentType(contentType: string) {
+    setContentType(contentType: string): FBlob {
         this._blob = this._blob?.slice(0, this._blob.size, contentType);
+        return this;
     }
 }

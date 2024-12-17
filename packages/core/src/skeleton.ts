@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { IFontLocale } from '../basics/interfaces';
-import { Disposable, Inject, LocaleService } from '@univerjs/core';
+import type { IFontLocale } from './sheets/util';
+import { Inject } from '@wendellhu/redi';
+import { LocaleService } from './services/locale/locale.service';
+import { Disposable } from './shared/lifecycle';
 
 export class Skeleton extends Disposable {
     private _fontLocale!: IFontLocale;

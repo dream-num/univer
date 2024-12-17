@@ -377,7 +377,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         const { row, column } = moveActualSelection;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(row, column);
+        const startCell = skeleton.getNoMergeCellWithCoordByIndex(row, column);
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 

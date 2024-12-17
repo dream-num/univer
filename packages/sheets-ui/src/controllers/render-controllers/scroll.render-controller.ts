@@ -175,7 +175,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 const { viewportScrollX, viewportScrollY, scrollX, scrollY } = scrollAfterParam;
 
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
@@ -217,7 +217,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
                 const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const freeze = this._getFreeze();
+
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );

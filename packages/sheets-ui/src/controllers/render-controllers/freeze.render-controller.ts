@@ -857,9 +857,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
+        const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
+        const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -1575,7 +1575,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
+        const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
         }

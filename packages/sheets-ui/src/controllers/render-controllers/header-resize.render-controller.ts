@@ -326,9 +326,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                 this._startOffsetY = transformCoord.y;
 
-                const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-                const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-                const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
+                const currentOffsetX = skeleton.getOffsetByColumn(this._currentColumn);
+                const currentOffsetY = skeleton.getOffsetByRow(this._currentRow);
+                const cell = skeleton.getNoMergeCellWithCoordByIndex(this._currentRow, this._currentColumn);
 
                 let isStartMove = false;
                 let moveChangeX = 0;

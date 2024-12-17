@@ -216,7 +216,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 const { viewportScrollX, viewportScrollY, scrollX, scrollY } = scrollAfterParam;
 
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );
@@ -258,7 +258,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
                 const freeze = this._getFreeze();
 
-                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                const { row, column, rowOffset, columnOffset } = skeleton.getOffsetRelativeToRowCol(
                     viewportScrollX,
                     viewportScrollY
                 );

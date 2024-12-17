@@ -17,56 +17,65 @@
 import type { ITransformState, Nullable } from '@univerjs/core';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { precisionTo } from '@univerjs/engine-render';
-import { attachRangeWithCoord, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertPositionSheetOverGridToAbsolute, type ISheetSelectionRenderService, type SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(
     position: ISheetDrawingPosition,
     selectionRenderService: ISheetSelectionRenderService,
     sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
-    const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
-    const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
+    const skeletonParam = sheetSkeletonManagerService.getCurrent();
+    if (skeletonParam == null) {
+        return;
+    }
+
+    const absolutePosition = convertPositionSheetOverGridToAbsolute(
+        skeletonParam.unitId, skeletonParam.sheetId, { from, to }, sheetSkeletonManagerService
+    );
+
+    let { left, top, width, height } = absolutePosition;
+
     const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
 
-    const startSelectionCell = attachRangeWithCoord(skeleton, {
-        startColumn: fromColumn,
-        endColumn: fromColumn,
-        startRow: fromRow,
-        endRow: fromRow,
-    });
+    // const startSelectionCell = attachRangeWithCoord(skeleton, {
+    //     startColumn: fromColumn,
+    //     endColumn: fromColumn,
+    //     startRow: fromRow,
+    //     endRow: fromRow,
+    // });
 
-    if (startSelectionCell == null) {
-        return;
-    }
+    // if (startSelectionCell == null) {
+    //     return;
+    // }
 
-    const endSelectionCell = attachRangeWithCoord(skeleton, {
-        startColumn: toColumn,
-        endColumn: toColumn,
-        startRow: toRow,
-        endRow: toRow,
-    });
+    // const endSelectionCell = attachRangeWithCoord(skeleton, {
+    //     startColumn: toColumn,
+    //     endColumn: toColumn,
+    //     startRow: toRow,
+    //     endRow: toRow,
+    // });
 
-    if (endSelectionCell == null) {
-        return;
-    }
+    // if (endSelectionCell == null) {
+    //     return;
+    // }
 
-    const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
+    // const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
 
-    const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
+    // const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    let left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    let top = precisionTo(startSelectionY + fromRowOffset, 1);
+    // let left = precisionTo(startSelectionX + fromColumnOffset, 1);
+    // let top = precisionTo(startSelectionY + fromRowOffset, 1);
 
-    let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
-    let height = precisionTo(endSelectionY + toRowOffset - top, 1);
+    // let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
+    // let height = precisionTo(endSelectionY + toRowOffset - top, 1);
 
-    if (startSelectionCell.startX === endSelectionCell.endX) {
-        width = 0;
-    }
+    // if (startSelectionCell.startX === endSelectionCell.endX) {
+    //     width = 0;
+    // }
 
-    if (startSelectionCell.startY === endSelectionCell.endY) {
-        height = 0;
-    }
+    // if (startSelectionCell.startY === endSelectionCell.endY) {
+    //     height = 0;
+    // }
 
     const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
     const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;

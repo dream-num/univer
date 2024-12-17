@@ -190,5 +190,5 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
-
+export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 // #endregion

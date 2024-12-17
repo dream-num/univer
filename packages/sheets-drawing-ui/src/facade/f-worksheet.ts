@@ -15,7 +15,6 @@
  */
 
 import { type IFBlobSource, ImageSourceType, type Nullable } from '@univerjs/core';
-import { getImageSize } from '@univerjs/drawing';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
@@ -60,6 +59,17 @@ export interface IFWorksheetLegacy {
     onImageDeleted(callback: (images: FOverGridImage[]) => void): void;
 
     onImageChanged(callback: (images: FOverGridImage[]) => void): void;
+
+     /**
+      * Create a new over grid image builder.
+      * @returns The builder
+      * @example
+      * ```ts
+      * // create a new over grid image builder.
+      * const builder = UniverApi.newOverGridImage();
+      * ```
+      */
+    newOverGridImage(): FOverGridImageBuilder;
 }
 
 export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
@@ -89,26 +99,14 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     }
 
     override async insertImage(url: IFBlobSource | string, column?: number, row?: number, offsetX?: number, offsetY?: number): Promise<boolean> {
-        const imageBuilder = this._injector.createInstance(FOverGridImageBuilder);
-        let width = 0;
-        let height = 0;
+        const imageBuilder = this.newOverGridImage();
         if (typeof url === 'string') {
             imageBuilder.setSource(url);
-            const size = await getImageSize(url);
-            width = size.width;
-            height = size.height;
         } else {
             const blobSource = url.getBlob();
             const base64 = await blobSource.getDataAsString();
             imageBuilder.setSource(base64, ImageSourceType.BASE64);
-            const size = await getImageSize(base64);
-            width = size.width;
-            height = size.height;
         }
-
-        imageBuilder.setWidth(width);
-
-        imageBuilder.setHeight(height);
 
         if (column != null) {
             imageBuilder.setColumn(column);
@@ -134,15 +132,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             imageBuilder.setRowOffset(0);
         }
 
-        const unitId = this._fWorkbook.getId();
-        const subUnitId = this.getSheetId();
-
-        imageBuilder.setUnitId(unitId);
-        imageBuilder.setSubUnitId(subUnitId);
-
-        const param = imageBuilder.build();
-        param.unitId = this._fWorkbook.getId();
-        param.subUnitId = this.getSheetId();
+        const param = await imageBuilder.build();
 
         return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }
@@ -223,6 +213,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             );
             callback(drawings);
         });
+    }
+
+    override newOverGridImage(): FOverGridImageBuilder {
+        const unitId = this._fWorkbook.getId();
+        const subUnitId = this.getSheetId();
+        return this._injector.createInstance(FOverGridImageBuilder, unitId, subUnitId);
     }
 }
 

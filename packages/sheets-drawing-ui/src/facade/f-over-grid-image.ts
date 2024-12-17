@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { PresetGeometryType } from '@univerjs/core';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
-import { IRenderManagerService, precisionTo } from '@univerjs/engine-render';
+import { getImageSize } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
-import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'> {
     column: number;
@@ -40,59 +40,15 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = sheetImage.sheetTransform;
 
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
-    const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
-    const current = sheetSkeletonManagerService.getCurrent()!;
+    const absolutePosition = convertPositionSheetOverGridToAbsolute(
+        sheetImage.unitId, sheetImage.subUnitId, { from, to }, sheetSkeletonManagerService
+    );
 
-    if (current == null) {
-        throw new Error('No current skeleton');
-    }
-
-    const skeletonParam = sheetSkeletonManagerService.getWorksheetSkeleton(sheetImage.subUnitId)!;
-    sheetSkeletonManagerService.setCurrent(skeletonParam);
-    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
-
-    const startSelectionCell = attachRangeWithCoord(skeleton, {
-        startColumn: fromColumn,
-        endColumn: fromColumn,
-        startRow: fromRow,
-        endRow: fromRow,
-    });
-
-    const endSelectionCell = attachRangeWithCoord(skeleton, {
-        startColumn: toColumn,
-        endColumn: toColumn,
-        startRow: toRow,
-        endRow: toRow,
-    });
-
-    sheetSkeletonManagerService.setCurrent(current);
-
-    const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
-
-    const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
-
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
-
-    let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
-    let height = precisionTo(endSelectionY + toRowOffset - top, 1);
-
-    if (startSelectionCell.startX === endSelectionCell.endX) {
-        width = 0;
-    }
-
-    if (startSelectionCell.startY === endSelectionCell.endY) {
-        height = 0;
-    }
+    const { left, top, width, height } = absolutePosition;
 
     return {
-        drawingId: sheetImage.drawingId,
-        drawingType: sheetImage.drawingType,
-        imageSourceType: sheetImage.imageSourceType,
-        source: sheetImage.source,
-        unitId: sheetImage.unitId,
-        subUnitId: sheetImage.subUnitId,
+        ...sheetImage,
         column: fromColumn,
         columnOffset: fromColumnOffset,
         row: fromRow,
@@ -110,58 +66,16 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
 function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, selectionRenderService: ISheetSelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): ISheetImage {
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0, width, height } = fOverGridImage;
 
-    const current = sheetSkeletonManagerService.getCurrent()!;
+    const absolutePosition = convertPositionCellToSheetOverGrid(
+        fOverGridImage.unitId, fOverGridImage.subUnitId, { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset }, width, height, selectionRenderService, sheetSkeletonManagerService
+    );
 
-    if (current == null) {
-        throw new Error('No current skeleton');
-    }
-
-    const skeletonParam = sheetSkeletonManagerService.getWorksheetSkeleton(fOverGridImage.subUnitId)!;
-    sheetSkeletonManagerService.setCurrent(skeletonParam);
-    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton()!;
-
-    const startSelectionCell = attachRangeWithCoord(skeleton, {
-        startColumn: fromColumn,
-        endColumn: fromColumn,
-        startRow: fromRow,
-        endRow: fromRow,
-    });
-
-    sheetSkeletonManagerService.setCurrent(current);
-
-    const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
-
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
-
-    const endSelectionCell = selectionRenderService.getCellWithCoordByOffset(left + width, top + height);
-
-    if (endSelectionCell == null) {
-        throw new Error('No end selection cell');
-    }
-
-    const to = {
-        column: endSelectionCell.actualColumn,
-        columnOffset: precisionTo(left + width - endSelectionCell.startX, 1),
-        row: endSelectionCell.actualRow,
-        rowOffset: precisionTo(top + height - endSelectionCell.startY, 1),
-    };
+    const { sheetTransform, transform } = absolutePosition;
 
     return {
-        drawingId: fOverGridImage.drawingId,
-        drawingType: fOverGridImage.drawingType,
-        imageSourceType: fOverGridImage.imageSourceType,
-        source: fOverGridImage.source,
-        unitId: fOverGridImage.unitId,
-        subUnitId: fOverGridImage.subUnitId,
+        ...fOverGridImage,
         sheetTransform: {
-            from: {
-                column: fromColumn,
-                columnOffset: fromColumnOffset,
-                row: fromRow,
-                rowOffset: fromRowOffset,
-            },
-            to,
+            ...sheetTransform,
             flipY,
             flipX,
             angle,
@@ -169,10 +83,7 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
             skewY,
         },
         transform: {
-            left,
-            top,
-            width,
-            height,
+            ...transform,
             flipY,
             flipX,
             angle,
@@ -185,6 +96,8 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
 export class FOverGridImageBuilder {
     private _image: IFOverGridImage;
     constructor(
+        unitId: string,
+        subUnitId: string,
         @Inject(Injector) protected readonly _injector: Injector
         // @Inject(SheetSkeletonManagerService) protected readonly _skeletonManagerService: SheetSkeletonManagerService,
         // @ISheetSelectionRenderService protected readonly _selectionRenderService: ISheetSelectionRenderService
@@ -194,8 +107,8 @@ export class FOverGridImageBuilder {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType: ImageSourceType.BASE64,
             source: '',
-            unitId: '',
-            subUnitId: '',
+            unitId,
+            subUnitId,
             column: 0,
             columnOffset: 0,
             row: 0,
@@ -224,10 +137,10 @@ export class FOverGridImageBuilder {
      * @example
      * ```ts
      * // create a new image builder.
-     * const imageBuilder = univerAPI.newOverGridImage();
-     * const param = imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).build();
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const imageBuilder = activeSheet.newOverGridImage();
+     * const param = imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).build();
      * activeSheet.insertImages([param]);
      * ```
      */
@@ -323,10 +236,10 @@ export class FOverGridImageBuilder {
         return this;
     }
 
-    setPresetGeometry(prstGeom: PresetGeometryType): FOverGridImageBuilder {
-        this._image.prstGeom = prstGeom;
-        return this;
-    }
+    // setPresetGeometry(prstGeom: PresetGeometryType): FOverGridImageBuilder {
+    //     this._image.prstGeom = prstGeom;
+    //     return this;
+    // }
 
     setUnitId(unitId: string): FOverGridImageBuilder {
         this._image.unitId = unitId;
@@ -338,7 +251,7 @@ export class FOverGridImageBuilder {
         return this;
     }
 
-    build(): ISheetImage {
+    async build(): Promise<ISheetImage> {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(this._image.unitId);
         if (!render) {
@@ -346,6 +259,21 @@ export class FOverGridImageBuilder {
         }
         const selectionRenderService = render.with(ISheetSelectionRenderService);
         const skeletonManagerService = render.with(SheetSkeletonManagerService);
+
+        if (this._image.width === 0 || this._image.height === 0) {
+            const size = await getImageSize(this._image.source);
+            const width = size.width;
+            const height = size.height;
+
+            if (this._image.width === 0) {
+                this._image.width = width;
+            }
+
+            if (this._image.height === 0) {
+                this._image.height = height;
+            }
+        }
+
         return convertFOverGridImageToSheetImage(this._image, selectionRenderService, skeletonManagerService);
     }
 }
@@ -437,8 +365,13 @@ export class FOverGridImage extends FBase {
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 
-    setPresetGeometry(prstGeom: PresetGeometryType): boolean {
-        this._image.prstGeom = prstGeom;
+    // setPresetGeometry(prstGeom: PresetGeometryType): boolean {
+    //     this._image.prstGeom = prstGeom;
+    //     return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+    // }
+
+    setRotate(angle: number): FOverGridImageBuilder {
+        this._image.sheetTransform.angle = angle;
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
     }
 }

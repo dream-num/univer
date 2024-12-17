@@ -18,7 +18,7 @@ import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRa
 import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, Tools, WrapStrategy } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
+import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
@@ -64,6 +64,10 @@ export class FRange extends FBase {
      */
     getRange(): IRange {
         return this._range;
+    }
+
+    override toString(withSheet?: boolean): string {
+        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), this._range) : serializeRange(this._range);
     }
 
     /**

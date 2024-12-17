@@ -27,9 +27,7 @@ export class SheetSkeletonRenderController extends Disposable implements IRender
         super();
 
         this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
-            this._sheetSkeletonManagerService.disposeSkeleton({
-                sheetId: sheet.getSheetId(),
-            });
+            this._sheetSkeletonManagerService.disposeSkeleton(sheet.getSheetId());
         }));
     }
 }

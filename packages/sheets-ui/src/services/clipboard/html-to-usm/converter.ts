@@ -557,6 +557,7 @@ export class HtmlToUSMService {
                     doc.paragraphs = [];
                 }
                 doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {
                     continue;

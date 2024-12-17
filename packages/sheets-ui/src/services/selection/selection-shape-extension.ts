@@ -243,8 +243,8 @@ export class SelectionShapeExtension {
             style: null,
         };
         const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+        const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
         const startX = startCell?.startX || 0;
@@ -709,8 +709,8 @@ export class SelectionShapeExtension {
             isLighten = rulerValue.isLighten;
         }
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+        const startCell = this._skeleton.getNoMergeCellWithCoordByIndex(startRow, startColumn);
+        const endCell = this._skeleton.getNoMergeCellWithCoordByIndex(endRow, endColumn);
 
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;

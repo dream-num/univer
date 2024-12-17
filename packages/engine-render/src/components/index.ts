@@ -18,5 +18,4 @@ export * from './component';
 export * from './extension';
 export * from './sheets';
 export { RENDER_RAW_FORMULA_KEY } from './sheets/sheet-skeleton';
-export * from './skeleton';
 export * from './slides';

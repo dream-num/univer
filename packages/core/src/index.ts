@@ -196,3 +196,7 @@ export { type BBox, type IRTreeItem, RBush, RTree } from './shared/r-tree';
 
 export { type IUniverConfig, Univer } from './univer';
 export { isNodeEnv } from './shared/tools';
+export { Skeleton } from './skeleton.ts';
+export { getCellCoordByIndexSimple as getCellPositionByIndex, getCellWithCoordByIndexCore, SheetSkeleton } from './sheets/sheet-skeleton';
+export type { IGetRowColByPosOptions } from './sheets/sheet-skeleton';
+export type { IPosition } from './sheets/typedef.ts';

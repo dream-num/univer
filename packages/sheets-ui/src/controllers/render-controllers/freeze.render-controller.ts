@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
+import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveRowColCommandParams,
+    ISetColHiddenMutationParams,
+    ISetFrozenMutationParams,
+    ISetRowHiddenMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import {
     ColorKit,
     createInterceptorKey,
@@ -28,6 +44,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -52,30 +69,13 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Subscription } from 'rxjs';
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-
-import type {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRowsCommandParams,
-    IRemoveRowColCommandParams,
-    ISetColHiddenMutationParams,
-    ISetFrozenMutationParams,
-    ISetRowHiddenMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
-import type { IViewportScrollState } from '../../services/scroll-manager.service';
 
 enum FREEZE_DIRECTION_TYPE {
     ROW,
@@ -854,9 +854,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         // freeze start
-        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row - ySplit, column - xSplit);
+        const startSheetView = skeleton.getNoMergeCellWithCoordByIndex(row - ySplit, column - xSplit, false);
         // freeze end
-        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column);
+        const endSheetView = skeleton.getNoMergeCellWithCoordByIndex(row, column, false);
 
         viewMainLeftTop.disable();
         viewMainTop.disable();
@@ -1546,7 +1546,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const position = skeleton?.getNoMergeCellPositionByIndex(row, column);
+        const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
         }

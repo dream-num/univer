@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-export * from './cell-position';
-export * from './const/index';
-export * from './interfaces/index';
-export * from './selection';
-export { createUniqueKey, groupByKey } from './utils';
+export interface ICellOverGridPosition {
+    column: number; // column number
+    columnOffset: number; // column offset, pixel unit
+    row: number; // row number
+    rowOffset: number; // row offset, pixel unit
+}
+
+export interface ISheetOverGridPosition {
+    from: ICellOverGridPosition; // Start position in its own sheet.
+    to: ICellOverGridPosition; // End position in its own sheet.
+}

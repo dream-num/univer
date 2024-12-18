@@ -18,13 +18,13 @@
 /* eslint-disable no-case-declarations */
 
 import type { Subscriber } from 'rxjs';
-import { Observable } from 'rxjs';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponseBody } from '../response';
-import { HTTPProgress, HTTPResponse, HTTPResponseError } from '../response';
+import type { IHTTPImplementation } from './implementation';
+import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { HTTPStatusCode } from '../http';
-import type { IHTTPImplementation } from './implementation';
+import { HTTPProgress, HTTPResponse, HTTPResponseError } from '../response';
 
 /**
  * An HTTP implementation using Fetch API. This implementation can both run in browser and Node.js.
@@ -38,7 +38,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             this._send(request, subscriber, abortController).then(() => {}, (error) => {
                 subscriber.error(new HTTPResponseError({
                     error,
-
+                    request,
                 }));
             });
 
@@ -59,6 +59,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             response = await fetchPromise;
         } catch (error: any) {
             subscriber.error(new HTTPResponseError({
+                request,
                 error,
                 status: error.status ?? 0,
                 statusText: error.statusText ?? 'Unknown Error',
@@ -87,6 +88,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             }));
         } else {
             subscriber.error(new HTTPResponseError({
+                request,
                 error: body,
                 status,
                 statusText,
@@ -137,6 +139,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             return body;
         } catch (error) {
             subscriber.error(new HTTPResponseError({
+                request,
                 error,
                 status: response.status,
                 statusText: response.statusText,

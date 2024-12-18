@@ -16,8 +16,8 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { FilterModel, ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter';
-import { FRange } from '@univerjs/sheets/facade';
 import { SetSheetFilterRangeCommand, SheetsFilterService } from '@univerjs/sheets-filter';
+import { FRange } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
 export interface IFRangeFilter {
@@ -29,7 +29,7 @@ export interface IFRangeFilter {
      * @return The interface class to handle the filter. If the worksheet already has a filter,
      * this method would return `null`.
      */
-    createFilter(this: FRange): Promise<FFilter | null>;
+    createFilter(this: FRange): FFilter | null;
     /**
      * Get the filter for the current range's worksheet.
      *
@@ -40,10 +40,10 @@ export interface IFRangeFilter {
 }
 
 export class FRangeFilter extends FRange implements IFRangeFilter {
-    override async createFilter(): Promise<FFilter | null> {
+    override createFilter(): FFilter | null {
         if (this._getFilterModel()) return null;
 
-        const success = await this._commandService.executeCommand(SetSheetFilterRangeCommand.id, <ISetSheetFilterRangeCommandParams>{
+        const success = this._commandService.syncExecuteCommand(SetSheetFilterRangeCommand.id, <ISetSheetFilterRangeCommandParams>{
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,

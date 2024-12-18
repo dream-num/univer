@@ -26,7 +26,7 @@ export interface IFRangeDataValidationMixin {
      * @param rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
      */
-    setDataValidation(this: FRange, rule: Nullable<FDataValidation>): Promise<FRange>;
+    setDataValidation(this: FRange, rule: Nullable<FDataValidation>): FRange;
     /**
      * get first data validation rule in current range
      * @returns data validation rule
@@ -42,9 +42,9 @@ export interface IFRangeDataValidationMixin {
 }
 
 export class FRangeDataValidationMixin extends FRange implements IFRangeDataValidationMixin {
-    override async setDataValidation(rule: Nullable<FDataValidation>): Promise<FRange> {
+    override setDataValidation(rule: Nullable<FDataValidation>): FRange {
         if (!rule) {
-            this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+            this._commandService.syncExecuteCommand(ClearRangeDataValidationCommand.id, {
                 unitId: this._workbook.getUnitId(),
                 subUnitId: this._worksheet.getSheetId(),
                 ranges: [this._range],
@@ -62,7 +62,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
             },
         };
 
-        await this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        this._commandService.syncExecuteCommand(AddSheetDataValidationCommand.id, params);
         return this;
     }
 

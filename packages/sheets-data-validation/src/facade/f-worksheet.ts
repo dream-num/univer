@@ -16,8 +16,8 @@
 
 import type { DataValidationStatus, Nullable, ObjectMatrix } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { FWorksheet } from '@univerjs/sheets/facade';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { FWorksheet } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
 export interface IFWorksheetDataValidationMixin {
@@ -36,7 +36,7 @@ export interface IFWorksheetDataValidationMixin {
 export class FWorksheetDataValidationMixin extends FWorksheet implements IFWorksheetDataValidationMixin {
     override getDataValidations(): FDataValidation[] {
         const dataValidationModel = this._injector.get(DataValidationModel);
-        return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
+        return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule, this._worksheet, this._injector));
     }
 
     override getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>> {

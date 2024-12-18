@@ -17,38 +17,38 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable ts/no-explicit-any */
 
-import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
 import type { HTTPRequest } from '../request';
-
 import type { HTTPEvent } from '../response';
 import type { IHTTPImplementation } from './implementation';
+import { ILogService, type Nullable } from '@univerjs/core';
 import { Observable } from 'rxjs';
 import { HTTPHeaders } from '../headers';
 import { ErrorStatusCodeLowerBound, HTTPStatusCode, SuccessStatusCodeLowerBound } from '../http';
 import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
+import { parseFetchParamsFromRequest } from './util';
 
 /**
  * An HTTP implementation using XHR. HTTP service provided by this service could only be async (we do not support sync XHR now).
  */
 export class XHRHTTPImplementation implements IHTTPImplementation {
+    constructor(
+        @ILogService private readonly _logService: ILogService
+    ) { }
+
     send(request: HTTPRequest): Observable<HTTPEvent<any>> {
         return new Observable((observer: Observer<HTTPEvent<any>>) => {
             const xhr = new XMLHttpRequest();
-            xhr.open(request.method, request.getUrlWithParams());
+            const urlWithParams = request.getUrlWithParams();
+            const fetchParams = parseFetchParamsFromRequest(request);
+
+            xhr.open(request.method, urlWithParams);
             if (request.withCredentials) {
                 xhr.withCredentials = true;
             }
 
-            // set default HTTP headers
-
-            request.headers.forEach((key, value) => xhr.setRequestHeader(key, value.join(',')));
-            if (!request.headers.has('Accept')) {
-                xhr.setRequestHeader('Accept', 'application/json, text/plain, */*');
-            }
-
-            if (!request.headers.has('Content-Type')) {
-                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            if (fetchParams.headers) {
+                Object.entries(fetchParams.headers).forEach(([key, value]) => xhr.setRequestHeader(key, value));
             }
 
             let responseHeader: Nullable<ResponseHeader>;
@@ -135,6 +135,8 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
 
             const body = request.getBody();
             xhr.send(body);
+
+            this._logService.debug(`[XHRHTTPImplementation]: sending request to url ${urlWithParams} with params ${fetchParams}`);
 
             // Abort the request if the subscription is disposed before the request completes.
             return () => {

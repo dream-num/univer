@@ -15,6 +15,11 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     ICommandService,
@@ -22,11 +27,6 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
-
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
@@ -43,7 +43,7 @@ export interface IRemoveSheetCommandParams {
 export const RemoveSheetCommand: ICommand = {
     id: 'sheet.command.remove-sheet',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params?: IRemoveSheetCommandParams) => {
+    handler: (accessor: IAccessor, params?: IRemoveSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

@@ -50,12 +50,19 @@ export interface IRemoveRowColCommandInterceptParams extends IRemoveRowColComman
     ranges?: IRange[];
 }
 
-export const RemoveRowCommandId = 'sheet.command.remove-row';
 export interface IRemoveRowByRangeCommandParams {
     range: IRange;
     unitId: string;
     subUnitId: string;
 }
+
+export interface IRemoveColByRangeCommandParams {
+    range: IRange;
+    unitId: string;
+    subUnitId: string;
+}
+
+export const RemoveRowCommandId = 'sheet.command.remove-row';
 
 export const RemoveRowByRangeCommand: ICommand<IRemoveRowByRangeCommandParams> = {
     type: CommandType.COMMAND,
@@ -171,12 +178,6 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 };
 
 export const RemoveColCommandId = 'sheet.command.remove-col';
-
-export interface IRemoveColByRangeCommandParams {
-    range: IRange;
-    unitId: string;
-    subUnitId: string;
-}
 
 export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> = {
     type: CommandType.COMMAND,

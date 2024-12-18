@@ -68,7 +68,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
-    handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
+    handler: <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
@@ -454,7 +454,7 @@ export interface ISetVerticalTextAlignCommandParams extends ISetStyleCommonParam
 export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-vertical-text-align',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -481,7 +481,7 @@ export interface ISetHorizontalTextAlignCommandParams extends ISetStyleCommonPar
 export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-horizontal-text-align',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -508,7 +508,7 @@ export interface ISetTextWrapCommandParams extends ISetStyleCommonParams {
 export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-wrap',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }

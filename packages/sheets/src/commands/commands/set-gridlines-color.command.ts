@@ -28,7 +28,7 @@ export interface ISetGridlinesColorCommandParams {
 export const SetGridlinesColorCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-gridlines-color',
-    handler: async (accessor: IAccessor, params?: ISetGridlinesColorCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetGridlinesColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

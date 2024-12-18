@@ -20,7 +20,7 @@ import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -127,12 +127,12 @@ export class FWorksheet extends FBase {
     /**
      * Set the default style of the worksheet
      * @param {StyleDataInfo} style default style
-     * @returns {Promise<FWorksheet>} This sheet, for chaining.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
-    async setDefaultStyle(style: string): Promise<FWorksheet> {
+    setDefaultStyle(style: string): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        await this._commandService.executeCommand(SetWorksheetDefaultStyleMutation.id, {
+        this._commandService.syncExecuteCommand(SetWorksheetDefaultStyleMutation.id, {
             unitId,
             subUnitId,
             defaultStyle: style,
@@ -145,9 +145,9 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet row
      * @param {number} index The row index
      * @param {string | Nullable<IStyleData>} style The style name or style data
-     * @returns {Promise<FWorksheet>} This sheet, for chaining.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
-    async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+    setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -161,7 +161,7 @@ export class FWorksheet extends FBase {
             },
         };
 
-        await this._commandService.executeCommand(SetColDataCommand.id, params);
+        this._commandService.syncExecuteCommand(SetColDataCommand.id, params);
         return this;
     }
 
@@ -169,9 +169,9 @@ export class FWorksheet extends FBase {
      * Set the default style of the worksheet column
      * @param {number} index The column index
      * @param {string | Nullable<IStyleData>} style The style name or style data
-     * @returns {Promise<FWorksheet>} This sheet, for chaining.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
-    async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+    setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -185,7 +185,7 @@ export class FWorksheet extends FBase {
             },
         };
 
-        await this._commandService.executeCommand(SetRowDataCommand.id, params);
+        this._commandService.syncExecuteCommand(SetRowDataCommand.id, params);
         return this;
     }
 
@@ -286,7 +286,7 @@ export class FWorksheet extends FBase {
      * @param afterPosition The row after which the new row should be added, starting at 0 for the first row.
      * @returns This sheet, for chaining.
      */
-    async insertRowAfter(afterPosition: number): Promise<FWorksheet> {
+    insertRowAfter(afterPosition: number): FWorksheet {
         return this.insertRowsAfter(afterPosition, 1);
     }
 
@@ -295,7 +295,7 @@ export class FWorksheet extends FBase {
      * @param beforePosition The row before which the new row should be added, starting at 0 for the first row.
      * @returns This sheet, for chaining.
      */
-    async insertRowBefore(beforePosition: number): Promise<FWorksheet> {
+    insertRowBefore(beforePosition: number): FWorksheet {
         return this.insertRowsBefore(beforePosition, 1);
     }
 
@@ -305,7 +305,7 @@ export class FWorksheet extends FBase {
      * @param numRows The number of rows to insert.
      * @returns This sheet, for chaining.
      */
-    async insertRows(rowIndex: number, numRows: number = 1): Promise<FWorksheet> {
+    insertRows(rowIndex: number, numRows: number = 1): FWorksheet {
         return this.insertRowsBefore(rowIndex, numRows);
     }
 
@@ -315,7 +315,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of rows to insert.
      * @returns This sheet, for chaining.
      */
-    async insertRowsAfter(afterPosition: number, howMany: number): Promise<FWorksheet> {
+    insertRowsAfter(afterPosition: number, howMany: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.DOWN;
@@ -328,7 +328,7 @@ export class FWorksheet extends FBase {
         // copy styles of the row below
         const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, true, afterPosition);
 
-        await this._commandService.executeCommand(InsertRowCommand.id, {
+        this._commandService.syncExecuteCommand(InsertRowByRangeCommand.id, {
             unitId,
             subUnitId,
             direction,
@@ -350,7 +350,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of rows to insert.
      * @returns This sheet, for chaining.
      */
-    async insertRowsBefore(beforePosition: number, howMany: number): Promise<FWorksheet> {
+    insertRowsBefore(beforePosition: number, howMany: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.UP;
@@ -363,7 +363,7 @@ export class FWorksheet extends FBase {
         // copy styles of the row above
         const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, true, beforePosition - 1);
 
-        await this._commandService.executeCommand(InsertRowCommand.id, {
+        this._commandService.syncExecuteCommand(InsertRowByRangeCommand.id, {
             unitId,
             subUnitId,
             direction,
@@ -384,7 +384,7 @@ export class FWorksheet extends FBase {
      * @param rowPosition The position of the row, starting at 0 for the first row.
      * @returns This sheet, for chaining.
      */
-    async deleteRow(rowPosition: number): Promise<FWorksheet> {
+    deleteRow(rowPosition: number): FWorksheet {
         return this.deleteRows(rowPosition, 1);
     }
 
@@ -394,7 +394,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of rows to delete.
      * @returns This sheet, for chaining.
      */
-    async deleteRows(rowPosition: number, howMany: number): Promise<FWorksheet> {
+    deleteRows(rowPosition: number, howMany: number): FWorksheet {
         const range = {
             startRow: rowPosition,
             endRow: rowPosition + howMany - 1,
@@ -402,8 +402,10 @@ export class FWorksheet extends FBase {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
-        await this._commandService.executeCommand(RemoveRowCommand.id, {
+        this._commandService.syncExecuteCommand(RemoveRowCommand.id, {
             range,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
         });
 
         return this;
@@ -415,7 +417,7 @@ export class FWorksheet extends FBase {
      * @param destinationIndex The index that the rows should be moved to. Note that this index is based on the coordinates before the rows are moved. Existing data is shifted down to make room for the moved rows while the source rows are removed from the grid. Therefore, the data may end up at a different index than originally specified. Use 0-index for this method.
      * @returns This sheet, for chaining.
      */
-    async moveRows(rowSpec: FRange, destinationIndex: number): Promise<FWorksheet> {
+    moveRows(rowSpec: FRange, destinationIndex: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToRowRange(rowSpec.getRange(), this._worksheet);
@@ -427,7 +429,7 @@ export class FWorksheet extends FBase {
             endColumn: range.endColumn,
         };
 
-        await this._commandService.executeCommand(MoveRowsCommand.id, {
+        this._commandService.syncExecuteCommand(MoveRowsCommand.id, {
             unitId,
             subUnitId,
             range,
@@ -443,12 +445,12 @@ export class FWorksheet extends FBase {
      * @param row The row range to hide.
      * @returns This sheet, for chaining.
      */
-    async hideRow(row: FRange): Promise<FWorksheet> {
+    hideRow(row: FRange): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToRowRange(row.getRange(), this._worksheet);
 
-        await this._commandService.executeCommand(SetRowHiddenCommand.id, {
+        this._commandService.syncExecuteCommand(SetRowHiddenCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -463,7 +465,7 @@ export class FWorksheet extends FBase {
      * @param numRows The number of rows to hide.
      * @returns This sheet, for chaining.
      */
-    async hideRows(rowIndex: number, numRows: number = 1): Promise<FWorksheet> {
+    hideRows(rowIndex: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
@@ -474,7 +476,7 @@ export class FWorksheet extends FBase {
             rangeType: RANGE_TYPE.ROW,
         };
 
-        await this._commandService.executeCommand(SetRowHiddenCommand.id, {
+        this._commandService.syncExecuteCommand(SetRowHiddenCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -487,12 +489,12 @@ export class FWorksheet extends FBase {
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
-    async unhideRow(row: FRange): Promise<FWorksheet> {
+    unhideRow(row: FRange): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToRowRange(row.getRange(), this._worksheet);
 
-        await this._commandService.executeCommand(SetSpecificRowsVisibleCommand.id, {
+        this._commandService.syncExecuteCommand(SetSpecificRowsVisibleCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -507,7 +509,7 @@ export class FWorksheet extends FBase {
      * @param numRows The number of rows to unhide.
      * @returns This sheet, for chaining.
      */
-    async showRows(rowIndex: number, numRows: number = 1): Promise<FWorksheet> {
+    showRows(rowIndex: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
@@ -518,7 +520,7 @@ export class FWorksheet extends FBase {
             rangeType: RANGE_TYPE.ROW,
         };
 
-        await this._commandService.executeCommand(SetSpecificRowsVisibleCommand.id, {
+        this._commandService.syncExecuteCommand(SetSpecificRowsVisibleCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -533,7 +535,7 @@ export class FWorksheet extends FBase {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    async setRowHeight(rowPosition: number, height: number): Promise<FWorksheet> {
+    setRowHeight(rowPosition: number, height: number): FWorksheet {
         return this.setRowHeights(rowPosition, 1, height);
     }
 
@@ -544,7 +546,7 @@ export class FWorksheet extends FBase {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    async setRowHeights(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
+    setRowHeights(startRow: number, numRows: number, height: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const rowManager = this._worksheet.getRowManager();
@@ -570,7 +572,7 @@ export class FWorksheet extends FBase {
         }
 
         if (rowHeightRanges.length > 0) {
-            await this._commandService.executeCommand(SetRowHeightCommand.id, {
+            this._commandService.syncExecuteCommand(SetRowHeightCommand.id, {
                 unitId,
                 subUnitId,
                 ranges: rowHeightRanges,
@@ -579,7 +581,7 @@ export class FWorksheet extends FBase {
         }
 
         if (autoHeightRanges.length > 0) {
-            await this._commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id, {
+            this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
                 unitId,
                 subUnitId,
                 ranges: autoHeightRanges,
@@ -596,7 +598,7 @@ export class FWorksheet extends FBase {
      * @param height The height in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    async setRowHeightsForced(startRow: number, numRows: number, height: number): Promise<FWorksheet> {
+    setRowHeightsForced(startRow: number, numRows: number, height: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [
@@ -608,7 +610,7 @@ export class FWorksheet extends FBase {
             },
         ];
 
-        await this._commandService.executeCommand(SetRowHeightCommand.id, {
+        this._commandService.syncExecuteCommand(SetRowHeightCommand.id, {
             unitId,
             subUnitId,
             ranges,
@@ -625,7 +627,7 @@ export class FWorksheet extends FBase {
      * @param custom The custom properties to set.
      * @returns This sheet, for chaining.
      */
-    async setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+    setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -642,7 +644,7 @@ export class FWorksheet extends FBase {
             rowData,
         };
 
-        await this._commandService.executeCommand(SetRowDataCommand.id, params);
+        this._commandService.syncExecuteCommand(SetRowDataCommand.id, params);
 
         return this;
     }
@@ -654,7 +656,7 @@ export class FWorksheet extends FBase {
      * @param afterPosition The column after which the new column should be added, starting at 0 for the first column.
      * @returns This sheet, for chaining.
      */
-    async insertColumnAfter(afterPosition: number): Promise<FWorksheet> {
+    insertColumnAfter(afterPosition: number): FWorksheet {
         return this.insertColumnsAfter(afterPosition, 1);
     }
 
@@ -663,7 +665,7 @@ export class FWorksheet extends FBase {
      * @param beforePosition The column before which the new column should be added, starting at 0 for the first column.
      * @returns This sheet, for chaining.
      */
-    async insertColumnBefore(beforePosition: number): Promise<FWorksheet> {
+    insertColumnBefore(beforePosition: number): FWorksheet {
         return this.insertColumnsBefore(beforePosition, 1);
     }
 
@@ -673,7 +675,7 @@ export class FWorksheet extends FBase {
      * @param numColumns The number of columns to insert.
      * @returns This sheet, for chaining.
      */
-    async insertColumns(columnIndex: number, numColumns: number = 1): Promise<FWorksheet> {
+    insertColumns(columnIndex: number, numColumns: number = 1): FWorksheet {
         return this.insertColumnsBefore(columnIndex, numColumns);
     }
 
@@ -683,7 +685,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of columns to insert.
      * @returns This sheet, for chaining.
      */
-    async insertColumnsAfter(afterPosition: number, howMany: number): Promise<FWorksheet> {
+    insertColumnsAfter(afterPosition: number, howMany: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.RIGHT;
@@ -696,7 +698,7 @@ export class FWorksheet extends FBase {
         // copy styles of the column to the right
         const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, false, afterPosition);
 
-        await this._commandService.executeCommand(InsertColCommand.id, {
+        this._commandService.syncExecuteCommand(InsertColByRangeCommand.id, {
             unitId,
             subUnitId,
             direction,
@@ -718,7 +720,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of columns to insert.
      * @returns This sheet, for chaining.
      */
-    async insertColumnsBefore(beforePosition: number, howMany: number): Promise<FWorksheet> {
+    insertColumnsBefore(beforePosition: number, howMany: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const direction = Direction.LEFT;
@@ -731,7 +733,7 @@ export class FWorksheet extends FBase {
         // copy styles of the column to the left
         const cellValue = copyRangeStyles(this._worksheet, startRow, endRow, startColumn, endColumn, false, beforePosition - 1);
 
-        await this._commandService.executeCommand(InsertColCommand.id, {
+        this._commandService.syncExecuteCommand(InsertColByRangeCommand.id, {
             unitId,
             subUnitId,
             direction,
@@ -752,7 +754,7 @@ export class FWorksheet extends FBase {
      * @param columnPosition The position of the column, starting at 0 for the first column.
      * @returns This sheet, for chaining.
      */
-    async deleteColumn(columnPosition: number): Promise<FWorksheet> {
+    deleteColumn(columnPosition: number): FWorksheet {
         return this.deleteColumns(columnPosition, 1);
     }
 
@@ -762,7 +764,7 @@ export class FWorksheet extends FBase {
      * @param howMany The number of columns to delete.
      * @returns This sheet, for chaining.
      */
-    async deleteColumns(columnPosition: number, howMany: number): Promise<FWorksheet> {
+    deleteColumns(columnPosition: number, howMany: number): FWorksheet {
         const range = {
             startRow: 0,
             endRow: this._worksheet.getRowCount() - 1,
@@ -770,8 +772,10 @@ export class FWorksheet extends FBase {
             endColumn: columnPosition + howMany - 1,
         };
 
-        await this._commandService.executeCommand(RemoveColCommand.id, {
+        this._commandService.syncExecuteCommand(RemoveColCommand.id, {
             range,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
         });
 
         return this;
@@ -783,7 +787,7 @@ export class FWorksheet extends FBase {
      * @param destinationIndex The index that the columns should be moved to. Note that this index is based on the coordinates before the columns are moved. Existing data is shifted right to make room for the moved columns while the source columns are removed from the grid. Therefore, the data may end up at a different index than originally specified. Use 0-index for this method.
      * @returns This sheet, for chaining.
      */
-    async moveColumns(columnSpec: FRange, destinationIndex: number): Promise<FWorksheet> {
+    moveColumns(columnSpec: FRange, destinationIndex: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToColRange(columnSpec.getRange(), this._worksheet);
@@ -795,7 +799,7 @@ export class FWorksheet extends FBase {
             endColumn: destinationIndex,
         };
 
-        await this._commandService.executeCommand(MoveColsCommand.id, {
+        this._commandService.syncExecuteCommand(MoveColsCommand.id, {
             unitId,
             subUnitId,
             range,
@@ -811,12 +815,12 @@ export class FWorksheet extends FBase {
      * @param column The column range to hide.
      * @returns This sheet, for chaining.
      */
-    async hideColumn(column: FRange): Promise<FWorksheet> {
+    hideColumn(column: FRange): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToColRange(column.getRange(), this._worksheet);
 
-        await this._commandService.executeCommand(SetColHiddenCommand.id, {
+        this._commandService.syncExecuteCommand(SetColHiddenCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -831,7 +835,7 @@ export class FWorksheet extends FBase {
      * @param numColumns The number of columns to hide.
      * @returns This sheet, for chaining.
      */
-    async hideColumns(columnIndex: number, numColumns: number = 1): Promise<FWorksheet> {
+    hideColumns(columnIndex: number, numColumns: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
@@ -842,7 +846,7 @@ export class FWorksheet extends FBase {
             rangeType: RANGE_TYPE.COLUMN,
         };
 
-        await this._commandService.executeCommand(SetColHiddenCommand.id, {
+        this._commandService.syncExecuteCommand(SetColHiddenCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -856,12 +860,12 @@ export class FWorksheet extends FBase {
      * @param column The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
-    async unhideColumn(column: FRange): Promise<FWorksheet> {
+    unhideColumn(column: FRange): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range = covertToColRange(column.getRange(), this._worksheet);
 
-        await this._commandService.executeCommand(SetSpecificColsVisibleCommand.id, {
+        this._commandService.syncExecuteCommand(SetSpecificColsVisibleCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -876,7 +880,7 @@ export class FWorksheet extends FBase {
      * @param numColumns The number of columns to unhide.
      * @returns This sheet, for chaining.
      */
-    async showColumns(columnIndex: number, numColumns: number = 1): Promise<FWorksheet> {
+    showColumns(columnIndex: number, numColumns: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const range: IRange = {
@@ -887,7 +891,7 @@ export class FWorksheet extends FBase {
             rangeType: RANGE_TYPE.COLUMN,
         };
 
-        await this._commandService.executeCommand(SetSpecificColsVisibleCommand.id, {
+        this._commandService.syncExecuteCommand(SetSpecificColsVisibleCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
@@ -902,7 +906,7 @@ export class FWorksheet extends FBase {
      * @param width The width in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    async setColumnWidth(columnPosition: number, width: number): Promise<FWorksheet> {
+    setColumnWidth(columnPosition: number, width: number): FWorksheet {
         return this.setColumnWidths(columnPosition, 1, width);
     }
 
@@ -913,7 +917,7 @@ export class FWorksheet extends FBase {
      * @param width The width in pixels to set it to.
      * @returns This sheet, for chaining.
      */
-    async setColumnWidths(startColumn: number, numColumns: number, width: number): Promise<FWorksheet> {
+    setColumnWidths(startColumn: number, numColumns: number, width: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const ranges = [
@@ -925,7 +929,7 @@ export class FWorksheet extends FBase {
             },
         ];
 
-        await this._commandService.executeCommand(SetColWidthCommand.id, {
+        this._commandService.syncExecuteCommand(SetColWidthCommand.id, {
             unitId,
             subUnitId,
             ranges,
@@ -942,7 +946,7 @@ export class FWorksheet extends FBase {
      * @param custom The custom properties to set.
      * @returns This sheet, for chaining.
      */
-    async setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+    setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
@@ -959,7 +963,7 @@ export class FWorksheet extends FBase {
             columnData,
         };
 
-        await this._commandService.executeCommand(SetColDataCommand.id, params);
+        this._commandService.syncExecuteCommand(SetColDataCommand.id, params);
 
         return this;
     }
@@ -1027,25 +1031,28 @@ export class FWorksheet extends FBase {
      * @deprecated use `setFrozenRows` and `setFrozenColumns` instead.
      * @returns True if the command was successful, false otherwise.
      */
-    setFreeze(freeze: IFreeze): boolean {
+    setFreeze(freeze: IFreeze): FWorksheet {
         this._logService.warn('setFreeze is deprecated, use setFrozenRows and setFrozenColumns instead');
-        return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+        this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
             ...freeze,
             unitId: this._workbook.getUnitId(),
             subUnitId: this.getSheetId(),
         });
+
+        return this;
     }
 
     /**
      * Cancels the frozen state of the current sheet.
      * @returns True if the command was successful, false otherwise.
      */
-    cancelFreeze(): boolean {
-        // TODO: this command should not be implemented in sheets-ui package
-        return this._commandService.syncExecuteCommand(CancelFrozenCommand.id, {
+    cancelFreeze(): FWorksheet {
+        this._commandService.syncExecuteCommand(CancelFrozenCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this.getSheetId(),
         });
+
+        return this;
     }
 
     /**
@@ -1079,8 +1086,8 @@ export class FWorksheet extends FBase {
      * @param startColumn
      * @param endColumn
      */
-    setFrozenColumns(startColumn: number, endColumn: number): void;
-    setFrozenColumns(...args: [number] | [number, number]): void {
+    setFrozenColumns(startColumn: number, endColumn: number): FWorksheet;
+    setFrozenColumns(...args: [number] | [number, number]): FWorksheet {
         const freezeCfg = this.getFreeze();
         if (arguments.length === 1) {
             const columns = args[0];
@@ -1103,6 +1110,8 @@ export class FWorksheet extends FBase {
                 subUnitId: this.getSheetId(),
             });
         }
+
+        return this;
     }
 
     /**
@@ -1127,8 +1136,8 @@ export class FWorksheet extends FBase {
      * fWorkSheet.setFrozenRows(0, 2);
      * ```
      */
-    setFrozenRows(startColumn: number, endColumn: number): void;
-    setFrozenRows(...args: [number] | [number, number]): void {
+    setFrozenRows(startColumn: number, endColumn: number): FWorksheet;
+    setFrozenRows(...args: [number] | [number, number]): FWorksheet {
         const freezeCfg = this.getFreeze();
         if (arguments.length === 1) {
             const rows = args[0];
@@ -1142,7 +1151,6 @@ export class FWorksheet extends FBase {
             if (startRow > endRow) {
                 [startRow, endRow] = [endRow, startRow];
             }
-            this._commandService.syncExecuteCommand;
             this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
                 startRow: endRow + 1,
                 ySplit: endRow - startRow + 1,
@@ -1152,6 +1160,8 @@ export class FWorksheet extends FBase {
                 subUnitId: this.getSheetId(),
             });
         }
+
+        return this;
     }
 
     /**
@@ -1230,12 +1240,14 @@ export class FWorksheet extends FBase {
      * fWorkSheet.setHiddenGridlines(true);
      * ```
      */
-    setHiddenGridlines(hidden: boolean): Promise<boolean> {
-        return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
+    setHiddenGridlines(hidden: boolean): FWorksheet {
+        this._commandService.executeCommand(ToggleGridlinesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
         } as IToggleGridlinesCommandParams);
+
+        return this;
     }
 
     /**
@@ -1250,12 +1262,14 @@ export class FWorksheet extends FBase {
      * fWorkSheet.setGridLinesColor('#ff0000');
      * ```
      */
-    setGridLinesColor(color: string | undefined): Promise<boolean> {
-        return this._commandService.executeCommand(SetGridlinesColorCommand.id, {
+    setGridLinesColor(color: string | undefined): FWorksheet {
+        this._commandService.syncExecuteCommand(SetGridlinesColorCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             color,
         } as ISetGridlinesColorCommandParams);
+
+        return this;
     }
 
     /**
@@ -1278,12 +1292,13 @@ export class FWorksheet extends FBase {
      * fWorkSheet.setTabColor('#ff0000');
      * ```
      */
-    setTabColor(color: string): Promise<boolean> {
-        return this._commandService.executeCommand(SetTabColorCommand.id, {
+    setTabColor(color: string): FWorksheet {
+        this._commandService.executeCommand(SetTabColorCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             color,
         });
+        return this;
     }
 
     /**
@@ -1372,7 +1387,7 @@ export class FWorksheet extends FBase {
      * fWorkSheet.hideSheet();
      * ``
      */
-    hideSheet(): void {
+    hideSheet(): FWorksheet {
         const commandService = this._injector.get(ICommandService);
         const workbook = this._workbook;
         const sheets = workbook.getSheets();
@@ -1381,10 +1396,12 @@ export class FWorksheet extends FBase {
             throw new Error('Cannot hide the only visible sheet');
         }
 
-        commandService.executeCommand(SetWorksheetHideCommand.id, {
+        commandService.syncExecuteCommand(SetWorksheetHideCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
         });
+
+        return this;
     }
 
     /**
@@ -1398,12 +1415,14 @@ export class FWorksheet extends FBase {
      * fWorkSheets[fWorkSheets.length - 1].showSheet();
      * ```
      */
-    showSheet(): Promise<boolean> {
+    showSheet(): FWorksheet {
         const commandService = this._injector.get(ICommandService);
-        return commandService.executeCommand(SetWorksheetShowCommand.id, {
+        commandService.syncExecuteCommand(SetWorksheetShowCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
         });
+
+        return this;
     }
 
     /**
@@ -1426,12 +1445,14 @@ export class FWorksheet extends FBase {
      * fWorkSheet.setName('Sheet1');
      * ```
      */
-    setName(name: string): Promise<boolean> {
-        return this._commandService.executeCommand(SetWorksheetNameCommand.id, {
+    setName(name: string): FWorksheet {
+        this._commandService.syncExecuteCommand(SetWorksheetNameCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             name,
         });
+
+        return this;
     }
 
     /**
@@ -1475,7 +1496,7 @@ export class FWorksheet extends FBase {
      * fWorkSheet.clear({ contentsOnly: true });
      * ```
      */
-    clear(options?: IFacadeClearOptions): Promise<boolean> {
+    clear(options?: IFacadeClearOptions): FWorksheet {
         if (options && options.contentsOnly && !options.formatOnly) {
             return this.clearContents();
         }
@@ -1495,12 +1516,14 @@ export class FWorksheet extends FBase {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
-        return commandService.executeCommand(ClearSelectionAllCommand.id, {
+        commandService.syncExecuteCommand(ClearSelectionAllCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
             options,
         });
+
+        return this;
     }
 
     /**
@@ -1514,7 +1537,7 @@ export class FWorksheet extends FBase {
      * fWorkSheet.clearContents();
      * ```
      */
-    clearContents(): Promise<boolean> {
+    clearContents(): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const commandService = this._injector.get(ICommandService);
@@ -1526,11 +1549,13 @@ export class FWorksheet extends FBase {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
-        return commandService.executeCommand(ClearSelectionContentCommand.id, {
+        commandService.syncExecuteCommand(ClearSelectionContentCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
         });
+
+        return this;
     }
 
     /**
@@ -1544,7 +1569,7 @@ export class FWorksheet extends FBase {
      * fWorkSheet.clearFormats();
      * ```
      */
-    clearFormats(): Promise<boolean> {
+    clearFormats(): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const commandService = this._injector.get(ICommandService);
@@ -1556,11 +1581,13 @@ export class FWorksheet extends FBase {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
-        return commandService.executeCommand(ClearSelectionFormatCommand.id, {
+        commandService.syncExecuteCommand(ClearSelectionFormatCommand.id, {
             unitId,
             subUnitId,
             ranges: [range],
         });
+
+        return this;
     }
 
     /**

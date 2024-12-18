@@ -295,7 +295,7 @@ export interface ISetWorksheetRowIsAutoHeightCommandParams {
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

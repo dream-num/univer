@@ -218,9 +218,11 @@ export {
     type IInsertRowCommandParams,
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from './commands/commands/insert-row-col.command';
 export { type IInsertSheetCommandParams, InsertSheetCommand } from './commands/commands/insert-sheet.command';
@@ -232,7 +234,7 @@ export {
     MoveRowsCommand,
 } from './commands/commands/move-rows-cols.command';
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
-export { type IRemoveRowColCommandInterceptParams, type IRemoveRowColCommandParams, RemoveColCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
+export { type IRemoveColByRangeCommandParams, type IRemoveRowByRangeCommandParams, type IRemoveRowColCommandInterceptParams, type IRemoveRowColCommandParams, RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
 export { type IRemoveSheetCommandParams, RemoveSheetCommand } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export { type IReorderRangeCommandParams, ReorderRangeCommand } from './commands/commands/reorder-range.command';

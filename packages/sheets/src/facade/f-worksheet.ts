@@ -1253,7 +1253,7 @@ export class FWorksheet extends FBase {
     /**
      * Set the color of the gridlines in the sheet.
      * @param {string|undefined} color The color to set for the gridlines.Undefined or null to reset to the default color.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1283,7 +1283,7 @@ export class FWorksheet extends FBase {
     /**
      * Sets the sheet tab color.
      * @param {string|null|undefined} color A color code in CSS notation (like '#ffffff' or 'white'), or null to reset the tab color.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1406,7 +1406,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Shows this sheet. Has no effect if the sheet is already visible.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1436,7 +1436,7 @@ export class FWorksheet extends FBase {
     /**
      * Sets the sheet name.
      * @param {string} name The new name for the sheet.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1485,7 +1485,7 @@ export class FWorksheet extends FBase {
      * @param {IFacadeClearOptions} [options] Options for clearing the sheet. If not provided, the contents and formatting are cleared both.
      * @param {boolean} [options.contentsOnly] If true, the contents of the sheet are cleared. If false, the contents and formatting are cleared. Default is false.
      * @param {boolean} [options.formatOnly] If true, the formatting of the sheet is cleared. If false, the contents and formatting are cleared. Default is false.
-     * @returns  {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1528,7 +1528,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Clears the sheet of contents, while preserving formatting information.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1560,7 +1560,7 @@ export class FWorksheet extends FBase {
 
     /**
      * Clears the sheet of formatting, while preserving contents.
-     * @returns {Promise<boolean>} True if the command was successful, false otherwise.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

@@ -217,7 +217,7 @@ exports.specPreset = () => {
 
 exports.jsdocPreset = () => {
     return {
-        files: ['**/*.{ts,tsx}'],
+        files: ['**/facade/*.{ts,tsx}'],
         rules: {
             ...jsdoc.configs.recommended.rules,
         },

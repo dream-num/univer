@@ -15,6 +15,9 @@
  */
 
 import type {
+    ICellInfo,
+    ICellWithCoord,
+    IPosition,
     IRange,
     IRangeWithCoord,
     IScale,
@@ -488,6 +491,125 @@ export function getScale(parentScale: IScale) {
     return Math.max(scaleX, scaleY);
 }
 
+export function getCellPositionByIndex(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[]
+): IPosition {
+    const startRow = row - 1;
+    const startColumn = column - 1;
+
+    const startY = rowHeightAccumulation[startRow] || 0;
+    let endY = rowHeightAccumulation[row];
+
+    if (endY == null) {
+        endY = rowHeightAccumulation[rowHeightAccumulation.length - 1];
+    }
+
+    const startX = columnWidthAccumulation[startColumn] || 0;
+    let endX = columnWidthAccumulation[column];
+
+    if (endX == null) {
+        endX = columnWidthAccumulation[columnWidthAccumulation.length - 1];
+    }
+
+    return {
+        startY,
+        endY,
+        startX,
+        endX,
+    };
+}
+
+/**
+ * @description Get the cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
+ * @param {number} row The row index of the cell
+ * @param {number} column The column index of the cell
+ * @param {number[]} rowHeightAccumulation The accumulated height of each row
+ * @param {number[]} columnWidthAccumulation The accumulated width of each column
+ * @param {ICellInfo} mergeDataInfo The merge information of the cell
+ * @returns {ICellWithCoord} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
+ */
+export function getCellWithCoordByIndexCore(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[],
+    mergeDataInfo: ICellInfo
+): ICellWithCoord {
+    row = Tools.clamp(row, 0, rowHeightAccumulation.length - 1);
+    column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
+    // eslint-disable-next-line prefer-const
+    let { startY, endY, startX, endX } = getCellPositionByIndex(
+        row,
+        column,
+        rowHeightAccumulation,
+        columnWidthAccumulation
+    );
+
+    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeDataInfo;
+
+    let mergeInfo = {
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+
+        startY: 0,
+        endY: 0,
+        startX: 0,
+        endX: 0,
+    };
+
+    const rowAccumulationCount = rowHeightAccumulation.length - 1;
+    const columnAccumulationCount = columnWidthAccumulation.length - 1;
+
+    if (isMerged && startRow !== -1 && startColumn !== -1) {
+        const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
+
+        const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
+        mergeInfo = {
+            ...mergeInfo,
+            startY: mergeStartY,
+            endY: mergeEndY,
+            startX: mergeStartX,
+            endX: mergeEndX,
+        };
+    } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
+
+        mergeInfo = {
+            ...mergeInfo,
+            startY,
+            endY: mergeEndY,
+            startX,
+            endX: mergeEndX,
+        };
+    }
+
+    return {
+        isMerged,
+        isMergedMainCell,
+        actualRow: row,
+        actualColumn: column,
+        startY,
+        endY,
+        startX,
+        endX,
+        mergeInfo,
+    };
+}
+
+/**
+ * @deprecated please use getCellWithCoordByIndexCore instead
+ */
+const getCellByIndexWithMergeInfo = getCellWithCoordByIndexCore;
+export { getCellByIndexWithMergeInfo };
+
 /**
  * Determine whether there are any cells in a row that are not in the merged cells, mainly used for the calculation of auto height
  * @deprecated please use SpreadsheetSkeleton@_hasUnMergedCellInRow
@@ -584,13 +706,13 @@ export function pixelToPt(px: number) {
 }
 
 /**
- * 当前单元格在任意一个 viewRanges 中
+ * Is cell in view ranges.
  * @param ranges
  * @param rowIndex
  * @param colIndex
- * @returns
+ * @returns boolean
  */
-export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number) {
+export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number): boolean {
     for (const range of ranges) {
         if (rowIndex >= range.startRow && rowIndex <= range.endRow &&
             colIndex >= range.startColumn && colIndex <= range.endColumn) {
@@ -598,36 +720,6 @@ export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: numbe
         }
     }
     return false;
-}
-
-/**
- * 在非下方区域中
- * @param ranges
- * @param rowIndex
- */
-export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) {
-    for (const range of ranges) {
-        if (rowIndex > range.endRow) {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * row 在任意一个 Range 中
- * @param ranges
- * @param rowIndex
- */
-export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
-    let flag = false;
-    for (const range of ranges) {
-        if (rowIndex >= range.startRow && rowIndex <= range.endRow) {
-            flag = true;
-            break;
-        }
-    }
-    return flag;
 }
 
 /**
@@ -656,7 +748,9 @@ export function clampRange(range: IRange, maxRow: number, maxColumn: number) {
     };
 }
 
-// Get system highlight color in rgb format.
+/**
+ * Get system highlight color in rgb format.
+ */
 export function getSystemHighlightColor() {
     const hiddenEle = document.createElement('div');
     hiddenEle.style.width = '0';

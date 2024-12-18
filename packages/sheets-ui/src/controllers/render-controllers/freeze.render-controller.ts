@@ -197,7 +197,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
@@ -398,7 +398,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -469,7 +469,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         freezeObjectMainRect: Rect,
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -794,7 +794,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         xSplit: number = 0,
         resetScroll = ResetScrollType.ALL
     ) {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -1545,7 +1545,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         const position = skeleton?.getNoMergeCellWithCoordByIndex(row, column);
         if (skeleton == null) {
             return;
@@ -1566,7 +1566,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _getFreeze() {
         const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
-            .getCurrent()
+            .getCurrentParam()
             ?.skeleton
             .getWorksheetConfig();
 

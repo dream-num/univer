@@ -124,7 +124,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = renderManagerService.getRenderById(unitId)!
             .with(SheetSkeletonManagerService)
-            .getWorksheetSkeleton(subUnitId)!.skeleton;
+            .getSkeletonParam(subUnitId)!.skeleton;
         return skeleton.getCellWithCoordByIndex(this._range.startRow, this._range.startColumn);
     }
 

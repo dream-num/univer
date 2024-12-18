@@ -373,7 +373,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _getFreeze(): Nullable<IFreeze> {
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 

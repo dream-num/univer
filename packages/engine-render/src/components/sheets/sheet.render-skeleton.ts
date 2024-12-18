@@ -55,7 +55,6 @@ import {
     IContextService,
     Inject,
     Injector,
-    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     isNullCell,
     isWhiteColor,
     LocaleService,
@@ -191,18 +190,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._scene = scene;
 
         this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
-            if (param.value.scaleX !== undefined) {
-                this.scaleX = param.value.scaleX;
-            }
-            if (param.value.scaleY !== undefined) {
-                this.scaleY = param.value.scaleY;
-            }
+            this.setScale(param.value.scaleX || 1, param.value.scaleY);
         });
-
-        // const viewMain = this._scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        // if (viewMain) {
-        //     viewMain;
-        // }
     }
 
     override _updateLayout() {
@@ -606,7 +595,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /**
      * For _calculateColMaxWidth
      * @param cell
-     * @returns {number} width
+     * @returns {number} currColWidth
      */
     _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, currColWidth: number) {
         let measuredWidth = 0;
@@ -1225,7 +1214,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 horizontalAlign,
                 wrapStrategy,
                 imageCacheMap: this._imageCacheMap,
-                fontRenderExtension: cell?.fontRenderExtension,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
@@ -1408,32 +1396,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             color: rgb,
         };
     }
-}
-
-/**
- * convert canvas content position to physical position in screen
- * @param offsetX
- * @param scaleX
- * @param scrollXY
- */
-export function convertTransformToOffsetX(
-    offsetX: number,
-    scaleX: number,
-    scrollXY: { x: number; y: number }
-): number {
-    const { x: scrollX } = scrollXY;
-    return (offsetX - scrollX) * scaleX;
-}
-
-    /**
-     * Distance from top left to col
-     * @param col
-     */
-    private _offsetXToCol(col: number): number {
-        const arr = this._columnWidthAccumulation;
-        const i = Math.max(0, col - 1);
-        return arr[i];
-    }
 
     getHiddenRowsInRange(range: IRowRange) {
         const hiddenRows = [];
@@ -1454,6 +1416,36 @@ export function convertTransformToOffsetX(
         }
         return hiddenCols;
     }
+}
+
+/**
+ * convert canvas content position to physical position in screen
+ * @param offsetX
+ * @param scaleX
+ * @param scrollXY
+ */
+export function convertTransformToOffsetX(
+    offsetX: number,
+    scaleX: number,
+    scrollXY: { x: number; y: number }
+): number {
+    const { x: scrollX } = scrollXY;
+    return (offsetX - scrollX) * scaleX;
+}
+
+/**
+ * convert canvas content position to physical position in screen
+ * @param offsetY
+ * @param scaleY
+ * @param scrollXY
+ */
+export function convertTransformToOffsetY(
+    offsetY: number,
+    scaleY: number,
+    scrollXY: { x: number; y: number }
+): number {
+    const { y: scrollY } = scrollXY;
+    return (offsetY - scrollY) * scaleY;
 }
 
 /**

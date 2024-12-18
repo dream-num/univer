@@ -35,6 +35,7 @@ import type {
 } from './typedef';
 import type { Worksheet } from './worksheet';
 import { Inject, Injector } from '@wendellhu/redi';
+import { IS_ROW_STYLE_PRECEDE_COLUMN_STYLE } from '../common/const';
 import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { IConfigService } from '../services/config/config.service';
 import { IContextService } from '../services/context/context.service';
@@ -66,15 +67,10 @@ export class SheetSkeleton extends Skeleton {
     protected _renderRawFormula = false;
     protected _cellData: ObjectMatrix<Nullable<ICellData>>;
     protected _imageCacheMap: ImageCacheMap;
-
-    /** Scale of Scene */
-    scaleX: number;
-    scaleY: number;
-    /** Viewport scrolled value */
-    scrollX: number;
-    /** Viewport scrolled value */
-    scrollY: number;
-
+    /**
+     * Whether the row style precedes the column style.
+     */
+    protected _isRowStylePrecedeColumnStyle = false;
     constructor(
         readonly worksheet: Worksheet,
         protected _styles: Styles,
@@ -91,7 +87,9 @@ export class SheetSkeleton extends Skeleton {
         this.init();
     }
 
-    init() {}
+    init() {
+        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+    }
 
     _resetCache() {
         //
@@ -99,7 +97,6 @@ export class SheetSkeleton extends Skeleton {
 
     /**
      * @deprecated should never expose a property that is provided by another module!
-     * @returns
      */
     getWorksheetConfig(): IWorksheetData {
         return this._worksheetData;
@@ -121,6 +118,13 @@ export class SheetSkeleton extends Skeleton {
     private _columnWidthAccumulation: number[] = [];
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
+    /** Scale of Scene */
+    protected _scaleX: number;
+    protected _scaleY: number;
+    /** Viewport scrolled value */
+    protected _scrollX: number;
+    /** Viewport scrolled value */
+    protected _scrollY: number;
 
     get rowHeightAccumulation(): number[] {
         return this._rowHeightAccumulation;
@@ -156,18 +160,34 @@ export class SheetSkeleton extends Skeleton {
 
     setScale(value: number, valueY?: number): void {
         this._updateLayout();
-        this.scaleX = value;
-        this.scaleY = valueY || value;
+        this._scaleX = value;
+        this._scaleY = valueY || value;
         this._updateLayout();
     }
 
     setScroll(scrollX?: number, scrollY?: number) {
         if (Tools.isDefine(scrollX)) {
-            this.scrollX = scrollX;
+            this._scrollX = scrollX;
         }
         if (Tools.isDefine(scrollY)) {
-            this.scrollY = scrollY;
+            this._scrollY = scrollY;
         }
+    }
+
+    get scrollX(): number {
+        return this._scrollX;
+    }
+
+    get scrollY(): number {
+        return this._scrollY;
+    }
+
+    get scaleX(): number {
+        return this._scaleX;
+    }
+
+    get scaleY(): number {
+        return this._scaleY;
     }
 
     get rowHeaderWidthAndMarginLeft(): number {
@@ -377,8 +397,6 @@ export class SheetSkeleton extends Skeleton {
             columnCount,
             rowHeader,
             columnHeader,
-            showGridlines,
-            gridlinesColor,
         } = this._worksheetData;
 
         const { rowTotalHeight, rowHeightAccumulation } =
@@ -534,8 +552,23 @@ export class SheetSkeleton extends Skeleton {
      * @param column
      * @returns {ISelectionCell} The cell info with merge data
      */
-    protected _getCellMergeInfo(row: number, column: number): ISelectionCell {
-        return this.worksheet.getCellInfoInMergeData(row, column);
+    // protected _getCellMergeInfo(row: number, column: number): ISelectionCell {
+    //     return this.worksheet.getCellInfoInMergeData(row, column);
+    // }
+
+    /**
+     * @deprecated use getNoMergeCellWithCoordByIndex instead.
+     * @param rowIndex
+     * @param columnIndex
+     * @param header
+     * @returns
+     */
+    getNoMergeCellPositionByIndex(
+        rowIndex: number,
+        columnIndex: number,
+        header: boolean = true
+    ) {
+        return this.getNoMergeCellWithCoordByIndex(rowIndex, columnIndex, header);
     }
 
     /**
@@ -895,7 +928,6 @@ export class SheetSkeleton extends Skeleton {
      * Original name: getDecomposedOffset
      * @param offsetX
      * @param offsetY
-     * @returns
      */
     getOffsetRelativeToRowCol(
         offsetX: number,

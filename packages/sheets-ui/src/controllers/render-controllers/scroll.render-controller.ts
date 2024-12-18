@@ -126,7 +126,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 this._scrollManagerService.rawScrollInfo$.subscribe((rawScrollInfo: Nullable<IScrollState>) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                     if (!skeleton) return;
 
                     if (rawScrollInfo == null) {
@@ -159,7 +159,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || scrollAfterParam.isTrigger === false) {
                     return;
                 }
@@ -208,7 +208,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             // get scrollByBar event from viewport and exec ScrollCommand.id.
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || param.isTrigger === false) {
                     return;
                 }
@@ -376,7 +376,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
         if (snapshot == null) {
             return;
         }
@@ -477,7 +477,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -499,7 +499,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();

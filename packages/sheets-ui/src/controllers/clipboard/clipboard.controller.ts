@@ -553,7 +553,7 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
-        const currentSkeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent();
+        const currentSkeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam();
         if (currentSkeleton == null) {
             return null;
         }

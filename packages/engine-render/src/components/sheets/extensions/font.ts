@@ -23,14 +23,13 @@ import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
-import { getDocsSkeletonPageSize } from '../sheet-skeleton';
+import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -139,6 +138,7 @@ export class Font extends SheetExtension {
 
             Range.foreach(range, (row, col) => {
                 const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
+                // put all merged cells to another pass to render. -1 means not merged.
                 if (index !== -1) {
                     return;
                 }

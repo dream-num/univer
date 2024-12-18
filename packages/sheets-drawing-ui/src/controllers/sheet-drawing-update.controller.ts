@@ -57,7 +57,7 @@ export function getDrawingSizeByCell(
         return false;
     }
     const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-    const skeleton = skeletonManagerService.getWorksheetSkeleton(location.subUnitId)?.skeleton;
+    const skeleton = skeletonManagerService.getSkeletonParam(location.subUnitId)?.skeleton;
     if (skeleton == null) {
         return false;
     }

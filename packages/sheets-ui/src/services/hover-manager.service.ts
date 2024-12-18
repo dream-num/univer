@@ -208,7 +208,7 @@ export class HoverManagerService extends Disposable {
 
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
         if (!currentRender) return null;
-        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
         if (!skeletonParam) return null;
 
         const scrollManagerService = currentRender.with(SheetScrollManagerService);

@@ -142,7 +142,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent(),
+            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentParam(),
         });
 
         this._usmToHtml = new USMToHtmlService();

@@ -32,10 +32,10 @@ import { MergeCellController } from '../../../controllers/merge-cell.controller'
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test remove rows cols', () => {
@@ -53,10 +53,12 @@ describe('Test remove rows cols', () => {
         [
             RemoveRowCommand,
             RemoveColCommand,
-            RemoveColMutation,
-            RemoveRowMutation,
+            RemoveRowByRangeCommand,
+            RemoveColByRangeCommand,
             InsertRowMutation,
             InsertColMutation,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
             SetSelectionsOperation,
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));

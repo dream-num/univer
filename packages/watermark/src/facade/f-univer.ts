@@ -76,11 +76,14 @@ export class FUniverWatermarkMixin extends FUniver {
         } else {
             throw new Error('Unknown watermark type');
         }
+
+        return this;
     }
 
     override deleteWatermark(): void {
         const watermarkService = this._injector.get(WatermarkService);
         watermarkService.deleteWatermarkConfig();
+        return this;
     }
 }
 

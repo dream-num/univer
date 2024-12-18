@@ -692,6 +692,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             });
         }
 
+        filteredHooks.forEach((h) => h.onAfterPaste?.(result));
         return result;
     }
 

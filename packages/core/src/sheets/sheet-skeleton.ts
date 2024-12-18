@@ -67,6 +67,14 @@ export class SheetSkeleton extends Skeleton {
     protected _cellData: ObjectMatrix<Nullable<ICellData>>;
     protected _imageCacheMap: ImageCacheMap;
 
+    /** Scale of Scene */
+    scaleX: number;
+    scaleY: number;
+    /** Viewport scrolled value */
+    scrollX: number;
+    /** Viewport scrolled value */
+    scrollY: number;
+
     constructor(
         readonly worksheet: Worksheet,
         protected _styles: Styles,
@@ -144,6 +152,22 @@ export class SheetSkeleton extends Skeleton {
 
     setMarginTop(top: number): void {
         this._marginTop = top;
+    }
+
+    setScale(value: number, valueY?: number): void {
+        this._updateLayout();
+        this.scaleX = value;
+        this.scaleY = valueY || value;
+        this._updateLayout();
+    }
+
+    setScroll(scrollX?: number, scrollY?: number) {
+        if (Tools.isDefine(scrollX)) {
+            this.scrollX = scrollX;
+        }
+        if (Tools.isDefine(scrollY)) {
+            this.scrollY = scrollY;
+        }
     }
 
     get rowHeaderWidthAndMarginLeft(): number {
@@ -1129,11 +1153,11 @@ export function getCellWithCoordByIndexCore(
 }
 
 /**
- * @TODO scrollXY ???? zoom or not??
- * @param offsetX
- * @param scaleX
- * @param scrollXY
- * @returns
+ * Get x in sheet coordinate. Already handled scrolling and zooming.
+ * @param offsetX Offset value from PointerEvent in canvas element.
+ * @param scaleX from scene.getAncestorScale
+ * @param scrollXY Scroll value of viewport
+ * @returns {number} x in sheet coordinate.
  */
 export function getTransformOffsetX(
     offsetX: number,

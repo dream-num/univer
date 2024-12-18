@@ -180,13 +180,17 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     viewportScrollY
                 );
 
-                const scrollInfo = {
+                const scrollInfo: IViewportScrollState = {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
+                    viewportScrollX,
+                    viewportScrollY,
+                    scrollX,
+                    scrollY,
                 };
-                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
+                this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
                 //#endregion
 
                 this._scrollManagerService.validViewportScrollInfo$.next({
@@ -196,7 +200,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     scrollX,
                     scrollY,
                 });
-                // snapshot is diff by diff people!
+                // snapshot is diff by diff users!
                 // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
             })
         );
@@ -259,7 +263,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                         viewportMain.viewportScrollX = 0;
                         viewportMain.viewportScrollY = 0;
                     }
-                    this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
+                    // why handle size in scroll controller?
+                    // this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
             })));
     }
@@ -400,8 +405,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;
 
-        const zoomRatio = worksheet.getZoomRatio() || 1;
-        scene?.setScaleValue(zoomRatio, zoomRatio);
+        // @TODO lumixraku why handle zoom in scroll.render-controller ???
+        // const zoomRatio = worksheet.getZoomRatio() || 1;
+        // scene?.setScaleValueOnly(zoomRatio, zoomRatio);
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,

@@ -83,7 +83,7 @@ export class Custom extends SheetExtension {
 
             const renderInfo = {
                 data: cellData,
-                style: skeleton.getsStyles().getStyleByCell(cellData),
+                style: skeleton.getStyles().getStyleByCell(cellData),
                 primaryWithCoord,
                 subUnitId,
                 row,

@@ -235,7 +235,7 @@ export class Engine extends Disposable {
     }
 
     addScene(sceneInstance: Scene): Scene {
-        const sceneKey = (sceneInstance as any).sceneKey;
+        const sceneKey = sceneInstance.sceneKey;
         if (this.hasScene(sceneKey)) {
             console.warn('Scenes has same key, it will be covered');
         }

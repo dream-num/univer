@@ -39,7 +39,9 @@ import type {
     Worksheet,
 } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { ITransformChangeState } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { Scene } from '../../scene';
 import {
     addLinkToDocumentModel,
     AUTO_HEIGHT_FOR_MERGED_CELLS,
@@ -78,61 +80,6 @@ import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
 import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
-
-/**
- * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
- * @param documentSkeleton Data of the document's ViewModel
- * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
- */
-export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0): Nullable<Required<ISize>> {
-    const skeletonData = documentSkeleton?.getSkeletonData();
-    const angle = degToRad(angleInDegree);
-
-    if (!skeletonData) {
-        return null;
-    }
-    const { pages } = skeletonData;
-    const lastPage = pages[pages.length - 1];
-    const { width, height } = lastPage;
-
-    if (angle === 0) {
-        return { width, height };
-    }
-
-    if (Math.abs(angle) === Math.PI / 2) {
-        return { width: height, height: width };
-    }
-
-    let allRotatedWidth = 0;
-    let allRotatedHeight = 0;
-
-    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
-
-    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
-        const { lines, width: columnWidth, spaceWidth } = column;
-
-        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
-
-        allRotatedHeight += rotatedHeight;
-
-        widthArray.push({ rotatedWidth, spaceWidth });
-    });
-
-    const widthCount = widthArray.length;
-
-    for (let i = 0; i < widthCount; i++) {
-        const { rotatedWidth } = widthArray[i];
-
-        if (i === 0) {
-            allRotatedWidth += rotatedWidth;
-        }
-    }
-
-    return {
-        width: allRotatedWidth,
-        height: allRotatedHeight,
-    };
-}
 
 interface ICellDocumentModelOption {
     isDeepClone?: boolean;
@@ -215,6 +162,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
     private _gridlinesColor: string | undefined = undefined;
 
+    private _scene: Nullable<Scene> = null;
     constructor(
         worksheet: Worksheet,
         _styles: Styles,
@@ -238,6 +186,24 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
                 this.makeDirty(true);
             })
         );
+    }
+
+    setScene(scene: Scene) {
+        this._scene = scene;
+
+        this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
+            if (param.value.scaleX !== undefined) {
+                this.scaleX = param.value.scaleX;
+            }
+            if (param.value.scaleY !== undefined) {
+                this.scaleY = param.value.scaleY;
+            }
+        });
+
+        // const viewMain = this._scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        // if (viewMain) {
+        //     viewMain;
+        // }
     }
 
     override _updateLayout() {
@@ -318,7 +284,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
     /**
      * @deprecated should never expose a property that is provided by another module!
      */
-    getsStyles(): Styles {
+    getStyles(): Styles {
         return this._styles;
     }
 
@@ -1523,4 +1489,59 @@ export function convertTransformToOffsetX(
         }
         return hiddenCols;
     }
+}
+
+/**
+ * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+ * @param documentSkeleton Data of the document's ViewModel
+ * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
+ */
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0): Nullable<Required<ISize>> {
+    const skeletonData = documentSkeleton?.getSkeletonData();
+    const angle = degToRad(angleInDegree);
+
+    if (!skeletonData) {
+        return null;
+    }
+    const { pages } = skeletonData;
+    const lastPage = pages[pages.length - 1];
+    const { width, height } = lastPage;
+
+    if (angle === 0) {
+        return { width, height };
+    }
+
+    if (Math.abs(angle) === Math.PI / 2) {
+        return { width: height, height: width };
+    }
+
+    let allRotatedWidth = 0;
+    let allRotatedHeight = 0;
+
+    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+
+    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+        const { lines, width: columnWidth, spaceWidth } = column;
+
+        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+
+        allRotatedHeight += rotatedHeight;
+
+        widthArray.push({ rotatedWidth, spaceWidth });
+    });
+
+    const widthCount = widthArray.length;
+
+    for (let i = 0; i < widthCount; i++) {
+        const { rotatedWidth } = widthArray[i];
+
+        if (i === 0) {
+            allRotatedWidth += rotatedWidth;
+        }
+    }
+
+    return {
+        width: allRotatedWidth,
+        height: allRotatedHeight,
+    };
 }

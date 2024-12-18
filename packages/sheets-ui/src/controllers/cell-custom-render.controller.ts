@@ -119,7 +119,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
 
                     const info: ICellRenderContext = {
                         data: cellData,
-                        style: skeleton.getsStyles().getStyleByCell(cellData),
+                        style: skeleton.getStyles().getStyleByCell(cellData),
                         primaryWithCoord: skeleton.getCellWithCoordByIndex(cellIndex.actualRow, cellIndex.actualCol),
                         unitId,
                         subUnitId,

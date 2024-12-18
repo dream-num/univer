@@ -41,6 +41,7 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
+import { isRichText } from '../editor/editing.render-controller';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
@@ -313,11 +314,8 @@ export function getSetCellValueMutations(
         }
         const { row: realRow, col: realCol } = mapFunc(row, col);
 
-        if (value.p?.body) {
+        if (value.p?.body && isRichText(value.p.body)) {
             const newValue = Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v });
-            if (newValue.p.body?.textRuns) {
-                newValue.p.body.textRuns = [];
-            }
             valueMatrix.setValue(realRow, realCol, newValue);
         } else {
             valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v, t: value.t }));
@@ -420,9 +418,6 @@ export function getSetCellStyleMutations(
                 cl: null,
             }, value.s),
         };
-        if (withRichFormat && value.p?.body) {
-            newValue.p = value.p;
-        }
         const content = String(value.v);
         const numfmtValue = numfmt.parseValue(content);
         if (numfmtValue?.z) {

@@ -655,6 +655,13 @@ describe('lexer nodeMaker test', () => {
             const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
             expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
+
+        it('manually set current sheet name', () => {
+            let result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2');
+            result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2,C1:D2,F3:G5', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2,Sheet1!$C$1:$D$2,Sheet1!$F$3:$G$5');
+        });
     });
 
     describe('moveFormulaRefOffset', () => {

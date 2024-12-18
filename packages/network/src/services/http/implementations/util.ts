@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
 import type { HTTPRequest } from '../request';
-import type { HTTPEvent } from '../response';
-import { createIdentifier } from '@univerjs/core';
 
-/**
- * HTTP service could be implemented differently on platforms.
- */
-export interface IHTTPImplementation {
-    /**
-     * Send a request. The result would be returned in an observable for possible stream response.
-     * @param request the request to be sent
-     */
-    // eslint-disable-next-line ts/no-explicit-any
-    send(request: HTTPRequest): Observable<HTTPEvent<any>>;
+export function parseFetchParamsFromRequest(request: HTTPRequest): RequestInit {
+    const fetchParams: RequestInit = {
+        method: request.method,
+        headers: request.getHeadersInit(),
+        body: request.getBody(),
+        credentials: request.withCredentials ? 'include' : undefined,
+    };
+
+    return fetchParams;
 }
-export const IHTTPImplementation = createIdentifier<IHTTPImplementation>('network.http-implementation');
+

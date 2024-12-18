@@ -21,6 +21,7 @@ import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
+import { FShortcut } from './f-shortcut';
 
 export interface IFUniverUIMixin {
     /**
@@ -28,6 +29,10 @@ export interface IFUniverUIMixin {
      * @returns the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
      */
     getURL(): URL;
+    /**
+     * Get the Shortcut handler to interact with Univer's shortcut functionalities.
+     */
+    getShortcut(): FShortcut;
     /**
      * Copy the current selected content of the currently focused unit into your system clipboard.
      */
@@ -113,6 +118,10 @@ export interface IFUniverUIMixin {
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override getURL(): URL {
         return new URL(window.location.href);
+    }
+
+    override getShortcut(): FShortcut {
+        return this._injector.createInstance(FShortcut);
     }
 
     override copy(): Promise<boolean> {

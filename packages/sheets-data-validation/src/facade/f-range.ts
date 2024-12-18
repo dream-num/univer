@@ -16,8 +16,8 @@
 
 import type { DataValidationStatus, Nullable } from '@univerjs/core';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { FRange } from '@univerjs/sheets/facade';
 import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
 export interface IFRangeDataValidationMixin {
@@ -75,7 +75,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
         );
 
         if (rule) {
-            return new FDataValidation(rule);
+            return new FDataValidation(rule, this._worksheet, this._injector);
         }
 
         return rule;
@@ -87,7 +87,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
             this._workbook.getUnitId(),
             this._worksheet.getSheetId(),
             [this._range]
-        ).map((rule) => new FDataValidation(rule));
+        ).map((rule) => new FDataValidation(rule, this._worksheet, this._injector));
     }
 
     override async getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]> {

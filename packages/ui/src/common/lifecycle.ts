@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
+import { toDisposable } from '@univerjs/core';
 
 export function fromGlobalEvent<K extends keyof WindowEventMap>(
     type: K,

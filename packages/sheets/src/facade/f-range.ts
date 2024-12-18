@@ -17,7 +17,7 @@
 import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, Tools, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
@@ -64,10 +64,6 @@ export class FRange extends FBase {
      */
     getRange(): IRange {
         return this._range;
-    }
-
-    override toString(withSheet?: boolean): string {
-        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), this._range) : serializeRange(this._range);
     }
 
     /**
@@ -636,20 +632,8 @@ export class FRange extends FBase {
      * console.log(fRange.getA1Notation()); // A1:B2
      * ```
      */
-    getA1Notation(): string {
-        const { startRow, endRow, startColumn, endColumn } = this._range;
-        let start;
-        let end;
-        if (startColumn < endColumn) {
-            start = Tools.numToWord(startColumn + 1) + (startRow + 1);
-            end = Tools.numToWord(endColumn + 1) + (endRow + 1);
-        } else {
-            start = Tools.numToWord(endColumn + 1) + (endRow + 1);
-            end = Tools.numToWord(startColumn + 1) + (startRow + 1);
-        }
-
-        if (start === end) return `${start}`;
-        return `${start}:${end}`;
+    getA1Notation(withSheet?: boolean): string {
+        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), this._range) : serializeRange(this._range);
     }
 
     /**

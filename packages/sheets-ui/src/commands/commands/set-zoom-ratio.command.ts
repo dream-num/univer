@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-
 import type { ICommand } from '@univerjs/core';
+import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
+
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
@@ -39,7 +39,7 @@ export interface IChangeZoomRatioCommandParams {
 export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
     id: 'sheet.command.change-zoom-ratio',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }

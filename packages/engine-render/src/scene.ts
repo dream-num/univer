@@ -17,7 +17,7 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
+import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
 import type { Canvas } from './canvas';

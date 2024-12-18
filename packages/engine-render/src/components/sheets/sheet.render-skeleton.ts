@@ -191,18 +191,8 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         this._scene = scene;
 
         this._scene.onTransformChange$.subscribeEvent((param: ITransformChangeState) => {
-            if (param.value.scaleX !== undefined) {
-                this.scaleX = param.value.scaleX;
-            }
-            if (param.value.scaleY !== undefined) {
-                this.scaleY = param.value.scaleY;
-            }
+            this.setScale(param.value.scaleX || 1, param.value.scaleY);
         });
-
-        // const viewMain = this._scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        // if (viewMain) {
-        //     viewMain;
-        // }
     }
 
     override _updateLayout() {

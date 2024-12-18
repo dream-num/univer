@@ -58,7 +58,7 @@ export class DragRenderController extends Disposable implements IRenderModule, I
             });
         };
 
-        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrentParam());
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((skeletonParam) => {
             handleSkeletonChange(skeletonParam);
         }));

@@ -212,7 +212,7 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
     }
 
     const currentRender = renderManagerService.getRenderById(workbook.getUnitId());
-    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+    const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getSkeletonParam(worksheet.getSheetId());
 
     const skeleton = skeletonParam?.skeleton;
 
@@ -282,7 +282,7 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
     }
 
     const docSkeleton = renderer.with(DocSkeletonManagerService).getSkeleton();
-    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getWorksheetSkeleton(sheetId)?.skeleton;
+    const sheetSkeleton = sheetRenderer.with(SheetSkeletonManagerService).getSkeletonParam(sheetId)?.skeleton;
 
     if (!docSkeleton || !sheetSkeleton) {
         return null;

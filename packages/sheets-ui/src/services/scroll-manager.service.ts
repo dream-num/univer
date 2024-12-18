@@ -97,7 +97,6 @@ export class SheetScrollManagerService implements IRenderModule {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         // empty
-        window.scroll = this;
     }
 
     dispose(): void {
@@ -132,14 +131,6 @@ export class SheetScrollManagerService implements IRenderModule {
         this._searchParamForScroll = param;
     }
 
-    // setSearchParamAndRefresh(param: IScrollStateSearchParam) {
-    //     this._searchParamForScroll = param;
-    //     const state = this.getScrollStateByParam(param);
-    //     if (state) {
-    //         this._emitRawScroll(state);
-    //     }
-    // }
-
     getScrollStateByParam(param: IScrollStateSearchParam): Readonly<Nullable<IScrollState>> {
         return this._getCurrentScroll(param);
     }
@@ -158,12 +149,11 @@ export class SheetScrollManagerService implements IRenderModule {
      * @param param
      */
     emitRawScrollParam(param: IScrollStateWithSearchParam) {
-        // this._setValidScrollState(param);
         this._emitRawScroll(param);
     }
 
     /**
-     * Set _scrollStateMap but no _scrollInfo$.next
+     * Set _scrollStateMap
      * @param scroll
      */
     setValidScrollStateToCurrSheet(scroll: IViewportScrollState) {
@@ -176,8 +166,11 @@ export class SheetScrollManagerService implements IRenderModule {
             ...scroll,
         });
 
-        // const sheetId = this._searchParamForScroll.sheetId;
-        this._sheetSkeletonManagerService.setScrollToCurrSk(scroll.viewportScrollX, scroll.viewportScrollY);
+        const sheetId = this._searchParamForScroll.sheetId;
+        const sheetSkeleton = this._sheetSkeletonManagerService.getSkeleton(sheetId);
+        if (sheetSkeleton) {
+            sheetSkeleton.setScroll(scroll.viewportScrollX, scroll.viewportScrollY);
+        }
     }
 
     clear(): void {

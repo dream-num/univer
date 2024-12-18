@@ -482,7 +482,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private _getAutoHeightUndoRedos(unitId: string, subUnitId: string, ranges: IRange[]) {
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
-        const skeleton = sheetSkeletonService?.getCurrent()?.skeleton;
+        const skeleton = sheetSkeletonService?.getCurrentParam()?.skeleton;
         if (!skeleton) return { redos: [], undos: [] };
 
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);

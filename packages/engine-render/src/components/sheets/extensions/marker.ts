@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { SpreadsheetSkeleton } from '../sheet.render-skeleton';
 import { Range } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';

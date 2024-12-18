@@ -154,7 +154,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                         return next(cell);
                     }
                     // const renderer = this._renderManagerService.getRenderById(unitId);
-                    // const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+                    // const skeleton = renderer?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId);
                     // if (!skeleton) {
                     //     return next(cell);
                     // }

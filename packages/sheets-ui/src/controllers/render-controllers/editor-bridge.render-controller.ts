@@ -102,7 +102,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             const unitId = this._context.unitId;
             const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
             if (!sheetId) return;
-            const mergeInfo = this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.getCellWithCoordByIndex(primary.actualRow, primary.actualColumn);
+            const mergeInfo = this._sheetSkeletonManagerService.getSkeletonParam(sheetId)?.skeleton.getCellWithCoordByIndex(primary.actualRow, primary.actualColumn);
             const newPrimary: ISelectionCell = mergeInfo
                 ? {
                     actualRow: mergeInfo.actualRow,

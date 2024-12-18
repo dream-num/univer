@@ -124,7 +124,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null) {
                 return;
             }

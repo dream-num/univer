@@ -63,7 +63,7 @@ export class SheetsThreadCommentPopupController extends Disposable {
     private _handleSelectionChange(selections: ISelectionWithStyle[], unitId: string, subUnitId: string) {
         const range = selections[0]?.range;
         const render = this._renderManagerService.getRenderById(unitId);
-        const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
+        const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
         if (!skeleton) {
             return;
         }

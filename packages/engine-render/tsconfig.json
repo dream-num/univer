@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "types", "../core/src/skeleton.ts"]
+    "include": ["src", "types"]
 }

@@ -26,7 +26,7 @@ export function convertPositionSheetOverGridToAbsolute(unitId: string, subUnitId
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
-    const skeleton = sheetSkeletonManagerService.getOrCreateSkeleton({ sheetId: subUnitId });
+    const skeleton = sheetSkeletonManagerService.ensureSkeleton(subUnitId);
 
     if (skeleton == null) {
         throw new Error('No current skeleton');
@@ -77,7 +77,7 @@ export function convertPositionSheetOverGridToAbsolute(unitId: string, subUnitId
 export function convertPositionCellToSheetOverGrid(unitId: string, subUnitId: string, cellOverGridPosition: ICellOverGridPosition, width: number, height: number, selectionRenderService: ISheetSelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService) {
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = cellOverGridPosition;
 
-    const skeleton = sheetSkeletonManagerService.getOrCreateSkeleton({ sheetId: subUnitId });
+    const skeleton = sheetSkeletonManagerService.ensureSkeleton(subUnitId);
 
     if (skeleton == null) {
         throw new Error('No current skeleton');

@@ -126,7 +126,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         // only style cursor style when pointer move
         const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null) {
                 return;
             }
@@ -166,7 +166,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const pointerDownHandler = (evt: IPointerEvent | IMouseEvent, state: EventState) => {
             if (state.isStopPropagation) return;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
             if (skeleton == null) {
                 return;
             }
@@ -356,7 +356,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         initialType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
     ) {
         const scene = this._context.scene;
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }

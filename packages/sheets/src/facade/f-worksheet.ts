@@ -1142,7 +1142,6 @@ export class FWorksheet extends FBase {
             if (startRow > endRow) {
                 [startRow, endRow] = [endRow, startRow];
             }
-            this._commandService.syncExecuteCommand;
             this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
                 startRow: endRow + 1,
                 ySplit: endRow - startRow + 1,

@@ -88,7 +88,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 if (this._normalSelectionDisabled()) return;
 
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
                 const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
@@ -103,7 +103,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this.disposeWithMe(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
             const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
             if (matchSelectionData) return;
@@ -120,7 +120,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             this._reset(); // remove all other selections
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            const skeleton = this._sheetSkeletonManagerService.getCurrentParam()!.skeleton;
             const selectionWithStyle = selectionDataForSelectAll(skeleton);
             this._addSelectionControlByModelData(selectionWithStyle);
             this.refreshSelectionMoveEnd();

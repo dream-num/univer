@@ -78,7 +78,7 @@ export class DragManagerService extends Disposable {
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
         if (!currentRender) return;
 
-        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrent();
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrentParam();
         const scrollManagerService = currentRender.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService.getCurrentScrollState();
 

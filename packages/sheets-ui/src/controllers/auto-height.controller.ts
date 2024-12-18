@@ -61,13 +61,13 @@ export class AutoHeightController extends Disposable {
         const subUnitId = worksheet.getSheetId();
 
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
-        if (!subUnitId || !sheetSkeletonService.getCurrent()) {
+        if (!subUnitId || !sheetSkeletonService.getCurrentParam()) {
             return {
                 redos: [],
                 undos: [],
             };
         }
-        const { skeleton } = sheetSkeletonService.getCurrent()!;
+        const { skeleton } = sheetSkeletonService.getCurrentParam()!;
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {

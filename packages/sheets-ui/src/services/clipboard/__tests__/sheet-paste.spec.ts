@@ -107,7 +107,7 @@ describe('Test clipboard', () => {
             const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const htmlToUSM = new HtmlToUSMService({
-                getCurrentSkeleton: () => sheetSkeletonManagerService.getCurrent(),
+                getCurrentSkeleton: () => sheetSkeletonManagerService.getCurrentParam(),
             });
             const htmlPath = path.join(__dirname, 'assets', 'html', 'excel-base-sample.html');
             const html = getHTMLString(htmlPath);
@@ -119,7 +119,7 @@ describe('Test clipboard', () => {
             const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
             const htmlToUSM = new HtmlToUSMService({
-                getCurrentSkeleton: () => sheetSkeletonManagerService.getCurrent(),
+                getCurrentSkeleton: () => sheetSkeletonManagerService.getCurrentParam(),
             });
             const htmlPath = path.join(__dirname, 'assets', 'html', 'google-base-sample.html');
             const html = getHTMLString(htmlPath);

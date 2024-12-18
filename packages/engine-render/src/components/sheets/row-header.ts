@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { IRowsHeaderCfgParam, RowHeaderLayout } from './extensions/row-header-layout';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
 import { SpreadsheetHeader } from './sheet-component';
 

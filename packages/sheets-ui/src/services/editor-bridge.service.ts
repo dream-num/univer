@@ -188,7 +188,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
         if (!ru) return;
 
-        const skeleton = ru.with(SheetSkeletonManagerService).getWorksheetSkeleton(currentEditCell.sheetId)?.skeleton;
+        const skeleton = ru.with(SheetSkeletonManagerService).getSkeletonParam(currentEditCell.sheetId)?.skeleton;
         const selectionRenderService = ru.with(ISheetSelectionRenderService);
         if (!skeleton) return;
         if (!this._currentEditCellState) return;

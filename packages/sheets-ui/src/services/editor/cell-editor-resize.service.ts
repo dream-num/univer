@@ -358,7 +358,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const editCellState = this._editorBridgeService.getEditCellState();
         if (!editCellState) return;
 
-        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(editCellState.sheetId)?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getSkeletonParam(editCellState.sheetId)?.skeleton;
         if (!skeleton) return;
         const { row, column, scaleX, scaleY, position, canvasOffset } = editCellState;
         const maxSize = this._getEditorMaxSize(position, canvasOffset);

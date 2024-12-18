@@ -129,7 +129,7 @@ export class SelectionShapeExtension {
     private _getFreeze() {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const freeze = renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
-            ?.getCurrent()
+            ?.getCurrentParam()
             ?.skeleton
             .getWorksheetConfig()
             .freeze;

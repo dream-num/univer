@@ -61,7 +61,7 @@ export function useSheetHighlight(unitId: string) {
         const currentSheetId = worksheet.getSheetId();
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
-        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+        const skeleton = sheetSkeletonManagerService?.getSkeletonParam(currentSheetId)?.skeleton;
         if (!skeleton) return;
 
         for (let i = 0, len = refSelections.length; i < len; i++) {

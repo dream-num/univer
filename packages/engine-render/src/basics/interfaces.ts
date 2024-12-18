@@ -58,6 +58,12 @@ export interface IRect extends ISize, IOffset {
     points: Vector2[];
 }
 
+/**
+ * width
+ * height
+ * scaleX
+ * scaleY
+ */
 export interface ISceneTransformState extends ISize, IScale {}
 
 export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {

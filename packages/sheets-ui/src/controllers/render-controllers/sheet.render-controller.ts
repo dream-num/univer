@@ -238,6 +238,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
+
+        window.sc = scene;
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,

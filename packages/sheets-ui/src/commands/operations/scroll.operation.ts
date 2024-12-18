@@ -35,7 +35,7 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
 
-        scrollManagerService.setScrollInfoAndEmitEvent({
+        scrollManagerService.emitRawScrollParam({
             unitId,
             sheetId,
             offsetX,

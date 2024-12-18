@@ -49,3 +49,5 @@ export const PasteCommand: IMultiCommand = {
     preconditions: () => false,
     handler: async () => true,
 };
+
+export const SheetPasteShortKeyCommandName = 'sheet.command.paste-bu-short-key';

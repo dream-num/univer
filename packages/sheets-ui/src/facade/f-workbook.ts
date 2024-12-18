@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
@@ -67,12 +67,18 @@ export interface IFWorkbookSheetsUIMixin {
     startEditing(): boolean;
 
     /**
-     * End the editing process
-     * @async
-     * @param save - Whether to save the changes
-     * @returns A promise that resolves to a boolean value
+     * Use endEditingAsync as instead
+     * @deprecated
      */
     endEditing(save?: boolean): Promise<boolean>;
+
+    /**
+     * @async
+     * @param save - Whether to save the changes, default is true
+     * @returns A promise that resolves to a boolean value
+     * @param save
+     */
+    endEditingAsync(save?: boolean): Promise<boolean>;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -142,6 +148,10 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         // wait for the async cell edit operation to complete
         await awaitTime(0);
         return true;
+    }
+
+    override endEditingAsync(save = true): Promise<boolean> {
+        return this.endEditing(save);
     }
 
     /**

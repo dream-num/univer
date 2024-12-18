@@ -103,21 +103,22 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                         })
                     );
                 } else {
-                    observer.error(
-                        new HTTPResponseError({
-                            request,
-                            error,
-                            headers,
-                            status,
-                            statusText,
-                        })
-                    );
-                    // Handler server logic error here
+                    const e = new HTTPResponseError({
+                        request,
+                        error,
+                        headers,
+                        status,
+                        statusText,
+                    });
+
+                    this._logService.error('[XHRHTTPImplementation]: network error', e);
+
+                    observer.error(e);
                 }
             };
 
             const onErrorHandler = (error: ProgressEvent) => {
-                const res = new HTTPResponseError({
+                const e = new HTTPResponseError({
                     request,
                     error,
                     status: xhr.status || 0,
@@ -125,7 +126,9 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                     headers: buildResponseHeader().headers,
                 });
 
-                observer.error(res);
+                this._logService.error('[XHRHTTPImplementation]: network error', e);
+
+                observer.error(e);
             };
 
             xhr.addEventListener('load', onLoadHandler);

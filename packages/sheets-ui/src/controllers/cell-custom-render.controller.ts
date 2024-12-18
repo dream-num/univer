@@ -197,7 +197,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         };
 
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe(handleSkeletonChange));
-        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrentParam());
         this.disposeWithMe(disposableCollection);
     }
 }

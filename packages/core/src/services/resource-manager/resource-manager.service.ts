@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Subject } from 'rxjs';
-import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { UniverInstanceType } from '../../common/unit';
 import type { IResources } from '../resource-manager/type';
 import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
+import { Subject } from 'rxjs';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
     private _resourceMap = new Map<IResourceName, IResourceHook>();

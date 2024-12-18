@@ -46,7 +46,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                     priority: 10,
                     effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                         if (!skeleton) {
                             return next(cell);
                         }

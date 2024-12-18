@@ -163,7 +163,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const render = renderManagerService.getRenderById(unitId);
-        const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
+        const skeleton = render?.with(SheetSkeletonManagerService).getSkeletonParam(subUnitId)?.skeleton;
         if (!skeleton) {
             logService.error('[Facade]: `FRange.getCell` can only be called in current worksheet');
             throw new Error('`FRange.getCell` can only be called in current worksheet');

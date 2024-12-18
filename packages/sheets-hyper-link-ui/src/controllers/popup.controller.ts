@@ -122,7 +122,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 const skeleton = renderer?.with(SheetSkeletonManagerService)
-                    .getWorksheetSkeleton(subUnitId)
+                    .getSkeletonParam(subUnitId)
                     ?.skeleton;
 
                 const currentCol = col;
@@ -210,7 +210,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                         const rect = customRange.rects[customRange.rects.length - 1];
                         const skeleton = this._renderManagerService.getRenderById(unitId)
                             ?.with(SheetSkeletonManagerService)
-                            .getWorksheetSkeleton(sheetId)
+                            .getSkeletonParam(sheetId)
                             ?.skeleton;
                         if (!skeleton || !rect) {
                             return;

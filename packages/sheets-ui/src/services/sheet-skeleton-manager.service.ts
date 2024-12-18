@@ -24,6 +24,7 @@ import { SetColumnHeaderHeightCommand, SetRowHeaderWidthCommand } from '../comma
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachRangeWithCoord } from './selection/util';
 
+ // Why need this SkParam? what is Param used for? Could unitId & sheetId & dirty in skeleton itself ?
 export interface ISheetSkeletonManagerParam {
     unitId: string;
     sheetId: string;
@@ -41,11 +42,10 @@ export interface ISheetSkeletonManagerSearch {
  * SheetSkeletonManagerService is registered in a render unit
  */
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
-    private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
-        sheetId: '',
-    };
+    private _sheetId: string = '';
 
-    private _sheetSkeletonStore: Map<string, ISheetSkeletonManagerParam> = new Map();
+    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself z?
+    private _sheetSkeletonParamStore: Map<string, ISheetSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
@@ -58,7 +58,8 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SheetSkeletonService) private readonly _sheetSkService: SheetSkeletonService
     ) {
         // empty
         super();
@@ -66,11 +67,10 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this.disposeWithMe(() => {
             this._currentSkeletonBefore$.complete();
             this._currentSkeleton$.complete();
-            this._sheetSkeletonStore = new Map();
+            this._sheetSkeletonParamStore = new Map();
         });
 
         this._initRemoveSheet();
-        window.sks = this;
     }
 
     private _initRemoveSheet() {
@@ -80,48 +80,84 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     getCurrentSkeleton(): Nullable<SpreadsheetSkeleton> {
-        return this.getCurrent()?.skeleton;
+        return this.getCurrentParam()?.skeleton;
     }
 
+    /**
+     * @deprecated use `getCurrentSkeleton` instead.
+     */
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton(this._currentSkeletonSearchParam.sheetId);
+        return this.getCurrentParam();
     }
 
-    getWorksheetSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+    /**
+     * get ISheetSkeletonManagerParam from _currentSkeletonSearchParam
+     * @returns
+     */
+    getCurrentParam(): Nullable<ISheetSkeletonManagerParam> {
+        return this._getSkeletonParam(this._sheetId);
+    }
+
+    /**
+     * Get skeleton by sheetId
+     * @param sheetId
+     */
+    getSkeleton(sheetId: string): Nullable<SpreadsheetSkeleton> {
         return this._getSkeleton(sheetId);
     }
 
     /**
-     * unitId is never read?
-     * why ?? what does unitId for ???
+     * Get SkeletonParam by sheetId
+     * @param sheetId
      */
-    getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        const param = this._getSkeleton(sheetId);
-        if (param) {
-            param.unitId = unitId;
-        }
-        return param;
+    getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        return this._getSkeletonParam(sheetId);
     }
+
+    /**
+     * @deprecated use `getSkeleton` instead.
+     */
+    getWorksheetSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        return this.getSkeletonParam(sheetId);
+    }
+
+    /**
+     * unitId is never read?
+     * why ?? what does unitId for ??? no need unitId this service is registered in render unit already.
+     */
+    // getUnitSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+    //     const param = this._getSkeleton(sheetId);
+    //     // if (param) {
+    //     //     param.unitId = unitId;
+    //     // }
+    //     return param;
+    // }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        this._setCurrent(searchParam);
+        this._setCurrent(searchParam.sheetId);
     }
 
-    private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        const skParam = this._getSkeleton(searchParam.sheetId);
+    setSkeletonParam(sheetId: string, skp: ISheetSkeletonManagerParam) {
+        this._sheetSkService.setSkeleton(skp.unitId, sheetId, skp.skeleton);
+        this._sheetSkeletonParamStore.set(sheetId, skp);
+    }
+
+    private _setCurrent(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        this._sheetId = sheetId;
+        const skParam = this._getSkeletonParam(sheetId);
         const unitId = this._context.unitId;
         if (skParam != null) {
-            this._reCalculate(skParam);
+            this.reCalculate(skParam);
         } else {
-            const { sheetId } = searchParam;
             const workbook = this._context.unit;
-            const worksheet = workbook.getSheetBySheetId(searchParam.sheetId);
+            const worksheet = workbook.getSheetBySheetId(sheetId);
             if (worksheet == null) {
                 return;
             }
 
-            const skeleton = this._buildSkeleton(worksheet);
-            this._sheetSkeletonStore.set(sheetId, {
+            const scene = this._context.scene;
+            const skeleton = this._buildSkeleton(worksheet, scene);
+            this.setSkeletonParam(sheetId, {
                 unitId,
                 sheetId,
                 skeleton,
@@ -129,29 +165,24 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             });
         }
 
-        this._currentSkeletonSearchParam = searchParam;
-        const sheetId = this._currentSkeletonSearchParam.sheetId;
-        const sheetSkeletonManagerParam = this.getUnitSkeleton(unitId, sheetId);
-
-        console.log('curr sk !!!');
+        const sheetSkeletonManagerParam = this._getSkeletonParam(sheetId);
         this._currentSkeletonBefore$.next(sheetSkeletonManagerParam);
         this._currentSkeleton$.next(sheetSkeletonManagerParam);
     }
 
-    reCalculate() {
-        const param = this.getCurrent();
+    // @TODO why need this function? How about caller get skeleton and call sk.calculate()?
+    reCalculate(param?: Nullable<ISheetSkeletonManagerParam>) {
+        if (!param) {
+            param = this.getCurrentParam();
+        }
         if (param == null) {
             return;
         }
-        this._reCalculate(param);
-    }
-
-    private _reCalculate(skParam: ISheetSkeletonManagerParam) {
-        if (skParam.dirty) {
-            skParam.skeleton.makeDirty(true);
-            skParam.dirty = false;
+        if (param.dirty) {
+            param.skeleton.makeDirty(true);
+            param.dirty = false;
         }
-        skParam.skeleton.calculate();
+        param.skeleton.calculate();
     }
 
     /**
@@ -160,7 +191,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
      * @param state
      */
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {
-        const param = this._getSkeleton(searchParm.sheetId);
+        const param = this._getSkeletonParam(searchParm.sheetId);
         if (param == null) {
             return;
         }
@@ -172,11 +203,11 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
      * @param searchParam
      */
     getOrCreateSkeleton(searchParam: ISheetSkeletonManagerSearch) {
-        this.ensureSkeleton(searchParam.sheetId);
+        return this.ensureSkeleton(searchParam.sheetId);
     }
 
     ensureSkeleton(sheetId: string) {
-        const skeleton = this._getSkeleton(sheetId);
+        const skeleton = this._getSkeletonParam(sheetId);
         if (skeleton) {
             return skeleton.skeleton;
         }
@@ -188,7 +219,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }
 
         const newSkeleton = this._buildSkeleton(worksheet);
-        this._sheetSkeletonStore.set(sheetId, {
+        this.setSkeletonParam(sheetId, {
             unitId: this._context.unitId,
             sheetId,
             skeleton: newSkeleton,
@@ -199,17 +230,12 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     disposeSkeleton(sheetId: string) {
-        const skParam = this.getWorksheetSkeleton(sheetId);
+        const skParam = this.getSkeletonParam(sheetId);
         if (skParam) {
             skParam.skeleton.dispose();
-            this._sheetSkeletonStore.delete(sheetId);
+            this._sheetSkeletonParamStore.delete(sheetId);
+            this._sheetSkService.deleteSkeleton(skParam.unitId, sheetId);
         }
-        // const index = this._sheetSkeletonStore.findIndex((param) => param.sheetId === searchParm.sheetId);
-        // if (index > -1) {
-        //     const skeleton = this._sheetSkeletonStore[index];
-        //     skeleton.skeleton.dispose();
-        //     this._sheetSkeletonStore.splice(index, 1);
-        // }
     }
 
     /** @deprecated Use function `attachRangeWithCoord` instead.  */
@@ -220,17 +246,17 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return attachRangeWithCoord(skeleton, range);
     }
 
-    private _getSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        // const item = this._sheetSkeletonStore.find((param) => param.sheetId === searchParm.sheetId);
-        const item = this._sheetSkeletonStore.get(sheetId);
-        // if (item) {
-        //     item.commandId = searchParm.commandId;
-        // }
-
+    private _getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+        const item = this._sheetSkeletonParamStore.get(sheetId);
         return item;
     }
 
-    private _buildSkeleton(worksheet: Worksheet) {
+    private _getSkeleton(sheetId: string): Nullable<SpreadsheetSkeleton> {
+        const param = this._getSkeletonParam(sheetId);
+        return param ? param.skeleton : null;
+    }
+
+    private _buildSkeleton(worksheet: Worksheet, scene: Nullable<Scene>) {
         const spreadsheetSkeleton = this._injector.createInstance(
             SpreadsheetSkeleton,
             worksheet,
@@ -311,5 +337,6 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
             sheetSkeletonManagerParam.commandId = SetRowHeaderWidthCommand.id;
             this._currentSkeleton$.next(sheetSkeletonManagerParam);
         }
+        return spreadsheetSkeleton;
     }
 }

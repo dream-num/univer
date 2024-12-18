@@ -17,7 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
+import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation, SheetSkeletonService } from '@univerjs/sheets';
 
 import { BehaviorSubject } from 'rxjs';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
@@ -194,6 +194,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
     const injector = univer.__getInjector();
 
     // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
+    const mockSheetSkService = new SheetSkeletonService(injector);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId,

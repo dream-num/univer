@@ -17,7 +17,7 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
-import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
+import type { ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
 import type { Canvas } from './canvas';
@@ -362,7 +362,7 @@ export class Scene extends Disposable {
     }
 
     /**
-     * Origin name: setScaleValue
+     * Unlike @scale, this method doesn't emit event.
      * @param scaleX
      * @param scaleY
      */
@@ -378,7 +378,6 @@ export class Scene extends Disposable {
 
     /**
      * Set scale, and then emit event to update Viewport scroll state.
-     * @deprecated use transformByState instead.
      * @param scaleX
      * @param scaleY
      * @returns Scene
@@ -406,7 +405,7 @@ export class Scene extends Disposable {
     scaleBy(deltaScaleX?: number, deltaScaleY?: number) {
         const preScaleX = this.scaleX;
         if (deltaScaleX !== undefined) {
-            this.scaleX += deltaScaleX; // why not this.scaleX *= deltaScaleX  ???
+            this.scaleX += deltaScaleX; // @TODO lumixraku why not this.scaleX *= deltaScaleX  ???
         }
         const preScaleY = this.scaleY;
         if (deltaScaleY !== undefined) {

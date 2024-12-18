@@ -26,7 +26,7 @@ import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
 import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { SpreadsheetSkeleton } from './sheet.render-skeleton';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getColor } from '../../basics/tools';

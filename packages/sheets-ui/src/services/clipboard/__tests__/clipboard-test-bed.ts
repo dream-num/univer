@@ -20,7 +20,7 @@ import type { Dependency, IDisposable, IWorkbookData } from '@univerjs/core';
 import { DisposableCollection, ILogService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, ICalculateFormulaService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetSkeletonService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import {
     BrowserClipboardService,
@@ -595,6 +595,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
     // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const mockSheetSkService = new SheetSkeletonService(injector);
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId: 'test',

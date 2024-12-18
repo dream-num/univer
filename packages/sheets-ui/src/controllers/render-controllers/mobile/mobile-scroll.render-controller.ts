@@ -150,7 +150,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _getFreeze(): Nullable<IFreeze> {
-        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig();
+        const snapshot: IWorksheetData | undefined = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton.getWorksheetConfig();
         if (snapshot == null) {
             return;
         }
@@ -181,7 +181,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                         return;
                     }
 
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                     if (!skeleton) return;
 
                     // data source: scroll-manager.service.ts@_scrollInfo
@@ -208,7 +208,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         this.disposeWithMe(
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
                 if (!scrollAfterParam) return;
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null) return;
                 const sheetObject = this._getSheetObject();
                 if (skeleton == null || sheetObject == null) return;
@@ -221,11 +221,14 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     viewportScrollY
                 );
 
-                const scrollInfo = {
+                const scrollInfo: IViewportScrollState = {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
+                    viewportScrollX,
+                    viewportScrollY,
+                    scrollX, scrollY,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
                 this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
@@ -245,7 +248,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         //#region scroll by bar
         this.disposeWithMe(
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
                 if (skeleton == null || param.isTrigger === false) {
                     return;
                 }
@@ -493,7 +496,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -503,7 +506,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number): boolean {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
 
@@ -513,7 +516,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getCurrentParam()?.skeleton;
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();

@@ -254,6 +254,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
      * @param worksheet
      */
     setActiveSheet(worksheet: Worksheet): void {
+        console.log('active sheet');
         this._activeSheet$.next(worksheet);
     }
 

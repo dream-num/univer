@@ -228,7 +228,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                     offsetY: rowOffset,
                 };
                 // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
-                this._scrollManagerService.setScrollStateToCurrSheet(scrollInfo);
+                this._scrollManagerService.setValidScrollStateToCurrSheet(scrollInfo);
                 this._scrollManagerService.validViewportScrollInfo$.next({
                     ...scrollInfo,
                     scrollX,
@@ -422,7 +422,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         if (!worksheet) return;
 
         const zoomRatio = worksheet.getZoomRatio() || 1;
-        scene?.setScaleValue(zoomRatio, zoomRatio);
+        scene?.setScaleValueOnly(zoomRatio, zoomRatio);
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,

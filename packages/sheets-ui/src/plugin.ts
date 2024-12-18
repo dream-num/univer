@@ -57,6 +57,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -209,6 +210,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderBasics(): void {
         ([
             [SheetSkeletonManagerService],
+            [SheetSkeletonRenderController],
             [SheetRenderController],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
         ] as Dependency[]).forEach((m) => {

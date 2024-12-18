@@ -48,5 +48,4 @@ export { type IChangeObserverConfig } from './scene.transformer';
 export * from './scene-viewer';
 export * from './scroll-timer';
 export * from './shape';
-export { ThinEngine } from './thin-engine';
 export * from './viewport';

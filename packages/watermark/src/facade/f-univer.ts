@@ -28,30 +28,30 @@ export interface IFUniverWatermarkMixin {
      * - If the type is 'Image', the config should follow the IImageWatermarkConfig interface.
      * @throws {Error} Throws an error if the watermark type is unknown.
      */
-    addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): void;
-    addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): void;
+    addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): FUniver;
+    addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): FUniver;
     addWatermark(
         type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
         config: ITextWatermarkConfig | IImageWatermarkConfig
-    ): void;
+    ): FUniver;
 
     /**
      * Deletes the currently applied watermark from the unit.
      *
      * This function retrieves the watermark service and invokes the method to remove any existing watermark configuration.
      */
-    deleteWatermark(): void;
+    deleteWatermark(): FUniver;
 }
 
 export class FUniverWatermarkMixin extends FUniver {
     // #region watermark
 
-    override addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): void;
-    override addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): void;
+    override addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): FUniver;
+    override addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): FUniver;
     override addWatermark(
         type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
         config: ITextWatermarkConfig | IImageWatermarkConfig
-    ): void {
+    ): FUniver {
         const watermarkService = this._injector.get(WatermarkService);
         if (type === IWatermarkTypeEnum.Text) {
             watermarkService.updateWatermarkConfig({
@@ -80,7 +80,7 @@ export class FUniverWatermarkMixin extends FUniver {
         return this;
     }
 
-    override deleteWatermark(): void {
+    override deleteWatermark(): FUniver {
         const watermarkService = this._injector.get(WatermarkService);
         watermarkService.deleteWatermarkConfig();
         return this;

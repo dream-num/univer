@@ -32,6 +32,7 @@ import { MergeCellController } from '../../../controllers/merge-cell.controller'
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
@@ -55,6 +56,8 @@ describe('Test remove rows cols', () => {
             RemoveColCommand,
             RemoveRowByRangeCommand,
             RemoveColByRangeCommand,
+            RemoveColMutation,
+            RemoveRowMutation,
             InsertRowMutation,
             InsertColMutation,
             InsertRowByRangeCommand,

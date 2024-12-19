@@ -149,6 +149,7 @@ export {
     WorksheetSortPermission,
     WorksheetViewPermission,
 } from './services/permission/permission-point';
+export { PermissionPointsDefinitions } from './services/permission/permission-point/const';
 export { UnitAction, UnitObject } from '@univerjs/protocol';
 export { checkRangesEditablePermission } from './services/permission/util';
 

@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DEFAULT_STYLES, Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
+import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
 import { KeyCode } from '@univerjs/ui';
 import { merge, type Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -99,47 +99,6 @@ export interface IEditorConfigParams {
 
     // show scrollBar
     scrollBar?: boolean;
-
-    // need vertical align and update canvas style. TODO: remove this latter.
-    /** @deprecated */
-    noNeedVerticalAlign?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSheetEditor?: boolean;
-    /**
-     * If the editor is for formula editing.
-     * @deprecated this is a temp fix before refactoring editor.
-     */
-    isFormulaEditor?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingle?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputFormula?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputRange?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputContent?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingleChoice?: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetUnitId?: Nullable<string>;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetSubUnitId?: Nullable<string>;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
@@ -395,28 +354,8 @@ export class Editor extends Disposable implements IEditor {
         this._focus = state;
     }
 
-    /** @deprecated */
-    isSingle() {
-        return this._param.isSingle === true || this.onlyInputRange();
-    }
-
     isReadOnly() {
         return this._param.readonly === true;
-    }
-
-    /** @deprecated */
-    onlyInputContent() {
-        return this._param.onlyInputContent === true;
-    }
-
-    /** @deprecated */
-    onlyInputFormula() {
-        return this._param.onlyInputFormula === true;
-    }
-
-    /** @deprecated */
-    onlyInputRange() {
-        return this._param.onlyInputRange === true;
     }
 
     getBoundingClientRect() {
@@ -456,42 +395,6 @@ export class Editor extends Disposable implements IEditor {
             ...this._param,
             ...param,
         };
-    }
-
-    /**
-     * @deprecated.
-     */
-    verticalAlign() {
-        const docDataModel = this._getDocDataModel();
-
-        if (docDataModel == null) {
-            return;
-        }
-
-        const { width, height } = this._param.editorDom.getBoundingClientRect();
-
-        if (height === 0 || width === 0) {
-            return;
-        }
-
-        if (!this.isSingle()) {
-            docDataModel.updateDocumentDataPageSize(width, undefined);
-            return;
-        }
-
-        let fontSize = DEFAULT_STYLES.fs;
-
-        if (this._param.canvasStyle?.fontSize) {
-            fontSize = this._param.canvasStyle.fontSize;
-        }
-
-        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
-
-        docDataModel.updateDocumentDataMargin({
-            t: top < 0 ? 0 : top,
-        });
-
-        docDataModel.updateDocumentDataPageSize(undefined, undefined);
     }
 
     /**

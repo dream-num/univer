@@ -17,10 +17,9 @@
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
 import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
-import type { IEditorConfigParams, IEditorStateParams } from './editor';
+import type { IEditorConfigParams } from './editor';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_STANDALONE, HorizontalAlign, ICommandService, IContextService, Inject, isInternalEditorID, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
 import { Editor } from './editor';
@@ -72,27 +71,15 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     private _focusEditorUnitId: Nullable<string>;
 
-    private readonly _state$ = new Subject<Nullable<IEditorStateParams>>();
-    readonly state$ = this._state$.asObservable();
-
     private readonly _blur$ = new Subject();
     readonly blur$ = this._blur$.asObservable();
 
     private readonly _focus$ = new Subject<ISuccinctDocRangeParam>();
     readonly focus$ = this._focus$.asObservable();
 
-    private readonly _setValue$ = new Subject<IEditorSetValueParam>();
-    readonly setValue$ = this._setValue$.asObservable();
-
-    private readonly _focusStyle$ = new Subject<Nullable<string>>();
-    readonly focusStyle$ = this._focusStyle$.asObservable();
-
-    private _spreadsheetFocusState: boolean = false;
-
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -143,7 +130,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors.has(editorUnitId);
     }
 
-    /** @deprecated */
     isSheetEditor(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
         return !!(editor && editor.isSheetEditor());
@@ -156,8 +142,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         const focusingEditor = this.getFocusEditor();
         focusingEditor?.blur();
-        this._focusStyle$.next();
-
         this._blur$.next(null);
     }
 
@@ -192,7 +176,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     override dispose(): void {
-        this._state$.complete();
         this._editors.clear();
         super.dispose();
     }
@@ -241,12 +224,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             // Delete scroll bar
             if (!config.scrollBar) {
                 (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
-            }
-
-            // @ggg, Move this to Text Editor?
-            if (!editor.isSheetEditor() && !config.noNeedVerticalAlign) {
-                editor.verticalAlign();
-                editor.updateCanvasStyle();
             }
         }
         return toDisposable(() => {

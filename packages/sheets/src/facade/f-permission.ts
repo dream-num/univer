@@ -20,7 +20,7 @@ import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRange
 import { PermissionPointsDefinitions } from './const';
 
 export class FPermission extends FBase {
-    private _permissionPointsDefinition = PermissionPointsDefinitions;
+    public permissionPointsDefinition = PermissionPointsDefinitions;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

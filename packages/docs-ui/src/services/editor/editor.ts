@@ -100,6 +100,9 @@ export interface IEditorConfigParams {
     // show scrollBar
     scrollBar?: boolean;
 
+    /**
+     * show text on single line
+     */
     isSingle?: boolean;
 }
 

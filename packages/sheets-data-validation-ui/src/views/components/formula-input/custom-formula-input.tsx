@@ -29,6 +29,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });
+
     return (
         <FormulaEditor
             initValue={value?.formula1 ?? '' as any}

@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import { createInternalEditorID, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
@@ -28,7 +28,7 @@ import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/s
 
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { filter, noop, throttleTime } from 'rxjs';
+import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 
 import { useEditorInput } from './hooks/useEditorInput';
@@ -174,22 +174,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const focus = useFocus(editor);
 
     useLayoutEffect(() => {
-        // 如果是失去焦点的话，需要立刻执行
-        // 在进行多个 input 切换的时候,失焦必须立刻执行.
         if (_isFocus) {
-            const time = setTimeout(() => {
-                isFocusSet(_isFocus);
-                if (_isFocus) {
-                    focus();
-                }
-            }, 30);
-            return () => {
-                clearTimeout(time);
-            };
+            isFocusSet(_isFocus);
+            focus();
         } else {
+            editor?.blur();
             resetSelection();
             isFocusSet(_isFocus);
-            editor?.blur();
         }
     }, [_isFocus, focus]);
 
@@ -303,15 +294,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useFirstHighlightDoc(rangeString, '', isFocus, highlightDoc, highlightSheet, editor);
 
     const handleClick = () => {
-        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
-        // 即使失焦是 mousedown 事件,
-        // 聚焦是 mouseup 事件,
-        // 但是 react 的 useEffect 无法保证顺序,无法确保失焦在聚焦之前.
-        setTimeout(() => {
-            onFocus();
-            focus();
-            isFocusSet(true);
-        }, 30);
+        onFocus();
+        focus();
+        isFocusSet(true);
     };
 
     const handleConfirm = (ranges: IUnitRangeName[]) => {
@@ -498,20 +483,20 @@ function RangeSelectorDialog(props: {
         }
     }, [ranges]);
 
-    useEffect(() => {
-        const d = editorService.focusStyle$
-            .pipe(
-                filter((e) => !!e && DOCS_NORMAL_EDITOR_UNIT_ID_KEY !== e)
-            )
-            .subscribe((e) => {
-                if (e !== editorId) {
-                    handleClose();
-                }
-            });
-        return () => {
-            d.unsubscribe();
-        };
-    }, [editorService, editorId]);
+    // useEffect(() => {
+    //     const d = editorService.focusStyle$
+    //         .pipe(
+    //             filter((e) => !!e && DOCS_NORMAL_EDITOR_UNIT_ID_KEY !== e)
+    //         )
+    //         .subscribe((e) => {
+    //             if (e !== editorId) {
+    //                 handleClose();
+    //             }
+    //         });
+    //     return () => {
+    //         d.unsubscribe();
+    //     };
+    // }, [editorService, editorId]);
 
     return (
         <Dialog

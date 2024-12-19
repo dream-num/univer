@@ -398,8 +398,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        this._setOpenForCurrent(unitId, sheetId);
-
         const { document, scene } = editorObject;
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
@@ -458,7 +456,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const editCellState = this._editorBridgeService.getEditCellState();
         let { keycode } = param;
-        this._setOpenForCurrent(null, null);
         this._cursorChange = CursorChange.InitialState;
 
         this._exitInput(param);
@@ -517,18 +514,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
         this._moveCursor(keycode);
-    }
-
-    private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
-        const sheetEditors = this._editorService.getAllEditor();
-        for (const [_, sheetEditor] of sheetEditors) {
-            if (!sheetEditor.isSheetEditor()) {
-                continue;
-            }
-
-            sheetEditor.setOpenForSheetUnitId(unitId);
-            sheetEditor.setOpenForSheetSubUnitId(sheetId);
-        }
     }
 
     private _getEditorObject() {

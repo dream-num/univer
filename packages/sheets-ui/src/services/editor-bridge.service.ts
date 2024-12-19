@@ -218,10 +218,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             startY = this._currentEditCellLayout.position.startY;
         }
 
-        this._editorService.setOperationSheetUnitId(unitId);
-
-        this._editorService.setOperationSheetSubUnitId(sheetId);
-
         this._currentEditCellLayout = {
             position: {
                 startX,
@@ -386,10 +382,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                 ];
             }
         }
-
-        this._editorService.setOperationSheetUnitId(unitId);
-
-        this._editorService.setOperationSheetSubUnitId(sheetId);
 
         return {
             position: {

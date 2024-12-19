@@ -26,8 +26,8 @@ export { hasParagraphInTable } from './basics/paragraph';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
-export { TextEditor } from './components/editor/TextEditor';
-export { RangeSelector as DocRangeSelector } from './components/range-selector/RangeSelector';
+// export { TextEditor } from './components/editor/TextEditor';
+// export { RangeSelector as DocRangeSelector } from './components/range-selector/RangeSelector';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';

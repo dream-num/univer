@@ -178,24 +178,17 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     useKeyboardEvent(isFocus, keyboradEventConfig, editor);
     useLayoutEffect(() => {
-        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
         if (_isFocus) {
-            const time = setTimeout(() => {
-                isFocusSet(_isFocus);
-                if (_isFocus) {
-                    focus();
-                }
-            }, 30);
-            return () => {
-                clearTimeout(time);
-            };
+            isFocusSet(_isFocus);
+            focus();
         } else {
             if (resetSelectionOnBlur) {
+                editor?.blur();
                 resetSelection();
             }
             isFocusSet(_isFocus);
         }
-    }, [_isFocus, focus, resetSelectionOnBlur]);
+    }, [_isFocus, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor);
     useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId);

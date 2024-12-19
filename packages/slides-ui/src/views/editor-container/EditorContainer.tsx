@@ -16,7 +16,7 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
-import { IEditorService, TextEditor } from '@univerjs/docs-ui';
+import { IEditorService } from '@univerjs/docs-ui';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
@@ -131,14 +131,14 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            <TextEditor
+            {/* <TextEditor
                 id={SLIDE_EDITOR_ID}
                 className={styles.editorInput}
                 snapshot={snapshot}
                 cancelDefaultResizeListener={false}
                 isSheetEditor={false}
                 isSingle={false}
-            />
+            /> */}
         </div>
     );
 };

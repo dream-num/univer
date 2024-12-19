@@ -173,12 +173,6 @@ export class Editor extends Disposable implements IEditor {
     private readonly _selectionChange$ = new Subject<IDocSelectionInnerParam>();
     selectionChange$: Observable<IDocSelectionInnerParam> = this._selectionChange$.asObservable();
 
-    private _valueLegality = true;
-
-    private _openForSheetUnitId: Nullable<string>;
-
-    private _openForSheetSubUnitId: Nullable<string>;
-
     constructor(
         private _param: IEditorOptions,
         private _univerInstanceService: IUniverInstanceService,
@@ -187,8 +181,6 @@ export class Editor extends Disposable implements IEditor {
         private _undoRedoService: IUndoRedoService
     ) {
         super();
-        this._openForSheetUnitId = this._param.openForSheetUnitId;
-        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
 
         this._listenSelection();
     }
@@ -394,40 +386,6 @@ export class Editor extends Disposable implements IEditor {
         return this._param.render;
     }
 
-    isSingleChoice() {
-        return this._param.isSingleChoice ?? false;
-    }
-
-    /** @deprecated */
-    setOpenForSheetUnitId(unitId: Nullable<string>) {
-        this._openForSheetUnitId = unitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetUnitId() {
-        return this._openForSheetUnitId;
-    }
-
-    /** @deprecated */
-    setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
-        this._openForSheetSubUnitId = subUnitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetSubUnitId() {
-        return this._openForSheetSubUnitId;
-    }
-
-    /** @deprecated */
-    isValueLegality() {
-        return this._valueLegality === true;
-    }
-
-    /** @deprecated */
-    setValueLegality(state = true) {
-        this._valueLegality = state;
-    }
-
     isFocus() {
         return this._focus;
     }
@@ -469,14 +427,8 @@ export class Editor extends Disposable implements IEditor {
         return this._param.visible;
     }
 
-    /** @deprecated */
     isSheetEditor() {
         return isInternalEditorID(this._getEditorId());
-    }
-
-    /** @deprecated */
-    isFormulaEditor() {
-        return this._param.isFormulaEditor === true;
     }
 
     /**

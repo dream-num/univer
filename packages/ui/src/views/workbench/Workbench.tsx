@@ -57,7 +57,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    const userHeaderComponents = useComponentsOfPart(BuiltInUIPart.USER_HEADER);
+    const customHeaderComponents = useComponentsOfPart(BuiltInUIPart.CUSTOM_HEADER);
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
     const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
@@ -140,8 +140,8 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
               */}
             <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* user header */}
-                <div className={styles.workbenchUserHeader}>
-                    <ComponentContainer key="user-header" components={userHeaderComponents} />
+                <div className={styles.workbenchCustomHeader}>
+                    <ComponentContainer key="custom-header" components={customHeaderComponents} />
                 </div>
 
                 {/* header */}

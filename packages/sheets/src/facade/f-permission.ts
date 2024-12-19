@@ -16,17 +16,11 @@
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { PermissionPointsDefinitions } from './const';
 
 export class FPermission extends FBase {
-    _workbookEditablePermission = WorkbookEditablePermission;
-    _workbookViewPermission = WorkbookViewPermission;
-
-    _worksheetEditPermission = WorksheetEditPermission;
-    _worksheetViewPermission = WorksheetViewPermission;
-
-    _rangeProtectionPermissionEditPoint = RangeProtectionPermissionEditPoint;
-    _rangeProtectionPermissionViewPoint = RangeProtectionPermissionViewPoint;
+    private _permissionPointsDefinition = PermissionPointsDefinitions;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

@@ -56,7 +56,7 @@ export interface IFRangeHyperlinkMixin {
      * @param id id of the hyperlink
      * @returns success or not
      */
-    cancelHyperLink(id: string): Promise<boolean>;
+    cancelHyperLink(id: string): boolean;
 }
 
 export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
@@ -128,7 +128,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
      * @param id id of the hyperlink
      * @returns success or not
      */
-    override cancelHyperLink(id: string): Promise<boolean> {
+    override cancelHyperLink(id: string): boolean {
         const params: ICancelHyperLinkCommandParams = {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -137,7 +137,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
             id,
         };
 
-        return this._commandService.executeCommand(CancelHyperLinkCommand.id, params);
+        return this._commandService.syncExecuteCommand(CancelHyperLinkCommand.id, params);
     }
 
     // #endregion

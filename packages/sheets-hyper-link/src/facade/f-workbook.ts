@@ -16,8 +16,8 @@
 
 import type { IRange } from '@univerjs/core';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
-import { FWorkbook } from '@univerjs/sheets/facade';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
+import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookHyperlinkMixin {
     /**
@@ -32,7 +32,6 @@ export interface IFWorkbookHyperlinkMixin {
      * @param hyperlink the hyperlink string
      * @returns the hyperlink info
      */
-    // TODO@weird94: this should be moved to hyperlink plugin
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
 

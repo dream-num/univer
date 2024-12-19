@@ -99,6 +99,8 @@ export interface IEditorConfigParams {
 
     // show scrollBar
     scrollBar?: boolean;
+
+    isSingle?: boolean;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
@@ -352,6 +354,10 @@ export class Editor extends Disposable implements IEditor {
     /** @deprecated */
     setFocus(state = false) {
         this._focus = state;
+    }
+
+    isSingle() {
+        return this._param.isSingle === true;
     }
 
     isReadOnly() {

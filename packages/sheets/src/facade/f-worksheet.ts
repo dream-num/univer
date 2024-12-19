@@ -1376,7 +1376,7 @@ export class FWorksheet extends FBase {
         const commandService = this._injector.get(ICommandService);
         const workbook = this._workbook;
         const sheets = workbook.getSheets();
-        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() === BooleanNumber.TRUE);
+        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() !== BooleanNumber.TRUE);
         if (visibleSheets.length <= 1) {
             throw new Error('Cannot hide the only visible sheet');
         }

@@ -16,9 +16,18 @@
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
 export class FPermission extends FBase {
+    _workbookEditablePermission = WorkbookEditablePermission;
+    _workbookViewPermission = WorkbookViewPermission;
+
+    _worksheetEditPermission = WorksheetEditPermission;
+    _worksheetViewPermission = WorksheetViewPermission;
+
+    _rangeProtectionPermissionEditPoint = RangeProtectionPermissionEditPoint;
+    _rangeProtectionPermissionViewPoint = RangeProtectionPermissionViewPoint;
+
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -75,7 +84,15 @@ export class FPermission extends FBase {
         if (hasRangeProtection) {
             throw new Error('sheet protection cannot intersect with range protection');
         }
-        const permissionId = await this._authzIoService.create({ objectType: UnitObject.Worksheet });
+        const permissionId = await this._authzIoService.create({
+            objectType: UnitObject.Worksheet, worksheetObject: {
+                collaborators: [],
+                unitID: unitId,
+                strategies: [],
+                name: '',
+                scope: undefined,
+            },
+        });
         const res = this._commandService.syncExecuteCommand(AddWorksheetProtectionMutation.id, {
             unitId,
             subUnitId,
@@ -139,7 +156,15 @@ export class FPermission extends FBase {
         } else {
             const rule = this._worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
             if (!rule) {
-                permissionId = await this._authzIoService.create({ objectType: UnitObject.Worksheet });
+                permissionId = await this._authzIoService.create({
+                    objectType: UnitObject.Worksheet, worksheetObject: {
+                        collaborators: [],
+                        unitID: unitId,
+                        strategies: [],
+                        name: '',
+                        scope: undefined,
+                    },
+                });
                 this._commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
             } else {
                 permissionId = rule.permissionId;
@@ -170,7 +195,14 @@ export class FPermission extends FBase {
         ruleId: string;
     } | undefined> {
         // The permission ID generation here only provides the most basic permission type. If need collaborators later, need to expand this
-        const permissionId = await this._authzIoService.create({ objectType: UnitObject.SelectRange });
+        const permissionId = await this._authzIoService.create({
+            objectType: UnitObject.SelectRange, selectRangeObject: {
+                collaborators: [],
+                unitID: unitId,
+                name: '',
+                scope: undefined,
+            },
+        });
         const ruleId = `ruleId_${generateRandomId(6)}`;
         const worksheetProtection = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         if (worksheetProtection) {

@@ -19,6 +19,7 @@ import {
     CellValueType,
     CommandType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     getCellValueType,
     ICommandService,
     isRealNum,
@@ -27,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 
 import {
     getCellAtRowCol,
@@ -35,6 +37,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { type IInsertFunction, InsertFunctionCommand } from '@univerjs/sheets-formula';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export interface IInsertFunctionOperationParams {
     /**
@@ -46,6 +49,7 @@ export interface IInsertFunctionOperationParams {
 export const InsertFunctionOperation: ICommand = {
     id: 'formula-ui.operation.insert-function',
     type: CommandType.OPERATION,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const editorService = accessor.get(IEditorService);
@@ -62,6 +66,7 @@ export const InsertFunctionOperation: ICommand = {
 
         const { value } = params;
         const commandService = accessor.get(ICommandService);
+        const editorBridgeService = accessor.get(IEditorBridgeService);
 
         // No match refRange situation, enter edit mode
         // In each range, first take the judgment result of the primary position (if there is no primary, take the upper left corner),
@@ -148,12 +153,13 @@ export const InsertFunctionOperation: ICommand = {
                 selections: [resultRange],
             };
             await commandService.executeCommand(SetSelectionsOperation.id, setSelectionParams);
-
-            // TODO@DR-Univer: Maybe setTimeout can be removed
-            setTimeout(() => {
-                // edit cell
-                editorService.setFormula(`=${value}(${editFormulaRangeString}`);
-            }, 0);
+            const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            editorBridgeService.changeVisible({
+                visible: true,
+                unitId,
+                eventType: DeviceInputEventType.Dblclick,
+            });
+            editor?.replaceText(`=${value}(${editFormulaRangeString}`);
         }
 
         if (list.length === 0) return false;

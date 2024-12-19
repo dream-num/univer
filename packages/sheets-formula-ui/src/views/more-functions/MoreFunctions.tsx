@@ -15,10 +15,12 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
-import { useActiveWorkbook } from '@univerjs/sheets-ui';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import { getSheetCommandTarget } from '@univerjs/sheets';
+import { IEditorBridgeService, useActiveWorkbook } from '@univerjs/sheets-ui';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
@@ -30,9 +32,10 @@ export function MoreFunctions() {
     const [inputParams, setInputParams] = useState<boolean>(false);
     // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
-
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const localeService = useDependency(LocaleService);
     const editorService = useDependency(IEditorService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -44,8 +47,15 @@ export function MoreFunctions() {
     }
 
     function handleConfirm() {
-        // TODO@Dushusir: save function  `=${functionInfo?.functionName}(${params.join(',')})`
-        editorService.setFormula(`=${functionInfo?.functionName}(`);
+        const sheetTarget = getSheetCommandTarget(univerInstanceService);
+        if (!sheetTarget) return;
+        editorBridgeService.changeVisible({
+            visible: true,
+            unitId: sheetTarget.unitId,
+            eventType: DeviceInputEventType.Dblclick,
+        });
+        const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        editor?.replaceText(`=${functionInfo?.functionName}(`);
     }
 
     return (

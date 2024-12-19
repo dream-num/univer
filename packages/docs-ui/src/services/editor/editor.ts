@@ -315,6 +315,24 @@ export class Editor extends Disposable implements IEditor {
         });
     }
 
+    replaceText(text: string) {
+        const data = this.getDocumentData();
+
+        this.setDocumentData(
+            {
+                ...data,
+                body: {
+                    dataStream: `${text}\r\n`,
+                },
+            },
+            [{
+                startOffset: text.length,
+                endOffset: text.length,
+                collapsed: true,
+            }]
+        );
+    }
+
     // Clear the undo redo history of this editor.
     clearUndoRedoHistory(): void {
         const editorUnitId = this.getEditorId();

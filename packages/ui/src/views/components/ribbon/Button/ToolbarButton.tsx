@@ -45,6 +45,11 @@ export interface IBaseToolbarButtonProps {
      */
     active?: boolean;
 
+    /**
+     * This toolbar button has no icon
+     */
+    noIcon?: boolean;
+
     onMouseEnter?: React.MouseEventHandler;
     onMouseLeave?: React.MouseEventHandler;
 }
@@ -59,6 +64,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
         style,
         disabled = false,
         active = false,
+        noIcon,
         onClick,
         onDoubleClick,
         ...restProps
@@ -83,13 +89,19 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     const _className = clsx(
         styles.toolbarBtn,
         {
-            [`${styles.toolbarBtn}-active`]: active,
+            [`
+              ${styles.toolbarBtnActive}
+            `]: active,
+            [`
+              ${styles.toolbarBtnNoIcon}
+            `]: noIcon,
         },
         className
     );
 
     return (
         <button
+            type="button"
             className={_className}
             style={style}
             disabled={disabled}

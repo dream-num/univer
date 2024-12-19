@@ -61,7 +61,7 @@ export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRang
 export function attachSelectionWithCoord(selection: ISelectionWithStyle, skeleton: SpreadsheetSkeleton): ISelectionWithCoord {
     const { range, primary, style } = selection;
     const rangeWithCoord = attachRangeWithCoord(skeleton, range);
-    const primaryWithCoord = primary ? attachPrimaryWithCoord(skeleton, primary) : undefined;
+    const primaryWithCoord = primary ? attachPrimaryWithCoord(skeleton, primary) : primary;
     return {
         rangeWithCoord,
         primaryWithCoord,

@@ -60,10 +60,10 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         if (!doc?.documentModel) return false;
 
         const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());
-        const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
+        const range = snapshot.body?.customRanges?.find((range) => `${range.rangeId}` === id);
         if (!range) return false;
 
-        const textX = BuildTextUtils.customRange.delete(accessor, { documentDataModel: doc.documentModel, rangeId: id });
+        const textX = BuildTextUtils.customRange.delete(accessor, { documentDataModel: doc.documentModel, rangeId: range.rangeId });
         if (!textX) return false;
 
         const newBody = TextX.apply(snapshot.body!, textX.serialize());

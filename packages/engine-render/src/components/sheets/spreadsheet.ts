@@ -120,7 +120,7 @@ export class Spreadsheet extends SheetComponent {
             ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRangeByViewBound(bound))
             : [];
 
-        const viewRanges = [spreadsheetSkeleton.getRangeByViewBound(viewportInfo.cacheBound)];
+        const viewRanges = [spreadsheetSkeleton.getCacheRangeByViewport(viewportInfo)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
 
@@ -541,7 +541,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, overflowCache, showGridlines } = spreadsheetSkeleton;
+        const { rowColumnSegment, overflowCache, showGridlines, gridlinesColor } = spreadsheetSkeleton;
         const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
@@ -562,7 +562,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        ctx.strokeStyle = ctx.renderConfig.gridlineColor ?? getColor([214, 216, 219]);
+        ctx.strokeStyle = gridlinesColor ?? ctx.renderConfig.gridlinesColor ?? getColor([214, 216, 219]);
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;

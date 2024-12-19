@@ -49,7 +49,7 @@ importers:
         version: link:packages/design
       '@vitejs/plugin-react':
         specifier: ^4.3.4
-        version: 4.3.4(vite@6.0.3(@types/node@22.10.1)(jiti@1.21.6)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1))
+        version: 4.3.4(vite@5.4.11(@types/node@22.10.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6))
       eslint:
         specifier: 9.16.0
         version: 9.16.0(jiti@1.21.6)
@@ -1055,8 +1055,8 @@ importers:
         specifier: 0.1.39
         version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
-        specifier: 0.16.1
-        version: 0.16.1
+        specifier: 0.16.2
+        version: 0.16.2
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -2286,6 +2286,9 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -5489,8 +5492,8 @@ packages:
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
 
-  '@wendellhu/redi@0.16.1':
-    resolution: {integrity: sha512-nwyKHCIbAgA7ZjhH6a49lVhe8oPFHjg4AtUHUSqdQgYNvHIFTbIWEbieS1pU0TMMHrff+mxGCGp3BZW14AvNsw==}
+  '@wendellhu/redi@0.16.2':
+    resolution: {integrity: sha512-34VWdZbIqjus5gAQCRDEBYxwtSEg0yU3pa7hqu0Mgo/xAZ6KpHb5WF0E7H0f3NGW/LwLzxlKCduYPn3d9EUPMw==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -12508,6 +12511,17 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
+  '@vitejs/plugin-react@4.3.4(vite@5.4.11(@types/node@22.10.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6))':
+    dependencies:
+      '@babel/core': 7.26.0
+      '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.0)
+      '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.0)
+      '@types/babel__core': 7.20.5
+      react-refresh: 0.14.2
+      vite: 5.4.11(@types/node@22.10.1)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)
+    transitivePeerDependencies:
+      - supports-color
+
   '@vitejs/plugin-react@4.3.4(vite@6.0.3(@types/node@22.10.1)(jiti@1.21.6)(less@4.2.1)(sass@1.77.5)(terser@5.31.6)(tsx@4.19.2)(yaml@2.6.1))':
     dependencies:
       '@babel/core': 7.26.0
@@ -12795,7 +12809,7 @@ snapshots:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@0.16.1': {}
+  '@wendellhu/redi@0.16.2': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

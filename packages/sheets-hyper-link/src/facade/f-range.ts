@@ -16,8 +16,8 @@
 
 import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
-import { FRange } from '@univerjs/sheets/facade';
 import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { FRange } from '@univerjs/sheets/facade';
 
 export interface ICellHyperLink {
     id: string;
@@ -28,6 +28,14 @@ export interface ICellHyperLink {
 }
 
 export interface IFRangeHyperlinkMixin {
+    /**
+     * Set hyperlink in the cell in the range.
+     * [!important] This method is async.
+     * @param url url
+     * @param label optional, label of the url
+     * @returns success or not
+     */
+    setHyperLink(url: string, label?: string): Promise<boolean>;
     /**
      * Get all hyperlinks in the cell in the range.
      * @returns hyperlinks
@@ -54,14 +62,7 @@ export interface IFRangeHyperlinkMixin {
 export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
-    /**
-     * Set hyperlink in the cell in the range.
-     * [!important] This method is async.
-     * @param url url
-     * @param label optional, label of the url
-     * @returns success or not
-     */
-    setHyperLink(url: string, label?: string): Promise<boolean> {
+    override setHyperLink(url: string, label?: string): Promise<boolean> {
         const params: IAddHyperLinkCommandParams = {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
@@ -90,7 +91,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return cellValue.p.body?.customRanges
             ?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)
             .map((range) => ({
-                id: `${range.rangeId}_${range.startIndex}_${range.endIndex}`,
+                id: `${range.rangeId}`,
                 startIndex: range.startIndex,
                 endIndex: range.endIndex,
                 url: range.properties?.url ?? '',

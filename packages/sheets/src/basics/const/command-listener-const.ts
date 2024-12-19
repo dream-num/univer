@@ -23,6 +23,7 @@ import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-wo
 import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
+import { SetGridlinesColorMutation } from '../../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
@@ -56,6 +57,7 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     RemoveColMutation.id,
     RemoveRowMutation.id,
     ToggleGridlinesMutation.id,
+    SetGridlinesColorMutation.id,
 ];
 
 export const COMMAND_LISTENER_VALUE_CHANGE = [

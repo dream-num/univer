@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { FUniver, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import { FUniver, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
@@ -42,10 +43,21 @@ export interface IFUniverSheetsMixin {
     getUniverSheet(id: string): FWorkbook | null;
     /**
      * Get the PermissionInstance.
-     *
+     * @deprecated This function is deprecated and will be removed in version 0.6.0.
+     *             Please use the function with the same name on the `FWorkbook` instance instead.
      * @returns {FPermission} - The PermissionInstance.
      */
     getPermission(): FPermission;
+    /**
+     * Register a callback that will be triggered when a Univer Sheet is created.
+     */
+    onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
+
+    /**
+     * Create a new defined name builder.
+     * @returns {FDefinedNameBuilder} - The defined name builder.
+     */
+    newDefinedName(): FDefinedNameBuilder;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
@@ -75,6 +87,19 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 
     override getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+
+    override onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable {
+        const subscription = this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            const fworkbook = this._injector.createInstance(FWorkbook, workbook);
+            callback(fworkbook);
+        });
+
+        return toDisposable(subscription);
+    }
+
+    override newDefinedName(): FDefinedNameBuilder {
+        return this._injector.createInstance(FDefinedNameBuilder);
     }
 }
 

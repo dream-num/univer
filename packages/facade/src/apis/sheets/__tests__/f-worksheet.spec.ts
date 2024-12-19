@@ -516,6 +516,11 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: -1, startColumn: 2, xSplit: 2, ySplit: 0 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.setFrozenColumns(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: -1, startColumn: 4, xSplit: 2, ySplit: 0 });
+        expect(activeSheet?.getFrozenColumnRange()).toEqual({ startColumn: 2, endColumn: 3 });
     });
 
     it('Worksheet setFrozenRows and getFrozenRows', () => {
@@ -526,6 +531,11 @@ describe('Test FWorksheet', () => {
 
         const freeze = activeSheet?.getFreeze();
         expect(freeze).toEqual({ startRow: 3, startColumn: -1, xSplit: 0, ySplit: 3 });
+
+        activeSheet?.cancelFreeze();
+        activeSheet?.setFrozenRows(2, 3);
+        expect(activeSheet?.getFreeze()).toEqual({ startRow: 4, startColumn: -1, xSplit: 0, ySplit: 2 });
+        expect(activeSheet?.getFrozenRowRange()).toEqual({ startRow: 2, endRow: 3 });
     });
 
     it('Worksheet combined frozen rows and columns', () => {

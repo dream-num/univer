@@ -15,6 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
+
 import {
     BooleanNumber,
     CommandType,
@@ -24,8 +26,6 @@ import {
     IUniverInstanceService,
     LocaleService,
 } from '@univerjs/core';
-
-import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 

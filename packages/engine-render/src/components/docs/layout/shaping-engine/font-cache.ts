@@ -225,7 +225,15 @@ export class FontCache {
             const canvas = document.createElement('canvas');
             this._context = canvas.getContext('2d')!;
         }
-
+        if (!this._context) {
+            return {
+                width: 0,
+                fontBoundingBoxAscent: 0,
+                fontBoundingBoxDescent: 0,
+                actualBoundingBoxAscent: 0,
+                actualBoundingBoxDescent: 0,
+            };
+        }
         // const { fontString, fontSize, fontFamily } = fontStyle;
 
         const ctx = this._context;

@@ -31,6 +31,14 @@ export class ScriptEditorService extends Disposable {
         super();
     }
 
+    override dispose(): void {
+        super.dispose();
+
+        if (this._editorInstance) {
+            this._editorInstance.dispose();
+        }
+    }
+
     setEditorInstance(editor: editor.IStandaloneCodeEditor): IDisposable {
         this._editorInstance = editor;
         return toDisposable(() => (this._editorInstance = null));
@@ -43,10 +51,7 @@ export class ScriptEditorService extends Disposable {
     requireVscodeEditor(): void {
         if (!window.MonacoEnvironment) {
             const config = this._configService.getConfig<IUniverUniscriptConfig>(UNISCRIPT_PLUGIN_CONFIG_KEY);
-
-            window.MonacoEnvironment = {
-                getWorkerUrl: config?.getWorkerUrl,
-            };
+            window.MonacoEnvironment = { getWorkerUrl: config?.getWorkerUrl };
         }
     }
 }

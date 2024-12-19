@@ -16,8 +16,8 @@
 
 import type { ICellData, Injector, Nullable } from '@univerjs/core';
 import type { FUniver } from '../../everything';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ICommandService, IUniverInstanceService, LocaleType } from '@univerjs/core';
+import { CopySheetCommand, InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SetWorksheetOrderMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
@@ -49,6 +49,9 @@ describe('Test FWorkbook', () => {
         commandService.registerCommand(SetWorksheetActiveOperation);
         commandService.registerCommand(RemoveSheetCommand);
         commandService.registerCommand(RemoveSheetMutation);
+        commandService.registerCommand(CopySheetCommand);
+        commandService.registerCommand(SetWorksheetOrderCommand);
+        commandService.registerCommand(SetWorksheetOrderMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -74,7 +77,7 @@ describe('Test FWorkbook', () => {
         expect(activeSheet).not.toBeNull();
     });
 
-    it('Workbook insertSheet, deleteSheet, and setActiveSheet', () => {
+    it('Workbook insertSheet, deleteSheet, and setActiveSheet', async () => {
         const workbook = univerAPI.getActiveWorkbook();
 
         // insert a new sheet
@@ -93,7 +96,24 @@ describe('Test FWorkbook', () => {
         expect(activeSheet?.getSheetName()).toBe('sheet1');
 
         // delete the active sheet
-        workbook?.deleteSheet(activeSheet!);
+        await workbook?.deleteSheet(activeSheet!);
         expect(workbook?.getSheets().length).toBe(1);
+    });
+
+    it('Workbook deleteActiveSheet', async () => {
+        const activeSpreadsheet = univerAPI.getActiveWorkbook()!;
+        activeSpreadsheet.insertSheet();
+        expect(activeSpreadsheet.getNumSheets()).toBe(2);
+        await activeSpreadsheet.deleteActiveSheet();
+        expect(activeSpreadsheet.getNumSheets()).toBe(1);
+        activeSpreadsheet.setActiveSheet(activeSpreadsheet.getSheets()[0]);
+        await activeSpreadsheet.duplicateActiveSheet();
+        expect(activeSpreadsheet.getNumSheets()).toBe(2);
+        activeSpreadsheet.setLocale(LocaleType.RU_RU);
+        expect(activeSpreadsheet.getLocale()).toBe(LocaleType.RU_RU);
+        const worksheet = activeSpreadsheet.getActiveSheet();
+        expect(worksheet.getIndex()).toBe(0);
+        await activeSpreadsheet.moveActiveSheet(1);
+        expect(worksheet.getIndex()).toBe(1);
     });
 });

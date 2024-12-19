@@ -137,6 +137,11 @@ export interface IWorksheetData {
     };
 
     showGridlines: BooleanNumber;
+    /**
+     * Color of the gridlines.
+     */
+    gridlinesColor?: string;
+
     rightToLeft: BooleanNumber;
 }
 

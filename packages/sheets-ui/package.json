@@ -27,6 +27,7 @@
         "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
+    "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/es/index.js",

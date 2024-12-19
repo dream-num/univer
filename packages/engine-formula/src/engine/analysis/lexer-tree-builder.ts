@@ -263,7 +263,7 @@ export class LexerTreeBuilder extends Disposable {
         return newSequenceNodes;
     }
 
-    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType) {
+    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType, currentSheetName: string = '') {
         const nodes = this.sequenceNodesBuilder(formulaString);
         if (nodes == null) {
             return formulaString;
@@ -298,7 +298,7 @@ export class LexerTreeBuilder extends Disposable {
                 const newToken = serializeRangeToRefString({
                     range: newRange,
                     unitId,
-                    sheetName,
+                    sheetName: sheetName || currentSheetName,
                 });
 
                 const minusCount = newToken.length - token.length;

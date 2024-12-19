@@ -376,6 +376,8 @@ export class Worksheet {
 
     /**
      * Get the merged cell Range of the sheet cell.
+     * If (row, col) is not in a merged cell, return null
+     *
      * @param {number} row The row index of test cell
      * @param {number} col The column index of test cell
      * @returns {Nullable<IRange>} The merged cell range of the cell, if the cell is not in a merged cell, return null
@@ -679,7 +681,7 @@ export class Worksheet {
 
     /**
      * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
-     * @returns Gridlines Hidden Status
+     * @returns {boolean} Gridlines Hidden Status.
      */
     hasHiddenGridlines(): boolean {
         const { _snapshot: _config } = this;
@@ -689,6 +691,14 @@ export class Worksheet {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the color of the gridlines, or undefined if the gridlines are not colored.
+     * @returns {string | undefined} returns the color of the gridlines, or undefined if the gridlines are default.
+     */
+    getGridlinesColor(): string | undefined {
+        return this.getConfig().gridlinesColor;
     }
 
     /**
@@ -813,6 +823,10 @@ export class Worksheet {
      */
     getLastColumnWithContent(): number {
         return this._cellData.getRange().endColumn;
+    }
+
+    getDataRangeScope(): IRange {
+        return this._cellData.getStartEndScope();
     }
 
     cellHasValue(value: ICellData) {

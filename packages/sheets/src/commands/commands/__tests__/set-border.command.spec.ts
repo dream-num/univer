@@ -37,11 +37,18 @@ describe('Test style commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-
+    let getBorder: ({ startRow, startColumn }: IRange) => IBorderData | undefined;
     beforeEach(() => {
         const testBed = createCommandTestBed();
         univer = testBed.univer;
         get = testBed.get;
+        getBorder = ({ startRow, startColumn }: IRange): IBorderData | undefined => {
+            return get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getRange(startRow, startColumn)
+                .getBorder();
+        };
 
         commandService = get(ICommandService);
         [
@@ -72,14 +79,6 @@ describe('Test style commands', () => {
                         style: null,
                     },
                 ]);
-
-                function getBorder({ startRow, startColumn }: IRange): IBorderData | undefined {
-                    return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
-                        ?.getSheetBySheetId('sheet1')
-                        ?.getRange(startRow, startColumn)
-                        .getBorder();
-                }
 
                 expect(
                     await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.TOP })
@@ -279,16 +278,7 @@ describe('Test style commands', () => {
                     },
                 ]);
 
-                function getBorder({ startRow, startColumn }: IRange): IBorderData | undefined {
-                    return get(IUniverInstanceService)
-                        .getUniverSheetInstance('test')
-                        ?.getSheetBySheetId('sheet1')
-                        ?.getRange(startRow, startColumn)
-                        .getBorder();
-                }
-
                 expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
-
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
@@ -308,6 +298,7 @@ describe('Test style commands', () => {
                         value: BorderStyleTypes.SLANT_DASH_DOT,
                     })
                 ).toBeTruthy();
+
                 expect(getBorder({ startRow: 0, endRow: 0, startColumn: 5, endColumn: 5 })?.r).toStrictEqual({
                     s: BorderStyleTypes.SLANT_DASH_DOT,
                     cl: { rgb: '#aaaaaa' },
@@ -338,6 +329,43 @@ describe('Test style commands', () => {
                 expect(getBorder({ startRow: 1, endRow: 1, startColumn: 5, endColumn: 5 })?.b).not.toBeNull();
                 expect(getBorder({ startRow: 1, endRow: 1, startColumn: 5, endColumn: 5 })?.t).not.toBeNull();
                 expect(getBorder({ startRow: 1, endRow: 1, startColumn: 5, endColumn: 5 })?.l).not.toBeNull();
+            });
+
+            it('set border and clear border in adjacent cells', async () => {
+                // merge B1:B3, and set BorderType.ALL
+                // then set BorderType.NONE for A2
+                // The left border of B1 B3 should be kept, only left border of B2 should be none;
+                const selectionManager = get(SheetsSelectionsService);
+                selectionManager.setSelections([
+                    {
+                        range: { startRow: 0, startColumn: 1, endRow: 2, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+                expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
+                expect(
+                    await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.ALL })
+                ).toBeTruthy();
+                selectionManager.setSelections([
+                    {
+                        range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+                expect(
+                    await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.NONE })
+                ).toBeTruthy();
+                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 1, endColumn: 1 })?.l).toStrictEqual({
+                    s: BorderStyleTypes.THIN,
+                    cl: { rgb: '#000000' },
+                });
+                expect(getBorder({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 })?.l).toBeFalsy();
+                expect(getBorder({ startRow: 2, endRow: 2, startColumn: 1, endColumn: 1 })?.l).toStrictEqual({
+                    s: BorderStyleTypes.THIN,
+                    cl: { rgb: '#000000' },
+                });
             });
         });
 

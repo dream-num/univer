@@ -57,6 +57,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const instanceService = useDependency(IUniverInstanceService);
     const contentRef = useRef<HTMLDivElement>(null);
 
+    const customHeaderComponents = useComponentsOfPart(BuiltInUIPart.CUSTOM_HEADER);
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
     const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
@@ -138,6 +139,11 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
               * bubbled to this element and refocus the input element.
               */}
             <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+                {/* user header */}
+                <div className={styles.workbenchCustomHeader}>
+                    <ComponentContainer key="custom-header" components={customHeaderComponents} />
+                </div>
+
                 {/* header */}
                 {header && toolbar && (
                     <header className={styles.workbenchContainerHeader}>

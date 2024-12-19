@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent } from '../response';
+import { createIdentifier } from '@univerjs/core';
 
 /**
  * HTTP service could be implemented differently on platforms.

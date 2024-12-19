@@ -15,15 +15,9 @@
  */
 
 import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
 import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
-
-interface ICellPosition {
-    column: number; // column number
-    columnOffset: number; // column offset, unit is EMUs
-    row: number; // row number
-    rowOffset: number; // row offset, unit is EMUs
-}
 
 export enum SheetDrawingAnchorType {
     Position = '0',
@@ -31,9 +25,8 @@ export enum SheetDrawingAnchorType {
     None = '2',
 }
 
-export interface ISheetDrawingPosition extends IRotationSkewFlipTransform {
-    from: ICellPosition;
-    to: ICellPosition;
+export interface ISheetDrawingPosition extends IRotationSkewFlipTransform, ISheetOverGridPosition {
+
 }
 
 export interface ISheetDrawingBase {

@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Direction } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
-
 import type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
     IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
 } from '../../commands/commands/set-selection.command';
+import { Direction } from '@univerjs/core';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
     ExpandSelectionCommand,
     JumpOver,

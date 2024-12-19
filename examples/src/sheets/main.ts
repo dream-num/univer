@@ -41,8 +41,8 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
+import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -53,8 +53,10 @@ import '@univerjs/sheets-filter/facade';
 import '@univerjs/sheets-formula/facade';
 import '@univerjs/sheets-numfmt/facade';
 import '@univerjs/sheets-hyper-link-ui/facade';
-import '@univerjs/sheets-thread-comment/facade';
 
+import '@univerjs/sheets-thread-comment/facade';
+import '@univerjs/sheets-conditional-formatting/facade';
+import '@univerjs/sheets-drawing-ui/facade';
 import '../global.css';
 
 /* eslint-disable-next-line node/prefer-global/process */

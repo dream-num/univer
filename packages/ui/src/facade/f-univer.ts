@@ -15,37 +15,115 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { IMessageOptions } from '@univerjs/design';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
-import { ComponentManager, CopyCommand, IDialogService, ISidebarService, PasteCommand } from '@univerjs/ui';
+import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, PasteCommand } from '@univerjs/ui';
+import { FMenu, FSubmenu } from './f-menu-builder';
+import { FShortcut } from './f-shortcut';
 
 export interface IFUniverUIMixin {
+    /**
+     * Return the URL of the current page.
+     * @returns the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
+     */
+    getURL(): URL;
+    /**
+     * Get the Shortcut handler to interact with Univer's shortcut functionalities.
+     */
+    getShortcut(): FShortcut;
+    /**
+     * Copy the current selected content of the currently focused unit into your system clipboard.
+     */
     copy(): Promise<boolean>;
-
+    /**
+     * Paste into the current selected position of the currently focused unit from your system clipboard.
+     */
     paste(): Promise<boolean>;
-
+    /**
+     * Create a menu build object. You can insert new menus into the UI.
+     * @param {IFacadeMenuItem} menuItem the menu item
+     *
+     * @example
+     * ```ts
+     * univerAPI.createMenu({
+     *   id: 'custom-menu',
+     *   title: 'Custom Menu',
+     *   action: () => {},
+     * }).appendTo('ribbon.start.others');
+     * ```
+     *
+     * @returns the {@link FMenu} object
+     */
+    createMenu(menuItem: IFacadeMenuItem): FMenu;
+    /**
+     * Create a menu that contains submenus, and later you can append this menu and its submenus to the UI.
+     * @param submenuItem the submenu item
+     *
+     * @example
+     * ```ts
+     * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
+     *   .addSubmenu(univerAPI.createSubmenu({ id: 'submenu-nested', title: 'Nested Submenu' })
+     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-1', title: 'Item 1', action: () => {} }))
+     *     .addSeparator()
+     *     .addSubmenu(univerAPI.createMenu({ id: 'submenu-nested-2', title: 'Item 2', action: () => {} }))
+     *   )
+     *   .appendTo('contextMenu.others');
+     * ```
+     *
+     * @returns the {@link FSubmenu} object
+     */
+    createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
     /**
      * Open a sidebar.
+     *
+     * @deprecated Please use `openSidebar` instead.
      * @param params the sidebar options
      * @returns the disposable object
      */
     openSiderbar(params: ISidebarMethodOptions): IDisposable;
-
+    /**
+     * Open a sidebar.
+     *
+     * @deprecated Please use `openSidebar` instead.
+     * @param params the sidebar options
+     * @returns the disposable object
+     */
+    openSidebar(params: ISidebarMethodOptions): IDisposable;
     /**
      * Open a dialog.
      * @param dialog the dialog options
      * @returns the disposable object
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable;
-
     /**
      * Get the component manager
      * @returns The component manager
      */
     getComponentManager(): ComponentManager;
+    /**
+     * Show a message.
+     *
+     * @example
+     * ```ts
+     * const message = univerAPI.showMessage({ key: 'my-message', content: 'Warning', duration: 0 });
+     *
+     * someAction().then(() => message.dispose());
+     * ```
+     */
+    showMessage(options: IMessageOptions): IDisposable;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
+    override getURL(): URL {
+        return new URL(window.location.href);
+    }
+
+    override getShortcut(): FShortcut {
+        return this._injector.createInstance(FShortcut);
+    }
+
     override copy(): Promise<boolean> {
         return this._commandService.executeCommand(CopyCommand.id);
     }
@@ -54,9 +132,21 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this._commandService.executeCommand(PasteCommand.id);
     }
 
+    override createMenu(menuItem: IFacadeMenuItem): FMenu {
+        return this._injector.createInstance(FMenu, menuItem);
+    }
+
+    override createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu {
+        return this._injector.createInstance(FSubmenu, submenuItem);
+    }
+
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         const sideBarService = this._injector.get(ISidebarService);
         return sideBarService.open(params);
+    }
+
+    override openSidebar(params: ISidebarMethodOptions): IDisposable {
+        return this.openSiderbar(params);
     }
 
     override openDialog(dialog: IDialogPartMethodOptions): IDisposable {
@@ -73,10 +163,15 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override getComponentManager(): ComponentManager {
         return this._injector.get(ComponentManager);
     }
+
+    override showMessage(options: IMessageOptions): IDisposable {
+        const messageService = this._injector.get(IMessageService);
+        return messageService.show(options);
+    }
 }
 
 FUniver.extend(FUniverUIMixin);
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverUIMixin {}
+    interface FUniver extends IFUniverUIMixin { }
 }

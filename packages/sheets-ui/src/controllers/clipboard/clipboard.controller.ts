@@ -824,10 +824,14 @@ export class SheetClipboardController extends RxDisposable {
                 matrix.forValue((row, col, value) => {
                     const style = value.s;
                     if (typeof style === 'object') {
-                        valueMatrix.setValue(range.rows[row], range.cols[col], {
-                            s: { ...style, bd: undefined },
-                            v: value.v,
-                        });
+                        const newValue = Tools.deepClone(value);
+                        if (newValue.s) {
+                            newValue.s = {
+                                ...style,
+                                bd: null,
+                            };
+                        }
+                        valueMatrix.setValue(range.rows[row], range.cols[col], newValue);
                     }
                 });
 

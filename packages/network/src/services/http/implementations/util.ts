@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-export * from './cell-position';
-export * from './const/index';
-export * from './interfaces/index';
-export * from './selection';
-export { createUniqueKey, groupByKey } from './utils';
+import type { HTTPRequest } from '../request';
+
+export function parseFetchParamsFromRequest(request: HTTPRequest): RequestInit {
+    const fetchParams: RequestInit = {
+        method: request.method,
+        headers: request.getHeadersInit(),
+        body: request.getBody(),
+        credentials: request.withCredentials ? 'include' : undefined,
+    };
+
+    return fetchParams;
+}
+

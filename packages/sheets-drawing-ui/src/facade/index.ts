@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './f-over-grid-image';
 import './f-worksheet';
 
+export type * from './f-over-grid-image';
 export type * from './f-worksheet';

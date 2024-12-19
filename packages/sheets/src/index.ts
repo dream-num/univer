@@ -149,6 +149,7 @@ export {
     WorksheetSortPermission,
     WorksheetViewPermission,
 } from './services/permission/permission-point';
+export { PermissionPointsDefinitions } from './services/permission/permission-point/const';
 export { UnitAction, UnitObject } from '@univerjs/protocol';
 export { checkRangesEditablePermission } from './services/permission/util';
 
@@ -423,4 +424,5 @@ export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './co
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
+export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
 // #endregion

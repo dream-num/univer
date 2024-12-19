@@ -17,7 +17,7 @@
 export { UniverSheetsDrawingPlugin } from './plugin';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
 export { SHEET_DRAWING_PLUGIN } from './controllers/sheet-drawing.controller';
-export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from './services/sheet-drawing.service';
+export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom, ISheetImage } from './services/sheet-drawing.service';
 
 // #region - all commands
 

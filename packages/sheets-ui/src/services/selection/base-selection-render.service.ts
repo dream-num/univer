@@ -79,7 +79,7 @@ export interface ISheetSelectionRenderService {
      */
     getSelectionCellByPosition(x: number, y: number): ICellWithCoord;
 
-    getCellWithCoordByOffset(x: number, y: number): Nullable<ICellWithCoord>; // drawing
+    getCellWithCoordByOffset(x: number, y: number, skeleton?: SpreadsheetSkeleton): Nullable<ICellWithCoord>; // drawing
 
     setSingleSelectionEnabled(enabled: boolean): void;
 
@@ -627,9 +627,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return this.getCellWithCoordByOffset(x, y);
     }
 
-    getCellWithCoordByOffset(x: number, y: number): ICellWithCoord {
+    getCellWithCoordByOffset(x: number, y: number, skeletonParam?: SpreadsheetSkeleton): ICellWithCoord {
         const scene = this._scene;
-        const skeleton = this._skeleton;
+        const skeleton = skeletonParam ?? this._skeleton;
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 

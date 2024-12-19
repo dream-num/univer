@@ -35,7 +35,7 @@ export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { CustomCommandExecutionError } from './common/error';
 export { throttle } from './common/function';
-export type { ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
+export type { IAsyncInterceptor, ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey, createInterceptorKey, InterceptorEffectEnum, InterceptorManager } from './common/interceptor';
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';

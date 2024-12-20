@@ -303,7 +303,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = range;
 
-        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
+        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
         const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
         let rowIndex = startRow;
 

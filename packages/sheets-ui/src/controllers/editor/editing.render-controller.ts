@@ -256,17 +256,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            if (this._instanceSrv.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY) === documentLayoutObject.documentModel) {
-                return;
-            }
-
+            const cellDocument = this._instanceSrv.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+            if (cellDocument == null) return;
             const { startX, endX } = position;
             const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
             const { vertexAngle: angle } = convertTextRotation(textRotation);
-            documentModel!.updateDocumentId(editorUnitId);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
+                cellDocument.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
             this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {

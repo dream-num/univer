@@ -25,6 +25,7 @@ import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service'
 import { Univer } from '../univer';
 import { FBase } from './f-base';
 import { FBlob } from './f-blob';
+import { FEnum } from './f-enum';
 import { FHooks } from './f-hooks';
 
 export class FUniver extends FBase {
@@ -161,5 +162,9 @@ export class FUniver extends FBase {
      */
     newBlob(): FBlob {
         return this._injector.createInstance(FBlob);
+    }
+
+    get enums() {
+        return this._injector.createInstance(FEnum);
     }
 }

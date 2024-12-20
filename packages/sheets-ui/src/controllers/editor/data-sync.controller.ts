@@ -214,7 +214,7 @@ export class EditorDataSyncController extends Disposable {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
-        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null || skeleton == null) {
@@ -229,7 +229,6 @@ export class EditorDataSyncController extends Disposable {
 
         docViewModel.reset(docDataModel);
         const currentRender = this._renderManagerService.getRenderById(unitId);
-
         if (currentRender == null) {
             return;
         }

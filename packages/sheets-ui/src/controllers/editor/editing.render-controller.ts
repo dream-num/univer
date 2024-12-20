@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelectionModel } from '@univerjs/sheets';
@@ -252,9 +252,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
             const { position, documentLayoutObject, scaleX, editorUnitId } = state;
 
-            if (
-                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE)
-            ) {
+            if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE)) {
                 return;
             }
 
@@ -301,9 +299,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }));
     }
 
-       /**
-        * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
-        */
+    /**
+     * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
+     */
     private _commandExecutedListener(d: DisposableCollection) {
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === RichTextEditingMutation.id) {
@@ -311,10 +309,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const { unitId: commandUnitId } = params;
 
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
-                if (
-                    !this._isCurrentSheetFocused() ||
-                    isRangeSelector(commandUnitId)
-                ) {
+                if (!this._isCurrentSheetFocused() || isRangeSelector(commandUnitId)) {
                     return;
                 }
 
@@ -389,7 +384,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             documentLayoutObject,
             editorUnitId,
             unitId,
-            sheetId,
             isInArrayFormulaRange = false,
         } = editCellState;
         const editorObject = this._getEditorObject();
@@ -420,7 +414,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
-            this._emptyDocumentDataModel(!!isInArrayFormulaRange);
+            this._emptyDocumentDataModel(documentDataModel.getSnapshot().documentStyle, !!isInArrayFormulaRange);
             document.makeDirty();
 
             // @JOCS, Why calculate here?
@@ -686,8 +680,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
-    private _emptyDocumentDataModel(removeStyle: boolean) {
-        const empty = (documentDataModel: DocumentDataModel) => {
+    private _emptyDocumentDataModel(documentStyle: IDocumentStyle, removeStyle: boolean) {
+        const empty = (documentDataModel: DocumentDataModel, resetDocumentStyle?: boolean) => {
             const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
             const documentViewModel = this._getEditorViewModel(documentDataModel.getUnitId());
             if (documentViewModel == null) {
@@ -695,6 +689,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
             }
 
             emptyBody(snapshot.body!, removeStyle);
+            if (resetDocumentStyle) {
+                snapshot.documentStyle = documentStyle;
+            }
             snapshot.drawings = {};
             snapshot.drawingsOrder = [];
             documentDataModel.reset(snapshot);
@@ -702,12 +699,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
         };
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
-        documentDataModel && empty(documentDataModel);
+        documentDataModel && empty(documentDataModel, true);
+
         const formulaDocument = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
         formulaDocument && empty(formulaDocument);
     }
 }
 
+// eslint-disable-next-line complexity
 export function getCellDataByInput(
     cellData: ICellData,
     documentDataModel: Nullable<DocumentDataModel>,

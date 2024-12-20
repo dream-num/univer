@@ -221,7 +221,6 @@ export function FormulaBar() {
                     {FormulaEditor && (
                         <FormulaEditor
                             editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                            isSingle
                             initValue=""
                             onChange={() => {}}
                             isFocus={isFocusFxBar}

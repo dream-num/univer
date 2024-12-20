@@ -152,7 +152,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 <FormulaEditor
                     editorId={DOCS_NORMAL_EDITOR_UNIT_ID_KEY}
                     className={styles.editorInput}
-                    isSingle
                     initValue=""
                     onChange={() => {}}
                     isFocus={visible?.visible}

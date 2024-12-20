@@ -24,7 +24,7 @@ import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { DisposableCollection, ICommandService, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSelectionsOperation } from '@univerjs/sheets';
+import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -45,7 +45,7 @@ export const useSheetSelectionChange = (
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop
 ) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -62,6 +62,7 @@ export const useSheetSelectionChange = (
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+    const refSelectionsService = useDependency(IRefSelectionsService);
 
     const isScalingRef = useRef(false);
 
@@ -259,14 +260,19 @@ export const useSheetSelectionChange = (
                         map((e) => {
                             return serializeRange(e);
                         }),
-                        distinctUntilChanged()
+                        distinctUntilChanged(),
+                        debounceTime(100)
                     ).subscribe((rangeText) => {
                         isScalingRef.current = true;
                         handleSequenceNodeReplace(rangeText, index);
                     }));
                 });
             };
-            const dispose = merge(editor.input$, refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)).subscribe(() => {
+            const dispose = merge(
+                editor.input$,
+                refSelectionsService.selectionSet$,
+                refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)
+            ).subscribe(() => {
                 reListen();
             });
 

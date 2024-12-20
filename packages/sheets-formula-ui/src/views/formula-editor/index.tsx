@@ -146,7 +146,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
-    const highligh = useEvent((text: string, isNeedResetSelection: boolean = true) => {
+    const highligh = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
         if (!editor) {
             return;
         }
@@ -160,7 +160,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             // remove equals need to remove highlight style
             preText.slice(1) === text && preText[0] === '='
         );
-        highlightSheet(isFocus ? ranges : []);
+        if (isEnd) {
+            highlightSheet(isFocus ? ranges : []);
+        }
     });
 
     useEffect(() => {
@@ -199,7 +201,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             return;
         }
         needEmit();
-        highligh(`=${refString}`);
+        highligh(`=${refString}`, true, isEnd);
         if (isEnd) {
             focus();
             if (offset !== -1) {

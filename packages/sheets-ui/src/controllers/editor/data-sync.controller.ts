@@ -14,18 +14,39 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocumentBody, IDrawings, IParagraph, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocumentBody, IDocumentStyle, IDrawings, IParagraph, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { ICellEditorState } from '../../services/editor-bridge.service';
-import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { FormulaEditorController } from './formula-editor.controller';
+
+const formulaEditorStyle: IDocumentStyle = {
+    pageSize: {
+        width: Number.POSITIVE_INFINITY,
+        height: Number.POSITIVE_INFINITY,
+    },
+    documentFlavor: DocumentFlavor.UNSPECIFIED,
+    marginTop: 5,
+    marginBottom: 5,
+    marginRight: 0,
+    marginLeft: 0,
+    paragraphLineGapDefault: 0,
+    renderConfig: {
+        horizontalAlign: HorizontalAlign.UNSPECIFIED,
+        verticalAlign: VerticalAlign.TOP,
+        centerAngle: 0,
+        vertexAngle: 0,
+        wrapStrategy: WrapStrategy.WRAP,
+        isRenderStyle: BooleanNumber.FALSE,
+    },
+};
 
 /**
  * sync data between cell editor and formula editor
@@ -177,7 +198,7 @@ export class EditorDataSyncController extends Disposable {
         }
 
         const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
-        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null) {
@@ -226,7 +247,6 @@ export class EditorDataSyncController extends Disposable {
         docDataModel.getSnapshot().drawingsOrder = drawingsOrder ?? [];
 
         this._checkAndSetRenderStyleConfig(docDataModel);
-
         docViewModel.reset(docDataModel);
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (currentRender == null) {
@@ -252,6 +272,7 @@ export class EditorDataSyncController extends Disposable {
             return;
         }
 
+        snapshot.documentStyle = formulaEditorStyle;
         let renderConfig = snapshot.documentStyle.renderConfig;
 
         if (renderConfig == null) {

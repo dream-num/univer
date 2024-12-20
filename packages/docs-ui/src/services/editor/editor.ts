@@ -237,17 +237,17 @@ export class Editor extends Disposable implements IEditor {
         docSelectionRenderService.focus();
 
         // Step 3: Sets the selection of the last selection, and if not, to the beginning of the document.
-        const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
-            unitId: editorUnitId,
-            subUnitId: editorUnitId,
-        });
+        // const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
+        //     unitId: editorUnitId,
+        //     subUnitId: editorUnitId,
+        // });
 
-        if (lastSelectionInfo) {
-            this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
-                unitId: editorUnitId,
-                subUnitId: editorUnitId,
-            }, false);
-        }
+        // if (lastSelectionInfo) {
+        //     this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
+        //         unitId: editorUnitId,
+        //         subUnitId: editorUnitId,
+        //     }, false);
+        // }
 
         this._focus = true;
     }

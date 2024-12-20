@@ -1598,7 +1598,17 @@ export class FWorksheet extends FBase {
         return this._worksheet.getLastColumnWithContent();
     }
 
-    // same as Google App script
+    /**
+     * Returns the position of the last column that has content. Same as getLastColumns.
+     * @returns {number} the last column of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100, 20, 1, 1);
+     * console.log(fWorkSheet.getLastColumn());
+     * ```
+     */
     getLastColumn(): number {
         return this._worksheet.getLastColumnWithContent();
     }
@@ -1618,7 +1628,17 @@ export class FWorksheet extends FBase {
         return this._worksheet.getLastRowWithContent();
     }
 
-    // same as Google App script
+    /**
+     * Returns the position of the last row that has content, same as getLastRows().
+     * @returns {number} the last row of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100,1,1,1);
+     * fRange.setValue('Hello World');
+     * console.log(fWorkSheet.getLastRow());
+     */
     getLastRow(): number {
         return this._worksheet.getLastRowWithContent();
     }

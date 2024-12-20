@@ -449,6 +449,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const editCellState = this._editorBridgeService.getEditCellState();
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const snapshot = Tools.deepClone(documentDataModel?.getSnapshot());
         let { keycode } = param;
         this._cursorChange = CursorChange.InitialState;
 
@@ -470,7 +472,19 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
 
-        // Reselect the current selections, when exist cell editor by press ESC.I
+        const { unitId, sheetId } = editCellState;
+        /**
+         * When closing the editor, switch to the current tab of the editor.
+         */
+        if (workbookId === unitId && sheetId !== worksheetId) {
+            // SetWorksheetActivateCommand handler uses Promise
+            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                subUnitId: sheetId,
+                unitId,
+            });
+        }
+
+          // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
@@ -487,23 +501,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const { unitId, sheetId } = editCellState;
-
-        /**
-         * When closing the editor, switch to the current tab of the editor.
-         */
-        if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
-            // SetWorksheetActivateCommand handler uses Promise
-            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                subUnitId: sheetId,
-                unitId,
-            });
-        }
-
-        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-
-        if (documentDataModel) {
-            await this._submitCellData(documentDataModel);
+        if (snapshot) {
+            await this._submitCellData(snapshot);
         }
 
         // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
@@ -515,10 +514,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     submitCellData(documentDataModel: DocumentDataModel) {
-        return this._submitCellData(documentDataModel);
+        return this._submitCellData(documentDataModel.getSnapshot());
     }
 
-    private async _submitCellData(documentDataModel: DocumentDataModel) {
+    private async _submitCellData(snapshot: IDocumentData) {
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -541,9 +540,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // This should moved to after cell editor
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
-            documentDataModel,
+            snapshot,
             this._lexerTreeBuilder,
-            (model) => model.getSnapshot(),
             this._localService,
             this._functionService,
             workbook.getStyles()
@@ -709,26 +707,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
 // eslint-disable-next-line complexity
 export function getCellDataByInput(
     cellData: ICellData,
-    documentDataModel: Nullable<DocumentDataModel>,
+    snapshot: Nullable<IDocumentData>,
     lexerTreeBuilder: LexerTreeBuilder,
-    getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
     functionService: IFunctionService,
     styles: Styles
 ) {
-    cellData = Tools.deepClone(cellData);
-
-    if (documentDataModel == null) {
+    if (snapshot?.body == null) {
         return null;
     }
-
-    const snapshot = getSnapshot(documentDataModel);
-
     const { body } = snapshot;
-    if (body == null) {
-        return null;
-    }
-
     cellData.t = undefined;
 
     const data = body.dataStream;

@@ -76,6 +76,8 @@ export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextInfo>>(null);
     private _currentClickedCell$ = new Subject<IHoverRichTextInfo>();
+    private _currentPointerDownCell$ = new Subject<IHoverRichTextInfo>();
+    private _currentPointerUpCell$ = new Subject<Partial<IHoverRichTextInfo>>();
 
     // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(
@@ -120,6 +122,8 @@ export class HoverManagerService extends Disposable {
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();
     currentClickedCell$ = this._currentClickedCell$.asObservable();
+    currentPointerDownCell$ = this._currentPointerDownCell$.asObservable();
+    currentPointerUpCell$ = this._currentPointerUpCell$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -135,6 +139,8 @@ export class HoverManagerService extends Disposable {
         super.dispose();
         this._currentCell$.complete();
         this._currentClickedCell$.complete();
+        this._currentPointerDownCell$.complete();
+        this._currentPointerUpCell$.complete();
     }
 
     private _initCellDisposableListener(): void {
@@ -227,6 +233,24 @@ export class HoverManagerService extends Disposable {
                 right: rect.right + cell.mergeInfo.startX + leftOffset,
             },
         };
+    }
+
+    triggerPointerDown(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        if (activeCell) {
+            this._currentPointerDownCell$.next({
+                location: getLocationBase(activeCell.location),
+                position: activeCell.position,
+            });
+        }
+    }
+
+    triggerPointerUp(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        const location = getLocationBase(activeCell!.location);
+        this._currentPointerUpCell$.next({
+            location,
+        });
     }
 
     triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {

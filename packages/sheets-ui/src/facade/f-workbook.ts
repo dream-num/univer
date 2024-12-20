@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
@@ -109,6 +109,20 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
             hoverManagerService.currentClickedCell$
                 .pipe(filter((cell) => !!cell))
                 .subscribe(callback)
+        );
+    }
+
+    onCellPointerDown(callback: (cell: IHoverRichTextInfo) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerDownCell$.subscribe(callback)
+        );
+    }
+
+    onCellPointerUp(callback: (cell: Partial<IHoverRichTextInfo>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerUpCell$.subscribe(callback)
         );
     }
 

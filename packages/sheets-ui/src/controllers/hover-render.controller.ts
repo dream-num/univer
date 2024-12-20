@@ -15,13 +15,12 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { throttleTime } from 'rxjs';
-import { HoverManagerService } from '../services/hover-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { Disposable, DisposableCollection, fromEventSubject, Inject } from '@univerjs/core';
+import { HoverManagerService } from '../services/hover-manager.service';
 import { SheetScrollManagerService } from '../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export class HoverRenderController extends Disposable implements IRenderModule {
     private _active = false;
@@ -60,12 +59,17 @@ export class HoverRenderController extends Disposable implements IRenderModule {
                 this._active = true;
             }));
 
-            disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
+            disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).subscribe((evt) => {
                 this._active = true;
                 this._hoverManagerService.triggerMouseMove(unitId, evt.offsetX, evt.offsetY);
             }));
 
+            disposeSet.add(mainComponent.onPointerDown$.subscribeEvent((evt) => {
+                this._hoverManagerService.triggerPointerDown(unitId, evt.offsetX, evt.offsetY);
+            }));
+
             disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
+                this._hoverManagerService.triggerPointerUp(unitId, evt.offsetX, evt.offsetY);
                 this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
             }));
 

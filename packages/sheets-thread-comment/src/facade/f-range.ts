@@ -15,8 +15,8 @@
  */
 
 import { ICommandService, type IDocumentBody, type Nullable, Tools, UserManagerService } from '@univerjs/core';
-import { FRange } from '@univerjs/sheets/facade';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 

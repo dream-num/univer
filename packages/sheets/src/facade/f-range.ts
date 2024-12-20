@@ -223,7 +223,6 @@ export class FRange extends FBase {
     }
 
     // #region editing
-
     setBackgroundColor(color: string): Promise<boolean> {
         return this._commandService.executeCommand(SetStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -236,6 +235,10 @@ export class FRange extends FBase {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+    }
+
+    setBackground(color: string): Promise<boolean> {
+        return this.setBackgroundColor(color);
     }
 
     /**

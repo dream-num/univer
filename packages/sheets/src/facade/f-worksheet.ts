@@ -483,7 +483,7 @@ export class FWorksheet extends FBase {
     }
 
     /**
-     * Un hides the row in the given range.
+     * Unhides the row in the given range.
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
@@ -1598,6 +1598,11 @@ export class FWorksheet extends FBase {
         return this._worksheet.getLastColumnWithContent();
     }
 
+    // same as Google App script
+    getLastColumn(): number {
+        return this._worksheet.getLastColumnWithContent();
+    }
+
     /**
      * Returns the position of the last row that has content.
      * @returns {number} the last row of the sheet that contains content.
@@ -1610,6 +1615,11 @@ export class FWorksheet extends FBase {
      * console.log(fWorkSheet.getLastRows()); // 100
      */
     getLastRows(): number {
+        return this._worksheet.getLastRowWithContent();
+    }
+
+    // same as Google App script
+    getLastRow(): number {
         return this._worksheet.getLastRowWithContent();
     }
 

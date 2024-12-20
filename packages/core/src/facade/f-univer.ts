@@ -26,6 +26,7 @@ import { Univer } from '../univer';
 import { FBase } from './f-base';
 import { FBlob } from './f-blob';
 import { FHooks } from './f-hooks';
+import { FUser } from './f-user';
 
 export class FUniver extends FBase {
     /**
@@ -161,5 +162,9 @@ export class FUniver extends FBase {
      */
     newBlob(): FBlob {
         return this._injector.createInstance(FBlob);
+    }
+
+    getUserManager(): FUser {
+        return this._injector.createInstance(FUser);
     }
 }

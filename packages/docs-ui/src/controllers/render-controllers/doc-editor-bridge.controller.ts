@@ -189,16 +189,16 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     }
 
     private _initialFocus() {
-        this.disposeWithMe(
-            this._editorService.focus$.subscribe((textRange) => {
-                if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
-                    return;
-                }
+        // this.disposeWithMe(
+        //     this._editorService.focus$.subscribe((textRange) => {
+        //         if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
+        //             return;
+        //         }
 
-                this._docSelectionRenderService.removeAllRanges();
-                this._docSelectionRenderService.addDocRanges([textRange]);
-            })
-        );
+        //         this._docSelectionRenderService.removeAllRanges();
+        //         this._docSelectionRenderService.addDocRanges([textRange]);
+        //     })
+        // );
 
         const focusExcepts = [
             'univer-formula-search',

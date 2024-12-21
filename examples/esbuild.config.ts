@@ -181,29 +181,29 @@ const entryPoints = [
     './src/sheets/main.ts',
     './src/sheets/worker.ts',
 
-    // sheets-multi
-    './src/sheets-multi/main.tsx',
+    // // sheets-multi
+    // './src/sheets-multi/main.tsx',
 
-    // sheets-uniscript
-    './src/sheets-uniscript/main.ts',
+    // // sheets-uniscript
+    // './src/sheets-uniscript/main.ts',
 
-    // docs
-    './src/docs/main.ts',
+    // // docs
+    // './src/docs/main.ts',
 
-    // docs-uniscript
-    './src/docs-uniscript/main.ts',
+    // // docs-uniscript
+    // './src/docs-uniscript/main.ts',
 
-    // slides
-    './src/slides/main.ts',
+    // // slides
+    // './src/slides/main.ts',
 
-    // uni
-    './src/uni/main.ts',
-    './src/uni/worker.ts',
-    './src/uni/lazy.ts',
+    // // uni
+    // './src/uni/main.ts',
+    // './src/uni/worker.ts',
+    // './src/uni/lazy.ts',
 
-    // mobile sheet
-    './src/mobile-s/main.ts',
-    './src/mobile-s/worker.ts',
+    // // mobile sheet
+    // './src/mobile-s/main.ts',
+    // './src/mobile-s/worker.ts',
 ];
 
 const config: SameShape<BuildOptions, BuildOptions> = {

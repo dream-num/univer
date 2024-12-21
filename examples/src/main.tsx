@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { render } from '@univerjs/design';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import pkg from '../../package.json';
 
 import './global.css';
@@ -109,4 +109,4 @@ function Examples() {
     );
 }
 
-createRoot(document.getElementById('app')!).render(<Examples />);
+render(<Examples />, document.getElementById('app')!);

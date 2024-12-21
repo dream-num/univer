@@ -209,6 +209,10 @@ export async function build(options?: IBuildOptions) {
         build: {
             target: 'chrome70',
         },
+        esbuild: {
+            minifyIdentifiers: false,
+            keepNames: true,
+        },
         resolve: {
             conditions: nodeFirst ? ['node', 'default'] : undefined,
         },

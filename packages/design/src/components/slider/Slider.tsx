@@ -212,7 +212,13 @@ export function Slider(props: ISliderProps) {
                     </div>
                 )}
             >
-                <a className={styles.sliderValue}>
+                <a
+                    className={`
+                      univer-text-gray-800 univer-h-7 univer-text-sm univer-flex univer-items-center
+                      univer-cursor-pointer univer-rounded univer-transition-all univer-w-[55px] univer-justify-center
+                      hover:univer-bg-gray-100
+                    `}
+                >
                     {value}
                     %
                 </a>

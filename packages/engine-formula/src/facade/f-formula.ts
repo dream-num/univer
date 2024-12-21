@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import type { FormulaExecutedStateType, IExecutionInProgressParams, ISequenceNode, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FBase, ICommandService, IConfigService, Inject, Injector } from '@univerjs/core';
-import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, LexerTreeBuilder, SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
@@ -26,9 +26,34 @@ export class FFormula extends FBase {
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
+    }
+
+    /**
+     * Offsets the formula
+     * @param {string} formulaString
+     * @param {number} refOffsetX
+     * @param {number} refOffsetY
+     * @param {boolean} [ignoreAbsolute] default is false
+     * @example
+     * const result = moveFormulaRefOffset('sum(a1,b2)',1,1)
+     * // result  is 'sum(b2,c3)'
+     */
+    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number, ignoreAbsolute?: boolean): string {
+        return this._lexerTreeBuilder.moveFormulaRefOffset(formulaString, refOffsetX, refOffsetY, ignoreAbsolute);
+    }
+
+    /**
+     * Resolves the formula string to a 'node' node
+     * @param {string} formulaString
+     * @return {*}  {((string | ISequenceNode)[])}
+     * @memberof FFormula
+     */
+    sequenceNodesBuilder(formulaString: string): (string | ISequenceNode)[] {
+        return this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
     }
 
     /**
@@ -38,9 +63,9 @@ export class FFormula extends FBase {
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
     }
 
-     /**
-      * Stop the calculation of the formula.
-      */
+    /**
+     * Stop the calculation of the formula.
+     */
     stopCalculation(): void {
         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
     }

@@ -156,6 +156,14 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         }));
     }
 
+    disableSelection() {
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
+    }
+
+    enableSelection() {
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+    }
+
     /**
      * Handle events in spreadsheet. (e.g. drag and move to make a selection)
      */

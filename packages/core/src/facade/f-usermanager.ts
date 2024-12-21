@@ -19,7 +19,7 @@ import { Inject, Injector } from '../common/di';
 import { UserManagerService } from '../services/user-manager/user-manager.service';
 import { FBase } from './f-base';
 
-export class FUser extends FBase {
+export class FUserManager extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(UserManagerService) private readonly _userManagerService: UserManagerService
@@ -29,9 +29,9 @@ export class FUser extends FBase {
 
     /**
      * Get current user info
-     * e.g. `univerAPI.getUserManager().getCurrUser()`
+     * e.g. `univerAPI.getUserManager().getCurrentUser()`
      */
-    getCurrUser(): IUser {
+    getCurrentUser(): IUser {
         return this._userManagerService.getCurrentUser();
     }
 }

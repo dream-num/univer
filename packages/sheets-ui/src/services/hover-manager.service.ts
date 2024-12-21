@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -31,6 +31,14 @@ export interface IHoverCellPosition {
      * location of cell
      */
     location: ISheetLocationBase;
+}
+
+export interface ICellWithEvent extends IHoverCellPosition {
+    event: IMouseEvent | IPointerEvent;
+}
+
+export interface ICellPosWithEvent extends ISheetLocationBase {
+    event: IMouseEvent | IPointerEvent;
 }
 
 export interface IHoverRichTextInfo extends IHoverCellPosition {
@@ -65,6 +73,8 @@ export interface IHoverRichTextPosition extends ISheetLocationBase {
     rect?: Nullable<IBoundRectNoAngle>;
 
     drawing?: Nullable<string>;
+
+    event?: IMouseEvent | IPointerEvent;
 }
 
 export function getLocationBase(location: ISheetLocation) {
@@ -76,8 +86,10 @@ export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextInfo>>(null);
     private _currentClickedCell$ = new Subject<IHoverRichTextInfo>();
-    private _currentPointerDownCell$ = new Subject<IHoverRichTextInfo>();
-    private _currentPointerUpCell$ = new Subject<Partial<IHoverRichTextInfo>>();
+
+    private _currentCellWithEvent$ = new Subject<Nullable<ICellWithEvent>>();
+    private _currentPointerDownCell$ = new Subject<ICellPosWithEvent>();
+    private _currentPointerUpCell$ = new Subject<ICellPosWithEvent>();
 
     // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(
@@ -119,6 +131,28 @@ export class HoverManagerService extends Disposable {
         } as IHoverRichTextPosition)
     );
 
+    /**
+     * Nearly same as currentRichText$, but with event
+     */
+    currentCellPosWithEvent$ = this._currentCellWithEvent$.pipe(
+        distinctUntilChanged(
+
+            (pre, aft) => (
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
+            )
+        ),
+        map((cell) => cell && {
+            unitId: cell.location.unitId,
+            subUnitId: cell.location.subUnitId,
+            row: cell.location.row,
+            col: cell.location.col,
+            event: cell.event,
+        } as ICellPosWithEvent)
+    );
+
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();
     currentClickedCell$ = this._currentClickedCell$.asObservable();
@@ -141,6 +175,7 @@ export class HoverManagerService extends Disposable {
         this._currentClickedCell$.complete();
         this._currentPointerDownCell$.complete();
         this._currentPointerUpCell$.complete();
+        this._currentCellWithEvent$.complete();
     }
 
     private _initCellDisposableListener(): void {
@@ -235,26 +270,30 @@ export class HoverManagerService extends Disposable {
         };
     }
 
-    triggerPointerDown(unitId: string, offsetX: number, offsetY: number) {
-        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
-        if (activeCell) {
+    triggerPointerDown(unitId: string, event: IPointerEvent | IMouseEvent) {
+        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
+        if (activeCell && activeCell.location) {
+            const { unitId, subUnitId, row, col } = getLocationBase(activeCell.location);
             this._currentPointerDownCell$.next({
-                location: getLocationBase(activeCell.location),
-                position: activeCell.position,
+                unitId, subUnitId, row, col,
+                event,
             });
         }
     }
 
-    triggerPointerUp(unitId: string, offsetX: number, offsetY: number) {
-        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
-        const location = getLocationBase(activeCell!.location);
-        this._currentPointerUpCell$.next({
-            location,
-        });
+    triggerPointerUp(unitId: string, event: IPointerEvent | IMouseEvent) {
+        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
+        if (activeCell) {
+            const location = getLocationBase(activeCell.location);
+            this._currentPointerUpCell$.next({
+                ...location,
+                event,
+            });
+        }
     }
 
-    triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {
-        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+    triggerMouseMove(unitId: string, event: IPointerEvent | IMouseEvent) {
+        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
         this._currentCell$.next(activeCell && {
             location: getLocationBase(activeCell.location),
             position: activeCell.position,
@@ -263,6 +302,12 @@ export class HoverManagerService extends Disposable {
         this._currentRichText$.next(activeCell && {
             ...activeCell,
             location: getLocationBase(activeCell.overflowLocation),
+        });
+
+        this._currentCellWithEvent$.next(activeCell && {
+            ...activeCell,
+            location: getLocationBase(activeCell.location),
+            event,
         });
     }
 

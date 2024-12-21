@@ -37,6 +37,10 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
     }
 
+    /**
+     * Subscribe to comment events.
+     * @param callback Callback function, param contains comment info and target cell.
+     */
     onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
         return commandService.onCommandExecuted((command) => {

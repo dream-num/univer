@@ -61,15 +61,15 @@ export class HoverRenderController extends Disposable implements IRenderModule {
 
             disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).subscribe((evt) => {
                 this._active = true;
-                this._hoverManagerService.triggerMouseMove(unitId, evt.offsetX, evt.offsetY);
+                this._hoverManagerService.triggerMouseMove(unitId, evt);
             }));
 
             disposeSet.add(mainComponent.onPointerDown$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerPointerDown(unitId, evt.offsetX, evt.offsetY);
+                this._hoverManagerService.triggerPointerDown(unitId, evt);
             }));
 
             disposeSet.add(mainComponent.onPointerUp$.subscribeEvent((evt) => {
-                this._hoverManagerService.triggerPointerUp(unitId, evt.offsetX, evt.offsetY);
+                this._hoverManagerService.triggerPointerUp(unitId, evt);
                 this._hoverManagerService.triggerClick(unitId, evt.offsetX, evt.offsetY);
             }));
 

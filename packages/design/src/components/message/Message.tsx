@@ -40,7 +40,7 @@ const iconMap = {
     [MessageType.Info]: <InfoSingle className="univer-text-indigo-600 dark:univer-text-primary-500" />,
     [MessageType.Warning]: <WarningSingle className="univer-text-yellow-400" />,
     [MessageType.Error]: <ErrorSingle className="univer-text-red-500" />,
-    [MessageType.Loading]: <Loading className="univer-text-yellow-400" />,
+    [MessageType.Loading]: <Loading className="univer-text-yellow-400 univer-animate-spin" />,
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -120,7 +120,7 @@ const createMessage = (() => {
             <div
                 className={`
                   univer-fixed univer-left-1/2 univer-top-4 univer-z-50 univer-flex univer-flex-col univer-items-center
-                  univer-gap-2 -univer-translate-x-1/2
+                  univer-gap-1 -univer-translate-x-1/2
                 `}
             >
                 {state.messages.map((message, index) => (
@@ -128,7 +128,7 @@ const createMessage = (() => {
                         key={message.id}
                         style={{
                             position: 'relative',
-                            top: `${index * (4 + 16)}px`,
+                            top: `${index * 4}px`,
                             zIndex: 50 - index,
                         }}
                     >

@@ -27,7 +27,7 @@ export const MessageOperation: ICommand = {
         messageService.show({
             type: MessageType.Success,
             content: 'Demo message',
-            duration: Infinity,
+            duration: 1500,
         });
 
         return true;

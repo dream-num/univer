@@ -41,7 +41,7 @@ export const Playground = {
         }
 
         return (
-            <>
+            <section className="univer-space-x-2">
                 <Button type="primary" onClick={() => handleOpen(MessageType.Success)}>
                     Click Me
                 </Button>
@@ -54,9 +54,12 @@ export const Playground = {
                 <Button type="primary" onClick={() => handleOpen(MessageType.Error)}>
                     Click Me
                 </Button>
+                <Button type="primary" onClick={() => handleOpen(MessageType.Loading)}>
+                    Click Me
+                </Button>
 
                 <Messager />
-            </>
+            </section>
         );
     },
 };

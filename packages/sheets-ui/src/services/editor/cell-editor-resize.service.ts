@@ -49,7 +49,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         super();
     }
 
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -96,18 +96,18 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         } else if (verticalAlign === VerticalAlign.TOP) {
             offsetTop = paddingData.t || 0;
         } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
-            offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
+            offsetTop = (editorHeight - actualHeight) / scaleY;
         }
 
         let offsetLeft = 0;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            offsetLeft = (editorWidth - actualWidth) / scaleX - (paddingData.r || 0);
+            offsetLeft = (editorWidth - actualWidth) / scaleX;
         } else {
             offsetLeft = paddingData.l || 0;
         }
-         // offsetTop /= scaleY;
+
         offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
         offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
         documentDataModel.updateDocumentDataMargin({
@@ -119,7 +119,17 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         documentSkeleton.calculate();
         // editorWidth -= 1;
         // editorHeight -= 1;
-        this._editAreaProcessing(editorWidth, editorHeight, position, canvasOffset, fill, scaleX, scaleY, callback);
+        this._editAreaProcessing(
+            editorWidth,
+            editorHeight,
+            position,
+            canvasOffset,
+            fill,
+            scaleX,
+            scaleY,
+            horizontalAlign,
+            callback
+        );
     }
 
     /**
@@ -182,7 +192,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         };
     }
 
-    private _getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset) {
+    private _getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset, horizontalAlign: HorizontalAlign) {
         const editorObject = this._getEditorObject();
         if (editorObject == null) {
             return;
@@ -199,8 +209,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
         const { width } = canvasClientRect; // real width affected by scale
         const scaleAdjust = width / widthOfCanvas;
-
-        const { startX, startY } = position;
+        const { startX, startY, endX } = position;
+        const enginWidth = this._context.engine.width;
 
         const clientHeight =
             document.body.clientHeight -
@@ -209,7 +219,15 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             canvasOffset.top -
             EDITOR_BORDER_SIZE * 2;
 
-        const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
+        let clientWidth = width - startX;
+
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            const rightGap = enginWidth - endX;
+            const leftGap = startX;
+            clientWidth = (endX - startX) + Math.min(leftGap, rightGap) * 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            clientWidth = endX;
+        }
 
         return {
             height: clientHeight,
@@ -232,6 +250,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         fill: Nullable<string>,
         scaleX: number = 1,
         scaleY: number = 1,
+        horizontalAlign: HorizontalAlign,
         callback?: () => void
     ) {
         const editorObject = this._getEditorObject();
@@ -249,7 +268,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
         const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
-        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset);
+        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign);
         if (!info) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
 
@@ -312,6 +331,13 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         startX = startX * scaleAdjust + (canvasBoundingRect.left - contentBoundingRect.left);
         startY = startY * scaleAdjust + (canvasBoundingRect.top - contentBoundingRect.top);
 
+        const cellWidth = actualRangeWithCoord.endX - actualRangeWithCoord.startX;
+        if (horizontalAlign === HorizontalAlign.RIGHT) {
+            startX += (cellWidth - editorWidth) * scaleAdjust;
+        } else if (horizontalAlign === HorizontalAlign.CENTER) {
+            startX += (cellWidth - editorWidth * scaleAdjust) / 2;
+        }
+
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
             startX,
@@ -370,8 +396,9 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
 
         const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(editCellState.sheetId)?.skeleton;
         if (!skeleton) return;
-        const { row, column, scaleX, scaleY, position, canvasOffset } = editCellState;
-        const maxSize = this._getEditorMaxSize(position, canvasOffset);
+        const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = editCellState;
+        const { horizontalAlign } = documentLayoutObject;
+        const maxSize = this._getEditorMaxSize(position, canvasOffset, horizontalAlign);
         if (!maxSize) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
 

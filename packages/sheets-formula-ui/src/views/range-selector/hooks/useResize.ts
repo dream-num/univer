@@ -21,7 +21,8 @@ import { type Editor, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { ScrollBar } from '@univerjs/engine-render';
 import { useEffect, useMemo } from 'react';
 
-export const useResize = (editor?: Editor) => {
+// eslint-disable-next-line max-lines-per-function
+export const useResize = (editor?: Editor, autoScrollbar?: boolean) => {
     const resize = () => {
         if (editor) {
             const { scene, mainComponent } = editor.render;
@@ -40,7 +41,7 @@ export const useResize = (editor?: Editor) => {
 
     const checkScrollBar = useMemo(() => {
         return debounce(() => {
-            if (!editor) {
+            if (!editor || !autoScrollbar) {
                 return;
             }
             const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
@@ -73,9 +74,10 @@ export const useResize = (editor?: Editor) => {
                 viewportMain?.getScrollBar()?.dispose();
             }
         }, 30);
-    }, [editor]);
+    }, [editor, autoScrollbar]);
 
     useEffect(() => {
+        if (!autoScrollbar) return;
         if (editor) {
             const time = setTimeout(() => {
                 resize();
@@ -85,9 +87,10 @@ export const useResize = (editor?: Editor) => {
                 clearTimeout(time);
             };
         }
-    }, [editor]);
+    }, [editor, autoScrollbar]);
 
     useEffect(() => {
+        if (!autoScrollbar) return;
         if (editor) {
             const d = editor.input$.subscribe(() => {
                 checkScrollBar();
@@ -96,7 +99,7 @@ export const useResize = (editor?: Editor) => {
                 d.unsubscribe();
             };
         }
-    }, [editor]);
+    }, [editor, autoScrollbar]);
 
     return { resize, checkScrollBar };
 };

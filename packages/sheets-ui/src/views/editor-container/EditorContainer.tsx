@@ -169,6 +169,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
+                    autoScrollbar={false}
                 />
             )}
         </div>

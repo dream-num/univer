@@ -49,6 +49,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         super();
     }
 
+    // eslint-disable-next-line complexity
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -64,7 +65,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
 
-        const { actualWidth, actualHeight } = this._predictingSize(
+        let { actualWidth, actualHeight } = this._predictingSize(
             position,
             canvasOffset,
             documentSkeleton,
@@ -74,50 +75,50 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         );
 
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
+        actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
+        actualHeight = actualHeight + (paddingData.t ?? 0) + (paddingData.b ?? 0);
+
         let editorWidth = endX - startX;
         let editorHeight = endY - startY;
-
         if (editorWidth < actualWidth) {
-            editorWidth = actualWidth;
+            editorWidth = Math.ceil(actualWidth);
         }
 
         if (editorHeight < actualHeight) {
-            editorHeight = actualHeight;
-            // To restore the page margins for the skeleton.
-            documentDataModel.updateDocumentDataMargin(paddingData);
-        } else {
-            // Set the top margin under vertical alignment.
-            let offsetTop = 0;
-
-            if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
-            } else if (verticalAlign === VerticalAlign.TOP) {
-                offsetTop = paddingData.t || 0;
-            } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
-                offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
-            }
-
-            let offsetLeft = 0;
-            if (horizontalAlign === HorizontalAlign.CENTER) {
-                offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
-            } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-                offsetLeft = (editorWidth - actualWidth) / scaleX - (paddingData.r || 0);
-            } else {
-                offsetLeft = paddingData.l || 0;
-            }
-            // offsetTop /= scaleY;
-            offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
-            offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
-            documentDataModel.updateDocumentDataMargin({
-                t: offsetTop,
-                l: offsetLeft,
-            });
+            editorHeight = Math.ceil(actualHeight);
         }
+
+        // Set the top margin under vertical alignment.
+        let offsetTop = 0;
+
+        if (verticalAlign === VerticalAlign.MIDDLE) {
+            offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
+        } else if (verticalAlign === VerticalAlign.TOP) {
+            offsetTop = paddingData.t || 0;
+        } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
+            offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
+        }
+
+        let offsetLeft = 0;
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            offsetLeft = (editorWidth - actualWidth) / scaleX - (paddingData.r || 0);
+        } else {
+            offsetLeft = paddingData.l || 0;
+        }
+         // offsetTop /= scaleY;
+        offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
+        offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
+        documentDataModel.updateDocumentDataMargin({
+            t: offsetTop,
+            l: offsetLeft,
+        });
 
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
-        editorWidth -= 1;
-        editorHeight -= 1;
+        // editorWidth -= 1;
+        // editorHeight -= 1;
         this._editAreaProcessing(editorWidth, editorHeight, position, canvasOffset, fill, scaleX, scaleY, callback);
     }
 

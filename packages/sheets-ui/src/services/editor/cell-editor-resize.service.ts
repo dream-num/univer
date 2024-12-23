@@ -72,8 +72,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             scaleX,
             scaleY
         );
-        const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
+        const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
         let editorWidth = endX - startX;
         let editorHeight = endY - startY;
 
@@ -97,17 +97,25 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
                 offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
             }
 
+            let offsetLeft = 0;
+            if (horizontalAlign === HorizontalAlign.CENTER) {
+                offsetLeft = (editorWidth - actualWidth) / 2 / scaleX;
+            } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+                offsetLeft = (editorWidth - actualWidth) / scaleX - (paddingData.r || 0);
+            } else {
+                offsetLeft = paddingData.l || 0;
+            }
             // offsetTop /= scaleY;
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
-
+            offsetLeft = offsetLeft < (paddingData.l || 0) ? paddingData.l || 0 : offsetLeft;
             documentDataModel.updateDocumentDataMargin({
                 t: offsetTop,
+                l: offsetLeft,
             });
         }
 
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
-
         editorWidth -= 1;
         editorHeight -= 1;
         this._editAreaProcessing(editorWidth, editorHeight, position, canvasOffset, fill, scaleX, scaleY, callback);
@@ -168,7 +176,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         });
 
         return {
-            actualWidth: editorWidth,
+            actualWidth: size.actualWidth * scaleX,
             actualHeight: size.actualHeight * scaleY,
         };
     }

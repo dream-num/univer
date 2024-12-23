@@ -38,8 +38,6 @@ import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIA
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams | IAutoFillCommandParams;
 
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
-
 export class SheetPermissionCheckUIController extends Disposable {
     disposableCollection = new DisposableCollection();
 

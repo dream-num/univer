@@ -28,8 +28,6 @@ import { getTransformCoord } from '../utils/component-tools';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
-
 export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 

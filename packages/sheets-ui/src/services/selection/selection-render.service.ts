@@ -313,10 +313,14 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             case RANGE_TYPE.ROW:
                 selectCell.startColumn = 0;
                 selectCell.endColumn = this._skeleton.getColumnCount() - 1;
+                selectCell.startRow = selectCell.actualRow;
+                selectCell.endRow = selectCell.actualRow;
                 break;
             case RANGE_TYPE.COLUMN:
                 selectCell.startRow = 0;
                 selectCell.endRow = this._skeleton.getRowCount() - 1;
+                selectCell.startColumn = selectCell.actualColumn;
+                selectCell.endColumn = selectCell.actualColumn;
                 break;
             case RANGE_TYPE.ALL:
                 selectCell.startRow = 0;

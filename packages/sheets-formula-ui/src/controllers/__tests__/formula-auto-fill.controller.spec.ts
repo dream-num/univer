@@ -60,7 +60,6 @@ describe('Test auto fill with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -88,7 +87,6 @@ describe('Test auto fill with formula', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-        autoFillController = get(AutoFillController);
 
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
@@ -126,21 +124,21 @@ describe('Test auto fill with formula', () => {
                     style: null,
                 },
             ]);
+            const sourceRange = {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 0,
+                endRow: 0,
+            };
 
-            (autoFillController as any)._triggerAutoFill(
-                {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 0,
-                },
-                {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 2,
-                }
-            );
+            const targetRange = {
+                startColumn: 1,
+                endColumn: 1,
+                startRow: 0,
+                endRow: 2,
+            };
+
+            commandService.executeCommand(AutoFillCommand.id, { sourceRange, targetRange });
 
             // B1:B3 values will be in the following format
             // [
@@ -177,19 +175,20 @@ describe('Test auto fill with formula', () => {
             expect(B2?.f).toStrictEqual('=SUM(A2)');
             expect(B2?.si).toEqual(B3?.si);
 
-            // drop to right
-            (autoFillController as any)._triggerAutoFill(
+            commandService.executeCommand(AutoFillCommand.id,
                 {
-                    startColumn: 1,
-                    endColumn: 1,
-                    startRow: 0,
-                    endRow: 2,
-                },
-                {
-                    startColumn: 1,
-                    endColumn: 3,
-                    startRow: 0,
-                    endRow: 2,
+                    sourceRange: {
+                        startColumn: 1,
+                        endColumn: 1,
+                        startRow: 0,
+                        endRow: 2,
+                    },
+                    targetRange: {
+                        startColumn: 1,
+                        endColumn: 3,
+                        startRow: 0,
+                        endRow: 2,
+                    },
                 }
             );
 
@@ -302,18 +301,20 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            (autoFillController as any)._triggerAutoFill(
+            commandService.executeCommand(AutoFillCommand.id,
                 {
-                    startColumn: 0,
-                    endColumn: 0,
-                    startRow: 9,
-                    endRow: 9,
-                },
-                {
-                    startColumn: 0,
-                    endColumn: 0,
-                    startRow: 6,
-                    endRow: 9,
+                    sourceRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 9,
+                        endRow: 9,
+                    },
+                    targetRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 6,
+                        endRow: 9,
+                    },
                 }
             );
 
@@ -368,18 +369,20 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            (autoFillController as any)._triggerAutoFill(
+            commandService.executeCommand(AutoFillCommand.id,
                 {
-                    startColumn: 0,
-                    endColumn: 0,
-                    startRow: 19,
-                    endRow: 20,
-                },
-                {
-                    startColumn: 0,
-                    endColumn: 0,
-                    startRow: 15,
-                    endRow: 20,
+                    sourceRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 19,
+                        endRow: 20,
+                    },
+                    targetRange: {
+                        startColumn: 0,
+                        endColumn: 0,
+                        startRow: 15,
+                        endRow: 20,
+                    },
                 }
             );
 

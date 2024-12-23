@@ -93,7 +93,7 @@ export const fromPlainText = (text: string): IDocumentBody => {
         }
     }
 
-    if (end !== dataStream.length - 1) {
+    if (end !== dataStream.length - 1 || dataStream.length === 1) {
         loopParagraph(dataStream.length, false);
     }
     return {

@@ -46,7 +46,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             return false;
         }
 
-        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder } = snapshot;
+        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder, documentStyle } = snapshot;
         const {
             body: prevBody,
             tableSource: prevTableSource,
@@ -55,6 +55,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             lists: prevLists,
             drawings: prevDrawings,
             drawingsOrder: prevDrawingsOrder,
+            documentStyle: prevDocumentStyle,
         } = prevSnapshot;
 
         if (body == null || prevBody == null) {
@@ -87,6 +88,13 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
         const rawActions: JSONXActions = [];
 
         const jsonX = JSONX.getInstance();
+
+        if (!Tools.diffValue(prevDocumentStyle, documentStyle)) {
+            const actions = jsonX.replaceOp(['documentStyle'], prevDocumentStyle, documentStyle);
+            if (actions != null) {
+                rawActions.push(actions);
+            }
+        }
 
         if (!Tools.diffValue(body, prevBody)) {
             const actions = jsonX.replaceOp(['body'], prevBody, body);

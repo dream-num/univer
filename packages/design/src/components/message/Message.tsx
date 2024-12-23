@@ -15,6 +15,7 @@
  */
 
 import { ErrorSingle, InfoSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from '../../helper/clsx';
@@ -85,6 +86,10 @@ const createMessage = (() => {
     let removeMessage: (id?: string) => void = () => {};
 
     const Messager = () => {
+        if (!canUseDom()) {
+            return null;
+        }
+
         const [state, setState] = useState<IMessageState>({ messages: [] });
 
         removeMessage = (id?: string) => {

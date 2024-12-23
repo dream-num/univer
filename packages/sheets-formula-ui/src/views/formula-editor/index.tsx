@@ -33,7 +33,6 @@ import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighl
 import { useKeyboardEvent } from '../range-selector/hooks/useKeyboardEvent';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
 import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
-import { useRefocus } from '../range-selector/hooks/useRefocus';
 import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
 import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
@@ -181,6 +180,35 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [onFormulaSelectingChange, isSelecting]);
 
     useKeyboardEvent(isFocus, keyboradEventConfig, editor);
+
+    useLayoutEffect(() => {
+        let dispose: IDisposable;
+        if (formulaEditorContainerRef.current) {
+            dispose = editorService.register({
+                autofocus: true,
+                editorUnitId: editorId,
+                isSingle: true,
+                initialSnapshot: {
+                    id: editorId,
+                    body: {
+                        dataStream: `${initValue}\r\n`,
+                        textRuns: [],
+                        customBlocks: [],
+                        customDecorations: [],
+                        customRanges: [],
+                    },
+                    documentStyle: {},
+                },
+            }, formulaEditorContainerRef.current);
+            const editor = editorService.getEditor(editorId)! as Editor;
+            editorSet(editor);
+        }
+
+        return () => {
+            dispose?.dispose();
+        };
+    }, []);
+
     useLayoutEffect(() => {
         if (_isFocus) {
             isFocusSet(_isFocus);
@@ -220,40 +248,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     });
 
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
-
-    useRefocus();
     useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
-
-    useLayoutEffect(() => {
-        let dispose: IDisposable;
-        if (formulaEditorContainerRef.current) {
-            dispose = editorService.register({
-                autofocus: true,
-                editorUnitId: editorId,
-                isSingle: true,
-                initialSnapshot: {
-                    id: editorId,
-                    body: {
-                        dataStream: `${initValue}\r\n`,
-                        textRuns: [],
-                        customBlocks: [],
-                        customDecorations: [],
-                        customRanges: [],
-                    },
-                    documentStyle: {},
-                },
-            }, formulaEditorContainerRef.current);
-            const editor = editorService.getEditor(editorId)! as Editor;
-            editorSet(editor);
-        }
-
-        return () => {
-            dispose?.dispose();
-        };
-    }, []);
 
     const handleFunctionSelect = (v: string) => {
         const res = handlerFormulaReplace(v);

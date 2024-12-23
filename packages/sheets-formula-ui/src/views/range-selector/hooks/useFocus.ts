@@ -15,18 +15,19 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
+import { Tools } from '@univerjs/core';
 import { useCallback } from 'react';
 
 export const useFocus = (editor?: Editor) => {
-    const focus = useCallback(() => {
+    const focus = useCallback((offset?: number) => {
         if (editor) {
             editor.focus();
             const selections = [...editor.getSelectionRanges()];
-            if (selections.length) {
+            if (Tools.isDefine(offset)) {
+                editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+            } else if (selections.length) {
                 editor.setSelectionRanges(selections);
-            }
-                // end
-            if (!selections.length) {
+            } else {
                 const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
                 const offset = Math.max(body.length - 2, 0);
                 editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);

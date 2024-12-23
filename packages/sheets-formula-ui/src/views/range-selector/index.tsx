@@ -88,21 +88,26 @@ export interface IRangeSelectorProps {
 
 const noopFunction = () => { };
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { initValue, unitId, subUnitId, errorText, placeholder, actions,
-            onChange = noopFunction,
-            onVerify = noopFunction,
-            onRangeSelectorDialogVisibleChange = noopFunction,
-            onBlur = noopFunction,
-            onFocus = noopFunction,
-            isFocus: _isFocus = true,
-            isOnlyOneRange = false,
-            isSupportAcrossSheet = false } = props;
-
+    const {
+        initValue,
+        unitId,
+        subUnitId,
+        errorText,
+        placeholder,
+        actions,
+        onChange = noopFunction,
+        onVerify = noopFunction,
+        onRangeSelectorDialogVisibleChange = noopFunction,
+        onBlur = noopFunction,
+        onFocus = noopFunction,
+        isFocus: _isFocus = true,
+        isOnlyOneRange = false,
+        isSupportAcrossSheet = false,
+    } = props;
     const editorService = useDependency(IEditorService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-
     const rangeSelectorWrapRef = useRef<HTMLDivElement>(null);
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(_isFocus);
@@ -172,17 +177,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [isSupportAcrossSheet]);
 
     const focus = useFocus(editor);
-
-    useLayoutEffect(() => {
-        if (_isFocus) {
-            isFocusSet(_isFocus);
-            focus();
-        } else {
-            editor?.blur();
-            resetSelection();
-            isFocusSet(_isFocus);
-        }
-    }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
     const getFormulaToken = useFormulaToken();
@@ -279,7 +273,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 isSingle: true,
                 initialSnapshot: {
                     id: editorId,
-                    body: { dataStream: '\r\n' },
+                    body: { dataStream: `${initValue}\r\n` },
                     documentStyle: {},
                 },
             }, containerRef.current);
@@ -290,6 +284,17 @@ export function RangeSelector(props: IRangeSelectorProps) {
             dispose?.dispose();
         };
     }, []);
+
+    useLayoutEffect(() => {
+        if (_isFocus) {
+            isFocusSet(_isFocus);
+            focus();
+        } else {
+            editor?.blur();
+            resetSelection();
+            isFocusSet(_isFocus);
+        }
+    }, [_isFocus, focus]);
 
     useFirstHighlightDoc(rangeString, '', isFocus, highlightDoc, highlightSheet, editor);
 

@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageProps } from '@univerjs/design';
+import { type ClassValue, clsx as cn } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-import type { IMessageService } from '../message.service';
-import { toDisposable } from '@univerjs/core';
-
-/**
- * This is a mocked message service for testing purposes.
- */
-export class MockMessageService implements IMessageService {
-    show(_options: IMessageProps): IDisposable {
-        return toDisposable(() => { /* empty */ });
-    }
-
-    setContainer(): void {
-        // empty
-    }
-
-    getContainer(): HTMLElement | undefined {
-        return undefined;
-    }
+export default function clsx(...inputs: ClassValue[]) {
+    return twMerge(cn(inputs));
 }

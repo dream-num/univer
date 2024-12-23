@@ -536,7 +536,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // If cross-sheet operation, switch current sheet first, then const cellData
         // This should moved to after cell editor
         const cellData: Nullable<ICellData> = getCellDataByInput(
-            worksheet.getCellRaw(row, column) || {},
+            Tools.deepClone(worksheet.getCellRaw(row, column) || {}),
             snapshot,
             this._lexerTreeBuilder,
             this._localService,

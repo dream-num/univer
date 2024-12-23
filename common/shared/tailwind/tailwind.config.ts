@@ -19,7 +19,7 @@ import animate from 'tailwindcss-animate';
 
 const config: Omit<Config, 'content'> = {
     prefix: 'univer-',
-    darkMode: ['class'],
+    darkMode: 'selector',
     corePlugins: {
         preflight: false,
     },

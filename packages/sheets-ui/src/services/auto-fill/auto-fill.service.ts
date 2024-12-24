@@ -78,7 +78,7 @@ export interface IAutoFillService {
     getAllHooks(): ISheetAutoFillHook[];
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
-    fillData(triggerUnitId: string, triggerSubUnitId: string, applyType: APPLY_TYPE): boolean;
+    fillData(applyType: APPLY_TYPE): boolean;
 
     triggerAutoFill(unitId: string, subUnitId: string, source: IRange, target: IRange): Promise<boolean>;
 }

@@ -26,12 +26,13 @@ export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './comp
 export { Confirm, type IConfirmProps } from './components/confirm';
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
-export { Dropdown, type IDropdownProps } from './components/dropdown';
+export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';
+export { DropdownOverlay, DropdownProvider, DropdownTrigger } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, type MenuRef, SubMenu } from './components/menu';
-export { type IMessageOptions, type IMessageProps, Message, MessageType } from './components/message';
+export { type IMessageProps, message, Messager, MessageType, removeMessage } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
 export { type IPopupProps, Popup } from './components/popup';
 export { type IRadioProps, Radio } from './components/radio';

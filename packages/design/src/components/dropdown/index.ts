@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export { Dropdown, type IDropdownProps } from './Dropdown';
+export { DropdownOverlay } from './DropdownOverlay';
+export { DropdownProvider } from './DropdownProvider';
+export { DropdownTrigger } from './DropdownTrigger';

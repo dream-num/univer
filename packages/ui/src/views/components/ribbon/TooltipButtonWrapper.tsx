@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDropdownProps, ITooltipProps, NullableTooltipRef } from '@univerjs/design';
-import { Dropdown, Tooltip } from '@univerjs/design';
+import type { IDropdownLegacyProps, ITooltipProps, NullableTooltipRef } from '@univerjs/design';
+import { DropdownLegacy, Tooltip } from '@univerjs/design';
 import React, { createContext, forwardRef, useContext, useMemo, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
@@ -64,7 +64,7 @@ export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper(props: IDropdownProps) {
+export function DropdownWrapper(props: IDropdownLegacyProps) {
     const { children, ...dropdownProps } = props;
 
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
@@ -74,13 +74,13 @@ export function DropdownWrapper(props: IDropdownProps) {
     }
 
     return (
-        <Dropdown
+        <DropdownLegacy
             onVisibleChange={handleVisibleChange}
             {...dropdownProps}
         >
             <div onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
-        </Dropdown>
+        </DropdownLegacy>
     );
 }

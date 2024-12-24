@@ -18,7 +18,7 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, useDependency } from '@univerjs/core';
 import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Dropdown, Menu, MenuItem, Tooltip } from '@univerjs/design';
+import { DropdownLegacy, Menu, MenuItem, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
@@ -117,7 +117,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         )}
                     {isCommentBySelf && !isMock && !resolved
                         ? (
-                            <Dropdown
+                            <DropdownLegacy
                                 overlay={(
                                     <Menu>
                                         <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
@@ -128,7 +128,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 <div className={styles.threadCommentIcon}>
                                     <MoreHorizontalSingle />
                                 </div>
-                            </Dropdown>
+                            </DropdownLegacy>
                         )
                         : null}
                 </div>

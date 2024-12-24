@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { type IMessageOptions, type IMessageProps, Message, MessageType } from './Message';
+export { type IMessageProps, message, Messager, MessageType, removeMessage } from './Message';

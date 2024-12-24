@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
+import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
@@ -59,6 +59,22 @@ export interface IFWorkbookSheetsUIMixin {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
+
+    /**
+     * Subscribe to pointer move events on workbook. Just like onCellHover, but with event information.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer down events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer up events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
 
     /**
      * Start the editing process
@@ -118,6 +134,31 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
             hoverManagerService.currentRichText$
                 .pipe(filter((cell) => !!cell))
                 .subscribe(callback)
+        );
+    }
+
+    override onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerDownCell$.subscribe(callback)
+        );
+    }
+
+    override onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerUpCell$.subscribe(callback)
+        );
+    }
+
+    override onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentCellPosWithEvent$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: ICellPosWithEvent) => {
+                    callback(cell, cell.event.buttons);
+                })
         );
     }
 

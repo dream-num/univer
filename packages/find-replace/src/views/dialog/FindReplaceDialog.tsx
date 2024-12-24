@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import type { IDisposable, Nullable } from '@univerjs/core';
+import type { ForwardedRef } from 'react';
+import { ICommandService, IContextService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
 import { ILayoutService, IMessageService, useObservable } from '@univerjs/ui';
-import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LocaleService, useDependency } from '@univerjs/core';
-import type { ForwardedRef } from 'react';
-import React, { forwardRef, Fragment, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { fromEvent } from 'rxjs';
 
-import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
-import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
-import { SearchInput } from './SearchInput';
-
+import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
+import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
 import styles from './FindReplaceDialog.module.less';
+
+import { SearchInput } from './SearchInput';
 
 interface ISubFormRef {
     focus(): void;
@@ -72,7 +72,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
     useFindInputFocus(findReplaceService, ref);
 
     return (
-        <Fragment>
+        <>
             <SearchInput
                 findCompleted={findCompleted}
                 className="univer-find-input"
@@ -88,7 +88,7 @@ export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
                     {localeService.t('find-replace.dialog.advanced-finding')}
                 </Button>
             </div>
-        </Fragment>
+        </>
     );
 });
 
@@ -161,20 +161,17 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
     useEffect(() => {
         const shouldDisplayNoMatchInfo = findCompleted && matchesCount === 0;
 
-        let messageDisposable: Nullable<IDisposable> = null;
         if (shouldDisplayNoMatchInfo) {
-            messageDisposable = messageService.show({
+            messageService.show({
                 content: localeService.t('find-replace.dialog.no-match'),
                 type: MessageType.Warning,
                 duration: 5000,
             });
         }
-
-        return () => messageDisposable?.dispose();
     }, [findCompleted, matchesCount, messageService, localeService]);
 
     return (
-        <Fragment>
+        <>
             <FormLayout label={localeService.t('find-replace.dialog.find')}>
                 <SearchInput
                     findCompleted={findCompleted}
@@ -198,17 +195,17 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                 <Select value={findDirection} options={findDirectionOptions} onChange={onChangeFindDirection} />
             </FormLayout>
             <FormDualColumnLayout>
-                <Fragment>
+                <>
                     <FormLayout label={localeService.t('find-replace.dialog.find-scope.title')}>
                         <Select value={findScope} options={findScopeOptions} onChange={onChangeFindScope}></Select>
                     </FormLayout>
                     <FormLayout label={localeService.t('find-replace.dialog.find-by.title')}>
                         <Select value={findBy} options={findByOptions} onChange={onChangeFindBy}></Select>
                     </FormLayout>
-                </Fragment>
+                </>
             </FormDualColumnLayout>
             <FormDualColumnLayout>
-                <Fragment>
+                <>
                     <FormLayout>
                         <Checkbox
                             checked={caseSensitive}
@@ -229,7 +226,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                             {localeService.t('find-replace.dialog.match-the-whole-cell')}
                         </Checkbox>
                     </FormLayout>
-                </Fragment>
+                </>
             </FormDualColumnLayout>
             <div className={styles.findReplaceButtonsGroup}>
                 <Button type="primary" onClick={onClickFindButton} disabled={findDisabled}>{localeService.t('find-replace.dialog.find')}</Button>
@@ -238,7 +235,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                     <Button disabled={replaceAllDisabled} onClick={onClickReplaceAllButton}>{localeService.t('find-replace.dialog.replace-all')}</Button>
                 </span>
             </div>
-        </Fragment>
+        </>
     );
 });
 

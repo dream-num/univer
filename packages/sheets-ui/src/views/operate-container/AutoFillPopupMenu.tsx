@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { DropdownLegacy } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -24,12 +24,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { useActiveWorkbook } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
-import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { useActiveWorkbook } from '../../components/hook';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import styles from './index.module.less';
 
 export interface IAnchorPoint {
@@ -186,7 +186,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             onMouseLeave={handleMouseLeave}
             style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
         >
-            <Dropdown
+            <DropdownLegacy
                 placement="bottomLeft"
                 trigger={['click']}
                 overlay={(
@@ -221,7 +221,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                     />
                     {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
                 </div>
-            </Dropdown>
+            </DropdownLegacy>
         </div>
     );
 };

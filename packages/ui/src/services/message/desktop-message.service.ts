@@ -14,45 +14,34 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageOptions, IMessageProps } from '@univerjs/design';
+import type { IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
+import { connectInjector, Disposable, Inject, Injector } from '@univerjs/core';
+import { message, Messager, removeMessage } from '@univerjs/design';
 
-import { Message } from '@univerjs/design';
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
-export class DesktopMessageService implements IMessageService, IDisposable {
-    // in node environment, document is undefined
-    protected _portalContainer: HTMLElement | undefined = canUseDom() ? document.body : undefined;
+export class DesktopMessageService extends Disposable implements IMessageService {
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+    ) {
+        super();
 
-    protected _message?: Message;
-
-    dispose(): void {
-        this._message?.dispose();
+        this._initUIPart();
     }
 
-    setContainer(container: HTMLElement): void {
-        if (this._message) {
-            return;
-        }
-
-        this._portalContainer = container;
-        this._message = new Message(container);
+    protected _initUIPart(): void {
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Messager, this._injector))
+        );
     }
 
-    getContainer(): HTMLElement | undefined {
-        return this._portalContainer;
+    override dispose(): void {
+        removeMessage();
     }
 
-    show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
-        if (!this._portalContainer) {
-            throw new Error('[DesktopMessageService]: no container to show message!');
-        }
-        if (!this._message) {
-            throw new Error('[DesktopMessageService]: no message implementation!');
-        }
-
-        const { type, ...rest } = options;
-        return this._message[type](rest);
+    show(options: IMessageProps) {
+        message(options);
     }
 }

@@ -793,13 +793,14 @@ export function getCellDataByInput(
 export function isRichText(body: IDocumentBody): boolean {
     const { textRuns = [], paragraphs = [], customRanges, customBlocks = [] } = body;
 
-    const bodyNoLineBreak = body.dataStream.replace('\r\n', '');
+    const bodyNoLineBreak = body.dataStream.replace(/(\r\n)+$/, '');
 
     // Some styles are unique to rich text. When this style appears, we consider the value to be rich text.
     const richTextStyle = ['va'];
 
     return (
-        textRuns.some((textRun) => {
+        // This is because after editing, an inexplicable second paragraph style will appear \r\n
+        textRuns.filter((ts) => ts.st < bodyNoLineBreak.length).some((textRun) => {
             const hasRichTextStyle = Boolean(textRun.ts && Object.keys(textRun.ts).some((property) => {
                 return richTextStyle.includes(property);
             }));

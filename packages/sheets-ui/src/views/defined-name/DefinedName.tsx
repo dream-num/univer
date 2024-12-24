@@ -16,7 +16,7 @@
 
 import { useDependency } from '@univerjs/core';
 
-import { Dropdown, Input } from '@univerjs/design';
+import { DropdownLegacy, Input } from '@univerjs/design';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -43,11 +43,11 @@ export function DefinedName({ disable }: { disable: boolean }) {
         <div className={styles.definedName}>
             <Input className={clsx({ [styles.defineNameInputDisable]: disable })} value={rangeString} type="text" size="small" affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px', height: '100%' }} />
 
-            <Dropdown overlay={<DefinedNameOverlay />}>
+            <DropdownLegacy overlay={<DefinedNameOverlay />}>
                 <div className={clsx(styles.definedNameDropDown, { [styles.definedNameDropDownDisable]: disable })}>
                     <MoreDownSingle />
                 </div>
-            </Dropdown>
+            </DropdownLegacy>
         </div>
     );
 }

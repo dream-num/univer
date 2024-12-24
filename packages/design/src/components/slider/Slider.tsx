@@ -20,7 +20,7 @@ import React, { useContext, useMemo, useRef } from 'react';
 
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Dropdown } from '../dropdown/Dropdown';
+import { DropdownLegacy } from '../dropdown-legacy/DropdownLegacy';
 import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.less';
 
@@ -176,7 +176,7 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <Dropdown
+            <DropdownLegacy
                 placement="topLeft"
                 overlay={(
                     <div className={styles.sliderShortcuts}>
@@ -207,7 +207,7 @@ export function Slider(props: ISliderProps) {
                     {value}
                     %
                 </a>
-            </Dropdown>
+            </DropdownLegacy>
         </div>
     );
 }

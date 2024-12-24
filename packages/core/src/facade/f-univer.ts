@@ -22,14 +22,11 @@ import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
-import { DataValidationOperator } from '../types/enum/data-validation-operator';
-import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
-import { DataValidationStatus } from '../types/enum/data-validation-status';
-import { DataValidationType } from '../types/enum/data-validation-type';
 import { Univer } from '../univer';
 import { FBase } from './f-base';
 import { FBlob } from './f-blob';
+import { FEnum } from './f-enum';
+import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 
 export class FUniver extends FBase {
@@ -168,9 +165,15 @@ export class FUniver extends FBase {
         return this._injector.createInstance(FBlob);
     }
 
-    DataValidationType = DataValidationType;
-    DataValidationErrorStyle = DataValidationErrorStyle;
-    DataValidationRenderMode = DataValidationRenderMode;
-    DataValidationOperator = DataValidationOperator;
-    DataValidationStatus = DataValidationStatus;
+    get Enum() {
+        return FEnum;
+    }
+
+    get Event() {
+        return FEventName;
+    }
+
+    addEvent(event: FEventName, callback: () => void) {
+
+    }
 }

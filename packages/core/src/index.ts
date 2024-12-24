@@ -44,6 +44,8 @@ export { FBase } from './facade/f-base';
 export { FUniver } from './facade/f-univer';
 export { FHooks } from './facade/f-hooks';
 export { FBlob, type IFBlobSource } from './facade/f-blob';
+export { FEventName } from './facade/f-event';
+export { FEnum } from './facade/f-enum';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';

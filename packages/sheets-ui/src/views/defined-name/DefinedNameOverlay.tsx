@@ -24,7 +24,6 @@ import { ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
-import styles from './index.module.less';
 
 export interface IDefinedNameOverlayProps {
 
@@ -97,20 +96,62 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     };
 
     return (
-        <div className={styles.definedNameOverlay}>
-            <div className={styles.definedNameOverlayContainer}>
+        <div className="univer-w-[300px] univer-bg-white">
+            <ul
+                className={`
+                  univer-max-h-[360px] univer-overflow-y-auto univer-scrollbar-thin univer-scrollbar-thumb-gray-300
+                  univer-scrollbar-track-transparent univer-scrollbar-w-[4px] univer-m-0 univer-list-none univer-p-0
+                `}
+            >
                 {definedNames.map((definedName, index) => {
                     return (
-                        <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
-                            <div className={styles.definedNameOverlayItemName} title={definedName.name}>{definedName.name}</div>
-                            <div className={styles.definedNameOverlayItemFormula} title={definedName.formulaOrRefString}>{definedName.formulaOrRefString}</div>
-                        </div>
+                        <li
+                            key={index}
+                            className={`
+                              univer-px-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                              hover:univer-bg-gray-100
+                            `}
+                            onClick={() => { focusDefinedName(definedName); }}
+                        >
+                            <div
+                                className={`
+                                  univer-flex univer-py-1 univer-items-center univer-justify-between univer-border-b
+                                  univer-border-solid univer-border-0 univer-border-gray-200 univer-gap-2
+                                `}
+                            >
+                                <div
+                                    className={`
+                                      univer-text-gray-600 univer-text-sm univer-overflow-hidden univer-text-ellipsis
+                                    `}
+                                    title={definedName.name}
+                                >
+                                    {definedName.name}
+                                </div>
+                                <div
+                                    className="univer-text-gray-400 univer-text-xs univer-flex-shrink-0"
+                                    title={definedName.formulaOrRefString}
+                                >
+                                    {definedName.formulaOrRefString}
+                                </div>
+                            </div>
+                        </li>
                     );
                 })}
-            </div>
-            <div className={styles.definedNameOverlayManager} onClick={openSlider}>
-                <div className={styles.definedNameOverlayManagerTitle}>{localeService.t('definedName.managerTitle')}</div>
-                <div className={styles.definedNameOverlayManagerContent}>{localeService.t('definedName.managerDescription')}</div>
+            </ul>
+
+            <div
+                className={`
+                  univer-p-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                  hover:univer-bg-gray-100
+                `}
+                onClick={openSlider}
+            >
+                <div className="univer-text-sm univer-font-semibold univer-text-gray-600 univer-mb-2">
+                    {localeService.t('definedName.managerTitle')}
+                </div>
+                <div className="univer-text-xs univer-text-gray-400">
+                    {localeService.t('definedName.managerDescription')}
+                </div>
             </div>
         </div>
     );

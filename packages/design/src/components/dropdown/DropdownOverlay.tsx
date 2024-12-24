@@ -15,6 +15,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import clsx from '../../helper/clsx';
 import { useDropdown } from './DropdownContext';
 
@@ -35,38 +36,39 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
         if (isOpen && triggerRef.current && overlayRef.current) {
             const triggerRect = triggerRef.current.getBoundingClientRect();
             const overlayRect = overlayRef.current.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = document.documentElement.clientHeight;
 
             let top = triggerRect.bottom + window.scrollY;
             let left = triggerRect.left + window.scrollX;
 
-            // Check if dropdown would go off the bottom of the viewport
-            if (top + overlayRect.height > viewportHeight) {
+            if (top + overlayRect.height > viewportHeight + window.scrollY) {
                 top = triggerRect.top - overlayRect.height + window.scrollY;
             }
 
-            // Check if dropdown would go off the right of the viewport
-            if (left + overlayRect.width > viewportWidth) {
+            if (left + overlayRect.width > viewportWidth + window.scrollX) {
                 left = triggerRect.right - overlayRect.width + window.scrollX;
             }
+
+            top = Math.max(top, window.scrollY);
+            left = Math.max(left, window.scrollX);
 
             setPosition({
                 top: top + (offset?.y ?? 0),
                 left: left + (offset?.x ?? 0),
             });
         }
-    }, [isOpen]);
+    }, [isOpen, offset?.x, offset?.y, overlayRef, triggerRef]);
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div
             ref={overlayRef}
             className={clsx(
                 `
-                  univer-fixed univer-z-50 univer-min-w-[8rem] univer-overflow-hidden univer-rounded-md univer-border
-                  univer-bg-white univer-p-1 univer-shadow-md univer-animate-in univer-fade-in-0 univer-zoom-in-95
+                  univer-fixed univer-z-50 univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
+                  univer-shadow-md univer-animate-in univer-fade-in-0 univer-zoom-in-95
                 `,
                 className
             )}
@@ -76,6 +78,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
             }}
         >
             {children}
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from '../../helper/clsx';
@@ -29,7 +30,11 @@ interface IDropdownOverlayProps {
 }
 
 export function DropdownOverlay({ children, className, offset }: IDropdownOverlayProps) {
-    const { isOpen, overlayRef, triggerRef } = useDropdown();
+    if (!canUseDom) {
+        return null;
+    }
+
+    const { isOpen, setIsOpen, overlayRef, triggerRef } = useDropdown();
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
@@ -76,6 +81,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 top: position.top,
                 left: position.left,
             }}
+            onClick={() => setIsOpen(false)}
         >
             {children}
         </div>,

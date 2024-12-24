@@ -20,12 +20,12 @@ import { DropdownOverlay, DropdownProvider, DropdownTrigger, Input } from '@univ
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 import styles from './index.module.less';
 
 export function DefinedName({ disable }: { disable: boolean }) {
-    const [rangeString, setRangeString] = React.useState('');
+    const [rangeString, setRangeString] = useState('');
     const definedNamesService = useDependency(IDefinedNamesService);
 
     useEffect(() => {

@@ -19,7 +19,6 @@ import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { IMessageService } from '../services/message/message.service';
 import { BuiltInUIPart } from '../services/parts/parts.service';
 import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
 import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
@@ -45,12 +44,10 @@ export function MobileApp(props: IUniverAppProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const messageService = useDependency(IMessageService);
     const contentRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
     const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
-    const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
@@ -75,7 +72,6 @@ export function MobileApp(props: IUniverAppProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
-        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
@@ -94,7 +90,7 @@ export function MobileApp(props: IUniverAppProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>

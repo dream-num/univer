@@ -31,6 +31,7 @@ export class UserManagerService {
      * @memberof UserManagerService
      */
     public currentUser$ = this._currentUser$.asObservable();
+
     getCurrentUser<T extends IUser>() {
         return this._currentUser$.getValue() as T;
     }

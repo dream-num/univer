@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IMessageOptions } from '@univerjs/design';
+import type { IMessageProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
@@ -112,7 +112,7 @@ export interface IFUniverUIMixin {
      * someAction().then(() => message.dispose());
      * ```
      */
-    showMessage(options: IMessageOptions): IDisposable;
+    showMessage(options: IMessageProps): void;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -164,9 +164,9 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this._injector.get(ComponentManager);
     }
 
-    override showMessage(options: IMessageOptions): IDisposable {
+    override showMessage(options: IMessageProps): void {
         const messageService = this._injector.get(IMessageService);
-        return messageService.show(options);
+        messageService.show(options);
     }
 }
 

@@ -29,6 +29,8 @@ import {
     IMessageService,
     INotificationService,
     IPlatformService,
+    IUIPartsService,
+    UIPartsService,
 } from '@univerjs/ui';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
@@ -544,6 +546,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([IUIPartsService, { useClass: UIPartsService }]);
             injector.add([SheetsSelectionsService]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
@@ -575,6 +578,8 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
             const localeService = injector.get(LocaleService);
             localeService.load({});
+
+            injector.get(IUIPartsService);
         }
     }
 

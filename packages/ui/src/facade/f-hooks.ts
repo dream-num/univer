@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { FHooks, ICommandService } from '@univerjs/core';
-import { CopyCommand, PasteCommand } from '@univerjs/ui';
+import { CopyCommand, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
 
 export interface IFHooksSheetsUIMixin {
     /**
@@ -90,7 +90,7 @@ export class FHooksSheetsMixin extends FHooks implements IFHooksSheetsUIMixin {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.onCommandExecuted((command) => {
-            if (command.id === PasteCommand.id) {
+            if (command.id === PasteCommand.id || command.id === SheetPasteShortKeyCommandName) {
                 callback();
             }
         });

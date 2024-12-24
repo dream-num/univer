@@ -34,10 +34,11 @@ interface IPermissionDetailMainPartProps {
     desc?: string;
     onDescChange: (desc: string) => void;
     rangeSelectorRef: React.MutableRefObject<any>;
+    onFocus: () => void;
 }
 
 export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) => {
-    const { ranges, onRangesChange, rangeSelectorRef, desc, onDescChange, rangesErrMsg, isFocusRangeSelector, permissionId } = props;
+    const { ranges, onRangesChange, rangeSelectorRef, desc, onDescChange, rangesErrMsg, isFocusRangeSelector, permissionId, onFocus } = props;
     const componentManager = useDependency(ComponentManager);
     const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -85,6 +86,7 @@ export const PermissionDetailMainPart = (props: IPermissionDetailMainPartProps) 
                         subUnitId={subUnitId}
                         initValue={ranges?.map((i) => serializeRange(i)).join(',')}
                         onChange={handleRangeChange}
+                        onFocus={onFocus}
                         isFocus={isFocusRangeSelector}
                         actions={rangeSelectorRef.current}
                     />

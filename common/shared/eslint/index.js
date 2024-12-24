@@ -196,7 +196,7 @@ exports.tailwindcssPreset = () => {
             ...eslintPluginReadableTailwind.configs.warning.rules,
             ...eslintPluginReadableTailwind.configs.error.rules,
             'jsonc/sort-keys': ['warn'],
-            'readable-tailwind/multiline': ['warn', { printWidth: 120 }],
+            'readable-tailwind/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
             'react-hooks/rules-of-hooks': 'off',
         },
     };

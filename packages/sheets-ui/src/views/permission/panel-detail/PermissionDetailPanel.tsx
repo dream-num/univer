@@ -18,7 +18,7 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { ComponentContainer, ISidebarService, useComponentsOfPart } from '@univerjs/ui';
+import { ComponentContainer, ISidebarService, useComponentsOfPart, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
@@ -47,10 +47,10 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     const rangeSelectorActionsRef = useRef<any>({});
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
-    };
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
 
     const PermissionDetailUserPart = useComponentsOfPart(UNIVER_SHEET_PERMISSION_USER_PART);
 
@@ -71,8 +71,9 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     }, []);
 
     return (
-        <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
+        <div className={styles.permissionPanelDetailWrapper}>
             <PermissionDetailMainPart
+                onFocus={() => isFocusRangeSelectorSet(true)}
                 permissionId={activeRule.permissionId}
                 ranges={ranges}
                 onRangesChange={(v: IRange[], err?: string) => {

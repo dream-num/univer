@@ -15,9 +15,9 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
+
+import { CommandType } from '@univerjs/core';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const SetActivateCellEditOperation: IOperation<ICurrentEditCellParam> = {

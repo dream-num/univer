@@ -31,7 +31,6 @@ import {
     BuiltInUIPart,
     ComponentContainer,
     ContextMenu,
-    IMessageService,
     type IWorkbenchOptions,
     UNI_DISABLE_CHANGING_FOCUS_KEY,
     useComponentsOfPart,
@@ -76,7 +75,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const messageService = useDependency(IMessageService);
     const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -127,7 +125,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
-        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
@@ -146,7 +143,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     const nodeTypes: NodeTypes = {
         customNode: UnitNode,

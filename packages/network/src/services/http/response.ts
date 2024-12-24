@@ -15,6 +15,7 @@
  */
 
 import type { HTTPHeaders } from './headers';
+import type { HTTPRequest } from './request';
 
 export type HTTPEvent<T> = HTTPResponse<T> | HTTPProgress;
 export enum HTTPEventType {
@@ -98,22 +99,26 @@ export class ResponseHeader {
 // #region error
 
 export class HTTPResponseError {
+    readonly request: HTTPRequest;
     readonly headers?: HTTPHeaders;
     readonly status?: number;
     readonly statusText?: string;
     readonly error: any;
 
     constructor({
+        request,
         headers,
         status,
         statusText,
         error,
     }: {
+        request: HTTPRequest;
         headers?: HTTPHeaders;
         status?: number;
         statusText?: string;
         error: any;
     }) {
+        this.request = request;
         this.headers = headers;
         this.status = status;
         this.statusText = statusText;

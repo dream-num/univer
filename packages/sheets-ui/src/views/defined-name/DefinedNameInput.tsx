@@ -21,11 +21,11 @@ import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
 import { ComponentManager, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
-import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
@@ -51,7 +51,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         name,
         formulaOrRefString,
         comment = '',
-        localSheetId = SCOPE_WORKBOOK_VALUE,
+        localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
         id,
 
@@ -93,7 +93,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
-        value: SCOPE_WORKBOOK_VALUE,
+        value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     }];
 
     const isFormula = (token: string) => {
@@ -180,10 +180,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
+        const currentSheetName = workbook.getActiveSheet().getName();
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL, currentSheetName),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });

@@ -24,7 +24,9 @@ import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { Univer } from '../univer';
 import { FBase } from './f-base';
+import { FBlob } from './f-blob';
 import { FHooks } from './f-hooks';
+import { FUserManager } from './f-usermanager';
 
 export class FUniver extends FBase {
     /**
@@ -147,5 +149,22 @@ export class FUniver extends FBase {
      */
     getHooks(): FHooks {
         return this._injector.createInstance(FHooks);
+    }
+
+    /**
+     * Create a new blob.
+     *
+     * @returns {FBlob} The new blob instance
+     * @example
+     * ```ts
+     * const blob = UniverApi.newBlob();
+     * ```
+     */
+    newBlob(): FBlob {
+        return this._injector.createInstance(FBlob);
+    }
+
+    getUserManager(): FUserManager {
+        return this._injector.createInstance(FUserManager);
     }
 }

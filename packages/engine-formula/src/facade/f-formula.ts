@@ -107,14 +107,14 @@ export class FFormula extends FBase {
     }
 
     /**
-     * Set the maximum number of iterations for the formula calculation.
+     * When a formula contains a circular reference, set the maximum number of iterations for the formula calculation.
      * @param maxIteration The maximum number of iterations. The default value is 1.
      * @example
-     * @example
      * ```ts
-     * // The code below moves the active sheet to the specified index
+     * // Set the maximum number of iterations for the formula calculation to 5.
+     * // The default value is 1.
      * const formulaEngine = univerAPI.getFormula();
-     * formulaEngine.maxIteration(5);
+     * formulaEngine.setMaxIteration(5);
      * ```
      */
     setMaxIteration(maxIteration: number): void {

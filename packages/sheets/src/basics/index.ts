@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export * from './cell-position';
 export * from './const/index';
 export * from './interfaces/index';
 export * from './selection';

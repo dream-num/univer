@@ -15,11 +15,11 @@
  */
 
 import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue } from '@univerjs/sheets';
+import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, Tools, WrapStrategy } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
+import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -223,7 +223,11 @@ export class FRange extends FBase {
     }
 
     // #region editing
-
+    /**
+     * Set background color for current range.
+     * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * @param color {string}
+     */
     setBackgroundColor(color: string): Promise<boolean> {
         return this._commandService.executeCommand(SetStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -236,6 +240,15 @@ export class FRange extends FBase {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+    }
+
+    /**
+     * Set background color for current range.
+     * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')`
+     * @param color {string}
+     */
+    setBackground(color: string): Promise<boolean> {
+        return this.setBackgroundColor(color);
     }
 
     /**
@@ -632,20 +645,8 @@ export class FRange extends FBase {
      * console.log(fRange.getA1Notation()); // A1:B2
      * ```
      */
-    getA1Notation(): string {
-        const { startRow, endRow, startColumn, endColumn } = this._range;
-        let start;
-        let end;
-        if (startColumn < endColumn) {
-            start = Tools.numToWord(startColumn + 1) + (startRow + 1);
-            end = Tools.numToWord(endColumn + 1) + (endRow + 1);
-        } else {
-            start = Tools.numToWord(endColumn + 1) + (endRow + 1);
-            end = Tools.numToWord(startColumn + 1) + (startRow + 1);
-        }
-
-        if (start === end) return `${start}`;
-        return `${start}:${end}`;
+    getA1Notation(withSheet?: boolean): string {
+        return withSheet ? serializeRangeWithSheet(this._worksheet.getName(), this._range) : serializeRange(this._range);
     }
 
     /**
@@ -676,12 +677,80 @@ export class FRange extends FBase {
         const mergeInfo = this._worksheet.getMergedCell(this._range.startRow, this._range.startColumn);
         // the range is a merge cell or single cell
         const valid = (mergeInfo && Rectangle.equals(mergeInfo, this._range)) ||
-        (!mergeInfo && this._range.startRow === this._range.endRow && this._range.startColumn === this._range.endColumn);
+            (!mergeInfo && this._range.startRow === this._range.endRow && this._range.startColumn === this._range.endColumn);
 
         if (valid) {
             return this.activate();
         } else {
             throw new Error('The range is not a single cell');
         }
+    }
+
+    /**
+     * Splits a column of text into multiple columns based on an auto-detected delimiter.
+     * @param {boolean} [treatMultipleDelimitersAsOne] Whether to treat multiple continuous delimiters as one. The default value is false.
+     * @example
+     * // A1:A3 has following values:
+     * //     A  | B | C
+     * //  1,2,3 |   |
+     * //  4,,5,6 |   |
+     * // After calling splitTextToColumns(true), the range will be:
+     * //  A | B | C
+     * //  1 | 2 | 3
+     * //  4 | 5 | 6
+     * // After calling splitTextToColumns(false), the range will be:
+     * //  A | B | C | D
+     * //  1 | 2 | 3 |
+     * //  4 |   | 5 | 6
+     */
+    splitTextToColumns(treatMultipleDelimitersAsOne?: boolean): void;
+    /**
+     * Splits a column of text into multiple columns based on a specified delimiter.
+     * @param {boolean} [treatMultipleDelimitersAsOne] Whether to treat multiple continuous delimiters as one. The default value is false.
+     * @param {SplitDelimiterEnum} [delimiter] The delimiter to use to split the text. The default delimiter is Tab(1)、Comma(2)、Semicolon(4)、Space(8)、Custom(16).A delimiter like 6 (SplitDelimiterEnum.Comma|SplitDelimiterEnum.Semicolon) means using Comma and Semicolon to split the text.
+     * @returns {void}
+     */
+    splitTextToColumns(treatMultipleDelimitersAsOne?: boolean, delimiter?: SplitDelimiterEnum): void;
+    /**
+     * Splits a column of text into multiple columns based on a custom specified delimiter.
+     * @param {boolean} [treatMultipleDelimitersAsOne] Whether to treat multiple continuous delimiters as one. The default value is false.
+     * @param {SplitDelimiterEnum} [delimiter] The delimiter to use to split the text. The default delimiter is Tab(1)、Comma(2)、Semicolon(4)、Space(8)、Custom(16).A delimiter like 6 (SplitDelimiterEnum.Comma|SplitDelimiterEnum.Semicolon) means using Comma and Semicolon to split the text.
+     * @param {string} [customDelimiter] The custom delimiter to split the text. An error will be thrown if custom delimiter is set but the customDelimiter is not a character.
+     * @example Show how to split text to columns with combined delimiter. The bit operations are used to combine the delimiters.
+     * // A1:A3 has following values:
+     * //     A   | B | C
+     * //  1;;2;3 |   |
+     * //  1;,2;3 |   |
+     * // After calling splitTextToColumns(false, SplitDelimiterEnum.Semicolon|SplitDelimiterEnum.Comma), the range will be:
+     * //  A | B | C | D
+     * //  1 |   | 2 | 3
+     * //  1 |   | 2 | 3
+     * // After calling splitTextToColumns(true, SplitDelimiterEnum.Semicolon|SplitDelimiterEnum.Comma), the range will be:
+     * //  A | B | C
+     * //  1 | 2 | 3
+     * //  1 | 2 | 3
+     * @example Show how to split text to columns with custom delimiter
+     * // A1:A3 has following values:
+     * //     A   | B | C
+     * //  1#2#3  |   |
+     * //  4##5#6 |   |
+     * // After calling splitTextToColumns(false, SplitDelimiterEnum.Custom, '#'), the range will be:
+     * //  A | B | C | D
+     * //  1 | 2 | 3 |
+     * //  4 |   | 5 | 6
+     * // After calling splitTextToColumns(true, SplitDelimiterEnum.Custom, '#'), the range will be:
+     * //  A | B | C
+     * //  1 | 2 | 3
+     * //  4 | 5 | 6
+     */
+    splitTextToColumns(treatMultipleDelimitersAsOne?: boolean, delimiter?: SplitDelimiterEnum, customDelimiter?: string): void {
+        this._commandService.executeCommand(SplitTextToColumnsCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            delimiter,
+            customDelimiter,
+            treatMultipleDelimitersAsOne,
+        });
     }
 }

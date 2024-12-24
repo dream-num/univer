@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable complexity */
+
 import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
@@ -248,7 +250,6 @@ export class HtmlToUSMService {
         return css;
     }
 
-    // eslint-disable-next-line complexity
     private _getStyle(node: HTMLElement, styleStr: string) {
         const recordStyle: Record<string, string> = turnToStyleObject(styleStr);
         const style = node.style;
@@ -551,6 +552,12 @@ export class HtmlToUSMService {
                 }
             } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {
                     continue;

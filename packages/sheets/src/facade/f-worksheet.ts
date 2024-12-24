@@ -16,10 +16,12 @@
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, FBase, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { covertToColRange, covertToRowRange } from './utils';
@@ -39,6 +41,7 @@ export class FWorksheet extends FBase {
         protected readonly _worksheet: Worksheet,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(SheetsSelectionsService) protected readonly _selectionManagerService: SheetsSelectionsService,
+        @Inject(ILogService) protected readonly _logService: ILogService,
         @ICommandService protected readonly _commandService: ICommandService
     ) {
         super();
@@ -1018,10 +1021,14 @@ export class FWorksheet extends FBase {
 
     /**
      * Sets the frozen state of the current sheet.
-     * @param freeze - The freeze object containing the parameters for freezing the sheet.
+     * @param freeze - the scrolling viewport start range and count of freezed rows and columns.
+     * that means if you want to freeze the first 3 rows and 2 columns, you should set freeze as { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
+     *
+     * @deprecated use `setFrozenRows` and `setFrozenColumns` instead.
      * @returns True if the command was successful, false otherwise.
      */
     setFreeze(freeze: IFreeze): boolean {
+        this._logService.warn('setFreeze is deprecated, use setFrozenRows and setFrozenColumns instead');
         return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
             ...freeze,
             unitId: this._workbook.getUnitId(),
@@ -1044,6 +1051,8 @@ export class FWorksheet extends FBase {
     /**
      * Get the freeze state of the current sheet.
      * @returns The freeze state of the current sheet.
+     *
+     * @deprecated use `getRowFreezeStatus` and `getColumnFreezeStatus` instead.
      */
     getFreeze(): IFreeze {
         return this._worksheet.getFreeze();
@@ -1054,13 +1063,46 @@ export class FWorksheet extends FBase {
      * @param columns The number of columns to freeze.
      * To unfreeze all columns, set this value to 0.
      */
-    setFrozenColumns(columns: number): void {
-        const currentFreeze = this.getFreeze();
-        this.setFreeze({
-            ...currentFreeze,
-            startColumn: columns > 0 ? columns : -1,
-            xSplit: columns,
-        });
+    setFrozenColumns(columns: number): void;
+    /**
+     * Set freeze column, then the range from startColumn to endColumn will be fixed.
+     * e.g. setFrozenColumns(0, 2) will fix the column range from 0 to 2.
+     * e.g. setFrozenColumns(2, 3) will fix the column range from 2 to 3, And column from 0 to 1 will be invisible.
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too columns.
+     * fWorkSheet.setFrozenColumns(0, 2);
+     * ```
+     * @param startColumn
+     * @param endColumn
+     */
+    setFrozenColumns(startColumn: number, endColumn: number): void;
+    setFrozenColumns(...args: [number] | [number, number]): void {
+        const freezeCfg = this.getFreeze();
+        if (arguments.length === 1) {
+            const columns = args[0];
+            this.setFreeze({
+                ...freezeCfg,
+                startColumn: columns > 0 ? columns : -1,
+                xSplit: columns,
+            });
+        } else if (arguments.length === 2) {
+            let [startColumn = 0, endColumn = 0] = args;
+            if (startColumn > endColumn) {
+                [startColumn, endColumn] = [endColumn, startColumn];
+            }
+            this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+                startColumn: endColumn + 1,
+                xSplit: endColumn - startColumn + 1,
+                startRow: freezeCfg.startRow,
+                ySplit: freezeCfg.ySplit,
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this.getSheetId(),
+            });
+        }
     }
 
     /**
@@ -1068,13 +1110,48 @@ export class FWorksheet extends FBase {
      * @param rows The number of rows to freeze.
      * To unfreeze all rows, set this value to 0.
      */
-    setFrozenRows(rows: number): void {
-        const currentFreeze = this.getFreeze();
-        this.setFreeze({
-            ...currentFreeze,
-            startRow: rows > 0 ? rows : -1,
-            ySplit: rows,
-        });
+    setFrozenRows(rows: number): void;
+
+    /**
+     * Set freeze row, then the range from startRow to endRow will be fixed.
+     * e.g. setFrozenRows(0, 2) will fix the row range from 0 to 2.
+     * e.g. setFrozenRows(2, 3) will fix the row range from 2 to 3, And row from 0 to 1 will be invisible.
+     * @param startRow
+     * @param endRow
+     *
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * // freeze the first too rows.
+     * fWorkSheet.setFrozenRows(0, 2);
+     * ```
+     */
+    setFrozenRows(startColumn: number, endColumn: number): void;
+    setFrozenRows(...args: [number] | [number, number]): void {
+        const freezeCfg = this.getFreeze();
+        if (arguments.length === 1) {
+            const rows = args[0];
+            this.setFreeze({
+                ...freezeCfg,
+                startRow: rows > 0 ? rows : -1,
+                ySplit: rows,
+            });
+        } else if (arguments.length === 2) {
+            let [startRow = 0, endRow = 0] = args;
+            if (startRow > endRow) {
+                [startRow, endRow] = [endRow, startRow];
+            }
+            this._commandService.syncExecuteCommand;
+            this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+                startRow: endRow + 1,
+                ySplit: endRow - startRow + 1,
+                startColumn: freezeCfg.startColumn,
+                xSplit: freezeCfg.xSplit,
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this.getSheetId(),
+            });
+        }
     }
 
     /**
@@ -1101,6 +1178,28 @@ export class FWorksheet extends FBase {
             return 0;
         }
         return freeze.startRow;
+    }
+
+    /**
+     * Get freezed rows.
+     */
+    getFrozenRowRange(): { startRow: number; endRow: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startRow: cfg.startRow - cfg.ySplit,
+            endRow: cfg.startRow - 1,
+        };
+    }
+
+    /**
+     * Get freezed columns
+     */
+    getFrozenColumnRange(): { startColumn: number; endColumn: number } {
+        const cfg = this._worksheet.getFreeze();
+        return {
+            startColumn: cfg.startColumn - cfg.xSplit,
+            endColumn: cfg.startColumn - 1,
+        };
     }
 
     /**
@@ -1277,7 +1376,7 @@ export class FWorksheet extends FBase {
         const commandService = this._injector.get(ICommandService);
         const workbook = this._workbook;
         const sheets = workbook.getSheets();
-        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() === BooleanNumber.TRUE);
+        const visibleSheets = sheets.filter((sheet) => sheet.isSheetHidden() !== BooleanNumber.TRUE);
         if (visibleSheets.length <= 1) {
             throw new Error('Cannot hide the only visible sheet');
         }
@@ -1500,6 +1599,21 @@ export class FWorksheet extends FBase {
     }
 
     /**
+     * Returns the position of the last column that has content. Same as getLastColumns.
+     * @returns {number} the last column of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100, 20, 1, 1);
+     * console.log(fWorkSheet.getLastColumn());
+     * ```
+     */
+    getLastColumn(): number {
+        return this._worksheet.getLastColumnWithContent();
+    }
+
+    /**
      * Returns the position of the last row that has content.
      * @returns {number} the last row of the sheet that contains content.
      * @example
@@ -1511,6 +1625,21 @@ export class FWorksheet extends FBase {
      * console.log(fWorkSheet.getLastRows()); // 100
      */
     getLastRows(): number {
+        return this._worksheet.getLastRowWithContent();
+    }
+
+    /**
+     * Returns the position of the last row that has content, same as getLastRows().
+     * @returns {number} the last row of the sheet that contains content.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorkSheet.getRange(100,1,1,1);
+     * fRange.setValue('Hello World');
+     * console.log(fWorkSheet.getLastRow());
+     */
+    getLastRow(): number {
         return this._worksheet.getLastRowWithContent();
     }
 
@@ -1531,5 +1660,40 @@ export class FWorksheet extends FBase {
             return this._worksheet.getSheetId() === other.getSheetId() && this._workbook.getUnitId() === other.getWorkbook().getUnitId();
         }
         return false;
+    }
+
+    /*
+    * Insert a defined name for worksheet.
+     * @param {string} name The name of the defined name to insert
+     * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
+     * @example
+     * ```ts
+     * // The code below inserts a defined name
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
+     * sheet1.insertDefinedName('MyDefinedName', 'Sheet1!A1');
+     * ```
+     */
+    insertDefinedName(name: string, formulaOrRefString: string): void {
+        const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
+        const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
+        param.localSheetId = this.getSheetId();
+        this._fWorkbook.insertDefinedNameBuilder(param);
+    }
+
+     /**
+      * Get all the defined names in the worksheet.
+      * @returns {FDefinedName[]} All the defined names in the worksheet
+      * @example
+      * ```ts
+      * // The code below gets all the defined names in the worksheet
+      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+      * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
+      * const definedNames = sheet1.getDefinedNames();
+      * ```
+      */
+    getDefinedNames(): FDefinedName[] {
+        const names = this._fWorkbook.getDefinedNames();
+        return names.filter((name) => name.getLocalSheetId() === this.getSheetId());
     }
 }

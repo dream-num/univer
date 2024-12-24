@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
-import { awaitTime, ICommandService, type IDisposable, ILogService, toDisposable } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { HoverManagerService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
+import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -60,6 +61,22 @@ export interface IFWorkbookSheetsUIMixin {
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
 
     /**
+     * Subscribe to pointer move events on workbook. Just like onCellHover, but with event information.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer down events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer up events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+
+    /**
      * Start the editing process
      * @returns A boolean value
      */
@@ -74,7 +91,7 @@ export interface IFWorkbookSheetsUIMixin {
     endEditing(save?: boolean): Promise<boolean>;
 }
 
-export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
+export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         this._logDeprecation('openSiderbar');
 
@@ -120,6 +137,31 @@ export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookShee
         );
     }
 
+    override onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerDownCell$.subscribe(callback)
+        );
+    }
+
+    override onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerUpCell$.subscribe(callback)
+        );
+    }
+
+    override onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentCellPosWithEvent$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: ICellPosWithEvent) => {
+                    callback(cell, cell.event.buttons);
+                })
+        );
+    }
+
     override startEditing(): boolean {
         const commandService = this._injector.get(ICommandService);
         return commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
@@ -142,9 +184,26 @@ export class FWorokbookSheetsUIMixin extends FWorkbook implements IFWorkbookShee
         await awaitTime(0);
         return true;
     }
+
+    /**
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
+    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) return null;
+        const scm = render.with(SheetScrollManagerService);
+        return scm.getScrollStateByParam({ unitId, sheetId });
+    }
 }
 
-FWorkbook.extend(FWorokbookSheetsUIMixin);
+FWorkbook.extend(FWorkbookSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FWorkbook extends IFWorkbookSheetsUIMixin {}

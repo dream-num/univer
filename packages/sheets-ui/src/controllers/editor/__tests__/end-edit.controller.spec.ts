@@ -112,11 +112,8 @@ describe('Test EndEditController', () => {
         const injector = get(Injector);
 
         const worksheet = workbook.getActiveSheet()!;
-        const config = worksheet.getConfig();
         spreadsheetSkeleton = new SpreadsheetSkeleton(
             worksheet,
-            config,
-            worksheet.getCellMatrix(),
             workbook.getStyles(),
             localeService,
             contextService,

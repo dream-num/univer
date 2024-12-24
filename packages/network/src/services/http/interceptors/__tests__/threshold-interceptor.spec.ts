@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@univerjs/core';
 import { awaitTime } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Injector } from '@univerjs/core';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { HTTPHeaders } from '../../headers';
 import { HTTPService } from '../../http.service';
@@ -55,6 +55,8 @@ describe('test "HTTPThresholdInterceptor"', () => {
 
     function emitError(uid: number) {
         httpImplementation.getHandler(uid).emitError(new HTTPResponseError({
+            // eslint-disable-next-line ts/no-explicit-any
+            request: {} as any,
             headers: new HTTPHeaders(),
             status: 400,
             statusText: 'Request Failed',

@@ -97,6 +97,8 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
+export { splitRangeText } from './basics/split-range-text';
+export type { SplitDelimiterEnum } from './basics/split-range-text';
 export { getNextPrimaryCell } from './services/selections/move-active-cell-util';
 
 export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
@@ -147,6 +149,7 @@ export {
     WorksheetSortPermission,
     WorksheetViewPermission,
 } from './services/permission/permission-point';
+export { PermissionPointsDefinitions } from './services/permission/permission-point/const';
 export { UnitAction, UnitObject } from '@univerjs/protocol';
 export { checkRangesEditablePermission } from './services/permission/util';
 
@@ -319,6 +322,10 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+
+export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
+export type { ISplitTextToColumnsCommandParams } from './commands/commands/split-text-to-columns.command';
+
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { SetProtectionCommand } from './commands/commands/set-protection.command';
@@ -414,5 +421,6 @@ export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.oper
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
-
+export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
+export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
 // #endregion

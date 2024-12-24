@@ -2336,9 +2336,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       typescript:
         specifier: ^5.7.2
         version: 5.7.2

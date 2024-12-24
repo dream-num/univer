@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import { FWorksheet } from '@univerjs/sheets/facade';
+import type { IDisposable } from '@univerjs/core';
+import type { IAddCommentCommandParams } from '@univerjs/thread-comment';
+import { ICommandService } from '@univerjs/core';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { FWorksheet } from '@univerjs/sheets/facade';
+import { AddCommentCommand } from '@univerjs/thread-comment';
 import { FThreadComment } from './f-thread-comment';
 
 export interface IFWorksheetCommentMixin {
@@ -31,6 +35,20 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
         const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
         const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
+
+    /**
+     * Subscribe to comment events.
+     * @param callback Callback function, param contains comment info and target cell.
+     */
+    onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.onCommandExecuted((command) => {
+            if (command.id === AddCommentCommand.id) {
+                const params = command.params as IAddCommentCommandParams;
+                callback(params);
+            }
+        });
     }
 }
 

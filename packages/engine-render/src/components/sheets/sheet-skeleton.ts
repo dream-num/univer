@@ -215,7 +215,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Range viewBounds. only update by viewBounds.
      * It would change multiple times in one frame if there is multiple viewport (after freeze row&col)
      */
-    private _visibleRange: IRowColumnRange = {
+    private _drawingRange: IRowColumnRange = {
         startRow: -1,
         endRow: -1,
         startColumn: -1,
@@ -310,7 +310,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Range of visible area(range in viewBounds)
      */
     get rowColumnSegment(): IRowColumnRange {
-        return this._visibleRange;
+        return this._drawingRange;
     }
 
     /**
@@ -363,7 +363,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._columnTotalWidth = 0;
         this._rowHeaderWidth = 0;
         this._columnHeaderHeight = 0;
-        this._visibleRange = {
+        this._drawingRange = {
             startRow: -1,
             endRow: -1,
             startColumn: -1,
@@ -450,10 +450,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         if (vpInfo) {
             const range = this.getRangeByViewport(vpInfo);
-            this._visibleRange = range;
             this._visibleRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, range);
 
             const cacheRange = this.getCacheRangeByViewport(vpInfo);
+            this._drawingRange = cacheRange;
             this._cacheRangeMap.set(vpInfo.viewportKey as SHEET_VIEWPORT_KEY, cacheRange);
         }
 
@@ -478,13 +478,13 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this.updateVisibleRange(vpInfo);
 
-        const rowColumnSegment = this._visibleRange;
+        const rowColumnSegment = this._drawingRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
 
         if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 
-        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._drawingRange);
         for (const mergeRange of mergeRanges) {
             this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
                 mergeRange,

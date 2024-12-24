@@ -18,7 +18,14 @@ import { FUniver } from '@univerjs/core';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
 export class FUnvierDataValidationMixin {
+    /**
+     * @deparecated use `univerAPI.newDataValidation()` as instead.
+     */
     static newDataValidation(): FDataValidationBuilder {
+        return new FDataValidationBuilder();
+    }
+
+    newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 }

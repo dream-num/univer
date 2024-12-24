@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDropdownProps } from '@univerjs/design';
+import type { Ref } from 'react';
+import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
-import type { IDropdownProps } from '@univerjs/design';
-import type { Ref } from 'react';
-
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
@@ -32,7 +32,6 @@ import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
-import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 
 export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownProps['align'] }, ref: Ref<any>) => {
     const { align } = props;
@@ -198,7 +197,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         return (
             <span>
                 <ToolbarButton
-                    className={styles.toolbarItemTextButton}
+                    noIcon={!icon}
                     active={activated}
                     disabled={disabled}
                     onClick={() => executeCommand(props.commandId ?? props.id)}
@@ -209,7 +208,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                             <CustomLabel title={title!} value={value} label={label} />
                         )
                         : (
-                            <CustomLabel icon={icon} />
+                            icon ? <CustomLabel icon={icon} /> : <CustomLabel title={title!} />
                         )}
                 </ToolbarButton>
             </span>

@@ -15,12 +15,13 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import type { IMessageOptions } from '@univerjs/design';
+import type { IMessageProps } from '@univerjs/design';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
+import { FShortcut } from './f-shortcut';
 
 export interface IFUniverUIMixin {
     /**
@@ -28,6 +29,10 @@ export interface IFUniverUIMixin {
      * @returns the [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object
      */
     getURL(): URL;
+    /**
+     * Get the Shortcut handler to interact with Univer's shortcut functionalities.
+     */
+    getShortcut(): FShortcut;
     /**
      * Copy the current selected content of the currently focused unit into your system clipboard.
      */
@@ -107,12 +112,16 @@ export interface IFUniverUIMixin {
      * someAction().then(() => message.dispose());
      * ```
      */
-    showMessage(options: IMessageOptions): IDisposable;
+    showMessage(options: IMessageProps): void;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override getURL(): URL {
         return new URL(window.location.href);
+    }
+
+    override getShortcut(): FShortcut {
+        return this._injector.createInstance(FShortcut);
     }
 
     override copy(): Promise<boolean> {
@@ -155,9 +164,9 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this._injector.get(ComponentManager);
     }
 
-    override showMessage(options: IMessageOptions): IDisposable {
+    override showMessage(options: IMessageProps): void {
         const messageService = this._injector.get(IMessageService);
-        return messageService.show(options);
+        messageService.show(options);
     }
 }
 

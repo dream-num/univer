@@ -78,7 +78,7 @@ export type { IEditorBridgeServiceParam } from './services/editor-bridge.service
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export { HoverManagerService } from './services/hover-manager.service';
-export type { IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
+export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
@@ -180,5 +180,6 @@ export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
 export { UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_USER_PART } from './consts/permission';
+export { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute } from './services/utils/drawing-position-util';
 export type { IScrollState, IViewportScrollState } from './services/scroll-manager.service';
 // #endregion

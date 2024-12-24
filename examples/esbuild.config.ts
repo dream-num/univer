@@ -114,47 +114,48 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     sourcemap: args.watch,
     minify: false,
     target: 'chrome70',
-    plugins: [{
-        name: 'ignore-global-css',
-        setup(build) {
-            build.onResolve({ filter: /\/global\.css$/ }, (args) => {
-                if (args.importer.includes('packages')) {
-                    return {
-                        path: args.path,
-                        namespace: 'ignore-global-css',
-                        pluginData: {
-                            importer: args.importer,
-                        },
-                    };
-                }
-            });
+    plugins: [
+        {
+            name: 'ignore-global-css',
+            setup(build) {
+                build.onResolve({ filter: /\/global\.css$/ }, (args) => {
+                    if (args.importer.includes('packages')) {
+                        return {
+                            path: args.path,
+                            namespace: 'ignore-global-css',
+                            pluginData: {
+                                importer: args.importer,
+                            },
+                        };
+                    }
+                });
 
-            build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
-                return { contents: '' };
-            });
-        },
-    },
-    copyPlugin({
-        assets: {
-            from: ['./public/**/*'],
-            to: ['./'],
-        },
-    }),
-    stylePlugin({
-        postcss: {
-            plugins: [tailwindcss],
-        },
-        cssModulesOptions: {
-            localsConvention: 'camelCaseOnly',
-            generateScopedName: 'univer-[local]',
-        },
-        renderOptions: {
-            lessOptions: {
-                paths: [nodeModules],
+                build.onLoad({ filter: /\/global\.css$/, namespace: 'ignore-global-css' }, () => {
+                    return { contents: '' };
+                });
             },
         },
-    }),
-    vue() as unknown as Plugin,
+        copyPlugin({
+            assets: {
+                from: ['./public/**/*'],
+                to: ['./'],
+            },
+        }),
+        stylePlugin({
+            postcss: {
+                plugins: [tailwindcss],
+            },
+            cssModulesOptions: {
+                localsConvention: 'camelCaseOnly',
+                generateScopedName: 'univer-[local]',
+            },
+            renderOptions: {
+                lessOptions: {
+                    paths: [nodeModules],
+                },
+            },
+        }),
+        vue() as unknown as Plugin,
     ],
     entryPoints,
     outdir: './local',

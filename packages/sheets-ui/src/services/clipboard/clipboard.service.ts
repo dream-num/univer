@@ -303,6 +303,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = range;
 
+        // TODO @ybzky This needs to be optimized. Both cell and cellRaw should be obtained, one for html and one for plain
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
         const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
         let rowIndex = startRow;
@@ -692,6 +693,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             });
         }
 
+        filteredHooks.forEach((h) => h.onAfterPaste?.(result));
         return result;
     }
 

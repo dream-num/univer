@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+import type { IDialogService } from './dialog.service';
 import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
+
 import { type IDisposable, Inject, Injector } from '@univerjs/core';
 import { Subject } from 'rxjs';
-
-import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
-import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import { DialogPart } from '../../views/components/dialog-part/DialogPart';
-import type { IDialogService } from './dialog.service';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopDialogService extends Disposable implements IDialogService {
     protected _dialogOptions: IDialogPartMethodOptions[] = [];

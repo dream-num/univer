@@ -19,6 +19,7 @@
 
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams, ISetWorksheetShowCommandParams } from '@univerjs/sheets';
+import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { CustomCommandExecutionError, Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, isICellData, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
@@ -37,7 +38,7 @@ import { PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
+type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams | IAutoFillCommandParams;
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
@@ -212,7 +213,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 break;
 
             case AutoFillCommand.id:
-                permission = this._permissionCheckByAutoFillCommand(this._autoFillService.autoFillLocation?.target);
+                permission = this._permissionCheckByAutoFillCommand(params as IAutoFillCommandParams);
                 errorMsg = this._localeService.t('permission.dialog.autoFillErr');
                 break;
 
@@ -538,17 +539,12 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         return true;
     }
 
-    private _permissionCheckByAutoFillCommand(params?: { rows: number[]; cols: number[] }) {
+    private _permissionCheckByAutoFillCommand(params?: { targetRange: IRange }) {
         if (!params) {
             return false;
         }
-        const { rows, cols } = params;
-        const startRow = rows[0];
-        const endRow = rows[rows.length - 1];
-        const startCol = cols[0];
-        const endCol = cols[cols.length - 1];
 
-        const targetRange = { startRow, endRow, startColumn: startCol, endColumn: endCol };
+        const { targetRange } = params;
 
         const target = getSheetCommandTarget(this._univerInstanceService);
         if (!target) {

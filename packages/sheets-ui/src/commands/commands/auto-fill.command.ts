@@ -22,8 +22,8 @@ import { generateNullCellValue, getSheetCommandTarget, SetRangeValuesMutation, S
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
 export interface IAutoFillCommandParams {
-    unitId: string;
-    subUnitId: string;
+    sourceRange: IRange;
+    targetRange: IRange;
 }
 
 export const AutoFillCommand: ICommand = {
@@ -32,7 +32,15 @@ export const AutoFillCommand: ICommand = {
 
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
-        return autoFillService.fillData(params.unitId, params.subUnitId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const { sourceRange, targetRange } = params;
+
+        const commandTarget = getSheetCommandTarget(univerInstanceService);
+        if (!commandTarget) return false;
+
+        const { subUnitId, unitId } = commandTarget;
+        return autoFillService.triggerAutoFill(unitId, subUnitId, sourceRange, targetRange);
     },
 };
 

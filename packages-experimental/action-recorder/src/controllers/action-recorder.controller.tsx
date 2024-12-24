@@ -47,7 +47,7 @@ import { AddWorksheetMergeAllCommand,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
-import { SetRangeBoldCommand,
+import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
@@ -170,6 +170,8 @@ export class ActionRecorderController extends Disposable {
             SheetPasteFormatCommand,
             SheetPasteShortKeyCommand,
             SheetPasteValueCommand,
+            AutoFillCommand,
+            RefillCommand,
 
             SetWorksheetActivateCommand,
             SetWorksheetActiveOperation,

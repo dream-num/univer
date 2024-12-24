@@ -122,13 +122,17 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
                                 <div
                                     className={`
                                       univer-text-gray-600 univer-text-sm univer-overflow-hidden univer-text-ellipsis
+                                      univer-flex-shrink-0 univer-w-[50%] univer-whitespace-nowrap
                                     `}
                                     title={definedName.name}
                                 >
                                     {definedName.name}
                                 </div>
                                 <div
-                                    className="univer-text-gray-400 univer-text-xs univer-flex-shrink-0"
+                                    className={`
+                                      univer-text-gray-400 univer-text-xs univer-flex-shrink-0 univer-overflow-hidden
+                                      univer-text-ellipsis univer-w-[50%] univer-whitespace-nowrap
+                                    `}
                                     title={definedName.formulaOrRefString}
                                 >
                                     {definedName.formulaOrRefString}

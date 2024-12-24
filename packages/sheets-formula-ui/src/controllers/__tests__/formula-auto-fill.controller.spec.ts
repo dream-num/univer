@@ -87,6 +87,7 @@ describe('Test auto fill with formula', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
+        get(AutoFillController);
 
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);

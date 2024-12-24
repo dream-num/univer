@@ -496,4 +496,4 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 }
 
-export const IAutoFillService = createIdentifier<AutoFillService>('univer.auto-fill-service');
+export const IAutoFillService = createIdentifier<IAutoFillService>('univer.auto-fill-service');

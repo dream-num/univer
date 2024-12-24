@@ -69,6 +69,7 @@ import {
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
+import { RefillCommand } from '../commands/commands/refill.command';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
@@ -153,6 +154,7 @@ export class AutoFillController extends Disposable {
                 && !fromSync
                 && !fromFormula
                 && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id
+                && (command.params as IMutationCommonParams).trigger !== RefillCommand.id
             ) {
                 this._quit();
             }

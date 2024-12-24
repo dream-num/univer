@@ -2329,6 +2329,9 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

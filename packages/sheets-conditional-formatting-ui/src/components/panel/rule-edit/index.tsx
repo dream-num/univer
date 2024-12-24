@@ -127,7 +127,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         }
         return defaultType;
     });
-    const result = useRef<Parameters<IStyleEditorProps['onChange']>>();
+    const result = useRef<Parameters<IStyleEditorProps['onChange']>>(undefined);
     const interceptorManager = useMemo(() => {
         const _interceptorManager = new InterceptorManager({ beforeSubmit, submit });
         return _interceptorManager;

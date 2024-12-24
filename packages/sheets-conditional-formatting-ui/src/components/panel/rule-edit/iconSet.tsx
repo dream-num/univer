@@ -554,7 +554,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     placement="bottomLeft"
                     overlay={(
                         <IconGroupList
-                            ref={(el) => !iconGroupListEl && el && setIconGroupListEl(el)}
+                            ref={(el) => {
+                                !iconGroupListEl && el && setIconGroupListEl(el);
+                            }}
                             iconType={currentIconType}
                             onClick={handleClickIconList}
                         />

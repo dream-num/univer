@@ -24,15 +24,17 @@ import * as ReactDOM from 'react-dom';
 
 type CreateRoot = (container: ContainerType) => Root;
 
-type fullClone = typeof ReactDOM & {
+type FullCloneType = typeof ReactDOM & {
     __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: {
         usingClientEntryPoint?: boolean;
     };
     createRoot?: CreateRoot;
+    render?: (node: React.ReactElement, container: ContainerType) => void;
+    unmountComponentAtNode?: (container: ContainerType) => void;
 };
 
-let fullClone: fullClone;
-async function getFullClone() {
+let fullClone: FullCloneType;
+async function getFullClone(): Promise<FullCloneType> {
     if (fullClone) return fullClone;
 
     try {
@@ -90,8 +92,8 @@ async function modernRender(node: React.ReactElement, container: ContainerType) 
 }
 
 async function legacyRender(node: React.ReactElement, container: ContainerType) {
-    const { render: reactRender } = await getFullClone();
-    reactRender(node, container);
+    const { render } = await getFullClone();
+    render?.(node, container);
 }
 
 export async function render(node: React.ReactElement, container: ContainerType) {
@@ -116,7 +118,7 @@ async function modernUnmount(container: ContainerType) {
 
 async function legacyUnmount(container: ContainerType) {
     const { unmountComponentAtNode } = await getFullClone();
-    unmountComponentAtNode(container);
+    unmountComponentAtNode?.(container);
 }
 
 export async function unmount(container: ContainerType) {

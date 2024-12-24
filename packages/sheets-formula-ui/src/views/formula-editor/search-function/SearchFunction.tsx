@@ -45,7 +45,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const commandService = useDependency(ICommandService);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = useMemo(() => !!searchList.length, [searchList]);
-    const ulRef = useRef<HTMLUListElement>();
+    const ulRef = useRef<HTMLUListElement>(undefined);
     const [active, activeSet] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
     const [position$] = useEditorPostion(editorId, visible, [searchText, searchList]);

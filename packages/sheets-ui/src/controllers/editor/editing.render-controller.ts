@@ -844,15 +844,11 @@ function emptyBody(body: IDocumentBody, removeStyle = false) {
     }
 
     if (body.paragraphs != null) {
-        if (body.paragraphs.length === 1) {
-            body.paragraphs[0].startIndex = 0;
-        } else {
-            body.paragraphs = [
-                {
-                    startIndex: 0,
-                },
-            ];
-        }
+        body.paragraphs = [
+            {
+                startIndex: 0,
+            },
+        ];
     }
 
     if (body.sectionBreaks != null) {

@@ -14,6 +14,29 @@
  * limitations under the License.
  */
 
-export { DropdownOverlay } from './DropdownOverlay';
-export { DropdownProvider } from './DropdownProvider';
-export { DropdownTrigger } from './DropdownTrigger';
+import type { Meta } from '@storybook/react';
+import React from 'react';
+
+import { Button } from '../button/Button';
+import { DropdownLegacy } from './DropdownLegacy';
+
+const meta: Meta<typeof DropdownLegacy> = {
+    title: 'Components / Dropdown Legacy',
+    component: DropdownLegacy,
+    parameters: {
+        layout: 'centered',
+    },
+    tags: ['autodocs'],
+};
+
+export default meta;
+
+export const Playground = {
+    render() {
+        return (
+            <DropdownLegacy overlay={<div>overlay</div>}>
+                <Button>Basic</Button>
+            </DropdownLegacy>
+        );
+    },
+};

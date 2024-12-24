@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
-export { DropdownOverlay } from './DropdownOverlay';
-export { DropdownProvider } from './DropdownProvider';
-export { DropdownTrigger } from './DropdownTrigger';
+import type { RefObject } from 'react';
+import { createContext, useContext } from 'react';
+
+interface IDropdownContextType {
+    isOpen: boolean;
+    setIsOpen: (value: boolean) => void;
+    overlayRef: RefObject<HTMLDivElement>;
+    triggerRef: RefObject<HTMLElement>;
+}
+
+export const DropdownContext = createContext<IDropdownContextType | null>(null);
+
+export const useDropdown = () => {
+    const context = useContext(DropdownContext);
+    if (!context) {
+        throw new Error('useDropdown must be used within a DropdownProvider');
+    }
+    return context;
+};

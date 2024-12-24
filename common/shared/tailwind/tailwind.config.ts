@@ -15,6 +15,7 @@
  */
 
 import type { Config } from 'tailwindcss';
+import scrollbar from 'tailwind-scrollbar';
 import animate from 'tailwindcss-animate';
 
 const config: Omit<Config, 'content'> = {
@@ -163,6 +164,7 @@ const config: Omit<Config, 'content'> = {
     },
     plugins: [
         animate,
+        scrollbar,
     ],
 };
 

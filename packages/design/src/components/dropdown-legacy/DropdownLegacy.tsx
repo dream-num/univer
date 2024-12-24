@@ -15,14 +15,14 @@
  */
 
 import type { ActionType, AlignType } from '@rc-component/trigger';
-import RcDropdown from 'rc-dropdown';
 import type Placements from 'rc-dropdown/lib/placements';
+import RcDropdown from 'rc-dropdown';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export interface IDropdownProps {
+export interface IDropdownLegacyProps {
     /** Semantic DOM class */
     className?: string;
 
@@ -79,7 +79,7 @@ export interface IDropdownProps {
     disabled?: boolean;
 }
 
-export function Dropdown(props: IDropdownProps) {
+export function DropdownLegacy(props: IDropdownLegacyProps) {
     const {
         className,
         placement,

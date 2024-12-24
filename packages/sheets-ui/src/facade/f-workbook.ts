@@ -15,7 +15,6 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';

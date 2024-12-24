@@ -134,7 +134,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
                 } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
+                    viewportMain?.resizeViewport();
                 }
             } else {
                 scrollBar = null;
@@ -146,7 +146,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
                 } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
+                    viewportMain?.resizeViewport();
                 }
             } else {
                 scrollBar = null;

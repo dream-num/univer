@@ -1216,7 +1216,7 @@ export class Scene extends Disposable {
      *
      */
     private _transformHandler() {
-        // why not use this.ancestorScaleXY ?
+        // why not use this.ancestorScaleXY instead of this.scaleX ?
         // if parent scale changed, this.ancestorScaleXY will remain same.
         const composeResult = Transform.create().composeMatrix({
             scaleX: this.scaleX,
@@ -1225,7 +1225,7 @@ export class Scene extends Disposable {
 
         this.transform = composeResult;
         this.getViewports().forEach((vp: Viewport) => {
-            vp.resetCanvasSizeAndUpdateScroll();
+            vp.resizeViewport();
         });
         this.makeDirty(true);
     }

@@ -1597,11 +1597,6 @@ export class FWorksheet extends FBase {
         return this._worksheet.getLastColumnWithContent();
     }
 
-    // same as Google App script
-    getLastColumn(): number {
-        return this._worksheet.getLastColumnWithContent();
-    }
-
     /**
      * Returns the position of the last column that has content. Same as getLastColumns.
      * @returns {number} the last column of the sheet that contains content.
@@ -1629,11 +1624,6 @@ export class FWorksheet extends FBase {
      * console.log(fWorkSheet.getLastRows()); // 100
      */
     getLastRows(): number {
-        return this._worksheet.getLastRowWithContent();
-    }
-
-    // same as Google App script
-    getLastRow(): number {
         return this._worksheet.getLastRowWithContent();
     }
 

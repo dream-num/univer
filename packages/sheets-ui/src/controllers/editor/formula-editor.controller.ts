@@ -40,8 +40,8 @@ import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -273,7 +273,7 @@ export class FormulaEditorController extends RxDisposable {
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetCanvasSizeAndUpdateScroll();
+                viewportMain?.resizeViewport();
             }
         } else {
             scrollBar = null;

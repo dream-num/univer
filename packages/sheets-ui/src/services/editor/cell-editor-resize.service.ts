@@ -253,7 +253,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetCanvasSizeAndUpdateScroll();
+                viewportMain?.resizeViewport();
             }
         } else {
             scrollBar = null;

@@ -70,7 +70,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
     private _addNewRender() {
         const { scene, engine } = this._context;
-
+        window.dsc = scene;
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: 0,
             top: 0,

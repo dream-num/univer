@@ -138,7 +138,7 @@ export class ScrollTimer {
             return;
         }
 
-        const scrolled = viewport?.scrollByViewportDeltaVal({
+        viewport?.scrollByViewportDeltaVal({
             viewportScrollX: x,
             viewportScrollY: y,
         });

@@ -51,13 +51,19 @@ export const getColor = (RgbArray: number[], opacity?: number): string => {
 
 const PERCENT_TO_NUMBER_DIVIDE = 100;
 
-export const toPx = (num: number | string, ReferenceValue: Nullable<number>): number => {
+/**
+ * If num is string and like 'v%', return baseValue * v / 100
+ * @param num {number | string}
+ * @param baseValue {number}
+ * @returns { number } return value
+ */
+export const toPx = (num: number | string, baseValue: Nullable<number>): number => {
     if (Tools.isNumber(num)) {
         return num;
     }
-    if (ReferenceValue && num && Tools.isString(num) && num.substr(num.length - 1, 1) === '%') {
+    if (baseValue && num && Tools.isString(num) && num.substr(num.length - 1, 1) === '%') {
         const numFloat = Number.parseFloat(num) / PERCENT_TO_NUMBER_DIVIDE;
-        return ReferenceValue * numFloat;
+        return baseValue * numFloat;
     }
     return 0;
 };

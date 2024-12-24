@@ -25,7 +25,7 @@ import type { BaseScrollBar } from './shape/base-scroll-bar';
 import { EventSubject, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import { fixLineWidthByScale, toPx } from './basics/tools';
+import { fixLineWidthByScale } from './basics/tools';
 import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
@@ -53,9 +53,6 @@ interface IViewProps extends IViewPosition {
     isWheelPreventDefaultX?: boolean;
     isWheelPreventDefaultY?: boolean;
     active?: boolean;
-
-    explicitViewportWidthSet?: boolean;
-    explicitViewportHeightSet?: boolean;
 
     allowCache?: boolean;
     bufferEdgeX?: number;
@@ -130,20 +127,6 @@ export class Viewport {
     private _preViewportScrollX: number = 0;
     private _preViewportScrollY: number = 0;
 
-    /**
-     * scene size in current viewport port with scale
-     * scene size relative to row col settings.
-     * if AB col has set to be freeze, then scene size in viewMain will be smaller compared to no freeze state.
-     */
-    private _sceneWCurrVpAfterScale: number = 0;
-    private _sceneHCurrVpAfterScale: number = 0;
-
-    /**
-     * scene size with scale
-     */
-    private _sceneWidthAfterScale: number;
-    private _sceneHeightAfterScale: number;
-
     onMouseWheel$ = new EventSubject<IWheelEvent>();
     onScrollAfter$ = new EventSubject<IScrollObserverParam>();
     onScrollEnd$ = new EventSubject<IScrollObserverParam>();
@@ -163,12 +146,51 @@ export class Viewport {
     private _widthOrigin: Nullable<number>;
     private _heightOrigin: Nullable<number>;
 
+    /**
+     * OffsetY of viewport to topleft of canvas, the size of actual pixel on system. You can get it by measure screenshot.
+     * Plus: for sheet, top of viewport should take row header & column header into consideration.
+     * for sheet, Only freeze & init change this value.
+     */
     private _top: number = 0;
+    /**
+     * OffsetX of viewport to topleft of canvas, the size of actual pixel on system. You can get it by measure screenshot.
+     * for sheet, Only freeze & init change this value.
+     */
     private _left: number = 0;
+
+    /**
+     * always 0
+     */
     private _bottom: number = 0;
+
+    /**
+     * always 0
+     */
     private _right: number = 0;
+
+    /**
+     * Size of viewport.
+     * For sheet, only frozen viewport (viewMainLeft & viewMainLeftTop) will explicitly specify the width value.
+     * For sheet, zoom in 🔍 --> smaller value because header turns bigger. Width Does not include header.
+     */
     private _width: Nullable<number>;
+
+    /**
+     * Size of viewport,
+     * For sheet, only frozen viewport (viewMainTop & viewMainLeftTop) will explicitly specify the height value.
+     * For sheet,zoom in 🔍 ---> smaller value because header bigger. Height Does not include header.
+     */
     private _height: Nullable<number>;
+
+    // /**
+    //  * The size of content in curr viewport * scale.
+    //  */
+    // private _sceneWCurrVpAfterScale: number = 0;
+
+    // /**
+    //  * The size of content in curr viewport * scale.
+    //  */
+    // private _sceneHCurrVpAfterScale: number = 0;
 
     private _scene!: Scene;
 
@@ -183,12 +205,12 @@ export class Viewport {
     private _active = true;
 
     /**
-     * after create a freeze column & row, there is a "padding distance" from row header to curr viewport.
+     * freezed row & col position
      */
-    private _paddingStartX: number = 0;
-    private _paddingEndX: number = 0;
-    private _paddingStartY: number = 0;
-    private _paddingEndY: number = 0;
+    private _freezeStartX: number = 0;
+    private _freezeEndX: number = 0;
+    private _freezeStartY: number = 0;
+    private _freezeEndY: number = 0;
 
     /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
@@ -232,13 +254,13 @@ export class Viewport {
         this._scene.addViewport(this);
         this._active = Tools.isDefine(props?.active) ? props?.active : true;
 
-        this._setViewportSize(props);
+        this._resizeViewportSizeByFreeze(props);
         this.initCacheCanvas(props);
 
         this._isWheelPreventDefaultX = props?.isWheelPreventDefaultX || false;
         this._isWheelPreventDefaultY = props?.isWheelPreventDefaultY || false;
 
-        this.resetCanvasSizeAndUpdateScroll();
+        this.resizeViewport();
         this.getBounding();
 
         this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
@@ -326,14 +348,15 @@ export class Viewport {
     }
 
     get isActive() {
-        if (this._active === false) {
-            return false;
-        }
+        return (this.height || 0) * (this.width || 0) > 0;
+        // if (this._active === false) {
+        //     return false;
+        // }
 
-        if ((this.height || 0) <= 0 || (this.width || 0) <= 0) {
-            return false;
-        }
-        return this._active;
+        // if ((this.height || 0) <= 0 || (this.width || 0) <= 0) {
+        //     return false;
+        // }
+        // return this._active;
     }
 
     set viewportScrollX(val: number) {
@@ -352,24 +375,46 @@ export class Viewport {
         return this._viewportScrollY;
     }
 
+    /**
+     * The size of content in curr viewport * scale.
+     */
+    get _sceneWCurrVpAfterScale() {
+        return (this._scene.width - this._freezeEndX) * this._scene.scaleX;
+    }
+
+    /**
+     * The size of content in curr viewport * scale.
+     */
+    get _sceneHCurrVpAfterScale() {
+        return (this._scene.height - this._freezeEndY) * this._scene.scaleY;
+    }
+
+    get _sceneWidthAfterScale() {
+        return this._scene.width * this._scene.scaleX;
+    }
+
+    get _sceneHeightAfterScale() {
+        return this._scene.height * this._scene.scaleY;
+    }
+
     private set top(num: number) {
         this._topOrigin = num;
-        this._top = toPx(num, this._scene?.getParent()?.height);
+        this._top = num;
     }
 
     private set left(num: number) {
         this._leftOrigin = num;
-        this._left = toPx(num, this.scene.getParent()?.width);
+        this._left = num;
     }
 
     private set bottom(num: number) {
         this._bottomOrigin = num;
-        this._bottom = toPx(num, this.scene.getParent()?.height);
+        this._bottom = num;
     }
 
     private set right(num: number) {
         this._rightOrigin = num;
-        this._right = toPx(num, this.scene.getParent()?.width);
+        this._right = num;
     }
 
     get viewBound() {
@@ -411,26 +456,58 @@ export class Viewport {
 
     get canvas() { return this._cacheCanvas; }
 
+    /**
+     * @deprecated use activate instead.
+     */
     enable() {
         this._active = true;
     }
 
+    /**
+     * @deprecated use deactivate instead.
+     */
     disable() {
         this._active = false;
     }
 
-    resetCanvasSizeAndUpdateScroll() {
-        this._resizeCacheCanvas();
+    activate() {
+        this._active = true;
+    }
+
+    deactivate() {
+        this._active = false;
+    }
+
+    /**
+     * Resize when canvas element size changed(and zoom)
+     * Origin name: resetCanvasSize
+     */
+    resizeViewport() {
+        // this._resizeCacheCanvas();
+        if (!this._active) return;
+
+        const { width, height } = this._calcViewPortSize();
+        this.width = width;
+        this.height = height;
+        const scaleX = this.scene.scaleX;
+        const scaleY = this.scene.scaleY;
+        const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
+        const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
+        this._cacheCanvas?.setSize(canvasW, canvasH);
+        this.cacheBound = this._viewBound;
+        this.preCacheBound = null;
+
+        this.markForceDirty(true);
         this._updateScrollByViewportScrollValue();
         this.onResized$.next({
             width: this._width,
             height: this._height,
             left: this._left,
             top: this._top,
-            paddingStartX: this._paddingStartX,
-            paddingEndX: this._paddingEndX,
-            paddingStartY: this._paddingStartY,
-            paddingEndY: this._paddingEndY,
+            paddingStartX: this._freezeStartX,
+            paddingEndX: this._freezeEndX,
+            paddingStartY: this._freezeStartY,
+            paddingEndY: this._freezeEndY,
         } as IViewportReSizeParam);
     }
 
@@ -458,22 +535,28 @@ export class Viewport {
         if (positionKeys.length === 0) {
             return;
         }
-        this._setViewportSize(position);
-        this.resetCanvasSizeAndUpdateScroll();
+        this._resizeViewportSizeByFreeze(position);
+        this.resizeViewport();
     }
 
-    setPadding(param: IPosition) {
+    /**
+     * Padding is the distance of freezing rows& columns size to the viewport.
+     * Or the distance to header from current viewport.
+     * e.g. if row 0 ~ 1 is frozen, then the paddingStartY is height of row 0 ~ 1.
+     * @param param
+     */
+    setFreezePos(param: IPosition) {
         const { startX = 0, startY = 0, endX = 0, endY = 0 } = param;
-        this._paddingStartX = startX;
-        this._paddingEndX = endX;
-        this._paddingStartY = startY;
-        this._paddingEndY = endY;
+        this._freezeStartX = startX;
+        this._freezeEndX = endX;
+        this._freezeStartY = startY;
+        this._freezeEndY = endY;
 
-        this.resetCanvasSizeAndUpdateScroll();
+        this.resizeViewport();
     }
 
-    resetPadding() {
-        this.setPadding({
+    resetFreeze() {
+        this.setFreezePos({
             startX: 0,
             endX: 0,
             startY: 0,
@@ -547,8 +630,8 @@ export class Viewport {
     }
 
     transViewportScroll2ScrollValue(viewportScrollX: number, viewportScrollY: number) {
-        let x = viewportScrollX - this._paddingStartX;
-        let y = viewportScrollY - this._paddingStartY;
+        let x = viewportScrollX - this._freezeStartX;
+        let y = viewportScrollY - this._freezeStartY;
 
         if (this._scrollBar) {
             x *= this._scrollBar.ratioScrollX; // convert to scroll coord
@@ -615,20 +698,20 @@ export class Viewport {
         const { scaleX, scaleY } = this._scene.getPrecisionScale();
 
         return {
-            x: fixLineWidthByScale(x + this._paddingStartX, scaleX),
-            y: fixLineWidthByScale(y + this._paddingStartY, scaleY),
+            x: fixLineWidthByScale(x + this._freezeStartX, scaleX),
+            y: fixLineWidthByScale(y + this._freezeStartY, scaleY),
         };
     }
 
     /**
      * get actual scroll value by scrollXY
      */
-    getViewportScrollByScrollXY() {
-        const x = this.scrollX;
-        const y = this.scrollY;
+    // getViewportScrollByScrollXY() {
+    //     const x = this.scrollX;
+    //     const y = this.scrollY;
 
-        return this.transScroll2ViewportScrollValue(x, y);
-    }
+    //     return this.transScroll2ViewportScrollValue(x, y);
+    // }
 
     getScrollBar() {
         return this._scrollBar;
@@ -637,6 +720,8 @@ export class Viewport {
     /**
      * Just record state of scroll. This method won't scroll viewport and scrollbar.
      * TODO: @lumixraku this method is so wried, viewportMain did not call it, now only called in freeze situation.
+     *
+     * TODO: @lumixraku does current fixed by fixLineWidthByScale???
      * @param current
      * @returns Viewport
      */
@@ -795,43 +880,26 @@ export class Viewport {
         }
 
         const sceneTrans = this._scene.transform.clone();
-
-        // const m = sceneTrans.getMatrix();
-
-        // const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
-
-        // const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
-
-        // const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
-
-        // const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
-
-        let width = this._width;
-        let height = this._height;
         const size = this._calcViewPortSize();
 
-        // if (m[0] > 1) {
-        width = size.width;
-        // }
-
-        // if (m[3] > 1) {
-        height = size.height;
-        // }
+        const width = size.width;
+        const height = size.height;
 
         const xFrom: number = this.left;
         const xTo: number = ((width || 0) + this.left);
         const yFrom: number = this.top;
         const yTo: number = ((height || 0) + this.top);
 
-        // this.getRelativeVector 加上了 scroll 后的坐标
         const topLeft = this.transformVector2SceneCoord(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.transformVector2SceneCoord(Vector2.FromArray([xTo, yTo]));
 
+        const { scaleX: scale } = this.scene;
         const viewBound = {
-            left: topLeft.x,
-            right: bottomRight.x,
-            top: topLeft.y,
-            bottom: bottomRight.y,
+            // fixLineWidthByScale is must or canvas would be blurry after zoom in(1.2x)
+            left: fixLineWidthByScale(topLeft.x, scale),
+            right: fixLineWidthByScale(bottomRight.x, scale),
+            top: fixLineWidthByScale(topLeft.y, scale),
+            bottom: fixLineWidthByScale(bottomRight.y, scale),
         };
         this._viewBound = viewBound;
         const preViewBound = this._preViewBound;
@@ -904,21 +972,24 @@ export class Viewport {
     }
 
     /**
-     * convert vector to scene coordinate, include row & col
+     * convert vector to scene coordinate(scale & scroll included), include row & col
      * @param vec
      * @returns Vector2
      */
     transformVector2SceneCoord(vec: Vector2): Vector2 {
         const sceneTrans = this.scene.transform.clone().invert();
-        const scroll = this.getViewportScrollByScrollXY();
-
-        const svCoord = sceneTrans.applyPoint(vec).add(Vector2.FromArray([scroll.x, scroll.y]));
-        return svCoord;
+        // const scrollO = this.transScroll2ViewportScrollValue(this.scrollX, this.scrollY);
+        // const svCoord1 = sceneTrans.applyPoint(vec).add(Vector2.FromArray([scrollO.x, scrollO.y]));
+        const scrollX = this.viewportScrollX;
+        const scrollY = this.viewportScrollY;
+        const svCoord2 = sceneTrans.applyPoint(vec).add(Vector2.FromArray([scrollX, scrollY]));
+        // console.log('sv coord', svCoord1, '::::', svCoord2);
+        return svCoord2;
     }
 
     getAbsoluteVector(coord: Vector2): Vector2 {
         const sceneTrans = this.scene.transform.clone();
-        const scroll = this.getViewportScrollByScrollXY();
+        const scroll = this.transScroll2ViewportScrollValue(this.scrollX, this.scrollY);
 
         const svCoord = sceneTrans.applyPoint(coord.subtract(Vector2.FromArray([scroll.x, scroll.y])));
         return svCoord;
@@ -1024,7 +1095,9 @@ export class Viewport {
         this._scene.removeViewport(this._viewportKey);
     }
 
-    limitedScroll(scrollX: Nullable<number>, scrollY: Nullable<number>) {
+    limitedScroll(scrollXParam: Nullable<number>, scrollYParam: Nullable<number>) {
+        let scrollX = scrollXParam;
+        let scrollY = scrollYParam;
         if (!this._scrollBar) {
             return {
                 scrollX: 0,
@@ -1076,15 +1149,15 @@ export class Viewport {
     _limitViewportScroll(viewportScrollX: number, viewportScrollY: number): ILimitedScrollResult {
         const { width, height } = this._calcViewPortSize();
         // Not enough! freeze row & col should also take into consideration.
-        const freezeHeight = this._paddingEndY - this._paddingStartY;
-        const freezeWidth = this._paddingEndX - this._paddingStartX;
+        const freezeHeight = this._freezeEndY - this._freezeStartY;
+        const freezeWidth = this._freezeEndX - this._freezeStartX;
         const scaleY = this.scene.scaleY;
         const scaleX = this.scene.scaleX;
         const maxViewportScrollX = this._sceneWidthAfterScale - freezeWidth * scaleX - width;
         const maxViewportScrollY = this._sceneHeightAfterScale - freezeHeight * scaleY - height;
         return {
-            viewportScrollX: Tools.clamp(viewportScrollX, this._paddingStartX, maxViewportScrollX / scaleX),
-            viewportScrollY: Tools.clamp(viewportScrollY, this._paddingStartY, maxViewportScrollY / scaleY),
+            viewportScrollX: Tools.clamp(viewportScrollX, this._freezeStartX, maxViewportScrollX / scaleX),
+            viewportScrollY: Tools.clamp(viewportScrollY, this._freezeStartY, maxViewportScrollY / scaleY),
             isLimitedX: viewportScrollX > maxViewportScrollX,
             isLimitedY: viewportScrollY > maxViewportScrollY,
         };
@@ -1118,22 +1191,22 @@ export class Viewport {
     }
 
     /**
-     * resize canvas & use viewportScrollXY to scrollTo
+     * For resize canvas element.
      */
-    private _resizeCacheCanvas() {
-        const { width, height } = this._calcViewPortSize();
-        this.width = width;
-        this.height = height;
-        const scaleX = this.scene.scaleX;
-        const scaleY = this.scene.scaleY;
-        const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
-        const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
-        this._cacheCanvas?.setSize(canvasW, canvasH);
-        this.cacheBound = this._viewBound;
-        this.preCacheBound = null;
+    // private _resizeCacheCanvas() {
+    //     const { width, height } = this._calcViewPortSize();
+    //     this.width = width;
+    //     this.height = height;
+    //     const scaleX = this.scene.scaleX;
+    //     const scaleY = this.scene.scaleY;
+    //     const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
+    //     const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
+    //     this._cacheCanvas?.setSize(canvasW, canvasH);
+    //     this.cacheBound = this._viewBound;
+    //     this.preCacheBound = null;
 
-        this.markForceDirty(true);
-    }
+    //     this.markForceDirty(true);
+    // }
 
     /**
      * Update scroll when viewport is resizing and removing rol & col
@@ -1144,12 +1217,8 @@ export class Viewport {
         if (!this.width || this.width < 0) return;
         if (!this.height || this.height < 0) return;
         const { width, height } = this._calcViewPortSize();
-        const sceneWidthCurrVpAfterScale = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
-        const sceneHeightCurrVpAfterScale = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
-        this._sceneWCurrVpAfterScale = sceneWidthCurrVpAfterScale;
-        this._sceneHCurrVpAfterScale = sceneHeightCurrVpAfterScale;
-        this._sceneWidthAfterScale = this._scene.width * this._scene.scaleX;
-        this._sceneHeightAfterScale = this._scene.height * this._scene.scaleY;
+        const sceneWidthCurrVpAfterScale = this._sceneWCurrVpAfterScale;
+        const sceneHeightCurrVpAfterScale = this._sceneHCurrVpAfterScale;
 
         if (this._scrollBar) {
             this._scrollBar.resize(width, height, sceneWidthCurrVpAfterScale, sceneHeightCurrVpAfterScale);
@@ -1163,6 +1232,9 @@ export class Viewport {
         this.markForceDirty(true);
     }
 
+    /**
+     * Calculate viewport size by canvas element and specific viewport w&h.
+     */
     private _calcViewPortSize() {
         const parent = this._scene.getParent();
         const { width: parentWidth, height: parentHeight } = parent;
@@ -1198,7 +1270,6 @@ export class Viewport {
         return {
             width,
             height,
-            parentHeight,
         };
     }
 
@@ -1242,9 +1313,6 @@ export class Viewport {
         if (this._scrollBar == null) {
             return;
         }
-
-        // TODO @lumixraku WTF? ?! sheet can not scroll when horizonThumb is invisible ??
-        // if (this._scrollBar.hasHorizonThumb()) {...}
 
         let scrollX = rawScrollXY.x;
         let scrollY = rawScrollXY.y;
@@ -1343,14 +1411,11 @@ export class Viewport {
     }
 
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {
-        const onePixelFix = 0;//FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
-            left: value.left - this.bufferEdgeX - onePixelFix,
-            right: value.right + this.bufferEdgeX + onePixelFix,
-            // left: Math.max(this.leftOrigin, value.left - this.bufferEdgeX) - onePixelFix,
-            // top: Math.max(this.topOrigin, value.top - this.bufferEdgeY) - onePixelFix,
-            top: value.top - this.bufferEdgeY - onePixelFix,
-            bottom: value.bottom + this.bufferEdgeY + onePixelFix,
+            left: value.left - this.bufferEdgeX,
+            right: value.right + this.bufferEdgeX,
+            top: value.top - this.bufferEdgeY,
+            bottom: value.bottom + this.bufferEdgeY,
         } as IBoundRectNoAngle;
     }
 
@@ -1485,7 +1550,7 @@ export class Viewport {
         }
     }
 
-    private _setViewportSize(props?: IViewProps) {
+    private _resizeViewportSizeByFreeze(props?: IViewProps) {
         if (Tools.isDefine(props?.top)) {
             this.top = props.top;
         }

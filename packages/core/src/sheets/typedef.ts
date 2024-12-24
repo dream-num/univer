@@ -353,6 +353,10 @@ export function isCellV(cell: Nullable<ICellData | CellValue>) {
     return cell != null && (typeof cell === 'string' || typeof cell === 'number' || typeof cell === 'boolean');
 }
 
+/**
+ * The scrolling viewport start range and count of freezed rows and columns.
+ * If you want to freeze the first 3 rows and 2 columns, freeze config is { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
+ */
 export interface IFreeze {
     xSplit: number;
     ySplit: number;

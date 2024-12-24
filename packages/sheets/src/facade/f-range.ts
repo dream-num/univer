@@ -242,10 +242,6 @@ export class FRange extends FBase {
         } as ISetStyleCommandParams<IColorStyle>);
     }
 
-    setBackground(color: string): Promise<boolean> {
-        return this.setBackgroundColor(color);
-    }
-
     /**
      * Set background color for current range.
      * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')`

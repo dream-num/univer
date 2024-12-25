@@ -46,7 +46,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             return false;
         }
 
-        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder, documentStyle } = snapshot;
+        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder, documentStyle } = Tools.deepClone(snapshot);
         const {
             body: prevBody,
             tableSource: prevTableSource,

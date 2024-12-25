@@ -268,7 +268,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
             this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
                 unitId: editorUnitId,
-                snapshot: Tools.deepClone(documentModel!.getSnapshot()),
+                snapshot: (documentModel!.getSnapshot()),
             });
 
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);

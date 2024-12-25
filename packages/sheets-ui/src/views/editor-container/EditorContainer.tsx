@@ -162,6 +162,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     isSupportAcrossSheet
                     resetSelectionOnBlur={false}
                     isSingle={false}
+                    autoScrollbar={false}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
                         if (isSelecting) {

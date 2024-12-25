@@ -3314,6 +3314,12 @@ importers:
 
   packages/ui:
     dependencies:
+      '@floating-ui/dom':
+        specifier: ^1.6.11
+        version: 1.6.11
+      '@floating-ui/utils':
+        specifier: ^0.2.8
+        version: 0.2.8
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand, Nullable } from '@univerjs/core';
 import { CommandType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ICommand, Nullable } from '@univerjs/core';
 import { DocDrawingUpdateRenderController } from '../../controllers/render-controllers/doc-drawing-update.render-controller';
 
 export interface IInsertDocImageCommandParams {

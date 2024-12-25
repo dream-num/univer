@@ -21,7 +21,7 @@ import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { ICanvasPopupService } from '@univerjs/ui';
+import { clientRect$, ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
@@ -459,7 +459,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const updatePosition = () => position$.next(this._calcCellPositionByCell(row, col, currentRender, skeleton, activeViewport));
 
         const disposable = new DisposableCollection();
-        disposable.add(currentRender.engine.clientRect$.subscribe(() => updatePosition()));
+        disposable.add(clientRect$(currentRender.engine.getContainer()!).subscribe(() => updatePosition()));
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;

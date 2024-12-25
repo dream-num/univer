@@ -75,6 +75,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@floating-ui/dom": "^1.6.11",
+        "@floating-ui/utils": "^0.2.8",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

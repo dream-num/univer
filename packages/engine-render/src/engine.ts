@@ -21,14 +21,13 @@ import type { ITimeMetric, ITransformChangeState } from './basics/interfaces';
 import type { IBasicFrameInfo } from './basics/performance-monitor';
 import type { Scene } from './scene';
 import { Disposable, EventSubject, toDisposable, Tools } from '@univerjs/core';
-import { Observable, shareReplay, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { type CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
 import { Canvas, CanvasRenderMode } from './canvas';
-import { observeClientRect } from './floating/util';
 
 export interface IEngineOption {
     elementWidth: number;
@@ -64,22 +63,7 @@ export class Engine extends Disposable {
      */
     private _renderStartTime: number = 0;
 
-    private _rect$: Nullable<Observable<void>> = null;
-
-    public get clientRect$(): Observable<void> {
-        return this._rect$ || (this._rect$ = new Observable((subscriber) => {
-            if (!this._container) {
-                throw new Error('[Engine]: cannot subscribe to rect changes when container is not set!');
-            }
-
-            const sub = observeClientRect(this._container).subscribe(() => subscriber.next());
-
-            return () => {
-                sub.unsubscribe();
-                this._rect$ = null;
-            };
-        })).pipe(shareReplay(1));
-    }
+    // private _rect$: Nullable<Observable<void>> = null;
 
     private _container: Nullable<HTMLElement>;
 
@@ -328,6 +312,10 @@ export class Engine extends Disposable {
                 if (timer !== undefined) window.cancelIdleCallback(timer);
             });
         }
+    }
+
+    getContainer() {
+        return this._container;
     }
 
     resize() {

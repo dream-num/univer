@@ -483,7 +483,6 @@ export class Viewport {
      * Origin name: resetCanvasSize
      */
     resizeViewport() {
-        // this._resizeCacheCanvas();
         if (!this._active) return;
 
         const { width, height } = this._calcViewPortSize();

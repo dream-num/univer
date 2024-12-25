@@ -36,9 +36,9 @@ export interface IRenderManagerService extends IDisposable {
     addRender(unitId: string, renderer: IRender): void;
 
     /**
-     * create renderUnit & init deps from renderDependencies by renderUnit's type.
+     * Create RenderUnit & init deps from renderDependencies by renderUnit's type.
      * @param unitId
-     * @returns renderUnit:IRender
+     * @returns { RenderUnit } RenderUnit implements IRender
      */
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
@@ -193,7 +193,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     /**
      * create renderUnit & init deps from renderDependencies
      * @param unitId
-     * @returns renderUnit:IRender
+     * @returns { RenderUnit} RenderUnit implements IRender
      */
     createRender(unitId: string): IRender {
         const renderer = this._createRender(unitId, new Engine(unitId));
@@ -239,11 +239,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     /**
-     * create renderUnit & init deps from renderDependencies by renderUnit's type
+     * Create RenderUnit & init deps from renderDependencies by renderUnit's type
      * @param unitId
      * @param engine
      * @param isMainScene
-     * @returns renderUnit:IRender
+     * @returns { RenderUnit } RenderUnit implements IRender
      */
     protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);

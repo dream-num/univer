@@ -15,4 +15,5 @@
  */
 
 export * from './cell';
+export * from './dom';
 export * from './util';

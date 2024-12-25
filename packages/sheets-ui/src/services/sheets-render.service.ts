@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, Workbook } from '@univerjs/core';
+import type { IRender } from '@univerjs/engine-render';
 import {
     IContextService,
     IUniverInstanceService,
@@ -28,7 +29,7 @@ import { distinctUntilChanged, takeUntil } from 'rxjs';
 const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
 
 /**
- * This controller is responsible for managing units of a specific kind (UnierSheet) to be rendered on the canvas.
+ * This controller is responsible for managing units of a specific kind (UniverSheet) to be rendered on the canvas.
  */
 export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
@@ -83,7 +84,7 @@ export class SheetsRenderService extends RxDisposable {
             .subscribe((workbook) => this._disposeRenderer(workbook));
     }
 
-    private _createRenderer(workbook: Workbook): void {
+    private _createRenderer(workbook: Workbook): IRender {
         const unitId = workbook.getUnitId();
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === unitId) {
@@ -91,10 +92,11 @@ export class SheetsRenderService extends RxDisposable {
                 renderer.engine.getCanvas().getContext().setId(`${SHEET_MAIN_CANVAS_ID}_${unitId}`);
             }
         });
-        this._renderManagerService.createRender(unitId);
-
-        // NOTE@wzhudev: maybe not in univer mode
+        // _renderManagerService@createRender will get unit(workbook) from instanceSrv. So, we don't need to pass workbook here.
+        const renderUnit = this._renderManagerService.createRender(unitId);
         this._renderManagerService.setCurrent(unitId);
+
+        return renderUnit;
     }
 
     private _disposeRenderer(workbook: Workbook): void {

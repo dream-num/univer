@@ -19,8 +19,9 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IRemoveRowColCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
 import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
@@ -321,13 +322,17 @@ describe('test controller of sheets filter', () => {
                     },
                 ],
             })).toBeTruthy();
-            expect(await commandService.executeCommand(RemoveRowCommand.id, {
-                unitId: 'test',
-                subUnitId: 'sheet1',
-                range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 5 },
-            })).toBeTruthy();
+
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 0, startColumn: 0, endRow: 0, endColumn: 5 },
+                    { startRow: 1, startColumn: 0, endRow: 1, endColumn: 5 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
-                .toEqual({ startRow: 2, startColumn: 0, endRow: 4, endColumn: 5 });
+                .toEqual({ startRow: 1, startColumn: 0, endRow: 3, endColumn: 5 });
         });
     });
 

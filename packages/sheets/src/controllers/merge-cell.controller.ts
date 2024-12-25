@@ -22,8 +22,6 @@ import type {
 import type {
     IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
 
@@ -34,6 +32,7 @@ import type { InsertRangeMoveRightCommandParams } from '../commands/commands/ins
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
+import type { IRemoveRowColCommandParams } from '../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
@@ -234,31 +233,31 @@ export class MergeCellController extends Disposable {
     refRangeHandle(config: EffectRefRangeParams, unitId: string, subUnitId: string) {
         switch (config.id) {
             case EffectRefRangId.MoveColsCommandId: {
-                const params = config.params as unknown as IMoveColsCommandParams;
+                const params = config.params as IMoveColsCommandParams;
                 return this._handleMoveColsCommand(params, unitId, subUnitId);
             }
             case EffectRefRangId.MoveRowsCommandId: {
-                const params = config.params as unknown as IMoveRowsCommandParams;
+                const params = config.params as IMoveRowsCommandParams;
                 return this._handleMoveRowsCommand(params, unitId, subUnitId);
             }
             case InsertRowCommand.id: {
-                const params = config.params as unknown as IInsertRowCommandParams;
+                const params = config.params as IInsertRowCommandParams;
                 const _unitId = params.unitId || unitId;
                 const _subUnitId = params.subUnitId || subUnitId;
                 return this._handleInsertRowCommand(params, _unitId, _subUnitId);
             }
             case InsertColCommand.id: {
-                const params = config.params as unknown as IInsertColCommandParams;
+                const params = config.params as IInsertColCommandParams;
                 const _unitId = params.unitId || unitId;
                 const _subUnitId = params.subUnitId || subUnitId;
                 return this._handleInsertColCommand(params, _unitId, _subUnitId);
             }
             case RemoveColCommand.id: {
-                const params = config.params as unknown as IRemoveColMutationParams;
+                const params = config.params as IRemoveRowColCommandParams;
                 return this._handleRemoveColCommand(params, unitId, subUnitId);
             }
             case RemoveRowCommand.id: {
-                const params = config.params as unknown as IRemoveRowsMutationParams;
+                const params = config.params as IRemoveRowColCommandParams;
                 return this._handleRemoveRowCommand(params, unitId, subUnitId);
             }
 
@@ -267,19 +266,19 @@ export class MergeCellController extends Disposable {
                 return this._handleMoveRangeCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveRightCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveRightCommandParams;
+                const params = config.params as InsertRangeMoveRightCommandParams;
                 return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveDownCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveDownCommandParams;
+                const params = config.params as InsertRangeMoveDownCommandParams;
                 return this._handleInsertRangeMoveDownCommand(params, unitId, subUnitId);
             }
             case DeleteRangeMoveUpCommand.id: {
-                const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
+                const params = config.params as IDeleteRangeMoveUpCommandParams;
                 return this._handleDeleteRangeMoveUpCommand(params, unitId, subUnitId);
             }
             case DeleteRangeMoveLeftCommand.id: {
-                const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
+                const params = config.params as IDeleteRangeMoveLeftCommandParams;
                 return this._handleDeleteRangeMoveLeftCommand(params, unitId, subUnitId);
             }
         }
@@ -618,7 +617,7 @@ export class MergeCellController extends Disposable {
         return { redos, undos };
     }
 
-    private _handleRemoveColCommand(config: IRemoveColMutationParams, unitId: string, subUnitId: string) {
+    private _handleRemoveColCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const workbook = getWorkbook(this._univerInstanceService, unitId);
         if (!workbook) {
             return this._handleNull();
@@ -627,39 +626,55 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const { range } = config;
-        const { startColumn, endColumn } = range;
+        const { ranges } = config;
 
-        const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                mergeCellsHasLapping.push(cell);
-            }
-            return mergeCellsHasLapping;
-        }, [] as IRange[]);
+        let oldMergeCells: IRange[] = [];
+        let newMergeCells: IRange[] = [];
 
+        // Step 1: Collect all old merge cells affected by any of the ranges
+        ranges.forEach((range) => {
+            const currentOldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+                if (Rectangle.intersects(range, cell)) {
+                    mergeCellsHasLapping.push(cell);
+                }
+                return mergeCellsHasLapping;
+            }, [] as IRange[]);
+            oldMergeCells = oldMergeCells.concat(currentOldMergeCells);
+        });
+
+        // If no merge cells are affected, return early
         if (oldMergeCells.length === 0) {
             return this._handleNull();
         }
 
-        const newMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                if (startColumn <= cell.startColumn && endColumn >= cell.endColumn) {
-                    return mergeCellsHasLapping;
-                } else if (startColumn >= cell.startColumn && endColumn <= cell.endColumn) {
-                    cell.endColumn -= endColumn - startColumn + 1;
-                } else if (startColumn < cell.startColumn) {
-                    cell.startColumn = startColumn;
-                    cell.endColumn -= endColumn - startColumn + 1;
-                } else if (endColumn > cell.endColumn) {
-                    cell.endColumn = startColumn - 1;
-                }
-                if (this._checkIsMergeCell(cell)) {
-                    mergeCellsHasLapping.push(cell);
-                }
-            }
-            return mergeCellsHasLapping;
-        }, [] as IRange[]);
+        // Step 2: Calculate new merge cells considering all ranges together
+        oldMergeCells.forEach((cell) => {
+            ranges.forEach((range) => {
+                const { startColumn, endColumn } = range;
 
+                if (Rectangle.intersects(range, cell)) {
+                    if (startColumn <= cell.startColumn && endColumn >= cell.endColumn) {
+                        // This range fully covers the merged cell, remove it
+
+                    } else if (startColumn >= cell.startColumn && endColumn <= cell.endColumn) {
+                        // This range is within the merged cell, shrink it
+                        cell.endColumn -= endColumn - startColumn + 1;
+                    } else if (startColumn < cell.startColumn) {
+                        // Adjust start column and shrink the merge
+                        cell.startColumn = startColumn;
+                        cell.endColumn -= endColumn - startColumn + 1;
+                    } else if (endColumn > cell.endColumn) {
+                        // Adjust end column
+                        cell.endColumn = startColumn - 1;
+                    }
+                }
+            });
+        });
+
+        // Step 3: Filter out invalid merge cells after adjustment
+        newMergeCells = oldMergeCells.filter((cell) => this._checkIsMergeCell(cell));
+
+        // Prepare mutation parameters for undo/redo
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
@@ -679,6 +694,7 @@ export class MergeCellController extends Disposable {
             addMergeMutationParams
         );
 
+        // Step 4: Return mutations for undo/redo operations
         const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
@@ -686,8 +702,8 @@ export class MergeCellController extends Disposable {
         return { preUndos, undos, preRedos, redos };
     }
 
-    private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
-        const { range } = config;
+    private _handleRemoveRowCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
+        const { ranges } = config;
         const workbook = getWorkbook(this._univerInstanceService, unitId);
         if (!workbook) {
             return this._handleNull();
@@ -697,38 +713,53 @@ export class MergeCellController extends Disposable {
             return this._handleNull();
         }
 
-        const { startRow, endRow } = range;
+        let oldMergeCells: IRange[] = [];
+        let newMergeCells: IRange[] = [];
 
-        const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                mergeCellsHasLapping.push(cell);
-            }
-            return mergeCellsHasLapping;
-        }, [] as IRange[]);
+        // Step 1: Collect all old merge cells affected by any of the ranges
+        ranges.forEach((range) => {
+            const currentOldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+                if (Rectangle.intersects(range, cell)) {
+                    mergeCellsHasLapping.push(cell);
+                }
+                return mergeCellsHasLapping;
+            }, [] as IRange[]);
+            oldMergeCells = oldMergeCells.concat(currentOldMergeCells);
+        });
 
+        // If no merge cells are affected, return early
         if (oldMergeCells.length === 0) {
             return this._handleNull();
         }
 
-        const newMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                if (startRow <= cell.startRow && endRow >= cell.endRow) {
-                    return mergeCellsHasLapping;
-                } else if (startRow >= cell.startRow && endRow <= cell.endRow) {
-                    cell.endRow -= endRow - startRow + 1;
-                } else if (startRow < cell.startRow) {
-                    cell.startRow = startRow;
-                    cell.endRow -= endRow - startRow + 1;
-                } else if (endRow > cell.endRow) {
-                    cell.endRow = startRow - 1;
-                }
-                if (this._checkIsMergeCell(cell)) {
-                    mergeCellsHasLapping.push(cell);
-                }
-            }
-            return mergeCellsHasLapping;
-        }, [] as IRange[]);
+        // Step 2: Calculate new merge cells considering all ranges together
+        oldMergeCells.forEach((cell) => {
+            ranges.forEach((range) => {
+                const { startRow, endRow } = range;
 
+                if (Rectangle.intersects(range, cell)) {
+                    if (startRow <= cell.startRow && endRow >= cell.endRow) {
+                        // This range fully covers the merged cell, remove it
+
+                    } else if (startRow >= cell.startRow && endRow <= cell.endRow) {
+                        // This range is within the merged cell, shrink it
+                        cell.endRow -= endRow - startRow + 1;
+                    } else if (startRow < cell.startRow) {
+                        // Adjust start row and shrink the merge
+                        cell.startRow = startRow;
+                        cell.endRow -= endRow - startRow + 1;
+                    } else if (endRow > cell.endRow) {
+                        // Adjust end row
+                        cell.endRow = startRow - 1;
+                    }
+                }
+            });
+        });
+
+        // Step 3: Filter out invalid merge cells after adjustment
+        newMergeCells = oldMergeCells.filter((cell) => this._checkIsMergeCell(cell));
+
+        // Prepare mutation parameters for undo/redo
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
@@ -748,6 +779,7 @@ export class MergeCellController extends Disposable {
             addMergeMutationParams
         );
 
+        // Step 4: Return mutations for undo/redo operations
         const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];

@@ -19,6 +19,7 @@ import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommand
 import { Direction, ICommandService, Inject, Injector, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 
 import { InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRowByRangeCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
@@ -89,9 +90,9 @@ describe('Test "Filter Interceptor"', () => {
     describe('Test "remove Command"', () => {
         it('remove col command, in filter range', async () => {
             const removeColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId', subUnitId: 'worksheetId', ranges: [{
+                    startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN,
+                }], direction: Direction.RIGHT,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveColCommand.id, removeColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 1, startRow: 1, endRow: 2 });
@@ -99,9 +100,9 @@ describe('Test "Filter Interceptor"', () => {
         });
         it('remove col command, before filter range', async () => {
             const removeColCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 0, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
-                }, direction: Direction.RIGHT,
+                unitId: 'workbookId', subUnitId: 'worksheetId', ranges: [{
+                    startColumn: 0, endColumn: 0, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN,
+                }], direction: Direction.RIGHT,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveColCommand.id, removeColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 0, endColumn: 1, startRow: 1, endRow: 2 });
@@ -110,9 +111,9 @@ describe('Test "Filter Interceptor"', () => {
 
         it('remove row command, in filter range', async () => {
             const removeRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 1, endRow: 1, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId', subUnitId: 'worksheetId', ranges: [{
+                    startColumn: 0, endColumn: 3, startRow: 1, endRow: 1, rangeType: RANGE_TYPE.ROW,
+                }], direction: Direction.DOWN,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveRowCommand.id, removeRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')).toBe(null);
@@ -120,9 +121,9 @@ describe('Test "Filter Interceptor"', () => {
 
         it('remove row command, before filter range', async () => {
             const removeRowCommandParams = {
-                unitId: 'workbookId', subUnitId: 'worksheetId', range: {
-                    startColumn: 0, endColumn: 3, startRow: 0, endRow: 0, type: RANGE_TYPE.ROW,
-                }, direction: Direction.DOWN,
+                unitId: 'workbookId', subUnitId: 'worksheetId', ranges: [{
+                    startColumn: 0, endColumn: 3, startRow: 0, endRow: 0, rangeType: RANGE_TYPE.ROW,
+                }], direction: Direction.DOWN,
             } as IRemoveRowColCommandParams;
             await commandService.executeCommand(RemoveRowCommand.id, removeRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 0, endRow: 1 });

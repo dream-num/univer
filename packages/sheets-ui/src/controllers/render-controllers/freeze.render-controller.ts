@@ -1406,28 +1406,33 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
                     if (command.id === RemoveColCommand.id || command.id === RemoveRowCommand.id) {
                         const params = command.params as IRemoveRowColCommandParams;
-                        const range = params.range;
+                        const ranges = params.ranges;
 
-                        if (range.rangeType === RANGE_TYPE.COLUMN && range.startColumn < freeze.startColumn) {
-                            const deleteFreezeColCount =
-                                Math.min(freeze.startColumn, range.endColumn + 1) - range.startColumn;
+                        let totalDeletedCols = 0;
+                        let totalDeletedRows = 0;
 
-                            const newFreeze: IFreeze = {
-                                ...freeze,
-                                startColumn: Math.max(1, freeze.startColumn - deleteFreezeColCount),
-                                xSplit: Math.max(1, freeze.xSplit - deleteFreezeColCount),
-                            };
+                        for (const range of ranges) {
+                            if (range.rangeType === RANGE_TYPE.COLUMN && range.startColumn < freeze.startColumn) {
+                                const deleteFreezeColCount =
+                                    Math.min(freeze.startColumn, range.endColumn + 1) - range.startColumn;
+                                totalDeletedCols += deleteFreezeColCount;
+                            }
 
-                            return createFreezeMutationAndRefresh(newFreeze);
+                            if (range.rangeType === RANGE_TYPE.ROW && range.startRow < freeze.startRow) {
+                                const deleteFreezeRowCount =
+                                    Math.min(freeze.startRow, range.endRow + 1) - range.startRow;
+                                totalDeletedRows += deleteFreezeRowCount;
+                            }
                         }
 
-                        if (params.range.rangeType === RANGE_TYPE.ROW && range.startRow < freeze.startRow) {
-                            const deleteFreezeRowCount = Math.min(freeze.startRow, range.endRow + 1) - range.startRow;
-
+                        // If any columns or rows were deleted, update the freeze settings
+                        if (totalDeletedCols > 0 || totalDeletedRows > 0) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
-                                startRow: Math.max(1, freeze.startRow - deleteFreezeRowCount),
-                                ySplit: Math.max(1, freeze.ySplit - deleteFreezeRowCount),
+                                startColumn: Math.max(1, freeze.startColumn - totalDeletedCols),
+                                xSplit: Math.max(1, freeze.xSplit - totalDeletedCols),
+                                startRow: Math.max(1, freeze.startRow - totalDeletedRows),
+                                ySplit: Math.max(1, freeze.ySplit - totalDeletedRows),
                             };
 
                             return createFreezeMutationAndRefresh(newFreeze);

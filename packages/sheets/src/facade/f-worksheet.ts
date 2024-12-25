@@ -612,6 +612,8 @@ export class FWorksheet extends FBaseInitialable {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
+        const params: =
+
         this._commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, {
             range,
             unitId: this._workbook.getUnitId(),

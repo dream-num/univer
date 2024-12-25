@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IRemoveRowColCommandParams } from '@univerjs/sheets';
 import type { ITestBed } from './util';
 import { ICommandService, type IRange } from '@univerjs/core';
 import { InsertColCommand, MoveRangeCommand, RemoveColCommand } from '@univerjs/sheets';
@@ -226,17 +227,18 @@ describe('FormulaRefRangeService', () => {
             }
         );
 
-        await testBed.get(ICommandService).executeCommand(
-            RemoveColCommand.id,
-            {
-                range: {
+        const params: IRemoveRowColCommandParams = {
+            ranges: [
+                {
                     startColumn: 0,
                     endColumn: 1,
                     startRow: 0,
                     endRow: 9999,
                 },
-            }
-        );
+            ],
+        };
+
+        await testBed.get(ICommandService).executeCommand(RemoveColCommand.id, params);
 
         expect(newFormulas).toEqual(
             [

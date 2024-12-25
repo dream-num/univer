@@ -49,7 +49,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         super();
     }
 
-    // eslint-disable-next-line complexity, max-lines-per-function
+    // eslint-disable-next-line complexity
     fitTextSize(callback?: () => void) {
         const param = this._editorBridgeService.getEditCellState();
         if (!param) return;
@@ -95,7 +95,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
         } else if (verticalAlign === VerticalAlign.TOP) {
             offsetTop = paddingData.t || 0;
-        } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
+        } else {
+            // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
             offsetTop = (editorHeight - actualHeight) / scaleY;
         }
 
@@ -115,10 +116,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             l: offsetLeft,
         });
 
-        // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
-        // editorWidth -= 1;
-        // editorHeight -= 1;
         this._editAreaProcessing(
             editorWidth,
             editorHeight,
@@ -262,7 +260,6 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const canvasElement = engine.getCanvasElement();
 
         // We should take the scale into account when canvas is scaled by CSS.
-
         let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
@@ -294,10 +291,6 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         if (editorWidth > clientWidth) {
             editorWidth = clientWidth;
         }
-
-        // move to fitTextSize
-        // startX -= FIX_ONE_PIXEL_BLUR_OFFSET;
-        // startY -= FIX_ONE_PIXEL_BLUR_OFFSET;
 
         this._addBackground(editorScene, editorWidth / scaleX, editorHeight / scaleY, fill);
 

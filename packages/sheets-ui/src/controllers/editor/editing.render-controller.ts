@@ -354,7 +354,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
-
         // Change `CursorChange` to changed status, when formula bar clicked.
         this._cursorChange =
             (eventType === DeviceInputEventType.PointerDown || eventType === DeviceInputEventType.Dblclick)
@@ -376,13 +375,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         });
 
         this._editorBridgeService.refreshEditCellPosition(false);
-
-        const {
-            documentLayoutObject,
-            editorUnitId,
-            unitId,
-            isInArrayFormulaRange = false,
-        } = editCellState;
+        const { unitId, isInArrayFormulaRange = false } = editCellState;
         const editorObject = this._getEditorObject();
 
         if (editorObject == null) {
@@ -392,9 +385,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const { document, scene } = editorObject;
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
-
-        const { documentModel: documentDataModel } = documentLayoutObject;
-        const skeleton = this._getEditorSkeleton(editorUnitId);
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+        const skeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
         if (!skeleton || !documentDataModel) {
             return;
         }

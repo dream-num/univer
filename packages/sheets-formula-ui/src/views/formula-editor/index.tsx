@@ -290,11 +290,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             setShouldMoveRefSelection(false);
         }
 
-        setTimeout(() => {
-            isFocusSet(true);
-            onFocus();
-            focus();
-        }, 30);
+        isFocusSet(true);
+        onFocus();
+        focus();
     };
     return (
         <div className={clsx(styles.sheetEmbeddingFormulaEditor, className)}>

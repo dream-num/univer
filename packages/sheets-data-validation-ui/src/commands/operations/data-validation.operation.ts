@@ -53,6 +53,7 @@ export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperatio
         });
 
         const disposable = sidebarService.open({
+            id: DATA_VALIDATION_PANEL,
             header: { title: isAdd ? 'dataValidation.panel.addTitle' : 'dataValidation.panel.title' },
             children: { label: DATA_VALIDATION_PANEL },
             width: 312,

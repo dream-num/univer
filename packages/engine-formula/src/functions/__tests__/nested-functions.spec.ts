@@ -393,7 +393,7 @@ describe('Test nested functions', () => {
             new Len(FUNCTION_NAMES_TEXT.LEN),
             new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Product(FUNCTION_NAMES_MATH.PRODUCT),
-            new Fact(FUNCTION_NAMES_MATH.FACT),
+            new Fact(FUNCTION_NAMES_MATH.FACT)
         );
 
         calculate = (formula: string) => {

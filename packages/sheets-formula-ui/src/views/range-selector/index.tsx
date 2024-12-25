@@ -26,11 +26,12 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
+import { useEvent } from '@univerjs/ui';
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { noop, throttleTime } from 'rxjs';
-import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 
+import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useEmitChange } from './hooks/useEmitChange';
 import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
@@ -112,7 +113,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(_isFocus);
     const editorId = useMemo(() => createInternalEditorID(`${RANGE_SELECTOR_SYMBOLS}-${generateRandomId(4)}`), []);
-    const [editor, editorSet] = useState<Editor>();
+    const editorRef = useRef<Editor>();
+    const editor = editorRef.current;
     const containerRef = useRef<HTMLDivElement>(null);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const isNeed = useMemo(() => !rangeDialogVisible && isFocus, [rangeDialogVisible, isFocus]);
@@ -184,14 +186,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const highlightDoc = useDocHight();
     const highlightSheet = useSheetHighlight(unitId);
-    const highligh = (text: string, isNeedResetSelection: boolean = true) => {
-        if (!editor) {
+    const highligh = useEvent((text: string, isNeedResetSelection: boolean = true, showSelection = true) => {
+        if (!editorRef.current) {
             return;
         }
         const sequenceNodes = getFormulaToken(text);
-        const ranges = highlightDoc(editor, sequenceNodes, isNeedResetSelection);
-        highlightSheet(ranges);
-    };
+        const ranges = highlightDoc(editorRef.current, sequenceNodes, isNeedResetSelection);
+        if (showSelection) {
+            highlightSheet(ranges);
+        }
+    });
 
     const needEmit = useEmitChange(sequenceNodes, handleInput, editor);
 
@@ -273,12 +277,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 isSingle: true,
                 initialSnapshot: {
                     id: editorId,
-                    body: { dataStream: `${initValue}\r\n` },
+                    body: { dataStream: `${rangeString}\r\n`, textRuns: [] },
                     documentStyle: {},
                 },
             }, containerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
-            editorSet(editor);
+            editorRef.current = editor;
+            highligh(rangeString, false, false);
         }
         return () => {
             dispose?.dispose();

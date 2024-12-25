@@ -481,7 +481,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
-          // Reselect the current selections, when exist cell editor by press ESC.I
+        // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             if (this._editorBridgeService.isForceKeepVisible()) {
                 this._editorBridgeService.disableForceKeepVisible();
@@ -490,7 +490,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (selections) {
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId: this._context.unit.getUnitId(),
-                    subUnitId: worksheetId,
+                    subUnitId: sheetId,
                     selections,
                 });
             }

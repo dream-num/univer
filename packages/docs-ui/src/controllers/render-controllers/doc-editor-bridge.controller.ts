@@ -16,10 +16,10 @@
 
 import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, ScrollBar } from '@univerjs/engine-render';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -65,7 +65,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         this._initialFocus();
     }
 
-    // eslint-disable-next-line complexity
     private _resize(unitId: Nullable<string>) {
         if (unitId == null) {
             return;
@@ -103,7 +102,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+        const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         const contentWidth = Math.max(actualWidth, width);
 
@@ -115,32 +114,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         });
 
         mainComponent?.resize(contentWidth, contentHeight);
-
-        if (!editor.isSingle()) {
-            if (actualHeight > height) {
-                if (scrollBar == null) {
-                    viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
-                } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
-                }
-            } else {
-                scrollBar = null;
-                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
-                viewportMain?.getScrollBar()?.dispose();
-            }
-        } else {
-            if (actualWidth > width) {
-                if (scrollBar == null) {
-                    viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
-                } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
-                }
-            } else {
-                scrollBar = null;
-                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
-                viewportMain?.getScrollBar()?.dispose();
-            }
-        }
     }
 
     private _initialSetValue() {

@@ -18,8 +18,8 @@ import type { DocumentDataModel, IPosition, Nullable, Workbook } from '@univerjs
 import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
 import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, IUniverInstanceService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
-import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
+import { DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
+import { convertTextRotation, fixLineWidthByScale, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import styles from '../../views/sheet-container/index.module.less';
@@ -229,7 +229,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
 
         return {
             height: clientHeight,
-            width: clientWidth,
+            width: clientWidth - EDITOR_BORDER_SIZE,
             scaleAdjust,
         };
     }
@@ -263,30 +263,30 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         let { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
-        const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        // const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
         const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign);
         if (!info) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
 
-        let physicHeight = editorHeight;
+        const physicHeight = editorHeight;
 
-        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+        // let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
-        if (physicHeight > clientHeight) {
-            physicHeight = clientHeight;
+        // if (physicHeight > clientHeight) {
+        //     physicHeight = clientHeight;
 
-            if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
-            } else {
-                viewportMain?.resetCanvasSizeAndUpdateScroll();
-            }
-        } else {
-            scrollBar = null;
-            viewportMain?.getScrollBar()?.dispose();
-        }
+        //     if (scrollBar == null) {
+        //         viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+        //     } else {
+        //         viewportMain?.resetCanvasSizeAndUpdateScroll();
+        //     }
+        // } else {
+        //     scrollBar = null;
+        //     viewportMain?.getScrollBar()?.dispose();
+        // }
 
-        editorWidth += scrollBar?.barSize || 0;
+        // editorWidth += scrollBar?.barSize || 0;
 
         if (editorWidth > clientWidth) {
             editorWidth = clientWidth;

@@ -276,7 +276,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
             dispose = editorService.register({
                 autofocus: true,
                 editorUnitId: editorId,
-                isSingle: true,
                 initialSnapshot: {
                     id: editorId,
                     body: { dataStream: `${rangeString}\r\n`, textRuns: [] },

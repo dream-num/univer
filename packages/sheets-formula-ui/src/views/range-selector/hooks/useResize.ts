@@ -22,7 +22,7 @@ import { ScrollBar } from '@univerjs/engine-render';
 import { useEffect, useMemo } from 'react';
 
 // eslint-disable-next-line max-lines-per-function
-export const useResize = (editor?: Editor, autoScrollbar?: boolean) => {
+export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean) => {
     const resize = () => {
         if (editor) {
             const { scene, mainComponent } = editor.render;
@@ -44,11 +44,12 @@ export const useResize = (editor?: Editor, autoScrollbar?: boolean) => {
             if (!editor || !autoScrollbar) {
                 return;
             }
+
             const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
             const skeleton = docSkeletonManagerService.getSkeleton();
             const { scene, mainComponent } = editor.render;
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-            const { actualWidth } = skeleton.getActualSize();
+            const { actualWidth, actualHeight } = skeleton.getActualSize();
             const { width, height } = editor.getBoundingClientRect();
             let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
             const contentWidth = Math.max(actualWidth, width);
@@ -61,17 +62,30 @@ export const useResize = (editor?: Editor, autoScrollbar?: boolean) => {
             });
 
             mainComponent?.resize(contentWidth, contentHeight);
-
-            if (actualWidth > width) {
-                if (scrollBar == null) {
-                    viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
+            if (!isSingle) {
+                if (actualHeight > height) {
+                    if (scrollBar == null) {
+                        viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                    } else {
+                        viewportMain?.resetCanvasSizeAndUpdateScroll();
+                    }
                 } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
+                    scrollBar = null;
+                    viewportMain?.scrollToBarPos({ x: 0, y: 0 });
+                    viewportMain?.getScrollBar()?.dispose();
                 }
             } else {
-                scrollBar = null;
-                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
-                viewportMain?.getScrollBar()?.dispose();
+                if (actualWidth > width) {
+                    if (scrollBar == null) {
+                        viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
+                    } else {
+                        viewportMain?.resetCanvasSizeAndUpdateScroll();
+                    }
+                } else {
+                    scrollBar = null;
+                    viewportMain?.scrollToBarPos({ x: 0, y: 0 });
+                    viewportMain?.getScrollBar()?.dispose();
+                }
             }
         }, 30);
     }, [editor, autoScrollbar]);

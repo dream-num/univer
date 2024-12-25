@@ -161,6 +161,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     onMoveInEditor={onMoveInEditor}
                     isSupportAcrossSheet
                     resetSelectionOnBlur={false}
+                    isSingle={false}
                     onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
                         isRefSelecting.current = isSelecting;
                         if (isSelecting) {
@@ -169,7 +170,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
-                    autoScrollbar={false}
                 />
             )}
         </div>

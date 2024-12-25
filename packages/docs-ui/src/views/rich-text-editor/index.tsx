@@ -84,7 +84,6 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
             dispose = editorService.register({
                 autofocus: true,
                 editorUnitId: editorId,
-                isSingle: true,
                 initialSnapshot: {
                     body: {
                         dataStream: '\r\n',

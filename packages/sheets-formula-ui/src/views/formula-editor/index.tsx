@@ -109,7 +109,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
-    const [editor, editorSet] = useState<Editor>();
+    const editorRef = useRef<Editor>();
+    const editor = editorRef.current;
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => propEditorId ?? createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
@@ -148,19 +149,20 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
     const highligh = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
-        if (!editor) {
+        if (!editorRef.current) {
             return;
         }
         const preText = highTextRef.current;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
-            editor,
+            editorRef.current,
             sequenceNodes,
             isNeedResetSelection,
             // remove equals need to remove highlight style
             preText.slice(1) === text && preText[0] === '='
         );
+
         if (isEnd) {
             highlightSheet(isFocus ? ranges : []);
         }
@@ -169,6 +171,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useEffect(() => {
         highligh(formulaText, false);
     }, [highligh, formulaText, isFocus]);
+
+    useEffect(() => {
+        if (isFocus) {
+            highligh(formulaText, false, true);
+        }
+    }, [isFocus]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -201,7 +209,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 },
             }, formulaEditorContainerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
-            editorSet(editor);
+            editorRef.current = editor;
+            highligh(initValue, false, true);
         }
 
         return () => {

@@ -66,7 +66,7 @@ export function getNewRangeByMoveParam(
     currentFormulaUnitId: string,
     currentFormulaSheetId: string
 ) {
-    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
+    const { type, unitId: userUnitId, sheetId: userSheetId, range, ranges, from, to } = formulaReferenceMoveParam;
 
     const {
         range: unitRange,
@@ -235,44 +235,6 @@ export function getNewRangeByMoveParam(
                 ...sequenceRange,
                 ...result,
             };
-        } else if (type === FormulaReferenceMoveType.RemoveRow) {
-            const operators = handleIRemoveRow(
-                {
-                    id: EffectRefRangId.RemoveRowCommandId,
-                    params: { range },
-                },
-                sequenceRange
-            );
-
-            const result = runRefRangeMutations(operators, sequenceRange);
-
-            if (result == null) {
-                return ErrorType.REF;
-            }
-
-            newRange = {
-                ...sequenceRange,
-                ...result,
-            };
-        } else if (type === FormulaReferenceMoveType.RemoveColumn) {
-            const operators = handleIRemoveCol(
-                {
-                    id: EffectRefRangId.RemoveColCommandId,
-                    params: { range },
-                },
-                sequenceRange
-            );
-
-            const result = runRefRangeMutations(operators, sequenceRange);
-
-            if (result == null) {
-                return ErrorType.REF;
-            }
-
-            newRange = {
-                ...sequenceRange,
-                ...result,
-            };
         } else if (type === FormulaReferenceMoveType.DeleteMoveLeft) {
             const operators = handleDeleteRangeMoveLeft(
                 {
@@ -343,6 +305,46 @@ export function getNewRangeByMoveParam(
 
             if (result == null) {
                 return;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        }
+    } else if (ranges != null) {
+        if (type === FormulaReferenceMoveType.RemoveRow) {
+            const operators = handleIRemoveRow(
+                {
+                    id: EffectRefRangId.RemoveRowCommandId,
+                    params: { ranges },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.RemoveColumn) {
+            const operators = handleIRemoveCol(
+                {
+                    id: EffectRefRangId.RemoveColCommandId,
+                    params: { ranges },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
             }
 
             newRange = {

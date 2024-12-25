@@ -15,8 +15,12 @@
  */
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { IRemoveSheetMutationParams } from '../../../basics';
 
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
+import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
 import { EffectRefRangId } from '../type';
 import {
     adjustRangeOnMutation,
@@ -39,10 +43,6 @@ import {
     handleRemoveRowCommon,
     runRefRangeMutations,
 } from '../util';
-import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
-import type { IRemoveSheetMutationParams } from '../../../basics';
-import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
-import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 
 const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
 
@@ -1241,15 +1241,15 @@ describe('test ref-range move', () => {
         });
     });
     describe('handleIRemoveCol', () => {
-        let range: IRange;
+        let ranges: IRange[];
         describe('the range contain targetRange', () => {
             beforeEach(() => {
-                range = { startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 };
+                ranges = [{ startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 }];
             });
             it('the targetRange is single col', () => {
                 const targetRange = { startRow: 0, endColumn: 5, startColumn: 5, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1258,7 +1258,7 @@ describe('test ref-range move', () => {
             it('the targetRange is multiple col ', () => {
                 const targetRange = { startRow: 0, endColumn: 5, startColumn: 6, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1267,7 +1267,7 @@ describe('test ref-range move', () => {
             it('the targetRange is equal range', () => {
                 const targetRange = { startRow: 0, endColumn: 5, startColumn: 10, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1276,12 +1276,12 @@ describe('test ref-range move', () => {
         });
         describe('the targetRange in the range right', () => {
             beforeEach(() => {
-                range = { startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 };
+                ranges = [{ startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 }];
             });
             it('targetRange is overlap with range ', () => {
                 const targetRange = { startRow: 0, endColumn: 11, startColumn: 10, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1290,7 +1290,7 @@ describe('test ref-range move', () => {
             it('targetRange is no overlap with range ', () => {
                 const targetRange = { startRow: 0, endColumn: 12, startColumn: 11, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1299,12 +1299,12 @@ describe('test ref-range move', () => {
         });
         describe('the targetRange in the range left', () => {
             beforeEach(() => {
-                range = { startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 };
+                ranges = [{ startRow: 0, endColumn: 10, startColumn: 5, endRow: 99 }];
             });
             it('targetRange is overlap with range ', () => {
                 const targetRange = { startRow: 0, endColumn: 5, startColumn: 4, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1313,7 +1313,7 @@ describe('test ref-range move', () => {
             it('targetRange is no overlap with range ', () => {
                 const targetRange = { startRow: 0, endColumn: 3, startColumn: 2, endRow: 99 };
                 const operators = handleIRemoveCol(
-                    { params: { range }, id: EffectRefRangId.RemoveColCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1322,15 +1322,15 @@ describe('test ref-range move', () => {
         });
     });
     describe('handleIRemoveRow', () => {
-        let range: IRange;
+        let ranges: IRange[];
         describe('the range contain targetRange', () => {
             beforeEach(() => {
-                range = { startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 };
+                ranges = [{ startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 }];
             });
             it('the targetRange is single row', () => {
                 const targetRange = { startRow: 5, endRow: 5, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1339,7 +1339,7 @@ describe('test ref-range move', () => {
             it('the targetRange is multiple row ', () => {
                 const targetRange = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1353,12 +1353,12 @@ describe('test ref-range move', () => {
         });
         describe('the targetRange in the range top', () => {
             beforeEach(() => {
-                range = { startRow: 5, endColumn: 99, startColumn: 0, endRow: 10 };
+                ranges = [{ startRow: 5, endColumn: 99, startColumn: 0, endRow: 10 }];
             });
             it('targetRange is overlap with range ', () => {
                 const targetRange = { startRow: 4, endRow: 5, endColumn: 99, startColumn: 0 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1367,7 +1367,7 @@ describe('test ref-range move', () => {
             it('targetRange is no overlap with range ', () => {
                 const targetRange = { startRow: 0, endColumn: 99, startColumn: 0, endRow: 3 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1376,12 +1376,12 @@ describe('test ref-range move', () => {
         });
         describe('the targetRange in the range bottom', () => {
             beforeEach(() => {
-                range = { startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 };
+                ranges = [{ startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 }];
             });
             it('targetRange is overlap with range ', () => {
                 const targetRange = { startRow: 10, endRow: 11, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1390,7 +1390,7 @@ describe('test ref-range move', () => {
             it('targetRange is no overlap with range ', () => {
                 const targetRange = { startRow: 11, endRow: 13, endColumn: 99, startColumn: 0 };
                 const operators = handleIRemoveRow(
-                    { params: { range }, id: EffectRefRangId.RemoveRowCommandId },
+                    { params: { ranges }, id: EffectRefRangId.RemoveRowCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
@@ -1456,16 +1456,16 @@ describe('test different situations of adjustRangeOnMutation', () => {
 
         it('should be delete', () => {
             const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-            const resultRange = handleRemoveRowCommon({ range: { ...targetRange } }, targetRange);
+            const resultRange = handleRemoveRowCommon({ ranges: [{ ...targetRange }] }, targetRange);
             expect(resultRange.length).toBe(0);
 
-            const resultRange2 = handleRemoveRowCommon({ range: { ...targetRange } }, { ...targetRange, startRow: 4 });
+            const resultRange2 = handleRemoveRowCommon({ ranges: [{ ...targetRange }] }, { ...targetRange, startRow: 4 });
             expect(resultRange2).toEqual([{ startRow: 4, endRow: 4, startColumn: 1, endColumn: 1 }]);
         });
 
         it('should not be delete ', () => {
             const targetRange: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
-            const resultRange = handleRemoveRowCommon({ range: { ...targetRange }, ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
+            const resultRange = handleRemoveRowCommon({ ranges: [{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }, { startRow: 6, endRow: 6, startColumn: 1, endColumn: 1 }] }, targetRange);
             expect(resultRange).toEqual([{ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 }]);
         });
     });

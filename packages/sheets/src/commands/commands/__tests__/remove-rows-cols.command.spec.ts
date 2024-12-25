@@ -103,13 +103,13 @@ describe('Test remove rows cols', () => {
             selectRow(0, 0);
 
             const result = await commandService.executeCommand<IRemoveRowColCommandParams>(RemoveRowCommand.id, {
-                range: {
+                ranges: [{
                     startRow: 0,
                     endRow: 0,
                     startColumn: 0,
                     endColumn: 19,
                     rangeType: RANGE_TYPE.ROW,
-                },
+                }],
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('B1');
@@ -127,13 +127,13 @@ describe('Test remove rows cols', () => {
             selectRow(0, 0);
 
             const result = await commandService.executeCommand<IRemoveRowColCommandParams>(RemoveColCommand.id, {
-                range: {
+                ranges: [{
                     startRow: 0,
                     endRow: 19,
                     startColumn: 0,
                     endColumn: 0,
                     rangeType: RANGE_TYPE.COLUMN,
-                },
+                }],
             });
             expect(result).toEqual(true);
             expect(getCellInfo(0, 0)?.v).toEqual('A2');

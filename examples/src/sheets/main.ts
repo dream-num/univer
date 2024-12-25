@@ -23,7 +23,6 @@ import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -127,7 +126,75 @@ userManagerService.setCurrentUser(mockUser);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            // 1
+            //  2-3-
+            // 	4
+            //  |
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 'A1',
+                            s: 's1',
+                        },
+                    },
+                    1: {
+                        1: {
+                            v: 'B2',
+                            s: 's2',
+                        },
+                        4: {
+                            v: 'E2',
+                            s: 's3',
+                        },
+                    },
+                    2: {
+                        1: {
+                            v: 'B3',
+                            s: 's4',
+                        },
+                    },
+                },
+                mergeData: [
+                    { startRow: 1, endRow: 1, startColumn: 2, endColumn: 3 },
+                    {
+                        startRow: 2,
+                        endRow: 3,
+                        startColumn: 2,
+                        endColumn: 2,
+                    },
+                    {
+                        startRow: 10,
+                        endRow: 15,
+                        startColumn: 2,
+                        endColumn: 2,
+                    },
+                    {
+                        startRow: 10,
+                        endRow: 10,
+                        startColumn: 10,
+                        endColumn: 15,
+                    },
+                ],
+                rowCount: 20,
+                columnCount: 20,
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {
+            s1: { bg: { rgb: '#ff0000' } },
+            s2: { bl: 0 },
+            s3: { bl: 1 },
+            s4: { fs: 12 },
+        },
+    });
 }
 
 setTimeout(() => {

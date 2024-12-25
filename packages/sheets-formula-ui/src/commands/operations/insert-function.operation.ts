@@ -19,6 +19,7 @@ import {
     CellValueType,
     CommandType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     getCellValueType,
     ICommandService,
@@ -154,12 +155,15 @@ export const InsertFunctionOperation: ICommand = {
             };
             await commandService.executeCommand(SetSelectionsOperation.id, setSelectionParams);
             const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             editorBridgeService.changeVisible({
                 visible: true,
                 unitId,
                 eventType: DeviceInputEventType.Dblclick,
             });
-            editor?.replaceText(`=${value}(${editFormulaRangeString}`);
+            const formulaText = `=${value}(${editFormulaRangeString}`;
+            editor?.replaceText(formulaText);
+            formulaEditor?.replaceText(formulaText, false);
         }
 
         if (list.length === 0) return false;

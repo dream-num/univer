@@ -103,7 +103,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _reserveRanges = false;
 
     get isFocusing() {
-        return this._input === document.activeElement || document.activeElement === document.body;
+        return this._input === document.activeElement;
+    }
+
+    get canFocusing() {
+        return this.isFocusing || document.activeElement === document.body || document.activeElement === null;
     }
 
     constructor(
@@ -312,7 +316,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        if (this.isFocusing || document.activeElement === null || force) {
+        if (this.canFocusing || force) {
             this.focus();
         }
     }

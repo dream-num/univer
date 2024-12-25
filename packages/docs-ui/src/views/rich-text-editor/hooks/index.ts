@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { type IKeyboardEventConfig, useKeyboardEvent } from '@univerjs/docs-ui';
+export { type IKeyboardEventConfig, useKeyboardEvent } from './useKeyboardEvent';

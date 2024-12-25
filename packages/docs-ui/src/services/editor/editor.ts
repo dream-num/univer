@@ -315,7 +315,7 @@ export class Editor extends Disposable implements IEditor {
         });
     }
 
-    replaceText(text: string) {
+    replaceText(text: string, resetCursor = true) {
         const data = this.getDocumentData();
 
         this.setDocumentData(
@@ -325,11 +325,13 @@ export class Editor extends Disposable implements IEditor {
                     dataStream: `${text}\r\n`,
                 },
             },
-            [{
-                startOffset: text.length,
-                endOffset: text.length,
-                collapsed: true,
-            }]
+            resetCursor
+                ? [{
+                    startOffset: text.length,
+                    endOffset: text.length,
+                    collapsed: true,
+                }]
+                : null
         );
     }
 

@@ -15,7 +15,7 @@
  */
 
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -55,7 +55,10 @@ export function MoreFunctions() {
             eventType: DeviceInputEventType.Dblclick,
         });
         const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-        editor?.replaceText(`=${functionInfo?.functionName}(`);
+        const formulaEditor = editorService.getEditor(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        const formulaText = `=${functionInfo?.functionName}(`;
+        editor?.replaceText(formulaText);
+        formulaEditor?.replaceText(formulaText, false);
     }
 
     return (

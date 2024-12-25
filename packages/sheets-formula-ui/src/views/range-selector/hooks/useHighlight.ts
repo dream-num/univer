@@ -155,8 +155,6 @@ export function useDocHight(_leadingCharacter: string = '') {
                 });
             }
 
-            // const cloneData = { ...data, body: cloneBody };
-            // editor.setDocumentData(cloneData, selections);
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
                 body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
@@ -168,7 +166,14 @@ export function useDocHight(_leadingCharacter: string = '') {
     return highlightDoc;
 }
 
-export function useColor() {
+interface IColorMap {
+    formulaRefColors: string[];
+    numberColor: string;
+    stringColor: string;
+    plainTextColor: string;
+}
+
+export function useColor(): IColorMap {
     const themeService = useDependency(ThemeService);
     const style = themeService.getCurrentTheme();
     const result = useMemo(() => {
@@ -188,17 +193,15 @@ export function useColor() {
         ];
         const numberColor = style.hyacinth700;
         const stringColor = style.verdancy800;
-        return { formulaRefColors, numberColor, stringColor };
+        const plainTextColor = style.colorBlack;
+        return { formulaRefColors, numberColor, stringColor, plainTextColor };
     }, [style]);
     return result;
 }
 
-export function buildTextRuns(descriptionService: IDescriptionService, colorMap: {
-    formulaRefColors: string[];
-    numberColor: string;
-    stringColor: string;
-}, sequenceNodes: Array<ISequenceNode | string>) {
-    const { formulaRefColors, numberColor, stringColor } = colorMap;
+// eslint-disable-next-line max-lines-per-function
+export function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
+    const { formulaRefColors, numberColor, stringColor, plainTextColor } = colorMap;
     const textRuns: ITextRun[] = [];
     const refSelections: IRefSelection[] = [];
     const themeColorMap = new Map<string, string>();
@@ -213,10 +216,24 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
             textRuns.push({
                 st: start,
                 ed: end,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
+                    },
+                },
             });
             continue;
         }
         if (descriptionService.hasDefinedNameDescription(node.token.trim())) {
+            textRuns.push({
+                st: node.startIndex,
+                ed: node.endIndex + 1,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
+                    },
+                },
+            });
             continue;
         }
         const { startIndex, endIndex, nodeType, token } = node;
@@ -251,6 +268,16 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                 ts: {
                     cl: {
                         rgb: themeColor,
+                    },
+                },
+            });
+        } else {
+            textRuns.push({
+                st: startIndex,
+                ed: endIndex + 1,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
                     },
                 },
             });

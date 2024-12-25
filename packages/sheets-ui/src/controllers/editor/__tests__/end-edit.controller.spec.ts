@@ -261,6 +261,118 @@ describe('Test EndEditController', () => {
                 ...target,
             });
         });
+        it('Text cell input richText', () => {
+            const cell: ICellData = {
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                t: 1,
+                v: '10',
+            };
+
+            const inputCell = {
+                p: {
+                    id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                    documentStyle: {
+                        pageSize: {
+                            width: 73,
+                            height: undefined,
+                        },
+                        marginTop: 1,
+                        marginBottom: 2,
+                        marginRight: 2,
+                        marginLeft: 2,
+                        renderConfig: {
+                            horizontalAlign: 0,
+                            verticalAlign: 0,
+                            centerAngle: 0,
+                            vertexAngle: 0,
+                            wrapStrategy: 0,
+                        },
+                    },
+                    body: {
+                        dataStream: '10\r\n',
+                        textRuns: [
+                            { ts: { ff: 'Arial', fs: 11 }, st: 0, ed: 1 },
+                            { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
+                        ],
+                        paragraphs: [
+                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                        ],
+                        sectionBreaks: [
+                            { startIndex: 3 },
+                        ],
+                        customRanges: [],
+                        customDecorations: [],
+                    },
+                    drawings: {},
+                    drawingsOrder: [],
+                    settings: {
+                        zoomRatio: 1,
+                    },
+                },
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            const target = {
+                v: '10',
+                t: CellValueType.STRING,
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                f: null,
+                si: null,
+                p: {
+                    id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                    documentStyle: {
+                        pageSize: {
+                            width: Infinity,
+                            height: Infinity,
+                        },
+                        marginTop: 0,
+                        marginBottom: 2,
+                        marginRight: 2,
+                        marginLeft: 2,
+                        renderConfig: {
+                            horizontalAlign: 0,
+                            verticalAlign: 0,
+                            centerAngle: 0,
+                            vertexAngle: 0,
+                            wrapStrategy: 0,
+                            zeroWidthParagraphBreak: 1,
+                        },
+                    },
+                    body: {
+                        dataStream: '10\r\n',
+                        textRuns: [
+                            { ts: { ff: 'Arial', fs: 11 }, st: 0, ed: 1 },
+                            { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
+                        ],
+                        paragraphs: [
+                            { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                        ],
+                        sectionBreaks: [
+                            { startIndex: 3 },
+                        ],
+                        customRanges: [],
+                        customDecorations: [],
+                    },
+                    drawings: {},
+                    drawingsOrder: [],
+                    settings: {
+                        zoomRatio: 1,
+                    },
+                },
+            };
+
+            expect(cellData).toEqual({
+                ...target,
+            });
+        });
         it('Rich text cell', () => {
             const cell = {
                 v: 1,

@@ -129,14 +129,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
 
+    const clickOutside = useEvent((e: MouseEvent, cb: () => void) => {
+        if (rangeSelectorWrapRef.current && !rangeDialogVisible) {
+            const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
+            !isContain && cb();
+        }
+    });
+
     // init actions
     if (actions) {
-        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
-            if (rangeSelectorWrapRef.current && !rangeDialogVisible) {
-                const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
-                !isContain && cb();
-            }
-        };
+        actions.handleOutClick = clickOutside;
     }
 
     const ranges = useMemo(() => {

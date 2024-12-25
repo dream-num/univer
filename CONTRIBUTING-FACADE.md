@@ -1,6 +1,6 @@
 # How to Contribute to Facade API
 
-Facade API is an API layer of all other packages of Univer and it helps users to use Univer easily. For a detailed introduction of Facade API, please visit [Facade API](https://univer.ai/guides/sheet/facade/facade).
+Facade API is an API layer of all other packages of Univer and it helps users to use Univer easily. For a detailed introduction of Facade API, please visit [Facade API](https://docs.univer.ai/en-US/guides/sheets/getting-started/facade).
 
 ## How to Contribute
 
@@ -31,6 +31,14 @@ export class FWorkbook {
 }
 ```
 
+## Specifications & Requirements
+
+TODO @weird94
+
 ## Documentation
 
 It is strongly suggested to add documentation for your code [here](https://github.com/dream-num/univer.ai/tree/dev/packages/community/src/content/docs/guides/sheet/facade). Please refer to our [documentation repo](https://github.com/dream-num/docs) for more guidance.
+
+## Deprecation Notice
+
+`@univerjs/facade` and `@univerjs-pro/facade` are deprecated and will be removed in future versions. Please refer to our [official website](https://docs.univer.ai/en-US/guides/sheets/getting-started/facade) for more information.

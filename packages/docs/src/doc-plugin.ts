@@ -22,6 +22,7 @@ import {
     Inject,
     Injector,
     Plugin,
+    Tools,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
@@ -45,7 +46,10 @@ export class UniverDocsPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(DOCS_PLUGIN_CONFIG_KEY, rest);
     }
 

@@ -22,6 +22,7 @@ import {
     Inject,
     Injector,
     Plugin,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -63,7 +64,10 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

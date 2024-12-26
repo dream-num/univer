@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { defaultPluginConfig, SHEETS_DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
@@ -35,7 +35,10 @@ export class UniverSheetsDrawingPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(SHEETS_DRAWING_PLUGIN_CONFIG_KEY, rest);
     }
 

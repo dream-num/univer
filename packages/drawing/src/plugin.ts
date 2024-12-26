@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';
 import { IDrawingManagerService } from './services/drawing-manager.service';
@@ -37,7 +37,10 @@ export class UniverDrawingPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(DRAWING_PLUGIN_CONFIG_KEY, rest);
     }
 

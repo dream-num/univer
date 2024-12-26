@@ -45,6 +45,8 @@ export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle,
 export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
+export { type IRangeThemeStyleItem, RangeThemeStyle } from './services/theme-range/range-theme-util';
+export { SheetRangeThemeService } from './services/theme-range/range-theme-service';
 export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';

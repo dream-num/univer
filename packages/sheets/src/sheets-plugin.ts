@@ -40,6 +40,7 @@ import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetPro
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+import { SheetRangeThemeService } from './services/theme-range/range-theme-service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -85,6 +86,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
+            [SheetRangeThemeService],
 
             // controllers
             [BasicWorksheetController],

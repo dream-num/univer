@@ -19,7 +19,7 @@ import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISet
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -773,5 +773,14 @@ export class FRange extends FBaseInitialable {
             customDelimiter,
             treatMultipleDelimitersAsOne,
         });
+    }
+
+    useThemeStyle(themeName: string): void {
+        const rangeInfo = {
+            range: this._range,
+            unitId: this.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        };
+        this._injector.get(SheetRangeThemeService).registerRangeThemeStyles(themeName, rangeInfo);
     }
 }

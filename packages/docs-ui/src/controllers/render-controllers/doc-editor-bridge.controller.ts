@@ -16,12 +16,11 @@
 
 import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule, ScrollBar } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';
-import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -99,10 +98,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         actualWidth += marginLeft + marginRight;
 
         const { width, height } = editor.getBoundingClientRect();
-
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-
-        const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         const contentWidth = Math.max(actualWidth, width);
 

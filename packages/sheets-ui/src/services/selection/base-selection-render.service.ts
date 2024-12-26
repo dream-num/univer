@@ -17,6 +17,7 @@
 import type {
     ICellInfo,
     ICellWithCoord,
+    IContextService,
     IDisposable,
     IFreeze,
     IInterceptor,
@@ -24,16 +25,15 @@ import type {
     IRange,
     IRangeWithCoord,
     Nullable,
-    ThemeService,
-} from '@univerjs/core';
+    ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoord, ISelectionWithStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE } from '@univerjs/core';
-
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+
+import { type ISelectionStyle, type ISelectionWithCoord, type ISelectionWithStyle, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
@@ -188,7 +188,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         protected readonly _themeService: ThemeService,
         // WTF: why shortcutService is injected here?
         protected readonly _shortcutService: IShortcutService,
-        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        private readonly contextService: IContextService
+
     ) {
         super();
         this._resetSelectionStyle();
@@ -275,10 +277,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             const selectionWithStyle = selectionsWithStyleList[i];
             const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             const control = allSelectionControls[i];
+
             if (control) {
                 control.updateRangeBySelectionWithCoord(selectionWithCoord);
             } else {
-                this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);
+                if (this.isSelectionEnabled()) {
+                    this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);
+                }
             }
         }
         if (selectionsWithStyleList.length < allSelectionControls.length) {
@@ -892,6 +897,18 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // const activeCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
 
         // activeControl.updateRange(newSelectionRange, currentCell);
+    }
+
+    isSelectionEnabled(): boolean {
+        return this.contextService.getContextValue(SELECTIONS_ENABLED);
+    }
+
+    isSelectionDisabled(): boolean {
+        return this.contextService.getContextValue(SELECTIONS_ENABLED) === false;
+    }
+
+    inRefSelectionMode(): boolean {
+        return this.contextService.getContextValue(REF_SELECTIONS_ENABLED);
     }
 }
 

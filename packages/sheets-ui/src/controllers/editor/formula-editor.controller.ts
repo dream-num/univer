@@ -38,10 +38,10 @@ import {
 } from '@univerjs/docs';
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { takeUntil } from 'rxjs';
+import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -210,9 +210,10 @@ export class FormulaEditorController extends RxDisposable {
 
     // Listen to changes in the size of the formula editor container to set the size of the editor.
     private _syncEditorSize() {
-        this._formulaEditorManagerService.position$.pipe(takeUntil(this.dispose$)).subscribe((position) => {
+        // this._univerInstanceService.
+        const addFOrmulaBar$ = this._univerInstanceService.unitAdded$.pipe(filter((unit) => unit.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY));
+        this.disposeWithMe(combineLatest([this._formulaEditorManagerService.position$, addFOrmulaBar$]).subscribe(([position]) => {
             if (!position) return this._clearScheduledCallback();
-
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
             const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                 DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
@@ -227,7 +228,7 @@ export class FormulaEditorController extends RxDisposable {
             formulaEditorDataModel.updateDocumentDataPageSize(width);
             this.autoScroll();
             this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
-        });
+        }));
     }
 
     private _scheduledCallback: number = -1;

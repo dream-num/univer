@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
@@ -60,6 +60,7 @@ export function FormulaBar() {
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    const ref = useRef<HTMLDivElement>(null);
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -133,15 +134,20 @@ export function FormulaBar() {
         return () => subscription.unsubscribe();
     }, [editorBridgeService.currentEditCellState$]);
 
-    function resizeCallBack(editor: Nullable<HTMLDivElement>) {
-        if (editor == null) {
-            return;
+    useEffect(() => {
+        if (ref.current) {
+            const handleResize = () => {
+                const editorRect = ref.current!.getBoundingClientRect();
+                formulaEditorManagerService.setPosition(editorRect);
+            };
+
+            handleResize();
+            const a = new ResizeObserver(handleResize);
+
+            a.observe(ref.current);
+            return () => a.disconnect();
         }
-
-        const editorRect = editor.getBoundingClientRect();
-
-        formulaEditorManagerService.setPosition(editorRect);
-    }
+    }, [formulaEditorManagerService]);
 
     function handleArrowClick() {
         setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
@@ -217,30 +223,33 @@ export function FormulaBar() {
                     </div>
                 </div>
 
-                <div className={styles.formulaInput}>
-                    {FormulaEditor && (
-                        <FormulaEditor
-                            editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                            initValue=""
-                            onChange={() => {}}
-                            isFocus={isFocusFxBar}
-                            className={styles.formulaContent}
-                            unitId={editState?.unitId}
-                            subUnitId={editState?.sheetId}
-                            isSupportAcrossSheet
-                            resetSelectionOnBlur={false}
-                            isSingle={false}
-                            keyboradEventConfig={keyCodeConfig}
-                            onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
-                                isRefSelecting.current = isSelecting;
-                                if (isSelecting) {
-                                    editorBridgeService.enableForceKeepVisible();
-                                } else {
-                                    editorBridgeService.disableForceKeepVisible();
-                                }
-                            }}
-                        />
-                    )}
+                <div className={styles.formulaContainer}>
+                    <div className={styles.formulaInput} ref={ref}>
+                        {FormulaEditor && (
+                            <FormulaEditor
+                                editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                                initValue=""
+                                onChange={() => {}}
+                                isFocus={isFocusFxBar}
+                                className={styles.formulaContent}
+                                unitId={editState?.unitId}
+                                subUnitId={editState?.sheetId}
+                                isSupportAcrossSheet
+                                resetSelectionOnBlur={false}
+                                isSingle={false}
+                                keyboradEventConfig={keyCodeConfig}
+                                onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
+                                    isRefSelecting.current = isSelecting;
+                                    if (isSelecting) {
+                                        editorBridgeService.enableForceKeepVisible();
+                                    } else {
+                                        editorBridgeService.disableForceKeepVisible();
+                                    }
+                                }}
+                                autoScrollbar={false}
+                            />
+                        )}
+                    </div>
                     <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (

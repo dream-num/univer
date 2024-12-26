@@ -25,6 +25,7 @@ import { ReplaceSnapshotCommand } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { FormulaEditorController } from './formula-editor.controller';
 
 const formulaEditorStyle: IDocumentStyle = {
@@ -59,7 +60,8 @@ export class EditorDataSyncController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
-        @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController
+        @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController,
+        @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService
     ) {
         super();
 
@@ -279,7 +281,14 @@ export class EditorDataSyncController extends Disposable {
             renderConfig = {};
             snapshot.documentStyle.renderConfig = renderConfig;
         }
-
+        const position = this._formulaEditorManagerService.getPosition();
+        if (position) {
+            const width = position.width;
+            snapshot.documentStyle.pageSize = {
+                width,
+                height: Infinity,
+            };
+        }
         if ((body?.dataStream ?? '').startsWith('=')) {
             renderConfig.isRenderStyle = BooleanNumber.TRUE;
         } else {

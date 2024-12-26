@@ -177,7 +177,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     /**
-     * Hide selection box.
+     * Disable selection. After disabled, there would be no response for selection.
      */
     disableSelection(): void {
         const unitId = this._workbook.getUnitId();
@@ -189,7 +189,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     }
 
     /**
-     * Show selection box.
+     * Enable selection. After this you can select range.
      */
     enableSelection(): void {
         const unitId = this._workbook.getUnitId();
@@ -197,6 +197,30 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
+        }
+    }
+
+    /**
+     * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
+     */
+    transparentSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).transparentSelection();
+        }
+    }
+
+    /**
+     * Set selection visible.
+     */
+    showSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
     }
 }

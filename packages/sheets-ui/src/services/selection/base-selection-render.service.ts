@@ -191,7 +191,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         // WTF: why shortcutService is injected here?
         protected readonly _shortcutService: IShortcutService,
         protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        private readonly contextService: IContextService
+        protected readonly contextService: IContextService
 
     ) {
         super();

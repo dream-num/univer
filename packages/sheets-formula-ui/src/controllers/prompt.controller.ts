@@ -849,7 +849,6 @@ export class PromptController extends Disposable {
      */
     private _contextSwitch() {
         const config = this._getCurrentBodyDataStreamAndOffset();
-        window.ctxs = this._contextService;
         if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
             this._contextService.setContextValue(REF_SELECTIONS_ENABLED, true);

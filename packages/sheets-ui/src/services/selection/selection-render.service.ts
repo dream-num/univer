@@ -21,7 +21,7 @@ import type { ISheetObjectParam } from '../../controllers/utils/component-tools'
 import type { SelectionControl } from './selection-control';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -50,7 +50,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService protected readonly _contextService: IContextService
     ) {
         super(
             injector,
@@ -62,8 +62,6 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
-
-        window.srs = this;
     }
 
     private _init(): void {
@@ -165,10 +163,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     }
 
     enableSelection() {
-        this._contextService.setContextValue(SELECTIONS_ENABLED, false);
+        this._contextService.setContextValue(SELECTIONS_ENABLED, true);
     }
 
-    setSelectionInvisible() {
+    transparentSelection() {
         this.setSelectionTheme({
             primaryColor: 'transparent',
         });
@@ -199,6 +197,23 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
     private _initUserActionSyncListener(): void {
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
+
+        this.disposeWithMe(this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED)
+            .pipe(startWith(false), distinctUntilChanged())
+            .subscribe((enabled) => {
+                if (enabled) {
+                    this._renderDisposable?.dispose();
+                    this._renderDisposable = null;
+                    this._reset();
+                } else {
+                    this._renderDisposable = toDisposable(
+                        //TODO @lumixraku ! these would only show the last selection, not all
+                        this.selectionMoveEnd$.subscribe((params) => {
+                            this._updateSelections(params, SelectionMoveType.MOVE_END);
+                        })
+                    );
+                }
+            }));
 
         this.disposeWithMe(this._contextService.subscribeContextValue$(SELECTIONS_ENABLED)
             .pipe(startWith(true), distinctUntilChanged())

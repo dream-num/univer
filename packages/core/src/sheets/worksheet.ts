@@ -17,7 +17,7 @@
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type { ICellData, ICellDataForSheetInterceptor, ICellDataWithExtraData, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
@@ -29,6 +29,7 @@ import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
+import { CellModeEnum } from './typedef';
 import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat } from './util';
 import { SheetViewModel } from './view-model';
 
@@ -535,37 +536,38 @@ export class Worksheet {
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
      *
-     * When `isRaw` === true && `both` === true, We will generate both the original cellData.v and the cellData.v after the Interceptor
-     * When `isRaw` === false，No text/plain will be generated, then can get it from cellData.v
+     * Control the v attribute in the return cellData.v through dataMode
      */
     getMatrixWithMergedCells(
         row: number,
         col: number,
         endRow: number,
         endCol: number,
-        isRaw = false,
-        both?: boolean
-    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number; plain?: string }> {
+        dataMode: CellModeEnum = CellModeEnum.Raw
+    ): ObjectMatrix<ICellDataWithExtraData> {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
         const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
-        const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number; plain?: string }>();
+        const returnCellMatrix = new ObjectMatrix<ICellDataWithExtraData>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
-            const v = isRaw ? this.getCellRaw(row, col) : this.getCell(row, col);
-            if (v) {
-                returnCellMatrix.setValue(row, col, v);
-            }
-            if (isRaw && both) {
-                const plain = String(this.getCell(row, col)?.v);
-                if (plain) {
-                    returnCellMatrix.setValue(row, col, {
-                        ...v,
-                        plain,
-                    });
+            let cellData: Nullable<ICellDataWithExtraData>;
+            if (dataMode === CellModeEnum.Raw) {
+                cellData = this.getCellRaw(row, col);
+            } else if (dataMode === CellModeEnum.Intercepted) {
+                cellData = this.getCell(row, col);
+            } else if (dataMode === CellModeEnum.Both) {
+                cellData = this.getCellRaw(row, col);
+                const displayV = this.getCell(row, col)?.v;
+                if (displayV && cellData) {
+                    cellData.displayV = String(displayV);
                 }
+            }
+
+            if (cellData) {
+                returnCellMatrix.setValue(row, col, cellData);
             }
         });
 

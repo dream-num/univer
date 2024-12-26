@@ -665,7 +665,7 @@ export interface ISelectionCell extends IRange, ISingleCell { }
 /**
  * ICellInfo has the same properties as ISelectionCell, but the name ICellInfo might be more semantically appropriate in some contexts.
  */
-export interface ICellInfo extends ISelectionCell {}
+export interface ICellInfo extends ISelectionCell { }
 
 export interface ISelection {
     /**
@@ -770,4 +770,12 @@ export function getCellInfoInMergeData(row: number, column: number, mergeData?: 
         startRow: mergeRow,
         startColumn: mergeColumn,
     };
+}
+
+export type ICellDataWithExtraData = ICellData & { rowSpan?: number; colSpan?: number; displayV?: string };
+
+export enum CellModeEnum {
+    Raw = 'raw',
+    Intercepted = 'intercepted',
+    Both = 'both',
 }

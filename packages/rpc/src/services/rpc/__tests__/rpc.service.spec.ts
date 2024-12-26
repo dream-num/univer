@@ -181,7 +181,7 @@ describe('test ChannelClient & ChannelServer', () => {
             let completed = false;
 
             const values: number[] = [];
-            const _subscription = clientService.getSignal$()
+            const subscription = clientService.getSignal$()
                 .subscribe({
                     next(value) {
                         values.push(value);
@@ -197,6 +197,7 @@ describe('test ChannelClient & ChannelServer', () => {
             signalSubject$.complete();
             await wait();
             expect(completed).toBe(true);
+            expect(subscription.closed).toBe(true);
         });
     });
 });

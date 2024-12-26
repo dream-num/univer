@@ -14,119 +14,33 @@
  * limitations under the License.
  */
 
-/**
- * Inspired by https://github.com/react-component/util
- */
-
 import type * as React from 'react';
 import type { Root } from 'react-dom/client';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
-type CreateRoot = (container: ContainerType) => Root;
-
-type FullCloneType = typeof ReactDOM & {
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: {
-        usingClientEntryPoint?: boolean;
-    };
-    createRoot?: CreateRoot;
-    render?: (node: React.ReactElement, container: ContainerType) => void;
-    unmountComponentAtNode?: (container: ContainerType) => void;
-};
-
-let fullClone: FullCloneType;
-async function getFullClone(): Promise<FullCloneType> {
-    if (fullClone) return fullClone;
-
-    try {
-        const { default: client } = await import('react-dom/client');
-        fullClone = { ...ReactDOM, ...client };
-    } catch {
-        fullClone = { ...ReactDOM };
-    }
-
-    return fullClone;
-}
-
-async function getCreateRoot() {
-    const fullClone = await getFullClone();
-
-    let createRoot: CreateRoot | undefined;
-    try {
-        const mainVersion = Number((fullClone.version || '').split('.')[0]);
-        if (mainVersion >= 18) {
-            createRoot = fullClone.createRoot;
-        }
-    } catch {}
-
-    return createRoot;
-}
-
-async function toggleWarning(skip: boolean) {
-    const { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } = await getFullClone();
-
-    if (
-        __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED &&
-    typeof __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED === 'object'
-    ) {
-        __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.usingClientEntryPoint =
-      skip;
-    }
-}
-
-const MARK = '__rc_react_root__';
+// Map to track container and corresponding Root
+const rootMap = new WeakMap<Element | DocumentFragment, Root>();
 
 // ========================== Render ==========================
-type ContainerType = (Element | DocumentFragment) & {
-    [MARK]?: Root;
-};
+export function render(node: React.ReactElement, container: Element | DocumentFragment) {
+    // Get or create the root
+    let root = rootMap.get(container);
 
-async function modernRender(node: React.ReactElement, container: ContainerType) {
-    toggleWarning(true);
-    const createRoot = await getCreateRoot();
-    const root = container[MARK] || createRoot?.(container);
-    toggleWarning(false);
-
-    root?.render(node);
-
-    container[MARK] = root;
-}
-
-async function legacyRender(node: React.ReactElement, container: ContainerType) {
-    const { render } = await getFullClone();
-    render?.(node, container);
-}
-
-export async function render(node: React.ReactElement, container: ContainerType) {
-    const createRoot = await getCreateRoot();
-    if (createRoot) {
-        modernRender(node, container);
-        return;
+    if (!root) {
+        root = createRoot(container);
+        rootMap.set(container, root);
     }
 
-    legacyRender(node, container);
+    // Render the React element
+    root.render(node);
 }
 
 // ========================= Unmount ==========================
-async function modernUnmount(container: ContainerType) {
-  // Delay to unmount to avoid React 18 sync warning
-    return Promise.resolve().then(() => {
-        container[MARK]?.unmount();
+export function unmount(container: Element | DocumentFragment) {
+    const root = rootMap.get(container);
 
-        delete container[MARK];
-    });
-}
-
-async function legacyUnmount(container: ContainerType) {
-    const { unmountComponentAtNode } = await getFullClone();
-    unmountComponentAtNode?.(container);
-}
-
-export async function unmount(container: ContainerType) {
-    const createRoot = await getCreateRoot();
-    if (createRoot !== undefined) {
-    // Delay to unmount to avoid React 18 sync warning
-        return modernUnmount(container);
+    if (root) {
+        root.unmount();
+        rootMap.delete(container); // Clean up the mapping
     }
-
-    legacyUnmount(container);
 }

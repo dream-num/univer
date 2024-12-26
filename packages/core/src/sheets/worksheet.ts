@@ -534,6 +534,9 @@ export class Worksheet {
      *
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
+     *
+     * When `isRaw` === true && `both` === true, We will generate both the original v and the v after the Interceptor
+     * When `isRaw` === false，No plain will be generated, then can get it from v
      */
     getMatrixWithMergedCells(
         row: number,

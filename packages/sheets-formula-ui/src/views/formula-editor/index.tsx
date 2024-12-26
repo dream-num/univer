@@ -311,8 +311,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                     onMouseUp={handleMouseUp}
                 >
                 </div>
-                {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}
             </div>
+            {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}
             <HelpFunction
                 editorId={editorId}
                 paramIndex={paramIndex}

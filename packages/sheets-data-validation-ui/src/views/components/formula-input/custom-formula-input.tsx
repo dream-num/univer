@@ -32,7 +32,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
 
     return (
         <FormulaEditor
-            initValue={value?.formula1 ?? '' as any}
+            initValue={value?.formula1 ?? '=' as any}
             unitId={unitId}
             subUnitId={subUnitId}
             isFocus={isFocusFormulaEditor}

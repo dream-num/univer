@@ -540,19 +540,29 @@ export class Worksheet {
         col: number,
         endRow: number,
         endCol: number,
-        isRaw = false
-    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
+        isRaw = false,
+        both?: boolean
+    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number; plain?: string }> {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
         const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
-        const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
+        const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number; plain?: string }>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
             const v = isRaw ? this.getCellRaw(row, col) : this.getCell(row, col);
             if (v) {
                 returnCellMatrix.setValue(row, col, v);
+            }
+            if (isRaw && both) {
+                const plain = String(this.getCell(row, col)?.v);
+                if (plain) {
+                    returnCellMatrix.setValue(row, col, {
+                        ...v,
+                        plain,
+                    });
+                }
             }
         });
 

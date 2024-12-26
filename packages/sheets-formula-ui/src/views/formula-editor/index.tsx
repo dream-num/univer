@@ -20,6 +20,7 @@ import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
 import type { IRefSelection } from '../range-selector/hooks/useHighlight';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
+import type { FormulaSelectingType } from './hooks/useFormulaSelection';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -40,7 +41,7 @@ import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
-import { FormulaSelectingType, useFormulaSelecting } from './hooks/useFormulaSelection';
+import { useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
 import { getFocusingReference } from './hooks/util';
@@ -127,7 +128,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const { isSelecting } = useFormulaSelecting(editorId, sequenceNodes);
-    const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
+    // const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
@@ -137,15 +138,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
-
-    useEffect(() => {
-        if (isSelecting === FormulaSelectingType.NEED_ADD) {
-            setShouldMoveRefSelection(true);
-        }
-        if (isSelecting === FormulaSelectingType.NOT_SELECT) {
-            setShouldMoveRefSelection(false);
-        }
-    }, [isSelecting]);
+    const shouldMoveRefSelection = Boolean(isSelecting);
 
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
         onChange(`=${text}`);
@@ -287,14 +280,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     };
 
     const handleMouseUp = () => {
-        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
-        // 即使失焦是 mousedown 事件,
-        // 聚焦是 mouseup 事件,
-        // 但是 react 的 useEffect 无法保证顺序,无法确保失焦在聚焦之前.
-        if (isSelecting !== FormulaSelectingType.NEED_ADD) {
-            setShouldMoveRefSelection(false);
-        }
-
         isFocusSet(true);
         onFocus();
         focus();

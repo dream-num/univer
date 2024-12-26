@@ -19,10 +19,9 @@ import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { matchRefDrawToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { isFormulaLexerToken, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { of } from 'rxjs';
+import { useEffect, useRef, useState } from 'react';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
@@ -36,27 +35,6 @@ function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     return { dataStream, offset: 0 };
 }
 
-function getCurrentChar(accssor: IAccessor) {
-    const docSelectionManagerService = accssor.get(DocSelectionManagerService);
-    const activeRange = docSelectionManagerService.getActiveTextRange();
-
-    if (activeRange == null) {
-        return;
-    }
-
-    const { startOffset } = activeRange;
-
-    const config = getCurrentBodyDataStreamAndOffset(accssor);
-
-    if (config == null || startOffset == null) {
-        return;
-    }
-
-    const dataStream = config.dataStream;
-
-    return dataStream[startOffset - 1 + config.offset];
-}
-
 export enum FormulaSelectingType {
     NOT_SELECT = 0,
     NEED_ADD = 1,
@@ -67,26 +45,37 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const injector = useDependency(Injector);
-    const textSelections$ = useMemo(() => docSelectionRenderService?.textSelectionInner$ ?? of(), [docSelectionRenderService?.textSelectionInner$]);
     const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const nodesRef = useRef(nodes);
     nodesRef.current = nodes;
+    const isDisabledByPointer = useRef(false);
     const isSelectingRef = useRef(isSelecting);
     isSelectingRef.current = isSelecting;
 
     useEffect(() => {
-        const sub = textSelections$.subscribe(() => {
-            const char = getCurrentChar(injector);
+        const sub = docSelectionManagerService.textSelection$.subscribe((param) => {
+            if (param.unitId !== editorId) return;
             const activeRange = docSelectionRenderService?.getActiveTextRange();
             const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
-            const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
+            const config = getCurrentBodyDataStreamAndOffset(injector);
+            if (!config) return;
+            const dataStream = config?.dataStream?.slice(0, -2);
+            const char = dataStream[index - 1 + config.offset];
+            const nextChar = dataStream[index + config.offset];
             const focusingIndex = nodesRef.current.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
+            const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
+            const editing = focusingIndex > -1;
 
-            if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || focusingIndex > -1)) {
-                if (focusingIndex > -1) {
+            if (dataStream?.substring(0, 1) === '=' && (adding || editing)) {
+                if (editing) {
+                    if (isDisabledByPointer.current) {
+                        return;
+                    }
                     setIsSelecting(FormulaSelectingType.CAN_EDIT);
                 } else {
+                    isDisabledByPointer.current = false;
                     setIsSelecting(FormulaSelectingType.NEED_ADD);
                 }
             } else {
@@ -95,19 +84,16 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
         });
 
         return () => sub.unsubscribe();
-    }, [docSelectionRenderService, injector, textSelections$]);
+    }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector]);
 
     useEffect(() => {
-        const sub = renderer?.mainComponent?.onPointerUp$.subscribeEvent(() => {
-            if (isSelectingRef.current === FormulaSelectingType.CAN_EDIT) {
-                setTimeout(() => {
-                    setIsSelecting(FormulaSelectingType.NOT_SELECT);
-                });
-            }
+        const sub = renderer?.mainComponent?.onPointerDown$.subscribeEvent(() => {
+            setIsSelecting(FormulaSelectingType.NOT_SELECT);
+            isDisabledByPointer.current = true;
         });
 
         return () => sub?.unsubscribe();
-    }, [renderer?.mainComponent?.onPointerUp$]);
+    }, [renderer?.mainComponent?.onPointerDown$]);
 
     return { isSelecting };
 }

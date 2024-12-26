@@ -19,7 +19,7 @@ import type {
     IUniverRPCMainThreadConfig,
     IUniverRPCWorkerThreadConfig,
 } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, Tools } from '@univerjs/core';
 import {
     defaultPluginMainThreadConfig,
     defaultPluginWorkerThreadConfig,
@@ -56,7 +56,10 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginMainThreadConfig,
+            this._config
+        );
         this._configService.setConfig(PLUGIN_CONFIG_KEY_MAIN_THREAD, rest);
     }
 
@@ -111,7 +114,10 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginWorkerThreadConfig,
+            this._config
+        );
         this._configService.setConfig(PLUGIN_CONFIG_KEY_WORKER_THREAD, rest);
     }
 

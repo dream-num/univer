@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Plugin, Tools, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
@@ -45,7 +45,10 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(SHEETS_CONDITIONAL_FORMATTING_PLUGIN_CONFIG_KEY, rest);
 
         ([

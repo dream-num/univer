@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { ZenEditorController } from './controllers/zen-editor.controller';
@@ -35,7 +35,10 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

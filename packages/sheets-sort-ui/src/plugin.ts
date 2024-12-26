@@ -22,6 +22,7 @@ import {
     Inject,
     Injector,
     Plugin,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
@@ -44,7 +45,10 @@ export class UniverSheetsSortUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = Tools.deepMerge(
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(SHEETS_SORT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 

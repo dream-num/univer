@@ -29,6 +29,7 @@ import { getCoordByOffset, getSheetObject } from '../../controllers/utils/compon
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getTopLeftSelectionOfCurrSheet, selectionDataForSelectAll } from './base-selection-render.service';
+import { genNormalSelectionStyle } from './const';
 import { attachSelectionWithCoord } from './util';
 
 /**
@@ -171,27 +172,25 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this.setSelectionTheme({
             primaryColor: 'transparent',
         });
-        const selections = this.getSelectionControls();
-        selections.forEach((selection) => {
-            selection.updateStyle({
-                stroke: 'transparent',
-                columnHeaderStroke: 'transparent',
-                rowHeaderStroke: 'transparent',
-            });
-        });
+        const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
+        for (let index = 0; index < selectionsWithStyle.length; index++) {
+            const selectionWithStyle = selectionsWithStyle[index];
+            selectionWithStyle.style = genNormalSelectionStyle(this._selectionTheme);
+        }
+        this.resetSelectionsByModelData(selectionsWithStyle);
     }
 
     showSelection() {
         const currTheme = this._themeService.getCurrentTheme();
         this.setSelectionTheme(currTheme);
-        const selections = this.getSelectionControls();
-        selections.forEach((selection) => {
-            selection.updateStyle({
-                stroke: currTheme.primaryColor,
-                columnHeaderStroke: currTheme.primaryColor,
-                rowHeaderStroke: currTheme.primaryColor,
-            });
-        });
+        const selectionsWithStyle = this._workbookSelections.getCurrentSelections();
+        for (let index = 0; index < selectionsWithStyle.length; index++) {
+            const selectionWithStyle = selectionsWithStyle[index];
+            if (selectionWithStyle.style) {
+                selectionWithStyle.style = genNormalSelectionStyle(this._selectionTheme);
+            }
+        }
+        this.resetSelectionsByModelData(selectionsWithStyle);
     }
 
     /**

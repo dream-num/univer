@@ -174,7 +174,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _selectionMoving = false;
-    private _selectionTheme: ThemeService;
+    protected _selectionTheme: ThemeService;
     get selectionMoving(): boolean {
         return this._selectionMoving;
     }

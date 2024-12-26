@@ -35,6 +35,7 @@ import {
     ILogService,
     Inject,
     Injector,
+    isNotNullOrUndefined,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -1121,7 +1122,7 @@ export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithExtraData>)
 }
 
 function getCellTextForClipboard(cell: ICellDataWithExtraData) {
-    if (cell.displayV !== undefined || cell.displayV !== null) {
+    if (isNotNullOrUndefined(cell.displayV)) {
         return cell.displayV;
     }
     return extractPureTextFromCell(cell);

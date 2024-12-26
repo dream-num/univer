@@ -30,7 +30,7 @@ import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
 import { CellModeEnum } from './typedef';
-import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat } from './util';
+import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
 
 export interface IDocumentLayoutObject {
@@ -561,7 +561,7 @@ export class Worksheet {
             } else if (dataMode === CellModeEnum.Both) {
                 cellData = this.getCellRaw(row, col);
                 const displayV = this.getCell(row, col)?.v;
-                if ((displayV !== undefined || displayV !== null) && cellData) {
+                if (isNotNullOrUndefined(displayV) && cellData) {
                     cellData.displayV = String(displayV);
                 }
             }

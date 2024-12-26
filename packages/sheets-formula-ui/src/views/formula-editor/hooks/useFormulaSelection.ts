@@ -81,10 +81,10 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
             const activeRange = docSelectionRenderService?.getActiveTextRange();
             const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
             const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
-            const isFocusingLastNode = nodesRef.current.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
+            const focusingIndex = nodesRef.current.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
 
-            if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || isFocusingLastNode)) {
-                if (isFocusingLastNode) {
+            if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || focusingIndex > -1)) {
+                if (focusingIndex > -1) {
                     setIsSelecting(FormulaSelectingType.CAN_EDIT);
                 } else {
                     setIsSelecting(FormulaSelectingType.NEED_ADD);
@@ -109,5 +109,5 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
         return () => sub?.unsubscribe();
     }, [renderer?.mainComponent?.onPointerUp$]);
 
-    return isSelecting;
+    return { isSelecting };
 }

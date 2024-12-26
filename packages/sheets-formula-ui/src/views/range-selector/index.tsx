@@ -17,6 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
+import type { IRefSelection } from './hooks/useHighlight';
 import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
@@ -24,14 +25,15 @@ import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeTy
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
+import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { noop, throttleTime } from 'rxjs';
 
+import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
+import { getFocusingReference } from '../formula-editor/hooks/util';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useEmitChange } from './hooks/useEmitChange';
 import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
@@ -128,6 +130,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
+    const refSelections = useRef<IRefSelection[]>([]);
 
     const clickOutside = useEvent((e: MouseEvent, cb: () => void) => {
         if (rangeSelectorWrapRef.current && !rangeDialogVisible) {
@@ -194,8 +197,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
         const sequenceNodes = getFormulaToken(text);
         const ranges = highlightDoc(editorRef.current, sequenceNodes, isNeedResetSelection);
+        refSelections.current = ranges;
         if (showSelection) {
-            highlightSheet(ranges);
+            highlightSheet(ranges, getFocusingReference(editorRef.current, ranges));
         }
     });
 

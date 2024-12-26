@@ -18,6 +18,7 @@ import type { DocumentDataModel, IDisposable } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
+import type { IRefSelection } from '../range-selector/hooks/useHighlight';
 import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEvent';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
@@ -42,6 +43,7 @@ import { useFormulaSearch } from './hooks/useFormulaSearch';
 import { FormulaSelectingType, useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
+import { getFocusingReference } from './hooks/util';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/getFormulaText';
@@ -124,7 +126,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const isSelecting = useFormulaSelecting(editorId, sequenceNodes);
+    const { isSelecting } = useFormulaSelecting(editorId, sequenceNodes);
     const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
@@ -134,6 +136,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const currentDoc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
+    const refSelections = useRef([] as IRefSelection[]);
 
     useEffect(() => {
         if (isSelecting === FormulaSelectingType.NEED_ADD) {
@@ -164,9 +167,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             // remove equals need to remove highlight style
             preText.slice(1) === text && preText[0] === '='
         );
+        refSelections.current = ranges;
 
         if (isEnd) {
-            highlightSheet(isFocus ? ranges : []);
+            highlightSheet(isFocus ? ranges : [], getFocusingReference(editorRef.current, ranges));
         }
     });
 
@@ -257,7 +261,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     });
 
-    useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
+    useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
     useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);

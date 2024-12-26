@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Workbook } from '@univerjs/core';
+import type { ITextRun, Nullable, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -26,14 +26,17 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-interface IRefSelection {
+export interface IRefSelection {
     refIndex: number;
     themeColor: string;
     token: string;
+    startIndex: number;
+    endIndex: number;
+    index: number;
 }
 
 /**
@@ -51,7 +54,7 @@ export function useSheetHighlight(unitId: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = useCallback((refSelections: IRefSelection[]) => {
+    const highlightSheet = useCallback((refSelections: IRefSelection[], focusingRef: Nullable<IRefSelection>) => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -95,7 +98,20 @@ export function useSheetHighlight(unitId: string) {
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
         }
+
+        if (focusingRef) {
+            refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
+        } else {
+            refSelectionsRenderService?.resetActiveSelectionIndex();
+        }
     }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, univerInstanceService]);
+
+    useEffect(() => {
+        return () => {
+            refSelectionsRenderService?.resetActiveSelectionIndex();
+        };
+    }, [refSelectionsRenderService]);
+
     return highlightSheet;
 }
 
@@ -119,8 +135,6 @@ export function useDocHight(_leadingCharacter: string = '') {
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             if (clearTextRun) {
                 cloneBody.textRuns = [];
-                // const cloneData = { ...data, body: cloneBody };
-                // editor.setDocumentData(cloneData);
                 commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                     unitId: editorId,
                     body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
@@ -252,6 +266,9 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                 refIndex: i,
                 themeColor,
                 token,
+                startIndex: node.startIndex,
+                endIndex: node.endIndex,
+                index: refSelections.length,
             });
         } else if (nodeType === sequenceNodeType.NUMBER) {
             themeColor = numberColor;

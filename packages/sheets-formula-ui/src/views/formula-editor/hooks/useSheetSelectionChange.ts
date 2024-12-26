@@ -18,10 +18,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IRefSelection } from '../../range-selector/hooks/useHighlight';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { DisposableCollection, ICommandService, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
@@ -35,6 +36,7 @@ import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToTex
 import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
 import { useStateRef } from '../hooks/useStateRef';
 import { useSelectionAdd } from './useSelectionAdd';
+import { getFocusingReference } from './util';
 
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
@@ -42,6 +44,7 @@ export const useSheetSelectionChange = (
     unitId: string,
     subUnitId: string,
     sequenceNodes: INode[],
+    refSelectionRef: React.MutableRefObject<IRefSelection[]>,
     isSupportAcrossSheet: boolean,
     listenSelectionSet: boolean,
     editor?: Editor,
@@ -51,6 +54,7 @@ export const useSheetSelectionChange = (
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sequenceNodesRef = useStateRef(sequenceNodes);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
 
@@ -59,14 +63,14 @@ export const useSheetSelectionChange = (
     const sheetName = useMemo(() => getSheetNameById(subUnitId), [subUnitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
-
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const refSelectionsService = useDependency(IRefSelectionsService);
-
     const isScalingRef = useRef(false);
 
     const scalingOptionRef = useRef<{ result: string; offset: number }>();
+
+    useEffect(() => {}, []);
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
@@ -84,14 +88,15 @@ export const useSheetSelectionChange = (
                 const docRange = currentDocSelections[0];
                 const offset = docRange.startOffset - 1;
                 const sequenceNodes = [...sequenceNodesRef.current];
+                const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+
                 if (getIsNeedAddSelection()) {
+                    if (nodeIndex === -1 && sequenceNodes.length) {
+                        return;
+                    }
                     if (offset !== 0) {
-                        const index = findIndexFromSequenceNodes(sequenceNodes, offset, false);
-                        if (index === -1 && sequenceNodes.length) {
-                            return;
-                        }
                         const range = selections[selections.length - 1];
-                        const lastNodes = sequenceNodes.splice(index + 1);
+                        const lastNodes = sequenceNodes.splice(nodeIndex + 1);
                         const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
                         const unitRangeName = {
                             range: range.rangeWithCoord,
@@ -121,7 +126,7 @@ export const useSheetSelectionChange = (
                 } else {
                     // 更新全部的 ref Selection
                     let currentRefIndex = 0;
-                    const currentText = sequenceNodes.map((item) => {
+                    const newTokens = sequenceNodes.map((item) => {
                         if (typeof item === 'string') {
                             return item;
                         }
@@ -152,7 +157,15 @@ export const useSheetSelectionChange = (
                             return refRanges[0];
                         }
                         return item.token;
-                    }).join('');
+                    });
+                    let currentText = '';
+                    let newOffset;
+                    newTokens.forEach((item, index) => {
+                        currentText += item;
+                        if (index === nodeIndex) {
+                            newOffset = currentText.length;
+                        }
+                    });
                     const theLastList: string[] = [];
                     for (let index = currentRefIndex; index <= selections.length - 1; index++) {
                         const selection = selections[index];
@@ -169,7 +182,7 @@ export const useSheetSelectionChange = (
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
                     const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
                     const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, result.length, true);
+                    handleRangeChange(result, newOffset ?? result.length, true);
                 }
             };
             const disposableCollection = new DisposableCollection();
@@ -338,4 +351,25 @@ export const useSheetSelectionChange = (
             };
         }
     }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+        const sub = docSelectionManagerService.textSelection$.subscribe((e) => {
+            const { unitId } = e;
+            if (unitId !== editor.getEditorId()) {
+                return;
+            }
+
+            const focusingRef = getFocusingReference(editor, refSelectionRef.current);
+            if (focusingRef) {
+                refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
+            } else {
+                refSelectionsRenderService?.resetActiveSelectionIndex();
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, sequenceNodesRef]);
 };

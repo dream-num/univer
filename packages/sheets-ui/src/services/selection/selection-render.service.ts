@@ -61,6 +61,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+
+        window.srs = this;
     }
 
     private _init(): void {
@@ -138,7 +140,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initThemeChangeListener(): void {
         this.disposeWithMe(this._themeService.currentTheme$.subscribe(() => {
-            this._resetSelectionStyle();
+            this._initSelectionThemeFromThemeService();
             const selections = this._workbookSelections.getCurrentSelections();
             if (!selections) return;
             this.resetSelectionsByModelData(selections);
@@ -163,6 +165,33 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     enableSelection() {
         this._contextService.setContextValue(SELECTIONS_ENABLED, false);
+    }
+
+    setSelectionInvisible() {
+        this.setSelectionTheme({
+            primaryColor: 'transparent',
+        });
+        const selections = this.getSelectionControls();
+        selections.forEach((selection) => {
+            selection.updateStyle({
+                stroke: 'transparent',
+                columnHeaderStroke: 'transparent',
+                rowHeaderStroke: 'transparent',
+            });
+        });
+    }
+
+    showSelection() {
+        const currTheme = this._themeService.getCurrentTheme();
+        this.setSelectionTheme(currTheme);
+        const selections = this.getSelectionControls();
+        selections.forEach((selection) => {
+            selection.updateStyle({
+                stroke: currTheme.primaryColor,
+                columnHeaderStroke: currTheme.primaryColor,
+                rowHeaderStroke: currTheme.primaryColor,
+            });
+        });
     }
 
     /**

@@ -24,13 +24,14 @@ import type {
     Injector,
     IRange,
     IRangeWithCoord,
-    Nullable,
-    ThemeService } from '@univerjs/core';
+    IStyleSheet,
+    Nullable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE } from '@univerjs/core';
+import {
+    convertCellToRange, createIdentifier, Disposable, InterceptorManager, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
 import { type ISelectionStyle, type ISelectionWithCoord, type ISelectionWithStyle, REF_SELECTIONS_ENABLED, SELECTIONS_ENABLED } from '@univerjs/sheets';
@@ -173,6 +174,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _selectionMoving = false;
+    private _selectionTheme: ThemeService;
     get selectionMoving(): boolean {
         return this._selectionMoving;
     }
@@ -193,7 +195,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     ) {
         super();
-        this._resetSelectionStyle();
+        // this._resetSelectionStyle();
+        this._initSelectionThemeFromThemeService();
         this._initMoving();
     }
 
@@ -221,9 +224,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     /**
      * Reset this._selectionStyle to default normal selection style
      */
-    protected _resetSelectionStyle(): void {
-        this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
-    }
+    // protected _resetSelectionStyle(): void {
+    //     this._setSelectionStyle(genNormalSelectionStyle(this._themeService));
+    // }
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport {
@@ -237,7 +240,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     newSelectionControl(scene: Scene, skeleton: SpreadsheetSkeleton, selection: ISelectionWithStyle): SelectionControl {
         const zIndex = this.getSelectionControls().length;
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const control = new SelectionControl(scene, zIndex, this._themeService, {
+        const control = new SelectionControl(scene, zIndex, this._selectionTheme, {
             highlightHeader: this._highlightHeader,
             rowHeaderWidth,
             columnHeaderHeight,
@@ -249,7 +252,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         control.setControlExtension({
             skeleton,
             scene,
-            themeService: this._themeService,
+            themeService: this._selectionTheme,
             injector: this._injector,
             selectionHooks: {
                 selectionMoveEnd: (): void => {
@@ -300,6 +303,16 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
     }
 
+    _initSelectionThemeFromThemeService() {
+        const currTheme = this._themeService.getCurrentTheme();
+        this._selectionTheme = new ThemeService();
+        this._selectionTheme.setTheme(currTheme);
+    }
+
+    setSelectionTheme(prop: IStyleSheet) {
+        this._selectionTheme.setTheme(prop);
+    }
+
     protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void {
         this._skeleton = skeleton;
         this._scene = scene;
@@ -342,7 +355,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     protected _addSelectionControlByModelData(selectionWithStyle: ISelectionWithStyle): SelectionControl {
         const skeleton = this._skeleton;
-        const style = selectionWithStyle.style ?? genNormalSelectionStyle(this._themeService);
+        const style = selectionWithStyle.style ?? genNormalSelectionStyle(this._selectionTheme);
         const scene = this._scene;
 
         selectionWithStyle.style = style;

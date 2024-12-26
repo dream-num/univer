@@ -197,7 +197,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             dispose = editorService.register({
                 autofocus: true,
                 editorUnitId: editorId,
-                isSingle,
                 initialSnapshot: {
                     id: editorId,
                     body: {

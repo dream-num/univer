@@ -308,7 +308,6 @@ export const useSheetSelectionChange = (
                     return;
                 }
                 const { selections } = params;
-
                 if (selections.length) {
                     const last = selections[selections.length - 1];
                     if (last) {

@@ -131,6 +131,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             subUnitId: worksheet.getSheetId(),
             selections,
             type: SelectionMoveType.MOVE_END,
+            extra,
         } as ISetSelectionsOperationParams);
         return rs;
     },
@@ -301,6 +302,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             subUnitId: sheetId,
             type: SelectionMoveType.MOVE_END,
             selections,
+            extra: params.extra,
         });
         const renderManagerService = accessor.get(IRenderManagerService);
         const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);

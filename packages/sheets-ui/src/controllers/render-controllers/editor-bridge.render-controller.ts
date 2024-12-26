@@ -28,6 +28,7 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { KeyCode } from '@univerjs/ui';
 import { filter, merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
@@ -217,8 +218,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         if (config == null) {
             return;
         }
-
         const event = config.event as KeyboardEvent;
+        if (event.which === KeyCode.UNKNOWN) {
+            return;
+        }
 
         this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: true,

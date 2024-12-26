@@ -1121,7 +1121,7 @@ export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithExtraData>)
 }
 
 function getCellTextForClipboard(cell: ICellDataWithExtraData) {
-    if (cell.displayV) {
+    if (cell.displayV !== undefined || cell.displayV !== null) {
         return cell.displayV;
     }
     return extractPureTextFromCell(cell);

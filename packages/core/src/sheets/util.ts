@@ -194,3 +194,7 @@ export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl
 
     TextX.apply(body, textX.serialize());
 }
+
+export function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
+    return value !== null && value !== undefined;
+}

@@ -19,7 +19,7 @@ import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@un
 import type { ICollaborator } from '@univerjs/protocol';
 import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { ObjectMatrix } from '@univerjs/core';
+import { CellModeEnum, ObjectMatrix } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 
@@ -90,7 +90,7 @@ export function getClearContentMutationParamsForRanges(
 
 export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
+    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Intercepted);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {

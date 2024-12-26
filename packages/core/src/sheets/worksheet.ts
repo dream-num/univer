@@ -17,7 +17,7 @@
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type { ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
@@ -29,7 +29,8 @@ import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat } from './util';
+import { CellModeEnum } from './typedef';
+import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, isNotNullOrUndefined } from './util';
 import { SheetViewModel } from './view-model';
 
 export interface IDocumentLayoutObject {
@@ -534,25 +535,55 @@ export class Worksheet {
      *
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
+     *
+     * Control the v attribute in the return cellData.v through dataMode
      */
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
     getMatrixWithMergedCells(
         row: number,
         col: number,
         endRow: number,
         endCol: number,
-        isRaw = false
-    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
+        dataMode: CellModeEnum
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number,
+        dataMode: CellModeEnum = CellModeEnum.Raw
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay> {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
         const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
-        const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
+        const returnCellMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
-            const v = isRaw ? this.getCellRaw(row, col) : this.getCell(row, col);
-            if (v) {
-                returnCellMatrix.setValue(row, col, v);
+            let cellData: Nullable<ICellDataWithSpanAndDisplay>;
+            if (dataMode === CellModeEnum.Raw) {
+                cellData = this.getCellRaw(row, col);
+            } else if (dataMode === CellModeEnum.Intercepted) {
+                cellData = this.getCell(row, col);
+            } else if (dataMode === CellModeEnum.Both) {
+                cellData = this.getCellRaw(row, col);
+                const displayV = this.getCell(row, col)?.v;
+                if (isNotNullOrUndefined(displayV) && cellData) {
+                    cellData.displayV = String(displayV);
+                }
+            }
+
+            if (cellData) {
+                returnCellMatrix.setValue(row, col, cellData);
             }
         });
 

@@ -17,7 +17,7 @@
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, ICellDataWithExtraData, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type { ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
@@ -538,22 +538,38 @@ export class Worksheet {
      *
      * Control the v attribute in the return cellData.v through dataMode
      */
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number,
+        dataMode: CellModeEnum
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay>;
+
     getMatrixWithMergedCells(
         row: number,
         col: number,
         endRow: number,
         endCol: number,
         dataMode: CellModeEnum = CellModeEnum.Raw
-    ): ObjectMatrix<ICellDataWithExtraData> {
+    ): ObjectMatrix<ICellDataWithSpanAndDisplay> {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
         const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
-        const returnCellMatrix = new ObjectMatrix<ICellDataWithExtraData>();
+        const returnCellMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
-            let cellData: Nullable<ICellDataWithExtraData>;
+            let cellData: Nullable<ICellDataWithSpanAndDisplay>;
             if (dataMode === CellModeEnum.Raw) {
                 cellData = this.getCellRaw(row, col);
             } else if (dataMode === CellModeEnum.Intercepted) {

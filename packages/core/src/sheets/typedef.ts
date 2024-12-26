@@ -772,7 +772,7 @@ export function getCellInfoInMergeData(row: number, column: number, mergeData?: 
     };
 }
 
-export type ICellDataWithExtraData = ICellData & { rowSpan?: number; colSpan?: number; displayV?: string };
+export type ICellDataWithSpanAndDisplay = ICellData & { rowSpan?: number; colSpan?: number; displayV?: string };
 
 export enum CellModeEnum {
     Raw = 'raw',

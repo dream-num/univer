@@ -15,7 +15,7 @@
  */
 
 import type {
-    ICellData, ICellDataWithExtraData, IDisposable,
+    ICellData, ICellDataWithSpanAndDisplay, IDisposable,
     IMutationInfo,
     IRange,
     Nullable, Workbook, Worksheet,
@@ -83,7 +83,7 @@ interface ICopyContent {
     copyId: string;
     plain: string;
     html: string;
-    matrixFragment: ObjectMatrix<ICellDataWithExtraData>;
+    matrixFragment: ObjectMatrix<ICellDataWithSpanAndDisplay>;
     discreteRange: IDiscreteRange;
 }
 
@@ -305,7 +305,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const { startColumn, startRow, endColumn, endRow } = range;
 
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Both);
-        const matrixFragment = new ObjectMatrix<ICellDataWithExtraData>();
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
         let rowIndex = startRow;
 
         const discreteRange: IDiscreteRange = { rows: [], cols: [] };
@@ -701,7 +701,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         unitId: string,
         subUnitId: string,
         range: IDiscreteRange,
-        cellMatrix: ObjectMatrix<ICellDataWithExtraData>,
+        cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
         pasteType?: string
     ) {
         const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
@@ -824,7 +824,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _transformPastedData(
         rowCount: number,
         colCount: number,
-        cellMatrix: ObjectMatrix<ICellDataWithExtraData>
+        cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
     ): IPasteTarget | null {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
@@ -955,7 +955,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         };
     }
 
-    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithExtraData>) {
+    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>) {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
         if (!subUnitId || !selection) {
@@ -1100,7 +1100,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 // #region copy generation
 
-export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithExtraData>) {
+export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>) {
     let plain = '';
     const matrixLength = matrix.getLength();
     matrix.forRow((row, cols) => {
@@ -1121,7 +1121,7 @@ export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithExtraData>)
     return plain;
 }
 
-function getCellTextForClipboard(cell: ICellDataWithExtraData) {
+function getCellTextForClipboard(cell: ICellDataWithSpanAndDisplay) {
     if (isNotNullOrUndefined(cell.displayV)) {
         return cell.displayV;
     }
@@ -1163,7 +1163,7 @@ function columnAcrossMergedCell(col: number, startRow: number, endRow: number, w
  * Determine whether CellMatrix consists of multiple cells, it must consist of 2 or more cells. It can be an ordinary cell or merge cell
  * @param cellMatrix
  */
-function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithExtraData>): boolean {
+function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>): boolean {
     let count = 0;
     cellMatrix.forValue((row, col, cell) => {
         if (cell) {

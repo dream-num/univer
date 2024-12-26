@@ -145,7 +145,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
-    const highligh = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
+    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
         if (!editorRef.current) {
             return;
         }
@@ -167,14 +167,19 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     });
 
     useEffect(() => {
-        highligh(formulaText, false);
-    }, [highligh, formulaText, isFocus]);
-
-    useEffect(() => {
         if (isFocus) {
-            highligh(formulaText, false, true);
+            highlight(formulaText, false, true);
         }
     }, [isFocus]);
+
+    useEffect(() => {
+        const sub = docSelectionRenderService?.onChangeByEvent$.subscribe(() => {
+            const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
+            highlight(formulaText, false, true);
+        });
+
+        return () => sub?.unsubscribe();
+    }, [docSelectionRenderService?.onChangeByEvent$, document, highlight]);
 
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -207,7 +212,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             }, formulaEditorContainerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
             editorRef.current = editor;
-            highligh(initValue, false, true);
+            highlight(initValue, false, true);
         }
 
         return () => {
@@ -237,7 +242,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             return;
         }
         needEmit();
-        highligh(`=${refString}`, true, isEnd);
+        highlight(`=${refString}`, true, isEnd);
         if (isEnd) {
             focus();
             if (offset !== -1) {
@@ -274,7 +279,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             }
             resetFormulaSearch();
             focus();
-            highligh(`=${res.text}`);
+            highlight(`=${res.text}`);
         }
     };
 

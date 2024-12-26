@@ -22,7 +22,7 @@ import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverIn
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
 
@@ -54,6 +54,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
+
+    readonly onChangeByEvent$ = merge(
+        this._onInput$,
+        this._onKeydown$,
+        this._onCompositionend$,
+        this._onKeydown$
+    );
 
     private readonly _onPaste$ = new Subject<IEditorInputConfig>();
     readonly onPaste$ = this._onPaste$.asObservable();

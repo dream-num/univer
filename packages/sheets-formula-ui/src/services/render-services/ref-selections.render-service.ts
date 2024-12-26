@@ -263,7 +263,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
      * @param viewport
      * @param scrollTimerType
      */
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     protected _onPointerDown(
         evt: IPointerEvent | IMouseEvent,
         _zIndex = 0,

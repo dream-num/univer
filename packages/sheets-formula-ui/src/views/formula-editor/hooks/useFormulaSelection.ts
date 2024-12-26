@@ -72,15 +72,17 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
     const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const nodesRef = useRef(nodes);
     nodesRef.current = nodes;
+    const isSelectingRef = useRef(isSelecting);
+    isSelectingRef.current = isSelecting;
 
     useEffect(() => {
         const sub = textSelections$.subscribe(() => {
             const char = getCurrentChar(injector);
             const activeRange = docSelectionRenderService?.getActiveTextRange();
             const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
-            const lastNode = nodesRef.current[nodesRef.current.length - 1];
             const dataStream = getCurrentBodyDataStreamAndOffset(injector)?.dataStream;
-            const isFocusingLastNode = typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE && index === (dataStream?.length ?? 2) - 2;
+            const isFocusingLastNode = nodesRef.current.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
+
             if (dataStream?.substring(0, 1) === '=' && ((char && matchRefDrawToken(char)) || isFocusingLastNode)) {
                 if (isFocusingLastNode) {
                     setIsSelecting(FormulaSelectingType.CAN_EDIT);
@@ -94,6 +96,18 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
 
         return () => sub.unsubscribe();
     }, [docSelectionRenderService, injector, textSelections$]);
+
+    useEffect(() => {
+        const sub = renderer?.mainComponent?.onPointerUp$.subscribeEvent(() => {
+            if (isSelectingRef.current === FormulaSelectingType.CAN_EDIT) {
+                setTimeout(() => {
+                    setIsSelecting(FormulaSelectingType.NOT_SELECT);
+                });
+            }
+        });
+
+        return () => sub?.unsubscribe();
+    }, [renderer?.mainComponent?.onPointerUp$]);
 
     return isSelecting;
 }

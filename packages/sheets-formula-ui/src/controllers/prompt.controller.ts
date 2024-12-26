@@ -78,14 +78,11 @@ import {
 } from '@univerjs/engine-render';
 import {
     convertSelectionDataToRange,
-
-    DISABLE_NORMAL_SELECTIONS,
     getPrimaryForRange,
     IRefSelectionsService,
+    REF_SELECTIONS_ENABLED,
     SelectionMoveType,
-    setEndForRange,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
+    setEndForRange, SheetsSelectionsService } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 
 import {
@@ -429,7 +426,7 @@ export class PromptController extends Disposable {
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+        this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
         this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, false);
 
         this._quitSelectingMode();
@@ -852,10 +849,10 @@ export class PromptController extends Disposable {
      */
     private _contextSwitch() {
         const config = this._getCurrentBodyDataStreamAndOffset();
-
+        window.ctxs = this._contextService;
         if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
-            this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
+            this._contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
             this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, true);
 
             const lastSequenceNodes =
@@ -876,9 +873,8 @@ export class PromptController extends Disposable {
 
             return;
         }
-
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+        this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
         this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, false);
 
         this._formulaPromptService.disableLockedSelectionChange();

@@ -214,10 +214,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
-        if (config == null) {
+        const event = config?.event as InputEvent;
+        if (config == null || (!event.data && event.inputType !== 'InsertParagraph')) {
             return;
         }
-        const event = config.event as KeyboardEvent;
 
         this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: true,

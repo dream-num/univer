@@ -128,7 +128,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
     const { isSelecting } = useFormulaSelecting(editorId, sequenceNodes);
-    // const [shouldMoveRefSelection, setShouldMoveRefSelection] = useState(false);
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);

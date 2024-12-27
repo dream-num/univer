@@ -15,10 +15,11 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
+import type { RenderManagerService } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -200,6 +201,70 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         if (!render) return null;
         const scm = render.with(SheetScrollManagerService);
         return scm.getScrollStateByParam({ unitId, sheetId });
+    }
+
+    /**
+     * Disable selection. After disabled, there would be no response for selection.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().disableSelection();
+     * ```
+     */
+    disableSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).disableSelection();
+        }
+    }
+
+    /**
+     * Enable selection. After this you can select range.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().enableSelection();
+     * ```
+     */
+    enableSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
+        }
+    }
+
+    /**
+     * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().transparentSelection();
+     * ```
+     */
+    transparentSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).transparentSelection();
+        }
+    }
+
+    /**
+     * Set selection visible.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().showSelection();
+     * ```
+     */
+    showSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
+        }
     }
 }
 

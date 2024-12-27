@@ -53,6 +53,7 @@ export class DataValidationRefRangeController extends Disposable {
         this.registerFormula(unitId, subUnitId, rule);
     };
 
+    // eslint-disable-next-line max-lines-per-function
     registerFormula(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const ruleId = rule.uid;
         const id = this._getIdWithUnitId(unitId, subUnitId, ruleId);
@@ -79,6 +80,7 @@ export class DataValidationRefRangeController extends Disposable {
                         [type]: formulaString,
                     },
                 },
+                source: 'patched',
             };
             const undoParams: IUpdateDataValidationMutationParams = {
                 unitId,
@@ -92,6 +94,7 @@ export class DataValidationRefRangeController extends Disposable {
                         formula2: oldRule.formula2,
                     },
                 },
+                source: 'patched',
             };
             const redos = [
                 {

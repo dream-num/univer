@@ -185,7 +185,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const focus = useFocus(editor);
 
-    const { checkScrollBar } = useResize(editor);
+    const { checkScrollBar } = useResize(editor, true, true);
     const getFormulaToken = useFormulaToken();
     const sequenceNodes = useMemo(() => getFormulaToken(rangeString), [rangeString]);
 

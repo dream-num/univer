@@ -1064,6 +1064,7 @@ export class FWorksheet extends FBase {
      * To unfreeze all columns, set this value to 0.
      */
     setFrozenColumns(columns: number): void;
+
     /**
      * Set freeze column, then the range from startColumn to endColumn will be fixed.
      * e.g. setFrozenColumns(0, 2) will fix the column range from 0 to 2.

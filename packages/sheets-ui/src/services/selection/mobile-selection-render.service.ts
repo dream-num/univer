@@ -39,7 +39,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -77,14 +77,16 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         @Inject(SheetSkeletonManagerService) sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IContextService private readonly _contextService: IContextService,
+        @IContextService protected readonly _contextService: IContextService,
         @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
+
     ) {
         super(
             injector,
             themeService,
             shortcutService,
-            sheetSkeletonManagerService
+            sheetSkeletonManagerService,
+            _contextService
         );
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
@@ -251,7 +253,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_START)));
         this.disposeWithMe(this.selectionMoving$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVING)));
 
-        this.disposeWithMe(this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS)
+        this.disposeWithMe(this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED)
             .pipe(startWith(false), distinctUntilChanged())
             .subscribe((disabled) => {
                 if (disabled) {
@@ -463,7 +465,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
     // same as PC
     private _normalSelectionDisabled(): boolean {
-        return this._contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
+        return this._contextService.getContextValue(REF_SELECTIONS_ENABLED);
     }
 
     override getSelectionControls() {

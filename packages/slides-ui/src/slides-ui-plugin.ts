@@ -16,7 +16,7 @@
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
 import type { IUniverSlidesUIConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CanvasView } from './controllers/canvas-view';
 import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -46,7 +46,8 @@ export class UniverSlidesUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

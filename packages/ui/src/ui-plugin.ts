@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
@@ -76,7 +76,8 @@ export class UniverUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

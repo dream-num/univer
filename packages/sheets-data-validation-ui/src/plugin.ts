@@ -16,7 +16,7 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
 import {
@@ -53,7 +53,8 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

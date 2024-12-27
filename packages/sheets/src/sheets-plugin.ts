@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, mergeOverrideWithDependencies, Plugin, registerDependencies, Tools, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
@@ -56,7 +56,8 @@ export class UniverSheetsPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

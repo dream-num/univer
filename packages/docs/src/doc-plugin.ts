@@ -21,8 +21,8 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
-    Tools,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
@@ -46,7 +46,8 @@ export class UniverDocsPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

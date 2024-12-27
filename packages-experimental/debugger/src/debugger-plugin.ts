@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
@@ -36,7 +36,8 @@ export class UniverDebuggerPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

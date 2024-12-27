@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverThreadCommentConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
 import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -38,7 +38,8 @@ export class UniverThreadCommentPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

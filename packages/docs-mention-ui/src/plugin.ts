@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
 import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
@@ -36,7 +36,8 @@ export class UniverDocsMentionUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

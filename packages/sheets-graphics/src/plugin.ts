@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetGraphicsConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetGraphicsRenderController } from './controllers/graphics-render.controller';
@@ -35,7 +35,8 @@ export class UniverSheetGraphicsPlugin extends Plugin {
     ) {
         super();
 
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

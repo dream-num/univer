@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsThreadCommentUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { PLUGIN_NAME } from './common/const';
@@ -40,7 +40,8 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

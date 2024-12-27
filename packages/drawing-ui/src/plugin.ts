@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDrawingUIConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { DrawingUpdateController } from './controllers/drawing-update.controller';
@@ -37,7 +37,8 @@ export class UniverDrawingUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

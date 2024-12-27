@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDataValidationConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { DATA_VALIDATION_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
@@ -39,7 +39,8 @@ export class UniverDataValidationPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

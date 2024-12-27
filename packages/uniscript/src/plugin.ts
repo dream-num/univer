@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverUniscriptConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { defaultPluginConfig, UNISCRIPT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
@@ -36,7 +36,8 @@ export class UniverUniscriptPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

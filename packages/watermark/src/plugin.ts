@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
-import { IConfigService, ILocalStorageService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, ILocalStorageService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 import { IWatermarkTypeEnum } from './common/type';
@@ -40,7 +40,8 @@ export class UniverWatermarkPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

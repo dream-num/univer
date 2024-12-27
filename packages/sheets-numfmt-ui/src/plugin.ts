@@ -15,7 +15,7 @@
  */
 
 import type { IUniverSheetsNumfmtUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, Tools, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
@@ -40,7 +40,8 @@ export class UniverSheetsNumfmtUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

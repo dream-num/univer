@@ -15,7 +15,7 @@
  */
 
 import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, Tools, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { defaultPluginConfig, SHEETS_HYPER_LINK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
@@ -41,7 +41,8 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

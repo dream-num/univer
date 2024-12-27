@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsSortConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
@@ -36,7 +36,8 @@ export class UniverSheetsSortPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

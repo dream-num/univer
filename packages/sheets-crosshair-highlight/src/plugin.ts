@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { defaultPluginConfig, SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsCrosshairHighlightController } from './controllers/crosshair.controller';
@@ -36,7 +36,8 @@ export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

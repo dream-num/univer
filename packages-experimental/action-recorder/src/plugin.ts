@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverActionRecorderConfig } from './controllers/config.schema';
-import { IConfigService, Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
 import { ACTION_RECORDER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
 import { ActionRecorderService } from './services/action-recorder.service';
@@ -37,7 +37,8 @@ export class UniverActionRecorderPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

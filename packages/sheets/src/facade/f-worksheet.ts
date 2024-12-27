@@ -15,7 +15,7 @@
  */
 
 import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { IRemoveRowColCommandParams, ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBase, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
@@ -395,16 +395,16 @@ export class FWorksheet extends FBase {
      * @returns This sheet, for chaining.
      */
     async deleteRows(rowPosition: number, howMany: number): Promise<FWorksheet> {
-        const range = {
-            startRow: rowPosition,
-            endRow: rowPosition + howMany - 1,
-            startColumn: 0,
-            endColumn: this._worksheet.getColumnCount() - 1,
+        const params: IRemoveRowColCommandParams = {
+            ranges: [{
+                startRow: rowPosition,
+                endRow: rowPosition + howMany - 1,
+                startColumn: 0,
+                endColumn: this._worksheet.getColumnCount() - 1,
+            }],
         };
 
-        await this._commandService.executeCommand(RemoveRowCommand.id, {
-            range,
-        });
+        await this._commandService.executeCommand(RemoveRowCommand.id, params);
 
         return this;
     }
@@ -763,16 +763,16 @@ export class FWorksheet extends FBase {
      * @returns This sheet, for chaining.
      */
     async deleteColumns(columnPosition: number, howMany: number): Promise<FWorksheet> {
-        const range = {
-            startRow: 0,
-            endRow: this._worksheet.getRowCount() - 1,
-            startColumn: columnPosition,
-            endColumn: columnPosition + howMany - 1,
+        const params: IRemoveRowColCommandParams = {
+            ranges: [{
+                startRow: 0,
+                endRow: this._worksheet.getRowCount() - 1,
+                startColumn: columnPosition,
+                endColumn: columnPosition + howMany - 1,
+            }],
         };
 
-        await this._commandService.executeCommand(RemoveColCommand.id, {
-            range,
-        });
+        await this._commandService.executeCommand(RemoveColCommand.id, params);
 
         return this;
     }

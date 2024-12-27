@@ -72,6 +72,8 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         const { workbook, worksheet, subUnitId, unitId } = target;
 
         const filteredRanges: IRange[] = [];
+        const startColumn = 0;
+        const endColumn = Math.max(worksheet.getMaxColumns() - 1, 0);
 
         ranges.forEach((range) => {
             const filterOutRowsInRemove: number[] = [];
@@ -89,13 +91,13 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
                         filteredRanges.push({
                             startRow: starts[i],
                             endRow: ends[i],
-                            startColumn: range.startColumn,
-                            endColumn: range.endColumn,
+                            startColumn,
+                            endColumn,
                         });
                     }
                 }
             } else {
-                filteredRanges.push(range);
+                filteredRanges.push({ ...range, startColumn, endColumn });
             }
         });
 
@@ -143,7 +145,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
                 ...(intercepted.preRedos ?? []),
                 ...redos,
                 ...intercepted.redos,
-                followSelectionOperation(filteredRanges[0], workbook, worksheet),
+                followSelectionOperation(ranges[0], workbook, worksheet),
             ],
             commandService
         );
@@ -194,21 +196,27 @@ export const RemoveColCommand: ICommand<IRemoveRowColCommandParams> = {
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
+        const rowRanges: IRange[] = [];
+        const startRow = 0;
+        const endRow = Math.max(worksheet.getMaxRows() - 1, 0);
+
         ranges.forEach((range) => {
-            range = {
+            const rowRange = {
                 ...range,
-                startRow: 0,
-                endRow: Math.max(worksheet.getMaxRows() - 1, 0),
+                startRow,
+                endRow,
             };
+
+            rowRanges.push(rowRange);
 
             const removeColParams: IRemoveColMutationParams = {
                 unitId,
                 subUnitId,
-                range,
+                range: rowRange,
             };
             const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
-            const removedCols = worksheet.getCellMatrix().getSlice(0, worksheet.getRowCount() - 1, range.startColumn, range.endColumn);
+            const removedCols = worksheet.getCellMatrix().getSlice(0, worksheet.getRowCount() - 1, rowRange.startColumn, rowRange.endColumn);
             const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
                 unitId,
                 subUnitId,
@@ -224,7 +232,7 @@ export const RemoveColCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const canPerform = await sheetInterceptorService.beforeCommandExecute({
             id: RemoveColCommand.id,
-            params: { ranges } as IRemoveRowColCommandParams,
+            params: { ranges: rowRanges } as IRemoveRowColCommandParams,
         });
 
         if (!canPerform) {
@@ -233,7 +241,7 @@ export const RemoveColCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
-            params: { ranges } as IRemoveRowColCommandParams,
+            params: { ranges: rowRanges } as IRemoveRowColCommandParams,
         });
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(

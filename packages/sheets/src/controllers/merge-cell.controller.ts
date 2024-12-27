@@ -626,55 +626,44 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
+
         const { ranges } = config;
 
-        let oldMergeCells: IRange[] = [];
-        let newMergeCells: IRange[] = [];
-
-        // Step 1: Collect all old merge cells affected by any of the ranges
-        ranges.forEach((range) => {
-            const currentOldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+        // Collect all affected merged cells
+        const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+            ranges.some((range) => {
                 if (Rectangle.intersects(range, cell)) {
                     mergeCellsHasLapping.push(cell);
+                    return true;
                 }
-                return mergeCellsHasLapping;
-            }, [] as IRange[]);
-            oldMergeCells = oldMergeCells.concat(currentOldMergeCells);
-        });
 
-        // If no merge cells are affected, return early
+                return false;
+            });
+            return mergeCellsHasLapping;
+        }, [] as IRange[]);
+
         if (oldMergeCells.length === 0) {
             return this._handleNull();
         }
 
-        // Step 2: Calculate new merge cells considering all ranges together
-        oldMergeCells.forEach((cell) => {
-            ranges.forEach((range) => {
-                const { startColumn, endColumn } = range;
+        // Update the merged cells for each range
+        const newMergeCells = Tools.deepClone(oldMergeCells).reduce((mergeCellsHasLapping, cell) => {
+            const deleteRanges: IRangeStartEnd[] = ranges.map((range) => [range.startColumn, range.endColumn]);
+            const originalRange: IRangeStartEnd = [cell.startColumn, cell.endColumn];
+            const newRange = processRanges(originalRange, deleteRanges);
 
-                if (Rectangle.intersects(range, cell)) {
-                    if (startColumn <= cell.startColumn && endColumn >= cell.endColumn) {
-                        // This range fully covers the merged cell, remove it
+            if (!newRange) return mergeCellsHasLapping;
 
-                    } else if (startColumn >= cell.startColumn && endColumn <= cell.endColumn) {
-                        // This range is within the merged cell, shrink it
-                        cell.endColumn -= endColumn - startColumn + 1;
-                    } else if (startColumn < cell.startColumn) {
-                        // Adjust start column and shrink the merge
-                        cell.startColumn = startColumn;
-                        cell.endColumn -= endColumn - startColumn + 1;
-                    } else if (endColumn > cell.endColumn) {
-                        // Adjust end column
-                        cell.endColumn = startColumn - 1;
-                    }
-                }
-            });
-        });
+            cell.startColumn = newRange[0];
+            cell.endColumn = newRange[1];
 
-        // Step 3: Filter out invalid merge cells after adjustment
-        newMergeCells = oldMergeCells.filter((cell) => this._checkIsMergeCell(cell));
+            if (this._checkIsMergeCell(cell)) {
+                mergeCellsHasLapping.push(cell);
+            }
 
-        // Prepare mutation parameters for undo/redo
+            return mergeCellsHasLapping;
+        }, [] as IRange[]);
+
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
@@ -694,7 +683,6 @@ export class MergeCellController extends Disposable {
             addMergeMutationParams
         );
 
-        // Step 4: Return mutations for undo/redo operations
         const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
@@ -713,53 +701,41 @@ export class MergeCellController extends Disposable {
             return this._handleNull();
         }
 
-        let oldMergeCells: IRange[] = [];
-        let newMergeCells: IRange[] = [];
-
-        // Step 1: Collect all old merge cells affected by any of the ranges
-        ranges.forEach((range) => {
-            const currentOldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+        // Collect all affected merged cells
+        const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
+            ranges.some((range) => {
                 if (Rectangle.intersects(range, cell)) {
                     mergeCellsHasLapping.push(cell);
+                    return true;
                 }
-                return mergeCellsHasLapping;
-            }, [] as IRange[]);
-            oldMergeCells = oldMergeCells.concat(currentOldMergeCells);
-        });
 
-        // If no merge cells are affected, return early
+                return false;
+            });
+            return mergeCellsHasLapping;
+        }, [] as IRange[]);
+
         if (oldMergeCells.length === 0) {
             return this._handleNull();
         }
 
-        // Step 2: Calculate new merge cells considering all ranges together
-        oldMergeCells.forEach((cell) => {
-            ranges.forEach((range) => {
-                const { startRow, endRow } = range;
+        // Update the merged cells for each range
+        const newMergeCells = Tools.deepClone(oldMergeCells).reduce((mergeCellsHasLapping, cell) => {
+            const deleteRanges: IRangeStartEnd[] = ranges.map((range) => [range.startRow, range.endRow]);
+            const originalRange: IRangeStartEnd = [cell.startRow, cell.endRow];
+            const newRange = processRanges(originalRange, deleteRanges);
 
-                if (Rectangle.intersects(range, cell)) {
-                    if (startRow <= cell.startRow && endRow >= cell.endRow) {
-                        // This range fully covers the merged cell, remove it
+            if (!newRange) return mergeCellsHasLapping;
 
-                    } else if (startRow >= cell.startRow && endRow <= cell.endRow) {
-                        // This range is within the merged cell, shrink it
-                        cell.endRow -= endRow - startRow + 1;
-                    } else if (startRow < cell.startRow) {
-                        // Adjust start row and shrink the merge
-                        cell.startRow = startRow;
-                        cell.endRow -= endRow - startRow + 1;
-                    } else if (endRow > cell.endRow) {
-                        // Adjust end row
-                        cell.endRow = startRow - 1;
-                    }
-                }
-            });
-        });
+            cell.startRow = newRange[0];
+            cell.endRow = newRange[1];
 
-        // Step 3: Filter out invalid merge cells after adjustment
-        newMergeCells = oldMergeCells.filter((cell) => this._checkIsMergeCell(cell));
+            if (this._checkIsMergeCell(cell)) {
+                mergeCellsHasLapping.push(cell);
+            }
 
-        // Prepare mutation parameters for undo/redo
+            return mergeCellsHasLapping;
+        }, [] as IRange[]);
+
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
@@ -779,7 +755,6 @@ export class MergeCellController extends Disposable {
             addMergeMutationParams
         );
 
-        // Step 4: Return mutations for undo/redo operations
         const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
         const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
         const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
@@ -1273,3 +1248,83 @@ function getWorksheet(workbook: Workbook, subUnitId?: string) {
     }
     return workbook.getActiveSheet();
 }
+
+type IRangeStartEnd = [number, number];
+type IDeleteRanges = IRangeStartEnd[];
+
+// Main function: Process range deletions similar to Excel's multi-column delete functionality
+// Handles merged cells represented as ranges
+function processRanges(originalRange: IRangeStartEnd, deleteRanges: IDeleteRanges): IRangeStartEnd | null {
+    if (!originalRange || deleteRanges.length === 0) return originalRange;
+
+    // Initialize result array to store all sub-ranges
+    let ranges: IRangeStartEnd[] = [originalRange];
+    // Track the minimum start position across all delete ranges
+    let minStart: number = originalRange[0];
+
+    // Process each delete range
+    for (const deleteRange of deleteRanges) {
+        // Update minimum start position if the delete range starts earlier
+        minStart = Math.min(minStart, deleteRange[0]);
+
+        // Split existing ranges based on current delete range
+        ranges = ranges.reduce<IRangeStartEnd[]>((acc, range) => {
+            // Get split results for current range against delete range
+            const splitResults = splitRange(range, deleteRange);
+            return acc.concat(splitResults);
+        }, []);
+
+        // If no ranges remain after deletion, return null
+        if (ranges.length === 0) return null;
+    }
+
+    // Merge remaining ranges considering the minimum start position
+    return mergeRanges(ranges, minStart);
+}
+
+// Helper function: Split a range based on delete range
+// Returns array of remaining sub-ranges after deletion
+function splitRange(range: IRangeStartEnd, deleteRange: IRangeStartEnd): IRangeStartEnd[] {
+    const [start, end] = range;
+    const [deleteStart, deleteEnd] = deleteRange;
+
+    // No intersection case - return original range unchanged
+    if (end < deleteStart || start > deleteEnd) {
+        return [range];
+    }
+
+    const results: IRangeStartEnd[] = [];
+
+    // Keep the portion before delete range if it exists
+    if (start < deleteStart) {
+        results.push([start, deleteStart - 1]);
+    }
+
+    // Keep the portion after delete range if it exists
+    if (end > deleteEnd) {
+        results.push([deleteEnd + 1, end]);
+    }
+
+    return results;
+}
+
+// Helper function: Merge remaining ranges into final result
+// Uses minStart to determine the starting position of the new range
+function mergeRanges(ranges: IRangeStartEnd[], minStart: number): IRangeStartEnd | null {
+    if (ranges.length === 0) return null;
+    // Special case for single range
+    if (ranges.length === 1) {
+        const totalLength = ranges[0][1] - ranges[0][0] + 1;
+        return [minStart, minStart + totalLength - 1];
+    }
+
+    // Sort ranges by start position
+    ranges.sort((a, b) => a[0] - b[0]);
+
+    // Calculate total length of all remaining sub-ranges
+    const totalLength = ranges.reduce((sum, [start, end]) => sum + (end - start + 1), 0);
+
+    // Create new range starting from minStart with calculated total length
+    return [minStart, minStart + totalLength - 1];
+}
+

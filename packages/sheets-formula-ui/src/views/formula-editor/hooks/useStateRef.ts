@@ -17,7 +17,7 @@
 import { useRef } from 'react';
 
 export const useStateRef = <T = any>(value: T) => {
-    const cache = useRef<T>();
+    const cache = useRef<T>(value);
     cache.current = value;
-    return cache as { current: T };
+    return cache;
 };

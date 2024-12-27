@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { ISidebarService, useEvent } from '@univerjs/ui';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject, throttleTime } from 'rxjs';
 import useResizeScrollObserver from './useResizeScrollObserver';
 
-export function useEditorPostion(editorId: string) {
+export function useEditorPostion(editorId: string, ready: boolean, deps?: any[]) {
     const editorService = useDependency(IEditorService);
     const position$ = useMemo(() => new BehaviorSubject({ left: -999, top: -999, right: -999, bottom: -999 }), []);
     const sidebarService = useDependency(ISidebarService);
@@ -42,23 +42,12 @@ export function useEditorPostion(editorId: string) {
     });
 
     useEffect(() => {
-        const disposableCollection = new DisposableCollection();
-        const handleEditor = () => {
-            updatePosition();
-        };
-
-        handleEditor();
-        const sub = univerInstanceService.unitAdded$.subscribe((unit) => {
-            if (unit.getUnitId() === editorId) {
-                handleEditor();
-            }
-        });
-
-        return () => {
-            sub.unsubscribe();
-            disposableCollection.dispose();
-        };
-    }, [editorId, editorService, univerInstanceService.unitAdded$, updatePosition]);
+        if (!ready) {
+            return;
+        }
+        updatePosition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editorId, editorService, univerInstanceService.unitAdded$, updatePosition, ready, ...(deps ?? [])]);
 
     useResizeScrollObserver(updatePosition);
 

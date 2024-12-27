@@ -19,7 +19,7 @@ import { LocaleService, useDependency } from '@univerjs/core';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
 import { RectPopup } from '@univerjs/ui';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPostion } from '../hooks/useEditorPostion';
 import styles from './index.module.less';
@@ -40,15 +40,11 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const localeService = useDependency(LocaleService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
-    const [position$, refreshPosition] = useEditorPostion(editorId);
+    const [position$] = useEditorPostion(editorId, visible, [functionInfo, paramIndex]);
 
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }
-
-    useEffect(() => {
-        refreshPosition();
-    }, [functionInfo, paramIndex, editorId]);
 
     return visible && functionInfo
         ? (

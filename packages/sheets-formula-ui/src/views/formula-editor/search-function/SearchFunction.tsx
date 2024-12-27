@@ -44,7 +44,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const ulRef = useRef<HTMLUListElement>();
     const [active, activeSet] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
-    const [position$, updatePosition] = useEditorPostion(editorId);
+    const [position$] = useEditorPostion(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
     const editor = editorService.getEditor(editorId);
 
@@ -130,12 +130,6 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
             d.dispose();
         };
     }, [searchList]);
-
-    useEffect(() => {
-        if (visible) {
-            updatePosition();
-        }
-    }, [searchText, searchList, visible]);
 
     function scrollToVisible(liIndex: number) {
         // Get the <li> element

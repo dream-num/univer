@@ -91,10 +91,10 @@ export const useSheetSelectionChange = (
                 const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
 
                 if (getIsNeedAddSelection()) {
-                    if (nodeIndex === -1 && sequenceNodes.length) {
-                        return;
-                    }
                     if (offset !== 0) {
+                        if (nodeIndex === -1 && sequenceNodes.length) {
+                            return;
+                        }
                         const range = selections[selections.length - 1];
                         const lastNodes = sequenceNodes.splice(nodeIndex + 1);
                         const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;

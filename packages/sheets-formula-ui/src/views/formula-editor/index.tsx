@@ -28,6 +28,7 @@ import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { debounceTime } from 'rxjs';
 import { useEmitChange } from '../range-selector/hooks/useEmitChange';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
@@ -138,7 +139,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
     const shouldMoveRefSelection = Boolean(isSelecting);
-
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
         onChange(`=${text}`);
     }, editor);
@@ -173,7 +173,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [isFocus]);
 
     useEffect(() => {
-        const sub = docSelectionRenderService?.onChangeByEvent$.subscribe(() => {
+        const sub = docSelectionRenderService?.onChangeByEvent$.pipe(debounceTime(30)).subscribe(() => {
             const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
             highlight(formulaText, false, true);
         });

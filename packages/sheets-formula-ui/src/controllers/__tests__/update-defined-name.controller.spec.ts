@@ -619,12 +619,12 @@ describe('Test update defined name', () => {
 
         it('Remove row, update reference', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startRow: 1,
                     endRow: 1,
                     startColumn: 0,
                     endColumn: 19,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
@@ -639,12 +639,12 @@ describe('Test update defined name', () => {
 
         it('Remove column, update reference', async () => {
             const params: IRemoveRowColCommandParams = {
-                range: {
+                ranges: [{
                     startColumn: 1,
                     endColumn: 1,
                     startRow: 0,
                     endRow: 2,
-                },
+                }],
             };
 
             expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();

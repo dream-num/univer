@@ -321,23 +321,60 @@ describe('Test insert and remove rows cols commands', () => {
         it('reduce merge cell length', async () => {
             await commandService.executeCommand(RemoveRowCommand.id, {
                 ranges: [
-                    { startRow: 12, endRow: 12, startColumn: 1, endColumn: 1 },
-                    { startRow: 13, endRow: 13, startColumn: 1, endColumn: 1 },
+                    { startRow: 11, endRow: 12, startColumn: 1, endColumn: 1 },
+                    { startRow: 12, endRow: 13, startColumn: 1, endColumn: 1 },
                 ],
             } as IRemoveRowColCommandParams);
-            expect(getMergedInfo(12, 2)).toEqual({ startRow: 10, endRow: 13, startColumn: 2, endColumn: 2 });
+            expect(getMergedInfo(10, 2)).toEqual({ startRow: 10, endRow: 12, startColumn: 2, endColumn: 2 });
+        });
+        it('remove merge cell', async () => {
+            await commandService.executeCommand(RemoveRowCommand.id, {
+                ranges: [
+                    { startRow: 10, endRow: 12, startColumn: 1, endColumn: 1 },
+                    { startRow: 13, endRow: 15, startColumn: 1, endColumn: 1 },
+                ],
+            } as IRemoveRowColCommandParams);
+            expect(getMergedInfo(10, 2)).toBeNull();
+        });
+        it('move merge cell position', async () => {
+            await commandService.executeCommand(RemoveRowCommand.id, {
+                ranges: [
+                    { startRow: 9, endRow: 11, startColumn: 1, endColumn: 1 },
+                    { startRow: 13, endRow: 14, startColumn: 1, endColumn: 1 },
+                ],
+            } as IRemoveRowColCommandParams);
+            expect(getMergedInfo(9, 2)).toEqual({ startRow: 9, endRow: 10, startColumn: 2, endColumn: 2 });
         });
     });
     describe('Remove col where contain mergeCell', () => {
         it('reduce merge cell length', async () => {
             await commandService.executeCommand(RemoveColCommand.id, {
                 ranges: [
-                    { startRow: 1, endRow: 1, startColumn: 12, endColumn: 12 },
-                    { startRow: 1, endRow: 1, startColumn: 13, endColumn: 13 },
-
+                    { startRow: 1, endRow: 1, startColumn: 11, endColumn: 12 },
+                    { startRow: 1, endRow: 1, startColumn: 12, endColumn: 13 },
                 ],
             } as IRemoveRowColCommandParams);
-            expect(getMergedInfo(10, 12)).toEqual({ startRow: 10, endRow: 10, startColumn: 10, endColumn: 13 });
+            expect(getMergedInfo(10, 12)).toEqual({ startRow: 10, endRow: 10, startColumn: 10, endColumn: 12 });
+        });
+
+        it('remove merge cell', async () => {
+            await commandService.executeCommand(RemoveColCommand.id, {
+                ranges: [
+                    { startRow: 1, endRow: 1, startColumn: 10, endColumn: 12 },
+                    { startRow: 1, endRow: 1, startColumn: 13, endColumn: 15 },
+                ],
+            } as IRemoveRowColCommandParams);
+            expect(getMergedInfo(10, 12)).toBeNull();
+        });
+
+        it('move merge cell position', async () => {
+            await commandService.executeCommand(RemoveColCommand.id, {
+                ranges: [
+                    { startRow: 1, endRow: 1, startColumn: 9, endColumn: 11 },
+                    { startRow: 1, endRow: 1, startColumn: 13, endColumn: 14 },
+                ],
+            } as IRemoveRowColCommandParams);
+            expect(getMergedInfo(10, 9)).toEqual({ startRow: 10, endRow: 10, startColumn: 9, endColumn: 10 });
         });
     });
 });

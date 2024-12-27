@@ -15,7 +15,7 @@
  */
 
 import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { IRemoveColByRangeCommandParams, IRemoveRowByRangeCommandParams, ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetTextWrapCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, WrapStrategy } from '@univerjs/core';
@@ -612,13 +612,13 @@ export class FWorksheet extends FBaseInitialable {
             endColumn: this._worksheet.getColumnCount() - 1,
         };
 
-        const params: =
-
-        this._commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, {
-            range,
+        const params: IRemoveRowByRangeCommandParams = {
+            ranges: [range],
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-        });
+        };
+
+        this._commandService.syncExecuteCommand(RemoveRowByRangeCommand.id, params);
 
         return this;
     }
@@ -1178,11 +1178,13 @@ export class FWorksheet extends FBaseInitialable {
             endColumn: columnPosition + howMany - 1,
         };
 
-        this._commandService.syncExecuteCommand(RemoveColByRangeCommand.id, {
-            range,
+        const params: IRemoveColByRangeCommandParams = {
+            ranges: [range],
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-        });
+        };
+
+        this._commandService.syncExecuteCommand(RemoveColByRangeCommand.id, params);
 
         return this;
     }

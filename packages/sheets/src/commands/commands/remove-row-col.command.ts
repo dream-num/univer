@@ -222,6 +222,7 @@ export const RemoveColByRangeCommand: ICommand<IRemoveColByRangeCommandParams> =
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
+
         ranges.forEach((range) => {
             const removeColParams: IRemoveColMutationParams = {
                 unitId,

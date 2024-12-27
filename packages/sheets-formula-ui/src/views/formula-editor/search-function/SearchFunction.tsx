@@ -14,39 +14,50 @@
  * limitations under the License.
  */
 
-import type { ISearchItem } from '@univerjs/sheets-formula';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ISequenceNode } from '@univerjs/engine-formula';
 import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode, RectPopup } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorPostion } from '../hooks/useEditorPostion';
+import { useFormulaSearch } from '../hooks/useFormulaSearch';
 import { useStateRef } from '../hooks/useStateRef';
 import styles from './index.module.less';
 
 interface ISearchFunctionProps {
-    searchList: ISearchItem[];
-    searchText: string;
-    onSelect: (functionName: string) => void;
+    isFocus: boolean;
+    sequenceNodes: (string | ISequenceNode)[];
+    onSelect: (data: {
+        text: string;
+        offset: number;
+    }) => void;
     onChange?: (functionName: string) => void;
-    editorId: string;
+    editor: Editor;
     onClose?: () => void;
 };
 const noop = () => { };
 export const SearchFunction = forwardRef<HTMLElement, ISearchFunctionProps>(SearchFunctionFactory);
 function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
-    const { searchText, searchList, onSelect, editorId, onClose = noop } = props;
-    const editorService = useDependency(IEditorService);
+    const { isFocus, sequenceNodes, onSelect, editor, onClose = noop } = props;
+    const editorId = editor.getEditorId();
     const shortcutService = useDependency(IShortcutService);
     const commandService = useDependency(ICommandService);
-
+    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const visible = useMemo(() => !!searchList.length, [searchList]);
     const ulRef = useRef<HTMLUListElement>();
     const [active, activeSet] = useState(0);
     const isEnableMouseEnterOrOut = useRef(false);
     const [position$] = useEditorPostion(editorId, visible, [searchText, searchList]);
     const stateRef = useStateRef({ searchList, active });
-    const editor = editorService.getEditor(editorId);
+
+    const handleFunctionSelect = (v: string) => {
+        const res = handlerFormulaReplace(v);
+        if (res) {
+            resetFormulaSearch();
+            onSelect(res);
+        }
+    };
 
     function handleLiMouseEnter(index: number) {
         if (!isEnableMouseEnterOrOut.current) {
@@ -93,10 +104,11 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                 case KeyCode.TAB:
                 case KeyCode.ENTER: {
                     const item = searchList[active];
-                    onSelect(item.name);
+                    handleFunctionSelect(item.name);
                     break;
                 }
                 case KeyCode.ESC: {
+                    resetFormulaSearch();
                     onClose();
                     break;
                 }
@@ -193,7 +205,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
             >
                 {searchList.map((item, index) => (
                     <li
-                        key={index}
+                        key={item.name}
                         className={active === index
                             ? `
                               ${styles.formulaSearchFunctionItem}
@@ -204,7 +216,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                         onMouseLeave={handleLiMouseLeave}
                         onMouseMove={debounceResetMouseState}
                         onClick={() => {
-                            onSelect(item.name);
+                            handleFunctionSelect(item.name);
                             if (editor) {
                                 editor.focus();
                             }

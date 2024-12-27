@@ -14,37 +14,97 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import type { Editor } from '@univerjs/docs-ui';
+import type { IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
-import { RectPopup } from '@univerjs/ui';
 
+import { RectPopup } from '@univerjs/ui';
 import React, { useMemo, useState } from 'react';
 import { generateParam } from '../../../services/utils';
 import { useEditorPostion } from '../hooks/useEditorPostion';
+import { useFormulaDescribe } from '../hooks/useFormulaDescribe';
 import styles from './index.module.less';
 
+interface IParamsProps {
+    className?: string;
+    title?: string;
+    value?: string;
+}
+
+const Params = ({ className, title, value }: IParamsProps) => (
+    <div className={styles.formulaHelpFunctionContentParams}>
+        <div className={`
+          ${styles.formulaHelpFunctionContentParamsTitle}
+          ${className}
+        `}
+        >
+            {title}
+        </div>
+        <div className={styles.formulaHelpFunctionContentParamsDetail}>{value}</div>
+    </div>
+);
+
+interface IHelpProps {
+    prefix?: string;
+    value?: IFunctionParam[];
+    active: number;
+    onClick: (paramIndex: number) => void;
+}
+
+const Help = (props: IHelpProps) => {
+    const { prefix, value, active, onClick } = props;
+    return (
+        <div className={styles.formulaHelpParam}>
+            <span className={styles.formulaHelpParamPrefix}>
+                {prefix}
+                (
+            </span>
+            {value &&
+                value.map((item: IFunctionParam, i: number) => (
+                    <span key={item.name} className={styles.formulaHelpParamItem}>
+                        <span
+                            className={active === i ? styles.formulaHelpFunctionActive : styles.formulaHelpParamActive}
+                            onClick={() => onClick(i)}
+                        >
+                            {generateParam(item)}
+                        </span>
+                        {i === value.length - 1 ? '' : ','}
+                    </span>
+                ))}
+            )
+        </div>
+    );
+};
+
 interface IHelpFunctionProps {
-    functionInfo?: IFunctionInfo;
-    paramIndex: number;
-    editorId: string;
     onParamsSwitch?: (index: number) => void;
     onClose?: () => void;
+    editor: Editor;
+    isFocus: boolean;
+    formulaText: string;
 };
+
 const noop = () => { };
 export function HelpFunction(props: IHelpFunctionProps) {
-    const { functionInfo, paramIndex, editorId, onParamsSwitch = noop, onClose = noop } = props;
-
+    const { onParamsSwitch = noop, onClose: propColose = noop, isFocus, editor, formulaText } = props;
+    const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
     const visible = useMemo(() => !!functionInfo && paramIndex >= 0, [functionInfo, paramIndex]);
     const [contentVisible, setContentVisible] = useState(true);
     const localeService = useDependency(LocaleService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
+    const editorId = editor.getEditorId();
     const [position$] = useEditorPostion(editorId, visible, [functionInfo, paramIndex]);
 
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }
+
+    const onClose = () => {
+        reset();
+        propColose();
+    };
 
     return visible && functionInfo
         ? (
@@ -108,55 +168,3 @@ export function HelpFunction(props: IHelpFunctionProps) {
         )
         : null;
 }
-
-interface IParamsProps {
-    className?: string;
-    title?: string;
-    value?: string;
-}
-
-const Params = (props: IParamsProps) => (
-    <div className={styles.formulaHelpFunctionContentParams}>
-        <div className={`
-          ${styles.formulaHelpFunctionContentParamsTitle}
-          ${props.className}
-        `}
-        >
-            {props.title}
-        </div>
-        <div className={styles.formulaHelpFunctionContentParamsDetail}>{props.value}</div>
-    </div>
-);
-
-interface IHelpProps {
-    prefix?: string;
-    value?: IFunctionParam[];
-    active: number;
-    onClick: (paramIndex: number) => void;
-}
-
-const Help = (props: IHelpProps) => {
-    const { prefix, value, active, onClick } = props;
-    return (
-        <div className={styles.formulaHelpParam}>
-            <span className={styles.formulaHelpParamPrefix}>
-                {prefix}
-                (
-            </span>
-            {value &&
-                value.map((item: IFunctionParam, i: number) => (
-                    // TODO@Dushusir: more params needs to be active
-                    <span key={i} className={styles.formulaHelpParamItem}>
-                        <span
-                            className={active === i ? styles.formulaHelpFunctionActive : styles.formulaHelpParamActive}
-                            onClick={() => onClick(i)}
-                        >
-                            {generateParam(item)}
-                        </span>
-                        {i === value.length - 1 ? '' : ','}
-                    </span>
-                ))}
-            )
-        </div>
-    );
-};

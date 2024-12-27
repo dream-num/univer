@@ -39,8 +39,6 @@ import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
 import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
 import { HelpFunction } from './help-function/HelpFunction';
-import { useFormulaDescribe } from './hooks/useFormulaDescribe';
-import { useFormulaSearch } from './hooks/useFormulaSearch';
 import { useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
@@ -260,11 +258,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
     useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
-    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
-    const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
-
-    const handleFunctionSelect = (v: string) => {
-        const res = handlerFormulaReplace(v);
+    const handleFunctionSelect = (res: { text: string; offset: number }) => {
         if (res) {
             const selections = editor?.getSelectionRanges();
             if (selections && selections.length === 1) {
@@ -276,7 +270,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                     }, 30);
                 }
             }
-            resetFormulaSearch();
             focus();
             highlight(`=${res.text}`);
         }
@@ -304,25 +297,29 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 </div>
             </div>
             {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}
-            <HelpFunction
-                editorId={editorId}
-                paramIndex={paramIndex}
-                functionInfo={functionInfo}
-                onClose={() => {
-                    reset();
-                    focus();
-                }}
-            >
-            </HelpFunction>
-            <SearchFunction
-                searchText={searchText}
-                editorId={editorId}
-                searchList={searchList}
-                onSelect={handleFunctionSelect}
-                onClose={() => resetFormulaSearch()}
-                ref={searchFunctionRef}
-            >
-            </SearchFunction>
+            {editor
+                ? (
+                    <HelpFunction
+                        editor={editor}
+                        isFocus={isFocus}
+                        formulaText={formulaText}
+                        onClose={() => {
+                            focus();
+                        }}
+                    />
+                )
+                : null}
+            {editor
+                ? (
+                    <SearchFunction
+                        isFocus={isFocus}
+                        sequenceNodes={sequenceNodes}
+                        onSelect={handleFunctionSelect}
+                        ref={searchFunctionRef}
+                        editor={editor}
+                    />
+                )
+                : null}
         </div>
     )
     ;

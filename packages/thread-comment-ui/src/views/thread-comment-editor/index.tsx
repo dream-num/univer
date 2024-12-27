@@ -19,7 +19,6 @@ import type { MentionProps } from '@univerjs/design';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ICommandService, IMentionIOService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Mention, Mentions } from '@univerjs/design';
-import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
@@ -61,7 +60,6 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const [localComment, setLocalComment] = useState({ ...comment });
     const [editing, setEditing] = useState(false);
     const inputRef = useRef(null);
-    const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const docSelectionRenderService = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
@@ -104,10 +102,6 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     setLocalComment?.({ ...comment, text: transformTextNodes2Document(parseMentions(e.target.value)) });
                 }}
                 onFocus={() => {
-                    const activeRange = docSelectionManagerService.getActiveTextRange();
-                    if (activeRange && activeRange.collapsed) {
-                        docSelectionRenderService?.removeAllRanges();
-                    }
                     docSelectionRenderService?.blur();
                     setEditing(true);
                 }}

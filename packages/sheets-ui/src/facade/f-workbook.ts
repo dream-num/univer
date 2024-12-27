@@ -90,6 +90,52 @@ export interface IFWorkbookSheetsUIMixin {
      * @returns A promise that resolves to a boolean value
      */
     endEditing(save?: boolean): Promise<boolean>;
+
+    /**
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
+    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState>;
+
+    /**
+     * Disable selection. After disabled, there would be no response for selection.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().disableSelection();
+     * ```
+     */
+    disableSelection(): void;
+
+    /**
+     * Enable selection. After this you can select range.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().enableSelection();
+     * ```
+     */
+    enableSelection(): void;
+
+    /**
+     * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().transparentSelection();
+     * ```
+     */
+    transparentSelection(): void;
+
+    /**
+     * Set selection visible.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().showSelection();
+     * ```
+     */
+    showSelection(): void;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -186,15 +232,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return true;
     }
 
-    /**
-     * Get scroll state of specified sheet.
-     * @returns {IScrollState} scroll state
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
-     * ```
-     */
-    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
+    override getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
@@ -203,14 +241,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return scm.getScrollStateByParam({ unitId, sheetId });
     }
 
-    /**
-     * Disable selection. After disabled, there would be no response for selection.
-     * @example
-     * ```
-     * univerAPI.getActiveWorkbook().disableSelection();
-     * ```
-     */
-    disableSelection(): void {
+    override disableSelection(): void {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
@@ -219,14 +250,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         }
     }
 
-    /**
-     * Enable selection. After this you can select range.
-     * @example
-     * ```
-     * univerAPI.getActiveWorkbook().enableSelection();
-     * ```
-     */
-    enableSelection(): void {
+    override enableSelection(): void {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
@@ -235,14 +259,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         }
     }
 
-    /**
-     * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
-     * @example
-     * ```
-     * univerAPI.getActiveWorkbook().transparentSelection();
-     * ```
-     */
-    transparentSelection(): void {
+    override transparentSelection(): void {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
@@ -251,14 +268,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         }
     }
 
-    /**
-     * Set selection visible.
-     * @example
-     * ```
-     * univerAPI.getActiveWorkbook().showSelection();
-     * ```
-     */
-    showSelection(): void {
+    override showSelection(): void {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);

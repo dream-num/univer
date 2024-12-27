@@ -53,6 +53,40 @@ export interface IFWorksheetSkeletonMixin {
      * ```
      */
     getZoom(): number;
+
+    /**
+     * Return visible range, sum view range of 4 viewports.
+     * @returns IRange
+     */
+    getVisibleRange(): IRange;
+
+    /**
+     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     * @param row
+     * @param column
+     */
+    scrollToCell(row: number, column: number): void;
+
+    /**
+     * Get scroll state of current sheet.
+     * @returns {IScrollState} curr scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
+     * ```
+     */
+    getScrollState(): Nullable<IScrollState>;
+
+    /**
+     * Invoked when scrolling the sheet.
+     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
+     * ```
+     */
+    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
+
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -89,11 +123,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return this._worksheet.getZoomRatio();
     }
 
-    /**
-     * Return visible range, sum view range of 4 viewports.
-     * @returns IRange
-     */
-    getVisibleRange(): IRange {
+    override getVisibleRange(): IRange {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
@@ -122,12 +152,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return range;
     }
 
-    /**
-     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
-     */
-    scrollToCell(row: number, column: number): void {
+    override scrollToCell(row: number, column: number): void {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
@@ -137,15 +162,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         }
     }
 
-    /**
-     * Get scroll state of current sheet.
-     * @returns {IScrollState} curr scroll state
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
-     * ```
-     */
-    getScrollState(): Nullable<IScrollState> {
+    override getScrollState(): Nullable<IScrollState> {
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const renderManagerService = this._injector.get(IRenderManagerService);
@@ -155,15 +172,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return scm.getScrollStateByParam({ unitId, sheetId });
     }
 
-    /**
-     * Invoked when scrolling the sheet.
-     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
-     * ```
-     */
-    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
+    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
@@ -173,12 +182,12 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             });
             return toDisposable(sub);
         }
-        return toDisposable(() => {});
+        return toDisposable(() => { });
     }
 }
 
 FWorksheet.extend(FWorksheetSkeletonMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorksheet extends IFWorksheetSkeletonMixin {}
+    interface FWorksheet extends IFWorksheetSkeletonMixin { }
 }

@@ -19,7 +19,7 @@ import type {
     IUniverSheetsFormulaBaseConfig,
     IUniverSheetsFormulaRemoteConfig,
 } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, isNodeEnv, merge, Plugin, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -58,7 +58,11 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = merge(
+            {},
+            defaultPluginRemoteConfig,
+            this._config
+        );
         this._configService.setConfig(PLUGIN_CONFIG_KEY_REMOTE, rest);
     }
 
@@ -84,7 +88,11 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = merge(
+            {},
+            defaultPluginBaseConfig,
+            this._config
+        );
         this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest);
     }
 

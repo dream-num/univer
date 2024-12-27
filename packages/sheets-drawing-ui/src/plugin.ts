@@ -21,6 +21,7 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
     registerDependencies,
     touchDependencies,
@@ -61,7 +62,11 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

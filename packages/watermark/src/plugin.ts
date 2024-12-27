@@ -17,10 +17,11 @@
 import type { Dependency } from '@univerjs/core';
 import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
-import { IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, ILocalStorageService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 import { IWatermarkTypeEnum } from './common/type';
+import { defaultPluginConfig, WATERMARK_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { WatermarkRenderController } from './controllers/watermark.render.controller';
 import { WatermarkService } from './services/watermark.service';
 
@@ -30,7 +31,7 @@ export class UniverWatermarkPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverWatermarkConfig> = {},
+        private readonly _config: Partial<IUniverWatermarkConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
@@ -38,18 +39,26 @@ export class UniverWatermarkPlugin extends Plugin {
     ) {
         super();
 
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(WATERMARK_PLUGIN_CONFIG_KEY, rest);
+
         this._initWatermarkStorage();
         this._initDependencies();
     }
 
     private async _initWatermarkStorage() {
-        const { ...rest } = this._config;
-        if (rest.userWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: { ...WatermarkUserInfoBaseConfig, ...rest.userWatermarkSettings } } });
-        } else if (rest.textWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Text, config: { text: { ...WatermarkTextBaseConfig, ...rest.textWatermarkSettings } } });
-        } else if (rest.imageWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Image, config: { image: { ...WatermarkImageBaseConfig, ...rest.imageWatermarkSettings } } });
+        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings } = this._config;
+        if (userWatermarkSettings) {
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: { ...WatermarkUserInfoBaseConfig, userWatermarkSettings } } });
+        } else if (textWatermarkSettings) {
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Text, config: { text: { ...WatermarkTextBaseConfig, textWatermarkSettings } } });
+        } else if (imageWatermarkSettings) {
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Image, config: { image: { ...WatermarkImageBaseConfig, imageWatermarkSettings } } });
         } else {
             const config = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
             if (config?.type === IWatermarkTypeEnum.UserInfo) {

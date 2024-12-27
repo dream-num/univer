@@ -23,8 +23,11 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    merge,
     mergeOverrideWithDependencies,
-    Plugin, touchDependencies, UniverInstanceType,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -114,7 +117,11 @@ export class UniverDocsUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

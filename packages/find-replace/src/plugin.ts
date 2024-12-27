@@ -15,7 +15,7 @@
  */
 
 import type { IUniverFindReplaceConfig } from './controllers/config.schema';
-import { IConfigService, Plugin } from '@univerjs/core';
+import { IConfigService, merge, Plugin } from '@univerjs/core';
 
 import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { defaultPluginConfig, FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -35,7 +35,11 @@ export class UniverFindReplacePlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(FIND_REPLACE_PLUGIN_CONFIG_KEY, rest);
     }
 

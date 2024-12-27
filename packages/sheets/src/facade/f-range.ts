@@ -225,7 +225,10 @@ export class FRange extends FBase {
     // #region editing
     /**
      * Set background color for current range.
-     * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * ```
      * @param color {string}
      */
     setBackgroundColor(color: string): Promise<boolean> {

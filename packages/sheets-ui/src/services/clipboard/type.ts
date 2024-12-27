@@ -22,7 +22,7 @@ export enum COPY_TYPE {
     CUT = 'CUT',
 }
 
-export type ICellDataWithSpanInfo = ICellData & { rowSpan?: number; colSpan?: number };
+export type ICellDataWithSpanInfo = ICellData & { rowSpan?: number; colSpan?: number; plain?: string };
 
 export interface IClipboardPropertyItem {
     [key: string]: string;

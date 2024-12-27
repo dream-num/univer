@@ -16,10 +16,10 @@
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
-import type { IScrollState, IViewportScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, ISheetSelectionRenderService, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 export interface IFWorksheetSkeletonMixin {
@@ -174,30 +174,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             return toDisposable(sub);
         }
         return toDisposable(() => {});
-    }
-
-    /**
-     * Hide selection box.
-     */
-    disableSelection(): void {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const render = renderManagerService.getRenderById(unitId);
-        if (render) {
-            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).disableSelection();
-        }
-    }
-
-    /**
-     * Show selection box.
-     */
-    enableSelection(): void {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const render = renderManagerService.getRenderById(unitId);
-        if (render) {
-            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
-        }
     }
 }
 

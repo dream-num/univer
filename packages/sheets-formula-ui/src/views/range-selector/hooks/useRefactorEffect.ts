@@ -16,10 +16,10 @@
 
 import { EDITOR_ACTIVATED, IContextService, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService } from '@univerjs/sheets';
+import { IRefSelectionsService, REF_SELECTIONS_ENABLED } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
-import { useEffect, useLayoutEffect } from 'react';
 
+import { useEffect, useLayoutEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string) => {
@@ -33,10 +33,12 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     useLayoutEffect(() => {
         if (isNeed && selecting) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
-            contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
+            contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+            contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
-                contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+                contextService.setContextValue(EDITOR_ACTIVATED, false);
+                contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
                 d1?.dispose();
             };
         }

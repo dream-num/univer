@@ -730,6 +730,17 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.STRING;
+
+        // Text format supports rich text
+        if (isRichText(body) && body.dataStream !== '\r\n') {
+            cellData.p = snapshot;
+        }
+
+        // If the style length in textRun.ts is equal to the content length, it should be set as the cell style
+        const style = getCellStyleBySnapshot(snapshot);
+        if (style) {
+            cellData.s = style;
+        }
     } else if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {
             return null;

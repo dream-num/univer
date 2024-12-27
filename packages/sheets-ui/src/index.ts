@@ -61,6 +61,7 @@ export type { IAutoFillLocation, ICopyDataPiece, ISheetAutoFillHook } from './se
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export {
+    getMatrixPlainText,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,

@@ -21,6 +21,7 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
 } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -45,7 +46,11 @@ export class UniverDocsPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(DOCS_PLUGIN_CONFIG_KEY, rest);
     }
 

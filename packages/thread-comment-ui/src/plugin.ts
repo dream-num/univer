@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import { defaultPluginConfig, THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -37,7 +37,8 @@ export class UniverThreadCommentUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

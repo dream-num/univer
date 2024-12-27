@@ -17,7 +17,7 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsFilterConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, SHEETS_FILTER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFilterController } from './controllers/sheets-filter.controller';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
@@ -34,7 +34,8 @@ export class UniverSheetsFilterPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

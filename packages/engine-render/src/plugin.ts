@@ -16,7 +16,7 @@
 
 import type { IUniverEngineRenderConfig } from './controllers/config.schema';
 
-import { createIdentifier, IConfigService, Inject, Injector, Plugin, registerDependencies, Tools } from '@univerjs/core';
+import { createIdentifier, IConfigService, Inject, Injector, merge, Plugin, registerDependencies } from '@univerjs/core';
 import { defaultPluginConfig, ENGINE_RENDER_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
@@ -39,7 +39,8 @@ export class UniverRenderEnginePlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

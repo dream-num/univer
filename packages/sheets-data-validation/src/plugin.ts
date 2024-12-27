@@ -19,8 +19,8 @@ import {
     DependentOn,
     ICommandService,
     IConfigService,
+    merge,
     Plugin,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@univerjs/core';
@@ -61,7 +61,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

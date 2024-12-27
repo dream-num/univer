@@ -21,9 +21,9 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
     registerDependencies,
-    Tools,
     touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -73,7 +73,8 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

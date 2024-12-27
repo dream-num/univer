@@ -21,8 +21,8 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
@@ -64,7 +64,8 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

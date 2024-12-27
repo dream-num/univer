@@ -21,9 +21,9 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Optional,
     Plugin,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -53,7 +53,8 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = Tools.deepMerge(
+        const { menu, ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
-import { IConfigService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import { defaultPluginConfig, SLIDES_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 // import { DocSelectionManagerService } from '@univerjs/docs';
@@ -45,7 +45,8 @@ export class UniverSlidesPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = Tools.deepMerge(
+        const { ...rest } = merge(
+            {},
             defaultPluginConfig,
             this._config
         );

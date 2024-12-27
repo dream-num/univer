@@ -17,7 +17,7 @@
 import type { IAccessor, Nullable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import type { IMenuItem } from '../menu/menu';
-import { createIdentifier, Disposable, IConfigService, Inject, Injector, Tools } from '@univerjs/core';
+import { createIdentifier, Disposable, IConfigService, Inject, Injector, merge } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from './types';
@@ -200,7 +200,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         for (const [key, value] of Object.entries(_target)) {
             if (key in source) {
                 const _key = key as keyof MenuSchemaType;
-                Tools.deepMerge(_target[_key], source[_key]);
+                merge(_target[_key], source[_key]);
 
                 this.menuChanged$.next();
             } else {
@@ -210,7 +210,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
     }
 
     appendRootMenu(source: MenuSchemaType): void {
-        Tools.deepMerge(this._menu, source);
+        merge(this._menu, source);
         this.menuChanged$.next();
     }
 

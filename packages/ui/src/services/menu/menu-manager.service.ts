@@ -200,7 +200,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
         for (const [key, value] of Object.entries(_target)) {
             if (key in source) {
                 const _key = key as keyof MenuSchemaType;
-                merge(_target[_key], source[_key]);
+                _target[_key] = merge({}, _target[_key], source[_key]);
 
                 this.menuChanged$.next();
             } else {
@@ -210,7 +210,7 @@ export class MenuManagerService extends Disposable implements IMenuManagerServic
     }
 
     appendRootMenu(source: MenuSchemaType): void {
-        merge(this._menu, source);
+        this._menu = merge({}, this._menu, source);
         this.menuChanged$.next();
     }
 

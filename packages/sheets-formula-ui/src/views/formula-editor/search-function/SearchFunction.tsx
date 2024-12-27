@@ -16,11 +16,11 @@
 
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
-import { Popup } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode } from '@univerjs/ui';
+import { IShortcutService, KeyCode, RectPopup } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { useEditorPostion } from '../hooks/useEditorPostion';
 import { useStateRef } from '../hooks/useStateRef';
 import styles from './index.module.less';
 
@@ -43,23 +43,10 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     const visible = useMemo(() => !!searchList.length, [searchList]);
     const ulRef = useRef<HTMLUListElement>();
     const [active, activeSet] = useState(0);
-    const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const isEnableMouseEnterOrOut = useRef(false);
-
+    const [position$, updatePosition] = useEditorPostion(editorId);
     const stateRef = useStateRef({ searchList, active });
     const editor = editorService.getEditor(editorId);
-
-    useEffect(() => {
-        const editor = editorService.getEditor(editorId);
-        const position = editor?.getBoundingClientRect();
-        if (position == null) {
-            return;
-        }
-        const { left, top, height } = position;
-
-        setOffset([left, top + height]);
-        activeSet(0); // Reset active state
-    }, [searchText, searchList]);
 
     function handleLiMouseEnter(index: number) {
         if (!isEnableMouseEnterOrOut.current) {
@@ -144,6 +131,12 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         };
     }, [searchList]);
 
+    useEffect(() => {
+        if (visible) {
+            updatePosition();
+        }
+    }, [searchText, searchList, visible]);
+
     function scrollToVisible(liIndex: number) {
         // Get the <li> element
         const liElement = ulRef.current?.querySelectorAll(`.${styles.formulaSearchFunctionItem}`)[
@@ -193,8 +186,8 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
         };
     }, []);
 
-    return searchList.length > 0 && (
-        <Popup visible={visible} offset={offset}>
+    return searchList.length > 0 && visible && (
+        <RectPopup anchorRect$={position$} direction="vertical">
             <ul
                 className={styles.formulaSearchFunction}
                 ref={(v) => {
@@ -231,6 +224,6 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     </li>
                 ))}
             </ul>
-        </Popup>
+        </RectPopup>
     );
 }

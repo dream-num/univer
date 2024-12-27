@@ -16,15 +16,12 @@
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { LocaleService, useDependency } from '@univerjs/core';
-import { Popup } from '@univerjs/design';
-import { IEditorService } from '@univerjs/docs-ui';
 import { CloseSingle, MoreSingle } from '@univerjs/icons';
-import { ISidebarService } from '@univerjs/ui';
+import { RectPopup } from '@univerjs/ui';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { throttleTime } from 'rxjs';
 import { generateParam } from '../../../services/utils';
-import { useResizeScrollObserver } from '../hooks/useResizeScrollObserver';
+import { useEditorPostion } from '../hooks/useEditorPostion';
 import styles from './index.module.less';
 
 interface IHelpFunctionProps {
@@ -38,99 +35,67 @@ const noop = () => { };
 export function HelpFunction(props: IHelpFunctionProps) {
     const { functionInfo, paramIndex, editorId, onParamsSwitch = noop, onClose = noop } = props;
 
-    const editorService = useDependency(IEditorService);
-    const sidebarService = useDependency(ISidebarService);
-
     const visible = useMemo(() => !!functionInfo && paramIndex >= 0, [functionInfo, paramIndex]);
-
     const [contentVisible, setContentVisible] = useState(true);
-    const [offset, setOffset] = useState<[number, number]>([0, 0]);
     const localeService = useDependency(LocaleService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
-
-    useResizeScrollObserver(updatePosition);
-
-    useEffect(() => {
-        const sidebarSubscription = sidebarService.scrollEvent$.pipe(throttleTime(100)).subscribe(updatePosition);
-
-        return () => {
-            sidebarSubscription.unsubscribe();
-        };
-    }, []);
-    useEffect(() => {
-        const doc = editorService.getEditor(editorId);
-        if (!doc) {
-            return;
-        }
-        const position = doc.getBoundingClientRect();
-        const { left, top, height } = position;
-        setOffset([left, top + height]);
-    }, [functionInfo, paramIndex, editorId]);
-
-    function updatePosition() {
-        const doc = editorService.getEditor(editorId);
-        if (!doc) {
-            return;
-        }
-        const position = doc.getBoundingClientRect();
-        const { left, top, height } = position;
-        setOffset([left, top + height]);
-        return position;
-    }
+    const [position$, refreshPosition] = useEditorPostion(editorId);
 
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }
 
-    return (
-        <Popup visible={visible} offset={offset}>
-            {functionInfo
-                ? (
-                    <div className={styles.formulaHelpFunction}>
-                        <div className={styles.formulaHelpFunctionTitle}>
-                            <Help
-                                prefix={functionInfo.functionName}
-                                value={functionInfo.functionParameter}
-                                active={paramIndex}
-                                onClick={handleSwitchActive}
-                            />
-                            <div className={styles.formulaHelpFunctionTitleIcons}>
-                                <div
-                                    className={styles.formulaHelpFunctionTitleIcon}
-                                    style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
-                                    onClick={() => setContentVisible(!contentVisible)}
-                                >
-                                    <MoreSingle />
-                                </div>
-                                <div
-                                    className={styles.formulaHelpFunctionTitleIcon}
-                                    onClick={onClose}
-                                >
-                                    <CloseSingle />
-                                </div>
+    useEffect(() => {
+        refreshPosition();
+    }, [functionInfo, paramIndex, editorId]);
+
+    return visible && functionInfo
+        ? (
+            <RectPopup anchorRect$={position$} direction="vertical">
+                <div className={styles.formulaHelpFunction}>
+                    <div className={styles.formulaHelpFunctionTitle}>
+                        <Help
+                            prefix={functionInfo.functionName}
+                            value={functionInfo.functionParameter}
+                            active={paramIndex}
+                            onClick={handleSwitchActive}
+                        />
+                        <div className={styles.formulaHelpFunctionTitleIcons}>
+                            <div
+                                className={styles.formulaHelpFunctionTitleIcon}
+                                style={{ transform: contentVisible ? 'rotateZ(-90deg)' : 'rotateZ(90deg)' }}
+                                onClick={() => setContentVisible(!contentVisible)}
+                            >
+                                <MoreSingle />
+                            </div>
+                            <div
+                                className={styles.formulaHelpFunctionTitleIcon}
+                                onClick={onClose}
+                            >
+                                <CloseSingle />
                             </div>
                         </div>
-
-                        <div
-                            className={styles.formulaHelpFunctionContent}
-                            style={{
-                                height: contentVisible ? 'unset' : 0,
-                                padding: contentVisible ? 'revert-layer' : 0,
-                            }}
-                        >
-                            <div className={styles.formulaHelpFunctionContentInner}>
-                                <Params
-                                    title={localeService.t('formula.prompt.helpExample')}
-                                    value={`${functionInfo.functionName}(${functionInfo.functionParameter
-                                        .map((item) => item.example)
-                                        .join(',')})`}
-                                />
-                                <Params
-                                    title={localeService.t('formula.prompt.helpAbstract')}
-                                    value={functionInfo.description}
-                                />
-                                {functionInfo &&
+                    </div>
+                    <div
+                        className={styles.formulaHelpFunctionContent}
+                        style={{
+                            height: contentVisible ? 'unset' : 0,
+                            padding: contentVisible ? 'revert-layer' : 0,
+                        }}
+                    >
+                        <div className={styles.formulaHelpFunctionContentInner}>
+                            <Params
+                                title={localeService.t('formula.prompt.helpExample')}
+                                value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                                    .map((item) => item.example)
+                                    .join(',')})`}
+                            />
+                            <Params
+                                title={localeService.t('formula.prompt.helpAbstract')}
+                                value={functionInfo.description}
+                            />
+                            {functionInfo &&
                                     functionInfo.functionParameter &&
                                     functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                         <Params
@@ -140,15 +105,12 @@ export function HelpFunction(props: IHelpFunctionProps) {
                                             value={`${item.require ? required : optional} ${item.detail}`}
                                         />
                                     ))}
-                            </div>
                         </div>
                     </div>
-                )
-                : (
-                    <></>
-                )}
-        </Popup>
-    );
+                </div>
+            </RectPopup>
+        )
+        : null;
 }
 
 interface IParamsProps {

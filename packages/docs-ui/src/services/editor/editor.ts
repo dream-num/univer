@@ -382,6 +382,10 @@ export class Editor extends Disposable implements IEditor {
         return this._param.editorDom.getBoundingClientRect();
     }
 
+    get editorDOM() {
+        return this._param.editorDom;
+    }
+
     isVisible() {
         return this._param.visible;
     }

@@ -21,8 +21,8 @@ import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, merge, Subject, takeUntil } from 'rxjs';
+import { ILayoutService, KeyCode } from '@univerjs/ui';
+import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
 
@@ -57,9 +57,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     readonly onChangeByEvent$ = merge(
         this._onInput$,
-        this._onKeydown$,
-        this._onCompositionend$,
-        this._onKeydown$
+        this._onKeydown$.pipe(filter((e) => (e.event as KeyboardEvent).keyCode === KeyCode.BACKSPACE)),
+        this._onCompositionend$
     );
 
     private readonly _onPaste$ = new Subject<IEditorInputConfig>();

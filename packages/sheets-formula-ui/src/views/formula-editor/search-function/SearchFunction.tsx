@@ -97,7 +97,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
                     break;
                 }
                 case KeyCode.ESC: {
-                    onSelect('');
+                    onClose();
                     break;
                 }
             }

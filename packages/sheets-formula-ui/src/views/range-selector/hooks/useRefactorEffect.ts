@@ -30,27 +30,29 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+
     useLayoutEffect(() => {
-        if (isNeed && selecting) {
-            const d1 = refSelectionsRenderService?.enableSelectionChanging();
-            contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+        if (isNeed) {
             contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
                 contextService.setContextValue(EDITOR_ACTIVATED, false);
+                refSelectionsService.clear();
+            };
+        }
+    }, [isNeed]);
+
+    useLayoutEffect(() => {
+        if (isNeed && selecting) {
+            const d1 = refSelectionsRenderService?.enableSelectionChanging();
+            contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+
+            return () => {
                 contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
                 d1?.dispose();
             };
         }
     }, [isNeed, selecting]);
-
-    useLayoutEffect(() => {
-        if (isNeed) {
-            return () => {
-                refSelectionsService.clear();
-            };
-        }
-    }, [isNeed]);
 
     //right context controller
     useEffect(() => {

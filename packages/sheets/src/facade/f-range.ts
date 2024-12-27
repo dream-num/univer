@@ -781,6 +781,6 @@ export class FRange extends FBaseInitialable {
             unitId: this.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
         };
-        this._injector.get(SheetRangeThemeService).registerRangeThemeStyles(themeName, rangeInfo);
+        this._injector.get(SheetRangeThemeService).registerRangeThemeStyle(themeName, rangeInfo);
     }
 }

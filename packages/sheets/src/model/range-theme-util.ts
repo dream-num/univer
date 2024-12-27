@@ -137,5 +137,32 @@ export class RangeThemeStyle {
             return this.wholeStyle;
         }
     }
+
+    toJSON(): Record<string, string> {
+        return {
+            name: this._name,
+            wholeStyle: JSON.stringify(this.wholeStyle),
+            headerRowStyle: JSON.stringify(this.headerRowStyle),
+            headerColumnStyle: JSON.stringify(this.headerColumnStyle),
+            firstRowStyle: JSON.stringify(this.firstRowStyle),
+            secondRowStyle: JSON.stringify(this.secondRowStyle),
+            lastRowStyle: JSON.stringify(this.lastRowStyle),
+            firstColumnStyle: JSON.stringify(this.firstColumnStyle),
+            secondColumnStyle: JSON.stringify(this.secondColumnStyle),
+            lastColumnStyle: JSON.stringify(this.lastColumnStyle),
+        };
+    }
+
+    fromJSON(json: Record<string, string>): void {
+        this.wholeStyle = JSON.parse(json.wholeStyle);
+        this.headerRowStyle = JSON.parse(json.headerRowStyle);
+        this.headerColumnStyle = JSON.parse(json.headerColumnStyle);
+        this.firstRowStyle = JSON.parse(json.firstRowStyle);
+        this.secondRowStyle = JSON.parse(json.secondRowStyle);
+        this.lastRowStyle = JSON.parse(json.lastRowStyle);
+        this.firstColumnStyle = JSON.parse(json.firstColumnStyle);
+        this.secondColumnStyle = JSON.parse(json.secondColumnStyle);
+        this.lastColumnStyle = JSON.parse(json.lastColumnStyle);
+    }
 }
 

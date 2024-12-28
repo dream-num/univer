@@ -17,10 +17,10 @@
 /* eslint-disable perfectionist/sort-imports */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
+import { Direction, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IRemoveRowColCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IRemoveRowColCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { CopySheetCommand, InsertColByRangeCommand, InsertColCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
@@ -325,19 +325,44 @@ describe('test controller of sheets filter', () => {
 
             const params: IRemoveRowColCommandParams = {
                 ranges: [
-                    { startRow: 0, startColumn: 0, endRow: 0, endColumn: 5 },
-                    { startRow: 1, startColumn: 0, endRow: 1, endColumn: 5 },
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 5 },
+                    { startRow: 1, startColumn: 0, endRow: 2, endColumn: 5 },
                 ],
             };
 
             expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
-                .toEqual({ startRow: 1, startColumn: 0, endRow: 3, endColumn: 5 });
+                .toEqual({ startRow: 0, startColumn: 0, endRow: 2, endColumn: 5 });
+        });
+
+        it('filter deleted if remove rows contains filter header', async () => {
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 5 },
+                    { startRow: 3, startColumn: 0, endRow: 3, endColumn: 5 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1'))
+                .toBeNull();
+        });
+        it('filter range should move up if remove rows before filter header, and reduce scope', async () => {
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 1, startColumn: 0, endRow: 2, endColumn: 5 },
+                    { startRow: 5, startColumn: 0, endRow: 5, endColumn: 5 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 1, startColumn: 0, endRow: 2, endColumn: 5 });
         });
     });
 
     describe('test interceptor of remove-cols-command', () => {
-        it('filter range should move left if remove cols before filter header', async () => {
+        it('filter range should move left if remove cols before filter', async () => {
             expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, {
                 unitId: 'test',
                 subUnitId: 'sheet1',
@@ -364,14 +389,156 @@ describe('test controller of sheets filter', () => {
                     },
                 ],
             })).toBeTruthy();
-            expect(await commandService.executeCommand(RemoveColCommand.id, {
+
+            const insertParams: IInsertColCommandParams = {
                 unitId: 'test',
                 subUnitId: 'sheet1',
-                range: { startRow: 0, startColumn: 0, endRow: 10, endColumn: 0 },
+                range: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 10,
+                    endColumn: 3,
+                },
+                direction: Direction.LEFT,
+            };
+            expect(await commandService.executeCommand(InsertColCommand.id, insertParams)).toBeTruthy();
+
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 0, startColumn: 0, endRow: 10, endColumn: 1 },
+                    { startRow: 0, startColumn: 1, endRow: 10, endColumn: 2 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 1, endRow: 5, endColumn: 6 });
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(0);
+
+            expect(await commandService.executeCommand(UndoCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+            })).toBeTruthy();
+
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 4, endRow: 5, endColumn: 9 });
+
+            expect(await commandService.executeCommand(UndoCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+            })).toBeTruthy();
+
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 5 });
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(1);
+        });
+
+        it('filter deleted if remove cols contains all columns', async () => {
+            expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 1,
+                criteria: {
+                    colId: 1,
+                    filters: {
+                        filters: ['test'],
+                    },
+                },
+            })).toBeTruthy();
+            expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                selections: [
+                    {
+                        range: {
+                            rangeType: RANGE_TYPE.COLUMN,
+                            startRow: 0,
+                            endRow: 10,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                ],
+            })).toBeTruthy();
+
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 0, startColumn: 0, endRow: 10, endColumn: 2 },
+                    { startRow: 0, startColumn: 3, endRow: 10, endColumn: 5 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')).toBeNull();
+
+            expect(await commandService.executeCommand(UndoCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
             })).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
-                .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 4 });
-            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(0);
+                .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 5 });
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(1);
+        });
+
+        it('filter move left if remove cols before filter, and reduce scope', async () => {
+            expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 1,
+                criteria: {
+                    colId: 1,
+                    filters: {
+                        filters: ['test'],
+                    },
+                },
+            })).toBeTruthy();
+            expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                selections: [
+                    {
+                        range: {
+                            rangeType: RANGE_TYPE.COLUMN,
+                            startRow: 0,
+                            endRow: 10,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                ],
+            })).toBeTruthy();
+
+            const insertParams: IInsertColCommandParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 10,
+                    endColumn: 3,
+                },
+                direction: Direction.LEFT,
+            };
+            expect(await commandService.executeCommand(InsertColCommand.id, insertParams)).toBeTruthy();
+
+            const params: IRemoveRowColCommandParams = {
+                ranges: [
+                    { startRow: 0, startColumn: 3, endRow: 10, endColumn: 5 },
+                    { startRow: 0, startColumn: 7, endRow: 10, endColumn: 8 },
+                ],
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 3, endRow: 5, endColumn: 4 });
+
+            expect(await commandService.executeCommand(UndoCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+            })).toBeTruthy();
+
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 4, endRow: 5, endColumn: 9 });
 
             expect(await commandService.executeCommand(UndoCommand.id, {
                 unitId: 'test',

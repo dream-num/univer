@@ -117,7 +117,7 @@ export function DataValidationDetail() {
     };
 
     const handleUpdateRuleRanges = useEvent((rangeText: string) => {
-        const unitRanges = rangeText.split(',').map(deserializeRangeWithSheet).map((unitRange) => {
+        const unitRanges = rangeText.split(',').filter(Boolean).map(deserializeRangeWithSheet).map((unitRange) => {
             const sheetName = unitRange.sheetName;
             if (sheetName) {
                 const sheetId = getSheetIdByName(univerInstanceService, unitRange.unitId, sheetName);

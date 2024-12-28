@@ -17,7 +17,7 @@
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import clsx from '../../helper/clsx';
+import { clsx } from '../../helper/clsx';
 import { useDropdown } from './DropdownContext';
 
 interface IDropdownOverlayProps {
@@ -74,6 +74,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 `
                   univer-fixed univer-z-50 univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
                   univer-shadow-md univer-animate-in univer-fade-in-0 univer-zoom-in-95
+                  dark:univer-bg-gray-700
                 `,
                 className
             )}

@@ -53,6 +53,7 @@ export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((pro
             ref={ref}
             {...tooltipProps}
             visible={tooltipVisible}
+            asChild
             onVisibleChange={handleChangeTooltipVisible}
         >
             <span>

@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
 import { DEBUGGER_PLUGIN_CONFIG_KEY, defaultPluginConfig } from './controllers/config.schema';
+import { DarkModeController } from './controllers/dark-mode.controller';
 import { DebuggerController } from './controllers/debugger.controller';
 import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
@@ -50,6 +51,7 @@ export class UniverDebuggerPlugin extends Plugin {
     override onStarting(): void {
         ([
             [PerformanceMonitorController],
+            [DarkModeController],
             [DebuggerController],
             [E2EController],
             [UniverWatermarkMenuController],
@@ -63,6 +65,7 @@ export class UniverDebuggerPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        this._injector.get(DarkModeController);
         this._injector.get(PerformanceMonitorController);
         this._injector.get(UniverWatermarkMenuController);
     }

@@ -18,7 +18,7 @@ import { ErrorSingle, InfoSingle, Loading, SuccessSingle, WarningSingle } from '
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import clsx from '../../helper/clsx';
+import { clsx } from '../../helper/clsx';
 
 export enum MessageType {
     Success = 'success',

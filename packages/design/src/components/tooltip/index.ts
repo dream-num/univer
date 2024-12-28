@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { resizeObserverCtor } from './hooks';
-export { type ITooltipProps, type NullableTooltipRef, Tooltip } from './Tooltip';
+export { type ITooltipProps, Tooltip } from './Tooltip';

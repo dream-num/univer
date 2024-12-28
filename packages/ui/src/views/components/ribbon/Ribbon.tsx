@@ -126,7 +126,7 @@ export function Ribbon(props: IRibbonProps) {
                             key={child.key}
                             ref={(ref) => {
                                 toolbarItemRefs.current[child.key] = {
-                                    el: ref?.nativeElement as HTMLDivElement,
+                                    el: ref as HTMLDivElement,
                                     key: child.key,
                                 };
                             }}

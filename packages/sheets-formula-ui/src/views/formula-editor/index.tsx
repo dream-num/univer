@@ -125,7 +125,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting } = useFormulaSelecting(editorId, sequenceNodes);
+    const { isSelecting } = useFormulaSelecting(editorId, isFocus, sequenceNodes);
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
@@ -255,7 +255,17 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     });
 
-    useSheetSelectionChange(isFocus && Boolean(isSelecting && docFocusing), unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, selectingMode, editor, handleSelectionChange);
+    useSheetSelectionChange(
+        isFocus && Boolean(isSelecting && docFocusing),
+        unitId,
+        subUnitId,
+        sequenceNodes,
+        refSelections,
+        isSupportAcrossSheet,
+        Boolean(selectingMode),
+        editor,
+        handleSelectionChange
+    );
     useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const handleFunctionSelect = (res: { text: string; offset: number }) => {

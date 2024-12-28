@@ -22,6 +22,7 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { isFormulaLexerToken, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useRef, useState } from 'react';
+import { distinctUntilChanged, filter, map } from 'rxjs';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
@@ -41,7 +42,7 @@ export enum FormulaSelectingType {
     CAN_EDIT = 2,
 }
 
-export function useFormulaSelecting(editorId: string, nodes: (string | ISequenceNode)[]) {
+export function useFormulaSelecting(editorId: string, isFocus: boolean, nodes: (string | ISequenceNode)[]) {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
@@ -50,41 +51,55 @@ export function useFormulaSelecting(editorId: string, nodes: (string | ISequence
     const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
     const nodesRef = useRef(nodes);
     nodesRef.current = nodes;
-    const isDisabledByPointer = useRef(false);
+    const isDisabledByPointer = useRef(true);
     const isSelectingRef = useRef(isSelecting);
     isSelectingRef.current = isSelecting;
 
     useEffect(() => {
-        const sub = docSelectionManagerService.textSelection$.subscribe((param) => {
-            if (param.unitId !== editorId) return;
-            const activeRange = docSelectionRenderService?.getActiveTextRange();
-            const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
-            const config = getCurrentBodyDataStreamAndOffset(injector);
-            if (!config) return;
-            const dataStream = config?.dataStream?.slice(0, -2);
-            const char = dataStream[index - 1 + config.offset];
-            const nextChar = dataStream[index + config.offset];
-            const focusingIndex = nodesRef.current.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
-            const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
-            const editing = focusingIndex > -1;
+        const sub = docSelectionManagerService.textSelection$
+            .pipe(
+                filter((param) => param.unitId === editorId),
+                map(() => {
+                    const activeRange = docSelectionRenderService?.getActiveTextRange();
+                    const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
+                    return index;
+                }),
+                distinctUntilChanged()
+            )
+            .subscribe((index) => {
+                const config = getCurrentBodyDataStreamAndOffset(injector);
+                if (!config) return;
+                const dataStream = config?.dataStream?.slice(0, -2);
+                const char = dataStream[index - 1 + config.offset];
+                const nextChar = dataStream[index + config.offset];
+                const focusingIndex = nodesRef.current.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
+                const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
+                const editing = focusingIndex > -1;
 
-            if (dataStream?.substring(0, 1) === '=' && (adding || editing)) {
-                if (editing) {
-                    if (isDisabledByPointer.current) {
-                        return;
+                if (dataStream?.substring(0, 1) === '=' && (adding || editing)) {
+                    if (editing) {
+                        if (isDisabledByPointer.current) {
+                            return;
+                        }
+                        setIsSelecting(FormulaSelectingType.CAN_EDIT);
+                    } else {
+                        isDisabledByPointer.current = false;
+                        setIsSelecting(FormulaSelectingType.NEED_ADD);
                     }
-                    setIsSelecting(FormulaSelectingType.CAN_EDIT);
                 } else {
-                    isDisabledByPointer.current = false;
-                    setIsSelecting(FormulaSelectingType.NEED_ADD);
+                    setIsSelecting(FormulaSelectingType.NOT_SELECT);
                 }
-            } else {
-                setIsSelecting(FormulaSelectingType.NOT_SELECT);
-            }
-        });
+            });
 
         return () => sub.unsubscribe();
     }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector]);
+
+    useEffect(() => {
+        if (!isFocus) {
+            setIsSelecting(FormulaSelectingType.NOT_SELECT);
+            isDisabledByPointer.current = true;
+        }
+    }, [isFocus]);
 
     useEffect(() => {
         const sub = renderer?.mainComponent?.onPointerDown$.subscribeEvent(() => {

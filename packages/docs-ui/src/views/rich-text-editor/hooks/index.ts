@@ -15,3 +15,4 @@
  */
 
 export { type IKeyboardEventConfig, useKeyboardEvent } from './useKeyboardEvent';
+export { useResize } from './useResize';

@@ -16,14 +16,14 @@
 
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
-import { createInternalEditorID, generateRandomId, type IDisposable, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
+import { createInternalEditorID, generateRandomId, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { IEditorService } from '../../services/editor/editor-manager.service';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { useKeyboardEvent } from './hooks';
+import { useKeyboardEvent, useResize } from './hooks';
+import { useEditor } from './hooks/useEditor';
 import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
 import styles from './index.module.less';
 
@@ -33,27 +33,37 @@ export interface IRichTextEditorProps {
     onFocusChange?: (isFocus: boolean) => void;
     initialValue?: IDocumentData;
     onClickOutside?: () => void;
-    keyboradEventConfig?: IKeyboardEventConfig;
+    keyboardEventConfig?: IKeyboardEventConfig;
     moveCursor?: boolean;
+    style?: React.CSSProperties;
+    isSingle?: boolean;
+    placeholder?: string;
 }
 
-export const RichTextEditor = (props: IRichTextEditorProps) => {
+export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, ref) => {
     const {
         className,
-        autoFocus: _autoFocus,
+        autoFocus,
         onFocusChange: _onFocusChange,
         initialValue,
         onClickOutside: _onClickOutside,
-        keyboradEventConfig,
+        keyboardEventConfig,
         moveCursor = true,
+        style,
+        isSingle,
     } = props;
-    const autoFocus = useMemo(() => _autoFocus ?? false, []);
+
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
-    const editorService = useDependency(IEditorService);
     const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorId = useMemo(() => createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), []);
-    const [editor, setEditor] = useState<Editor>();
+    const editor = useEditor({
+        editorId,
+        initialValue,
+        container: formulaEditorContainerRef,
+        autoFocus,
+        isSingle,
+    });
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
@@ -61,7 +71,7 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
     const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
     useObservable(editor?.blur$);
     useObservable(editor?.focus$);
-
+    useResize(editor, isSingle, true);
     useEffect(() => {
         onFocusChange?.(isFocusing);
     }, [isFocusing, onFocusChange]);
@@ -78,56 +88,25 @@ export const RichTextEditor = (props: IRichTextEditorProps) => {
         };
     }, [onClickOutside]);
 
-    useLayoutEffect(() => {
-        let dispose: IDisposable;
-        if (formulaEditorContainerRef.current) {
-            dispose = editorService.register({
-                autofocus: true,
-                editorUnitId: editorId,
-                initialSnapshot: {
-                    body: {
-                        dataStream: '\r\n',
-                        textRuns: [],
-                        customBlocks: [],
-                        customDecorations: [],
-                        customRanges: [],
-                    },
-                    documentStyle: {},
-                    ...initialValue,
-                    id: editorId,
-                },
-            }, formulaEditorContainerRef.current);
-            const editor = editorService.getEditor(editorId)! as Editor;
-            setEditor(editor);
-
-            if (autoFocus) {
-                editor.focus();
-            }
-        }
-
-        return () => {
-            dispose?.dispose();
-        };
-    }, []);
-
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
-    useKeyboardEvent(isFocusing, keyboradEventConfig, editor);
+    useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
+    useImperativeHandle(ref, () => editor!, [editor]);
 
-    <div className={clsx(styles.richTextEditor, className)}>
-        <div
-            className={clsx(styles.richTextEditorWrap, {
-                [styles.richTextEditorActive]: isFocusing,
-            })}
-            ref={sheetEmbeddingRef}
-        >
+    return (
+        <div className={clsx(styles.richTextEditor, className)} style={style}>
             <div
-                className={styles.richTextEditorText}
-                ref={formulaEditorContainerRef}
-                onMouseUp={() => {
-                    editor?.focus();
-                }}
+                className={clsx(styles.richTextEditorWrap, {
+                    [styles.richTextEditorActive]: isFocusing,
+                })}
+                ref={sheetEmbeddingRef}
             >
+                <div
+                    className={styles.richTextEditorText}
+                    ref={formulaEditorContainerRef}
+                    onMouseUp={() => editor?.focus()}
+                >
+                </div>
             </div>
         </div>
-    </div>;
-};
+    );
+});

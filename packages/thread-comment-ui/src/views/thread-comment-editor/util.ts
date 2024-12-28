@@ -15,7 +15,7 @@
  */
 
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-import { CustomRangeType, type IDocumentBody } from '@univerjs/core';
+import { CustomRangeType, getBodySlice, type IDocumentBody } from '@univerjs/core';
 
 export type TextNode = {
     type: 'text';
@@ -81,11 +81,13 @@ export const transformTextNode2Text = (nodes: TextNode[]) => {
     }).join('');
 };
 
-export const transformDocument2TextNodes = (doc: IDocumentBody) => {
+const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
     const { dataStream, customRanges } = doc;
-    const end = dataStream.length - 2;
+    const end = dataStream.endsWith('\r\n') ? dataStream.length : dataStream.length - 2;
     const textNodes: TextNode[] = [];
+
     let lastIndex = 0;
+
     customRanges?.forEach((range) => {
         if (lastIndex < range.startIndex) {
             textNodes.push({
@@ -108,6 +110,17 @@ export const transformDocument2TextNodes = (doc: IDocumentBody) => {
         content: dataStream.slice(lastIndex, end),
     });
     return textNodes;
+};
+
+export const transformDocument2TextNodes = (doc: IDocumentBody) => {
+    const { paragraphs = [] } = doc;
+    let lastIndex = 0;
+
+    return paragraphs.map((paragraph) => {
+        const body = getBodySlice(doc, lastIndex, paragraph.startIndex);
+        lastIndex = paragraph.startIndex + 1;
+        return transformDocument2TextNodesInParagraph(body);
+    });
 };
 
 export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody => {

@@ -24,7 +24,7 @@ export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, dele
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
-export { type IKeyboardEventConfig, useKeyboardEvent } from './views/rich-text-editor/hooks';
+export { type IKeyboardEventConfig, useKeyboardEvent, useResize } from './views/rich-text-editor/hooks';
 export { RichTextEditor } from './views/rich-text-editor';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
 // export { TextEditor } from './components/editor/TextEditor';
@@ -32,7 +32,6 @@ export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema as DocsUIMenuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export * from './docs-ui-plugin';
 export * from './services';

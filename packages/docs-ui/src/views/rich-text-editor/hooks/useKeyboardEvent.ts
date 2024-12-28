@@ -16,10 +16,10 @@
 
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { Editor } from '../../../services/editor/editor';
-import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, DisposableCollection, generateRandomId, ICommandService, useDependency } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export interface IKeyboardEventConfig {
     keyCodes: { keyCode: KeyCode; metaKey?: MetaKeys }[];
@@ -29,13 +29,14 @@ export interface IKeyboardEventConfig {
 export function useKeyboardEvent(isNeed: boolean, config?: IKeyboardEventConfig, editor?: Editor) {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
+    const key = useMemo(() => generateRandomId(4), []);
 
     useEffect(() => {
         if (!editor || !isNeed || !config) {
             return;
         }
         const editorId = editor.getEditorId();
-        const operationId = `sheet.operation.formula-embedding-editor-${editorId}-keyboard-event`;
+        const operationId = `sheet.operation.editor-${editorId}-keyboard-${key}`;
         const d = new DisposableCollection();
 
         d.add(commandService.registerCommand({
@@ -66,5 +67,5 @@ export function useKeyboardEvent(isNeed: boolean, config?: IKeyboardEventConfig,
         return () => {
             d.dispose();
         };
-    }, [commandService, config, editor, isNeed, shortcutService]);
+    }, [commandService, config, editor, isNeed, key, shortcutService]);
 }

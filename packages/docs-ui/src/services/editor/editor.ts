@@ -318,6 +318,13 @@ export class Editor extends Disposable implements IEditor {
                 ...data,
                 body: {
                     dataStream: `${text}\r\n`,
+                    paragraphs: [{
+                        startIndex: 0,
+                    }],
+                    customRanges: [],
+                    sectionBreaks: [],
+                    tables: [],
+                    textRuns: [],
                 },
             },
             resetCursor

@@ -162,20 +162,24 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : (
                     <div className={styles.threadCommentItemContent}>
-                        {transformDocument2TextNodes(item.text).map((item, i) => {
-                            switch (item.type) {
-                                case 'mention':
-                                    return (
-                                        <a className={styles.threadCommentItemAt} key={i}>
-                                            @
-                                            {item.content.label}
-                                            {' '}
-                                        </a>
-                                    );
-                                default:
-                                    return item.content;
-                            }
-                        })}
+                        {transformDocument2TextNodes(item.text).map((paragraph, i) => (
+                            <div key={i}>
+                                {paragraph.map((item, i) => {
+                                    switch (item.type) {
+                                        case 'mention':
+                                            return (
+                                                <a className={styles.threadCommentItemAt} key={i}>
+                                                    @
+                                                    {item.content.label}
+                                                    {' '}
+                                                </a>
+                                            );
+                                        default:
+                                            return item.content;
+                                    }
+                                })}
+                            </div>
+                        ))}
                     </div>
                 )}
         </div>

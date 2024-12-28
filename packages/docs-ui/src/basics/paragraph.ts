@@ -47,6 +47,17 @@ export function getTextRunAtPosition(
         }
     }
 
+    if (position === 0) {
+        const textRun = textRuns[0];
+        const { st } = textRun;
+        if (st === 0) {
+            retTextRun.ts = {
+                ...retTextRun.ts,
+                ...textRun.ts,
+            };
+        }
+    }
+
     if (cacheStyle) {
         retTextRun.ts = {
             ...retTextRun.ts,

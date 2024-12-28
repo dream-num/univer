@@ -74,7 +74,7 @@ export class ConditionalFormattingRuleModel {
         }
     }
 
-    setRule(unitId: string, subUnitId: string, rule: Partial<IConditionFormattingRule>, oldCfId: string) {
+    setRule(unitId: string, subUnitId: string, rule: IConditionFormattingRule, oldCfId: string) {
         const list = this._ensureList(unitId, subUnitId);
         const oldRule = list.find((item) => item.cfId === oldCfId);
         if (oldRule) {

@@ -23,7 +23,7 @@ export interface ISetConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
     cfId?: string;
-    rule: Partial<IConditionFormattingRule> & Pick<IConditionFormattingRule, 'cfId'>;
+    rule: IConditionFormattingRule;
 }
 
 export const SetConditionalRuleMutation: IMutation<ISetConditionalRuleMutationParams> = {

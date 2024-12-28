@@ -77,6 +77,10 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         ];
 
         dependencies.forEach((dependency) => j.add(dependency));
+
+        const componentManager = this._injector.get(ComponentManager);
+        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
+        componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
     }
 
     override onRendered(): void {
@@ -92,11 +96,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
             [FormulaClipboardController],
             [FormulaRenderManagerController],
         ]);
-
-        const componentManager = this._injector.get(ComponentManager);
-
-        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
-        componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
     }
 
     override onSteady(): void {

@@ -25,10 +25,9 @@ import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstan
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
-import { useEvent } from '@univerjs/ui';
+import { useEvent, useUpdateEffect } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useEmitChange } from '../range-selector/hooks/useEmitChange';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useDocHight, useSheetHighlight } from '../range-selector/hooks/useHighlight';
@@ -83,7 +82,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         isSupportAcrossSheet = false,
         onFocus = noop,
         onBlur = noop,
-        onChange,
+        onChange: propOnChange,
         onVerify,
         actions,
         className,
@@ -99,7 +98,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const editorService = useDependency(IEditorService);
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
-
+    const onChange = useEvent(propOnChange);
     // init actions
     if (actions) {
         actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
@@ -136,9 +135,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
     const selectingMode = isSelecting;
-    const needEmit = useEmitChange(sequenceNodes, (text: string) => {
-        onChange(`=${text}`);
-    }, editor);
+
+    useUpdateEffect(() => {
+        onChange(formulaText);
+    }, [formulaText, onChange]);
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId);
@@ -238,7 +238,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (!isFocusing) {
             return;
         }
-        needEmit();
         highlight(`=${refString}`, true, isEnd);
         if (isEnd) {
             focus();

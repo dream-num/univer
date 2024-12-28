@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-export { useEvent } from './event';
-export { useObservable, useObservableRef } from './observable';
-export { useUpdateEffect } from './update-effect';
-export { useClickOutSide } from './useClickOutSide';
-export { useVirtualList } from './virtual-list';
+import React, { useEffect } from 'react';
+
+export const useUpdateEffect: typeof React.useEffect = (effect, deps) => {
+    const hasMount = React.useRef(false);
+
+    useEffect(() => {
+        if (hasMount.current) {
+            return effect();
+        } else {
+            hasMount.current = true;
+        }
+    }, deps);
+};

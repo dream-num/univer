@@ -274,6 +274,8 @@ export class SheetsCfRefRangeController extends Disposable {
                         redoMap[`${unitId}_${subUnitId}_${cfId}`].push(item.params as ISetConditionalRuleMutationParamsRedo);
                     });
                     Object.values(redoMap).forEach((paramsList) => {
+                        const { payload, ...initValue } = paramsList[0];
+
                         result.push({
                             id: SetConditionalRuleMutation.id,
                             params: paramsList.reduce((pre, cur) => {
@@ -311,7 +313,7 @@ export class SheetsCfRefRangeController extends Disposable {
                                     }
                                 }
                                 return newRule;
-                            }),
+                            }, initValue),
                         });
                     });
                 }

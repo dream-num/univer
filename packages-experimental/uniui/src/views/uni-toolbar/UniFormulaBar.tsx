@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
+// import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
@@ -206,7 +206,7 @@ export function FormulaBar() {
 
     return (
         <div className={styles.uniFormulaBox}>
-            <TextEditor
+            {/* <TextEditor
                 id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                 isSheetEditor
                 resizeCallBack={resizeCallBack}
@@ -215,7 +215,7 @@ export function FormulaBar() {
                 className={clsx(styles.uniFormulaInput, styles.formulaContent)}
                 snapshot={INITIAL_SNAPSHOT}
                 isSingle
-            />
+            /> */}
             <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
                 <span
                     className={clsx(styles.iconContainer, styles.iconContainerError)}

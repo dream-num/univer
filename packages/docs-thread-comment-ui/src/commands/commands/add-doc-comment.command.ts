@@ -45,6 +45,7 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
             {
                 id: comment.threadId,
                 type: CustomDecorationType.COMMENT,
+                unitId,
             }
         );
         if (doMutation) {

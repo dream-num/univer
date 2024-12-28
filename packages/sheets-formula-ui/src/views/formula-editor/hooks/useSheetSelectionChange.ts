@@ -18,12 +18,14 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
-
-import type { ISelectionWithCoord } from '@univerjs/sheets';
+import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IRefSelection } from '../../range-selector/hooks/useHighlight';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
-import { DisposableCollection, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -34,6 +36,7 @@ import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToTex
 import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
 import { useStateRef } from '../hooks/useStateRef';
 import { useSelectionAdd } from './useSelectionAdd';
+import { getFocusingReference } from './util';
 
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
@@ -41,13 +44,17 @@ export const useSheetSelectionChange = (
     unitId: string,
     subUnitId: string,
     sequenceNodes: INode[],
+    refSelectionRef: React.MutableRefObject<IRefSelection[]>,
     isSupportAcrossSheet: boolean,
+    listenSelectionSet: boolean,
     editor?: Editor,
-    handleRangeChange: ((refString: string, offset: number, isEnd: boolean) => void) = noop) => {
+    handleRangeChange: ((refString: string, offset: number, isEnd: boolean, isModify?: boolean) => void) = noop
+) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-
+    const commandService = useDependency(ICommandService);
     const sequenceNodesRef = useStateRef(sequenceNodes);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
 
@@ -56,13 +63,14 @@ export const useSheetSelectionChange = (
     const sheetName = useMemo(() => getSheetNameById(subUnitId), [subUnitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
-
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-
+    const refSelectionsService = useDependency(IRefSelectionsService);
     const isScalingRef = useRef(false);
 
     const scalingOptionRef = useRef<{ result: string; offset: number }>();
+
+    useEffect(() => {}, []);
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
@@ -80,14 +88,15 @@ export const useSheetSelectionChange = (
                 const docRange = currentDocSelections[0];
                 const offset = docRange.startOffset - 1;
                 const sequenceNodes = [...sequenceNodesRef.current];
+                const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
+
                 if (getIsNeedAddSelection()) {
                     if (offset !== 0) {
-                        const index = findIndexFromSequenceNodes(sequenceNodes, offset, false);
-                        if (index === -1 && sequenceNodes.length) {
+                        if (nodeIndex === -1 && sequenceNodes.length) {
                             return;
                         }
                         const range = selections[selections.length - 1];
-                        const lastNodes = sequenceNodes.splice(index + 1);
+                        const lastNodes = sequenceNodes.splice(nodeIndex + 1);
                         const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
                         const unitRangeName = {
                             range: range.rangeWithCoord,
@@ -95,7 +104,7 @@ export const useSheetSelectionChange = (
                             sheetName: getSheetNameById(rangeSheetId),
                         };
                         const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
                         sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                         const result = sequenceNodeToText(newSequenceNodes);
@@ -117,7 +126,7 @@ export const useSheetSelectionChange = (
                 } else {
                     // 更新全部的 ref Selection
                     let currentRefIndex = 0;
-                    const currentText = sequenceNodes.map((item) => {
+                    const newTokens = sequenceNodes.map((item) => {
                         if (typeof item === 'string') {
                             return item;
                         }
@@ -144,11 +153,19 @@ export const useSheetSelectionChange = (
                                 unitId: selection.rangeWithCoord.unitId ?? unitId,
                                 sheetName: getSheetNameById(rangeSheetId),
                             };
-                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet);
+                            const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
                             return refRanges[0];
                         }
                         return item.token;
-                    }).join('');
+                    });
+                    let currentText = '';
+                    let newOffset;
+                    newTokens.forEach((item, index) => {
+                        currentText += item;
+                        if (index === nodeIndex) {
+                            newOffset = currentText.length;
+                        }
+                    });
                     const theLastList: string[] = [];
                     for (let index = currentRefIndex; index <= selections.length - 1; index++) {
                         const selection = selections[index];
@@ -159,16 +176,17 @@ export const useSheetSelectionChange = (
                             sheetName: getSheetNameById(rangeSheetId),
                         };
                         const isAcrossSheet = rangeSheetId !== subUnitId;
-                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet, sheetName);
                         theLastList.push(refRanges[0]);
                     }
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
                     const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
                     const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, result.length, true);
+                    handleRangeChange(result, newOffset ?? result.length, true);
                 }
             };
-            const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+            const disposableCollection = new DisposableCollection();
+            disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections);
                 isScalingRef.current = false;
                 if (scalingOptionRef.current) {
@@ -176,15 +194,10 @@ export const useSheetSelectionChange = (
                     handleRangeChange(result, offset || -1, true);
                     scalingOptionRef.current = undefined;
                 }
-            });
-
-            // const d2 = refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
-            //     handleSelectionsChange(selections);
-            // });
+            }));
 
             return () => {
-                d1.unsubscribe();
-                // d2.unsubscribe();
+                disposableCollection.dispose();
             };
         }
     }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed]);
@@ -260,14 +273,19 @@ export const useSheetSelectionChange = (
                         map((e) => {
                             return serializeRange(e);
                         }),
-                        distinctUntilChanged()
+                        distinctUntilChanged(),
+                        debounceTime(100)
                     ).subscribe((rangeText) => {
                         isScalingRef.current = true;
                         handleSequenceNodeReplace(rangeText, index);
                     }));
                 });
             };
-            const dispose = merge(editor.input$, refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)).subscribe(() => {
+            const dispose = merge(
+                editor.input$,
+                refSelectionsService.selectionSet$,
+                refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)
+            ).subscribe(() => {
                 reListen();
             });
 
@@ -277,4 +295,80 @@ export const useSheetSelectionChange = (
             };
         }
     }, [isNeed, refSelectionsRenderService, editor]);
+
+    useEffect(() => {
+        if (listenSelectionSet) {
+            const d = commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id !== SetSelectionsOperation.id) {
+                    return;
+                }
+
+                const params = commandInfo.params as ISetSelectionsOperationParams;
+                if (params.extra !== 'formula-editor') {
+                    return;
+                }
+                const { selections } = params;
+                if (selections.length) {
+                    const last = selections[selections.length - 1];
+                    if (last) {
+                        const range = last.range;
+                        const sheetId = subUnitId;
+                        const unitRangeName = {
+                            range,
+                            unitId: params.unitId === unitId ? '' : params.unitId,
+                            sheetName: params.subUnitId === sheetId ? '' : getSheetNameById(sheetId),
+                        };
+                        const sequenceNodes = [...sequenceNodesRef.current];
+                        const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet, sheetName);
+                        const result = refRanges[0];
+                        let lastNode = sequenceNodes[sequenceNodes.length - 1];
+                        if (typeof lastNode === 'object' && lastNode.nodeType === sequenceNodeType.REFERENCE) {
+                            lastNode = { ...lastNode };
+                            lastNode.token = result;
+                            lastNode.endIndex = lastNode.startIndex + result.length;
+                            sequenceNodes[sequenceNodes.length - 1] = lastNode;
+                            const refStr = sequenceNodeToText(sequenceNodes);
+                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        } else {
+                            const start = getOffsetFromSequenceNodes(sequenceNodes);
+                            sequenceNodes.push({
+                                nodeType: sequenceNodeType.REFERENCE,
+                                token: result,
+                                startIndex: start,
+                                endIndex: start + result.length,
+                            });
+
+                            const refStr = sequenceNodeToText(sequenceNodes);
+                            handleRangeChange(refStr, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        }
+                    }
+                }
+            });
+
+            return () => {
+                d.dispose();
+            };
+        }
+    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+        const sub = docSelectionManagerService.textSelection$.subscribe((e) => {
+            const { unitId } = e;
+            if (unitId !== editor.getEditorId()) {
+                return;
+            }
+
+            const focusingRef = getFocusingReference(editor, refSelectionRef.current);
+            if (focusingRef) {
+                refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
+            } else {
+                refSelectionsRenderService?.resetActiveSelectionIndex();
+            }
+        });
+
+        return () => sub.unsubscribe();
+    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, sequenceNodesRef]);
 };

@@ -16,14 +16,15 @@
 
 import type { ICellData, IContextService, Nullable } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
-import { CellValueType, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, isFormulaId, isFormulaString } from '@univerjs/core';
+import { CellValueType, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, isFormulaId, isFormulaString } from '@univerjs/core';
 import { ERROR_TYPE_SET, stripErrorMargin } from '@univerjs/engine-formula';
 
 export function whenEditorStandalone(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_DOC) &&
-        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR)
+        // &&
+        // contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
     );
 }
 

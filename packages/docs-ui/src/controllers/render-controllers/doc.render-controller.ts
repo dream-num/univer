@@ -178,6 +178,16 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.changeSkeleton(skeleton);
         docBackground.changeSkeleton(skeleton);
 
+        const { unitId } = this._context;
+
+        // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
+            this._context.mainComponent?.makeDirty();
+
+            return;
+        }
+
         this._recalculateSizeBySkeleton(skeleton);
     }
 

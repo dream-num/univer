@@ -115,6 +115,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         endColumn: -1,
     };
 
+    protected _activeControlIndex = -1;
+
     /**
      * the posX of viewport when the pointer down
      */
@@ -419,6 +421,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         );
     }
 
+    setActiveSelectionIndex(index: number) {
+        this._activeControlIndex = index;
+    }
+
+    resetActiveSelectionIndex(): void {
+        this._activeControlIndex = -1;
+    }
+
     /**
      * get active(actually last) selection control
      * @returns T extends SelectionControl
@@ -426,7 +436,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     getActiveSelectionControl<T extends SelectionControl = SelectionControl>(): Nullable<T> {
         const controls = this.getSelectionControls();
         if (controls) {
-            return controls[controls.length - 1] as T;
+            if (this._activeControlIndex < 0) {
+                return controls[controls.length - 1] as T;
+            }
+
+            return controls[this._activeControlIndex] as T;
         }
     }
 

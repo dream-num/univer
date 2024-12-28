@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Workbook } from '@univerjs/core';
+import type { ITextRun, Nullable, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { genFormulaRefSelectionStyle } from '../../../common/selection';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-interface IRefSelection {
+export interface IRefSelection {
     refIndex: number;
     themeColor: string;
     token: string;
+    startIndex: number;
+    endIndex: number;
+    index: number;
 }
 
 /**
@@ -50,7 +54,7 @@ export function useSheetHighlight(unitId: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = (refSelections: IRefSelection[]) => {
+    const highlightSheet = useCallback((refSelections: IRefSelection[], focusingRef: Nullable<IRefSelection>) => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -94,17 +98,32 @@ export function useSheetHighlight(unitId: string) {
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
         }
-    };
+
+        if (focusingRef) {
+            refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
+        } else {
+            refSelectionsRenderService?.resetActiveSelectionIndex();
+        }
+    }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, univerInstanceService]);
+
+    useEffect(() => {
+        return () => {
+            refSelectionsRenderService?.resetActiveSelectionIndex();
+        };
+    }, [refSelectionsRenderService]);
+
     return highlightSheet;
 }
 
 export function useDocHight(_leadingCharacter: string = '') {
     const descriptionService = useDependency(IDescriptionService);
     const colorMap = useColor();
+    const commandService = useDependency(ICommandService);
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
-    const highlightDoc = (editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true) => {
+    const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true, clearTextRun = true) => {
         const data = editor.getDocumentData();
+        const editorId = editor.getEditorId();
         if (!data) {
             return [];
         }
@@ -114,9 +133,13 @@ export function useDocHight(_leadingCharacter: string = '') {
         }
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            cloneBody.textRuns = [];
-            const cloneData = { ...data, body: cloneBody };
-            editor.setDocumentData(cloneData);
+            if (clearTextRun) {
+                cloneBody.textRuns = [];
+                commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
+                    unitId: editorId,
+                    body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
+                });
+            }
             return [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
@@ -146,15 +169,25 @@ export function useDocHight(_leadingCharacter: string = '') {
                 });
             }
 
-            const cloneData = { ...data, body: cloneBody };
-            editor.setDocumentData(cloneData, selections);
+            commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
+                unitId: editorId,
+                body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
+                textRanges: selections,
+            });
             return refSelections;
         }
-    };
+    }, [commandService, descriptionService, colorMap, leadingCharacterLength, _leadingCharacter]);
     return highlightDoc;
 }
 
-export function useColor() {
+interface IColorMap {
+    formulaRefColors: string[];
+    numberColor: string;
+    stringColor: string;
+    plainTextColor: string;
+}
+
+export function useColor(): IColorMap {
     const themeService = useDependency(ThemeService);
     const style = themeService.getCurrentTheme();
     const result = useMemo(() => {
@@ -174,17 +207,15 @@ export function useColor() {
         ];
         const numberColor = style.hyacinth700;
         const stringColor = style.verdancy800;
-        return { formulaRefColors, numberColor, stringColor };
+        const plainTextColor = style.colorBlack;
+        return { formulaRefColors, numberColor, stringColor, plainTextColor };
     }, [style]);
     return result;
 }
 
-export function buildTextRuns(descriptionService: IDescriptionService, colorMap: {
-    formulaRefColors: string[];
-    numberColor: string;
-    stringColor: string;
-}, sequenceNodes: Array<ISequenceNode | string>) {
-    const { formulaRefColors, numberColor, stringColor } = colorMap;
+// eslint-disable-next-line max-lines-per-function
+export function buildTextRuns(descriptionService: IDescriptionService, colorMap: IColorMap, sequenceNodes: Array<ISequenceNode | string>) {
+    const { formulaRefColors, numberColor, stringColor, plainTextColor } = colorMap;
     const textRuns: ITextRun[] = [];
     const refSelections: IRefSelection[] = [];
     const themeColorMap = new Map<string, string>();
@@ -199,10 +230,24 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
             textRuns.push({
                 st: start,
                 ed: end,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
+                    },
+                },
             });
             continue;
         }
         if (descriptionService.hasDefinedNameDescription(node.token.trim())) {
+            textRuns.push({
+                st: node.startIndex,
+                ed: node.endIndex + 1,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
+                    },
+                },
+            });
             continue;
         }
         const { startIndex, endIndex, nodeType, token } = node;
@@ -221,6 +266,9 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                 refIndex: i,
                 themeColor,
                 token,
+                startIndex: node.startIndex,
+                endIndex: node.endIndex,
+                index: refSelections.length,
             });
         } else if (nodeType === sequenceNodeType.NUMBER) {
             themeColor = numberColor;
@@ -237,6 +285,16 @@ export function buildTextRuns(descriptionService: IDescriptionService, colorMap:
                 ts: {
                     cl: {
                         rgb: themeColor,
+                    },
+                },
+            });
+        } else {
+            textRuns.push({
+                st: startIndex,
+                ed: endIndex + 1,
+                ts: {
+                    cl: {
+                        rgb: plainTextColor,
                     },
                 },
             });

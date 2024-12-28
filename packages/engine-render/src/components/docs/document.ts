@@ -177,6 +177,7 @@ export class Documents extends DocComponent {
                 pagePaddingBottom,
                 verticalAlign
             );
+
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle, verticalOffsetNoAngle);
             const centerAngle = degToRad(centerAngleDeg);
             const vertexAngle = degToRad(vertexAngleDeg);

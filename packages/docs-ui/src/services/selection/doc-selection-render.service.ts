@@ -21,8 +21,8 @@ import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
+import { ILayoutService, KeyCode } from '@univerjs/ui';
+import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
 
@@ -54,6 +54,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
+
+    readonly onChangeByEvent$ = merge(
+        this._onInput$,
+        this._onKeydown$.pipe(filter((e) => (e.event as KeyboardEvent).keyCode === KeyCode.BACKSPACE)),
+        this._onCompositionend$
+    );
 
     private readonly _onPaste$ = new Subject<IEditorInputConfig>();
     readonly onPaste$ = this._onPaste$.asObservable();
@@ -99,9 +105,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _isIMEInputApply = false;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
-    private _editorFocusing = true;
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
+
+    get isFocusing() {
+        return this._input === document.activeElement;
+    }
+
+    get canFocusing() {
+        return this.isFocusing || document.activeElement === document.body || document.activeElement === null;
+    }
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -305,12 +318,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        if (isFocusing || force) {
+        if (this.canFocusing || force) {
             this.focus();
         }
     }
@@ -320,30 +332,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     focus(): void {
-        if (!this._editorFocusing) {
-            return;
-        }
         this._input.focus();
     }
 
     blur() {
         this._input.blur();
-    }
-
-    /**
-     * @deprecated
-     */
-    focusEditor(): void {
-        this._editorFocusing = true;
-        this.focus();
-    }
-
-    /**
-     * @deprecated
-     */
-    blurEditor(): void {
-        this._editorFocusing = false;
-        this.blur();
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
@@ -448,7 +441,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     // Handle pointer down.
     // eslint-disable-next-line max-lines-per-function, complexity
     __onPointDown(evt: IPointerEvent | IMouseEvent) {
-        this._editorFocusing = true;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
@@ -700,6 +692,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.contentEditable = 'true';
 
         this._input.classList.add('univer-editor');
+        this._input.id = `__editor_${this._context.unitId}`;
         this._input.style.cssText = `
             position: absolute;
             overflow: hidden;

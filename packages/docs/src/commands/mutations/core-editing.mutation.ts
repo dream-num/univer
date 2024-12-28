@@ -101,7 +101,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         documentViewModel.reset(documentDataModel);
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
-        if (!noNeedSetTextRange && textRanges && trigger != null) {
+        if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {
             queueMicrotask(() => {
                 docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
             });

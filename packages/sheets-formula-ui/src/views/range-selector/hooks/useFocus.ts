@@ -15,26 +15,26 @@
  */
 
 import type { Editor } from '@univerjs/docs-ui';
-import { useMemo } from 'react';
+import { Tools } from '@univerjs/core';
+import { useCallback } from 'react';
 
 export const useFocus = (editor?: Editor) => {
-    const focus = useMemo(() => {
-        return () => {
-            if (editor) {
-                editor.focus();
-                const selections = [...editor.getSelectionRanges()];
-                if (selections.length) {
-                    editor.setSelectionRanges(selections);
-                }
-                // end
-                if (!selections.length) {
-                    const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
-                    const offset = Math.max(body.length - 2, 0);
-                    editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                }
+    const focus = useCallback((offset?: number) => {
+        if (editor) {
+            editor.focus();
+            const selections = [...editor.getSelectionRanges()];
+            if (Tools.isDefine(offset)) {
+                editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+            } else if (selections.length) {
+                editor.setSelectionRanges(selections);
+            } else {
+                const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
+                const offset = Math.max(body.length - 2, 0);
+                editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
             }
         };
     }, [editor]);
+
     return focus;
 };
 

@@ -36,7 +36,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY, IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { combineLatest, filter, takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -54,7 +54,8 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -72,17 +73,12 @@ export class FormulaEditorController extends RxDisposable {
 
         this._create(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
-        this._textSelectionManagerService.textSelection$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            const { unitId } = param;
-            // Mark formula editor as non-focused, when current selection is not in formula editor.
-            if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+        this.disposeWithMe(this._editorService.focus$.subscribe(() => {
+            const focusUnitId = this._editorService.getFocusEditor()?.getEditorId();
+            if (focusUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
                 this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, false);
-                this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
-        });
+        }));
     }
 
     private _handleContentChange() {

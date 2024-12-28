@@ -30,7 +30,9 @@ export class FUserManager extends FBase {
     /**
      * Get current user info
      * @example
-     * `univerAPI.getUserManager().getCurrentUser()`
+     * ```
+     * univerAPI.getUserManager().getCurrentUser()
+     * ```
      */
     getCurrentUser(): IUser {
         return this._userManagerService.getCurrentUser();

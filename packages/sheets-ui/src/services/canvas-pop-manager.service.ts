@@ -18,9 +18,9 @@ import type { DrawingTypeEnum, ICommandInfo, INeedCheckDisposable, IRange, Nulla
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } from '@univerjs/sheets';
 import type { IPopup } from '@univerjs/ui';
-import { Disposable, DisposableCollection, ICommandService, Inject, Injector, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, getSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
@@ -53,7 +53,8 @@ export class SheetCanvasPopManagerService extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(Injector) private readonly _injector: Injector
+        @IRefSelectionsService private readonly _refSelectionsService: ISheetSelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
 
@@ -63,14 +64,24 @@ export class SheetCanvasPopManagerService extends Disposable {
     private _isSelectionMoving = false;
 
     private _initMoving() {
-        const slectionService = getSelectionsService(this._injector);
         this.disposeWithMe(
-            slectionService.selectionMoving$.subscribe(() => {
+            this._refSelectionsService.selectionMoving$.subscribe(() => {
                 this._isSelectionMoving = true;
             })
         );
         this.disposeWithMe(
-            slectionService.selectionMoveEnd$.subscribe(() => {
+            this._refSelectionsService.selectionMoveEnd$.subscribe(() => {
+                this._isSelectionMoving = false;
+            })
+        );
+
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoving$.subscribe(() => {
+                this._isSelectionMoving = true;
+            })
+        );
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
                 this._isSelectionMoving = false;
             })
         );

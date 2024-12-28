@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable } from '@univerjs/core';
-import type { IRangeThemeStyleItem } from './range-theme-util';
+import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
 import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, RTree, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
@@ -85,6 +85,34 @@ export class SheetRangeThemeModel extends Disposable {
         rTreeCollection.insert({ unitId, sheetId: subUnitId, range, id });
     }
 
+    getRegisteredRangeThemeStyle(rangeInfo: IRangeThemeRangeInfo): string | undefined {
+        const { unitId, subUnitId, range } = rangeInfo;
+        const rTreeCollection = this._ensureRTreeCollection(unitId);
+        const themes = Array.from(rTreeCollection.bulkSearch([{ unitId, sheetId: subUnitId, range }]));
+        if (themes[0]) {
+            const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+            const themeRule = themeRuleMap.get(themes[0] as string);
+            if (themeRule) {
+                return themeRule.themeName;
+            }
+        }
+        return undefined;
+    }
+
+    removeRangeThemeRule(themeName: string, rangeInfo: IRangeThemeRangeInfo): void {
+        const { unitId, subUnitId, range } = rangeInfo;
+        const rTreeCollection = this._ensureRTreeCollection(unitId);
+        const themes = Array.from(rTreeCollection.bulkSearch([{ unitId, sheetId: subUnitId, range }]));
+        if (themes[0]) {
+            const themeRuleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+            const themeRule = themeRuleMap.get(themes[0] as string);
+            if (themeRule && themeRule.themeName === themeName) {
+                themeRuleMap.delete(themes[0] as string);
+                rTreeCollection.remove({ unitId, sheetId: subUnitId, range, id: themes[0] as string });
+            }
+        }
+    }
+
     registerDefaultRangeTheme(rangeThemeStyle: RangeThemeStyle): void {
         this._defaultRangeThemeMap.set(rangeThemeStyle.getName(), rangeThemeStyle);
     }
@@ -116,7 +144,7 @@ export class SheetRangeThemeModel extends Disposable {
                 const offsetRow = row - rangeInfo.range.startRow;
                 const offsetCol = col - rangeInfo.range.startColumn;
                 const theme = this.getRangeThemeStyle(unitId, themeName);
-                return theme.getStyle(offsetRow, offsetCol);
+                return theme.getStyle(offsetRow, offsetCol, row === rangeInfo.range.endRow, col === rangeInfo.range.endColumn);
             }
         }
         return undefined;
@@ -141,16 +169,18 @@ export class SheetRangeThemeModel extends Disposable {
     }
 
     toJson(unitId: string) {
+        // deserialize registered range theme style rule
         const ruleMap = this._ensureRangeThemeStyleRuleMap(unitId);
         const rangeThemeStyleRuleMap: Record<string, IRangeThemeStyleRule> = {};
         ruleMap.forEach((value, key) => {
             rangeThemeStyleRuleMap[key] = value;
         });
 
+        // deserialize custom range theme style
         const rangeThemeStyleMap = this._ensureRangeThemeStyleMap(unitId);
-        const rangeThemeStyleMapJson: Record<string, Record<string, string>> = {};
+        const rangeThemeStyleMapJson: Record<string, IRangeThemeStyleJSON> = {};
         rangeThemeStyleMap.forEach((value, key) => {
-            rangeThemeStyleMapJson[key] = value.toJSON();
+            rangeThemeStyleMapJson[key] = value.toJson();
         });
 
         return JSON.stringify({
@@ -176,7 +206,7 @@ export class SheetRangeThemeModel extends Disposable {
         Object.keys(rangeThemeStyleMapJson).forEach((key) => {
             const styleMap = rangeThemeStyleMapJson[key];
             const style = new RangeThemeStyle(styleMap.name);
-            style.fromJSON(styleMap);
+            style.fromJson(styleMap);
             this._ensureRangeThemeStyleMap(key).set(style.getName(), style);
         });
     }

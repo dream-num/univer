@@ -18,24 +18,118 @@ import type { IStyleData, Nullable } from '@univerjs/core';
 
 export type IRangeThemeStyleItem = Pick<IStyleData, 'bg' | 'ol' | 'bd' | 'cl'>;
 
+export interface IRangeThemeStyleJSON {
+    name: string;
+    wholeStyle?: IRangeThemeStyleItem;
+    headerRowStyle?: IRangeThemeStyleItem;
+    headerColumnStyle?: IRangeThemeStyleItem;
+    firstRowStyle?: IRangeThemeStyleItem;
+    secondRowStyle?: IRangeThemeStyleItem;
+    lastRowStyle?: IRangeThemeStyleItem;
+    firstColumnStyle?: IRangeThemeStyleItem;
+    secondColumnStyle?: IRangeThemeStyleItem;
+    lastColumnStyle?: IRangeThemeStyleItem;
+}
+
+const serializeRangeStyle = (style: IRangeThemeStyleItem) => {
+    const result = {} as IRangeThemeStyleItem;
+    if (style.bg) {
+        result.bg = { ...style.bg };
+    }
+    if (style.ol) {
+        result.ol = { ...style.ol };
+    }
+    if (style.bd) {
+        result.bd = { ...style.bd };
+    }
+    if (style.cl) {
+        result.cl = { ...style.cl };
+    }
+    return result;
+};
+
+function composeStyles(styles: IStyleData[]): IRangeThemeStyleItem {
+    const composedStyle: IRangeThemeStyleItem = {};
+
+    for (const style of styles) {
+        if (style.bg) {
+            composedStyle.bg = style.bg;
+        }
+        if (style.ol) {
+            composedStyle.ol = style.ol;
+        }
+        if (style.bd) {
+            composedStyle.bd = { ...composedStyle.bd, ...style.bd };
+        }
+        if (style.cl) {
+            composedStyle.cl = style.cl;
+        }
+    }
+
+    return composedStyle;
+}
+
+const STYLE_MAP = {
+    wholeStyle: 1,
+    headerRowStyle: 2,
+    headerColumnStyle: 4,
+    firstRowStyle: 8,
+    secondRowStyle: 16,
+    lastRowStyle: 32,
+    firstColumnStyle: 128,
+    secondColumnStyle: 256,
+    lastColumnStyle: 512,
+};
+
 /**
  * Range theme style
  * @description The range theme style is used to set the style of the range.
  */
 export class RangeThemeStyle {
     private readonly _name: string;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} wholeStyle effect for the whole range.
+     */
     wholeStyle: Nullable<IRangeThemeStyleItem> = null;
 
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} headerRowStyle effect for the header row.
+     */
     headerRowStyle: Nullable<IRangeThemeStyleItem> = null;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} headerColumnStyle effect for the header column.
+     */
     headerColumnStyle: Nullable<IRangeThemeStyleItem> = null;
 
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} firstRowStyle effect for the first row.
+     */
     firstRowStyle: Nullable<IRangeThemeStyleItem> = null;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} secondRowStyle effect for the second row.
+     */
     secondRowStyle: Nullable<IRangeThemeStyleItem> = null;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} lastRowStyle effect for the last row.
+     */
     lastRowStyle: Nullable<IRangeThemeStyleItem> = null;
-
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} effect for the first column.
+     */
     firstColumnStyle: Nullable<IRangeThemeStyleItem> = null;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} effect for the second column.
+     */
     secondColumnStyle: Nullable<IRangeThemeStyleItem> = null;
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} effect for the last column.
+     */
     lastColumnStyle: Nullable<IRangeThemeStyleItem> = null;
+
+    /**
+     * @property {Nullable<IRangeThemeStyleItem>} quickly get merge style
+     */
+    private _mergeCacheMap: Map<number, IRangeThemeStyleItem> = new Map();
     /**
      * @constructor
      * @param {string} name The name of the range theme style, it used to identify the range theme style.
@@ -44,6 +138,10 @@ export class RangeThemeStyle {
         this._name = name;
     }
 
+    /**
+     * Gets the name of the range theme style.The name is read only, and use to identifier the range theme style.
+     * @returns {string} The name of the range theme style.
+     */
     getName(): string {
         return this._name;
     }
@@ -120,49 +218,177 @@ export class RangeThemeStyle {
         this.headerColumnStyle = style;
     }
 
-    public getStyle(offsetRow: number, offsetCol: number) {
-        if (offsetCol === 0) {
-            return this.headerColumnStyle;
+    public getStyle(offsetRow: number, offsetCol: number, isLastRow: boolean, isLastCol: boolean) {
+        let mergeNumber = 0;
+
+        if (isLastRow) {
+            mergeNumber = mergeNumber | STYLE_MAP.lastRowStyle;
         }
-        if (offsetRow === 0) {
-            return this.headerRowStyle;
+
+        if (isLastCol) {
+            mergeNumber = mergeNumber | STYLE_MAP.lastColumnStyle;
         }
-        if (offsetRow % 2 === 0) {
-            return this.firstRowStyle;
+
+        if (offsetRow >= 0 && offsetCol >= 0) {
+            mergeNumber = mergeNumber | STYLE_MAP.wholeStyle;
         }
+
         if (offsetRow % 2 === 1) {
-            return this.secondRowStyle;
+            mergeNumber = mergeNumber | STYLE_MAP.firstRowStyle;
         }
-        if (this.wholeStyle && offsetRow >= 0 && offsetCol >= 0) {
-            return this.wholeStyle;
+
+        if (offsetRow % 2 === 0 && offsetRow !== 0) {
+            mergeNumber = mergeNumber | STYLE_MAP.secondRowStyle;
         }
+
+        if (offsetRow === 0) {
+            mergeNumber = mergeNumber | STYLE_MAP.headerRowStyle;
+        }
+
+        if (offsetCol === 0) {
+            mergeNumber = mergeNumber | STYLE_MAP.headerColumnStyle;
+        }
+
+        if (offsetCol % 2 === 1) {
+            mergeNumber = mergeNumber | STYLE_MAP.firstColumnStyle;
+        }
+
+        if (offsetCol % 2 === 0 && offsetCol !== 0) {
+            mergeNumber = mergeNumber | STYLE_MAP.secondColumnStyle;
+        }
+
+         // it means no style should be merged
+        if (mergeNumber === 0) {
+            return null;
+        }
+        return this._getMergeStyle(mergeNumber);
     }
 
-    toJSON(): Record<string, string> {
-        return {
+    private _getMergeStyle(mergeNumber: number) {
+        let style = this._mergeCacheMap.get(mergeNumber);
+        if (!style) {
+            style = this._mergeStyle(mergeNumber);
+            this._mergeCacheMap.set(mergeNumber, style);
+        }
+        return style;
+    }
+
+    private _mergeStyle(mergeNumber: number): IRangeThemeStyleItem {
+        const rs: IRangeThemeStyleItem[] = [];
+        if (this.wholeStyle && (mergeNumber & STYLE_MAP.wholeStyle)) {
+            rs.push(this.wholeStyle);
+        }
+        if (this.headerRowStyle && (mergeNumber & STYLE_MAP.headerRowStyle)) {
+            rs.push(this.headerRowStyle);
+        }
+        if (this.headerColumnStyle && (mergeNumber & STYLE_MAP.headerColumnStyle) && !(mergeNumber & STYLE_MAP.headerRowStyle)) {
+            rs.push(this.headerColumnStyle);
+        }
+        if (this.firstRowStyle && (mergeNumber & STYLE_MAP.firstRowStyle)) {
+            rs.push(this.firstRowStyle);
+        }
+        if (this.secondRowStyle && (mergeNumber & STYLE_MAP.secondRowStyle)) {
+            rs.push(this.secondRowStyle);
+        }
+        if (this.lastRowStyle && (mergeNumber & STYLE_MAP.lastRowStyle)) {
+            rs.push(this.lastRowStyle);
+        }
+        if (this.firstColumnStyle && (mergeNumber & STYLE_MAP.firstColumnStyle)) {
+            rs.push(this.firstColumnStyle);
+        }
+        if (this.secondColumnStyle && (mergeNumber & STYLE_MAP.secondColumnStyle)) {
+            rs.push(this.secondColumnStyle);
+        }
+        if (this.lastColumnStyle && (mergeNumber & STYLE_MAP.lastColumnStyle)) {
+            rs.push(this.lastColumnStyle);
+        }
+
+        return composeStyles(rs as IStyleData[]);
+    }
+
+    toJson(): IRangeThemeStyleJSON {
+        const jsonData: IRangeThemeStyleJSON = {
             name: this._name,
-            wholeStyle: JSON.stringify(this.wholeStyle),
-            headerRowStyle: JSON.stringify(this.headerRowStyle),
-            headerColumnStyle: JSON.stringify(this.headerColumnStyle),
-            firstRowStyle: JSON.stringify(this.firstRowStyle),
-            secondRowStyle: JSON.stringify(this.secondRowStyle),
-            lastRowStyle: JSON.stringify(this.lastRowStyle),
-            firstColumnStyle: JSON.stringify(this.firstColumnStyle),
-            secondColumnStyle: JSON.stringify(this.secondColumnStyle),
-            lastColumnStyle: JSON.stringify(this.lastColumnStyle),
         };
+
+        if (this.wholeStyle) {
+            jsonData.wholeStyle = serializeRangeStyle(this.wholeStyle)!;
+        }
+
+        if (this.headerRowStyle) {
+            jsonData.headerRowStyle = serializeRangeStyle(this.headerRowStyle)!;
+        }
+
+        if (this.headerColumnStyle) {
+            jsonData.headerColumnStyle = serializeRangeStyle(this.headerColumnStyle)!;
+        }
+
+        if (this.firstRowStyle) {
+            jsonData.firstRowStyle = serializeRangeStyle(this.firstRowStyle)!;
+        }
+
+        if (this.secondRowStyle) {
+            jsonData.secondRowStyle = serializeRangeStyle(this.secondRowStyle)!;
+        }
+
+        if (this.lastRowStyle) {
+            jsonData.lastRowStyle = serializeRangeStyle(this.lastRowStyle)!;
+        }
+
+        if (this.firstColumnStyle) {
+            jsonData.firstColumnStyle = serializeRangeStyle(this.firstColumnStyle)!;
+        }
+
+        if (this.secondColumnStyle) {
+            jsonData.secondColumnStyle = serializeRangeStyle(this.secondColumnStyle)!;
+        }
+
+        if (this.lastColumnStyle) {
+            jsonData.lastColumnStyle = serializeRangeStyle(this.lastColumnStyle)!;
+        }
+        return jsonData;
     }
 
-    fromJSON(json: Record<string, string>): void {
-        this.wholeStyle = JSON.parse(json.wholeStyle);
-        this.headerRowStyle = JSON.parse(json.headerRowStyle);
-        this.headerColumnStyle = JSON.parse(json.headerColumnStyle);
-        this.firstRowStyle = JSON.parse(json.firstRowStyle);
-        this.secondRowStyle = JSON.parse(json.secondRowStyle);
-        this.lastRowStyle = JSON.parse(json.lastRowStyle);
-        this.firstColumnStyle = JSON.parse(json.firstColumnStyle);
-        this.secondColumnStyle = JSON.parse(json.secondColumnStyle);
-        this.lastColumnStyle = JSON.parse(json.lastColumnStyle);
+    fromJson(json: IRangeThemeStyleJSON): void {
+        if (json.wholeStyle) {
+            this.wholeStyle = serializeRangeStyle(json.wholeStyle);
+        }
+
+        if (json.headerRowStyle) {
+            this.headerRowStyle = serializeRangeStyle(json.headerRowStyle);
+        }
+
+        if (json.headerColumnStyle) {
+            this.headerColumnStyle = serializeRangeStyle(json.headerColumnStyle);
+        }
+
+        if (json.firstRowStyle) {
+            this.firstRowStyle = serializeRangeStyle(json.firstRowStyle);
+        }
+
+        if (json.secondRowStyle) {
+            this.secondRowStyle = serializeRangeStyle(json.secondRowStyle);
+        }
+
+        if (json.lastRowStyle) {
+            this.lastRowStyle = serializeRangeStyle(json.lastRowStyle);
+        }
+
+        if (json.firstColumnStyle) {
+            this.firstColumnStyle = serializeRangeStyle(json.firstColumnStyle);
+        }
+
+        if (json.secondColumnStyle) {
+            this.secondColumnStyle = serializeRangeStyle(json.secondColumnStyle);
+        }
+
+        if (json.lastColumnStyle) {
+            this.lastColumnStyle = serializeRangeStyle(json.lastColumnStyle);
+        }
+    }
+
+    dispose(): void {
+        this._mergeCacheMap.clear();
     }
 }
 

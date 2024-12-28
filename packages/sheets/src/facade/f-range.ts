@@ -19,7 +19,7 @@ import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISet
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -775,12 +775,64 @@ export class FRange extends FBaseInitialable {
         });
     }
 
+    /**
+     * Set the theme style for the range.
+     * @param {string} themeName The name of the theme style to apply.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.useThemeStyle('default');
+     * ```
+     */
     useThemeStyle(themeName: string): void {
-        const rangeInfo = {
-            range: this._range,
-            unitId: this.getUnitId(),
+        this._commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
+            unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
-        };
-        this._injector.get(SheetRangeThemeService).registerRangeThemeStyle(themeName, rangeInfo);
+            range: this._range,
+            themeName,
+        });
+    }
+
+    /**
+     * Remove the theme style for the range.
+     * @param {string} themeName The name of the theme style to remove.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.removeThemeStyle('default');
+     * ```
+     */
+    removeThemeStyle(themeName: string): void {
+        this._commandService.executeCommand(DeleteWorksheetRangeThemeStyleCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            themeName,
+        });
+    }
+
+    /**
+     * Gets the theme style applied to the range.
+     * @returns {string | undefined} The name of the theme style applied to the range or not exist.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.useThemeStyle('default');
+     * const themeStyle = fRange.getUsedThemeStyle();
+     * console.log(themeStyle); // 'default'
+     * ```
+     */
+    getUsedThemeStyle(): string | undefined {
+        return this._injector.get(SheetRangeThemeService).getRegisteredRangeThemeStyle({
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+        });
     }
 }

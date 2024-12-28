@@ -20,6 +20,7 @@ import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { AddWorksheetProtectionCommand } from '../commands/commands/add-worksheet-protection.command';
+import { SetWorksheetRangeThemeStyleCommand } from '../commands/commands/add-worksheet-range-theme.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
@@ -28,6 +29,7 @@ import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-mo
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
 import { DeleteRangeProtectionCommand } from '../commands/commands/delete-range-protection.command';
 import { DeleteWorksheetProtectionCommand } from '../commands/commands/delete-worksheet-protection.command';
+import { DeleteWorksheetRangeThemeStyleCommand } from '../commands/commands/delete-worksheet-range-theme.command';
 import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
@@ -106,20 +108,22 @@ import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.co
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
+import { SetWorksheetRangeThemeStyleMutation } from '../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
+import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 
+import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
-
 import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
@@ -309,6 +313,12 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetDefaultStyleCommand,
 
                 SplitTextToColumnsCommand,
+
+                SetWorksheetRangeThemeStyleCommand,
+                DeleteWorksheetRangeThemeStyleCommand,
+                DeleteWorksheetRangeThemeStyleMutation,
+                SetWorksheetRangeThemeStyleMutation,
+
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

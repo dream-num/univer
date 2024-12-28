@@ -16,7 +16,7 @@
 
 import type { IAnchor } from '../utils/anchor';
 import type { IConditionFormattingRule, IRuleModel } from './type';
-import { merge, Tools } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { findIndexByAnchor, moveByAnchor } from '../utils/anchor';
 
@@ -79,7 +79,7 @@ export class ConditionalFormattingRuleModel {
         const oldRule = list.find((item) => item.cfId === oldCfId);
         if (oldRule) {
             const cloneRule = Tools.deepClone(oldRule);
-            merge(oldRule, rule);
+            Object.assign(oldRule, rule);
             this._ruleChange$.next({ rule: oldRule, subUnitId, unitId, type: 'set', oldRule: cloneRule });
         }
     }

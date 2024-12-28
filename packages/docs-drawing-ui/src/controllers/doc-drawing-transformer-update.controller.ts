@@ -80,7 +80,6 @@ export class DocDrawingTransformerController extends Disposable {
     private _listenDrawingFocus(): void {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((drawingParams) => {
-                // console.log('===add$', drawingParams);
                 if (drawingParams.length === 0) {
                     return;
                 }

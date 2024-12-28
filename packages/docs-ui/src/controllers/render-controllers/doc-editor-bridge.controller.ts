@@ -19,10 +19,8 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent } from 'rxjs';
-import { VIEWPORT_KEY } from '../../basics/docs-view-key';
-import { CoverContentCommand } from '../../commands/commands/replace-content.command';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
@@ -43,16 +41,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     }
 
     private _initialize() {
-        this.disposeWithMe(
-            this._editorService.resize$.subscribe((unitId: string) => {
-                if (unitId !== this._context.unitId) {
-                    return;
-                }
-
-                this._resize(unitId);
-            })
-        );
-
         this._editorService.getAllEditor().forEach((editor) => {
             const unitId = editor.getEditorId();
 
@@ -74,11 +62,8 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         this._initialBlur();
 
         this._initialFocus();
-
-        this._initialValueChange();
     }
 
-    // eslint-disable-next-line complexity
     private _resize(unitId: Nullable<string>) {
         if (unitId == null) {
             return;
@@ -114,10 +99,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
 
         const { width, height } = editor.getBoundingClientRect();
 
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-
-        let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
-
         const contentWidth = Math.max(actualWidth, width);
 
         const contentHeight = Math.max(actualHeight, height);
@@ -128,55 +109,27 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         });
 
         mainComponent?.resize(contentWidth, contentHeight);
-
-        if (!editor.isSingle()) {
-            if (actualHeight > height) {
-                if (scrollBar == null) {
-                    viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
-                } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
-                }
-            } else {
-                scrollBar = null;
-                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
-                viewportMain?.getScrollBar()?.dispose();
-            }
-        } else {
-            if (actualWidth > width) {
-                if (scrollBar == null) {
-                    viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
-                } else {
-                    viewportMain?.resetCanvasSizeAndUpdateScroll();
-                }
-            } else {
-                scrollBar = null;
-                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
-                viewportMain?.getScrollBar()?.dispose();
-            }
-        }
     }
 
     private _initialSetValue() {
-        this.disposeWithMe(
-            this._editorService.setValue$.subscribe((param) => {
-                if (param.editorUnitId !== this._context.unitId) {
-                    return;
-                }
+        // this.disposeWithMe(
+        //     this._editorService.setValue$.subscribe((param) => {
+        //         if (param.editorUnitId !== this._context.unitId) {
+        //             return;
+        //         }
 
-                this._commandService.executeCommand(CoverContentCommand.id, {
-                    unitId: param.editorUnitId,
-                    body: param.body,
-                    segmentId: null,
-                });
-            })
-        );
+        //         this._commandService.executeCommand(CoverContentCommand.id, {
+        //             unitId: param.editorUnitId,
+        //             body: param.body,
+        //             segmentId: null,
+        //         });
+        //     })
+        // );
     }
 
     private _initialBlur() {
         this.disposeWithMe(
             this._editorService.blur$.subscribe(() => {
-                // this._docSelectionRenderService.removeAllRanges();
-
                 this._docSelectionRenderService.blur();
             })
         );
@@ -204,16 +157,16 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     }
 
     private _initialFocus() {
-        this.disposeWithMe(
-            this._editorService.focus$.subscribe((textRange) => {
-                if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
-                    return;
-                }
+        // this.disposeWithMe(
+            // this._editorService.focus$.subscribe((textRange) => {
+                // if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
+                //     return;
+                // }
 
-                this._docSelectionRenderService.removeAllRanges();
-                this._docSelectionRenderService.addDocRanges([textRange]);
-            })
-        );
+                // this._docSelectionRenderService.removeAllRanges();
+                // this._docSelectionRenderService.addDocRanges([textRange]);
+            // })
+        // );
 
         const focusExcepts = [
             'univer-formula-search',
@@ -228,11 +181,8 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 const hasSearch = target.classList[0] || '';
 
                 if (checkForSubstrings(hasSearch, focusExcepts)) {
-                    this._editorService.changeSpreadsheetFocusState(true);
                     event.stopPropagation();
-                    return;
                 }
-                this._editorService.changeSpreadsheetFocusState(false);
             })
         );
 
@@ -251,37 +201,9 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 return;
             }
             fromEvent(canvasEle, 'mousedown').subscribe((evt) => {
-                this._editorService.changeSpreadsheetFocusState(true);
                 evt.stopPropagation();
             });
         });
-    }
-
-    private _initialValueChange() {
-        this.disposeWithMe(
-            this._docSelectionRenderService.onCompositionupdate$.subscribe(this._valueChange.bind(this))
-        );
-        this.disposeWithMe(
-            this._docSelectionRenderService.onInput$.subscribe(this._valueChange.bind(this))
-        );
-        this.disposeWithMe(
-            this._docSelectionRenderService.onKeydown$.subscribe(this._valueChange.bind(this))
-        );
-        this.disposeWithMe(
-            this._docSelectionRenderService.onPaste$.subscribe(this._valueChange.bind(this))
-        );
-    }
-
-    private _valueChange() {
-        const { unitId } = this._context;
-
-        const editor = this._editorService.getEditor(unitId);
-
-        if (editor == null || editor.isSheetEditor()) {
-            return;
-        }
-
-        this._editorService.refreshValueChange(unitId);
     }
 
     /**
@@ -305,8 +227,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                     // Only for Text editor?
                     if (editor && !editor.params.scrollBar) {
                         this._resize(unitId);
-
-                        this._valueChange();
                     }
                 }
             })

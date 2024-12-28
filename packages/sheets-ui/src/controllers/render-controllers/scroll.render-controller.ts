@@ -440,9 +440,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const selection = this._getSelectionsService().getCurrentLastSelection();
         if (!selection) return;
 
-        const { startRow, startColumn, actualRow, actualColumn } = selection.primary;
-        const selectionStartRow = targetIsActualRowAndColumn ? actualRow : startRow;
-        const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn : startColumn;
+        const { startRow, startColumn, actualRow, actualColumn } = selection.primary ?? selection.range;
+        const selectionStartRow = targetIsActualRowAndColumn ? actualRow ?? startRow : startRow;
+        const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn ?? startColumn : startColumn;
         this._scrollToCell(selectionStartRow, selectionStartColumn);
     }
 

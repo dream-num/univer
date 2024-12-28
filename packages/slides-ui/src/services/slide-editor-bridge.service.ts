@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable } from '@univerjs/core';
+import type { Engine, IDocumentLayoutObject, RichText, Scene } from '@univerjs/engine-render';
+import type { KeyCode } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import {
     createIdentifier,
     Disposable,
@@ -29,10 +33,6 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { SLIDE_KEY } from '@univerjs/slides';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { IDisposable, IDocumentBody, IDocumentData, IDocumentSettings, IDocumentStyle, IParagraph, IParagraphStyle, IPosition, Nullable } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, RichText, Scene } from '@univerjs/engine-render';
-import type { KeyCode } from '@univerjs/ui';
-import type { Observable } from 'rxjs';
 import { SLIDE_EDITOR_ID } from '../const';
 
 // TODO same as @univerjs/slides/views/render/adaptors/index.js

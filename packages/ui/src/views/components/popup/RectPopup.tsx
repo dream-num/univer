@@ -70,7 +70,9 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     if (direction === 'vertical' || direction.includes('top') || direction.includes('bottom')) {
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
         const verticalStyle = (direction === 'vertical' && endY > containerHeight - height - PUSHING_MINIMUM_GAP) || direction.indexOf('top') > -1
+            // top
             ? { top: Math.max(startY - height, PUSHING_MINIMUM_GAP) }
+            // bottom
             : { top: Math.min(endY, containerHeight - height - PUSHING_MINIMUM_GAP) };
 
         let horizontalStyle;

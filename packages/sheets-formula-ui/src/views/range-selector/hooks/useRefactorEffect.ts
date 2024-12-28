@@ -22,7 +22,7 @@ import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
+export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -30,33 +30,37 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+
     useLayoutEffect(() => {
         if (isNeed) {
-            const d1 = refSelectionsRenderService?.enableSelectionChanging();
-            contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
             contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
                 contextService.setContextValue(EDITOR_ACTIVATED, false);
-                contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
-                d1?.dispose();
-            };
-        }
-    }, [isNeed]);
-
-    useLayoutEffect(() => {
-        if (isNeed) {
-            return () => {
                 refSelectionsService.clear();
             };
         }
     }, [isNeed]);
 
+    useLayoutEffect(() => {
+        if (isNeed && selecting) {
+            const d1 = refSelectionsRenderService?.enableSelectionChanging();
+            contextService.setContextValue(REF_SELECTIONS_ENABLED, true);
+
+            return () => {
+                contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
+                d1?.dispose();
+            };
+        }
+    }, [isNeed, selecting]);
+
     //right context controller
     useEffect(() => {
         if (isNeed) {
+            contextService.setContextValue(EDITOR_ACTIVATED, true);
             contextMenuService.disable();
             return () => {
+                contextService.setContextValue(EDITOR_ACTIVATED, false);
                 contextMenuService.enable();
             };
         }

@@ -34,7 +34,6 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
 
     const formulaTextRef = useRef(formulaText);
     formulaTextRef.current = formulaText;
-
     const reset = () => {
         functionInfoSet(undefined);
         paramIndexSet(-1);
@@ -48,7 +47,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                     const [range] = e.textRanges;
                     if (range.collapsed && isShowRef.current) {
                         // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
-                        const res = lexerTreeBuilder.getFunctionAndParameter(formulaTextRef.current, range.startOffset - 1);
+                        const res = lexerTreeBuilder.getFunctionAndParameter(`${formulaTextRef.current}A`, range.startOffset - 1);
                         if (res) {
                             const { functionName, paramIndex } = res;
                             const info = descriptionService.getFunctionInfo(functionName);
@@ -83,6 +82,8 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     }, [isNeed]);
 
     return {
-        functionInfo, paramIndex, reset,
+        functionInfo,
+        paramIndex,
+        reset,
     };
 };

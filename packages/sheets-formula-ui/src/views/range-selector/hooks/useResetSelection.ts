@@ -17,27 +17,22 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 
-export const useResetSelection = (isNeed: boolean) => {
+export const useResetSelection = (isNeed: boolean, unitId: string, subUnitId: string) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
 
-    const resetSelection = useMemo(() => {
+    const resetSelection = useCallback(() => {
         if (isNeed) {
+            const selections = [...sheetsSelectionsService.getWorkbookSelections(unitId).getSelectionsOfWorksheet(subUnitId)];
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const sheet = workbook?.getActiveSheet();
-            const selections = [...sheetsSelectionsService.getCurrentSelections()];
-            return () => {
-                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                const currentSheet = workbook?.getActiveSheet();
-                if (currentSheet && currentSheet === sheet) {
-                    sheetsSelectionsService.setSelections(selections);
-                }
-            };
-        }
-        return () => { };
-    }, [isNeed]);
+            const currentSheet = workbook?.getActiveSheet();
+            if (currentSheet && currentSheet.getSheetId() === subUnitId) {
+                sheetsSelectionsService.setSelections(selections);
+            }
+        };
+    }, [isNeed, sheetsSelectionsService, subUnitId, unitId, univerInstanceService]);
 
     return resetSelection;
 };

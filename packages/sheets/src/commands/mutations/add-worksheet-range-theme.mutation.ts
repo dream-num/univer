@@ -42,7 +42,7 @@ export const SetWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeTheme
 export const SetWorksheetRangeThemeStyleMutationFactory = (accessor: IAccessor, params: IWorksheetRangeThemeStyleMutationParams) => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetDefaultStyleMutationFactory]: worksheet is null error!');
+        throw new Error('[SetWorksheetRangeThemeStyleMutation]: worksheet is null error!');
     }
 
     const { worksheet } = target;

@@ -42,7 +42,7 @@ export const DeleteWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeTh
 export const DeleteWorksheetRangeThemeStyleMutationFactory = (accessor: IAccessor, params: IWorksheetRangeThemeStyleMutationParams) => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetDefaultStyleMutationFactory]: worksheet is null error!');
+        throw new Error('[DeleteWorksheetRangeThemeStyleMutationFactory]: worksheet is null error!');
     }
 
     const { worksheet } = target;

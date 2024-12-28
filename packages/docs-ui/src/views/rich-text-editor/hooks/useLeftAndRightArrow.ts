@@ -22,11 +22,11 @@ import { useEffect, useRef } from 'react';
 import { MoveCursorOperation, MoveSelectionOperation } from '../../../commands/operations/doc-cursor.operation';
 
 // eslint-disable-next-line max-lines-per-function
-export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: boolean, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
+export const useLeftAndRightArrow = (isNeed: boolean, selectingMode: boolean, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
-    const shouldMoveSelectionRef = useRef(shouldMoveSelection);
-    shouldMoveSelectionRef.current = shouldMoveSelection;
+    const selectingModeRef = useRef(selectingMode);
+    selectingModeRef.current = selectingMode;
     const onMoveInEditorRef = useRef(onMoveInEditor);
     onMoveInEditorRef.current = onMoveInEditor;
 

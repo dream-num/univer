@@ -20,9 +20,10 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
 import { IShortcutService, KeyCode, MetaKeys } from '@univerjs/ui';
 import { useEffect, useRef } from 'react';
+import { FormulaSelectingType } from '../../formula-editor/hooks/useFormulaSelection';
 
 // eslint-disable-next-line max-lines-per-function
-export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: boolean, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
+export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
     const shouldMoveSelectionRef = useRef(shouldMoveSelection);
@@ -81,6 +82,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: boole
                         direction,
                         jumpOver: JumpOver.moveGap,
                         extra: 'formula-editor',
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
                     });
                 } else if (metaKey === MetaKeys.SHIFT) {
                     commandService.executeCommand(ExpandSelectionCommand.id, {
@@ -97,6 +99,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: boole
                     commandService.executeCommand(MoveSelectionCommand.id, {
                         direction,
                         extra: 'formula-editor',
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
                     });
                 }
             } else {

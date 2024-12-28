@@ -59,12 +59,14 @@ export interface IMoveSelectionCommandParams {
     jumpOver?: JumpOver;
     nextStep?: number;
     extra?: string;
+    fromCurrentSelection?: boolean;
 }
 
 export interface IMoveSelectionEnterAndTabCommandParams {
     direction: Direction;
     keycode: KeyCode;
     extra?: string;
+    fromCurrentSelection?: boolean;
 }
 
 /**
@@ -82,7 +84,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selection = getSelectionsService(accessor).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor, params.fromCurrentSelection).getCurrentLastSelection();
         if (!selection) {
             return false;
         }

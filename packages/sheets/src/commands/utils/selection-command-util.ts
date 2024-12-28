@@ -20,10 +20,11 @@ import { IRefSelectionsService } from '../../services/selections/ref-selections.
 import { REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '../../services/selections/selection.service';
 
 export function getSelectionsService(
-    accessor: IAccessor
+    accessor: IAccessor,
+    fromCurrentSelection?: boolean
 ): SheetsSelectionsService {
     const contextService = accessor.get(IContextService);
     const isInRefSelectionMode = contextService.getContextValue(REF_SELECTIONS_ENABLED);
 
-    return accessor.get(isInRefSelectionMode ? IRefSelectionsService : SheetsSelectionsService);
+    return accessor.get(isInRefSelectionMode && !fromCurrentSelection ? IRefSelectionsService : SheetsSelectionsService);
 }

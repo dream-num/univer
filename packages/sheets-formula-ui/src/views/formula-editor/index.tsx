@@ -135,7 +135,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const currentDoc = useObservable(currentDoc$);
     const docFocusing = currentDoc?.getUnitId() === editorId;
     const refSelections = useRef([] as IRefSelection[]);
-    const shouldMoveRefSelection = Boolean(isSelecting);
+    const selectingMode = isSelecting;
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
         onChange(`=${text}`);
     }, editor);
@@ -232,7 +232,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
     useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId);
-    useLeftAndRightArrow(isFocus && moveCursor, shouldMoveRefSelection, editor, onMoveInEditor);
+    useLeftAndRightArrow(isFocus && moveCursor, selectingMode, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {
         if (!isFocusing) {
@@ -255,7 +255,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     });
 
-    useSheetSelectionChange(isFocus && Boolean(isSelecting && docFocusing), unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
+    useSheetSelectionChange(isFocus && Boolean(isSelecting && docFocusing), unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, selectingMode, editor, handleSelectionChange);
     useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const handleFunctionSelect = (res: { text: string; offset: number }) => {

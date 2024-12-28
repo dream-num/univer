@@ -53,7 +53,6 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         style,
         isSingle,
     } = props;
-
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);

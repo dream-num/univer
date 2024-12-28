@@ -65,7 +65,14 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
             if (!isSingle) {
                 if (actualHeight > height) {
                     if (scrollBar == null) {
-                        viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, enableVertical: true, barSize: 8 });
+                        if (viewportMain) {
+                            scrollBar = new ScrollBar(viewportMain, {
+                                enableHorizontal: false,
+                                enableVertical: true,
+                                barSize: 8,
+                                minThumbSizeV: 8,
+                            });
+                        }
                     } else {
                         viewportMain?.resetCanvasSizeAndUpdateScroll();
                     }
@@ -77,7 +84,12 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
             } else {
                 if (actualWidth > width) {
                     if (scrollBar == null) {
-                        viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false, enableHorizontal: true });
+                        viewportMain && new ScrollBar(viewportMain, {
+                            barSize: 8,
+                            enableVertical: false,
+                            enableHorizontal: true,
+                            minThumbSizeV: 8,
+                        });
                     } else {
                         viewportMain?.resetCanvasSizeAndUpdateScroll();
                     }

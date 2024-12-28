@@ -98,7 +98,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -118,7 +117,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         // EditingRenderController is per unit. It should only handle keyboard events when the unit is
         // the current of its type.
-        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (workbook?.getUnitId() === this._context.unitId) {
                 this._d = this._init();
             } else {
@@ -160,7 +159,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._commandExecutedListener(d);
         this._initSkeletonListener(d);
 
-        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((_unit: UnitModel) => {
             clearTimeout(this._cursorTimeout);
         }));
 
@@ -261,7 +260,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            if (this._instanceSrv.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY) === documentLayoutObject.documentModel) {
+            if (this._getDocumentDataModel() === documentLayoutObject.documentModel) {
                 return;
             }
 
@@ -274,7 +273,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
-            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
+            this._univerInstanceService.changeDoc(editorUnitId, documentModel!);
             this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
             this._textSelectionManagerService.replaceTextRanges([{
                 startOffset: 0,
@@ -351,6 +350,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
+    // eslint-disable-next-line complexity
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
 
@@ -377,7 +377,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._editorBridgeService.refreshEditCellPosition(false);
 
         const {
-            documentLayoutObject,
             editorUnitId,
             unitId,
             sheetId,
@@ -396,7 +395,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
-        const { documentModel: documentDataModel } = documentLayoutObject;
+        const documentDataModel = this._getDocumentDataModel();
         const skeleton = this._getEditorSkeleton(editorUnitId);
         if (!skeleton || !documentDataModel) {
             return;
@@ -409,8 +408,29 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 viewportScrollY: Number.POSITIVE_INFINITY,
             });
         });
-        // move selection
-        if (
+
+        // f2, continue to edit
+        if (eventType === DeviceInputEventType.Keyboard && keycode === KeyCode.F2) {
+            document.makeDirty();
+            this._textSelectionManagerService.replaceDocRanges([
+                {
+                    startOffset: 0,
+                    endOffset: 0,
+                },
+            ]);
+            const endOffset = (documentDataModel.getBody()?.dataStream.length ?? 2) - 2;
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
+                    startOffset: endOffset,
+                    endOffset,
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
+        } else if (
+            // clear and edit
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
@@ -423,19 +443,22 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 this._editorBridgeService.changeEditorDirty(true);
             }
 
-            this._textSelectionManagerService.replaceDocRanges([
-                {
+            this._textSelectionManagerService.replaceDocRanges(
+                [{
                     startOffset: 0,
                     endOffset: 0,
-                },
-            ]);
+                }],
+                {
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                }
+            );
         } else if (eventType === DeviceInputEventType.Dblclick) {
             if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
                 return;
             }
 
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-
             this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: cursor,
@@ -681,10 +704,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
     }
 
+    private _getDocumentDataModel() {
+        return this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+    }
+
     // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
     // "DocSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
     private _isCurrentSheetFocused(): boolean {
-        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
+        return this._univerInstanceService.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 
     private _getEditorSkeleton(editorId: string) {
@@ -696,13 +723,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private _emptyDocumentDataModel(removeStyle: boolean) {
-        const editCellState = this._editorBridgeService.getEditCellState();
-        if (editCellState == null) {
-            return;
-        }
-
-        const { documentLayoutObject } = editCellState;
-        const documentDataModel = documentLayoutObject.documentModel;
+        const documentDataModel = this._getDocumentDataModel();
         if (documentDataModel == null) {
             return;
         }

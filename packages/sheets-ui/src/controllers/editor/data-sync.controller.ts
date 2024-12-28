@@ -184,6 +184,7 @@ export class EditorDataSyncController extends Disposable {
 
         this._commandService.syncExecuteCommand(RichTextEditingMutation.id, {
             ...parmas,
+            textRanges: null,
             isSync: true,
             unitId,
             syncer: parmas.unitId,

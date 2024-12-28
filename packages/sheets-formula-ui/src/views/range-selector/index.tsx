@@ -325,6 +325,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             isFocusSet(true);
             editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
             focus();
+            checkScrollBar();
         }, 30);
     };
 

@@ -19,7 +19,7 @@ import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
@@ -744,10 +744,24 @@ export class FWorkbook extends FBaseInitialable {
      * const builder = activeSpreadsheet.getDefinedName('MyDefinedName').toBuilder();
      * builder.setRef('Sheet1!A2').setName('MyDefinedName1').build();
      * activeSpreadsheet.updateDefinedNameBuilder(param);
-     *
      * ```
      */
     updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
         this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
+    }
+
+    /**
+     * Gets the registered range themes.
+     * @returns {string[]} The name list of registered range themes.
+     * @example
+     * ```ts
+     * // The code below gets the registered range themes
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const themes = activeSpreadsheet.getRegisteredRangeThemes();
+     * console.log(themes);
+     * ```
+     */
+    getRegisteredRangeThemes(): string[] {
+        return this._injector.get(SheetRangeThemeService).getRegisteredRangeThemes();
     }
 }

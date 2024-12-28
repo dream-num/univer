@@ -117,6 +117,10 @@ export class SheetRangeThemeModel extends Disposable {
         this._defaultRangeThemeMap.set(rangeThemeStyle.getName(), rangeThemeStyle);
     }
 
+    getRegisteredRangeThemes(): string[] {
+        return Array.from(this._defaultRangeThemeMap.keys());
+    }
+
     registerRangeThemeStyle(unitId: string, rangeThemeStyle: RangeThemeStyle): void {
         this._ensureRangeThemeStyleMap(unitId).set(rangeThemeStyle.getName(), rangeThemeStyle);
     }

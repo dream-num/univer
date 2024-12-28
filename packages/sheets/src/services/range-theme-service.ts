@@ -41,4 +41,8 @@ export class SheetRangeThemeService extends Disposable {
     getRegisteredRangeThemeStyle(rangeInfo: IRangeThemeRangeInfo): string | undefined {
         return this._sheetRangeThemeModel.getRegisteredRangeThemeStyle(rangeInfo);
     }
+
+    getRegisteredRangeThemes() {
+        return this._sheetRangeThemeModel.getRegisteredRangeThemes();
+    }
 }

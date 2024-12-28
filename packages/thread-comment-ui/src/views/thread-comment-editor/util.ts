@@ -83,7 +83,7 @@ export const transformTextNode2Text = (nodes: TextNode[]) => {
 
 const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
     const { dataStream, customRanges } = doc;
-    const end = dataStream.endsWith('\r\n') ? dataStream.length : dataStream.length - 2;
+    const end = dataStream.endsWith('\r\n') ? dataStream.length - 2 : dataStream.length;
     const textNodes: TextNode[] = [];
 
     let lastIndex = 0;

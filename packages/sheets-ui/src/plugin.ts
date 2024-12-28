@@ -184,6 +184,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsRenderService],
             [ActiveWorksheetController],
             [SheetPermissionInterceptorBaseController],
+            [SheetPermissionInitController],
         ]);
     }
 
@@ -191,7 +192,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         this._registerRenderModules();
 
         touchDependencies(this._injector, [
-            [SheetPermissionInitController],
             [SheetPermissionRenderManagerController],
             [SheetClipboardController],
             [FormulaEditorController],

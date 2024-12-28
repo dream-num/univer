@@ -19,7 +19,7 @@ import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
@@ -29,31 +29,12 @@ import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { defaultPluginConfig } from './controllers/config.schema';
+// import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { DragRenderController } from './controllers/drag-render.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
-import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
-import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
-import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
-import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
-import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { StatusBarController } from './controllers/status-bar.controller';
-import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
-import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
-import { CellAlertManagerService } from './services/cell-alert-manager.service';
-import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
-import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
-import { HoverManagerService } from './services/hover-manager.service';
-import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-import { SheetScrollManagerService } from './services/scroll-manager.service';
-import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
-import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-import { SheetsRenderService } from './services/sheets-render.service';
-import { ShortcutExperienceService } from './services/shortcut-experience.service';
-import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-// import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
-import { DragRenderController } from './controllers/drag-render.controller';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
@@ -61,15 +42,34 @@ import { SheetPermissionInterceptorCanvasRenderController } from './controllers/
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
+import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
+import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { StatusBarController } from './controllers/status-bar.controller';
+import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
+import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+import { CellAlertManagerService } from './services/cell-alert-manager.service';
+import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
+import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
+import { HoverManagerService } from './services/hover-manager.service';
+import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { SelectAllService } from './services/select-all/select-all.service';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { MobileSheetsSelectionRenderService } from './services/selection/mobile-selection-render.service';
+import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
+import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+import { SheetsRenderService } from './services/sheets-render.service';
+import { ShortcutExperienceService } from './services/shortcut-experience.service';
+import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 
 /**
  * @ignore
@@ -112,6 +112,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetsRenderService],
                 [SheetUIMobileController],
                 [StatusBarController],
+                [IRefSelectionsService, { useClass: RefSelectionsService }],
 
                 // permission
                 [SheetPermissionPanelModel],

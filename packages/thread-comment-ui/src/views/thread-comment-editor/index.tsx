@@ -112,7 +112,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 keyboardEventConfig={keyboardEventConfig}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
                 initialValue={comment?.text && getSnapshot(comment.text)}
-                onFocusChange={(isFocus) => setEditing(isFocus)}
+                onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
                 isSingle={false}
                 onClickOutside={() => {
                     setTimeout(() => {

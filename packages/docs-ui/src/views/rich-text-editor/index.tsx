@@ -16,11 +16,11 @@
 
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
-import { createInternalEditorID, generateRandomId, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/useEditor';
@@ -69,6 +69,17 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const isFocusing = docSelectionRenderService?.isFocusing ?? false;
     const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
+    const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+
+    useEffect(() => {
+        setShowPlaceholder(!BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+
+        const sub = editor?.selectionChange$.subscribe(() => {
+            setShowPlaceholder(!BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+        });
+
+        return () => sub?.unsubscribe();
+    }, [editor]);
     useObservable(editor?.blur$);
     useObservable(editor?.focus$);
     useResize(editor, isSingle, true);
@@ -104,8 +115,14 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
                     className={styles.richTextEditorText}
                     ref={formulaEditorContainerRef}
                     onMouseUp={() => editor?.focus()}
-                >
-                </div>
+                />
+                {!showPlaceholder
+                    ? null
+                    : (
+                        <div className={styles.richTextEditorPlaceholder}>
+                            {props.placeholder}
+                        </div>
+                    )}
             </div>
         </div>
     );

@@ -395,14 +395,11 @@ function RangeSelectorDialog(props: {
     isOnlyOneRange: boolean;
     isSupportAcrossSheet: boolean;
 }) {
-    const { editorId, handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
-
+    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
     const localeService = useDependency(LocaleService);
-    const editorService = useDependency(IEditorService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const renderManagerService = useDependency(IRenderManagerService);
-
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
@@ -499,21 +496,6 @@ function RangeSelectorDialog(props: {
         }
     }, [ranges]);
 
-    // useEffect(() => {
-    //     const d = editorService.focusStyle$
-    //         .pipe(
-    //             filter((e) => !!e && DOCS_NORMAL_EDITOR_UNIT_ID_KEY !== e)
-    //         )
-    //         .subscribe((e) => {
-    //             if (e !== editorId) {
-    //                 handleClose();
-    //             }
-    //         });
-    //     return () => {
-    //         d.unsubscribe();
-    //     };
-    // }, [editorService, editorId]);
-
     return (
         <Dialog
             width="328px"
@@ -540,7 +522,7 @@ function RangeSelectorDialog(props: {
         >
             <div className={styles.sheetRangeSelectorDialog}>
                 {ranges.map((text, index) => (
-                    <div key={index} className={styles.sheetRangeSelectorDialogItem}>
+                    <div key={`${text}_${index}`} className={styles.sheetRangeSelectorDialogItem}>
                         <Input
                             affixWrapperStyle={{ width: '100%' }}
                             placeholder={localeService.t('rangeSelector.placeHolder')}

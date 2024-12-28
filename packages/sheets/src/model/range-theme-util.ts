@@ -273,34 +273,44 @@ export class RangeThemeStyle {
         return style;
     }
 
+    // eslint-disable-next-line complexity
     private _mergeStyle(mergeNumber: number): IRangeThemeStyleItem {
         const rs: IRangeThemeStyleItem[] = [];
+        // the push order means the priority of the style
         if (this.wholeStyle && (mergeNumber & STYLE_MAP.wholeStyle)) {
             rs.push(this.wholeStyle);
         }
-        if (this.headerRowStyle && (mergeNumber & STYLE_MAP.headerRowStyle)) {
-            rs.push(this.headerRowStyle);
-        }
+
+        //header
         if (this.headerColumnStyle && (mergeNumber & STYLE_MAP.headerColumnStyle) && !(mergeNumber & STYLE_MAP.headerRowStyle)) {
             rs.push(this.headerColumnStyle);
         }
-        if (this.firstRowStyle && (mergeNumber & STYLE_MAP.firstRowStyle)) {
-            rs.push(this.firstRowStyle);
+
+        if (this.headerRowStyle && (mergeNumber & STYLE_MAP.headerRowStyle)) {
+            rs.push(this.headerRowStyle);
         }
-        if (this.secondRowStyle && (mergeNumber & STYLE_MAP.secondRowStyle)) {
-            rs.push(this.secondRowStyle);
-        }
-        if (this.lastRowStyle && (mergeNumber & STYLE_MAP.lastRowStyle)) {
-            rs.push(this.lastRowStyle);
-        }
+
+        // zebra crossing
         if (this.firstColumnStyle && (mergeNumber & STYLE_MAP.firstColumnStyle)) {
             rs.push(this.firstColumnStyle);
         }
         if (this.secondColumnStyle && (mergeNumber & STYLE_MAP.secondColumnStyle)) {
             rs.push(this.secondColumnStyle);
         }
-        if (this.lastColumnStyle && (mergeNumber & STYLE_MAP.lastColumnStyle)) {
+
+        if (this.firstRowStyle && (mergeNumber & STYLE_MAP.firstRowStyle)) {
+            rs.push(this.firstRowStyle);
+        }
+        if (this.secondRowStyle && (mergeNumber & STYLE_MAP.secondRowStyle)) {
+            rs.push(this.secondRowStyle);
+        }
+
+        // last
+        if (this.lastColumnStyle && (mergeNumber & STYLE_MAP.lastColumnStyle) && !(mergeNumber & STYLE_MAP.lastRowStyle)) {
             rs.push(this.lastColumnStyle);
+        }
+        if (this.lastRowStyle && (mergeNumber & STYLE_MAP.lastRowStyle)) {
+            rs.push(this.lastRowStyle);
         }
 
         return composeStyles(rs as IStyleData[]);

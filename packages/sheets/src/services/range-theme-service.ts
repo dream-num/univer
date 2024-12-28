@@ -26,22 +26,44 @@ export class SheetRangeThemeService extends Disposable {
         super();
     }
 
+    /**
+     * Register a custom range theme style.
+     * @param {string} unitId Which unit to register the range theme style.
+     * @param {RangeThemeStyle} rangeThemeStyle The range theme style to register.
+     */
     registerRangeTheme(unitId: string, rangeThemeStyle: RangeThemeStyle): void {
         this._sheetRangeThemeModel.registerRangeThemeStyle(unitId, rangeThemeStyle);
     }
 
+    /**
+     * Get custom register themes name list
+     * @returns {string[]} The list of custom register themes name.
+     */
     getALLRegisterThemes(): string[] {
         return this._sheetRangeThemeModel.getALLRegisteredTheme();
     }
 
+    /**
+     * Register range theme style to the range.
+     * @param {string} themeName The defined theme name.
+     * @param {IRangeThemeRangeInfo} rangeInfo The range info to apply the theme style.
+     */
     registerRangeThemeStyle(themeName: string, rangeInfo: IRangeThemeRangeInfo): void {
         this._sheetRangeThemeModel.registerRangeThemeRule(themeName, rangeInfo);
     }
 
-    getRegisteredRangeThemeStyle(rangeInfo: IRangeThemeRangeInfo): string | undefined {
+    /**
+     * Get applied range theme style name.
+     * @param {IRangeThemeRangeInfo} rangeInfo The range info to get the applied theme style.
+     * @returns {string | undefined} The applied theme style name or not exist.
+     */
+    getAppliedRangeThemeStyle(rangeInfo: IRangeThemeRangeInfo): string | undefined {
         return this._sheetRangeThemeModel.getRegisteredRangeThemeStyle(rangeInfo);
     }
 
+    /**
+     * Get registered build-in range theme style
+     */
     getRegisteredRangeThemes() {
         return this._sheetRangeThemeModel.getRegisteredRangeThemes();
     }

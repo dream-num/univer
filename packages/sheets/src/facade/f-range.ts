@@ -829,7 +829,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getUsedThemeStyle(): string | undefined {
-        return this._injector.get(SheetRangeThemeService).getRegisteredRangeThemeStyle({
+        return this._injector.get(SheetRangeThemeService).getAppliedRangeThemeStyle({
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,

@@ -19,8 +19,7 @@ import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { BreakLineCommand, DocSelectionRenderService, RichTextEditor } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { BreakLineCommand, IEditorService, RichTextEditor } from '@univerjs/docs-ui';
 import { KeyCode } from '@univerjs/ui';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
@@ -54,10 +53,9 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
+    const editorService = useDependency(IEditorService);
     const editor = useRef<Editor>(null);
-    const renderManagerService = useDependency(IRenderManagerService);
-    const renderer = type === UniverInstanceType.UNIVER_SHEET ? renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY) : renderManagerService.getRenderById(unitId);
-    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const rootEditorId = type === UniverInstanceType.UNIVER_SHEET ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : unitId;
     const [canSubmit, setCanSubmit] = useState(() => BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
     useEffect(() => {
         setCanSubmit(BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
@@ -93,15 +91,15 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
         if (editor.current) {
             const newText = Tools.deepClone(editor.current.getDocumentData().body);
             setEditing(false);
-            editor.current.blur();
             onSave?.({
                 ...comment,
                 text: newText!,
             });
-            editor.current?.replaceText('');
+            editor.current.replaceText('');
             setTimeout(() => {
                 editor.current?.setSelectionRanges([]);
-            }, 30);
+                editor.current?.blur();
+            }, 10);
         }
     };
 
@@ -117,8 +115,9 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 onFocusChange={(isFocus) => setEditing(isFocus)}
                 isSingle={false}
                 onClickOutside={() => {
-                    editor.current?.blur();
-                    docSelectionRenderService?.focus();
+                    setTimeout(() => {
+                        editorService.focus(rootEditorId);
+                    }, 30);
                 }}
             />
             {editing

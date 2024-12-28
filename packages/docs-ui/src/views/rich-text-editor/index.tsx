@@ -21,6 +21,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/useEditor';
@@ -53,6 +54,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         isSingle,
     } = props;
 
+    const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null);
@@ -89,7 +91,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (!editor?.isFocus()) return;
+            if (editorService.getFocusId() !== editorId) return;
             if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
                 onClickOutside?.();
             }
@@ -101,7 +103,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };
-    }, [onClickOutside]);
+    }, [editor, editorId, editorService, onClickOutside]);
 
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);

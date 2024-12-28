@@ -113,6 +113,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     private _setFocusId(id: Nullable<string>) {
+        if (id) {
+            this.getEditor(id)?.setFocus(true);
+        }
         this._focusEditorUnitId = id;
     }
 

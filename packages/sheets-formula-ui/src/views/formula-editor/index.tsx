@@ -255,8 +255,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     });
 
-    useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
-    useSwitchSheet(isFocus, unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
+    useSheetSelectionChange(isFocus && Boolean(isSelecting && docFocusing), unitId, subUnitId, sequenceNodes, refSelections, isSupportAcrossSheet, shouldMoveRefSelection, editor, handleSelectionChange);
+    useSwitchSheet(isFocus && Boolean(isSelecting && docFocusing), unitId, isSupportAcrossSheet, isFocusSet, onBlur, noop);
 
     const handleFunctionSelect = (res: { text: string; offset: number }) => {
         if (res) {
@@ -303,9 +303,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                         editor={editor}
                         isFocus={isFocus}
                         formulaText={formulaText}
-                        onClose={() => {
-                            focus();
-                        }}
+                        onClose={() => focus()}
                     />
                 )
                 : null}

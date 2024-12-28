@@ -57,8 +57,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
 
         this._commandExecutedListener();
 
-        this._initialSetValue();
-
         this._initialBlur();
 
         this._initialFocus();
@@ -111,22 +109,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         mainComponent?.resize(contentWidth, contentHeight);
     }
 
-    private _initialSetValue() {
-        // this.disposeWithMe(
-        //     this._editorService.setValue$.subscribe((param) => {
-        //         if (param.editorUnitId !== this._context.unitId) {
-        //             return;
-        //         }
-
-        //         this._commandService.executeCommand(CoverContentCommand.id, {
-        //             unitId: param.editorUnitId,
-        //             body: param.body,
-        //             segmentId: null,
-        //         });
-        //     })
-        // );
-    }
-
     private _initialBlur() {
         this.disposeWithMe(
             this._editorService.blur$.subscribe(() => {
@@ -157,17 +139,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     }
 
     private _initialFocus() {
-        // this.disposeWithMe(
-            // this._editorService.focus$.subscribe((textRange) => {
-                // if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
-                //     return;
-                // }
-
-                // this._docSelectionRenderService.removeAllRanges();
-                // this._docSelectionRenderService.addDocRanges([textRange]);
-            // })
-        // );
-
         const focusExcepts = [
             'univer-formula-search',
             'univer-formula-help',
@@ -185,12 +156,6 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                 }
             })
         );
-
-        // this.disposeWithMe(
-        //     fromEvent(window, 'mousedown').subscribe(() => {
-        //         this._editorService.changeSpreadsheetFocusState(false);
-        //     })
-        // );
 
         const currentUniverSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         currentUniverSheet.forEach((unit) => {

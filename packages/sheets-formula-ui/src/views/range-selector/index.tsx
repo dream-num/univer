@@ -15,27 +15,28 @@
  */
 
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import type { IRefSelection } from './hooks/useHighlight';
-import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
+import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import { IDescriptionService } from '@univerjs/sheets-formula';
 
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { useEvent } from '@univerjs/ui';
 import cl from 'clsx';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { getFocusingReference } from '../formula-editor/hooks/util';
 import { useEditorInput } from './hooks/useEditorInput';
-import { useEmitChange } from './hooks/useEmitChange';
 import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
 import { useFocus } from './hooks/useFocus';
 import { useFormulaToken } from './hooks/useFormulaToken';
@@ -98,7 +99,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         errorText,
         placeholder,
         actions,
-        onChange = noopFunction,
+        onChange: propOnChange = noopFunction,
         onVerify = noopFunction,
         onRangeSelectorDialogVisibleChange = noopFunction,
         onBlur = noopFunction,
@@ -107,6 +108,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         isOnlyOneRange = false,
         isSupportAcrossSheet = false,
     } = props;
+    const onChange = useEvent(propOnChange);
     const editorService = useDependency(IEditorService);
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
@@ -203,13 +205,23 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
     });
 
-    const needEmit = useEmitChange(sequenceNodes, handleInput, editor);
+    useEffect(() => {
+        const sub = commandService.onCommandExecuted((info) => {
+            if (info.id === RichTextEditingMutation.id) {
+                const params = info.params as IRichTextEditingMutationParams;
+                const { unitId } = params;
+                if (unitId === editorId) {
+                    onChange(BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+                }
+            }
+        });
+        return () => sub.dispose();
+    }, [commandService, editor, editorId, onChange]);
 
     const handleSheetSelectionChange = useMemo(() => {
         return (text: string, offset: number, isEnd: boolean) => {
             highligh(text);
             rangeStringSet(text);
-            needEmit();
             if (isEnd) {
                 focus();
                 if (offset !== -1) {
@@ -317,7 +329,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const handleConfirm = (ranges: IUnitRangeName[]) => {
         const text = unitRangesToText(ranges, isSupportAcrossSheet).join(matchToken.COMMA);
         highligh(text);
-        needEmit();
         rangeStringSet(text);
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);

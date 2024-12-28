@@ -171,7 +171,6 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                         case 'mention':
                                             return (
                                                 <a className={styles.threadCommentItemAt} key={i}>
-                                                    @
                                                     {item.content.label}
                                                     {' '}
                                                 </a>

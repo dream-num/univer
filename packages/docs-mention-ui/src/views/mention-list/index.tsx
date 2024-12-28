@@ -24,27 +24,25 @@ export interface IMentionListProps {
     active?: string;
     onSelect?: (item: IMention) => void;
     onClick?: () => void;
+    editorId: string;
 }
 
 export const MentionList = (props: IMentionListProps) => {
-    const { mentions, active, onSelect, onClick } = props;
+    const { mentions, active, onSelect, onClick, editorId } = props;
     const ref = useRef<HTMLDivElement>(null);
     const [activeId, setActiveId] = useState(active ?? mentions[0]?.mentions[0]?.objectId);
     const handleSelect = (item: IMention) => {
         onSelect?.(item);
     };
 
-    // useEffect(() => {
-    //     ref.current?.focus();
-    // }, []);
-
     return (
-        <div ref={ref} tabIndex={0} className={styles.docMentionPanel} onClick={onClick}>
+        <div ref={ref} data-editorid={editorId} tabIndex={0} className={styles.docMentionPanel} onClick={onClick}>
             {mentions.map((typeMentions) => (
                 <div key={typeMentions.type}>
                     <div className={styles.docMentionType}>{typeMentions.title}</div>
                     {typeMentions.mentions.map((mention) => (
                         <div
+                            data-editorid={editorId}
                             key={mention.objectId}
                             className={cs(styles.docMention, { [styles.docMentionActive]: activeId === mention.objectId })}
                             onClick={() => handleSelect(mention)}

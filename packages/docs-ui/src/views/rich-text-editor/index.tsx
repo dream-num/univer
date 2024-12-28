@@ -93,6 +93,9 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (editorService.getFocusId() !== editorId) return;
+
+            const id = (event.target as HTMLDivElement)?.dataset?.editorid;
+            if (id === editorId) return;
             if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
                 onClickOutside?.();
             }
@@ -101,6 +104,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         setTimeout(() => {
             document.addEventListener('click', handleClickOutside);
         }, 100);
+
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };

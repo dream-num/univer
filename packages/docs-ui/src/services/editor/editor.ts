@@ -50,16 +50,13 @@ interface IEditor {
     // Emit when doc selection changed.
     selectionChange$: Observable<IDocSelectionInnerParam>;
 
+    isFocus(): boolean;
     // Methods
     // The focused editor is the editor that will receive keyboard and similar events by default.
     focus(): void;
     // The Editor.blur() method removes keyboard focus from the current editor.
     blur(): void;
     // has focus.
-    /**
-     * @deprecated use `IEditorService` instead
-     */
-    isFocus(): boolean;
     // Selects the entire content of the editor.
     // Calling editor.select() will not necessarily focus the editor, so it is often used with Editor.focus
     select(): void;
@@ -123,7 +120,6 @@ export class Editor extends Disposable implements IEditor {
     paste$: Observable<IEditorInputConfig> = this._paste$.asObservable();
 
     // Editor get focus.
-    private _focus = false;
     private readonly _focus$ = new Subject<IEditorInputConfig>();
     focus$: Observable<IEditorInputConfig> = this._focus$.asObservable();
 
@@ -222,6 +218,11 @@ export class Editor extends Disposable implements IEditor {
         );
     }
 
+    isFocus() {
+        const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
+        return docSelectionRenderService.isFocusing && Boolean(docSelectionRenderService.getActiveTextRange());
+    }
+
     focus() {
         const curDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const editorUnitId = this.getEditorId();
@@ -246,15 +247,12 @@ export class Editor extends Disposable implements IEditor {
         //         subUnitId: editorUnitId,
         //     }, false);
         // }
-
-        this._focus = true;
     }
 
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 
         docSelectionRenderService.blur();
-        this._focus = false;
     }
 
     // Selects the entire content of the editor.
@@ -373,16 +371,6 @@ export class Editor extends Disposable implements IEditor {
 
     get render() {
         return this._param.render;
-    }
-
-    /** @deprecated */
-    isFocus() {
-        return this._focus;
-    }
-
-    /** @deprecated */
-    setFocus(state = false) {
-        this._focus = state;
     }
 
     isReadOnly() {

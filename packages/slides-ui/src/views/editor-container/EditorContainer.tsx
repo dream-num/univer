@@ -131,12 +131,10 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            {/* <TextEditor
-                id={SLIDE_EDITOR_ID}
+            {/* <RichTextEditor
+                editorId={SLIDE_EDITOR_ID}
                 className={styles.editorInput}
-                snapshot={snapshot}
-                cancelDefaultResizeListener={false}
-                isSheetEditor={false}
+                initialValue={snapshot}
                 isSingle={false}
             /> */}
         </div>

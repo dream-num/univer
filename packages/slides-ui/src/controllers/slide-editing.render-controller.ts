@@ -822,7 +822,10 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * The logic here predicts the user's first cursor movement behavior based on this rule
      */
     private _cursorStateListener(d: DisposableCollection) {
-        const editorObject = this._getEditorObject()!;
+        const editorObject = this._getEditorObject();
+        if (!editorObject) {
+            return;
+        }
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {

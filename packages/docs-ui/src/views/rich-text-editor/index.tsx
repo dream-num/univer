@@ -39,6 +39,7 @@ export interface IRichTextEditorProps {
     style?: React.CSSProperties;
     isSingle?: boolean;
     placeholder?: string;
+    editorId?: string;
 }
 
 export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, ref) => {
@@ -52,12 +53,13 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         moveCursor = true,
         style,
         isSingle,
+        editorId: propsEditorId,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null);
-    const editorId = useMemo(() => createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), []);
+    const editorId = useMemo(() => propsEditorId ?? createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), [propsEditorId]);
     const editor = useEditor({
         editorId,
         initialValue,

@@ -60,12 +60,7 @@ export class SheetsCfRefRangeController extends Disposable {
                     return { redos: [], undos: [] };
                 }
                 if (resultRanges.length) {
-                    // const redoParams: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: { cfId: rule.cfId, ranges: resultRanges } };
-                    const redoParams: ISetConditionalRuleMutationParams & {
-                        payload: {
-                            newRanges: IRange[];
-                        };
-                    } = { unitId, subUnitId, rule, payload: { newRanges: resultRanges } };
+                    const redoParams: ISetConditionalRuleMutationParamsRedo = { unitId, subUnitId, rule, payload: { newRanges: resultRanges } };
                     const redos = [{ id: SetConditionalRuleMutation.id, params: redoParams }];
                     const undos = setConditionalRuleMutationUndoFactory(this._injector, redoParams);
                     return { redos, undos };

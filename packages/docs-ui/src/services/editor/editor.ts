@@ -56,6 +56,9 @@ interface IEditor {
     // The Editor.blur() method removes keyboard focus from the current editor.
     blur(): void;
     // has focus.
+    /**
+     * @deprecated use `IEditorService` instead
+     */
     isFocus(): boolean;
     // Selects the entire content of the editor.
     // Calling editor.select() will not necessarily focus the editor, so it is often used with Editor.focus
@@ -372,6 +375,7 @@ export class Editor extends Disposable implements IEditor {
         return this._param.render;
     }
 
+    /** @deprecated */
     isFocus() {
         return this._focus;
     }

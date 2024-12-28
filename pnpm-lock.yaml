@@ -1795,6 +1795,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../sheets-conditional-formatting
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
@@ -1835,9 +1838,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../sheets-formula-ui

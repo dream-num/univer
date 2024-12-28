@@ -37,7 +37,7 @@ export function useEditorPostion(editorId: string, ready: boolean, deps?: any[])
         if (current.left === left && current.top === top && current.right === right && current.bottom === bottom) {
             return;
         }
-        position$.next({ left, right, top, bottom });
+        position$.next({ left: left - 1, right: right + 1, top: top - 1, bottom: bottom + 1 });
         return position;
     });
 

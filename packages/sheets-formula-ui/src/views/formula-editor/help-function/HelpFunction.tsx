@@ -96,7 +96,6 @@ export function HelpFunction(props: IHelpFunctionProps) {
     const optional = localeService.t('formula.prompt.optional');
     const editorId = editor.getEditorId();
     const [position$] = useEditorPostion(editorId, visible, [functionInfo, paramIndex]);
-
     function handleSwitchActive(paramIndex: number) {
         onParamsSwitch && onParamsSwitch(paramIndex);
     }
@@ -108,7 +107,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
 
     return visible && functionInfo
         ? (
-            <RectPopup anchorRect$={position$} direction="vertical">
+            <RectPopup onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
                 <div className={styles.formulaHelpFunction}>
                     <div className={styles.formulaHelpFunctionTitle}>
                         <Help

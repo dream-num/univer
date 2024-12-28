@@ -89,11 +89,15 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            if (!editor?.isFocus()) return;
             if (sheetEmbeddingRef.current && !sheetEmbeddingRef.current.contains(event.target as any)) {
                 onClickOutside?.();
             }
         };
-        document.addEventListener('click', handleClickOutside);
+
+        setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 100);
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };

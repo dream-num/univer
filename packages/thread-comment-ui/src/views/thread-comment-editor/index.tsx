@@ -17,11 +17,12 @@
 import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import type { Editor, IKeyboardEventConfig } from '@univerjs/docs-ui';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { ICommandService, LocaleService, Tools, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { BreakLineCommand, RichTextEditor } from '@univerjs/docs-ui';
+import { BreakLineCommand, DocSelectionRenderService, RichTextEditor } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
-import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
 
@@ -33,6 +34,7 @@ export interface IThreadCommentEditorProps {
     autoFocus?: boolean;
     unitId: string;
     subUnitId: string;
+    type: UniverInstanceType;
 }
 
 export interface IThreadCommentEditorInstance {
@@ -48,11 +50,24 @@ function getSnapshot(body: IDocumentBody): IDocumentData {
 }
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
-    const { comment, onSave, id, onCancel, autoFocus } = props;
+    const { comment, onSave, id, onCancel, autoFocus, unitId, type } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [editing, setEditing] = useState(false);
     const editor = useRef<Editor>(null);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const renderer = type === UniverInstanceType.UNIVER_SHEET ? renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY) : renderManagerService.getRenderById(unitId);
+    const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
+    const [canSubmit, setCanSubmit] = useState(() => BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
+    useEffect(() => {
+        setCanSubmit(BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
+
+        const sub = editor.current?.selectionChange$.subscribe(() => {
+            setCanSubmit(BuildTextUtils.transform.getPlainText(editor.current?.getDocumentData().body?.dataStream ?? ''));
+        });
+
+        return () => sub?.unsubscribe();
+    }, [editor.current?.selectionChange$]);
 
     const keyboardEventConfig: IKeyboardEventConfig = useMemo(() => (
         {
@@ -83,7 +98,10 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 ...comment,
                 text: newText!,
             });
-            editor.current?.replaceText('', true);
+            editor.current?.replaceText('');
+            setTimeout(() => {
+                editor.current?.setSelectionRanges([]);
+            }, 30);
         }
     };
 
@@ -98,6 +116,10 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 initialValue={comment?.text && getSnapshot(comment.text)}
                 onFocusChange={(isFocus) => setEditing(isFocus)}
                 isSingle={false}
+                onClickOutside={() => {
+                    editor.current?.blur();
+                    docSelectionRenderService?.focus();
+                }}
             />
             {editing
                 ? (
@@ -115,7 +137,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         </Button>
                         <Button
                             type="primary"
-                            // disabled={!localComment.text}
+                            disabled={!canSubmit}
                             onClick={handleSave}
                         >
                             {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}

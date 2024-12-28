@@ -16,23 +16,26 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, IFormulaHighlightCell, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, Inject, Injector, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, isRangesEqual, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
+import { CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, isRangesEqual, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
+import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 
 export class SheetsCfRefRangeController extends Disposable {
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(RefRangeService) private _refRangeService: RefRangeService
+        @Inject(RefRangeService) private _refRangeService: RefRangeService,
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
     ) {
         super();
 
         this._initRefRange();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initRefRange() {
         const disposableMap: Map<string, () => void> = new Map();
         const getCfIdWithUnitId = (unitID: string, subUnitId: string, cfId: string) => `${unitID}_${subUnitId}_${cfId}`;
@@ -47,7 +50,7 @@ export class SheetsCfRefRangeController extends Disposable {
                     return { redos: [], undos: [] };
                 }
                 if (resultRanges.length) {
-                    const redoParams: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: { ...rule, ranges: resultRanges } };
+                    const redoParams: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: { cfId: rule.cfId, ranges: resultRanges } };
                     const redos = [{ id: SetConditionalRuleMutation.id, params: redoParams }];
                     const undos = setConditionalRuleMutationUndoFactory(this._injector, redoParams);
                     return { redos, undos };
@@ -58,11 +61,40 @@ export class SheetsCfRefRangeController extends Disposable {
                     return { redos, undos };
                 }
             };
+            const handleFormulaChange = (newFormulaString: string) => {
+                if ((rule.rule as IFormulaHighlightCell).value === newFormulaString) {
+                    return { redos: [], undos: [] };
+                }
+                const redoParams: ISetConditionalRuleMutationParams = {
+                    unitId,
+                    subUnitId,
+                    rule: {
+                        cfId: rule.cfId,
+                        rule: {
+                            value: newFormulaString,
+                        } as IFormulaHighlightCell,
+                    },
+                };
+                const redos = [{ id: SetConditionalRuleMutation.id, params: redoParams }];
+                const undos = setConditionalRuleMutationUndoFactory(this._injector, redoParams);
+                return { redos, undos };
+            };
+
             const disposeList: (() => void)[] = [];
             rule.ranges.forEach((range) => {
                 const disposable = this._refRangeService.registerRefRange(range, handleRangeChange);
                 disposeList.push(() => disposable.dispose());
             });
+            // Conditional formatting custom formulas also need to monitor changes in the reference range
+            if ('subType' in rule.rule && rule.rule.subType === CFSubRuleType.formula) {
+                const disposable = this._formulaRefRangeService.registerFormula(
+                    unitId,
+                    subUnitId,
+                    rule.rule.value,
+                    (newFormulaString) => handleFormulaChange(newFormulaString)
+                );
+                disposeList.push(() => disposable.dispose());
+            }
             disposableMap.set(getCfIdWithUnitId(unitId, subUnitId, rule.cfId), () => disposeList.forEach((dispose) => dispose()));
         };
 

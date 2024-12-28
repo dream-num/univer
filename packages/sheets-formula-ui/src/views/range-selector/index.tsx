@@ -264,7 +264,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',').replaceAll(/(^,)/g, '');
                 highligh(text, false);
                 rangeStringSet(text);
-                needEmit();
             });
             return () => {
                 dispose.unsubscribe();

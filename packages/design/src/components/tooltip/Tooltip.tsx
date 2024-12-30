@@ -259,7 +259,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
                 <div
                     ref={tooltipRef}
                     className={clsx(`
-                      univer-pointer-events-none univer-fixed univer-z-[1001] univer-animate-in univer-fade-in-0
+                      univer-pointer-events-none univer-fixed univer-z-[1100] univer-animate-in univer-fade-in-0
                       univer-zoom-in-95 univer-duration-200 univer-opacity-0
                     `, {
                         'univer-opacity-100': ready,

@@ -60,7 +60,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
         return null;
     }
 
-    const [ready, setReady] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [actualPlacement, setActualPlacement] = useState(placement);
     const triggerRef = useRef<HTMLDivElement>(null);
@@ -192,18 +192,18 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
         setPosition(pos);
         setActualPlacement(newPlacement);
         setArrowOffset(newArrowOffset);
-        setReady(true);
+        setMounted(true);
     };
 
     useEffect(() => {
         if (show) {
-            setReady(false);
+            setMounted(false);
             requestAnimationFrame(() => {
                 updatePosition();
             });
 
             const handleUpdate = () => {
-                setReady(false);
+                setMounted(false);
                 requestAnimationFrame(updatePosition);
             };
 
@@ -238,7 +238,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
 
         function onMouseLeave() {
             updateShow(false);
-            setReady(false);
+            setMounted(false);
         }
 
         if (isControlled && !onVisibleChange) {
@@ -257,12 +257,12 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
     useEffect(() => {
         if (isControlled) {
             if (visible) {
-                setReady(false);
+                setMounted(false);
                 requestAnimationFrame(() => {
                     updatePosition();
                 });
             } else {
-                setReady(false);
+                setMounted(false);
             }
         }
     }, [visible, isControlled]);
@@ -293,11 +293,11 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
                       univer-pointer-events-none univer-fixed univer-z-[1100] univer-animate-in univer-fade-in-0
                       univer-zoom-in-95 univer-duration-200 univer-opacity-0 univer-font-sans
                     `, {
-                        'univer-opacity-100': ready,
-                        'univer-slide-in-from-bottom-2': actualPlacement === 'top' && ready,
-                        'univer-slide-in-from-top-2': actualPlacement === 'bottom' && ready,
-                        'univer-slide-in-from-right-2': actualPlacement === 'left' && ready,
-                        'univer-slide-in-from-left-2': actualPlacement === 'right' && ready,
+                        'univer-opacity-100': mounted,
+                        'univer-slide-in-from-bottom-2': actualPlacement === 'top' && mounted,
+                        'univer-slide-in-from-top-2': actualPlacement === 'bottom' && mounted,
+                        'univer-slide-in-from-right-2': actualPlacement === 'left' && mounted,
+                        'univer-slide-in-from-left-2': actualPlacement === 'right' && mounted,
                     })}
                     data-state={show ? 'open' : 'closed'}
                     style={{

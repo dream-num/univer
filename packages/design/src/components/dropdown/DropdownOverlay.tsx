@@ -35,7 +35,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
     }
 
     const { show, updateShow, overlayRef, triggerRef } = useDropdown();
-    const [ready, setReady] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
@@ -65,7 +65,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
             });
 
             requestAnimationFrame(() => {
-                setReady(true);
+                setMounted(true);
             });
         }
     }, [show, offset?.x, offset?.y, overlayRef, triggerRef]);
@@ -82,7 +82,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                   dark:univer-bg-gray-700
                 `,
                 {
-                    'univer-opacity-100 univer-slide-in-from-top-2 univer-animate-in': ready,
+                    'univer-opacity-100 univer-slide-in-from-top-2 univer-animate-in': mounted,
                 },
                 className
             )}

@@ -235,13 +235,7 @@ export class SheetsCfRefRangeController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        const redoParams: ISetConditionalRuleMutationParams & {
-            payload: {
-                newFormulaString: string;
-                type: CFRuleType;
-                valueTypeOrIndex?: string | number;
-            };
-        } = {
+        const redoParams: ISetConditionalRuleMutationParamsRedo = {
             unitId,
             subUnitId,
             rule,

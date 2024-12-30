@@ -119,7 +119,7 @@ describe('Test SheetInterceptorService', () => {
 
             expect(getCell(0, 0)).toEqual({ v: 'intercepted A' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
-            expect(getCell(0, 0, 'should-skip', (interceptor) => interceptor.id !== 'should-skip')).toEqual({ v: 'intercepted B' });
+            expect(getCell(0, 0, 'cache-filter-key', (interceptor) => interceptor.id !== 'should-skip')).toEqual({ v: 'intercepted B' });
         });
     });
 

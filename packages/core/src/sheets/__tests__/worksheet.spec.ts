@@ -209,58 +209,6 @@ describe('test worksheet', () => {
             expect(value6.value).toBeUndefined();
         });
     });
-
-    describe('test "getCellWithFilteredInterceptors"', () => {
-        const TEST_WORKBOOK_DATA_WITH_MERGED_CELL: IWorkbookData = {
-            id: 'test',
-            appVersion: '3.0.0-alpha',
-            sheets: {
-                sheet1: {
-                    id: 'sheet1',
-                    mergeData: [
-                        { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
-                    ],
-                    cellData: {
-                        0: {
-                            0: {
-                                v: 'A1:B2',
-                            },
-                            2: {
-                                v: 'C1',
-                            },
-                        },
-                        1: {
-
-                            2: {
-                                v: 'C2',
-                            },
-                        },
-                        2: {
-                            0: {
-                                v: 'A3',
-                            },
-                            1: {
-                                v: 'B3',
-                            },
-                        },
-                    },
-                },
-            },
-            locale: LocaleType.ZH_CN,
-            name: 'TEST_WORKBOOK_DATA_WITH_MERGED_CELL',
-            sheetOrder: ['sheet1'],
-            styles: {},
-        };
-
-        beforeEach(() => {
-            prepare(TEST_WORKBOOK_DATA_WITH_MERGED_CELL);
-            caseDisposable = new DisposableCollection();
-        });
-
-        it('should support filtered out specific interceptors', () => {
-
-        });
-    });
 });
 
 describe('test "extractPureTextFromCell"', () => {

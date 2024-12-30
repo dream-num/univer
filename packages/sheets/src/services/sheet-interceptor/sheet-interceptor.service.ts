@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type {
     ICellData,
     ICellDataForSheetInterceptor,
     ICellInterceptor,
     ICommandInfo,
+    IComposeInterceptors,
     IDisposable,
     IInterceptor,
     IRange,
@@ -87,6 +90,9 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
+    private _interceptorsDirty = true;
+    private _composedInterceptorByKey: Map<string, ReturnType<IComposeInterceptors<any, any>>> = new Map();
+
     readonly writeCellInterceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
@@ -145,9 +151,11 @@ export class SheetInterceptorService extends Disposable {
         this._workbookDisposables.forEach((disposable) => disposable.dispose());
         this._workbookDisposables.clear();
         this._worksheetDisposables.clear();
+
+        this._interceptorsByName.clear();
     }
 
-    // #region Intercept command execution
+    // #region intercept command execution
 
     /**
      * Add a listener function to a specific command to add affiliated mutations. It should be called in controllers.
@@ -205,7 +213,7 @@ export class SheetInterceptorService extends Disposable {
     }
 
     /**
-     * Add a listener function to a specific command to deteminte if the command can execute mutations. It should be
+     * Add a listener function to a specific command to determine if the command can execute mutations. It should be
      * called in controllers.
      *
      * Pairs with {@link beforeCommandExecute}.
@@ -236,7 +244,7 @@ export class SheetInterceptorService extends Disposable {
 
     // #endregion
 
-    // #region intercept ranges - mainly for pivot table currrently (2024/10/28).
+    // #region intercept ranges - mainly for pivot table currently (2024/10/28).
 
     /**
      * By adding callbacks to some Ranges can get some additional mutations, such as clearing all plugin data in a certain area.
@@ -265,7 +273,9 @@ export class SheetInterceptorService extends Disposable {
         };
     }
 
-    // #region write cell
+    // #endregion
+
+    // #region intercept on writing cell
 
     async onWriteCell(workbook: Workbook, worksheet: Worksheet, row: number, col: number, cellData: ICellData) {
         const context = {
@@ -285,13 +295,12 @@ export class SheetInterceptorService extends Disposable {
 
     // #endregion
 
-    // #endregion
-
     intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T): IDisposable {
         const key = name as unknown as string;
         if (!this._interceptorsByName.has(key)) {
             this._interceptorsByName.set(key, []);
         }
+
         const interceptors = this._interceptorsByName.get(key)!;
         interceptors.push(interceptor);
         const sortedInterceptors = interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
@@ -301,6 +310,7 @@ export class SheetInterceptorService extends Disposable {
                 `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
                 sortedInterceptors
             );
+
             const BOTH_EFFECT = InterceptorEffectEnum.Style | InterceptorEffectEnum.Value;
             this._interceptorsByName.set(
                 `${key}-${(InterceptorEffectEnum.Style)}`,
@@ -317,13 +327,29 @@ export class SheetInterceptorService extends Disposable {
             );
         }
 
+        this._interceptorsDirty = true;
         return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
     }
 
-    fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>, effect?: InterceptorEffectEnum) {
-        const key = effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`;
-        const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
-        return composeInterceptors<T, C>(interceptors || []);
+    fetchThroughInterceptors<T, C>(
+        name: IInterceptor<T, C>,
+        effect?: InterceptorEffectEnum,
+        _key?: string,
+        filter?: (interceptor: IInterceptor<any, any>) => boolean
+    ): ReturnType<IComposeInterceptors<T, C>> {
+        const key = _key ?? (effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`);
+        let composed = this._composedInterceptorByKey.get(key);
+
+        if (!composed || this._interceptorsDirty) {
+            let interceptors = this._composedInterceptorByKey.get(key) as unknown as Array<typeof name>;
+            if (filter) {
+                interceptors = interceptors.filter(filter);
+            }
+
+            composed = composeInterceptors<T, C>(interceptors || []);
+        }
+
+        return composed;
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
@@ -340,9 +366,15 @@ export class SheetInterceptorService extends Disposable {
                 sheetInterceptorService._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
 
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
-                    getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
+                    getCell(
+                        row: number,
+                        col: number,
+                        effect: InterceptorEffectEnum,
+                        key?: string,
+                        filter?: (interceptor: IInterceptor<any, any>) => boolean
+                    ): Nullable<ICellData> {
                         const rawData = worksheet.getCellRaw(row, col);
-                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
+                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect, key, filter)(
                             rawData,
                             {
                                 unitId,
@@ -352,8 +384,7 @@ export class SheetInterceptorService extends Disposable {
                                 worksheet,
                                 workbook,
                                 rawData,
-                            }
-                        );
+                            });
                     },
                 }));
 

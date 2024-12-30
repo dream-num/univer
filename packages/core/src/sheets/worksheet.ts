@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
@@ -524,6 +525,11 @@ export class Worksheet {
 
     getCellRaw(row: number, col: number): Nullable<ICellData> {
         return this.getCellMatrix().getValue(row, col);
+    }
+
+    // eslint-disable-next-line ts/no-explicit-any
+    getCellWithFilteredInterceptors(row: number, col: number, key: string, filter: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellDataForSheetInterceptor> {
+        return this._viewModel.getCell(row, col, key, filter);
     }
 
     getRowFiltered(row: number): boolean {

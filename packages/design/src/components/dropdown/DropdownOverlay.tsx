@@ -34,11 +34,12 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
         return null;
     }
 
-    const { isOpen, setIsOpen, overlayRef, triggerRef } = useDropdown();
+    const { show, updateShow, overlayRef, triggerRef } = useDropdown();
+    const [ready, setReady] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
-        if (isOpen && triggerRef.current && overlayRef.current) {
+        if (show && triggerRef.current && overlayRef.current) {
             const triggerRect = triggerRef.current.getBoundingClientRect();
             const overlayRect = overlayRef.current.getBoundingClientRect();
             const viewportWidth = document.documentElement.clientWidth;
@@ -62,27 +63,34 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 top: top + (offset?.y ?? 0),
                 left: left + (offset?.x ?? 0),
             });
-        }
-    }, [isOpen, offset?.x, offset?.y, overlayRef, triggerRef]);
 
-    if (!isOpen) return null;
+            requestAnimationFrame(() => {
+                setReady(true);
+            });
+        }
+    }, [show, offset?.x, offset?.y, overlayRef, triggerRef]);
+
+    if (!show) return null;
 
     return createPortal(
         <div
             ref={overlayRef}
             className={clsx(
                 `
-                  univer-fixed univer-z-50 univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
-                  univer-shadow-md univer-animate-in univer-fade-in-0 univer-zoom-in-95
+                  univer-fixed univer-z-[1071] univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
+                  univer-shadow-md univer-opacity-0
                   dark:univer-bg-gray-700
                 `,
+                {
+                    'univer-opacity-100 univer-slide-in-from-top-2 univer-animate-in': ready,
+                },
                 className
             )}
             style={{
                 top: position.top,
                 left: position.left,
             }}
-            onClick={() => setIsOpen(false)}
+            onClick={() => updateShow(false)}
         >
             {children}
         </div>,

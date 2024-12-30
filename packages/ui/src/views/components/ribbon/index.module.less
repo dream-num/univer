@@ -94,11 +94,7 @@
 
             overflow: hidden;
             display: flex;
-            gap: var(--margin-xs);
             align-items: center;
-
-            height: @toolbar-btn-size;
-            padding-right: 18px;
 
             font-size: var(--font-size-lg);
 
@@ -124,20 +120,6 @@
                 background-color: rgb(var(--grey-100));
             }
 
-            &:hover {
-                background-color: rgb(var(--grey-100));
-
-                .toolbar {
-                    &-item {
-                        &-select-button {
-                            &-label {
-                                background-color: rgb(var(--grey-100));
-                            }
-                        }
-                    }
-                }
-            }
-
             &-label {
                 position: relative;
                 z-index: 1;
@@ -148,30 +130,9 @@
                 height: 100%;
                 padding: 0 var(--padding-xs);
 
-                &:hover {
-                    background-color: rgb(var(--grey-300)) !important;
-                }
-            }
-
-            &-arrow {
-                position: absolute;
-                top: 0;
-                left: 0;
-
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-
-                box-sizing: border-box;
-                width: 100%;
-                height: 100%;
-                padding-right: var(--padding-xs);
-
-                color: rgb(var(--grey-400));
-
-                &:hover {
-                    background-color: rgb(var(--grey-300));
-                }
+                // &:hover {
+                //     background-color: rgb(var(--grey-300)) !important;
+                // }
             }
         }
 

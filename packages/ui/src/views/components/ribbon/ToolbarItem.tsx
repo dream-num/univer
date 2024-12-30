@@ -109,13 +109,22 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
-                    className={clsx(styles.toolbarItemSelectButton, {
+                    className={clsx(styles.toolbarItemSelectButton, `
+                      univer-pr-5 univer-h-6 univer-group univer-transition-colors
+                      hover:univer-bg-gray-100
+                    `, {
                         [styles.toolbarItemSelectButtonDisabled]: disabled,
                         [styles.toolbarItemSelectButtonActivated]: activated,
                     })}
                     data-disabled={disabled}
                 >
-                    <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
+                    <div
+                        className={clsx(styles.toolbarItemSelectButtonLabel, `
+                          univer-transition-colors
+                          hover:univer-bg-gray-200
+                        `)}
+                        onClick={handleClick}
+                    >
                         <CustomLabel
                             icon={iconToDisplay}
                             title={title!}
@@ -124,11 +133,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                             onChange={handleSelectionsValueChange}
                         />
                     </div>
+
                     <DropdownWrapper
                         disabled={disabled}
-                        align={align ?? {
-                            targetOffset: [32, -12],
-                        }}
                         overlay={(
                             <Menu
                                 overViewport="scroll"
@@ -140,13 +147,18 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         )}
                     >
                         <div
-                            className={clsx(styles.toolbarItemSelectButtonArrow, {
-                                [styles.toolbarItemSelectButtonArrowDisabled]: disabled,
-                                [styles.toolbarItemSelectButtonArrowActivated]: activated,
+                            className={clsx(`
+                              univer-absolute univer-top-0 univer-right-0 univer-box-border text-gray-400
+                              univer-transition-colors univer-w-5 univer-flex univer-justify-center univer-items-center
+                              univer-h-6
+                              hover:univer-bg-gray-200
+                            `, {
+                                'univer-cursor-not-allowed univer-text-gray-400': disabled,
+                                'univer-bg-gray-200': activated,
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle style={{ height: '100%' }} />
+                            <MoreDownSingle />
                         </div>
                     </DropdownWrapper>
                 </div>

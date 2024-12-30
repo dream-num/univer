@@ -15,7 +15,7 @@
  */
 
 import type { IDropdownLegacyProps, ITooltipProps } from '@univerjs/design';
-import { DropdownLegacy, Tooltip } from '@univerjs/design';
+import { DropdownOverlay, DropdownProvider, DropdownTrigger, Tooltip } from '@univerjs/design';
 import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
@@ -72,9 +72,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper(props: IDropdownLegacyProps) {
-    const { children, ...dropdownProps } = props;
-
+export function DropdownWrapper({ children, overlay, disabled }: IDropdownLegacyProps) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
@@ -82,13 +80,18 @@ export function DropdownWrapper(props: IDropdownLegacyProps) {
     }
 
     return (
-        <DropdownLegacy
-            onVisibleChange={handleVisibleChange}
-            {...dropdownProps}
-        >
-            <div onClick={(e) => e.stopPropagation()}>
-                {children}
-            </div>
-        </DropdownLegacy>
+        <DropdownProvider disabled={disabled} onVisibleChange={handleVisibleChange}>
+            <DropdownTrigger>
+                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                    {children}
+                </div>
+            </DropdownTrigger>
+            <DropdownOverlay>
+                {/* TODO: When the new Menu Component is ready, plz remove the univer-theme class */}
+                <div className="univer-grid univer-gap-2 univer-theme">
+                    {overlay}
+                </div>
+            </DropdownOverlay>
+        </DropdownProvider>
     );
 }

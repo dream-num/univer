@@ -19,19 +19,34 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DropdownContext } from './DropdownContext';
 
 interface IDropdownProviderProps {
+    visible?: boolean;
     children: ReactNode;
+    disabled?: boolean;
+    onVisibleChange?: (visible: boolean) => void;
 }
 
-export function DropdownProvider({ children }: IDropdownProviderProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export function DropdownProvider({ visible, children, disabled = false, onVisibleChange }: IDropdownProviderProps) {
     const triggerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
+
+    const [internalShow, setInternalShow] = useState(false);
+    const isControlled = visible !== undefined;
+    const show = isControlled ? visible : internalShow;
+
+    const updateShow = (newShow: boolean) => {
+        if (disabled) return;
+
+        if (!isControlled) {
+            setInternalShow(newShow);
+        }
+        onVisibleChange?.(newShow);
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
             if (!triggerRef.current?.contains(target) && !overlayRef.current?.contains(target)) {
-                setIsOpen(false);
+                updateShow(false);
             }
         };
 
@@ -39,7 +54,7 @@ export function DropdownProvider({ children }: IDropdownProviderProps) {
         return () => window.removeEventListener('mousedown', handleClickOutside, true);
     }, []);
 
-    const contextValue = useMemo(() => ({ isOpen, setIsOpen, triggerRef, overlayRef }), [isOpen]);
+    const contextValue = useMemo(() => ({ show, updateShow, disabled, triggerRef, overlayRef }), [show, disabled]);
 
     return (
         <DropdownContext.Provider value={contextValue}>

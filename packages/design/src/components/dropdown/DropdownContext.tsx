@@ -18,8 +18,9 @@ import type { RefObject } from 'react';
 import { createContext, useContext } from 'react';
 
 interface IDropdownContextType {
-    isOpen: boolean;
-    setIsOpen: (value: boolean) => void;
+    show: boolean;
+    updateShow: (value: boolean) => void;
+    disabled: boolean;
     overlayRef: RefObject<HTMLDivElement>;
     triggerRef: RefObject<HTMLElement>;
 }

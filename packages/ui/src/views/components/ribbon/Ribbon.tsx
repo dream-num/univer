@@ -157,7 +157,7 @@ export function Ribbon(props: IRibbonProps) {
                       univer-animate-in univer-flex univer-gap-2 univer-justify-center univer-items-center univer-h-0
                       univer-transition-all univer-overflow-hidden
                     `, {
-                        'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1,
+                        'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
                     })}
                 >
                     {ribbon.length > 1 && ribbon.map((group) => (
@@ -178,7 +178,15 @@ export function Ribbon(props: IRibbonProps) {
                 </div>
 
                 {(headerMenuComponents && headerMenuComponents.size > 0) && (
-                    <div className={styles.headerMenu}>
+                    <div
+                        className={`
+                          univer-absolute univer-top-0 univer-right-2 univer-h-full univer-flex univer-gap-2
+                          univer-items-center
+                          [&>*]:univer-inline-flex [&>*]:univer-items-center [&>*]:univer-rounded
+                          [&>*]:univer-transition-colors [&>*]:univer-px-1 [&>*]:univer-h-6
+                          hover:[&>*]:univer-bg-gray-300
+                        `}
+                    >
                         <ComponentContainer components={headerMenuComponents} />
                     </div>
                 )}

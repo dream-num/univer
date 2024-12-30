@@ -214,7 +214,7 @@ export class AsyncInterceptorManager<P extends Record<string, IAsyncInterceptor<
      * @returns It will return a composed interceptor function. If you will perform the interceptor repeatedly,
      * you should cache the result instead of calling this function multiple times.
      */
-    public fetchThroughAsyncInterceptors<T, C>(name: IAsyncInterceptor<T, C>, filter: (interceptor: IAsyncInterceptor<any, any>) => boolean) {
+    public fetchThroughAsyncInterceptors<T, C>(name: IAsyncInterceptor<T, C>, filter?: (interceptor: IAsyncInterceptor<any, any>) => boolean) {
         const key = name as unknown as string;
         let interceptors = this._asyncInterceptorsByName.get(key) as unknown as Array<typeof name>;
 

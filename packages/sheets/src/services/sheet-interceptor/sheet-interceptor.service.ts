@@ -90,7 +90,7 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    private _interceptorsDirty = true;
+    private _interceptorsDirty = false;
     private _composedInterceptorByKey: Map<string, ReturnType<IComposeInterceptors<any, any>>> = new Map();
 
     readonly writeCellInterceptor = new InterceptorManager({
@@ -337,16 +337,18 @@ export class SheetInterceptorService extends Disposable {
         _key?: string,
         filter?: (interceptor: IInterceptor<any, any>) => boolean
     ): ReturnType<IComposeInterceptors<T, C>> {
-        const key = _key ?? (effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`);
+        const byNamesKey = effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`;
+        const key = _key ?? byNamesKey;
         let composed = this._composedInterceptorByKey.get(key);
 
         if (!composed || this._interceptorsDirty) {
-            let interceptors = this._composedInterceptorByKey.get(key) as unknown as Array<typeof name>;
-            if (filter) {
+            let interceptors = this._interceptorsByName.get(byNamesKey) as unknown as Array<IInterceptor<any, any>> | undefined;
+            if (interceptors && filter) {
                 interceptors = interceptors.filter(filter);
             }
 
             composed = composeInterceptors<T, C>(interceptors || []);
+            this._composedInterceptorByKey.set(key, composed);
         }
 
         return composed;
@@ -355,7 +357,6 @@ export class SheetInterceptorService extends Disposable {
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
         const unitId = workbook.getUnitId();
-        // const isRowStylePrecedeColumnStyle = this._isRowStylePrecedeColumnStyle;
 
         // eslint-disable-next-line ts/no-this-alias
         const sheetInterceptorService = this;

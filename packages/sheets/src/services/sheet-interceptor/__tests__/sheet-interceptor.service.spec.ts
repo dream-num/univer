@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import type { ICellData, IInterceptor, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ISheetLocation } from '../utils/interceptor';
 import { createInterceptorKey, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
-
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import { createSheetTestBed } from './create-core-test-bed';
-import type { ISheetLocation } from '../utils/interceptor';
 
 describe('Test SheetInterceptorService', () => {
     let univer: Univer;
@@ -37,10 +36,12 @@ describe('Test SheetInterceptorService', () => {
 
     afterEach(() => univer.dispose());
 
-    function getCell(row: number, col: number): Nullable<ICellData> {
+    function getCell(row: number, col: number): Nullable<ICellData>;
+    function getCell(row: number, col: number, key: string, filter: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellData>;
+    function getCell(row: number, col: number, key?: string, filter?: (interceptor: IInterceptor<any, any>) => boolean): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
         const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
-        return sheet.getCell(row, col);
+        return (key && filter) ? sheet.getCellWithFilteredInterceptors(row, col, key, filter) : sheet.getCell(row, col);
     }
 
     function getRowFiltered(row: number): boolean {
@@ -88,6 +89,37 @@ describe('Test SheetInterceptorService', () => {
 
             expect(getCell(0, 0)).toEqual({ v: 'intercepted' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
+        });
+
+        it('should skip some interceptors by filtering out the effect', () => {
+            const interceptorService = get(SheetInterceptorService);
+            interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                id: 'should-skip',
+                priority: 100,
+                handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
+                    if (location.row === 0 && location.col === 0) {
+                        return { v: 'intercepted A' };
+                    }
+
+                    return next();
+                },
+            });
+
+            interceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                id: 'should-not-skip',
+                priority: 0,
+                handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
+                    if (location.row === 0 && location.col === 0) {
+                        return { v: 'intercepted B' };
+                    }
+
+                    return next();
+                },
+            });
+
+            expect(getCell(0, 0)).toEqual({ v: 'intercepted A' });
+            expect(getCell(0, 1)).toEqual({ v: 'A2' });
+            expect(getCell(0, 0, 'should-skip', (interceptor) => interceptor.id !== 'should-skip')).toEqual({ v: 'intercepted B' });
         });
     });
 
@@ -199,17 +231,4 @@ describe('Test SheetInterceptorService', () => {
             expect(result).toBe('zero');
         });
     });
-
-    // it('Test SheetInterceptorService', () => {
-    //     it('getLastRowWithContent', () => {
-    //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
-    //         expect(sheet.getLastRowWithContent()).toBe(3);
-    //     });
-    //     it('getLastColumnWithContent', () => {
-    //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
-    //         expect(sheet.getLastColumnWithContent()).toBe(3);
-    //     });
-    // });
 });

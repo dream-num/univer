@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import type { Univer } from '../../univer';
-import { LocaleType } from '../../types/enum/locale-type';
-import { extractPureTextFromCell, type Worksheet } from '../worksheet';
+import type { IRange, IWorkbookData } from '../typedef';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DisposableCollection } from '../../shared/lifecycle';
 import { CellValueType } from '../../types/enum';
-import type { IRange, IWorkbookData } from '../typedef';
+import { LocaleType } from '../../types/enum/locale-type';
 import { RANGE_TYPE } from '../typedef';
+import { extractPureTextFromCell, type Worksheet } from '../worksheet';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('test worksheet', () => {
@@ -208,6 +207,58 @@ describe('test worksheet', () => {
             const value6 = iterator1.next();
             expect(value6.done).toBeTruthy();
             expect(value6.value).toBeUndefined();
+        });
+    });
+
+    describe('test "getCellWithFilteredInterceptors"', () => {
+        const TEST_WORKBOOK_DATA_WITH_MERGED_CELL: IWorkbookData = {
+            id: 'test',
+            appVersion: '3.0.0-alpha',
+            sheets: {
+                sheet1: {
+                    id: 'sheet1',
+                    mergeData: [
+                        { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
+                    ],
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 'A1:B2',
+                            },
+                            2: {
+                                v: 'C1',
+                            },
+                        },
+                        1: {
+
+                            2: {
+                                v: 'C2',
+                            },
+                        },
+                        2: {
+                            0: {
+                                v: 'A3',
+                            },
+                            1: {
+                                v: 'B3',
+                            },
+                        },
+                    },
+                },
+            },
+            locale: LocaleType.ZH_CN,
+            name: 'TEST_WORKBOOK_DATA_WITH_MERGED_CELL',
+            sheetOrder: ['sheet1'],
+            styles: {},
+        };
+
+        beforeEach(() => {
+            prepare(TEST_WORKBOOK_DATA_WITH_MERGED_CELL);
+            caseDisposable = new DisposableCollection();
+        });
+
+        it('should support filtered out specific interceptors', () => {
+
         });
     });
 });

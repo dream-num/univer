@@ -34,7 +34,8 @@ import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 import { enUS, faIR, frFR, ruRU, zhCN } from '../locales';
 
 import 'react-mosaic-component/react-mosaic-component.css';
-import './index.css';
+
+import '../global.css';
 
 function factory(id: string) {
     return function createUniverOnContainer() {

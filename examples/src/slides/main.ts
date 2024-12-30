@@ -28,6 +28,8 @@ import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, zhCN } from '../locales';
 
+import '../global.css';
+
 // univer
 const univer = new Univer({
     theme: greenTheme,

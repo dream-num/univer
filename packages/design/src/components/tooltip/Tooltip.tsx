@@ -20,17 +20,43 @@ import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 
 export interface ITooltipProps {
+    /**
+     * Whether the tooltip is visible
+     * @description If not set, the tooltip will be controlled by the component itself
+     */
     visible?: boolean;
+    /**
+     * Whether the tooltip is a child of the trigger element
+     * @default false
+     */
     asChild?: boolean;
-    title: string;
+    /**
+     * The content of the tooltip
+     * @description If not set, the tooltip will not be displayed。 Although it can be set to ReactNode, it is recommended to use string.
+     */
+    title?: React.ReactNode;
+    /**
+     * The trigger element
+     */
     children: React.ReactNode;
+    /**
+     * The placement of the tooltip
+     * @default 'bottom'
+     */
     placement?: 'top' | 'bottom' | 'left' | 'right';
+    /**
+     * Whether the tooltip is displayed when the content is ellipsis
+     * @default false
+     */
     showIfEllipsis?: boolean;
+    /**
+     * Callback when the visibility of the tooltip changes
+     */
     onVisibleChange?: (visible: boolean) => void;
 }
 
 export function Tooltip({ visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange }: ITooltipProps) {
-    if (!canUseDom) {
+    if (!canUseDom || title === undefined) {
         return null;
     }
 

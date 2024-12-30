@@ -20,7 +20,9 @@ import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceM
 import { INTERCEPTOR_POINT, RangeThemeInterceptorId } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { RangeThemeStyle } from './range-theme-util';
-import defaultRangeThemeStyle from './range-themes/default';
+
+import { buildInThemes } from './range-themes/build-in-theme.factory';
+import { defaultRangeThemeStyle } from './range-themes/default';
 
 export interface IRangeThemeRangeInfo {
     range: IRange;
@@ -46,8 +48,15 @@ export class SheetRangeThemeModel extends Disposable {
     ) {
         super();
         this._registerIntercept();
-        this.registerDefaultRangeTheme(defaultRangeThemeStyle);
         this._initSnapshot();
+        this._initDefaultTheme();
+    }
+
+    private _initDefaultTheme() {
+        this.registerDefaultRangeTheme(defaultRangeThemeStyle);
+        for (const theme of buildInThemes) {
+            this.registerDefaultRangeTheme(theme);
+        }
     }
 
     private _ensureRangeThemeStyleMap(unitId: string) {
@@ -164,6 +173,7 @@ export class SheetRangeThemeModel extends Disposable {
             effect: InterceptorEffectEnum.Style,
             handler: (cell, context, next) => {
                 const { row, col, unitId, subUnitId } = context;
+
                 const style = this.getCellStyle(unitId, subUnitId, row, col);
 
                 if (style) {

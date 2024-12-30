@@ -16,7 +16,7 @@
 
 import type { IStyleData, Nullable } from '@univerjs/core';
 
-export type IRangeThemeStyleItem = Pick<IStyleData, 'bg' | 'ol' | 'bd' | 'cl'>;
+export type IRangeThemeStyleItem = Pick<IStyleData, 'bg' | 'ol' | 'bd' | 'cl' | 'ht' | 'vt' | 'bl'>;
 
 export interface IRangeThemeStyleJSON {
     name: string;
@@ -45,11 +45,24 @@ const serializeRangeStyle = (style: IRangeThemeStyleItem) => {
     if (style.cl) {
         result.cl = { ...style.cl };
     }
+    if (style.ht) {
+        result.ht = style.ht;
+    }
+    if (style.vt) {
+        result.vt = style.vt;
+    }
+    // the bl type is BooleanNumber, may be 0
+    if (style.bl !== undefined) {
+        result.bl = style.bl;
+    }
     return result;
 };
 
 function composeStyles(styles: IStyleData[]): IRangeThemeStyleItem {
     const composedStyle: IRangeThemeStyleItem = {};
+    if (styles.length === 1) {
+        return styles[0];
+    }
 
     for (const style of styles) {
         if (style.bg) {
@@ -63,6 +76,15 @@ function composeStyles(styles: IStyleData[]): IRangeThemeStyleItem {
         }
         if (style.cl) {
             composedStyle.cl = style.cl;
+        }
+        if (style.ht) {
+            composedStyle.ht = style.ht;
+        }
+        if (style.vt) {
+            composedStyle.vt = style.vt;
+        }
+        if (style.bl !== undefined) {
+            composedStyle.bl = style.bl;
         }
     }
 
@@ -83,10 +105,10 @@ const STYLE_MAP = {
 
 /**
  * Range theme style
- * @description The range theme style is used to set the style of the range.
+ * @description The range theme style is used to set the style of the range.This class is used to create a build-in theme style or a custom theme style.
  */
 export class RangeThemeStyle {
-    private readonly _name: string;
+    private _name: string;
     /**
      * @property {Nullable<IRangeThemeStyleItem>} wholeStyle effect for the whole range.
      */
@@ -133,8 +155,13 @@ export class RangeThemeStyle {
     /**
      * @constructor
      * @param {string} name The name of the range theme style, it used to identify the range theme style.
+     * @param {IRangeThemeStyleJSON} options The options to initialize the range theme style.
      */
-    constructor(name: string) {
+    constructor(name: string, options?: Omit<IRangeThemeStyleJSON, 'name'>) {
+        if (options) {
+            this.fromJson({ ...options, name });
+        }
+
         this._name = name;
     }
 
@@ -237,7 +264,7 @@ export class RangeThemeStyle {
             mergeNumber = mergeNumber | STYLE_MAP.firstRowStyle;
         }
 
-        if (offsetRow % 2 === 0 && offsetRow !== 0) {
+        if (offsetRow % 2 === 0) {
             mergeNumber = mergeNumber | STYLE_MAP.secondRowStyle;
         }
 
@@ -253,11 +280,11 @@ export class RangeThemeStyle {
             mergeNumber = mergeNumber | STYLE_MAP.firstColumnStyle;
         }
 
-        if (offsetCol % 2 === 0 && offsetCol !== 0) {
+        if (offsetCol % 2 === 0) {
             mergeNumber = mergeNumber | STYLE_MAP.secondColumnStyle;
         }
 
-         // it means no style should be merged
+        // it means no style should be merged
         if (mergeNumber === 0) {
             return null;
         }
@@ -273,21 +300,11 @@ export class RangeThemeStyle {
         return style;
     }
 
-    // eslint-disable-next-line complexity
     private _mergeStyle(mergeNumber: number): IRangeThemeStyleItem {
         const rs: IRangeThemeStyleItem[] = [];
         // the push order means the priority of the style
         if (this.wholeStyle && (mergeNumber & STYLE_MAP.wholeStyle)) {
             rs.push(this.wholeStyle);
-        }
-
-        //header
-        if (this.headerColumnStyle && (mergeNumber & STYLE_MAP.headerColumnStyle) && !(mergeNumber & STYLE_MAP.headerRowStyle)) {
-            rs.push(this.headerColumnStyle);
-        }
-
-        if (this.headerRowStyle && (mergeNumber & STYLE_MAP.headerRowStyle)) {
-            rs.push(this.headerRowStyle);
         }
 
         // zebra crossing
@@ -305,10 +322,20 @@ export class RangeThemeStyle {
             rs.push(this.secondRowStyle);
         }
 
-        // last
-        if (this.lastColumnStyle && (mergeNumber & STYLE_MAP.lastColumnStyle) && !(mergeNumber & STYLE_MAP.lastRowStyle)) {
+        // column header
+        if (this.headerColumnStyle && (mergeNumber & STYLE_MAP.headerColumnStyle)) {
+            rs.push(this.headerColumnStyle);
+        }
+        // last column
+        if (this.lastColumnStyle && (mergeNumber & STYLE_MAP.lastColumnStyle)) {
             rs.push(this.lastColumnStyle);
         }
+
+        // row header
+        if (this.headerRowStyle && (mergeNumber & STYLE_MAP.headerRowStyle)) {
+            rs.push(this.headerRowStyle);
+        }
+        // last row
         if (this.lastRowStyle && (mergeNumber & STYLE_MAP.lastRowStyle)) {
             rs.push(this.lastRowStyle);
         }
@@ -360,6 +387,7 @@ export class RangeThemeStyle {
     }
 
     fromJson(json: IRangeThemeStyleJSON): void {
+        this._name = json.name;
         if (json.wholeStyle) {
             this.wholeStyle = serializeRangeStyle(json.wholeStyle);
         }

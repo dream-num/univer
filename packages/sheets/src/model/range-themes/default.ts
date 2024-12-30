@@ -14,41 +14,39 @@
  * limitations under the License.
  */
 
+import type { IRangeThemeStyleJSON } from '../range-theme-util';
+import { BooleanNumber, BorderStyleTypes, HorizontalAlign } from '@univerjs/core';
 import { RangeThemeStyle } from '../range-theme-util';
 
-const defaultRangeThemeStyle = new RangeThemeStyle('default');
+const defaultRangeThemeStyleJSON: Omit<IRangeThemeStyleJSON, 'name'> = {
 
-defaultRangeThemeStyle.setWholeStyle({
-    ol: {
-        s: 1,
+    headerRowStyle: {
+        bg: {
+            rgb: 'rgb(68,114,196)',
+        },
         cl: {
-            rgb: 'rgb(0,0,0)',
+            rgb: 'rgb(255,255,255)',
+        },
+        ht: HorizontalAlign.CENTER,
+        bl: BooleanNumber.TRUE,
+    },
+    firstRowStyle: {
+        bg: {
+            rgb: 'rgb(217,225,242)',
         },
     },
-});
-
-defaultRangeThemeStyle.setHeaderColumnStyle({
-    bg: {
-        rgb: 'rgb(119,159,205)',
+    lastRowStyle: {
+        bd: {
+            t: {
+                s: BorderStyleTypes.THIN,
+                cl: {
+                    rgb: 'rgb(68,114,196)',
+                },
+            },
+        },
+        ht: HorizontalAlign.CENTER,
+        bl: BooleanNumber.TRUE,
     },
-});
+};
+export const defaultRangeThemeStyle = new RangeThemeStyle('default', defaultRangeThemeStyleJSON);
 
-defaultRangeThemeStyle.setHeaderRowStyle({
-    bg: {
-        rgb: 'rgb(184,216,235)',
-    },
-});
-
-defaultRangeThemeStyle.setFirstRowStyle({
-    bg: {
-        rgb: 'rgb(256,256,256)',
-    },
-});
-
-defaultRangeThemeStyle.setSecondRowStyle({
-    bg: {
-        rgb: 'rgb(184,216,235)',
-    },
-});
-
-export default defaultRangeThemeStyle;

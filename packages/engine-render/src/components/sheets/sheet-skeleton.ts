@@ -2092,6 +2092,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
+
         this._setFontStylesCache(row, col, cell);
     }
 

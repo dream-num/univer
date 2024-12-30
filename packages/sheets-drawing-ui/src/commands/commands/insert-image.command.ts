@@ -23,14 +23,20 @@ export interface IInsertImageCommandParams {
     files: Nullable<File[]>;
 };
 
+/**
+ * For image file selector
+ */
 export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     id: 'sheet.command.insert-float-image',
     type: CommandType.COMMAND,
     handler: (accessor) => {
         const renderManagerService = accessor.get(IRenderManagerService);
-        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+        const rs = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
             ?.with(SheetDrawingUpdateController)
             .insertFloatImage() ?? false;
+        console.log('!!!sheet.command.insert-float-image', rs);
+
+        return rs;
     },
 };
 

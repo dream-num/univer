@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDropdownLegacyProps, ITooltipProps, NullableTooltipRef } from '@univerjs/design';
+import type { IDropdownLegacyProps, ITooltipProps } from '@univerjs/design';
 import { DropdownLegacy, Tooltip } from '@univerjs/design';
-import React, { createContext, forwardRef, useContext, useMemo, useState } from 'react';
+import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
     setDropdownVisible: (_visible: boolean) => {},
 });
 
-export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref) => {
+export interface ITooltipWrapperRef {
+    el: HTMLSpanElement | null;
+}
+
+export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((props, ref) => {
     const { children, ...tooltipProps } = props;
+    const spanRef = useRef<HTMLSpanElement>(null);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -48,15 +53,17 @@ export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((pro
         setDropdownVisible: handleChangeDropdownVisible,
     }), [dropdownVisible]);
 
+    useImperativeHandle(ref, () => ({
+        el: spanRef.current,
+    }));
+
     return (
         <Tooltip
-            ref={ref}
             {...tooltipProps}
             visible={tooltipVisible}
-            asChild
             onVisibleChange={handleChangeTooltipVisible}
         >
-            <span>
+            <span ref={spanRef}>
                 <TooltipWrapperContext.Provider value={contextValue}>
                     {children}
                 </TooltipWrapperContext.Provider>

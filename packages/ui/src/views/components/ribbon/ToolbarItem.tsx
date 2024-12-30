@@ -15,8 +15,8 @@
  */
 
 import type { IDropdownLegacyProps } from '@univerjs/design';
-import type { Ref } from 'react';
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
+import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -33,7 +33,7 @@ import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
-export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownLegacyProps['align'] }, ref: Ref<any>) => {
+export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem> & { align?: IDropdownLegacyProps['align'] }>((props, ref) => {
     const { align } = props;
 
     const localeService = useDependency(LocaleService);
@@ -228,7 +228,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
     }
 
     return !hidden && (
-        <TooltipWrapper ref={ref} title={tooltipTitle} placement="bottom">
+        <TooltipWrapper
+            ref={ref}
+            title={tooltipTitle}
+            placement="bottom"
+        >
             {renderItem()}
         </TooltipWrapper>
     );

@@ -192,12 +192,12 @@ export const DefinedNameContainer = () => {
                                     </div>
                                     <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>
                                 </div>
-                                <Tooltip title={localeService.t('definedName.updateButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
                                     <div className={clsx(styles.definedNameContainerItemUpdate, styles.definedNameContainerItemShow)} onClick={() => { closeInsertOpenKeyEditor(definedName.id); }}>
                                         <CheckMarkSingle />
                                     </div>
                                 </Tooltip>
-                                <Tooltip title={localeService.t('definedName.deleteButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
                                     <div className={clsx(styles.definedNameContainerItemDelete, styles.definedNameContainerItemShow)} onClick={() => { deleteDefinedName(definedName.id); }}>
                                         <DeleteSingle />
                                     </div>

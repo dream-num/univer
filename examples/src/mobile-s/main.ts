@@ -35,6 +35,8 @@ import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { enUS, faIR } from '../locales';
 
+import '../global.css';
+
 // univer
 const univer = new Univer({
     theme: defaultTheme,

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
-
 /**
  * All elements are observed by a single ResizeObserver is got greater performance than each element observed by separate ResizeObserver
  * See issue https://github.com/WICG/resize-observer/issues/59#issuecomment-408098151
@@ -40,25 +37,4 @@ export function resizeObserverCtor(callback: ResizeObserverCallback) {
             _resizeObserver.unobserve(target);
         },
     };
-}
-
-export function useIsEllipsis(element: HTMLElement | null | undefined) {
-    const [isEllipsis, setIsEllipsis] = useState(false);
-
-    useEffect(() => {
-        if (!canUseDom() || !element) {
-            return;
-        }
-
-        const resizeObserver = resizeObserverCtor(() => {
-            element && setIsEllipsis(element.scrollWidth > element.offsetWidth);
-        });
-        setIsEllipsis(element.scrollWidth > element.offsetWidth);
-        resizeObserver.observe(element);
-        return () => {
-            resizeObserver.unobserve(element);
-        };
-    }, [element]);
-
-    return isEllipsis;
 }

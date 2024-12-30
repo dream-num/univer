@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import type { RefObject } from 'react';
-import { createContext, useContext } from 'react';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, ILocalStorageService } from '@univerjs/core';
 
-interface IDropdownContextType {
-    show: boolean;
-    updateShow: (value: boolean) => void;
-    disabled: boolean;
-    overlayRef: RefObject<HTMLDivElement>;
-    triggerRef: RefObject<HTMLElement>;
+export interface IDarkModeCommandParams {
+    value?: 'dark' | 'light' | 'auto';
 }
 
-export const DropdownContext = createContext<IDropdownContextType | null>(null);
+export const DarkModeOperation: ICommand = {
+    id: 'debugger.operation.dark-mode',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: IDarkModeCommandParams) => {
+        const localStorageService = accessor.get(ILocalStorageService);
+        localStorageService.setItem('local.darkMode', params.value);
+        window.location.reload();
 
-export const useDropdown = () => {
-    const context = useContext(DropdownContext);
-    if (!context) {
-        throw new Error('useDropdown must be used within a DropdownProvider');
-    }
-    return context;
+        return true;
+    },
 };

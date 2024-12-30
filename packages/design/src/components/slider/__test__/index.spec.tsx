@@ -35,7 +35,7 @@ describe('Slider', () => {
 
         const { container } = render(<Slider value={value} resetPoint={30} onChange={handleChange} />);
 
-        fireEvent.click(container.querySelector('[role=reset button]')!);
+        fireEvent.click(container.querySelector('[role=button]')!);
 
         expect(value).toBe(30);
     });

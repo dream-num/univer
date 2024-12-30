@@ -51,9 +51,9 @@ const Message = ({ content, type = MessageType.Info }: IMessageProps) => {
         <div
             className={clsx(
                 `
-                  univer-rounded-xl univer-p-4 univer-min-w-[320px] univer-transition-all univer-bg-white
-                  univer-duration-300 univer-animate-in univer-fade-in univer-slide-in-from-top-4 univer-shadow-md
-                  univer-max-w-[480px] univer-border univer-border-gray-200 univer-border-solid
+                  univer-font-sans univer-rounded-xl univer-p-4 univer-min-w-[320px] univer-transition-all
+                  univer-bg-white univer-duration-300 univer-animate-in univer-fade-in univer-slide-in-from-top-4
+                  univer-shadow-md univer-max-w-[480px] univer-border univer-border-gray-200 univer-border-solid
                   dark:univer-border-gray-700 dark:univer-bg-gray-700
                 `
             )}

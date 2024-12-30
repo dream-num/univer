@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
@@ -29,6 +30,10 @@ export interface ITooltipProps {
 }
 
 export function Tooltip({ visible, asChild = false, title, children, placement = 'bottom', showIfEllipsis = false, onVisibleChange }: ITooltipProps) {
+    if (!canUseDom) {
+        return null;
+    }
+
     const [ready, setReady] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [actualPlacement, setActualPlacement] = useState(placement);
@@ -260,7 +265,7 @@ export function Tooltip({ visible, asChild = false, title, children, placement =
                     ref={tooltipRef}
                     className={clsx(`
                       univer-pointer-events-none univer-fixed univer-z-[1100] univer-animate-in univer-fade-in-0
-                      univer-zoom-in-95 univer-duration-200 univer-opacity-0
+                      univer-zoom-in-95 univer-duration-200 univer-opacity-0 univer-font-sans
                     `, {
                         'univer-opacity-100': ready,
                         'univer-slide-in-from-bottom-2': actualPlacement === 'top' && ready,

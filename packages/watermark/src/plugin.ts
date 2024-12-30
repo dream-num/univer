@@ -52,13 +52,32 @@ export class UniverWatermarkPlugin extends Plugin {
     }
 
     private async _initWatermarkStorage() {
-        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings } = this._config;
+        const config = this._configService.getConfig<IUniverWatermarkConfig>(WATERMARK_PLUGIN_CONFIG_KEY);
+        if (!config) {
+            return;
+        }
+        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings } = config;
         if (userWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: { ...WatermarkUserInfoBaseConfig, userWatermarkSettings } } });
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, {
+                type: IWatermarkTypeEnum.UserInfo,
+                config: {
+                    userInfo: merge({}, WatermarkUserInfoBaseConfig, userWatermarkSettings),
+                },
+            });
         } else if (textWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Text, config: { text: { ...WatermarkTextBaseConfig, textWatermarkSettings } } });
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, {
+                type: IWatermarkTypeEnum.Text,
+                config: {
+                    text: merge({}, WatermarkTextBaseConfig, textWatermarkSettings),
+                },
+            });
         } else if (imageWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Image, config: { image: { ...WatermarkImageBaseConfig, imageWatermarkSettings } } });
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, {
+                type: IWatermarkTypeEnum.Image,
+                config: {
+                    image: merge({}, WatermarkImageBaseConfig, imageWatermarkSettings),
+                },
+            });
         } else {
             const config = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
             if (config?.type === IWatermarkTypeEnum.UserInfo) {

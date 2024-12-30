@@ -17,7 +17,7 @@
 import type { ICellDataForSheetInterceptor, IRange, Nullable } from '@univerjs/core';
 import type { IRangeThemeStyleItem, IRangeThemeStyleJSON } from './range-theme-util';
 import { Disposable, generateRandomId, Inject, InterceptorEffectEnum, IResourceManagerService, RTree, UniverInstanceType } from '@univerjs/core';
-import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
+import { INTERCEPTOR_POINT, RangeThemeInterceptorId } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { RangeThemeStyle } from './range-theme-util';
 import defaultRangeThemeStyle from './range-themes/default';
@@ -160,6 +160,7 @@ export class SheetRangeThemeModel extends Disposable {
 
     private _registerIntercept(): void {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            id: RangeThemeInterceptorId,
             effect: InterceptorEffectEnum.Style,
             handler: (cell, context, next) => {
                 const { row, col, unitId, subUnitId } = context;

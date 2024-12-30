@@ -115,6 +115,7 @@ export function Scrollbar(props: IScrollbarProps) {
 
         return () => {
             contentRef.current?.removeEventListener('scroll', handleScroll);
+            observer.disconnect();
         };
     }, []);
 

@@ -34,8 +34,6 @@ import styles from './index.module.less';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
 export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem> & { align?: IDropdownLegacyProps['align'] }>((props, ref) => {
-    const { align } = props;
-
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
@@ -113,8 +111,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                       univer-pr-5 univer-h-6 univer-group univer-transition-colors
                       hover:univer-bg-gray-100
                     `, {
-                        [styles.toolbarItemSelectButtonDisabled]: disabled,
-                        [styles.toolbarItemSelectButtonActivated]: activated,
+                        'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                     })}
                     data-disabled={disabled}
                 >
@@ -122,7 +119,9 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         className={clsx(styles.toolbarItemSelectButtonLabel, `
                           univer-transition-colors
                           hover:univer-bg-gray-200
-                        `)}
+                        `, {
+                            'univer-bg-gray-200': activated,
+                        })}
                         onClick={handleClick}
                     >
                         <CustomLabel
@@ -136,6 +135,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
 
                     <DropdownWrapper
                         disabled={disabled}
+                        offset={{ x: -24 }}
                         overlay={(
                             <Menu
                                 overViewport="scroll"
@@ -153,12 +153,12 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                               univer-h-6
                               hover:univer-bg-gray-200
                             `, {
-                                'univer-cursor-not-allowed univer-text-gray-400': disabled,
+                                'univer-cursor-not-allowed univer-text-gray-400 univer-pointer-events-none': disabled,
                                 'univer-bg-gray-200': activated,
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </DropdownWrapper>
                 </div>
@@ -179,7 +179,7 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {
-                            [styles.toolbarItemSelectDisabled]: disabled,
+                            'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
                     >
@@ -192,10 +192,10 @@ export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenu
                         />
                         <div
                             className={clsx(styles.toolbarItemSelectArrow, {
-                                [styles.toolbarItemSelectArrowDisabled]: disabled,
+                                'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                             })}
                         >
-                            <MoreDownSingle />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </div>
                 </DropdownWrapper>

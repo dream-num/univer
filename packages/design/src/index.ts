@@ -27,7 +27,7 @@ export { Confirm, type IConfirmProps } from './components/confirm';
 export { DatePanel, DatePicker, type IDatePanelProps, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { DropdownLegacy, type IDropdownLegacyProps } from './components/dropdown-legacy';
-export { DropdownOverlay, DropdownProvider, DropdownTrigger } from './components/dropdown';
+export { DropdownOverlay, DropdownProvider, DropdownTrigger, type IDropdownOverlayProps } from './components/dropdown';
 export { FormDualColumnLayout, FormLayout, type IFormDualColumnLayoutProps, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';

@@ -18,9 +18,9 @@ import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { clsx } from '@univerjs/design';
-import { MoreFunctionSingle } from '@univerjs/icons';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { MoreFunctionSingle } from '@univerjs/icons';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { ComponentContainer } from '../ComponentContainer';
@@ -45,6 +45,11 @@ export function Ribbon(props: IRibbonProps) {
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
     const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
+
+    const handleSelectTab = useCallback((group: IMenuSchema) => {
+        toolbarItemRefs.current = {};
+        setActivatedTab(group.key);
+    }, []);
 
     // subscribe to menu changes
     useEffect(() => {
@@ -71,11 +76,15 @@ export function Ribbon(props: IRibbonProps) {
                 const collapsedIds: string[] = [];
                 let totalWidth = 0;
 
+                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+                const a = [];
+
                 for (const { el, key } of toolbarItems) {
                     if (!el) continue;
+                    a.push(el);
 
                     totalWidth += el.getBoundingClientRect().width + 8;
-                    if (totalWidth > toolbarWidth - 32 - 32) {
+                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
                         collapsedIds.push(key);
                     }
                 }
@@ -91,10 +100,7 @@ export function Ribbon(props: IRibbonProps) {
         return () => {
             observer.disconnect();
         };
-    }, [ribbon]);
-
-    // Should the header when there is at least one header menu components or menu groups.
-    const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || ribbon.length > 1, [headerMenuComponents, ribbon]);
+    }, [ribbon, activatedTab]);
 
     const activeGroup = useMemo(() => {
         const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
@@ -145,37 +151,38 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             {/* header */}
-            {hasHeaderMenu && (
-                <header className="univer-relative univer-select-none">
-                    <div
-                        className={`
-                          univer-animate-in univer-fade-in univer-flex univer-gap-2 univer-justify-center
-                          univer-items-center univer-h-8
-                        `}
-                    >
-                        {ribbon.length > 1 && ribbon.map((group) => (
-                            <a
-                                key={group.key}
-                                className={clsx(`
-                                  univer-text-gray-700 univer-text-sm univer-rounded univer-px-2 univer-py-0.5
-                                  univer-cursor-pointer univer-transition-colors univer-box-border
-                                  hover:univer-bg-gray-300
-                                `, {
-                                    'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
-                                })}
-                                onClick={() => {
-                                    setActivatedTab(group.key);
-                                }}
-                            >
-                                {localeService.t(group.key)}
-                            </a>
-                        ))}
-                    </div>
+            <header className="univer-relative univer-select-none">
+                <div
+                    className={clsx(`
+                      univer-animate-in univer-flex univer-gap-2 univer-justify-center univer-items-center univer-h-0
+                      univer-transition-all univer-overflow-hidden
+                    `, {
+                        'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1,
+                    })}
+                >
+                    {ribbon.length > 1 && ribbon.map((group) => (
+                        <a
+                            key={group.key}
+                            className={clsx(`
+                              univer-text-gray-700 univer-text-sm univer-rounded univer-px-2 univer-py-0.5
+                              univer-cursor-pointer univer-transition-colors univer-box-border
+                              hover:univer-bg-gray-300
+                            `, {
+                                'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
+                            })}
+                            onClick={() => handleSelectTab(group)}
+                        >
+                            {localeService.t(group.key)}
+                        </a>
+                    ))}
+                </div>
+
+                {(headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div className={styles.headerMenu}>
                         <ComponentContainer components={headerMenuComponents} />
                     </div>
-                </header>
-            )}
+                )}
+            </header>
 
             <section role="toolbar" className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>

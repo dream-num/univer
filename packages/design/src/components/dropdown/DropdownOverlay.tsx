@@ -15,12 +15,12 @@
  */
 
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { clsx } from '../../helper/clsx';
 import { useDropdown } from './DropdownContext';
 
-interface IDropdownOverlayProps {
+export interface IDropdownOverlayProps {
     children: React.ReactNode;
     className?: string;
     offset?: {
@@ -70,6 +70,11 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
         }
     }, [show, offset?.x, offset?.y, overlayRef, triggerRef]);
 
+    const hideAfterClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        updateShow(false);
+    }, []);
+
     if (!show) return null;
 
     return createPortal(
@@ -90,7 +95,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 top: position.top,
                 left: position.left,
             }}
-            onClick={() => updateShow(false)}
+            onClick={hideAfterClick}
         >
             {children}
         </div>,

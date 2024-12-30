@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDropdownLegacyProps, ITooltipProps } from '@univerjs/design';
+import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
 import { DropdownOverlay, DropdownProvider, DropdownTrigger, Tooltip } from '@univerjs/design';
 import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
@@ -72,7 +72,7 @@ export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper({ children, overlay, disabled }: IDropdownLegacyProps) {
+export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdownOverlayProps & { overlay: React.ReactNode; disabled?: boolean }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
@@ -86,7 +86,7 @@ export function DropdownWrapper({ children, overlay, disabled }: IDropdownLegacy
                     {children}
                 </div>
             </DropdownTrigger>
-            <DropdownOverlay>
+            <DropdownOverlay offset={offset}>
                 {/* TODO: When the new Menu Component is ready, plz remove the univer-theme class */}
                 <div className="univer-grid univer-gap-2 univer-theme">
                     {overlay}

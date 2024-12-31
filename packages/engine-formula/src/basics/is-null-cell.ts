@@ -17,7 +17,7 @@
 import type { ICellData, Nullable } from '@univerjs/core';
 
 /**
- * Examine if a cell is empty (null) is the formula-related modules. This is not
+ * Examine if a cell is empty (null) in the formula-related modules. This is not
  * interchangable with {@link isNullCell} from the core package, because for
  * formulas, "custom" field is meaningless.
  */

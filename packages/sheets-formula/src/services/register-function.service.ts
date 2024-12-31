@@ -23,7 +23,7 @@ import { IRemoteRegisterFunctionService } from './remote/remote-register-functio
 
 export type IRegisterFunction = (
     ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
-) => PrimitiveValueType | PrimitiveValueType[][];
+) => PrimitiveValueType | PrimitiveValueType[][] | Promise<PrimitiveValueType | PrimitiveValueType[][]>;
 
 // [[Function, FunctionName, Description]]
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];

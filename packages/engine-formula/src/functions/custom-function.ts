@@ -20,4 +20,8 @@ export class CustomFunction extends BaseFunction {
     override isCustom(): boolean {
         return true;
     }
+
+    override isAsync(): boolean {
+        return true;
+    }
 }

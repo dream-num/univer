@@ -22,8 +22,7 @@ import type {
     AsyncObject,
     BaseReferenceObject,
     FunctionVariantType,
-    NodeValueType,
-} from '../reference-object/base-reference-object';
+    NodeValueType } from '../reference-object/base-reference-object';
 import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -33,6 +32,9 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
+import {
+    AsyncPromiseObject,
+} from '../reference-object/base-reference-object';
 import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
@@ -219,15 +221,16 @@ export class FunctionNode extends BaseAstNode {
                     if (variant.isArray()) {
                         return (variant as ArrayValueObject).toValue();
                     }
-
                     return variant.getValue();
                 })
             );
-            if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
+
+            if (resultVariantCustom instanceof Promise) {
+                resultVariant = AsyncPromiseObject.create(resultVariantCustom);
+            } else if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
                 resultVariant = ValueObjectFactory.create(resultVariantCustom);
             } else {
                 const arrayValues = transformToValueObject(resultVariantCustom);
-
                 resultVariant = ArrayValueObject.create({
                     calculateValueList: arrayValues,
                     rowCount: arrayValues.length,

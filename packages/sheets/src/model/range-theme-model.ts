@@ -35,6 +35,11 @@ export interface IRangeThemeStyleRule {
     themeName: string;
 }
 
+interface ISheetRangeThemeModelJSON {
+    rangeThemeStyleRuleMap: Record<string, IRangeThemeStyleRule>;
+    rangeThemeStyleMapJson: Record<string, IRangeThemeStyleJSON>;
+}
+
 const SHEET_RANGE_THEME_MODEL_PLUGIN = 'SHEET_RANGE_THEME_MODEL_PLUGIN';
 
 export class SheetRangeThemeModel extends Disposable {
@@ -208,18 +213,17 @@ export class SheetRangeThemeModel extends Disposable {
         });
     }
 
-    fromJSON(json: string) {
-        const { rangeThemeStyleRuleMap, rangeThemeStyleMapJson } = JSON.parse(json);
+    fromJSON(json: ISheetRangeThemeModelJSON) {
+        const { rangeThemeStyleRuleMap, rangeThemeStyleMapJson } = json;
+        this._rangeThemeStyleMap.clear();
+        this._rangeThemeStyleRuleMap.clear();
+        this._rTreeCollection.clear();
         Object.keys(rangeThemeStyleRuleMap).forEach((key) => {
-            this._ensureRangeThemeStyleRuleMap(key).clear();
-            this._ensureRTreeCollection(key).clear();
             const ruleMap = rangeThemeStyleRuleMap[key];
-            Object.keys(ruleMap).forEach((ruleKey) => {
-                const rule = ruleMap[ruleKey];
-                this.registerRangeThemeRule(rule.themeName, rule.rangeInfo);
-                const rTreeCollection = this._ensureRTreeCollection(key);
-                rTreeCollection.insert({ unitId: key, sheetId: rule.rangeInfo.subUnitId, range: rule.rangeInfo.range, id: ruleKey });
-            });
+            const { themeName, rangeInfo } = ruleMap;
+            this.registerRangeThemeRule(themeName, rangeInfo);
+            const rTreeCollection = this._ensureRTreeCollection(rangeInfo.unitId);
+            rTreeCollection.insert({ unitId: key, sheetId: rangeInfo.subUnitId, range: rangeInfo.range, id: key });
         });
 
         Object.keys(rangeThemeStyleMapJson).forEach((key) => {
@@ -267,6 +271,7 @@ export class SheetRangeThemeModel extends Disposable {
         super.dispose();
         this._rangeThemeStyleMap.clear();
         this._rangeThemeStyleRuleMap.clear();
+        this._defaultRangeThemeMap.clear();
         this._rTreeCollection.clear();
     }
 }

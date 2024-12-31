@@ -30,10 +30,6 @@ export const SetWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeTheme
         const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
         if (!target) return false;
 
-        const { worksheet } = target;
-        if (!worksheet) {
-            return false;
-        }
         sheetRangeThemeModel.registerRangeThemeRule(themeName, { range, unitId, subUnitId });
         return true;
     },

@@ -30,10 +30,6 @@ export const DeleteWorksheetRangeThemeStyleMutation: IMutation<IWorksheetRangeTh
         const sheetRangeThemeModel = accessor.get(SheetRangeThemeModel);
         if (!target) return false;
 
-        const { worksheet } = target;
-        if (!worksheet) {
-            return false;
-        }
         sheetRangeThemeModel.removeRangeThemeRule(themeName, { range, unitId, subUnitId });
         return true;
     },

@@ -147,6 +147,7 @@ export class UniverSheetsPlugin extends Plugin {
         touchDependencies(this._injector, [
             [CalculateResultApplyController],
             [DefinedNameDataController],
+            [SheetRangeThemeModel],
             [NumberCellDisplayController],
             [RangeProtectionRenderModel],
             [RangeProtectionRefRangeService],

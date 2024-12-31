@@ -201,7 +201,7 @@ export class FUniver extends FBase {
     }
 
     /**
-     * add an event listener
+     * Add an event listener
      * @param event key of event
      * @param callback callback when event triggered
      * @returns {Disposable} The Disposable instance, for remove the listener
@@ -218,7 +218,7 @@ export class FUniver extends FBase {
     }
 
     /**
-     * fire an event, used in internal only.
+     * Fire an event, used in internal only.
      * @param event {string} key of event
      * @param params {any} parmas of event
      * @returns {boolean} should cancel

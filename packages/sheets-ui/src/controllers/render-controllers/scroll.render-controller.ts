@@ -554,18 +554,33 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             }
         }
 
+        // what circumstance make startSheetViewRow to be undefined ??? this should always have a value, it's rendering!
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollState() || {};
+        let { offsetX, offsetY, sheetViewStartRow, sheetViewStartColumn } = this._scrollManagerService.getCurrentScrollState() || {};
 
-        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : startSheetViewRow;
-        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
+        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : undefined;
+        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : undefined;
+
+        offsetX = startSheetViewRow ? offsetX : 0;
+        offsetY = startSheetViewColumn ? offsetY : 0;
+        if (forceTop) offsetY = 0;
+        if (forceLeft) offsetX = 0;
+
+        startSheetViewRow = startSheetViewRow ?? sheetViewStartRow;
+        startSheetViewColumn = startSheetViewColumn ?? sheetViewStartColumn;
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),
-            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : ((startSheetViewColumn ?? 0) - freezeXSplit),
-            offsetX: startSheetViewColumn === undefined ? offsetX : 0,
-            offsetY: startSheetViewRow === undefined ? offsetY : 0,
+            // sheetViewStartRow & offsetX could never be undefined, it's rendering, there should always be a value.
+
+            // sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),
+            // sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : ((startSheetViewColumn ?? 0) - freezeXSplit),
+            // offsetX: startSheetViewColumn === undefined ? offsetX : 0,
+            // offsetY: startSheetViewRow === undefined ? offsetY : 0,
+            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : (startSheetViewRow - freezeYSplit),
+            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : (startSheetViewColumn - freezeXSplit),
+            offsetX,
+            offsetY,
         });
     }
 }

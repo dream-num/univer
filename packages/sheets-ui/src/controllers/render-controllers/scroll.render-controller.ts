@@ -223,8 +223,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
                 // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
                 this._commandService.executeCommand(ScrollCommand.id, {
-                    sheetViewStartRow: row + (freeze?.ySplit || 0),
-                    sheetViewStartColumn: column + (freeze?.xSplit || 0),
+                    sheetViewStartRow: row,
+                    sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
                 });
@@ -287,9 +287,15 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
      * @returns
      */
     scrollToCell(row: number, column: number) {
+        const worksheet = this._context.unit.getActiveSheet();
+        // if (!worksheet) return false;
+        const {
+            ySplit: freezeYSplit,
+            xSplit: freezeXSplit,
+        } = worksheet.getFreeze();
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: row,
-            sheetViewStartColumn: column,
+            sheetViewStartRow: row - freezeYSplit,
+            sheetViewStartColumn: column - freezeXSplit,
             offsetX: 0,
             offsetY: 0,
         });
@@ -557,8 +563,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : startSheetViewRow,
-            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : startSheetViewColumn,
+            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),
+            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : ((startSheetViewColumn ?? 0) - freezeXSplit),
             offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });

@@ -22,7 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
-import { SetScrollOperation } from '../operations/scroll.operation';
+import { SetScrollBarOperation, SetScrollOperation } from '../operations/scroll.operation';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -65,9 +65,16 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             offsetY: currentOffsetY = 0,
         } = currentScroll || {};
         // the receiver is scroll.operation.ts
+        // const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
+
+        console.log('cmd vp sheetViewStartColumn', sheetViewStartColumn);
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
+
+            // why + ySplit? receiver - ySplit in scroll.operation.ts
+            // sheetViewStartRow: sheetViewStartRow + ySplit,
+            // sheetViewStartColumn: sheetViewStartColumn + xSplit,
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max
@@ -110,13 +117,20 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetX: currentOffsetX,
             offsetY: currentOffsetY,
         } = currentScroll || {};
-
+        const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
         const commandService = accessor.get(ICommandService);
-        return commandService.syncExecuteCommand(SetScrollOperation.id, {
+
+        // console.log('cmd YYY ', sheetViewStartColumn ?? (currentColumn ?? 0));
+        console.log('cmd YYY  split', sheetViewStartColumn, (currentColumn || 0) + xSplit);
+
+        return commandService.syncExecuteCommand(SetScrollBarOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
-            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0),
-            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0),
+            // why + ySplit? receiver - ySplit in scroll.operation.ts
+            // sheetViewStartRow: sheetViewStartRow + ySplit,
+            // sheetViewStartColumn: sheetViewStartColumn + xSplit,
+            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0 + ySplit),
+            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0 + xSplit),
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
         });

@@ -33,7 +33,7 @@ export interface IScrollCommandParams {
     offsetX?: number;
     offsetY?: number;
     /**
-     * Not the index of row in spreadsheet, but index of first row in current viewport.
+     * The index of row in spreadsheet.
      * e.g. if row start 10 at current viewport after freeze, and scroll value is zero, startRow is 0.
      * e.g. if scrolled about 2 rows, now top is 12, then sheetViewStartRow is 2.
      */

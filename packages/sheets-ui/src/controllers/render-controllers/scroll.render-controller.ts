@@ -17,10 +17,11 @@
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,
@@ -477,7 +478,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     // why so complicated?  ScrollRenderController@scrollToCell do the same thing, including the scenario of freezing.
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
+    private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
@@ -498,10 +499,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
 
         const {
-            startColumn: freezeStartColumn,
-            startRow: freezeStartRow,
-            ySplit: freezeYSplit,
-            xSplit: freezeXSplit,
+            startColumn: scrollableStartCol,
+            startRow: scrollableStartRow,
+            ySplit: freezedRowCount,
+            xSplit: freezedColCount,
         } = worksheet.getFreeze();
 
         const bounds = this._getViewportBounding();
@@ -513,15 +514,17 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             endRow: viewportEndRow,
             endColumn: viewportEndColumn,
         } = bounds;
+        const visibleRangeOfViewMain = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
         let startSheetViewRow: number | undefined;
         let startSheetViewColumn: number | undefined;
 
         // vertical overflow only happens when the selection's row is in not the freeze area
-        if (row >= freezeStartRow && column >= freezeStartColumn - freezeXSplit) {
+        if (row >= scrollableStartRow && column >= scrollableStartCol - freezedRowCount) {
             // top overflow
             if (row <= viewportStartRow) {
                 startSheetViewRow = row;
+                forceTop = true;
             }
 
             // bottom overflow
@@ -536,10 +539,12 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             }
         }
         // horizontal overflow only happens when the selection's column is in not the freeze area
-        if (column >= freezeStartColumn && row >= freezeStartRow - freezeYSplit) {
+        // why need row >= scrollableStartRow - freezedRowCount ?? we are handling column here, why need row?
+        if (column >= scrollableStartCol && row >= scrollableStartRow - freezedRowCount) {
             // left overflow
             if (column <= viewportStartColumn) {
                 startSheetViewColumn = column;
+                forceLeft = true;
             }
 
             // right overflow
@@ -562,25 +567,27 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : undefined;
         startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : undefined;
 
-        offsetX = startSheetViewRow ? offsetX : 0;
-        offsetY = startSheetViewColumn ? offsetY : 0;
-        if (forceTop) offsetY = 0;
         if (forceLeft) offsetX = 0;
+        if (forceTop) offsetY = 0;
 
-        startSheetViewRow = startSheetViewRow ?? sheetViewStartRow;
-        startSheetViewColumn = startSheetViewColumn ?? sheetViewStartColumn;
+        startSheetViewRow = startSheetViewRow ?? sheetViewStartRow + freezedRowCount;
+        startSheetViewColumn = startSheetViewColumn ?? sheetViewStartColumn + freezedColCount;
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            // sheetViewStartRow & offsetX could never be undefined, it's rendering, there should always be a value.
+            // sheetViewStartRow & offsetX should never be undefined, it's rendering, there should always be a value!
 
             // sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),
             // sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : ((startSheetViewColumn ?? 0) - freezeXSplit),
             // offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             // offsetY: startSheetViewRow === undefined ? offsetY : 0,
-            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : (startSheetViewRow - freezeYSplit),
-            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : (startSheetViewColumn - freezeXSplit),
+
+            // @TODO lumixraku there is scrolling issue if some rows are hidden in this scenario! need to fix it!
+            // e.g. row freezed at 0 ~ 5, then freezedRowCount = 6, but 14 - 16 is hidden.
+            // the actual freezedRowCount for viewMain is 6 + 3 = 9!
+            sheetViewStartRow: forceTop ? Math.max(0, row - freezedRowCount) : (startSheetViewRow - freezedRowCount),
+            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezedColCount) : (startSheetViewColumn - freezedColCount),
             offsetX,
             offsetY,
-        });
+        } as IScrollCommandParams);
     }
 }

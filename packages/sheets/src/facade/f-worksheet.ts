@@ -485,7 +485,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Unhides the row in the given range.
+     * Make the row in the given range visible.
      * @param row The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
@@ -504,9 +504,9 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Unhides one or more consecutive rows starting at the given index. Use 0-index for this method.
-     * @param rowIndex The starting index of the rows to unhide.
-     * @param numRows The number of rows to unhide.
+     * Scrolling sheet to make specific rows visible.
+     * @param rowIndex The starting index of the rows
+     * @param numRows The number of rows
      * @returns This sheet, for chaining.
      */
     showRows(rowIndex: number, numRows: number = 1): FWorksheet {
@@ -529,6 +529,32 @@ export class FWorksheet extends FBaseInitialable {
         return this;
     }
 
+    // /**
+    //  * Scrolling sheet to make specific rows visible.
+    //  * @param rowIndex The starting index of the rows
+    //  * @param numRows The number of rows
+    //  * @returns This sheet, for chaining.
+    //  */
+    // showRows(rowIndex: number, numRows: number = 1): FWorksheet {
+    //     const unitId = this._workbook.getUnitId();
+    //     const subUnitId = this._worksheet.getSheetId();
+    //     const range: IRange = {
+    //         startRow: rowIndex,
+    //         endRow: rowIndex + numRows - 1,
+    //         startColumn: 0,
+    //         endColumn: this._worksheet.getColumnCount() - 1,
+    //         rangeType: RANGE_TYPE.ROW,
+    //     };
+
+    //     this._commandService.syncExecuteCommand(SetSpecificRowsVisibleCommand.id, {
+    //         unitId,
+    //         subUnitId,
+    //         ranges: [range],
+    //     });
+
+    //     return this;
+    // }
+
     /**
      * Sets the row height of the given row in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
      * @param rowPosition The row position to change.
@@ -540,7 +566,8 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Sets the height of the given rows in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
+     * Sets the height of the given rows in pixels.
+     * By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
      * @param startRow The starting row position to change.
      * @param numRows The number of rows to change.
      * @param height The height in pixels to set it to.
@@ -856,7 +883,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Unhides the column in the given range.
+     * Show the column in the given range.
      * @param column The range to unhide, if hidden.
      * @returns This sheet, for chaining.
      */
@@ -875,7 +902,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
-     * Unhides one or more consecutive columns starting at the given index. Use 0-index for this method.
+     * Show one or more consecutive columns starting at the given index. Use 0-index for this method.
      * @param columnIndex The starting index of the columns to unhide.
      * @param numColumns The number of columns to unhide.
      * @returns This sheet, for chaining.
@@ -1007,7 +1034,7 @@ export class FWorksheet extends FBaseInitialable {
      * Sets the active selection region for this sheet.
      * @param range The range to set as the active selection.
      */
-    setActiveRange(range: FRange): void {
+    setActiveRange(range: FRange): FRange {
         const { unitId, sheetId } = range.getRange();
 
         if (unitId !== this._workbook.getUnitId() || sheetId !== this._worksheet.getSheetId()) {
@@ -1015,6 +1042,7 @@ export class FWorksheet extends FBaseInitialable {
         }
 
         this._fWorkbook.setActiveRange(range);
+        return range;
     }
 
     /**
@@ -1070,7 +1098,7 @@ export class FWorksheet extends FBaseInitialable {
      * @param columns The number of columns to freeze.
      * To unfreeze all columns, set this value to 0.
      */
-    setFrozenColumns(columns: number): void;
+    setFrozenColumns(columns: number): FWorksheet;
 
     /**
      * Set freeze column, then the range from startColumn to endColumn will be fixed.
@@ -1111,7 +1139,6 @@ export class FWorksheet extends FBaseInitialable {
                 subUnitId: this.getSheetId(),
             });
         }
-
         return this;
     }
 
@@ -1120,7 +1147,7 @@ export class FWorksheet extends FBaseInitialable {
      * @param rows The number of rows to freeze.
      * To unfreeze all rows, set this value to 0.
      */
-    setFrozenRows(rows: number): void;
+    setFrozenRows(rows: number): FWorksheet;
 
     /**
      * Set freeze row, then the range from startRow to endRow will be fixed.
@@ -1161,15 +1188,14 @@ export class FWorksheet extends FBaseInitialable {
                 subUnitId: this.getSheetId(),
             });
         }
-
         return this;
     }
 
     /**
      * Get the number of frozen columns.
-     * @returns The number of frozen columns.
-     * Returns 0 if no columns are frozen.
+     * @returns The number of frozen columns, returns 0 if no columns are frozen.
      */
+    // Same as Google App script.
     getFrozenColumns(): number {
         const freeze = this.getFreeze();
         if (freeze.startColumn === -1) {
@@ -1180,9 +1206,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get the number of frozen rows.
-     * @returns The number of frozen rows.
-     * Returns 0 if no rows are frozen.
+     * @returns The number of frozen rows. returns 0 if no rows are frozen.
      */
+    // Same as Google App script.
     getFrozenRows(): number {
         const freeze = this.getFreeze();
         if (freeze.startRow === -1) {
@@ -1194,7 +1220,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Get freezed rows.
      */
-    getFrozenRowRange(): { startRow: number; endRow: number } {
+    getFrozenRowRange(): Partial<IRange> {
         const cfg = this._worksheet.getFreeze();
         return {
             startRow: cfg.startRow - cfg.ySplit,
@@ -1205,7 +1231,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Get freezed columns
      */
-    getFrozenColumnRange(): { startColumn: number; endColumn: number } {
+    getFrozenColumnRange(): Partial<IRange> {
         const cfg = this._worksheet.getFreeze();
         return {
             startColumn: cfg.startColumn - cfg.xSplit,
@@ -1247,7 +1273,6 @@ export class FWorksheet extends FBaseInitialable {
             subUnitId: this._worksheet.getSheetId(),
             showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
         } as IToggleGridlinesCommandParams);
-
         return this;
     }
 
@@ -1269,7 +1294,6 @@ export class FWorksheet extends FBaseInitialable {
             subUnitId: this._worksheet.getSheetId(),
             color,
         } as ISetGridlinesColorCommandParams);
-
         return this;
     }
 
@@ -1386,7 +1410,7 @@ export class FWorksheet extends FBaseInitialable {
      * const fWorkSheet = fWorkbook.getActiveSheet();
      * // hide the active sheet
      * fWorkSheet.hideSheet();
-     * ``
+     * ```
      */
     hideSheet(): FWorksheet {
         const commandService = this._injector.get(ICommandService);
@@ -1422,7 +1446,6 @@ export class FWorksheet extends FBaseInitialable {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
         });
-
         return this;
     }
 
@@ -1499,11 +1522,11 @@ export class FWorksheet extends FBaseInitialable {
      */
     clear(options?: IFacadeClearOptions): FWorksheet {
         if (options && options.contentsOnly && !options.formatOnly) {
-            return this.clearContents();
+            this.clearContents();
         }
 
         if (options && options.formatOnly && !options.contentsOnly) {
-            return this.clearFormats();
+            this.clearFormats();
         }
 
         const unitId = this._workbook.getUnitId();
@@ -1523,7 +1546,6 @@ export class FWorksheet extends FBaseInitialable {
             ranges: [range],
             options,
         });
-
         return this;
     }
 
@@ -1555,7 +1577,6 @@ export class FWorksheet extends FBaseInitialable {
             subUnitId,
             ranges: [range],
         });
-
         return this;
     }
 
@@ -1627,6 +1648,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * @deprecated use getLastColumn instead.
      * Returns the position of the last column that has content. Same as getLastColumns.
      * @returns {number} the last column of the sheet that contains content.
      * @example
@@ -1642,6 +1664,7 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * @deprecated use getLastRow instead.
      * Returns the position of the last row that has content.
      * @returns {number} the last row of the sheet that contains content.
      * @example

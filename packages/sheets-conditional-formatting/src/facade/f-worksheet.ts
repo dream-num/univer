@@ -62,6 +62,7 @@ export interface IFWorksheetConditionalFormattingMixin {
      *      .build();
      * ```
      */
+    // in Google, newConditionalFormatRule
     createConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**

@@ -80,12 +80,24 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Start the editing process
      * @returns A boolean value
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().startEditing();
+     * ```
      */
     startEditing(): boolean;
 
     /**
      * Use endEditingAsync as instead
      * @deprecated
+     * End the editing process
+     * @async
+     * @param save - Whether to save the changes
+     * @returns A promise that resolves to a boolean value
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().endEditing(true);
+     * ```
      */
     endEditing(save?: boolean): Promise<boolean>;
 
@@ -113,7 +125,7 @@ export interface IFWorkbookSheetsUIMixin {
      * univerAPI.getActiveWorkbook().disableSelection();
      * ```
      */
-    disableSelection(): void;
+    disableSelection(): FWorkbook;
 
     /**
      * Enable selection. After this you can select range.
@@ -122,7 +134,7 @@ export interface IFWorkbookSheetsUIMixin {
      * univerAPI.getActiveWorkbook().enableSelection();
      * ```
      */
-    enableSelection(): void;
+    enableSelection(): FWorkbook;
 
     /**
      * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
@@ -131,7 +143,7 @@ export interface IFWorkbookSheetsUIMixin {
      * univerAPI.getActiveWorkbook().transparentSelection();
      * ```
      */
-    transparentSelection(): void;
+    transparentSelection(): FWorkbook;
 
     /**
      * Set selection visible.
@@ -140,7 +152,7 @@ export interface IFWorkbookSheetsUIMixin {
      * univerAPI.getActiveWorkbook().showSelection();
      * ```
      */
-    showSelection(): void;
+    showSelection(): FWorkbook;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -258,40 +270,44 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return scm.getScrollStateByParam({ unitId, sheetId });
     }
 
-    override disableSelection(): void {
+    override disableSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).disableSelection();
         }
+        return this;
     }
 
-    override enableSelection(): void {
+    override enableSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
         }
+        return this;
     }
 
-    override transparentSelection(): void {
+    override transparentSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).transparentSelection();
         }
+        return this;
     }
 
-    override showSelection(): void {
+    override showSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
+        return this;
     }
 }
 

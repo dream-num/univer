@@ -132,10 +132,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
         });
     }
 
-    /**
-     * get data validation validator status for current workbook
-     * @returns matrix of validator status
-     */
     override getValidatorStatus(): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorkbook(this._workbook.getUnitId());

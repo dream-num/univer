@@ -25,6 +25,7 @@ export interface IFWorkbookHyperlinkMixin {
      * @param sheetId the sheet id to link
      * @param range the range to link, or define-name id
      * @returns the hyperlink string
+     * 
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
     /**

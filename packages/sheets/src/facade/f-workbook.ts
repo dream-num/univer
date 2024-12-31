@@ -425,13 +425,15 @@ export class FWorkbook extends FBaseInitialable {
      * Used to modify the editing permissions of the workbook. When the value is false, editing is not allowed.
      * @param {boolean} value  editable value want to set
      */
-    setEditable(value: boolean): void {
+    setEditable(value: boolean): FWorkbook {
         const instance = new WorkbookEditablePermission(this._workbook.getUnitId());
         const editPermissionPoint = this._permissionService.getPermissionPoint(instance.id);
         if (!editPermissionPoint) {
             this._permissionService.addPermissionPoint(instance);
         }
         this._permissionService.updatePermissionPoint(instance.id, value);
+
+        return this;
     }
 
     /**
@@ -467,6 +469,7 @@ export class FWorkbook extends FBaseInitialable {
      * Returns the selected range in the active sheet, or null if there is no active range.
      * @returns the active range
      */
+    // could sheet have no active range ?
     getActiveRange(): FRange | null {
         const activeSheet = this._workbook.getActiveSheet();
         const selections = this._selectionManagerService.getCurrentSelections();
@@ -557,6 +560,14 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
+     * @deprecated use setSpreadsheetLocale instead.
+     * @param locale
+     */
+    setLocale(locale: LocaleType): void {
+        this._localeService.setLocale(locale);
+    }
+
+    /**
      * Set the locale of the workbook.
      * @param {LocaleType} locale The locale to set
      * @example
@@ -566,9 +577,9 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.setLocale(LocaleType.EN_US);
      * ```
      */
-
-    setLocale(locale: LocaleType): void {
+    setSpreadsheetLocale(locale: LocaleType): FWorkbook {
         this._localeService.setLocale(locale);
+        return this;
     }
 
     /**
@@ -610,8 +621,6 @@ export class FWorkbook extends FBaseInitialable {
             order: sheetIndexVal,
             subUnitId: sheet.getSheetId(),
         });
-
-        return this;
     }
 
     /**
@@ -690,11 +699,12 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.insertDefinedName('MyDefinedName', 'Sheet1!A1');
      * ```
      */
-    insertDefinedName(name: string, formulaOrRefString: string): void {
+    insertDefinedName(name: string, formulaOrRefString: string): FWorkbook {
         const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
         const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
         param.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
         this.insertDefinedNameBuilder(param);
+        return this;
     }
 
     /**
@@ -719,7 +729,7 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * insert a defined name by builder param
+     * Insert a defined name by builder param.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
      * @example
      * ```ts

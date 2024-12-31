@@ -279,12 +279,12 @@ function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, w
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
+    const { ranges } = params;
     const { unitId, sheetId } = getCurrentSheetInfo(workbook);
 
     return {
         type: FormulaReferenceMoveType.RemoveRow,
-        range,
+        ranges,
         unitId,
         sheetId,
     };
@@ -294,12 +294,12 @@ function handleRefRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>, w
     const { params } = command;
     if (!params) return null;
 
-    const { range } = params;
+    const { ranges } = params;
     const { unitId, sheetId } = getCurrentSheetInfo(workbook);
 
     return {
         type: FormulaReferenceMoveType.RemoveColumn,
-        range,
+        ranges,
         unitId,
         sheetId,
     };

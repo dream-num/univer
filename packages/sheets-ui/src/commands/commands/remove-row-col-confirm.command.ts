@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { IRemoveRowColCommandParams } from '@univerjs/sheets';
+import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { getSheetCommandTarget, RemoveColCommand, RemoveRowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
@@ -28,13 +28,8 @@ export const RemoveRowConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-        let range = params?.range;
-        if (!range) {
-            range = selectionManagerService.getCurrentLastSelection()?.range;
-        }
-        if (!range) {
-            return false;
-        }
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections().map((s) => s.range);
+        if (ranges.length === 0) return false;
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -45,7 +40,7 @@ export const RemoveRowConfirmCommand: ICommand = {
         const { worksheet } = target;
         const allRowRanges = worksheet.getVisibleRows();
 
-        if (isAllRowsCovered(allRowRanges, [range])) {
+        if (isAllRowsCovered(allRowRanges, ranges)) {
             const confirmService = accessor.get(IConfirmService);
             const localeService = accessor.get(LocaleService);
 
@@ -62,7 +57,7 @@ export const RemoveRowConfirmCommand: ICommand = {
             return false;
         }
 
-        await commandService.executeCommand(RemoveRowCommand.id, { range });
+        await commandService.executeCommand(RemoveRowCommand.id, { ranges });
         return true;
     },
 };
@@ -73,13 +68,8 @@ export const RemoveColConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
 
-        let range = params?.range;
-        if (!range) {
-            range = selectionManagerService.getCurrentLastSelection()?.range;
-        }
-        if (!range) {
-            return false;
-        }
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections().map((s) => s.range);
+        if (ranges.length === 0) return false;
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -90,7 +80,7 @@ export const RemoveColConfirmCommand: ICommand = {
         const { worksheet } = target;
         const allColumnRanges = worksheet.getVisibleCols();
 
-        if (isAllColumnsCovered(allColumnRanges, [range])) {
+        if (isAllColumnsCovered(allColumnRanges, ranges)) {
             const confirmService = accessor.get(IConfirmService);
             const localeService = accessor.get(LocaleService);
 
@@ -107,7 +97,7 @@ export const RemoveColConfirmCommand: ICommand = {
             return false;
         }
 
-        await commandService.executeCommand(RemoveColCommand.id, { range });
+        await commandService.executeCommand(RemoveColCommand.id, { ranges });
         return true;
     },
 };

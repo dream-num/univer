@@ -22,8 +22,6 @@ import type {
 import type {
     IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
 
@@ -34,6 +32,7 @@ import type { InsertRangeMoveRightCommandParams } from '../commands/commands/ins
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
+import type { IRemoveRowColCommandParams } from '../commands/commands/remove-row-col.command';
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
@@ -234,31 +233,31 @@ export class MergeCellController extends Disposable {
     refRangeHandle(config: EffectRefRangeParams, unitId: string, subUnitId: string) {
         switch (config.id) {
             case EffectRefRangId.MoveColsCommandId: {
-                const params = config.params as unknown as IMoveColsCommandParams;
+                const params = config.params as IMoveColsCommandParams;
                 return this._handleMoveColsCommand(params, unitId, subUnitId);
             }
             case EffectRefRangId.MoveRowsCommandId: {
-                const params = config.params as unknown as IMoveRowsCommandParams;
+                const params = config.params as IMoveRowsCommandParams;
                 return this._handleMoveRowsCommand(params, unitId, subUnitId);
             }
             case InsertRowCommand.id: {
-                const params = config.params as unknown as IInsertRowCommandParams;
+                const params = config.params as IInsertRowCommandParams;
                 const _unitId = params.unitId || unitId;
                 const _subUnitId = params.subUnitId || subUnitId;
                 return this._handleInsertRowCommand(params, _unitId, _subUnitId);
             }
             case InsertColCommand.id: {
-                const params = config.params as unknown as IInsertColCommandParams;
+                const params = config.params as IInsertColCommandParams;
                 const _unitId = params.unitId || unitId;
                 const _subUnitId = params.subUnitId || subUnitId;
                 return this._handleInsertColCommand(params, _unitId, _subUnitId);
             }
             case RemoveColCommand.id: {
-                const params = config.params as unknown as IRemoveColMutationParams;
+                const params = config.params as IRemoveRowColCommandParams;
                 return this._handleRemoveColCommand(params, unitId, subUnitId);
             }
             case RemoveRowCommand.id: {
-                const params = config.params as unknown as IRemoveRowsMutationParams;
+                const params = config.params as IRemoveRowColCommandParams;
                 return this._handleRemoveRowCommand(params, unitId, subUnitId);
             }
 
@@ -267,19 +266,19 @@ export class MergeCellController extends Disposable {
                 return this._handleMoveRangeCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveRightCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveRightCommandParams;
+                const params = config.params as InsertRangeMoveRightCommandParams;
                 return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
             }
             case InsertRangeMoveDownCommand.id: {
-                const params = config.params as unknown as InsertRangeMoveDownCommandParams;
+                const params = config.params as InsertRangeMoveDownCommandParams;
                 return this._handleInsertRangeMoveDownCommand(params, unitId, subUnitId);
             }
             case DeleteRangeMoveUpCommand.id: {
-                const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
+                const params = config.params as IDeleteRangeMoveUpCommandParams;
                 return this._handleDeleteRangeMoveUpCommand(params, unitId, subUnitId);
             }
             case DeleteRangeMoveLeftCommand.id: {
-                const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
+                const params = config.params as IDeleteRangeMoveLeftCommandParams;
                 return this._handleDeleteRangeMoveLeftCommand(params, unitId, subUnitId);
             }
         }
@@ -618,7 +617,7 @@ export class MergeCellController extends Disposable {
         return { redos, undos };
     }
 
-    private _handleRemoveColCommand(config: IRemoveColMutationParams, unitId: string, subUnitId: string) {
+    private _handleRemoveColCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
         const workbook = getWorkbook(this._univerInstanceService, unitId);
         if (!workbook) {
             return this._handleNull();
@@ -627,13 +626,19 @@ export class MergeCellController extends Disposable {
         if (!worksheet) {
             return this._handleNull();
         }
-        const { range } = config;
-        const { startColumn, endColumn } = range;
 
+        const { ranges } = config;
+
+        // Collect all affected merged cells
         const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                mergeCellsHasLapping.push(cell);
-            }
+            ranges.some((range) => {
+                if (Rectangle.intersects(range, cell)) {
+                    mergeCellsHasLapping.push(cell);
+                    return true;
+                }
+
+                return false;
+            });
             return mergeCellsHasLapping;
         }, [] as IRange[]);
 
@@ -641,22 +646,21 @@ export class MergeCellController extends Disposable {
             return this._handleNull();
         }
 
-        const newMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                if (startColumn <= cell.startColumn && endColumn >= cell.endColumn) {
-                    return mergeCellsHasLapping;
-                } else if (startColumn >= cell.startColumn && endColumn <= cell.endColumn) {
-                    cell.endColumn -= endColumn - startColumn + 1;
-                } else if (startColumn < cell.startColumn) {
-                    cell.startColumn = startColumn;
-                    cell.endColumn -= endColumn - startColumn + 1;
-                } else if (endColumn > cell.endColumn) {
-                    cell.endColumn = startColumn - 1;
-                }
-                if (this._checkIsMergeCell(cell)) {
-                    mergeCellsHasLapping.push(cell);
-                }
+        // Update the merged cells for each range
+        const newMergeCells = Tools.deepClone(oldMergeCells).reduce((mergeCellsHasLapping, cell) => {
+            const deleteRanges: IRangeStartEnd[] = ranges.map((range) => [range.startColumn, range.endColumn]);
+            const originalRange: IRangeStartEnd = [cell.startColumn, cell.endColumn];
+            const newRange = processRanges(originalRange, deleteRanges);
+
+            if (!newRange) return mergeCellsHasLapping;
+
+            cell.startColumn = newRange[0];
+            cell.endColumn = newRange[1];
+
+            if (this._checkIsMergeCell(cell)) {
+                mergeCellsHasLapping.push(cell);
             }
+
             return mergeCellsHasLapping;
         }, [] as IRange[]);
 
@@ -686,8 +690,8 @@ export class MergeCellController extends Disposable {
         return { preUndos, undos, preRedos, redos };
     }
 
-    private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
-        const { range } = config;
+    private _handleRemoveRowCommand(config: IRemoveRowColCommandParams, unitId: string, subUnitId: string) {
+        const { ranges } = config;
         const workbook = getWorkbook(this._univerInstanceService, unitId);
         if (!workbook) {
             return this._handleNull();
@@ -697,12 +701,16 @@ export class MergeCellController extends Disposable {
             return this._handleNull();
         }
 
-        const { startRow, endRow } = range;
-
+        // Collect all affected merged cells
         const oldMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                mergeCellsHasLapping.push(cell);
-            }
+            ranges.some((range) => {
+                if (Rectangle.intersects(range, cell)) {
+                    mergeCellsHasLapping.push(cell);
+                    return true;
+                }
+
+                return false;
+            });
             return mergeCellsHasLapping;
         }, [] as IRange[]);
 
@@ -710,22 +718,21 @@ export class MergeCellController extends Disposable {
             return this._handleNull();
         }
 
-        const newMergeCells = Tools.deepClone(worksheet.getMergeData()).reduce((mergeCellsHasLapping, cell) => {
-            if (Rectangle.intersects(range, cell)) {
-                if (startRow <= cell.startRow && endRow >= cell.endRow) {
-                    return mergeCellsHasLapping;
-                } else if (startRow >= cell.startRow && endRow <= cell.endRow) {
-                    cell.endRow -= endRow - startRow + 1;
-                } else if (startRow < cell.startRow) {
-                    cell.startRow = startRow;
-                    cell.endRow -= endRow - startRow + 1;
-                } else if (endRow > cell.endRow) {
-                    cell.endRow = startRow - 1;
-                }
-                if (this._checkIsMergeCell(cell)) {
-                    mergeCellsHasLapping.push(cell);
-                }
+        // Update the merged cells for each range
+        const newMergeCells = Tools.deepClone(oldMergeCells).reduce((mergeCellsHasLapping, cell) => {
+            const deleteRanges: IRangeStartEnd[] = ranges.map((range) => [range.startRow, range.endRow]);
+            const originalRange: IRangeStartEnd = [cell.startRow, cell.endRow];
+            const newRange = processRanges(originalRange, deleteRanges);
+
+            if (!newRange) return mergeCellsHasLapping;
+
+            cell.startRow = newRange[0];
+            cell.endRow = newRange[1];
+
+            if (this._checkIsMergeCell(cell)) {
+                mergeCellsHasLapping.push(cell);
             }
+
             return mergeCellsHasLapping;
         }, [] as IRange[]);
 
@@ -1241,3 +1248,83 @@ function getWorksheet(workbook: Workbook, subUnitId?: string) {
     }
     return workbook.getActiveSheet();
 }
+
+type IRangeStartEnd = [number, number];
+type IDeleteRanges = IRangeStartEnd[];
+
+// Main function: Process range deletions similar to Excel's multi-column delete functionality
+// Handles merged cells represented as ranges
+function processRanges(originalRange: IRangeStartEnd, deleteRanges: IDeleteRanges): IRangeStartEnd | null {
+    if (!originalRange || deleteRanges.length === 0) return originalRange;
+
+    // Initialize result array to store all sub-ranges
+    let ranges: IRangeStartEnd[] = [originalRange];
+    // Track the minimum start position across all delete ranges
+    let minStart: number = originalRange[0];
+
+    // Process each delete range
+    for (const deleteRange of deleteRanges) {
+        // Update minimum start position if the delete range starts earlier
+        minStart = Math.min(minStart, deleteRange[0]);
+
+        // Split existing ranges based on current delete range
+        ranges = ranges.reduce<IRangeStartEnd[]>((acc, range) => {
+            // Get split results for current range against delete range
+            const splitResults = splitRange(range, deleteRange);
+            return acc.concat(splitResults);
+        }, []);
+
+        // If no ranges remain after deletion, return null
+        if (ranges.length === 0) return null;
+    }
+
+    // Merge remaining ranges considering the minimum start position
+    return mergeRanges(ranges, minStart);
+}
+
+// Helper function: Split a range based on delete range
+// Returns array of remaining sub-ranges after deletion
+function splitRange(range: IRangeStartEnd, deleteRange: IRangeStartEnd): IRangeStartEnd[] {
+    const [start, end] = range;
+    const [deleteStart, deleteEnd] = deleteRange;
+
+    // No intersection case - return original range unchanged
+    if (end < deleteStart || start > deleteEnd) {
+        return [range];
+    }
+
+    const results: IRangeStartEnd[] = [];
+
+    // Keep the portion before delete range if it exists
+    if (start < deleteStart) {
+        results.push([start, deleteStart - 1]);
+    }
+
+    // Keep the portion after delete range if it exists
+    if (end > deleteEnd) {
+        results.push([deleteEnd + 1, end]);
+    }
+
+    return results;
+}
+
+// Helper function: Merge remaining ranges into final result
+// Uses minStart to determine the starting position of the new range
+function mergeRanges(ranges: IRangeStartEnd[], minStart: number): IRangeStartEnd | null {
+    if (ranges.length === 0) return null;
+    // Special case for single range
+    if (ranges.length === 1) {
+        const totalLength = ranges[0][1] - ranges[0][0] + 1;
+        return [minStart, minStart + totalLength - 1];
+    }
+
+    // Sort ranges by start position
+    ranges.sort((a, b) => a[0] - b[0]);
+
+    // Calculate total length of all remaining sub-ranges
+    const totalLength = ranges.reduce((sum, [start, end]) => sum + (end - start + 1), 0);
+
+    // Create new range starting from minStart with calculated total length
+    return [minStart, minStart + totalLength - 1];
+}
+

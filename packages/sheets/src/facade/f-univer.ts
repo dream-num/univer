@@ -19,6 +19,7 @@ import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
 import { FUniver, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
+import { filter, take } from 'rxjs';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -64,7 +65,7 @@ export interface IFUniverSheetsMixin {
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
-    override _initialize(): void {
+    private _init(): void {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
@@ -127,6 +128,12 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 }
             })
         );
+    }
+
+    override _initialize(): void {
+        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage > 0), take(1)).subscribe(() => {
+            this._init();
+        });
     }
 
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {

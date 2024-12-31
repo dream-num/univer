@@ -47,8 +47,15 @@ export class FUniver extends FBase {
         return injector.createInstance(FUniver);
     }
 
-    private _eventRegistry: Registry = new Registry<{ event: string; callback: (...args: any[]) => void }>();
-    private _disposables: [] = [];
+    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+
+    private _ensureEventRegistry(event: string) {
+        if (!this._eventRegistry.has(event)) {
+            this._eventRegistry.set(event, new Registry());
+        }
+
+        return this._eventRegistry.get(event)!;
+    }
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -206,12 +213,8 @@ export class FUniver extends FBase {
      * ```
      */
     addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void) {
-        const data = {
-            event,
-            callback,
-        };
-        this._eventRegistry.add(data);
-        return toDisposable(() => this._eventRegistry.delete(data));
+        this._ensureEventRegistry(event).add(callback);
+        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
     }
 
     /**
@@ -225,10 +228,8 @@ export class FUniver extends FBase {
      * ```
      */
     protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
-        this._eventRegistry.getData().forEach((item) => {
-            if (item.event === event) {
-                item.callback(params);
-            }
+        this._eventRegistry.get(event)?.getData().forEach((callback) => {
+            callback(params);
         });
 
         return params.cancel;

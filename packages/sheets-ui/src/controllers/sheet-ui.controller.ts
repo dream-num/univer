@@ -86,7 +86,7 @@ import {
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
-import { SetScrollBarOperation, SetScrollOperation } from '../commands/operations/scroll.operation';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
@@ -244,7 +244,6 @@ export class SheetUIController extends Disposable {
             SetOnceFormatPainterCommand,
             ApplyFormatPainterCommand,
             SetScrollOperation,
-            SetScrollBarOperation,
             SetScrollRelativeCommand,
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,

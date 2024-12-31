@@ -22,7 +22,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
-import { SetScrollBarOperation, SetScrollOperation } from '../operations/scroll.operation';
+import { SetScrollOperation } from '../operations/scroll.operation';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -32,7 +32,18 @@ export interface ISetScrollRelativeCommandParams {
 export interface IScrollCommandParams {
     offsetX?: number;
     offsetY?: number;
+    /**
+     * Not the index of row in spreadsheet, but index of first row in current viewport.
+     * e.g. if row start 10 at current viewport after freeze, and scroll value is zero, startRow is 0.
+     * e.g. if scrolled about 2 rows, now top is 12, then sheetViewStartRow is 2.
+     */
     sheetViewStartRow?: number;
+
+    /**
+     * Not the index of col in spreadsheet, but index of first column in current viewport.
+     * e.g. if col start C at current viewport after freeze, and scroll value is zero, startColumn is 0.
+     * e.g. if scrolled about 2 columns, now left is E, then sheetViewStartColumn is 2.
+     */
     sheetViewStartColumn?: number;
 }
 
@@ -67,7 +78,6 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         // the receiver is scroll.operation.ts
         // const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
 
-        console.log('cmd vp sheetViewStartColumn', sheetViewStartColumn);
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
@@ -120,10 +130,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
         const commandService = accessor.get(ICommandService);
 
-        // console.log('cmd YYY ', sheetViewStartColumn ?? (currentColumn ?? 0));
-        console.log('cmd YYY  split', sheetViewStartColumn, (currentColumn || 0) + xSplit);
-
-        return commandService.syncExecuteCommand(SetScrollBarOperation.id, {
+        return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
             // why + ySplit? receiver - ySplit in scroll.operation.ts

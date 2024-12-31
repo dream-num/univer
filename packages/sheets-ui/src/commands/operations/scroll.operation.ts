@@ -17,7 +17,7 @@
 import type { IOperation } from '@univerjs/core';
 import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
@@ -39,39 +39,6 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         // const worksheet = workbook!.getSheetBySheetId(sheetId);
         // const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
-        console.log('opt vp sheetViewStartColumn split', sheetViewStartColumn);
-        scrollManagerService.setScrollInfoAndEmitEvent({
-            unitId,
-            sheetId,
-            offsetX,
-            offsetY,
-            sheetViewStartRow,
-            sheetViewStartColumn,
-        });
-
-        return true;
-    },
-};
-
-export const SetScrollBarOperation: IOperation<IScrollStateWithSearchParam> = {
-    id: 'sheet.operation.set-scrollbar',
-    type: CommandType.OPERATION,
-
-    handler: (accessor, params: IScrollStateWithSearchParam) => {
-        if (!params) {
-            return false;
-        }
-
-        // freeze is handled by set-scroll.command.ts
-        const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = params;
-        const renderManagerService = accessor.get(IRenderManagerService);
-        const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
-        const currentService = accessor.get(IUniverInstanceService);
-        const workbook = currentService.getUniverSheetInstance(unitId);
-        const worksheet = workbook!.getSheetBySheetId(sheetId);
-        const { xSplit, ySplit } = worksheet!.getConfig().freeze;
-
-        console.log('opt bar sheetViewStartColumn split', sheetViewStartColumn - xSplit);
         scrollManagerService.setScrollInfoAndEmitEvent({
             unitId,
             sheetId,

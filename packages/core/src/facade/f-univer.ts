@@ -24,7 +24,7 @@ import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { Disposable, toDisposable } from '../shared';
+import { toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBase } from './f-base';
 import { FBlob } from './f-blob';
@@ -60,22 +60,15 @@ export class FUniver extends FBase {
     }
 
     override _initialize(): void {
-        const disposeMe = () => {
-            this.dispose();
-        };
-        class FDisposable extends Disposable {
-            override dispose() {
-                super.dispose();
-                disposeMe();
-            }
-        }
-
-        this._injector.add([FDisposable]);
         this.disposeWithMe(
             this._lifecycleService.lifecycle$.subscribe((stage) => {
                 this.fireEvent(this.Event.LifeCycleChanged, { stage });
             })
         );
+
+        this._injector.onDispose(() => {
+            this.dispose();
+        });
     }
 
     /**

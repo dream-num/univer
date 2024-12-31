@@ -43,6 +43,7 @@ import type {
 } from '../../services/clipboard/type';
 import {
     BooleanNumber,
+    connectInjector,
     convertBodyToHtml,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
@@ -83,12 +84,13 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { IMessageService } from '@univerjs/ui';
+import { BuiltInUIPart, IMessageService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
     SheetCutCommand,
+    SheetOptionalPasteCommand,
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
     SheetPasteCommand,
@@ -98,7 +100,9 @@ import {
 } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
+import { RemovePasteMenuCommands } from './const';
 import {
     generateBody,
     getClearAndSetMergeMutations,
@@ -133,11 +137,13 @@ export class SheetClipboardController extends RxDisposable {
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localService: LocaleService
+        @Inject(LocaleService) private readonly _localService: LocaleService,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
     ) {
         super();
         this._init();
         this._initCommandListener();
+        this._initUIComponents();
         this._pasteWithDoc();
     }
 
@@ -189,6 +195,7 @@ export class SheetClipboardController extends RxDisposable {
             SheetPasteColWidthCommand,
             SheetPasteBesidesBorderCommand,
             SheetPasteShortKeyCommand,
+            SheetOptionalPasteCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         // register basic sheet clipboard hooks
@@ -895,6 +902,20 @@ export class SheetClipboardController extends RxDisposable {
                     this._sheetClipboardService.removeMarkSelection();
                 }
             })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (RemovePasteMenuCommands.includes(command.id)) {
+                    this._sheetClipboardService.disposePasteOptionsCache();
+                }
+            })
+        );
+    }
+
+    private _initUIComponents() {
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ClipboardPopupMenu, this._injector))
         );
     }
 }

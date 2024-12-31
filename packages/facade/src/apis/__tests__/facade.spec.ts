@@ -367,4 +367,46 @@ describe('Test FUniver', () => {
         expect(worksheet.getComments().length).toBe(0);
         expect(range.getComment()).toBeNull();
     });
+
+    it('Function registerFunction should handle async function', () => {
+        const functionName = 'ASYNCFUNC';
+        const functionsDisposable = univerAPI.registerFunction({
+            calculate: [
+                [async function (...variants) {
+                    return Promise.resolve(42);
+                }, functionName, 'Async custom function'],
+            ],
+        });
+
+        const descriptionService = get(IDescriptionService);
+        const functionInfo = descriptionService.getFunctionInfo(functionName);
+
+        expect(functionInfo?.functionName).toBe(functionName);
+
+        functionsDisposable.dispose();
+
+        const functionInfoAfterDispose = descriptionService.getFunctionInfo(functionName);
+        expect(functionInfoAfterDispose).toBeUndefined();
+    });
+
+    it('Function registerFunction should handle async array function', () => {
+        const functionName = 'ASYNCARRAY';
+        const functionsDisposable = univerAPI.registerFunction({
+            calculate: [
+                [async function (...variants) {
+                    return Promise.resolve([[1, 2], [3, 4]]);
+                }, functionName, 'Async array function'],
+            ],
+        });
+
+        const descriptionService = get(IDescriptionService);
+        const functionInfo = descriptionService.getFunctionInfo(functionName);
+
+        expect(functionInfo?.functionName).toBe(functionName);
+
+        functionsDisposable.dispose();
+
+        const functionInfoAfterDispose = descriptionService.getFunctionInfo(functionName);
+        expect(functionInfoAfterDispose).toBeUndefined();
+    });
 });

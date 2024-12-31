@@ -192,7 +192,7 @@ export class BaseFunction {
 
     calculateCustom(
         ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
-    ): PrimitiveValueType | PrimitiveValueType[][] {
+    ): PrimitiveValueType | PrimitiveValueType[][] | Promise<PrimitiveValueType | PrimitiveValueType[][]> {
         return null;
     }
 

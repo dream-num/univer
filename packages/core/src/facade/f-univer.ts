@@ -192,11 +192,11 @@ export class FUniver extends FBase {
     }
 
     get Enum() {
-        return FEnum;
+        return FEnum.get();
     }
 
     get Event() {
-        return FEventName;
+        return FEventName.get();
     }
 
     /**
@@ -230,7 +230,7 @@ export class FUniver extends FBase {
      * this.fireEvent(univerAPI.event.UnitCreated, params);
      * ```
      */
-    protected fireEvent(event: keyof IEventParamConfig, params: IEventParamConfig[typeof event]) {
+    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
         this._eventRegistry.getData().forEach((item) => {
             if (item.event === event) {
                 item.callback(params);

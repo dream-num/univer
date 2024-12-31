@@ -24,12 +24,23 @@ import { DataValidationType } from '../types/enum/data-validation-type';
 import { FBase } from './f-base';
 
 export class FEnum extends FBase {
-    static UniverInstanceType = UniverInstanceType;
-    static LifecycleStages = LifecycleStages;
+    static _intance: FEnum | null;
+    static get() {
+        if (this._intance) {
+            return this._intance;
+        }
 
-    static DataValidationType = DataValidationType;
-    static DataValidationErrorStyle = DataValidationErrorStyle;
-    static DataValidationRenderMode = DataValidationRenderMode;
-    static DataValidationOperator = DataValidationOperator;
-    static DataValidationStatus = DataValidationStatus;
+        const instance = new FEnum();
+        this._intance = instance;
+        return instance;
+    }
+
+    readonly UniverInstanceType = UniverInstanceType;
+    readonly LifecycleStages = LifecycleStages;
+
+    readonly DataValidationType = DataValidationType;
+    readonly DataValidationErrorStyle = DataValidationErrorStyle;
+    readonly DataValidationRenderMode = DataValidationRenderMode;
+    readonly DataValidationOperator = DataValidationOperator;
+    readonly DataValidationStatus = DataValidationStatus;
 }

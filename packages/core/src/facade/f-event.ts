@@ -20,11 +20,6 @@ import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
 import { FBase } from './f-base';
 
-export class FEventName extends FBase {
-    static UnitCreated = 'UnitCreated' as const;
-    static LifeCycleChanged = 'LifeCycleChanged' as const;
-}
-
 export interface ISheetCreateParam {
     unitId: string;
     type: UniverInstanceType.UNIVER_SHEET;
@@ -40,13 +35,28 @@ export interface IDocumentCreateParam {
 export interface ILifeCycleChangedParam {
     stage: LifecycleStages;
 }
-
 export interface IEventBase {
     cancel?: boolean;
 }
 
 export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
 export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
+
+export class FEventName extends FBase {
+    static _intance: FEventName | null;
+    static get() {
+        if (this._intance) {
+            return this._intance;
+        }
+
+        const instance = new FEventName();
+        this._intance = instance;
+        return instance;
+    }
+
+    UnitCreated = 'UnitCreated' as const;
+    LifeCycleChanged = 'LifeCycleChanged' as const;
+}
 
 export interface IEventParamConfig {
     // UnitCreated: IUnitCreateEvent;

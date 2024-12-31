@@ -19,6 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import preset from '@univerjs-infra/shared/tailwind';
 import fs from 'fs-extra';
+import animate from 'tailwindcss-animate';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -38,6 +39,9 @@ const config: Config = {
     content: [
         '.storybook/**/*.{js,ts,jsx,tsx}',
         ...tailwindProjects,
+    ],
+    plugins: [
+        animate,
     ],
 };
 

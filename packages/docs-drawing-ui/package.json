@@ -74,7 +74,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.8",
+        "@univerjs/icons": "^0.2.10",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"
     },
@@ -84,27 +84,8 @@
         "postcss": "^8.4.49",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "tailwindcss": "^3.4.16",
         "typescript": "^5.7.2",
-        "vite": "^6.0.3",
+        "vite": "^6.0.6",
         "vitest": "^2.1.8"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./locale/*": {
-            "import": "./lib/es/locale/*.js",
-            "require": "./lib/cjs/locale/*.js",
-            "types": "./lib/types/locale/*.d.ts"
-        },
-        "./lib/*": "./lib/*"
     }
 }

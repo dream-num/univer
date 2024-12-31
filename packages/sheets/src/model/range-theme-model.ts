@@ -85,6 +85,10 @@ export class SheetRangeThemeModel extends Disposable {
         return this._rTreeCollection.get(unitId)!;
     }
 
+    public getDefaultRangeThemeStyle(name: string): RangeThemeStyle {
+        return this._defaultRangeThemeMap.get(name)!;
+    }
+
     /**
      * Register range theme styles
      * @param {string} themeName

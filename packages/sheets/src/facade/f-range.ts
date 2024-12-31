@@ -777,7 +777,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the theme style for the range.
-     * @param {string} themeName The name of the theme style to apply.
+     * @param {string|undefined} themeName The name of the theme style to apply.If a undefined value is passed, the theme style will be removed if it exist.
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -786,13 +786,20 @@ export class FRange extends FBaseInitialable {
      * fRange.useThemeStyle('default');
      * ```
      */
-    useThemeStyle(themeName: string): void {
-        this._commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            range: this._range,
-            themeName,
-        });
+    useThemeStyle(themeName: string | undefined): void {
+        if (themeName === null || themeName === undefined) {
+            const usedThemeName = this.getUsedThemeStyle();
+            if (usedThemeName) {
+                this.removeThemeStyle(usedThemeName);
+            }
+        } else {
+            this._commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
+                range: this._range,
+                themeName,
+            });
+        }
     }
 
     /**

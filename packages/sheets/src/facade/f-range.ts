@@ -224,6 +224,14 @@ export class FRange extends FBase {
 
     // #region editing
 
+    /**
+     * Set background color for current range.
+     * @param color {string}
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * ```
+     */
     setBackgroundColor(color: string): FRange {
         this._commandService.syncExecuteCommand(SetStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -236,6 +244,19 @@ export class FRange extends FBase {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+        return this;
+    }
+
+    /**
+     * Set background color for current range.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')
+     * ```
+     * @param color {string}
+     */
+    setBackground(color: string): FRange {
+        this.setBackgroundColor(color);
         return this;
     }
 

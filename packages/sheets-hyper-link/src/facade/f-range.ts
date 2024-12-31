@@ -91,7 +91,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return cellValue.p.body?.customRanges
             ?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)
             .map((range) => ({
-                id: `${range.rangeId}_${range.startIndex}_${range.endIndex}`,
+                id: `${range.rangeId}`,
                 startIndex: range.startIndex,
                 endIndex: range.endIndex,
                 url: range.properties?.url ?? '',

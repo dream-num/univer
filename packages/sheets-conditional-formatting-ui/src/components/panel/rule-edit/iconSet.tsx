@@ -19,10 +19,21 @@ import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formattin
 import type { IStyleEditorProps } from './type';
 
 import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, DropdownLegacy, InputNumber, Select } from '@univerjs/design';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap } from '@univerjs/sheets-conditional-formatting';
+import {
+    CFNumberOperator,
+    CFRuleType,
+    CFSubRuleType,
+    CFValueType,
+    compareWithNumber,
+    createDefaultValue,
+    EMPTY_ICON_TYPE,
+    getOppositeOperator,
+    iconGroup,
+    iconMap,
+} from '@univerjs/sheets-conditional-formatting';
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 
@@ -270,12 +281,12 @@ const IconSetRuleEdit = (props: {
                           ${styles.width45}
                         `}
                         >
-                            <Dropdown overlay={<IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />}>
+                            <DropdownLegacy overlay={<IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />}>
                                 <div className={styles.dropdownIcon}>
                                     {icon ? <img src={icon} className={styles.icon} /> : <SlashSingle className={styles.icon} />}
                                     <MoreDownSingle />
                                 </div>
-                            </Dropdown>
+                            </DropdownLegacy>
 
                         </div>
                         {!isEnd
@@ -353,7 +364,13 @@ const IconSetRuleEdit = (props: {
                                       ${styles.width45}
                                     `}
                                     >
-                                        <TextInput id={index} type={item.value.type} error={error} value={item.value.value || ''} onChange={(v) => handleValueValueChange(v, index)} />
+                                        <TextInput
+                                            id={index}
+                                            type={item.value.type}
+                                            error={error}
+                                            value={item.value.value || ''}
+                                            onChange={(v) => handleValueValueChange(v, index)}
+                                        />
                                     </div>
 
                                 </div>
@@ -417,7 +434,15 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         });
         return (
             <div className={styles.iconWrap}>
-                {list.map((icon, index) => (icon ? <img className={styles.icon} key={index} src={icon} /> : <SlashSingle className={styles.icon} key={index} />))}
+                {list.map((icon, index) => (icon
+                    ? (
+                        <img
+                            className={styles.icon}
+                            key={index}
+                            src={icon}
+                        />
+                    )
+                    : <SlashSingle className={styles.icon} key={index} />))}
             </div>
         );
     }, [configList]);
@@ -525,13 +550,22 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
               ${stylesBase.mTSm}
             `}
             >
-                <Dropdown placement="bottomLeft" overlay={<IconGroupList ref={(el) => !iconGroupListEl && el && setIconGroupListEl(el)} iconType={currentIconType} onClick={handleClickIconList} />}>
+                <DropdownLegacy
+                    placement="bottomLeft"
+                    overlay={(
+                        <IconGroupList
+                            ref={(el) => !iconGroupListEl && el && setIconGroupListEl(el)}
+                            iconType={currentIconType}
+                            onClick={handleClickIconList}
+                        />
+                    )}
+                >
                     <div className={styles.dropdownIcon} style={{ width: 'unset' }}>
                         {previewIcon}
                         <MoreDownSingle />
                     </div>
                     {/* <div>{previewIcon}</div> */}
-                </Dropdown>
+                </DropdownLegacy>
             </div>
             <div className={`
               ${stylesBase.mTSm}

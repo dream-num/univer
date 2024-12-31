@@ -1,13 +1,21 @@
-# project
+# CODEOWNERS
+
+## project
+
 .github @jikkai @wzhudev @hexf00
+
 common @jikkai
+
 **/package.json @jikkai
 
-# documents
+## documentation
+
 docs @wzhudev
+
 CONTRIBUTING.md @wzhudev
 
-# core & fundamental
+## core & fundamental
+
 packages/core @wzhudev
 packages/core/src/services/resource-loader @Gggpound
 packages/core/src/services/resource-manager @Gggpound
@@ -31,7 +39,8 @@ packages/ui/src/services/popup/canvas-popup.service.ts @weird94
 packages/uniscript @wzhudev
 packages/watermark @ybzky
 
-# sheets
+## sheets
+
 packages/data-validation @weird94
 packages/sheets-data-validation @weird94
 packages/sheets @wzhudev @VicKun4937
@@ -61,7 +70,8 @@ packages/sheets/src/services/ref-range @Gggpound
 packages/sheets/src/services/ref-range @weird94
 packages/sheets/src/services/sheet-interceptor @Gggpound
 
-# docs
+## docs
+
 packages/docs @Jocs
 packages/docs-drawing @weird94
 packages/docs-drawing-ui @weird94
@@ -71,7 +81,11 @@ packages/docs-mention-ui @weird94
 packages/docs-thread-comment-ui @weird94
 packages/docs-ui @jikkai @Jocs
 
-# slides
+## slides
+
 packages/slides @jikkai
 packages/slides-ui @jikkai
 
+## Facade API
+
+**/facade/** @weird94 @VicKun4937

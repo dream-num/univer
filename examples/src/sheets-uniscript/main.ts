@@ -29,8 +29,9 @@ import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-
 import { enUS, faIR, ruRU, zhCN } from '../locales';
+
+import '../global.css';
 
 // univer
 const univer = new Univer({

@@ -16,7 +16,7 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import { LocaleService, LocaleType, throttle, useDependency } from '@univerjs/core';
-import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
+import { Button, Checkbox, DraggableList, DropdownLegacy, Radio, RadioGroup } from '@univerjs/design';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
 import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -203,7 +203,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                     <SequenceSingle />
                 </div>
                 <div className={styles.customSortPanelItemColumn}>
-                    <Dropdown
+                    <DropdownLegacy
                         placement="bottomLeft"
                         trigger={['click']}
                         visible={visible}
@@ -233,7 +233,7 @@ export function SortOptionItem(props: ISortOptionItemProps) {
                             <span className={styles.customSortPanelItemColumnInputText}>{itemLabel}</span>
                             <MoreDownSingle className={styles.customSortPanelItemColumnInputDropdown} />
                         </div>
-                    </Dropdown>
+                    </DropdownLegacy>
                 </div>
             </div>
             <div className={styles.customSortPanelItemOrder}>

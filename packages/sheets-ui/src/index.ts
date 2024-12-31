@@ -61,6 +61,7 @@ export type { IAutoFillLocation, ICopyDataPiece, ISheetAutoFillHook } from './se
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export {
+    getMatrixPlainText,
     ISheetClipboardService,
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
@@ -78,7 +79,7 @@ export type { IEditorBridgeServiceParam } from './services/editor-bridge.service
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export { HoverManagerService } from './services/hover-manager.service';
-export type { IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
+export type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from './services/hover-manager.service';
 export { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';

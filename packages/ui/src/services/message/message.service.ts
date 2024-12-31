@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageOptions } from '@univerjs/design';
+import type { IMessageProps } from '@univerjs/design';
 import { createIdentifier } from '@univerjs/core';
 
 export const IMessageService = createIdentifier<IMessageService>('ui.message.service');
 
 export interface IMessageService {
-    show(options: IMessageOptions): IDisposable;
-
-    setContainer(container: HTMLElement): void;
-    getContainer(): HTMLElement | undefined;
+    show(options: IMessageProps): void;
 }

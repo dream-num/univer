@@ -61,6 +61,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             unitId,
                             subUnitId,
                             rule,
+                            source: 'patched',
                         },
                     }],
                     redos: [{
@@ -69,6 +70,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             unitId,
                             subUnitId,
                             ruleId: rule.uid,
+                            source: 'patched',
                         },
                     }],
                 };
@@ -90,6 +92,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: first.formulas[1],
                         },
                     },
+                    source: 'patched',
                 } as IUpdateDataValidationMutationParams,
             });
             undos.push({
@@ -106,6 +109,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: oldFormula2,
                         },
                     },
+                    source: 'patched',
                 },
             });
 
@@ -124,6 +128,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                             formula2: item.formulas[1],
                             ranges: item.ranges,
                         },
+                        source: 'patched',
                     },
                 });
                 undos.push({
@@ -132,6 +137,7 @@ export class DataValidationFormulaRefRangeController extends Disposable {
                         unitId,
                         subUnitId,
                         ruleId: id,
+                        source: 'patched',
                     },
                 });
             }

@@ -16,10 +16,9 @@
 
 import type { IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
+import { merge } from 'lodash-es';
 import { filter, Observable, Subject } from 'rxjs';
 import { createIdentifier } from '../../common/di';
-
-import { Tools } from '../../shared';
 
 // WARNING!!! Do not set per unit config here! You can definitely find a better place to do that.
 
@@ -66,12 +65,12 @@ export class ConfigService implements IConfigService, IDisposable {
     }
 
     setConfig(id: string, value: unknown, options?: IConfigOptions): void {
-        const { merge = false } = options || {};
+        const { merge: isMerge = false } = options || {};
 
         let nextValue = this._config.get(id) ?? {};
 
-        if (merge) {
-            nextValue = Tools.deepMerge(nextValue, value);
+        if (isMerge) {
+            nextValue = merge(nextValue, value);
         } else {
             nextValue = value;
         }

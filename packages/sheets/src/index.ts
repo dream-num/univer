@@ -48,14 +48,7 @@ export { BorderStyleManagerService, type IBorderInfo } from './services/border-s
 export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
-export {
-    DISABLE_NORMAL_SELECTIONS,
-    IRefSelectionsService,
-    RefSelectionsService,
-    SelectionMoveType,
-    SheetsSelectionsService,
-    WorkbookSelectionModel,
-} from './services/selections';
+export * from './services/selections';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';

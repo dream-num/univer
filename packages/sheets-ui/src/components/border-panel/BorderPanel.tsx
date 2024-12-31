@@ -15,7 +15,7 @@
  */
 
 import { BorderStyleTypes, useDependency } from '@univerjs/core';
-import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
+import { ColorPicker, DropdownLegacy, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
 import { BorderStyleManagerService, type IBorderInfo } from '@univerjs/sheets';
 import { ComponentManager } from '@univerjs/ui';
@@ -119,7 +119,7 @@ export function BorderPanel(props: IBorderPanelProps) {
 
             <div className={styles.uiPluginSheetsBorderPanelStyles}>
                 <div>
-                    <Dropdown
+                    <DropdownLegacy
                         align={{
                             offset: [0, 18],
                         }}
@@ -135,11 +135,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 <MoreDownSingle />
                             </span>
                         </a>
-                    </Dropdown>
+                    </DropdownLegacy>
                 </div>
 
                 <div>
-                    <Dropdown
+                    <DropdownLegacy
                         align={{
                             offset: [0, 18],
                         }}
@@ -165,7 +165,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                                 <MoreDownSingle />
                             </span>
                         </a>
-                    </Dropdown>
+                    </DropdownLegacy>
                 </div>
             </div>
         </section>

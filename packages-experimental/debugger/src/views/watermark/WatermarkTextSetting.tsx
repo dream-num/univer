@@ -16,7 +16,7 @@
 
 import type { ITextWatermarkConfig } from '@univerjs/watermark';
 import { LocaleService, useDependency } from '@univerjs/core';
-import { Checkbox, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, ColorPicker, DropdownLegacy, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React from 'react';
@@ -97,7 +97,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
 
                 <div className={styles.watermarkTextSettingFontStylePart}>
                     <div className={styles.watermarkIconWrapper}>
-                        <Dropdown
+                        <DropdownLegacy
                             overlay={(
                                 <div className={styles.watermarkColorPickerWrapper}>
                                     <ColorPicker color={config.color} onChange={(val) => onChange({ ...config, color: val })} />
@@ -105,7 +105,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                             )}
                         >
                             <FontColor className={styles.watermarkIcon} extend={{ colorChannel1: config.color ?? 'rgb(var(--primary-color))' }} />
-                        </Dropdown>
+                        </DropdownLegacy>
                     </div>
                     <div className={clsx(styles.watermarkIconWrapper, { [styles.watermarkIconWrapperSelect]: config.bold })} onClick={() => { onChange({ ...config, bold: !config.bold }); }}>
                         <BoldSingle className={styles.watermarkIcon} />

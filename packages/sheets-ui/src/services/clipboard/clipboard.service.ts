@@ -15,7 +15,7 @@
  */
 
 import type {
-    ICellData, IDisposable,
+    ICellData, ICellDataWithSpanAndDisplay, IDisposable,
     IMutationInfo,
     IRange,
     Nullable, Workbook, Worksheet,
@@ -23,7 +23,6 @@ import type {
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
-    ICellDataWithSpanInfo,
     IClipboardPropertyItem,
     IPasteTarget,
     ISheetClipboardHook,
@@ -31,10 +30,12 @@ import type {
     IUniverSheetCopyDataModel,
 } from './type';
 import {
+    CellModeEnum,
     createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
     ILogService,
     Inject,
     Injector,
+    isNotNullOrUndefined,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
@@ -82,7 +83,7 @@ interface ICopyContent {
     copyId: string;
     plain: string;
     html: string;
-    matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>;
+    matrixFragment: ObjectMatrix<ICellDataWithSpanAndDisplay>;
     discreteRange: IDiscreteRange;
 }
 
@@ -303,8 +304,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = range;
 
-        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
-        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
+        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Both);
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
         let rowIndex = startRow;
 
         const discreteRange: IDiscreteRange = { rows: [], cols: [] };
@@ -700,7 +701,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         unitId: string,
         subUnitId: string,
         range: IDiscreteRange,
-        cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>,
+        cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>,
         pasteType?: string
     ) {
         const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
@@ -823,7 +824,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _transformPastedData(
         rowCount: number,
         colCount: number,
-        cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>
+        cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>
     ): IPasteTarget | null {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
@@ -954,7 +955,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         };
     }
 
-    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>) {
+    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>) {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
         if (!subUnitId || !selection) {
@@ -1099,7 +1100,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 // #region copy generation
 
-function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
+export function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanAndDisplay>) {
     let plain = '';
     const matrixLength = matrix.getLength();
     matrix.forRow((row, cols) => {
@@ -1120,7 +1121,10 @@ function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
     return plain;
 }
 
-function getCellTextForClipboard(cell: ICellDataWithSpanInfo) {
+function getCellTextForClipboard(cell: ICellDataWithSpanAndDisplay) {
+    if (isNotNullOrUndefined(cell.displayV)) {
+        return cell.displayV;
+    }
     return extractPureTextFromCell(cell);
 }
 
@@ -1159,7 +1163,7 @@ function columnAcrossMergedCell(col: number, startRow: number, endRow: number, w
  * Determine whether CellMatrix consists of multiple cells, it must consist of 2 or more cells. It can be an ordinary cell or merge cell
  * @param cellMatrix
  */
-function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>): boolean {
+function isMultipleCells(cellMatrix: ObjectMatrix<ICellDataWithSpanAndDisplay>): boolean {
     let count = 0;
     cellMatrix.forValue((row, col, cell) => {
         if (cell) {

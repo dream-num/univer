@@ -22,6 +22,7 @@ import type {
 
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
+    CellModeEnum,
     CommandType,
     Dimension,
     ICommandService,
@@ -105,7 +106,7 @@ function getClearContentMutationParamsForRanges(
 
 function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
+    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Intercepted);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && (row !== startRow || col !== startColumn)) {

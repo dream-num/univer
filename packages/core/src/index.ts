@@ -35,7 +35,7 @@ export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { CustomCommandExecutionError } from './common/error';
 export { throttle } from './common/function';
-export type { ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
+export type { IAsyncInterceptor, ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey, createInterceptorKey, InterceptorEffectEnum, InterceptorManager } from './common/interceptor';
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
@@ -167,7 +167,7 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
-export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { ImageCacheMap } from './shared/cache/image-cache';

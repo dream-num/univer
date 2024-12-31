@@ -15,9 +15,14 @@
  */
 
 import type { Config } from 'tailwindcss';
+import scrollbar from 'tailwind-scrollbar';
 
 const config: Omit<Config, 'content'> = {
     prefix: 'univer-',
+    darkMode: 'selector',
+    corePlugins: {
+        preflight: false,
+    },
     theme: {
         extend: {
             colors: {
@@ -156,7 +161,9 @@ const config: Omit<Config, 'content'> = {
             },
         },
     },
-    plugins: [],
+    plugins: [
+        scrollbar,
+    ],
 };
 
 export default config;

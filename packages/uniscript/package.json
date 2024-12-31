@@ -73,7 +73,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "monaco-editor": "0.52.0"
+        "monaco-editor": "0.52.2"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

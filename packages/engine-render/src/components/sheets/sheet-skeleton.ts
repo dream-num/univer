@@ -2088,7 +2088,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
         const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
 
-        const style = this._isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
+        const style = this._isRowStylePrecedeColumnStyle
+            ? composeStyles(defaultStyle, columnStyle, rowStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle)
+            : composeStyles(defaultStyle, rowStyle, columnStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle);
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);

@@ -293,6 +293,8 @@ export interface ICellDataForSheetInterceptor extends ICellData {
         downOffset?: number;
         isSkip?: boolean;
     };
+    // use for save the theme style, it  can not be composed directly
+    themeStyle?: Nullable<IStyleData>;
 }
 
 export function isICellData(value: any): value is ICellData {

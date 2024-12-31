@@ -187,7 +187,7 @@ export class SheetRangeThemeModel extends Disposable {
 
                 if (style) {
                     const newCell: ICellDataForSheetInterceptor = { ...cell };
-                    newCell.s = style;
+                    newCell.themeStyle = style;
                     return next(newCell);
                 }
 

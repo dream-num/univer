@@ -58,7 +58,7 @@ const serializeRangeStyle = (style: IRangeThemeStyleItem) => {
     return result;
 };
 
-function composeStyles(styles: IStyleData[]): IRangeThemeStyleItem {
+export function composeStyles(styles: IStyleData[]): IRangeThemeStyleItem {
     const composedStyle: IRangeThemeStyleItem = {};
     if (styles.length === 1) {
         return styles[0];

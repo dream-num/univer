@@ -29,7 +29,7 @@ export const SetTabColorCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-tab-color',
 
-    handler: async (accessor: IAccessor, params: ISetTabColorCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetTabColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 

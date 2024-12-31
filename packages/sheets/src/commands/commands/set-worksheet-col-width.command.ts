@@ -154,7 +154,7 @@ export interface ISetColWidthCommandParams {
 export const SetColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-col-width',
-    handler: async (accessor: IAccessor, params: ISetColWidthCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetColWidthCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

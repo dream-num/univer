@@ -37,7 +37,7 @@ export const SetWorksheetHideCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-hidden',
 
-    handler: async (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const errorService = accessor.get(ErrorService);

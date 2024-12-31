@@ -44,7 +44,7 @@ export const ClearSelectionContentCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor, params: IClearSelectionContentCommandParams) => {
+    handler: (accessor: IAccessor, params: IClearSelectionContentCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

@@ -40,7 +40,7 @@ export interface IFWorksheetSkeletonMixin {
      * console.log(zoomRatio); // 200
      * ```
      */
-    zoom(zoomRatio: number): Promise<boolean>;
+    zoom(zoomRatio: number): FWorksheet;
     /**
      * Get the zoom ratio of the worksheet.
      * @returns The zoom ratio of the worksheet.
@@ -110,13 +110,15 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         mainComponent.makeDirty();
     }
 
-    override zoom(zoomRatio: number): Promise<boolean> {
+    override zoom(zoomRatio: number): FWorksheet {
         const commandService = this._injector.get(ICommandService);
-        return commandService.executeCommand(ChangeZoomRatioCommand.id, {
+        commandService.syncExecuteCommand(ChangeZoomRatioCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             zoomRatio,
         });
+
+        return this;
     }
 
     override getZoom(): number {

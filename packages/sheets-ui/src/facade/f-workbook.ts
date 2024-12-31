@@ -84,14 +84,19 @@ export interface IFWorkbookSheetsUIMixin {
     startEditing(): boolean;
 
     /**
-     * End the editing process
-     * @async
-     * @param save - Whether to save the changes
-     * @returns A promise that resolves to a boolean value
+     * Use endEditingAsync as instead
+     * @deprecated
      */
     endEditing(save?: boolean): Promise<boolean>;
 
     /**
+     * @async
+     * @param save - Whether to save the changes, default is true
+     * @returns A promise that resolves to a boolean value
+     * @param save
+     */
+    endEditingAsync(save?: boolean): Promise<boolean>;
+    /*
      * Get scroll state of specified sheet.
      * @returns {IScrollState} scroll state
      * @example
@@ -232,6 +237,18 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return true;
     }
 
+    override endEditingAsync(save = true): Promise<boolean> {
+        return this.endEditing(save);
+    }
+
+    /**
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
     override getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);

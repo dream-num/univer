@@ -47,7 +47,7 @@ export interface ISetSpecificRowsVisibleCommandParams {
 export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-specific-rows-visible',
-    handler: async (accessor: IAccessor, params: ISetSpecificRowsVisibleCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetSpecificRowsVisibleCommandParams) => {
         const { unitId, subUnitId, ranges } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -149,7 +149,7 @@ export interface ISetRowHiddenCommandParams {
 export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',
-    handler: async (accessor: IAccessor, params?: ISetRowHiddenCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetRowHiddenCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

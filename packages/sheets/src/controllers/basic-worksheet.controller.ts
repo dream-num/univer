@@ -105,6 +105,7 @@ import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show
 import { SplitTextToColumnsCommand } from '../commands/commands/split-text-to-columns.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
+import { UnregisterWorksheetRangeThemeStyleCommand } from '../commands/commands/unregister-range-theme.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
@@ -114,12 +115,13 @@ import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-
 import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
-import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 
+import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
-import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 
+import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
+import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
@@ -147,6 +149,7 @@ import {
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
+import { UnregisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/unregister-range-theme-style.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -314,10 +317,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
                 SplitTextToColumnsCommand,
 
+                // range theme
                 SetWorksheetRangeThemeStyleCommand,
                 DeleteWorksheetRangeThemeStyleCommand,
                 DeleteWorksheetRangeThemeStyleMutation,
                 SetWorksheetRangeThemeStyleMutation,
+                UnregisterWorksheetRangeThemeStyleMutation,
+                RegisterWorksheetRangeThemeStyleMutation,
+                UnregisterWorksheetRangeThemeStyleCommand,
+                RegisterWorksheetRangeThemeStyleMutation,
 
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }

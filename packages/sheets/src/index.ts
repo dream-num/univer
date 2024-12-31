@@ -178,6 +178,7 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { copyRangeStyles } from './commands/commands/utils/selection-utils';
+export { RangeThemeStyle } from './model/range-theme-util';
 
 // #region - all commands
 
@@ -324,6 +325,13 @@ export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.
 
 export { SplitTextToColumnsCommand } from './commands/commands/split-text-to-columns.command';
 export type { ISplitTextToColumnsCommandParams } from './commands/commands/split-text-to-columns.command';
+
+export { UnregisterWorksheetRangeThemeStyleCommand } from './commands/commands/unregister-range-theme.command';
+export type { IUnregisterWorksheetRangeThemeStyleCommandParams } from './commands/commands/unregister-range-theme.command';
+export { RegisterWorksheetRangeThemeStyleCommand } from './commands/commands/register-range-theme.command';
+export type { IRegisterWorksheetRangeThemeStyleCommandParams } from './commands/commands/register-range-theme.command';
+export { type IRegisterWorksheetRangeThemeStyleMutationParams, RegisterWorksheetRangeThemeStyleMutation } from './commands/mutations/register-range-theme.mutation';
+export { type IUnregisterWorksheetRangeThemeStyleMutationParams, UnregisterWorksheetRangeThemeStyleMutation } from './commands/mutations/unregister-range-theme-style.mutation';
 
 export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';

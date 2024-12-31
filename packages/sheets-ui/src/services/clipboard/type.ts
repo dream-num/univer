@@ -63,7 +63,7 @@ export interface IPasteTarget {
 export interface ICopyPastePayload {
     copyType?: COPY_TYPE;
     copyId?: string;
-    pasteType: string;
+    pasteType: IPasteHookValueType;
 }
 
 export interface ISheetDiscreteRangeLocation {
@@ -192,5 +192,6 @@ export interface IPasteOptionCache {
 }
 
 export type IPasteSource = ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE };
-export type IPasteHookKeyType = keyof typeof PREDEFINED_HOOK_NAME;
-export type IPasteHookValueType = typeof PREDEFINED_HOOK_NAME[IPasteHookKeyType];
+export type IPasteHookKeyType = Exclude<keyof typeof PREDEFINED_HOOK_NAME, 'default-copy'>;
+export type IPasteHookValueTypeWithoutDefaultCopy = typeof PREDEFINED_HOOK_NAME[IPasteHookKeyType];
+export type IPasteHookValueType = Exclude<IPasteHookValueTypeWithoutDefaultCopy, 'default-copy'>;

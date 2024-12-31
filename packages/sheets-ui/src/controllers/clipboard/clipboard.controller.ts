@@ -41,6 +41,8 @@ import type {
     ISheetClipboardHook,
     ISheetDiscreteRangeLocation,
 } from '../../services/clipboard/type';
+import type { IUniverSheetsUIConfig } from '../config.schema';
+
 import {
     BooleanNumber,
     connectInjector,
@@ -66,10 +68,9 @@ import {
 } from '@univerjs/core';
 
 import { MessageType } from '@univerjs/design';
-
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -101,6 +102,7 @@ import {
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { ClipboardPopupMenu } from '../../views/clipboard/ClipboardPopupMenu';
+import { SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
 import { RemovePasteMenuCommands } from './const';
 import {
@@ -904,6 +906,11 @@ export class SheetClipboardController extends RxDisposable {
             })
         );
 
+        const sheetsUIConfig = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        if (sheetsUIConfig?.clipboardConfig?.hidePasteOptions) {
+            return;
+        }
+
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (RemovePasteMenuCommands.includes(command.id)) {
@@ -914,6 +921,10 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _initUIComponents() {
+        const sheetsUIConfig = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        if (sheetsUIConfig?.clipboardConfig?.hidePasteOptions) {
+            return;
+        }
         this.disposeWithMe(
             this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ClipboardPopupMenu, this._injector))
         );

@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICellData, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, IPasteHookValueType, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -82,7 +82,11 @@ export class FormulaClipboardController extends Disposable {
         isSpecialPaste: boolean
     ) {
         // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
-        if ([PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH].includes(payload.pasteType)) {
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+        ];
+        if (specialPastes.includes(payload.pasteType)) {
             return {
                 undos: [],
                 redos: [],

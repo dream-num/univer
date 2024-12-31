@@ -15,16 +15,17 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import type { IPasteHookKeyType, IPasteOptionCache } from '../../services/clipboard/type';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { IPasteHookKeyType } from '../../services/clipboard/type';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable, useDependency, useObservable } from '@univerjs/core';
 import { DropdownOverlay, DropdownProvider, DropdownTrigger } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, MoreDownSingle, PasteSpecial } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SheetOptionalPasteCommand } from '../../commands/commands/clipboard.command';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { useActiveWorkbook } from '../../components/hook';
+import { useActiveWorkbook, useSheetSkeleton } from '../../components/hook';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
@@ -42,21 +43,21 @@ const SheetPasteOptions = [
     { value: 'SPECIAL_PASTE_FORMULA', label: 'formula.operation.pasteFormula' },
 ];
 
-const useMenuPosition = (pasteOptionsCache: IPasteOptionCache | null) => {
+const useMenuPosition = (range?: IDiscreteRange) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
 
     const workbook = useActiveWorkbook();
-
-    const range = pasteOptionsCache?.target.pastedRange;
     if (!range || !workbook) return null;
 
     const anchor = {
-        row: range.rows[range.rows.length - 1],
-        col: range.cols[range.cols.length - 1],
+        startRow: range.rows[0],
+        startCol: range.cols[0],
+        endRow: range.rows[range.rows.length - 1],
+        endCol: range.cols[range.cols.length - 1],
     };
 
-    if (anchor.row < 0 || anchor.col < 0) {
+    if (anchor.endRow < 0 || anchor.endCol < 0) {
         return null;
     }
 
@@ -75,21 +76,30 @@ const useMenuPosition = (pasteOptionsCache: IPasteOptionCache | null) => {
     const scrollXY = scene?.getViewportScrollXY(viewport);
     const canvas = scene.getEngine()?.getCanvas();
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
-    const x = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endX || 0;
-    const y = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endY || 0;
-    let positionX = skeleton?.convertTransformToOffsetX(x, scaleX, scrollXY) ?? -9999;
-    let positionY = skeleton?.convertTransformToOffsetY(y, scaleY, scrollXY) ?? -9999;
+
+    const endPosition = skeleton?.getNoMergeCellPositionByIndex(anchor.endRow, anchor.endCol);
+    const endX = endPosition?.endX ?? 0;
+    const endY = endPosition?.endY ?? 0;
+
+    const positionEndX = skeleton?.convertTransformToOffsetX(endX, scaleX, scrollXY) ?? -9999;
+    const positionEndY = skeleton?.convertTransformToOffsetY(endY, scaleY, scrollXY) ?? -9999;
 
     const canvasWidth = canvas?.getWidth();
     const canvasHeight = canvas?.getHeight();
 
     if (!canvasWidth || !canvasHeight) return null;
 
-    if (positionX + 50 > canvasWidth) {
+    const XInSideView = positionEndX + 50 <= canvasWidth;
+    const YInSideView = positionEndY + 50 <= canvasHeight;
+
+    let positionX = positionEndX;
+    let positionY = positionEndY;
+
+    if (!XInSideView) {
         positionX = canvasWidth - 100;
     }
 
-    if (positionY + 50 > canvasHeight) {
+    if (!YInSideView) {
         positionY = canvasHeight - 100;
     }
 
@@ -112,19 +122,11 @@ export const ClipboardPopupMenu = () => {
 
     const [_, setVersion] = useState(Math.random());
 
-    const relativePosition = useMenuPosition(pasteOptionsCache);
+    const range = pasteOptionsCache?.target.pastedRange;
 
-    const workbook = useActiveWorkbook();
-    const { sheetSkeletonManagerService } = useMemo(() => {
-        if (workbook) {
-            const ru = renderManagerService.getRenderById(workbook.getUnitId());
-            return {
-                sheetSkeletonManagerService: ru?.with(SheetSkeletonManagerService),
-            };
-        }
+    const relativePosition = useMenuPosition(range);
 
-        return { sheetSkeletonManagerService: null };
-    }, [workbook, renderManagerService]);
+    const sheetSkeletonManagerService = useSheetSkeleton();
 
     useEffect(() => {
         if (!showMenu) {
@@ -156,7 +158,7 @@ export const ClipboardPopupMenu = () => {
 
     if (!relativePosition || !showMenu) return null;
 
-    if (relativePosition.positionX < 50) return null;
+    if (relativePosition.positionX < 50 || relativePosition.positionY < 30) return null;
 
     const iconVisible = menuHovered || menuVisible;
 

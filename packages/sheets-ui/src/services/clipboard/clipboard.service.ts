@@ -303,7 +303,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             cellMatrix,
             colProperties,
             rowProperties,
-        }, target, PREDEFINED_HOOK_NAME[type], source);
+        }, target, PREDEFINED_HOOK_NAME[type] as IPasteHookValueType, source);
 
         return true;
     }
@@ -407,7 +407,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._clipboardHooks$.next(this._clipboardHooks);
     }
 
-    private async _pastePlainText(text: string, pasteType: string): Promise<boolean> {
+    private async _pastePlainText(text: string, pasteType: IPasteHookValueType): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;

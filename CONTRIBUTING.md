@@ -227,6 +227,21 @@ npm create @univerjs/cli init <project-name>
 
 ```
 
+### How to Contribute to Facade API
+#### Synchronous API Priority
+* For asynchronous APIs, consider the following: Can a synchronous sub-API be extracted, separating logic such as secondary confirmation.
+* For APIs that must be asynchronous, indicate this in the method name, such as `addCommentAsync`.
+
+#### Chaining Principle
+*. APIs must adhere to the chaining principle.
+*. APIs with `modify` semantics should return `this`.
+*. APIs with `create` semantics should return the created instance.
+*. APIs with `delete` semantics should return `true/false`.
+
+#### Easy to Get
+*. All APIs/constants/enums should be accessible from the `univerAPI` variable.
+
+
 ## Links
 
 * [How to Contribute to Facade API](./packages/facade/docs/CONTRIBUTING.md)

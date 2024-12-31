@@ -108,6 +108,10 @@
             "data": "{}"
         },
         {
+            "name": "SHEET_RANGE_THEME_MODEL_PLUGIN",
+            "data": "{}"
+        },
+        {
             "name": "SHEET_DATA_VALIDATION_PLUGIN",
             "data": "{}"
         },

@@ -195,13 +195,18 @@ export class SheetRangeThemeModel extends Disposable {
     toJson(unitId: string) {
         // deserialize registered range theme style rule
         const ruleMap = this._ensureRangeThemeStyleRuleMap(unitId);
+          // deserialize custom range theme style
+        const rangeThemeStyleMap = this._ensureRangeThemeStyleMap(unitId);
+
+        if (rangeThemeStyleMap.size === 0 && ruleMap.size === 0) {
+            return '{}';
+        }
+
         const rangeThemeStyleRuleMap: Record<string, IRangeThemeStyleRule> = {};
         ruleMap.forEach((value, key) => {
             rangeThemeStyleRuleMap[key] = value;
         });
 
-        // deserialize custom range theme style
-        const rangeThemeStyleMap = this._ensureRangeThemeStyleMap(unitId);
         const rangeThemeStyleMapJson: Record<string, IRangeThemeStyleJSON> = {};
         rangeThemeStyleMap.forEach((value, key) => {
             rangeThemeStyleMapJson[key] = value.toJson();
@@ -215,9 +220,13 @@ export class SheetRangeThemeModel extends Disposable {
 
     fromJSON(json: ISheetRangeThemeModelJSON) {
         const { rangeThemeStyleRuleMap, rangeThemeStyleMapJson } = json;
+
         this._rangeThemeStyleMap.clear();
         this._rangeThemeStyleRuleMap.clear();
         this._rTreeCollection.clear();
+        if (!rangeThemeStyleRuleMap || !rangeThemeStyleMapJson) {
+            return;
+        }
         Object.keys(rangeThemeStyleRuleMap).forEach((key) => {
             const ruleMap = rangeThemeStyleRuleMap[key];
             const { themeName, rangeInfo } = ruleMap;

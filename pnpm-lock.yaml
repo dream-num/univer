@@ -1064,8 +1064,8 @@ importers:
         specifier: 0.1.39
         version: 0.1.39(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
-        specifier: 0.16.2
-        version: 0.16.2
+        specifier: 0.17.0
+        version: 0.17.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -5709,8 +5709,8 @@ packages:
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
 
-  '@wendellhu/redi@0.16.2':
-    resolution: {integrity: sha512-34VWdZbIqjus5gAQCRDEBYxwtSEg0yU3pa7hqu0Mgo/xAZ6KpHb5WF0E7H0f3NGW/LwLzxlKCduYPn3d9EUPMw==}
+  '@wendellhu/redi@0.17.0':
+    resolution: {integrity: sha512-lWO5N4u24rYItkiP8Atu63ItHnakIX5XV+jhG6V4EAoGHdo74ssx4PlQa/Nklh9vl2/3odb65BmW4cOHrimhXA==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -13211,7 +13211,7 @@ snapshots:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@0.16.2': {}
+  '@wendellhu/redi@0.17.0': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

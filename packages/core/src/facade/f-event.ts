@@ -14,6 +14,41 @@
  * limitations under the License.
  */
 
-export class FEventName {
-    static CellChanged = 'CellChanged';
+import type { UniverInstanceType } from '../common/unit';
+import type { LifecycleStages } from '../services/lifecycle/lifecycle';
+import type { IWorkbookData } from '../sheets/typedef';
+import type { IDocumentData } from '../types/interfaces';
+import { FBase } from './f-base';
+
+export class FEventName extends FBase {
+    static UnitCreated = 'UnitCreated' as const;
+    static LifeCycleChanged = 'LifeCycleChanged' as const;
+}
+
+export interface ISheetCreateParam {
+    unitId: string;
+    type: UniverInstanceType.UNIVER_SHEET;
+    data: IWorkbookData;
+}
+
+export interface IDocumentCreateParam {
+    unitId: string;
+    type: UniverInstanceType.UNIVER_DOC;
+    data: IDocumentData;
+}
+
+export interface ILifeCycleChangedParam {
+    stage: LifecycleStages;
+}
+
+export interface IEventBase {
+    cancel?: boolean;
+}
+
+export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
+export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
+
+export interface IEventParamConfig {
+    // UnitCreated: IUnitCreateEvent;
+    LifeCycleChanged: ILifeCycleChangedEvent;
 }

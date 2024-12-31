@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
+import { UniverInstanceType } from '../common/unit';
+import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
 import { DataValidationOperator } from '../types/enum/data-validation-operator';
 import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
 import { DataValidationStatus } from '../types/enum/data-validation-status';
 import { DataValidationType } from '../types/enum/data-validation-type';
+import { FBase } from './f-base';
 
-export class FEnum {
+export class FEnum extends FBase {
+    static UniverInstanceType = UniverInstanceType;
+    static LifecycleStages = LifecycleStages;
+
     static DataValidationType = DataValidationType;
     static DataValidationErrorStyle = DataValidationErrorStyle;
     static DataValidationRenderMode = DataValidationRenderMode;

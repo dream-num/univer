@@ -17,11 +17,14 @@
 import type { IDisposable } from '../common/di';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
+import type { IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
+import { Registry } from '../common/registry';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
+import { Disposable, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBase } from './f-base';
 import { FBlob } from './f-blob';
@@ -43,12 +46,35 @@ export class FUniver extends FBase {
         return injector.createInstance(FUniver);
     }
 
+    private _eventRegistry: Registry = new Registry<{ event: string; callback: (...args: any[]) => void }>();
+    private _disposables: [] = [];
+
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
-        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         super();
+    }
+
+    override _initialize(): void {
+        const disposeMe = () => {
+            this.dispose();
+        };
+        class FDisposable extends Disposable {
+            override dispose() {
+                super.dispose();
+                disposeMe();
+            }
+        }
+
+        this._injector.add([FDisposable]);
+        this.disposeWithMe(
+            this._lifecycleService.lifecycle$.subscribe((stage) => {
+                this.fireEvent(this.Event.LifeCycleChanged, { stage });
+            })
+        );
     }
 
     /**
@@ -91,7 +117,7 @@ export class FUniver extends FBase {
 
     /**
      * Register a callback that will be triggered before invoking a command.
-     *
+     * @deprecated use `addEvent(univerAPI.event.BeforeCommandExecute, () => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -103,7 +129,7 @@ export class FUniver extends FBase {
 
     /**
      * Register a callback that will be triggered when a command is invoked.
-     *
+     * @deprecated use `addEvent(univerAPI.event.CommandExecuted, () => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -145,7 +171,7 @@ export class FUniver extends FBase {
 
     /**
      * Get hooks.
-     *
+     * @deprecated use `addEvent` instead.
      * @returns {FHooks} FHooks instance
      */
     getHooks(): FHooks {
@@ -173,7 +199,45 @@ export class FUniver extends FBase {
         return FEventName;
     }
 
-    addEvent(event: FEventName, callback: () => void) {
+    /**
+     * add an event listener
+     * @param event key of event
+     * @param callback callback when event triggered
+     * @returns {Disposable} The Disposable instance, for remove the listener
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
+    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void) {
+        const data = {
+            event,
+            callback,
+        };
+        this._eventRegistry.add(data);
+        return toDisposable(() => this._eventRegistry.delete(data));
+    }
 
+    /**
+     * fire an event, used in internal only.
+     * @param event {string} key of event
+     * @param params {any} parmas of event
+     * @returns {boolean} should cancel
+     * @example
+     * ```ts
+     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * ```
+     */
+    protected fireEvent(event: keyof IEventParamConfig, params: IEventParamConfig[typeof event]) {
+        this._eventRegistry.getData().forEach((item) => {
+            if (item.event === event) {
+                item.callback(params);
+            }
+        });
+
+        return params.cancel;
     }
 }
+

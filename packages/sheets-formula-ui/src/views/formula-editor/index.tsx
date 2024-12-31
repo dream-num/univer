@@ -19,7 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
-import { operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -34,6 +34,9 @@ import { useRefocus } from '../range-selector/hooks/useRefocus';
 import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
 import { useSwitchSheet } from '../range-selector/hooks/useSwitchSheet';
+import { rangePreProcess } from '../range-selector/utils/rangePreProcess';
+import { sequenceNodeToText } from '../range-selector/utils/sequenceNodeToText';
+import { unitRangesToText } from '../range-selector/utils/unitRangesToText';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
@@ -69,6 +72,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     } = props;
 
     const editorService = useDependency(IEditorService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const [formulaText, formulaTextSet] = useState(() => {
@@ -103,7 +107,29 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol]);
 
     const needEmit = useEmitChange(sequenceNodes, (text: string) => {
-        onChange(`=${text}`);
+        const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
+        if (nodes) {
+            const preNodes = nodes.map((node) => {
+                if (typeof node === 'string') {
+                    return node;
+                } else if (node.nodeType === sequenceNodeType.REFERENCE) {
+                    // The 'sequenceNodesBuilder' will cache the results.
+                    // You Can't modify the reference here. This will cause a cache error
+                    const cloneNode = { ...node };
+                    const unitRange = deserializeRangeWithSheet(node.token);
+                    unitRange.range = rangePreProcess(unitRange.range);
+                    if (!isSupportAcrossSheet) {
+                        unitRange.sheetName = '';
+                        unitRange.unitId = '';
+                    }
+                    cloneNode.token = unitRangesToText([unitRange], isSupportAcrossSheet)[0];
+                    return cloneNode;
+                }
+                return node;
+            });
+            const result = sequenceNodeToText(preNodes);
+            onChange(`=${result}`);
+        }
     }, editor);
 
     const highlightDoc = useDocHight('=');

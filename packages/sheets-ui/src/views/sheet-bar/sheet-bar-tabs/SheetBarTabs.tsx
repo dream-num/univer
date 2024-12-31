@@ -19,7 +19,7 @@ import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
 import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { DropdownLegacy } from '@univerjs/design';
 
 import { LockSingle } from '@univerjs/icons';
 import {
@@ -412,7 +412,7 @@ export function SheetBarTabs() {
     };
 
     return (
-        <Dropdown
+        <DropdownLegacy
             className={styles.slideTabItemDropdown}
             visible={visible}
             align={{ offset }}
@@ -441,6 +441,6 @@ export function SheetBarTabs() {
                     ))}
                 </div>
             </div>
-        </Dropdown>
+        </DropdownLegacy>
     );
 }

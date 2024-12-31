@@ -17,20 +17,18 @@
 import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
-import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 
 import clsx from 'clsx';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { IMessageService } from '../../services/message/message.service';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
-import { IZenZoneService } from '../../services/zen-zone/zen-zone.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Ribbon } from '../components/ribbon/Ribbon';
-import { Sidebar } from '../components/sidebar/Sidebar';
 
+import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from '../parts';
 import styles from './workbench.module.less';
@@ -53,7 +51,6 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const messageService = useDependency(IMessageService);
     const instanceService = useDependency(IUniverInstanceService);
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -64,8 +61,6 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
-    const zenService = useDependency(IZenZoneService);
-    const zenZoneVisible = useObservable(zenService.visible$, zenService.visible);
 
     const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
 
@@ -108,7 +103,6 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
-        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
@@ -129,7 +123,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
         <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
@@ -199,7 +193,6 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
-
         </ConfigProvider>
     );
 }

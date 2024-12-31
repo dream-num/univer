@@ -16,7 +16,7 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
@@ -46,7 +46,11 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

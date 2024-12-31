@@ -367,20 +367,10 @@ export class MergeCellController extends Disposable {
         const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
         const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
         return {
-            redos: [
-                { id: RemoveWorksheetMergeMutation.id, params: removeParams },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: addParams,
-                },
-            ],
-            undos: [
-                { id: RemoveWorksheetMergeMutation.id, params: addUndo },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: removeUndo,
-                },
-            ],
+            preRedos: [{ id: RemoveWorksheetMergeMutation.id, params: removeParams }],
+            redos: [{ id: AddWorksheetMergeMutation.id, params: addParams }],
+            preUndos: [{ id: RemoveWorksheetMergeMutation.id, params: addUndo }],
+            undos: [{ id: AddWorksheetMergeMutation.id, params: removeUndo }],
         };
     }
 
@@ -413,20 +403,10 @@ export class MergeCellController extends Disposable {
         const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
         const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
         return {
-            redos: [
-                { id: RemoveWorksheetMergeMutation.id, params: removeParams },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: addParams,
-                },
-            ],
-            undos: [
-                { id: RemoveWorksheetMergeMutation.id, params: addUndo },
-                {
-                    id: AddWorksheetMergeMutation.id,
-                    params: removeUndo,
-                },
-            ],
+            preRedos: [{ id: RemoveWorksheetMergeMutation.id, params: removeParams }],
+            redos: [{ id: AddWorksheetMergeMutation.id, params: addParams }],
+            preUndos: [{ id: RemoveWorksheetMergeMutation.id, params: addUndo }],
+            undos: [{ id: AddWorksheetMergeMutation.id, params: removeUndo }],
         };
     }
 

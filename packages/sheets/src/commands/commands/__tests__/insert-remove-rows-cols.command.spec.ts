@@ -41,12 +41,14 @@ import { SetSelectionsOperation } from '../../operations/selection.operation';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -69,6 +71,10 @@ describe('Test insert and remove rows cols commands', () => {
             InsertColAfterCommand,
             InsertColBeforeCommand,
             InsertColCommand,
+            InsertColByRangeCommand,
+            InsertRowByRangeCommand,
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
             RemoveRowCommand,
             RemoveColCommand,
 

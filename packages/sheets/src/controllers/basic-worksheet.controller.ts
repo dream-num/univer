@@ -34,16 +34,18 @@ import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-m
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from '../commands/commands/insert-row-col.command';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
-import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
 import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
@@ -201,17 +203,21 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 DeltaRowHeightCommand,
                 InsertColAfterCommand,
                 InsertColBeforeCommand,
+                InsertColByRangeCommand,
                 InsertColCommand,
                 InsertRangeMoveDownCommand,
                 InsertRangeMoveRightCommand,
                 InsertRowAfterCommand,
                 InsertRowBeforeCommand,
+                InsertRowByRangeCommand,
                 InsertRowCommand,
                 InsertSheetCommand,
                 MoveColsCommand,
                 MoveRangeCommand,
                 MoveRowsCommand,
+                RemoveRowByRangeCommand,
                 RemoveColCommand,
+                RemoveColByRangeCommand,
                 RemoveRowCommand,
                 RemoveSheetCommand,
                 ReorderRangeCommand,

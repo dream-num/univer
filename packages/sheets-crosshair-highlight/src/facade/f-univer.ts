@@ -23,28 +23,31 @@ export interface IFUniverCrosshairHighlightMixin {
      * Enable or disable crosshair highlight.
      * @param {boolean} enabled if crosshair highlight should be enabled
      */
-    setCrosshairHighlightEnabled(enabled: boolean): void;
+    setCrosshairHighlightEnabled(enabled: boolean): FUniver;
 
     /**
      * Set the color of the crosshair highlight.
      * @param {string} color the color of the crosshair highlight
      */
-    setCrosshairHighlightColor(color: string): void;
+    setCrosshairHighlightColor(color: string): FUniver;
 }
 
 export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverCrosshairHighlightMixin {
-    override setCrosshairHighlightEnabled(enabled: boolean): void {
+    override setCrosshairHighlightEnabled(enabled: boolean): FUniver {
         if (enabled) {
-            this._commandService.executeCommand(EnableCrosshairHighlightOperation.id);
+            this._commandService.syncExecuteCommand(EnableCrosshairHighlightOperation.id);
         } else {
-            this._commandService.executeCommand(DisableCrosshairHighlightOperation.id);
+            this._commandService.syncExecuteCommand(DisableCrosshairHighlightOperation.id);
         }
+
+        return this;
     }
 
-    override setCrosshairHighlightColor(color: string): void {
-        this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
+    override setCrosshairHighlightColor(color: string): FUniver {
+        this._commandService.syncExecuteCommand(SetCrosshairHighlightColorOperation.id, {
             value: color,
         } as ISetCrosshairHighlightColorOperationParams);
+        return this;
     }
 }
 

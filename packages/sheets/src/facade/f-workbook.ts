@@ -292,10 +292,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.deleteSheet(sheet);
      * ```
      */
-    deleteSheet(sheet: FWorksheet): Promise<boolean> {
+    deleteSheet(sheet: FWorksheet): boolean {
         const unitId = this.id;
         const subUnitId = sheet.getSheetId();
-        return this._commandService.executeCommand(RemoveSheetCommand.id, {
+        return this._commandService.syncExecuteCommand(RemoveSheetCommand.id, {
             unitId,
             subUnitId,
         });
@@ -312,9 +312,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.undo();
      * ```
      */
-    undo(): Promise<boolean> {
+    undo(): FWorkbook {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(UndoCommand.id);
+        this._commandService.syncExecuteCommand(UndoCommand.id);
+        return this;
     }
 
     /**
@@ -327,9 +328,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.redo();
      * ```
      */
-    redo(): Promise<boolean> {
+    redo(): FWorkbook {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(RedoCommand.id);
+        this._commandService.syncExecuteCommand(RedoCommand.id);
+        return this;
     }
 
     /**
@@ -484,7 +486,7 @@ export class FWorkbook extends FBase {
      * const sheet = univerAPI.getActiveWorkbook().deleteActiveSheet();
      * ```
      */
-    deleteActiveSheet(): Promise<boolean> {
+    deleteActiveSheet(): boolean {
         const sheet = this.getActiveSheet();
         return this.deleteSheet(sheet);
     }
@@ -492,7 +494,7 @@ export class FWorkbook extends FBase {
     /**
      * Duplicates the given worksheet.
      * @param {FWorksheet} sheet The worksheet to duplicate.
-     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
+     * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
      * // The code below duplicates the given worksheet
@@ -501,16 +503,18 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.duplicateSheet(activeSheet);
      * ```
      */
-    duplicateSheet(sheet: FWorksheet): Promise<boolean> {
-        return this._commandService.executeCommand(CopySheetCommand.id, {
+    duplicateSheet(sheet: FWorksheet): FWorksheet {
+        this._commandService.syncExecuteCommand(CopySheetCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             subUnitId: sheet.getSheetId(),
         });
+
+        return this._injector.createInstance(FWorksheet, this, this._workbook, this._workbook.getActiveSheet());
     }
 
     /**
      * Duplicates the active sheet.
-     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
+     * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
      * // The code below duplicates the active sheet
@@ -518,7 +522,7 @@ export class FWorkbook extends FBase {
      *  activeSpreadsheet.duplicateActiveSheet();
      * ```
      */
-    duplicateActiveSheet(): Promise<boolean> {
+    duplicateActiveSheet(): FWorksheet {
         const sheet = this.getActiveSheet();
         return this.duplicateSheet(sheet);
     }
@@ -584,7 +588,7 @@ export class FWorkbook extends FBase {
      * Move the sheet to the specified index.
      * @param {FWorksheet} sheet The sheet to move
      * @param {number} index The index to move the sheet to
-     * @returns {Promise<boolean>} true if the sheet was moved, false otherwise
+     * @returns {FWorkbook} This workbook, for chaining
      * @example
      * ```ts
      * // The code below moves the sheet to the specified index
@@ -593,24 +597,26 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveSheet(sheet, 1);
      * ```
      */
-    moveSheet(sheet: FWorksheet, index: number): Promise<boolean> {
+    moveSheet(sheet: FWorksheet, index: number): FWorkbook {
         let sheetIndexVal = index;
         if (sheetIndexVal < 0) {
             sheetIndexVal = 0;
         } else if (sheetIndexVal > this._workbook.getSheets().length - 1) {
             sheetIndexVal = this._workbook.getSheets().length - 1;
         }
-        return this._commandService.executeCommand(SetWorksheetOrderCommand.id, {
+        this._commandService.syncExecuteCommand(SetWorksheetOrderCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             order: sheetIndexVal,
             subUnitId: sheet.getSheetId(),
         });
+
+        return this;
     }
 
     /**
      * Move the active sheet to the specified index.
      * @param {number} index The index to move the active sheet to
-     * @returns {Promise<boolean>} true if the sheet was moved, false otherwise
+     * @returns {FWorkbook} This workbook, for chaining
      * @example
      * ```ts
      * // The code below moves the active sheet to the specified index
@@ -618,7 +624,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveActiveSheet(1);
      * ```
      */
-    moveActiveSheet(index: number): Promise<boolean> {
+    moveActiveSheet(index: number): FWorkbook {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
     }

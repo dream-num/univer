@@ -20,7 +20,8 @@ import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/m
 import type { IConditionalFormattingRuleConfig } from '../models/type';
 
 import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, ObjectMatrix, RefAlias, Tools } from '@univerjs/core';
-import { IActiveDirtyManagerService,
+import {
+    IActiveDirtyManagerService,
     RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation,
@@ -203,16 +204,16 @@ export class ConditionalFormattingFormulaService extends Disposable {
             },
         };
 
-        this._commandService.executeCommand(SetOtherFormulaMutation.id, params).then(() => {
+        this._commandService.executeCommand(SetOtherFormulaMutation.id, params, { onlyLocal: true }).then(() => {
             this._commandService.executeCommand(ConditionalFormattingFormulaMarkDirty.id,
-                { [unitId]: { [subUnitId]: { [formulaId]: true } } });
+                { [unitId]: { [subUnitId]: { [formulaId]: true } } }, { onlyLocal: true });
         });
     }
 
     private _removeFormulaByCfId(unitId: string, subUnitId: string, cfId: string) {
         const values = this.deleteCache(unitId, subUnitId, cfId);
         const formulaIdList = values.map((item) => item.formulaId);
-        this._commandService.executeCommand(RemoveOtherFormulaMutation.id, { unitId, subUnitId, formulaIdList } as IRemoveOtherFormulaMutationParams);
+        this._commandService.executeCommand(RemoveOtherFormulaMutation.id, { unitId, subUnitId, formulaIdList } as IRemoveOtherFormulaMutationParams, { onlyLocal: true });
     }
 
     public getFormulaResultWithCoords(unitId: string, subUnitId: string, cfId: string, formulaText: string, row: number = 0, col: number = 0) {

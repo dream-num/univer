@@ -46,6 +46,8 @@ import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { enUS, faIR } from '../locales';
 
+import '../global.css';
+
 const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
 // univer

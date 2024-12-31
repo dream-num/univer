@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -50,6 +50,9 @@
         "lib"
     ],
     "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
         "build": "univer-cli build"
     },

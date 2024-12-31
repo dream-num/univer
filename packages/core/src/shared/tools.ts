@@ -241,6 +241,7 @@ export class Tools {
         return instance.constructor.name;
     }
 
+    /** @deprecated This method is deprecated, please use `import { merge } from '@univerjs/core` instead */
     static deepMerge(target: any, ...sources: any[]): any {
         sources.forEach((item) => item && deepItem(item));
 

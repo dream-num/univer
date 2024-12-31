@@ -20,7 +20,7 @@ import React, { useContext, useMemo, useRef } from 'react';
 
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { Dropdown } from '../dropdown/Dropdown';
+import { DropdownLegacy } from '../dropdown-legacy/DropdownLegacy';
 import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.less';
 
@@ -157,8 +157,17 @@ export function Slider(props: ISliderProps) {
 
             <div className={styles.sliderRail}>
                 <div ref={sliderInnerRailRef} role="track" className={styles.sliderInnerRail}>
-                    <Tooltip title={`${locale?.Slider.resetTo} ${resetPoint}%`}>
-                        <a className={styles.sliderResetPoint} role="reset button" onClick={handleReset} />
+                    <Tooltip title={`${locale?.Slider.resetTo} ${resetPoint}%`} placement="top" asChild>
+                        <a
+                            key="reset-button"
+                            className={`
+                              univer-cursor-pointer univer-absolute univer-left-1/2 univer-top-1/2
+                              -univer-translate-x-1/2 -univer-translate-y-1/2 univer-box-border univer-w-0.5
+                              univer-h-0.5 univer-bg-white univer-rounded-full univer-block
+                            `}
+                            role="button"
+                            onClick={handleReset}
+                        />
                     </Tooltip>
 
                     <div
@@ -176,7 +185,7 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <Dropdown
+            <DropdownLegacy
                 placement="topLeft"
                 overlay={(
                     <div className={styles.sliderShortcuts}>
@@ -207,7 +216,7 @@ export function Slider(props: ISliderProps) {
                     {value}
                     %
                 </a>
-            </Dropdown>
+            </DropdownLegacy>
         </div>
     );
 }

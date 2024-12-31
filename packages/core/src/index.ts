@@ -169,7 +169,7 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
-export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { ImageCacheMap } from './shared/cache/image-cache';

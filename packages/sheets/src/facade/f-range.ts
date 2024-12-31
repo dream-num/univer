@@ -224,8 +224,16 @@ export class FRange extends FBase {
 
     // #region editing
 
-    setBackgroundColor(color: string): Promise<boolean> {
-        return this._commandService.executeCommand(SetStyleCommand.id, {
+    /**
+     * Set background color for current range.
+     * @param color {string}
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * ```
+     */
+    setBackgroundColor(color: string): FRange {
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
@@ -236,74 +244,98 @@ export class FRange extends FBase {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+        return this;
+    }
+
+    /**
+     * Set background color for current range.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')
+     * ```
+     * @param color {string}
+     */
+    setBackground(color: string): FRange {
+        this.setBackgroundColor(color);
+        return this;
     }
 
     /**
      * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      * @param value
      */
-    setValue(value: CellValue | ICellData): Promise<boolean> {
+    setValue(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);
 
         if (!realValue) {
             throw new Error('Invalid value');
         }
 
-        return this._commandService.executeCommand(SetRangeValuesCommand.id, {
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
         });
+
+        return this;
     }
 
     /**
      * Set the cell wrap of the given range.
      * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
      */
-    setWrap(isWrapEnabled: boolean): Promise<boolean> {
-        return this._commandService.executeCommand(SetTextWrapCommand.id, {
+    setWrap(isWrapEnabled: boolean): FRange {
+        this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: isWrapEnabled ? WrapStrategy.WRAP : WrapStrategy.UNSPECIFIED,
         } as ISetTextWrapCommandParams);
+
+        return this;
     }
 
     /**
      * Sets the text wrapping strategy for the cells in the range.
      */
-    setWrapStrategy(strategy: WrapStrategy): Promise<boolean> {
-        return this._commandService.executeCommand(SetTextWrapCommand.id, {
+    setWrapStrategy(strategy: WrapStrategy): FRange {
+        this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: strategy,
         } as ISetTextWrapCommandParams);
+
+        return this;
     }
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
      */
-    setVerticalAlignment(alignment: FVerticalAlignment): Promise<boolean> {
-        return this._commandService.executeCommand(SetVerticalTextAlignCommand.id, {
+    setVerticalAlignment(alignment: FVerticalAlignment): FRange {
+        this._commandService.syncExecuteCommand(SetVerticalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: transformFacadeVerticalAlignment(alignment),
         } as ISetVerticalTextAlignCommandParams);
+
+        return this;
     }
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
      */
-    setHorizontalAlignment(alignment: FHorizontalAlignment): Promise<boolean> {
-        return this._commandService.executeCommand(SetHorizontalTextAlignCommand.id, {
+    setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {
+        this._commandService.syncExecuteCommand(SetHorizontalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: transformFacadeHorizontalAlignment(alignment),
         } as ISetHorizontalTextAlignCommandParams);
+
+        return this;
     }
 
     /**
@@ -316,15 +348,17 @@ export class FRange extends FBase {
             | IObjectMatrixPrimitiveType<CellValue>
             | ICellData[][]
             | IObjectMatrixPrimitiveType<ICellData>
-    ): Promise<boolean> {
+    ): FRange {
         const realValue = covertCellValues(value, this._range);
 
-        return this._commandService.executeCommand(SetRangeValuesCommand.id, {
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
         });
+
+        return this;
     }
 
     /**
@@ -534,11 +568,11 @@ export class FRange extends FBase {
      *
      * @returns This range, for chaining
      */
-    async merge(defaultMerge: boolean = true): Promise<FRange> {
+    merge(defaultMerge: boolean = true): FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
 
         return this;
     }
@@ -550,12 +584,12 @@ export class FRange extends FBase {
      *
      * @returns This range, for chaining
      */
-    async mergeAcross(defaultMerge: boolean = true): Promise<FRange> {
+    mergeAcross(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }
@@ -567,12 +601,12 @@ export class FRange extends FBase {
      *
      * @returns This range, for chaining
      */
-    async mergeVertically(defaultMerge: boolean = true): Promise<FRange> {
+    mergeVertically(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }

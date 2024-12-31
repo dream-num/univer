@@ -21,6 +21,7 @@ import {
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -44,7 +45,11 @@ export class UniverSheetsSortUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(SHEETS_SORT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 

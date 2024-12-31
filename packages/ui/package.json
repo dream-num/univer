@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -90,7 +90,6 @@
     "devDependencies": {
         "@testing-library/react": "^16.0.1",
         "@testing-library/react-hooks": "^8.0.1",
-        "@types/react-transition-group": "^4.4.11",
         "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.1",
         "postcss": "^8.4.49",

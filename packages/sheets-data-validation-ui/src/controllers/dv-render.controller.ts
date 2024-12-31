@@ -248,13 +248,19 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 // patched data-validation change don't need to re-calc row height
                 // re-calc of row height will be triggered precisely by the origin command
                 filter((change) => change.source === 'command'),
-                bufferTime(16)
+                bufferTime(100)
             )
             .subscribe((infos) => {
+                if (infos.length === 0) {
+                    return;
+                }
+
                 const ranges: IRange[] = [];
                 infos.forEach((info) => {
-                    if (info.rule?.ranges) {
-                        ranges.push(...info.rule.ranges);
+                    if (info.rule.type === DataValidationType.LIST_MULTIPLE || info.rule.type === DataValidationType.LIST) {
+                        if (info.rule?.ranges) {
+                            ranges.push(...info.rule.ranges);
+                        }
                     }
                 });
 

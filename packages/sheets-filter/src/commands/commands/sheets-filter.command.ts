@@ -171,7 +171,7 @@ export interface ISetSheetsFilterCriteriaCommandParams extends ISheetCommandShar
 export const SetSheetsFilterCriteriaCommand: ICommand<ISetSheetsFilterCriteriaCommandParams> = {
     id: 'sheet.command.set-filter-criteria',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetSheetsFilterCriteriaCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetSheetsFilterCriteriaCommandParams) => {
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

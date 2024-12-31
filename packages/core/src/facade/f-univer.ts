@@ -31,6 +31,7 @@ import { FBlob } from './f-blob';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
+import { FUserManager } from './f-usermanager';
 
 export class FUniver extends FBase {
     /**
@@ -238,6 +239,10 @@ export class FUniver extends FBase {
         });
 
         return params.cancel;
+    }
+
+    getUserManager(): FUserManager {
+        return this._injector.createInstance(FUserManager);
     }
 }
 

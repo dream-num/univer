@@ -18,8 +18,8 @@ import { useDependency } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
-import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 import { useObservable } from '../../../components/hooks/observable';
+import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 
 import styles from './index.module.less';
 

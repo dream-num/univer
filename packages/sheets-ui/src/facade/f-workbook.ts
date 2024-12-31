@@ -15,10 +15,11 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
+import type { RenderManagerService } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState } from '@univerjs/sheets-ui';
-import { HoverManagerService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -61,18 +62,85 @@ export interface IFWorkbookSheetsUIMixin {
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
 
     /**
+     * Subscribe to pointer move events on workbook. Just like onCellHover, but with event information.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer down events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+    /**
+     * Subscribe to cell pointer up events.
+     * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
+     */
+    onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+
+    /**
      * Start the editing process
      * @returns A boolean value
      */
     startEditing(): boolean;
 
     /**
-     * End the editing process
-     * @async
-     * @param save - Whether to save the changes
-     * @returns A promise that resolves to a boolean value
+     * Use endEditingAsync as instead
+     * @deprecated
      */
     endEditing(save?: boolean): Promise<boolean>;
+
+    /**
+     * @async
+     * @param save - Whether to save the changes, default is true
+     * @returns A promise that resolves to a boolean value
+     * @param save
+     */
+    endEditingAsync(save?: boolean): Promise<boolean>;
+    /*
+     * Get scroll state of specified sheet.
+     * @returns {IScrollState} scroll state
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
+     * ```
+     */
+    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState>;
+
+    /**
+     * Disable selection. After disabled, there would be no response for selection.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().disableSelection();
+     * ```
+     */
+    disableSelection(): void;
+
+    /**
+     * Enable selection. After this you can select range.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().enableSelection();
+     * ```
+     */
+    enableSelection(): void;
+
+    /**
+     * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().transparentSelection();
+     * ```
+     */
+    transparentSelection(): void;
+
+    /**
+     * Set selection visible.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().showSelection();
+     * ```
+     */
+    showSelection(): void;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -121,6 +189,31 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         );
     }
 
+    override onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerDownCell$.subscribe(callback)
+        );
+    }
+
+    override onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerUpCell$.subscribe(callback)
+        );
+    }
+
+    override onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentCellPosWithEvent$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: ICellPosWithEvent) => {
+                    callback(cell, cell.event.buttons);
+                })
+        );
+    }
+
     override startEditing(): boolean {
         const commandService = this._injector.get(ICommandService);
         return commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
@@ -144,6 +237,10 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return true;
     }
 
+    override endEditingAsync(save = true): Promise<boolean> {
+        return this.endEditing(save);
+    }
+
     /**
      * Get scroll state of specified sheet.
      * @returns {IScrollState} scroll state
@@ -152,13 +249,49 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
      * univerAPI.getActiveWorkbook().getScrollStateBySheetId($sheetId)
      * ```
      */
-    getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
+    override getScrollStateBySheetId(sheetId: string): Nullable<IScrollState> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
         if (!render) return null;
         const scm = render.with(SheetScrollManagerService);
         return scm.getScrollStateByParam({ unitId, sheetId });
+    }
+
+    override disableSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).disableSelection();
+        }
+    }
+
+    override enableSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
+        }
+    }
+
+    override transparentSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).transparentSelection();
+        }
+    }
+
+    override showSelection(): void {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
+        }
     }
 }
 

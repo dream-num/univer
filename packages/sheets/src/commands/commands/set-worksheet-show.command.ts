@@ -35,7 +35,7 @@ export const SetWorksheetShowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-show',
 
-    handler: async (accessor: IAccessor, params: ISetWorksheetShowCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetWorksheetShowCommandParams) => {
         const { unitId, subUnitId } = params;
 
         const commandService = accessor.get(ICommandService);

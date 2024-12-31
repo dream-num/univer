@@ -136,7 +136,7 @@ export class FDataValidation {
      * @param values An array containing the operator, formula1, and formula2 values.
      * @returns true if the criteria is set successfully, false otherwise.
      */
-    setCriteria(type: DataValidationType, values: [DataValidationOperator, string, string]): boolean {
+    setCriteria(type: DataValidationType, values: [DataValidationOperator, string, string], allowBlank = true): FDataValidation {
         if (this.getApplied()) {
             const commandService = this._injector!.get(ICommandService);
             const res = commandService.syncExecuteCommand(UpdateSheetDataValidationSettingCommand.id, {
@@ -148,11 +148,12 @@ export class FDataValidation {
                     formula1: values[1],
                     formula2: values[2],
                     type: this.rule.type,
+                    allowBlank,
                 },
             } as IUpdateSheetDataValidationSettingCommandParams);
 
             if (!res) {
-                return false;
+                throw new Error('setCriteria failed');
             }
         }
 
@@ -160,8 +161,9 @@ export class FDataValidation {
         this.rule.formula1 = values[1];
         this.rule.formula2 = values[2];
         this.rule.type = type;
+        this.rule.allowBlank = allowBlank;
 
-        return true;
+        return this;
     }
 
     /**
@@ -170,7 +172,7 @@ export class FDataValidation {
      * @param options An object containing the options to set. `IDataValidationRuleOptions`
      * @returns true if the options are set successfully, false otherwise.
      */
-    setOptions(options: Partial<IDataValidationRuleOptions>): boolean {
+    setOptions(options: Partial<IDataValidationRuleOptions>): FDataValidation {
         if (this.getApplied()) {
             const commandService = this._injector!.get(ICommandService);
             const res = commandService.syncExecuteCommand(UpdateSheetDataValidationOptionsCommand.id, {
@@ -184,12 +186,12 @@ export class FDataValidation {
             } as IUpdateSheetDataValidationOptionsCommandParams);
 
             if (!res) {
-                return false;
+                throw new Error('setOptions failed');
             }
         }
 
         Object.assign(this.rule, options);
-        return true;
+        return this;
     }
 
     /**
@@ -197,7 +199,7 @@ export class FDataValidation {
      * @param ranges new ranges array.
      * @returns true if the ranges are set successfully, false otherwise.
      */
-    setRanges(ranges: FRange[]): boolean {
+    setRanges(ranges: FRange[]): FDataValidation {
         if (this.getApplied()) {
             const commandService = this._injector!.get(ICommandService);
             const res = commandService.syncExecuteCommand(UpdateSheetDataValidationRangeCommand.id, {
@@ -208,12 +210,12 @@ export class FDataValidation {
             } as IUpdateSheetDataValidationRangeCommandParams);
 
             if (!res) {
-                return false;
+                throw new Error('setRanges failed');
             }
         }
 
         this.rule.ranges = ranges.map((range) => range.getRange());
-        return true;
+        return this;
     }
 
     /**

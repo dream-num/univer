@@ -16,7 +16,7 @@
 
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
-import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
 import {
@@ -51,8 +51,12 @@ export class UniverSheetsDataValidationMobileUIPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration..
-        const { menu, ...rest } = this._config;
+        // Manage the plugin configuration.
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }

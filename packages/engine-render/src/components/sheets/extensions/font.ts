@@ -302,7 +302,11 @@ export class Font extends SheetExtension {
                     ctx.save();
                     ctx.translate(x + rotatedWidth / 2, y + rotatedHeight / 2);
                     ctx.rotate(angleRadians);
-                    ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                    try {
+                        ctx.drawImage(image, -rotatedWidth / 2, -rotatedHeight / 2, width, height);
+                    } catch (e) {
+                        console.error(e);
+                    }
                     ctx.restore();
                 }
             }

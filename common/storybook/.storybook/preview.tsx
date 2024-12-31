@@ -45,7 +45,7 @@ import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univer
 import enUS from '@univerjs/design/locale/en-US';
 import zhCN from '@univerjs/design/locale/zh-CN';
 import { DesktopLocalStorageService } from '@univerjs/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import './global.css';
 
@@ -86,33 +86,55 @@ const preview: Preview = {
                 showName: true,
             },
         },
+        darkMode: {
+            name: 'darkMode',
+            description: 'Dark mode',
+            defaultValue: 'light',
+            toolbar: {
+                icon: 'sun',
+                items: ['light', 'dark'],
+                showName: true,
+            },
+        },
     },
 
     decorators: [(Story, context) => {
-        const injector = new Injector([
-            [IUniverInstanceService, { useClass: UniverInstanceService }],
-            [ErrorService],
-            [LocaleService],
-            [ThemeService],
-            [LifecycleService],
-            [ILogService, { useClass: DesktopLogService, lazy: true }],
-            [ICommandService, { useClass: CommandService, lazy: true }],
-            [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
-            [IConfigService, { useClass: ConfigService }],
-            [IContextService, { useClass: ContextService }],
-            [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
-            [IPermissionService, { useClass: PermissionService }],
-
-            // services
-            [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
-        ]);
-
-        injector.get(LocaleService).setLocale(context.globals.i18n);
         themeInstance.setTheme(document.body, themes[context.globals.theme]);
         const designLocale = context.globals.i18n === LocaleType.ZH_CN ? zhCN.design : enUS.design;
 
+        if (context.globals.darkMode === 'dark') {
+            document.body.classList.add('univer-dark');
+        } else {
+            document.body.classList.remove('univer-dark');
+        }
+
+        const rediContext = useMemo(() => {
+            const injector = new Injector([
+                [IUniverInstanceService, { useClass: UniverInstanceService }],
+                [ErrorService],
+                [LocaleService],
+                [ThemeService],
+                [LifecycleService],
+                [ILogService, { useClass: DesktopLogService, lazy: true }],
+                [ICommandService, { useClass: CommandService, lazy: true }],
+                [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
+                [IConfigService, { useClass: ConfigService }],
+                [IContextService, { useClass: ContextService }],
+                [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
+                [IPermissionService, { useClass: PermissionService }],
+
+                // services
+                [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
+            ]);
+
+            injector.get(LocaleService).setLocale(context.globals.i18n);
+            return {
+                injector,
+            };
+        }, []);
+
         return (
-            <RediContext.Provider value={{ injector }}>
+            <RediContext.Provider value={rediContext}>
                 <ConfigProvider locale={designLocale} mountContainer={document.body}>
                     <Story />
                 </ConfigProvider>

@@ -188,5 +188,9 @@
         "toml",
         "less",
         "css"
-    ]
+    ],
+
+    "editor.quickSuggestions": {
+        "strings": "on"
+    }
 }

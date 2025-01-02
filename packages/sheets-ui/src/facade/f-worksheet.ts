@@ -61,10 +61,14 @@ export interface IFWorksheetSkeletonMixin {
     getVisibleRange(): IRange;
 
     /**
-     * Scroll spreadsheet to cell position. Make the cell at topleft of current viewport.
+     * Scroll spreadsheet(viewMain) to cell position. Make the cell at topleft of current viewport.
      * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
      * @param row
      * @param column
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
+     * ```
      */
     scrollToCell(row: number, column: number): FWorksheet;
 

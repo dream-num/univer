@@ -15,16 +15,19 @@
  */
 
 import type { IRuleChange } from '@univerjs/data-validation';
-import type { IAddSheetDataValidationCommandParams,
+import type {
+    IAddSheetDataValidationCommandParams,
     IRemoveSheetAllDataValidationCommandParams,
     IRemoveSheetDataValidationCommandParams,
     IUpdateSheetDataValidationOptionsCommandParams,
     IUpdateSheetDataValidationRangeCommandParams,
     IUpdateSheetDataValidationSettingCommandParams,
-    IValidStatusChange } from '@univerjs/sheets-data-validation';
+    IValidStatusChange,
+} from '@univerjs/sheets-data-validation';
 import { type DataValidationStatus, type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
 
-import { AddSheetDataValidationCommand,
+import {
+    AddSheetDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
     RemoveSheetDataValidationCommand,
     SheetDataValidationModel,
@@ -39,13 +42,17 @@ import { filter } from 'rxjs';
 export interface IFWorkbookDataValidationMixin {
     /**
      * get data validation validator status for current workbook
-     * @returns matrix of validator status
+     * @returns A promise that resolves to a matrix of validator status.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getValidatorStatus().then((status) => { console.log(status) })
+     * ```
      */
     getValidatorStatus(this: FWorkbook): Promise<Record<string, ObjectMatrix<Nullable<DataValidationStatus>>>>;
 
     /**
      * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onDataValidationChange(
@@ -54,7 +61,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onDataValidationStatusChange(
@@ -63,7 +70,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeAddDataValidation(
@@ -73,7 +80,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeUpdateDataValidationCriteria event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeUpdateDataValidationCriteria(
@@ -83,7 +90,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeUpdateDataValidationRange event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeUpdateDataValidationRange(
@@ -92,7 +99,7 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
     /**
      * The onBeforeUpdateDataValidationOptions event is fired before the data validation rule is updated.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeUpdateDataValidationOptions(
@@ -102,7 +109,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeDeleteDataValidation event is fired before the data validation rule is deleted.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeDeleteDataValidation(
@@ -112,7 +119,7 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeDeleteAllDataValidation event is fired before delete all data validation rules.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onBeforeDeleteAllDataValidation(
@@ -140,7 +147,7 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
     // region DataValidationHooks
     /**
      * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     override onDataValidationChange(
@@ -154,7 +161,7 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
 
     /**
      * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     override onDataValidationStatusChange(
@@ -167,7 +174,7 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
 
     /**
      * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback Callback function that will be called when the event is fired
+     * @param callback - Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     override onBeforeAddDataValidation(

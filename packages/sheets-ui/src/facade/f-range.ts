@@ -19,9 +19,9 @@ import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FRange } from '@univerjs/sheets/facade';
 import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
 export interface IFComponentKey {
@@ -42,35 +42,77 @@ export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFCom
 interface IFRangeSheetsUIMixin {
     /**
      * Return this cell information, including whether it is merged and cell coordinates
-     * @returns The cell information
+     * @returns {ICellWithCoord} cell location and coordinate.
+     * @example
+     * ``` ts
+     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
+     * s.getRange(5, 7).getCell();
+     * ```
      */
-    getCell(): ICellWithCoord;
+    getCell(this: FRange): ICellWithCoord;
+
     /**
      * Returns the coordinates of this cell,does not include units
      * @returns coordinates of the cell， top, right, bottom, left
+     * @example
+     * ``` ts
+     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
+     * s.getRange(5, 7).getCellRect();
+     * ```
      */
-    getCellRect(): DOMRect;
+    getCellRect(this: FRange): DOMRect;
+
     /**
      * Generate HTML content for the range.
+     * @example
+     * ``` ts
+     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
+     * s.getRange(5, 7).generateHTML();
+     * ```
      */
     generateHTML(this: FRange): string;
+
     /**
      * Attach a popup to the start cell of current range.
      * If current worksheet is not active, the popup will not be shown.
      * Be careful to manager the detach disposable object, if not dispose correctly, it might memory leaks.
      * @param popup The popup to attach
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
+     * @example
+    ```
+        let s = univerAPI.getActiveWorkbook().getActiveSheet();
+        let r = s.getRange(2, 2, 3, 3);
+        let disposable = r.attachPopup({
+        componentKey: 'univer.sheet.cell-alert',
+        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+        });
+    ```
      */
     attachPopup(popup: IFCanvasPopup): Nullable<IDisposable>;
+
     /**
      * Attach an alert popup to the start cell of current range.
      * @param alert The alert to attach
      * @returns The disposable object to detach the alert.
+     * @example
+     * ```
+     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
+     * let r = s.getRange(2, 2, 3, 3);
+     * r.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
+     * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
 
     /**
-     * Highlight this range.
+     *  Highlight the range with the specified style and primary cell.
+     * @param style - style for highlight range.
+     * @param primary - primary cell for highlight range.
+     * @example
+     * ```
+     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
+     * let r = s.getRange(2, 2, 3, 3);
+     * r.highlight({ stroke: 'red' }, { startRow: 2, startColumn: 2 });
+     * ```
      */
     highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
 }
@@ -103,6 +145,10 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     }
 
     override attachPopup(popup: IFCanvasPopup): Nullable<IDisposable> {
+        popup.direction = popup.direction ?? 'horizontal';
+        popup.extraProps = popup.extraProps ?? {};
+        popup.offset = popup.offset ?? [0, 0];
+
         const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
         const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
         const disposePopup = sheetsPopupService.attachPopupToCell(

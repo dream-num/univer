@@ -437,10 +437,10 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * Sets the active selection region for this sheet.
+     * Sets the selection region for active sheet.
      * @param range The range to set as the active selection.
      */
-    setActiveRange(range: FRange): void {
+    setActiveRange(range: FRange): FWorkbook {
         // In theory, FRange should belong to a specific context, rather than getting the currently active sheet
         const sheet = this.getActiveSheet();
         const sheetId = range.getRange().sheetId || sheet.getSheetId();
@@ -463,6 +463,8 @@ export class FWorkbook extends FBaseInitialable {
         };
 
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+
+        return this;
     }
 
     /**

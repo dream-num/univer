@@ -165,7 +165,7 @@ export interface IFWorksheetLegacy {
       * @example
       * ```ts
       * // create a new over grid image builder.
-      * const builder = UniverApi.newOverGridImage();
+      * const builder = univerAPI.newOverGridImage();
       * ```
       */
     newOverGridImage(): FOverGridImageBuilder;

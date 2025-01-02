@@ -529,32 +529,6 @@ export class FWorksheet extends FBaseInitialable {
         return this;
     }
 
-    // /**
-    //  * Scrolling sheet to make specific rows visible.
-    //  * @param rowIndex The starting index of the rows
-    //  * @param numRows The number of rows
-    //  * @returns This sheet, for chaining.
-    //  */
-    // showRows(rowIndex: number, numRows: number = 1): FWorksheet {
-    //     const unitId = this._workbook.getUnitId();
-    //     const subUnitId = this._worksheet.getSheetId();
-    //     const range: IRange = {
-    //         startRow: rowIndex,
-    //         endRow: rowIndex + numRows - 1,
-    //         startColumn: 0,
-    //         endColumn: this._worksheet.getColumnCount() - 1,
-    //         rangeType: RANGE_TYPE.ROW,
-    //     };
-
-    //     this._commandService.syncExecuteCommand(SetSpecificRowsVisibleCommand.id, {
-    //         unitId,
-    //         subUnitId,
-    //         ranges: [range],
-    //     });
-
-    //     return this;
-    // }
-
     /**
      * Sets the row height of the given row in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
      * @param rowPosition The row position to change.
@@ -1034,7 +1008,7 @@ export class FWorksheet extends FBaseInitialable {
      * Sets the active selection region for this sheet.
      * @param range The range to set as the active selection.
      */
-    setActiveRange(range: FRange): FRange {
+    setActiveRange(range: FRange): FWorksheet {
         const { unitId, sheetId } = range.getRange();
 
         if (unitId !== this._workbook.getUnitId() || sheetId !== this._worksheet.getSheetId()) {
@@ -1042,7 +1016,7 @@ export class FWorksheet extends FBaseInitialable {
         }
 
         this._fWorkbook.setActiveRange(range);
-        return range;
+        return this;
     }
 
     /**

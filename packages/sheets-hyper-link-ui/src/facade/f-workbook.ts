@@ -23,6 +23,10 @@ interface IFWorkbookHyperlinkUIMixin {
     /**
      * navigate to the sheet hyperlink
      * @param hyperlink the hyperlink string
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().navigateToSheetHyperlink('#gid=sheet_Id&range=F6')
+     * ```
      */
     navigateToSheetHyperlink(this: FWorkbook, hyperlink: string): void;
 }

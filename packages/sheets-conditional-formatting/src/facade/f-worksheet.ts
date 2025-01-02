@@ -44,6 +44,28 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
+
+    /**
+     * @deprecated use newConditionalFormattingRule instead.
+     * Creates a constructor for conditional formatting
+     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rule = worksheet?.createConditionalFormattingRule()
+     *      .whenCellNotEmpty()
+     *      .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
+     *      .setItalic(true)
+     *      .setItalic(true)
+     *      .setBackground('red')
+     *      .setFontColor('green')
+     *      .build();
+     * ```
+     */
+    createConditionalFormattingRule(): FConditionalFormattingBuilder;
+
     /**
      * Creates a constructor for conditional formatting
      * @return {*}  {ConditionalFormatRuleBuilder}
@@ -62,8 +84,7 @@ export interface IFWorksheetConditionalFormattingMixin {
      *      .build();
      * ```
      */
-    // in Google, newConditionalFormatRule
-    createConditionalFormattingRule(): FConditionalFormattingBuilder;
+    newConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Add a new conditional format
@@ -151,6 +172,10 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
     }
 
     override createConditionalFormattingRule(): FConditionalFormattingBuilder {
+        return new FConditionalFormattingBuilder();
+    }
+
+    override newConditionalFormattingRule(): FConditionalFormattingBuilder {
         return new FConditionalFormattingBuilder();
     }
 

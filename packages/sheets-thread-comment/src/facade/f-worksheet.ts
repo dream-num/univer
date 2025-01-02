@@ -31,7 +31,7 @@ export interface IFWorksheetCommentMixin {
 
     /**
      * Subscribe to comment events.
-     * @param callback Callback function, param contains comment info and target cell.
+     * @param callback (cellPos: Nullable<IHoverCellPosition>) => void Callback function, param contains comment info and target cell.
      * @example
      * ```
      * univerAPI.getActiveWorkbook().getActiveSheet().onCommented((params) => {...})

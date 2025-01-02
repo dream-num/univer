@@ -183,7 +183,7 @@ export class FUniver extends FBaseInitialable {
      * @returns {FBlob} The new blob instance
      * @example
      * ```ts
-     * const blob = UniverApi.newBlob();
+     * const blob = univerAPI.newBlob();
      * ```
      */
     newBlob(): FBlob {
@@ -241,4 +241,3 @@ export class FUniver extends FBaseInitialable {
         return this._injector.createInstance(FUserManager);
     }
 }
-

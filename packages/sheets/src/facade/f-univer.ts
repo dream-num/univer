@@ -103,7 +103,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 switch (commandInfo.id) {
                     case InsertSheetCommand.id: {
                         const params = commandInfo.params as IInsertSheetCommandParams;
-                        const { unitId } = params;
+                        const { unitId } = params || {};
                         const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook();
                         if (!workbook) {
                             return;

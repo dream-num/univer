@@ -108,7 +108,7 @@ export { functionCompatibility } from './functions/compatibility/function-map';
 export { FUNCTION_NAMES_COMPATIBILITY } from './functions/compatibility/function-names';
 export { functionCube } from './functions/cube/function-map';
 export { FUNCTION_NAMES_CUBE } from './functions/cube/function-names';
-export { CustomFunction } from './functions/custom-function';
+export { AsyncCustomFunction, CustomFunction } from './functions/custom-function';
 export { functionDatabase } from './functions/database/function-map';
 export { FUNCTION_NAMES_DATABASE } from './functions/database/function-names';
 export { functionDate } from './functions/date/function-map';

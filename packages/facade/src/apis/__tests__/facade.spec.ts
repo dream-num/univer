@@ -372,7 +372,7 @@ describe('Test FUniver', () => {
         const functionName = 'ASYNCFUNC';
         const functionsDisposable = univerAPI.registerFunction({
             calculate: [
-                [async function (...variants) {
+                [function (...variants) {
                     return Promise.resolve(42);
                 }, functionName, 'Async custom function'],
             ],
@@ -393,7 +393,7 @@ describe('Test FUniver', () => {
         const functionName = 'ASYNCARRAY';
         const functionsDisposable = univerAPI.registerFunction({
             calculate: [
-                [async function (...variants) {
+                [function (...variants) {
                     return Promise.resolve([[1, 2], [3, 4]]);
                 }, functionName, 'Async array function'],
             ],

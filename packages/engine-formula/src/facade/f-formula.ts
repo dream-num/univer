@@ -24,11 +24,16 @@ import { ENGINE_FORMULA_CYCLE_REFERENCE_COUNT, SetFormulaCalculationNotification
  */
 export class FFormula extends FBase {
     constructor(
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(ICommandService) protected readonly _commandService: ICommandService,
         @Inject(Injector) protected readonly _injector: Injector,
         @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
+        this._initialize();
+    }
+
+    _initialize(): void {
+        // do nothing
     }
 
     /**

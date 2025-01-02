@@ -23,6 +23,7 @@ import type {
     BaseReferenceObject,
     FunctionVariantType,
     NodeValueType } from '../reference-object/base-reference-object';
+import type { FormulaFunctionValueType } from '../value-object/primitive-object';
 import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -31,8 +32,8 @@ import { FormulaDataModel } from '../../models/formula-data.model';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
 
+import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
@@ -202,14 +203,27 @@ export class FunctionNode extends BaseAstNode {
         }
     }
 
-    private _calculate(variants: BaseValueObject[]) {
-        // Check the number of parameters
-        const { minParams, maxParams } = this._functionExecutor;
-        if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
-            return ErrorValueObject.create(ErrorType.NA);
+    /**
+     * Transform the result of a custom function to a NodeValueType.
+     */
+    private _handleCustomResult(resultVariantCustom: FormulaFunctionValueType): NodeValueType {
+        if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
+            return ValueObjectFactory.create(resultVariantCustom);
         }
-        this._setRefInfo();
 
+        const arrayValues = transformToValueObject(resultVariantCustom);
+        return ArrayValueObject.create({
+            calculateValueList: arrayValues,
+            rowCount: arrayValues.length,
+            columnCount: arrayValues[0]?.length || 0,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+    }
+
+    private _handleAddressFunction() {
         /**
          * In Excel, to inject a defined name into a function that has positioning capabilities,
          * such as using the INDIRECT function to reference a named range,
@@ -219,7 +233,37 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.isAddress()) {
             this._setDefinedNamesForFunction();
         }
-        const resultVariant: NodeValueType = this._functionExecutor.calculate(...variants);
+    }
+
+    private _mapVariantsToValues(variants: BaseValueObject[]) {
+        return variants.map((variant) => {
+            if (variant.isArray()) {
+                return (variant as ArrayValueObject).toValue();
+            }
+            return variant.getValue();
+        });
+    }
+
+    private _calculate(variants: BaseValueObject[]) {
+        // Check the number of parameters
+        const { minParams, maxParams } = this._functionExecutor;
+        if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+        let resultVariant: NodeValueType;
+
+        this._setRefInfo();
+
+        if (this._functionExecutor.isCustom()) {
+            const resultVariantCustom = this._functionExecutor.calculateCustom(
+                ...this._mapVariantsToValues(variants)
+            ) as FormulaFunctionValueType;
+
+            resultVariant = this._handleCustomResult(resultVariantCustom);
+        } else {
+            this._handleAddressFunction();
+            resultVariant = this._functionExecutor.calculate(...variants);
+        }
 
         return resultVariant;
     }
@@ -237,38 +281,12 @@ export class FunctionNode extends BaseAstNode {
 
         if (this._functionExecutor.isCustom()) {
             const resultVariantCustom = await this._functionExecutor.calculateCustom(
-                ...variants.map((variant) => {
-                    if (variant.isArray()) {
-                        return (variant as ArrayValueObject).toValue();
-                    }
-                    return variant.getValue();
-                })
+                ...this._mapVariantsToValues(variants)
             );
 
-            if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
-                resultVariant = ValueObjectFactory.create(resultVariantCustom);
-            } else {
-                const arrayValues = transformToValueObject(resultVariantCustom);
-                resultVariant = ArrayValueObject.create({
-                    calculateValueList: arrayValues,
-                    rowCount: arrayValues.length,
-                    columnCount: arrayValues[0]?.length || 0,
-                    unitId: '',
-                    sheetId: '',
-                    row: -1,
-                    column: -1,
-                });
-            }
+            resultVariant = this._handleCustomResult(resultVariantCustom);
         } else {
-            /**
-             * In Excel, to inject a defined name into a function that has positioning capabilities,
-             * such as using the INDIRECT function to reference a named range,
-             * you can write it as follows:
-             * =INDIRECT("DefinedName1")
-             */
-            if (this._functionExecutor.isAddress()) {
-                this._setDefinedNamesForFunction();
-            }
+            this._handleAddressFunction();
             resultVariant = this._functionExecutor.calculate(...variants);
         }
 

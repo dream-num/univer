@@ -581,7 +581,7 @@ export class Worksheet {
             } else if (dataMode === CellModeEnum.Intercepted) {
                 cellData = this.getCell(row, col);
             } else if (dataMode === CellModeEnum.Both) {
-                cellData = this.getCellRaw(row, col);
+                cellData = { ...this.getCellRaw(row, col) };
                 const displayV = this.getCell(row, col)?.v;
                 if (isNotNullOrUndefined(displayV) && cellData) {
                     cellData.displayV = String(displayV);

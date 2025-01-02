@@ -39,7 +39,6 @@ export interface IFFormulaSheetsMixin {
      * @returns A disposable object that will unregister the function when disposed
      * @example
      * ```js
-     * // Register a simple function that adds one to a number
      * univerAPI.getFormula().registerFunction('HELLO', (name) => `Hello, ${name}!`, 'A simple greeting function');
      *
      * // Use the function in a cell

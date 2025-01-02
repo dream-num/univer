@@ -17,18 +17,23 @@
 import type { IDisposable } from '../common/di';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
+import type { IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
+import { Registry } from '../common/registry';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
+import { toDisposable } from '../shared';
 import { Univer } from '../univer';
-import { FBase } from './f-base';
+import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
+import { FEnum } from './f-enum';
+import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 
-export class FUniver extends FBase {
+export class FUniver extends FBaseInitialable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
      *
@@ -42,12 +47,33 @@ export class FUniver extends FBase {
         return injector.createInstance(FUniver);
     }
 
+    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+
+    private _ensureEventRegistry(event: string) {
+        if (!this._eventRegistry.has(event)) {
+            this._eventRegistry.set(event, new Registry());
+        }
+
+        return this._eventRegistry.get(event)!;
+    }
+
     constructor(
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
-        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
-        super();
+        super(_injector);
+
+        this.disposeWithMe(
+            this._lifecycleService.lifecycle$.subscribe((stage) => {
+                this.fireEvent(this.Event.LifeCycleChanged, { stage });
+            })
+        );
+
+        this._injector.onDispose(() => {
+            this.dispose();
+        });
     }
 
     /**
@@ -90,7 +116,7 @@ export class FUniver extends FBase {
 
     /**
      * Register a callback that will be triggered before invoking a command.
-     *
+     * @deprecated use `addEvent(univerAPI.event.BeforeCommandExecute, () => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -102,7 +128,7 @@ export class FUniver extends FBase {
 
     /**
      * Register a callback that will be triggered when a command is invoked.
-     *
+     * @deprecated use `addEvent(univerAPI.event.CommandExecuted, () => {})` instead.
      * @param {CommandListener} callback The callback.
      * @returns {IDisposable} The disposable instance.
      */
@@ -144,7 +170,7 @@ export class FUniver extends FBase {
 
     /**
      * Get hooks.
-     *
+     * @deprecated use `addEvent` instead.
      * @returns {FHooks} FHooks instance
      */
     getHooks(): FHooks {
@@ -164,7 +190,51 @@ export class FUniver extends FBase {
         return this._injector.createInstance(FBlob);
     }
 
+    get Enum() {
+        return FEnum.get();
+    }
+
+    get Event() {
+        return FEventName.get();
+    }
+
+    /**
+     * Add an event listener
+     * @param event key of event
+     * @param callback callback when event triggered
+     * @returns {Disposable} The Disposable instance, for remove the listener
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
+    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void) {
+        this._ensureEventRegistry(event).add(callback);
+        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
+    }
+
+    /**
+     * Fire an event, used in internal only.
+     * @param event {string} key of event
+     * @param params {any} parmas of event
+     * @returns {boolean} should cancel
+     * @example
+     * ```ts
+     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * ```
+     */
+    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]) {
+        this._eventRegistry.get(event)?.getData().forEach((callback) => {
+            callback(params);
+        });
+
+        return params.cancel;
+    }
+
     getUserManager(): FUserManager {
         return this._injector.createInstance(FUserManager);
     }
 }
+

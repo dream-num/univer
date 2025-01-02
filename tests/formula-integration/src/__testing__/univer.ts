@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { FUniver, LifecycleService } from '@univerjs/core';
+import { FUniver } from '@univerjs/core';
 import { createUniverOnNode } from 'examples-node';
 
 export function createFormulaTestBed() {
     const univer = createUniverOnNode();
     const injector = univer.__getInjector();
-    injector.add([LifecycleService]);
 
     return {
         univer,

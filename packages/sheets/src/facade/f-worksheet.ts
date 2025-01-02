@@ -18,7 +18,7 @@ import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectA
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, Direction, FBase, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, FBaseInitialable, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -34,17 +34,17 @@ interface IFacadeClearOptions {
 /**
  * Represents a worksheet facade api instance. Which provides a set of methods to interact with the worksheet.
  */
-export class FWorksheet extends FBase {
+export class FWorksheet extends FBaseInitialable {
     constructor(
         protected readonly _fWorkbook: FWorkbook,
         protected readonly _workbook: Workbook,
         protected readonly _worksheet: Worksheet,
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @Inject(SheetsSelectionsService) protected readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(ILogService) protected readonly _logService: ILogService,
         @ICommandService protected readonly _commandService: ICommandService
     ) {
-        super();
+        super(_injector);
     }
 
     /**

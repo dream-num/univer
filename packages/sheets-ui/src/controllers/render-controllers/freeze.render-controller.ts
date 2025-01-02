@@ -190,7 +190,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._zoomRefresh();
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -238,7 +238,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE, left: 0, top: startY - FREEZE_OFFSET, zIndex: 3,
+                height: FREEZE_SIZE, left: 0,
+                top: startY - FREEZE_OFFSET,
+                zIndex: 3,
             });
 
             let fill = this._freezeNormalHeaderColor;

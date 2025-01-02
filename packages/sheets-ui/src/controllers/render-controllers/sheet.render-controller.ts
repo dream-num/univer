@@ -40,7 +40,6 @@ import {
 } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetsRenderService } from '../../services/sheets-render.service';
-import { FREEZE_COLUMN_HEADER_NAME, FREEZE_ROW_HEADER_NAME } from './freeze.render-controller';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -369,18 +368,19 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 height: columnHeaderHeight,
             });
 
-            const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
-            if (rowFreezeHeaderRect) {
-                rowFreezeHeaderRect.transformByState({
-                    top: columnHeaderHeight - rowFreezeHeaderRect.height,
-                });
-            }
-            const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
-            if (colFreezeHeaderRect) {
-                colFreezeHeaderRect.transformByState({
-                    height: columnHeaderHeight,
-                });
-            }
+            // no need to update freezelineRect, freeze render controller has handled.
+            // const rowFreezeHeaderRect = this._context.scene.getObject(FREEZE_ROW_HEADER_NAME);
+            // if (rowFreezeHeaderRect) {
+            //     rowFreezeHeaderRect.transformByState({
+            //         top: columnHeaderHeight - rowFreezeHeaderRect.height,
+            //     });
+            // }
+            // const colFreezeHeaderRect = this._context.scene.getObject(FREEZE_COLUMN_HEADER_NAME);
+            // if (colFreezeHeaderRect) {
+            //     colFreezeHeaderRect.transformByState({
+            //         height: columnHeaderHeight,
+            //     });
+            // }
         }));
     }
 

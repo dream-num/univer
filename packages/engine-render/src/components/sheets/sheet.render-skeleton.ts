@@ -42,9 +42,9 @@ import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-c
 import type { ITransformChangeState } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { Scene } from '../../scene';
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 import {
     addLinkToDocumentModel,
-    AUTO_HEIGHT_FOR_MERGED_CELLS,
     BooleanNumber,
     CellValueType,
     composeStyles,
@@ -77,7 +77,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, MEASURE_EXTENT, MEASURE_EXTENT_FOR_PARAGRAPH } from './constants';
-import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
+import { SHEET_VIEWPORT_KEY } from './interfaces';
 import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
 interface ICellDocumentModelOption {
@@ -1210,39 +1210,55 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
     }
 
-    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellDataForSheetInterceptor>) {
-        if (isNullCell(cell)) return;
+    _setFontStylesCache(row: number, col: number, cellData: Nullable<ICellDataForSheetInterceptor>) {
+        if (isNullCell(cellData)) return;
 
-        this._handleFontMatrix.setValue(row, col, true);
-        if (this._stylesCache.fontMatrix.getValue(row, col)) return;
+        let config: Partial<IFontCacheItem> = {
+            cellData,
+            imageCacheMap: this._imageCacheMap,
+        };
 
-        const modelObject = this._getCellDocumentModel(cell, {
+        const cacheValue = this._stylesCache.fontMatrix.getValue(row, col);
+        if (!cacheValue) {
+            this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
+        } else {
+            const cacheItem = cacheValue as IFontCacheItem;
+            cacheItem.cellData = cellData;
+            this._stylesCache.fontMatrix.setValue(row, col, cacheValue as IFontCacheItem);
+            return;
+        }
+
+        const modelObject = this._getCellDocumentModel(cellData, {
             displayRawFormula: this._renderRawFormula,
         });
-        if (modelObject == null) return;
-        const { documentModel } = modelObject;
-        if (documentModel == null) return;
+        if (modelObject) {
+            const { documentModel } = modelObject;
+            if (documentModel) {
+                const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+                const documentViewModel = new DocumentViewModel(documentModel);
+                if (documentViewModel) {
+                    const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
+                    const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
+                    documentSkeleton.calculate();
 
-        const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
-
-        const documentViewModel = new DocumentViewModel(documentModel);
-        if (documentViewModel) {
-            const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
-            documentSkeleton.calculate();
-
-            const config: IFontCacheItem = {
-                documentSkeleton,
-                vertexAngle,
-                centerAngle,
-                verticalAlign,
-                horizontalAlign,
-                wrapStrategy,
-                imageCacheMap: this._imageCacheMap,
-            };
-            this._stylesCache.fontMatrix.setValue(row, col, config);
-            this._calculateOverflowCell(row, col, config);
+                    config = {
+                        documentSkeleton,
+                        vertexAngle,
+                        centerAngle,
+                        verticalAlign,
+                        horizontalAlign,
+                        wrapStrategy,
+                        imageCacheMap: this._imageCacheMap,
+                        cellData,
+                    };
+                    this._calculateOverflowCell(row, col, config as IFontCacheItem);
+                    this._handleFontMatrix.setValue(row, col, true);
+                }
+            }
         }
+
+        this._stylesCache.fontMatrix.setValue(row, col, config as IFontCacheItem);
+        this._handleFontMatrix.setValue(row, col, true);
     }
 
     /**
@@ -1260,7 +1276,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         // const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
         // const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
 
-        // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
+        // // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
         // if (handledBgCell && handledBorderCell) {
         //     return;
         // }
@@ -1286,7 +1302,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-
         const cellStyle = this._styles.getStyleByCell(cell);
         const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
@@ -1298,7 +1313,6 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-
         this._setFontStylesCache(row, col, { ...cell, ...{ s: style } });
     }
 

@@ -18,29 +18,47 @@ import type { UniverInstanceType } from '../common/unit';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
+import type { FWorkbook } from './f-workbook';
+import type { FDoc } from './FDoc';
 import { FBase } from './f-base';
 
 export interface ISheetCreateParam {
     unitId: string;
     type: UniverInstanceType.UNIVER_SHEET;
-    data: IWorkbookData;
+    workbook: FWorkbook;
+    unit: FWorkbook;
 }
 
 export interface IDocumentCreateParam {
     unitId: string;
     type: UniverInstanceType.UNIVER_DOC;
-    data: IDocumentData;
+    doc: FDoc;
+    unit: FDoc;
 }
 
-export interface ILifeCycleChangedParam {
-    stage: LifecycleStages;
-}
 export interface IEventBase {
     cancel?: boolean;
 }
 
+export interface ILifeCycleChangedEvent extends IEventBase {
+    stage: LifecycleStages;
+}
+
 export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
-export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
+
+export interface ISheetDisposedEvent extends IEventBase {
+    unitId: string;
+    unitType: UniverInstanceType.UNIVER_SHEET;
+    snapshot: IWorkbookData;
+}
+
+export interface IDocDisposedEvent extends IEventBase {
+    unitId: string;
+    unitType: UniverInstanceType.UNIVER_DOC;
+    snapshot: IDocumentData;
+}
+
+export type IUnitDisposeEvent = ISheetDisposedEvent | IDocDisposedEvent;
 
 export class FEventName extends FBase {
     static _intance: FEventName | null;
@@ -54,8 +72,16 @@ export class FEventName extends FBase {
         return instance;
     }
 
+    get BeforeUnitCreate() {
+        return 'BeforeUnitCreate' as const;
+    }
+
     get UnitCreated() {
         return 'UnitCreated' as const;
+    }
+
+    get UnitDisposed() {
+        return 'UnitDisposed' as const;
     }
 
     get LifeCycleChanged() {
@@ -64,6 +90,7 @@ export class FEventName extends FBase {
 }
 
 export interface IEventParamConfig {
-    // UnitCreated: IUnitCreateEvent;
     LifeCycleChanged: ILifeCycleChangedEvent;
+    UnitDisposed: IUnitDisposeEvent;
+    UnitCreated: IUnitCreateEvent;
 }

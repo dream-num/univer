@@ -15,11 +15,16 @@
  */
 
 import type { IDisposable } from '../common/di';
+import type { DocumentDataModel } from '../docs';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
+import type { IWorkbookData } from '../sheets/typedef';
+import type { Workbook } from '../sheets/workbook';
+import type { IDocumentData } from '../types/interfaces';
 import type { IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
 import { Registry } from '../common/registry';
+import { UniverInstanceType } from '../common/unit';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -32,6 +37,8 @@ import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
+import { FWorkbook } from './f-workbook';
+import { FDoc } from './FDoc';
 
 export class FUniver extends FBaseInitialable {
     /**
@@ -68,6 +75,57 @@ export class FUniver extends FBaseInitialable {
         this.disposeWithMe(
             this._lifecycleService.lifecycle$.subscribe((stage) => {
                 this.fireEvent(this.Event.LifeCycleChanged, { stage });
+            })
+        );
+
+        this.disposeWithMe(
+            this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    this.fireEvent(this.Event.UnitDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IWorkbookData,
+
+                        }
+                    );
+                } else if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    this.fireEvent(this.Event.UnitDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IDocumentData,
+                        }
+                    );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    const workbook = unit as Workbook;
+                    const workbookUnit = this._injector.createInstance(FWorkbook, workbook);
+                    this.fireEvent(this.Event.UnitCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            workbook: workbookUnit,
+                            unit: workbookUnit,
+                        }
+                    );
+                } else if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    const doc = unit as DocumentDataModel;
+                    const docUnit = this._injector.createInstance(FDoc, doc);
+                    this.fireEvent(this.Event.UnitCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            doc: docUnit,
+                            unit: docUnit,
+                        }
+                    );
+                }
             })
         );
 

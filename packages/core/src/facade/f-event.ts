@@ -54,8 +54,13 @@ export class FEventName extends FBase {
         return instance;
     }
 
-    UnitCreated = 'UnitCreated' as const;
-    LifeCycleChanged = 'LifeCycleChanged' as const;
+    get UnitCreated() {
+        return 'UnitCreated' as const;
+    }
+
+    get LifeCycleChanged() {
+        return 'LifeCycleChanged' as const;
+    }
 }
 
 export interface IEventParamConfig {

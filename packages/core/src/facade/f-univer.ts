@@ -24,7 +24,7 @@ import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
-import { toDisposable } from '../shared';
+import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
@@ -188,6 +188,10 @@ export class FUniver extends FBaseInitialable {
      */
     newBlob(): FBlob {
         return this._injector.createInstance(FBlob);
+    }
+
+    newColor(): ColorBuilder {
+        return new ColorBuilder();
     }
 
     get Enum() {

@@ -20,13 +20,13 @@ import type { FWorksheet } from './f-worksheet';
 import { FEventName } from '@univerjs/core';
 
 export interface IFSheetEventMixin {
-    SheetCreated: 'SheetCreated';
-    BeforeSheetCreate: 'BeforeSheetCreate';
+    get SheetCreated(): 'SheetCreated' ;
+    get BeforeSheetCreate(): 'BeforeSheetCreate';
 }
 
 export class FSheetEventName extends FEventName implements IFSheetEventMixin {
-    override readonly SheetCreated = 'SheetCreated' as const;
-    override readonly BeforeSheetCreate = 'BeforeSheetCreate' as const;
+    override get SheetCreated(): 'SheetCreated' { return 'SheetCreated' as const; }
+    override get BeforeSheetCreate(): 'BeforeSheetCreate' { return 'BeforeSheetCreate' as const; }
 }
 
 export interface IBeforeSheetCreateEventParams extends IEventBase {

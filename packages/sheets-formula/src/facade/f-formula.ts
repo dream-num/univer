@@ -146,13 +146,21 @@ export interface IFFormulaSheetsMixin {
      *     return userId * 10 + Math.floor(Math.random() * 20);
      *   },
      *   {
-     *     description: 'function.description.FETCH_USER_SCORE',
+     *     description: 'customFunction.description.FETCH_USER_SCORE',
      *     locales: {
      *       'zhCN': {
-     *         'function.description.FETCH_USER_SCORE': '模拟从数据库中获取用户分数'
+     *          'customFunction': {
+     *              'description': {
+     *                  'FETCH_USER_SCORE': '从数据库中获取用户分数'
+     *              }
+     *          }
      *       },
      *       'enUS': {
-     *         'function.description.FETCH_USER_SCORE': 'Mock fetching user score from database'
+     *          'customFunction': {
+     *              'description': {
+     *                  'FETCH_USER_SCORE': 'Mock fetching user score from database'
+     *              }
+     *          }
      *       }
      *     }
      *   }

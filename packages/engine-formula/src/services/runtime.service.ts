@@ -21,16 +21,14 @@ import type {
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../basics/common';
-
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-
+import { isNullCellForFormula } from '../basics/is-null-cell';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
-
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
@@ -700,10 +698,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                 // arrayDataCell may display 0 as {v: null}. Although it is an empty cell, it is considered to have a value.
                 if (
-                    !isNullCell(cell) ||
+                    !isNullCellForFormula(cell) ||
                     this._isInOtherArrayFormulaRange(formulaUnitId, formulaSheetId, formulaRow, formulaColumn, r, c) ||
-                    !isNullCell(currentCell) ||
-                    !isNullCell(featureCell)
+                    !isNullCellForFormula(currentCell) ||
+                    !isNullCellForFormula(featureCell)
                 ) {
                     return true;
                 }

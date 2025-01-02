@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
-import { FUniver, IUniverInstanceService, LifecycleService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
-import { filter, take } from 'rxjs';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -65,9 +64,10 @@ export interface IFUniverSheetsMixin {
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
-    private _init(): void {
+    override _initialize(injector: Injector): void {
+        const commandService = injector.get(ICommandService);
         this.disposeWithMe(
-            this._commandService.beforeCommandExecuted((commandInfo) => {
+            commandService.beforeCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
                     case InsertSheetCommand.id: {
                         const params = commandInfo.params as IInsertSheetCommandParams;
@@ -99,7 +99,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         );
 
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((commandInfo) => {
+            commandService.onCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
                     case InsertSheetCommand.id: {
                         const params = commandInfo.params as IInsertSheetCommandParams;
@@ -128,13 +128,6 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 }
             })
         );
-    }
-
-    override _initialize(): void {
-        const lifecycleService = this._injector.get(LifecycleService);
-        lifecycleService.lifecycle$.pipe(filter((stage) => stage > 0), take(1)).subscribe(() => {
-            this._init();
-        });
     }
 
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {

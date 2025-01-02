@@ -26,14 +26,14 @@ import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { toDisposable } from '../shared';
 import { Univer } from '../univer';
-import { FBase } from './f-base';
+import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 
-export class FUniver extends FBase {
+export class FUniver extends FBaseInitialable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
      *

@@ -23,26 +23,9 @@ import { Disposable } from '../shared';
  * The `_initialize` as a special method that will be called after the constructor. You should never call it directly.
  */
 export abstract class FBase extends Disposable {
-    private static _constructorQueue: Array<() => void> = [];
-
-    constructor(
-        protected _injector: Injector
-    ) {
-        super();
-        // eslint-disable-next-line ts/no-this-alias
-        const self = this;
-        FBase._constructorQueue.forEach(function (fn) {
-            fn.apply(self);
-        });
-    }
-
-    _initialize() { }
-
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
-            if (name === '_initialize') {
-                FBase._constructorQueue.push(source.prototype._initialize);
-            } else if (name !== 'constructor') {
+            if (name !== 'constructor') {
                 // @ts-ignore
                 this.prototype[name] = source.prototype[name];
             }
@@ -57,3 +40,36 @@ export abstract class FBase extends Disposable {
     }
 }
 
+export class FBaseInitialable extends Disposable {
+    private static _constructorQueue: Array<(_injector: Injector) => void> = [];
+    constructor(
+        protected _injector: Injector
+    ) {
+        super();
+        // eslint-disable-next-line ts/no-this-alias
+        const self = this;
+        FBaseInitialable._constructorQueue.forEach(function (fn) {
+            fn.apply(self, [_injector]);
+        });
+    }
+
+    _initialize(injector: Injector) {}
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name === '_initialize') {
+                FBaseInitialable._constructorQueue.push(source.prototype._initialize);
+            } else if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+}

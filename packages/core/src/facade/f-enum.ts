@@ -35,12 +35,31 @@ export class FEnum extends FBase {
         return instance;
     }
 
-    readonly UniverInstanceType = UniverInstanceType;
-    readonly LifecycleStages = LifecycleStages;
+    get UniverInstanceType() {
+        return UniverInstanceType;
+    }
 
-    readonly DataValidationType = DataValidationType;
-    readonly DataValidationErrorStyle = DataValidationErrorStyle;
-    readonly DataValidationRenderMode = DataValidationRenderMode;
-    readonly DataValidationOperator = DataValidationOperator;
-    readonly DataValidationStatus = DataValidationStatus;
+    get LifecycleStages() {
+        return LifecycleStages;
+    }
+
+    get DataValidationType() {
+        return DataValidationType;
+    }
+
+    get DataValidationErrorStyle() {
+        return DataValidationErrorStyle;
+    }
+
+    get DataValidationRenderMode() {
+        return DataValidationRenderMode;
+    }
+
+    get DataValidationOperator() {
+        return DataValidationOperator;
+    }
+
+    get DataValidationStatus() {
+        return DataValidationStatus;
+    }
 }

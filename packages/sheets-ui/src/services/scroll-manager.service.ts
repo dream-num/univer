@@ -112,11 +112,11 @@ export class SheetScrollManagerService implements IRenderModule {
         this._scrollStateNext(param);
     }
 
-    getScrollStateByParam(param: IScrollStateSearchParam): Readonly<Nullable<IScrollState>> {
+    getScrollStateByParam(param: IScrollStateSearchParam): Readonly<IScrollState> {
         return this._getCurrentScroll(param);
     }
 
-    getCurrentScrollState(): Readonly<Nullable<IScrollState>> {
+    getCurrentScrollState(): Readonly<IScrollState> {
         return this._getCurrentScroll(this._searchParamForScroll);
     }
 
@@ -204,12 +204,19 @@ export class SheetScrollManagerService implements IRenderModule {
         this._scrollStateNext(param);
     }
 
-    private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>) {
+    private _getCurrentScroll(param: Nullable<IScrollStateSearchParam>): IScrollState {
+        const emptyState = {
+            sheetViewStartRow: 0,
+            sheetViewStartColumn: 0,
+            offsetX: 0,
+            offsetY: 0,
+        };
         if (param == null) {
-            return;
+            return emptyState;
         }
         const { unitId, sheetId } = param;
-        return this._scrollStateMap.get(unitId)?.get(sheetId);
+        const currScrollState = this._scrollStateMap.get(unitId)?.get(sheetId);
+        return currScrollState || emptyState;
     }
 
     private _scrollStateNext(param: IScrollStateSearchParam): void {

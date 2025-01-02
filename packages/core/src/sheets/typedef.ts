@@ -354,9 +354,22 @@ export function isCellV(cell: Nullable<ICellData | CellValue>) {
 }
 
 export interface IFreeze {
+    /**
+     * count of fixed cols
+     */
     xSplit: number;
+    /**
+     * count of fixed rows
+     */
     ySplit: number;
+    /**
+     * scrollable start row
+     */
     startRow: number;
+
+    /**
+     * scrollable start column
+     */
     startColumn: number;
 }
 

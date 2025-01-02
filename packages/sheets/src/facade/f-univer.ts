@@ -29,12 +29,23 @@ export interface IFUniverSheetsMixin {
      *
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
      * @returns {FWorkbook} FWorkbook API instance.
+     * @example
+     * ```ts
+     * univerAPI.createUniverSheet({ id: 'Sheet1', name: 'Sheet1' });
+     * ```
      */
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
     /**
      * Get the currently focused Univer spreadsheet.
-     *
      * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
+     * @example
+     * ```ts
+     * univerAPI.getActiveUniverSheet();
+     * ```
+     */
+    getActiveUniverSheet(): FWorkbook | null;
+    /**
+     * @deprecated use `getActiveUniverSheet` as instead.
      */
     getActiveWorkbook(): FWorkbook | null;
     /**
@@ -46,19 +57,23 @@ export interface IFUniverSheetsMixin {
     getUniverSheet(id: string): FWorkbook | null;
     /**
      * Get the PermissionInstance.
-     * @deprecated This function is deprecated and will be removed in version 0.6.0.
-     *             Please use the function with the same name on the `FWorkbook` instance instead.
-     * @returns {FPermission} - The PermissionInstance.
+     * @deprecated This function is deprecated and will be removed in version 0.6.0. Please use the function with the same name on the `FWorkbook` instance instead.
      */
     getPermission(): FPermission;
+
     /**
-     * Register a callback that will be triggered when a Univer Sheet is created.
+     * @deprecated Use `univerAPI.addEvent(univerAPI.Event.UnitCreated, () => {})`
      */
     onUniverSheetCreated(callback: (workbook: FWorkbook) => void): IDisposable;
 
     /**
      * Create a new defined name builder.
      * @returns {FDefinedNameBuilder} - The defined name builder.
+     *
+     * @example
+     * ```ts
+     * univerAPI.newDefinedName();
+     * ```
      */
     newDefinedName(): FDefinedNameBuilder;
 }
@@ -136,13 +151,17 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         return this._injector.createInstance(FWorkbook, workbook);
     };
 
-    override getActiveWorkbook(): FWorkbook | null {
+    override getActiveUniverSheet(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getActiveWorkbook(): FWorkbook | null {
+        return this.getActiveUniverSheet();
     }
 
     override getUniverSheet(id: string): FWorkbook | null {

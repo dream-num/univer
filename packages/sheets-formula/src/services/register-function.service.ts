@@ -103,10 +103,25 @@ export const IRegisterFunctionService = createIdentifier<IRegisterFunctionServic
 );
 
 export interface ISingleFunctionRegisterParams {
+    /**
+     * function name
+     */
     name: string;
+    /**
+     * function calculation
+     */
     func: IRegisterFunction | IRegisterAsyncFunction;
+    /**
+     * function description
+     */
     description: string | IFunctionInfo;
+    /**
+     * function locales
+     */
     locales?: ILocales;
+    /**
+     * function async
+     */
     async?: boolean;
 }
 

@@ -370,13 +370,9 @@ describe('Test FUniver', () => {
 
     it('Function registerFunction should handle async function', () => {
         const functionName = 'ASYNCFUNC';
-        const functionsDisposable = univerAPI.registerFunction({
-            calculate: [
-                [function (...variants) {
-                    return Promise.resolve(42);
-                }, functionName, 'Async custom function'],
-            ],
-        });
+        const functionsDisposable = univerAPI.getFormula().registerFunction(functionName, () => {
+            return 42;
+        }, 'Async custom function');
 
         const descriptionService = get(IDescriptionService);
         const functionInfo = descriptionService.getFunctionInfo(functionName);
@@ -391,13 +387,9 @@ describe('Test FUniver', () => {
 
     it('Function registerFunction should handle async array function', () => {
         const functionName = 'ASYNCARRAY';
-        const functionsDisposable = univerAPI.registerFunction({
-            calculate: [
-                [function (...variants) {
-                    return Promise.resolve([[1, 2], [3, 4]]);
-                }, functionName, 'Async array function'],
-            ],
-        });
+        const functionsDisposable = univerAPI.getFormula().registerAsyncFunction(functionName, async () => {
+            return [[1, 2], [3, 4]];
+        }, 'Async array function');
 
         const descriptionService = get(IDescriptionService);
         const functionInfo = descriptionService.getFunctionInfo(functionName);

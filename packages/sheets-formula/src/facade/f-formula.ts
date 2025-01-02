@@ -16,6 +16,7 @@
 
 import type { IDisposable, ILocales } from '@univerjs/core';
 
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
 import { FFormula, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
@@ -102,7 +103,7 @@ export interface IFFormulaSheetsMixin {
      * // A1 will display: "Hello, John!"
      * ```
      */
-    registerFunction(name: string, func: IRegisterFunction, { locales, description }: { locales?: ILocales; description?: string }): IDisposable;
+    registerFunction(name: string, func: IRegisterFunction, { locales, description }: { locales?: ILocales; description?: string | IFunctionInfo }): IDisposable;
 
    /**
     * Register a custom asynchronous formula function.
@@ -145,7 +146,7 @@ export interface IFFormulaSheetsMixin {
      *     return userId * 10 + Math.floor(Math.random() * 20);
      *   },
      *   {
-     *     description: 'Fetches user score from database',
+     *     description: 'function.description.FETCH_USER_SCORE',
      *     locales: {
      *       'zhCN': {
      *         'function.description.FETCH_USER_SCORE': '模拟从数据库中获取用户分数'
@@ -162,7 +163,7 @@ export interface IFFormulaSheetsMixin {
      * // After 1 second, A1 will display a score
      * ```
      */
-    registerAsyncFunction(name: string, func: IRegisterAsyncFunction, { locales, description }: { locales?: ILocales; description?: string }): IDisposable;
+    registerAsyncFunction(name: string, func: IRegisterAsyncFunction, { locales, description }: { locales?: ILocales; description?: string | IFunctionInfo }): IDisposable;
 }
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
@@ -216,7 +217,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
     override registerFunction(
         name: string,
         func: IRegisterFunction,
-        options?: string | { locales?: ILocales; description?: string }
+        options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
     ): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
 
@@ -242,7 +243,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
     override registerAsyncFunction(
         name: string,
         func: IRegisterAsyncFunction,
-        options?: string | { locales?: ILocales; description?: string }
+        options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
     ): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
 

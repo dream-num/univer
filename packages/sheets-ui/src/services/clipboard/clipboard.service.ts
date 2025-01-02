@@ -320,15 +320,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             for (let c = startColumn; c <= endColumn; c++) {
                 const cellData = matrix.getValue(r, c);
                 if (cellData) {
+                    const newCellData = Tools.deepClone(cellData);
                     plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
                         ...getEmptyCell(),
-                        ...Tools.deepClone(cellData),
+                        ...newCellData,
                     });
 
-                    delete cellData.displayV;
+                    delete newCellData.displayV;
                     matrixFragment.setValue(rowIndex - startRow, c - startColumn, {
                         ...getEmptyCell(),
-                        ...Tools.deepClone(cellData),
+                        ...newCellData,
                     });
                 } else {
                     plainMatrix.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());

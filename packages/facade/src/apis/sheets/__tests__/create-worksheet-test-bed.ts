@@ -23,6 +23,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    LifecycleService,
     LocaleService,
     LocaleType,
     LogLevel,
@@ -141,6 +142,7 @@ export function createWorksheetTestBed(workbookData?: IWorkbookData, dependencie
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([LifecycleService]);
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);

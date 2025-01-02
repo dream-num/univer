@@ -46,6 +46,7 @@ import {
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
+import { RegisterWorksheetRangeThemeStyleCommand } from '../commands/commands/register-range-theme.command';
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
@@ -114,12 +115,12 @@ import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-rang
 import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../commands/mutations/delete-worksheet-range-theme.mutation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
-import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 
+import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
-import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/numfmt-mutation';
 import { RegisterWorksheetRangeThemeStyleMutation } from '../commands/mutations/register-range-theme.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
@@ -318,14 +319,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SplitTextToColumnsCommand,
 
                 // range theme
-                SetWorksheetRangeThemeStyleCommand,
-                DeleteWorksheetRangeThemeStyleCommand,
+
                 DeleteWorksheetRangeThemeStyleMutation,
                 SetWorksheetRangeThemeStyleMutation,
                 UnregisterWorksheetRangeThemeStyleMutation,
                 RegisterWorksheetRangeThemeStyleMutation,
                 UnregisterWorksheetRangeThemeStyleCommand,
-                RegisterWorksheetRangeThemeStyleMutation,
+                RegisterWorksheetRangeThemeStyleCommand,
+                SetWorksheetRangeThemeStyleCommand,
+                DeleteWorksheetRangeThemeStyleCommand,
 
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }

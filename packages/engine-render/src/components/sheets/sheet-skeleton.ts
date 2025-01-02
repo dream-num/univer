@@ -2036,6 +2036,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 horizontalAlign,
                 wrapStrategy,
                 imageCacheMap: this._imageCacheMap,
+                fontRenderExtension: cell?.fontRenderExtension,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);

@@ -58,8 +58,8 @@ export class FUniverSheetsFilterMixin extends FUniver {
             criteria: params.criteria,
         };
 
+        this.fireEvent(this.Event.SheetBeforeRangeFilter, eventParams);
         if (eventParams.cancel) {
-            this.fireEvent(this.Event.SheetBeforeRangeFilter, eventParams);
             throw new Error('SetSheetsFilterCriteriaCommand canceled.');
         }
     }
@@ -74,8 +74,8 @@ export class FUniverSheetsFilterMixin extends FUniver {
             criteria: params.criteria,
         };
 
+        this.fireEvent(this.Event.SheetRangeFiltered, eventParams);
         if (eventParams.cancel) {
-            this.fireEvent(this.Event.SheetRangeFiltered, eventParams);
             throw new Error('SetSheetsFilterCriteriaCommand canceled.');
         }
     }
@@ -88,8 +88,8 @@ export class FUniverSheetsFilterMixin extends FUniver {
             worksheet: fworkbook.getSheetBySheetId(params.subUnitId)!,
         };
 
+        this.fireEvent(this.Event.SheetBeforeRangeFilterClear, eventParams);
         if (eventParams.cancel) {
-            this.fireEvent(this.Event.SheetBeforeRangeFilterClear, eventParams);
             throw new Error('SetSheetsFilterCriteriaCommand canceled.');
         }
     }
@@ -102,8 +102,8 @@ export class FUniverSheetsFilterMixin extends FUniver {
             worksheet: fworkbook.getSheetBySheetId(params.subUnitId)!,
         };
 
+        this.fireEvent(this.Event.SheetRangeFilterCleared, eventParams);
         if (eventParams.cancel) {
-            this.fireEvent(this.Event.SheetRangeFilterCleared, eventParams);
             throw new Error('SetSheetsFilterCriteriaCommand canceled.');
         }
     }

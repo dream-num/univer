@@ -32,9 +32,7 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import {
-    AsyncPromiseObject,
-} from '../reference-object/base-reference-object';
+
 import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
@@ -98,7 +96,7 @@ export class FunctionNode extends BaseAstNode {
             }
         }
 
-        const resultVariant = this._calculate(variants);
+        const resultVariant = await this._calculateAsync(variants);
         let result: FunctionVariantType;
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
             result = await (resultVariant as AsyncObject | AsyncArrayObject).getValue();
@@ -210,13 +208,35 @@ export class FunctionNode extends BaseAstNode {
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
             return ErrorValueObject.create(ErrorType.NA);
         }
+        this._setRefInfo();
+
+        /**
+         * In Excel, to inject a defined name into a function that has positioning capabilities,
+         * such as using the INDIRECT function to reference a named range,
+         * you can write it as follows:
+         * =INDIRECT("DefinedName1")
+         */
+        if (this._functionExecutor.isAddress()) {
+            this._setDefinedNamesForFunction();
+        }
+        const resultVariant: NodeValueType = this._functionExecutor.calculate(...variants);
+
+        return resultVariant;
+    }
+
+    private async _calculateAsync(variants: BaseValueObject[]) {
+        // Check the number of parameters
+        const { minParams, maxParams } = this._functionExecutor;
+        if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
 
         let resultVariant: NodeValueType;
 
         this._setRefInfo();
 
         if (this._functionExecutor.isCustom()) {
-            const resultVariantCustom = this._functionExecutor.calculateCustom(
+            const resultVariantCustom = await this._functionExecutor.calculateCustom(
                 ...variants.map((variant) => {
                     if (variant.isArray()) {
                         return (variant as ArrayValueObject).toValue();
@@ -225,9 +245,7 @@ export class FunctionNode extends BaseAstNode {
                 })
             );
 
-            if (resultVariantCustom instanceof Promise) {
-                resultVariant = AsyncPromiseObject.create(resultVariantCustom);
-            } else if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
+            if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
                 resultVariant = ValueObjectFactory.create(resultVariantCustom);
             } else {
                 const arrayValues = transformToValueObject(resultVariantCustom);

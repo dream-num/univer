@@ -17,7 +17,6 @@
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
-import type { PrimitiveValueType } from '../value-object/primitive-object';
 import { CellValueType, moveRangeByOffset } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
@@ -25,7 +24,7 @@ import { isNullCellForFormula } from '../../basics/is-null-cell';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { getCellValue } from '../utils/cell';
 import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
-import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
+import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
     createBooleanValueObjectByRawValue,
@@ -35,7 +34,7 @@ import {
     StringValueObject,
 } from '../value-object/primitive-object';
 
-export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject | AsyncPromiseObject;
+export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject;
 
@@ -653,42 +652,5 @@ export class AsyncArrayObject extends ObjectClassType {
         };
 
         return ArrayValueObject.create(arrayValueObjectData);
-    }
-}
-
-export class AsyncPromiseObject extends ObjectClassType {
-    static create(rawValue: Promise<PrimitiveValueType | PrimitiveValueType[][]>) {
-        return new AsyncPromiseObject(rawValue);
-    }
-
-    constructor(private _promise: Promise<PrimitiveValueType | PrimitiveValueType[][]>) {
-        super();
-    }
-
-    override isAsyncArrayObject() {
-        return true;
-    }
-
-    async getValue() {
-        let resultVariant: NodeValueType;
-
-        const resultVariantCustom = await this._promise;
-
-        if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
-            resultVariant = ValueObjectFactory.create(resultVariantCustom);
-        } else {
-            const arrayValues = transformToValueObject(resultVariantCustom);
-            resultVariant = ArrayValueObject.create({
-                calculateValueList: arrayValues,
-                rowCount: arrayValues.length,
-                columnCount: arrayValues[0]?.length || 0,
-                unitId: '',
-                sheetId: '',
-                row: -1,
-                column: -1,
-            });
-        }
-
-        return resultVariant;
     }
 }

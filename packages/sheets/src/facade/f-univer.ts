@@ -70,16 +70,16 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
             commandService.beforeCommandExecuted((commandInfo) => {
                 switch (commandInfo.id) {
                     case InsertSheetCommand.id: {
-                        const params = commandInfo.params as IInsertSheetCommandParams;
-                        const { unitId } = params;
+                        const params = (commandInfo.params) as IInsertSheetCommandParams;
+                        const { unitId, index, sheet } = params || {};
                         const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook();
                         if (!workbook) {
                             return;
                         }
                         const eventParams: IBeforeSheetCreateEventParams = {
                             workbook,
-                            index: params.index,
-                            sheet: params.sheet,
+                            index,
+                            sheet,
                         };
                         this.fireEvent(
                             this.Event.BeforeSheetCreate,

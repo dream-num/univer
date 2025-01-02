@@ -476,7 +476,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return skeleton.getRangeByViewBound(vpInfo.viewBound);
     }
 
-    // why so complicated?  ScrollRenderController@scrollToCell do the same thing, including the scenario of freezing.
+    // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
@@ -509,28 +509,30 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (bounds == null) return false;
 
         const {
-            startRow: viewportStartRow,
-            startColumn: viewportStartColumn,
-            endRow: viewportEndRow,
-            endColumn: viewportEndColumn,
+            startRow: viewMainStartRow,
+            startColumn: viewMainStartColumn,
+            endRow: viewMainEndRow,
+            endColumn: viewMainEndColumn,
         } = bounds;
         const visibleRangeOfViewMain = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
+        // why undefined?
         let startSheetViewRow: number | undefined;
         let startSheetViewColumn: number | undefined;
 
         // vertical overflow only happens when the selection's row is in not the freeze area
+        // row >= scrollableStartRow means row is in scrollable area.
         if (row >= scrollableStartRow && column >= scrollableStartCol - freezedRowCount) {
-            // top overflow
-            if (row <= viewportStartRow) {
+            // top overflow: to row above first row in curr viewMain.
+            if (row <= viewMainStartRow) {
                 startSheetViewRow = row;
                 forceTop = true;
             }
 
-            // bottom overflow
-            if (row >= viewportEndRow) {
+            // bottom overflow: to row below last row.
+            if (row >= viewMainEndRow) {
                 const minRowAccumulation = rowHeightAccumulation[row] - viewport.height!;
-                for (let r = viewportStartRow; r <= row; r++) {
+                for (let r = viewMainStartRow; r <= row; r++) {
                     startSheetViewRow = r + 1;
                     if (rowHeightAccumulation[r] >= minRowAccumulation) {
                         break;
@@ -538,19 +540,19 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
             }
         }
-        // horizontal overflow only happens when the selection's column is in not the freeze area
         // why need row >= scrollableStartRow - freezedRowCount ?? we are handling column here, why need row?
+        // column >= scrollableStartCol means column is in scrollable area.
         if (column >= scrollableStartCol && row >= scrollableStartRow - freezedRowCount) {
             // left overflow
-            if (column <= viewportStartColumn) {
+            if (column <= viewMainStartColumn) {
                 startSheetViewColumn = column;
                 forceLeft = true;
             }
 
             // right overflow
-            if (column >= viewportEndColumn) {
+            if (column >= viewMainEndColumn) {
                 const minColumnAccumulation = columnWidthAccumulation[column] - viewport.width!;
-                for (let c = viewportStartColumn; c <= column; c++) {
+                for (let c = viewMainStartColumn; c <= column; c++) {
                     startSheetViewColumn = c + 1;
                     if (columnWidthAccumulation[c] >= minColumnAccumulation) {
                         break;
@@ -559,19 +561,30 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             }
         }
 
-        // what circumstance make startSheetViewRow to be undefined ??? this should always have a value, it's rendering!
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        let { offsetX, offsetY, sheetViewStartRow, sheetViewStartColumn } = this._scrollManagerService.getCurrentScrollState() || {};
+        let { offsetX, offsetY, sheetViewStartRow: preSheetViewStartRow, sheetViewStartColumn: preSheetViewStartColumn } = this._scrollManagerService.getCurrentScrollState() || {};
 
-        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : undefined;
-        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : undefined;
+        // startSheetViewRow is undefined means not top overflow or bottom overflow.
+        // means keep current scroll state.
+        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : preSheetViewStartRow + freezedRowCount; ;
+        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : preSheetViewStartColumn + freezedColCount;
 
-        if (forceLeft) offsetX = 0;
-        if (forceTop) offsetY = 0;
+        if (forceLeft) {
+            offsetX = 0;
+            startSheetViewColumn = column;
+            // for hidden columns
+            const hiddenColumns = skeleton.getHiddenColumnsInRange({ startColumn: startSheetViewColumn - freezedColCount, endColumn: startSheetViewColumn });
+            startSheetViewColumn = startSheetViewColumn - hiddenColumns.length;
+        }
 
-        startSheetViewRow = startSheetViewRow ?? sheetViewStartRow + freezedRowCount;
-        startSheetViewColumn = startSheetViewColumn ?? sheetViewStartColumn + freezedColCount;
+        if (forceTop) {
+            offsetY = 0;
+            startSheetViewRow = row;
+            // for hidden rows, consider hidden rows above the viewport visible area(not in scrollable area)
+            const hiddenRows = skeleton.getHiddenRowsInRange({ startRow: startSheetViewRow - freezedRowCount, endRow: startSheetViewRow });
+            startSheetViewRow = startSheetViewRow - hiddenRows.length;
+        }
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
             // sheetViewStartRow & offsetX should never be undefined, it's rendering, there should always be a value!
@@ -581,11 +594,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             // offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             // offsetY: startSheetViewRow === undefined ? offsetY : 0,
 
-            // @TODO lumixraku there is scrolling issue if some rows are hidden in this scenario! need to fix it!
-            // e.g. row freezed at 0 ~ 5, then freezedRowCount = 6, but 14 - 16 is hidden.
-            // the actual freezedRowCount for viewMain is 6 + 3 = 9!
-            sheetViewStartRow: forceTop ? Math.max(0, row - freezedRowCount) : (startSheetViewRow - freezedRowCount),
-            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezedColCount) : (startSheetViewColumn - freezedColCount),
+            sheetViewStartRow: Math.max(0, startSheetViewRow - freezedRowCount),
+            sheetViewStartColumn: Math.max(0, startSheetViewColumn - freezedColCount),
             offsetX,
             offsetY,
         } as IScrollCommandParams);

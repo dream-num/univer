@@ -2299,4 +2299,24 @@ export class SpreadsheetSkeleton extends Skeleton {
         const i = Math.max(0, col - 1);
         return arr[i];
     }
+
+    getHiddenRowsInRange(range: IRowRange) {
+        const hiddenRows = [];
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (!this.worksheet.getRowVisible(i)) {
+                hiddenRows.push(i);
+            }
+        }
+        return hiddenRows;
+    }
+
+    getHiddenColumnsInRange(range: IColumnRange) {
+        const hiddenCols = [];
+        for (let i = range.startColumn; i <= range.endColumn; i++) {
+            if (!this.worksheet.getColVisible(i)) {
+                hiddenCols.push(i);
+            }
+        }
+        return hiddenCols;
+    }
 }

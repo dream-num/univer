@@ -18,8 +18,8 @@ import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
 import type { IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { FRange } from '@univerjs/sheets/facade';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { FRange } from '@univerjs/sheets/facade';
 import { DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 
 export class FThreadComment {
@@ -97,7 +97,7 @@ export class FThreadComment {
      * Delete the comment and it's replies
      * @returns success or not
      */
-    delete(): Promise<boolean> {
+    deleteAsync(): Promise<boolean> {
         return this._commandService.executeCommand(
             this.getIsRoot() ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
             {
@@ -109,11 +109,25 @@ export class FThreadComment {
     }
 
     /**
+     * @deprecated use `deleteAsync` as instead.
+     */
+    delete(): Promise<boolean> {
+        return this.deleteAsync();
+    }
+
+    /**
+     * @deprecated use `updateAsync` as instead
+     */
+    async update(content: IDocumentBody): Promise<boolean> {
+        return this.updateAsync(content);
+    }
+
+    /**
      * Update the comment content
      * @param content The new content of the comment
      * @returns success or not
      */
-    async update(content: IDocumentBody): Promise<boolean> {
+    async updateAsync(content: IDocumentBody): Promise<boolean> {
         const dt = getDT();
         const res = await this._commandService.executeCommand(
             UpdateCommentCommand.id,
@@ -133,11 +147,18 @@ export class FThreadComment {
     }
 
     /**
-     * Resolve the comment
-     * @param resolved Whether the comment is resolved
-     * @returns success or not
+     * @deprecated use `resolveAsync` as instead
      */
     resolve(resolved?: boolean): Promise<boolean> {
+        return this.resolveAsync(resolved);
+    }
+
+     /**
+      * Resolve the comment
+      * @param resolved Whether the comment is resolved
+      * @returns success or not
+      */
+    resolveAsync(resolved?: boolean): Promise<boolean> {
         return this._commandService.executeCommand(
             ResolveCommentCommand.id,
             {

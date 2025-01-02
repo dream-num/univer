@@ -78,7 +78,7 @@ export const darkRangeThemeBuilder = (baseName: string, rowHeader: string, first
                 rgb: rowHeader,
             },
             cl: {
-                rgb: 'rgb(255,255,255)',
+                rgb: 'rgb(255, 255, 255)',
             },
             ht: HorizontalAlign.CENTER,
             bl: BooleanNumber.TRUE,

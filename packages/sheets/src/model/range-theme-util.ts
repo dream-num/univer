@@ -155,7 +155,7 @@ export class RangeThemeStyle {
     /**
      * @constructor
      * @param {string} name The name of the range theme style, it used to identify the range theme style.
-     * @param {IRangeThemeStyleJSON} options The options to initialize the range theme style.
+     * @param {IRangeThemeStyleJSON} [options] The options to initialize the range theme style.
      */
     constructor(name: string, options?: Omit<IRangeThemeStyleJSON, 'name'>) {
         if (options) {

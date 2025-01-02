@@ -72,7 +72,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     case InsertSheetCommand.id: {
                         const params = (commandInfo.params) as IInsertSheetCommandParams;
                         const { unitId, index, sheet } = params || {};
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook();
+                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
                         if (!workbook) {
                             return;
                         }
@@ -104,7 +104,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     case InsertSheetCommand.id: {
                         const params = commandInfo.params as IInsertSheetCommandParams;
                         const { unitId } = params || {};
-                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook();
+                        const workbook = unitId ? this.getUniverSheet(unitId) : this.getActiveWorkbook?.();
                         if (!workbook) {
                             return;
                         }

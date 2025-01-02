@@ -21,8 +21,9 @@ import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { Workbook } from '../sheets/workbook';
 import type { IDocumentData } from '../types/interfaces';
-import type { IEventParamConfig } from './f-event';
+import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
+import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
 import { UniverInstanceType } from '../common/unit';
 import { ICommandService } from '../services/command/command.service';
@@ -54,9 +55,9 @@ export class FUniver extends FBaseInitialable {
         return injector.createInstance(FUniver);
     }
 
-    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+    protected _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
 
-    private _ensureEventRegistry(event: string) {
+    protected _ensureEventRegistry(event: string) {
         if (!this._eventRegistry.has(event)) {
             this._eventRegistry.set(event, new Registry());
         }
@@ -64,6 +65,7 @@ export class FUniver extends FBaseInitialable {
         return this._eventRegistry.get(event)!;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     constructor(
         @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -80,6 +82,8 @@ export class FUniver extends FBaseInitialable {
 
         this.disposeWithMe(
             this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.UnitDisposed)) return;
+
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                     this.fireEvent(this.Event.UnitDisposed,
                         {
@@ -103,6 +107,8 @@ export class FUniver extends FBaseInitialable {
 
         this.disposeWithMe(
             this._univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.UnitCreated)) return;
+
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                     const workbook = unit as Workbook;
                     const workbookUnit = this._injector.createInstance(FWorkbook, workbook);
@@ -125,6 +131,62 @@ export class FUniver extends FBaseInitialable {
                             unit: docUnit,
                         }
                     );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((commandInfo) => {
+                if (
+                    !this._eventRegistry.get(this.Event.BeforeRedo) &&
+                    this._eventRegistry.get(this.Event.BeforeUndo) &&
+                    this._eventRegistry.get(this.Event.BeforeCommandExecute)
+                ) {
+                    return;
+                }
+                const { id, type: propType, params } = commandInfo;
+                const type = propType!;
+                const eventParams: ICommandEvent = { id, type, params };
+                switch (commandInfo.id) {
+                    case RedoCommand.id:
+                        this.fireEvent(this.Event.BeforeRedo, eventParams);
+                        break;
+                    case UndoCommand.id:
+                        this.fireEvent(this.Event.BeforeUndo, eventParams);
+                        break;
+                    default:
+                        this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
+                        break;
+                }
+
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (
+                    !this._eventRegistry.get(this.Event.Redo) &&
+                    this._eventRegistry.get(this.Event.Undo) &&
+                    this._eventRegistry.get(this.Event.CommandExecuted)
+                ) {
+                    return;
+                }
+                const { id, type: propType, params } = commandInfo;
+                const type = propType!;
+                const eventParams: ICommandEvent = { id, type, params };
+                switch (commandInfo.id) {
+                    case RedoCommand.id:
+                        this.fireEvent(this.Event.Redo, eventParams);
+                        break;
+                    case UndoCommand.id:
+                        this.fireEvent(this.Event.Undo, eventParams);
+                        break;
+                    default:
+                        this.fireEvent(this.Event.CommandExecuted, eventParams);
+                        break;
                 }
             })
         );

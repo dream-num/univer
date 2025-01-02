@@ -17,7 +17,7 @@
 import type { IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
-import { FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
@@ -102,7 +102,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         );
                         // cancel this command
                         if (eventParams.cancel) {
-                            throw new Error('Sheet create canceled by facade api.');
+                            throw new CanceledError();
                         }
                         break;
                     }

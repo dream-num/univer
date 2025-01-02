@@ -33,7 +33,7 @@ export {
 } from './common/const';
 export * from './common/di';
 export { shallowEqual } from './common/equal';
-export { CustomCommandExecutionError } from './common/error';
+export { CanceledError, CustomCommandExecutionError } from './common/error';
 export { throttle } from './common/function';
 export type { IAsyncInterceptor, ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey, createInterceptorKey, InterceptorEffectEnum, InterceptorManager } from './common/interceptor';

@@ -14,16 +14,3 @@
  * limitations under the License.
  */
 
-export class CustomCommandExecutionError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'CustomCommandExecutionError';
-    }
-}
-
-export class CanceledError extends Error {
-    constructor() {
-        super('Canceled by facade');
-        this.name = 'CanceledError';
-    }
-}

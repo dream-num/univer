@@ -15,6 +15,7 @@
  */
 
 import type { UniverInstanceType } from '../common/unit';
+import type { CommandType } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
@@ -60,6 +61,12 @@ export interface IDocDisposedEvent extends IEventBase {
 
 export type IUnitDisposeEvent = ISheetDisposedEvent | IDocDisposedEvent;
 
+export interface ICommandEvent extends IEventBase {
+    params: any;
+    id: string;
+    type: CommandType;
+}
+
 export class FEventName extends FBase {
     static _intance: FEventName | null;
     static get() {
@@ -87,10 +94,40 @@ export class FEventName extends FBase {
     get LifeCycleChanged() {
         return 'LifeCycleChanged' as const;
     }
+
+    get Redo() {
+        return 'Redo' as const;
+    }
+
+    get Undo() {
+        return 'Undo' as const;
+    }
+
+    get BeforeRedo() {
+        return 'BeforeRedo' as const;
+    }
+
+    get BeforeUndo() {
+        return 'BeforeUndo' as const;
+    }
+
+    get CommandExecuted() {
+        return 'CommandExecuted' as const;
+    }
+
+    get BeforeCommandExecute() {
+        return 'BeforeCommandExecute' as const;
+    }
 }
 
 export interface IEventParamConfig {
     LifeCycleChanged: ILifeCycleChangedEvent;
     UnitDisposed: IUnitDisposeEvent;
     UnitCreated: IUnitCreateEvent;
+    Redo: ICommandEvent;
+    Undo: ICommandEvent;
+    BeforeRedo: ICommandEvent;
+    BeforeUndo: ICommandEvent;
+    CommandExecuted: ICommandEvent;
+    BeforeCommandExecute: ICommandEvent;
 }

@@ -15,6 +15,7 @@
  */
 
 import { UniverInstanceType } from '../common/unit';
+import { CommandType } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
 import { DataValidationOperator } from '../types/enum/data-validation-operator';
@@ -61,5 +62,9 @@ export class FEnum extends FBase {
 
     get DataValidationStatus() {
         return DataValidationStatus;
+    }
+
+    get CommandType() {
+        return CommandType;
     }
 }

@@ -24,15 +24,30 @@ import { DataValidationType } from '../types/enum/data-validation-type';
 import { FBase } from './f-base';
 
 export class FEnum extends FBase {
-    static _intance: FEnum | null;
+    static _instance: FEnum | null;
     static get() {
-        if (this._intance) {
-            return this._intance;
+        if (this._instance) {
+            return this._instance;
         }
 
         const instance = new FEnum();
-        this._intance = instance;
+        this._instance = instance;
         return instance;
+    }
+
+    static extendEnum(Source: { new(): FEnum }): void {
+        const sourceInstance = new Source();
+
+        Object.getOwnPropertyNames(sourceInstance).forEach((key) => {
+            if (key === 'constructor') {
+                return;
+            }
+            const instance = this.get();
+            const descriptor = Object.getOwnPropertyDescriptor(sourceInstance, key);
+            if (descriptor) {
+                Object.defineProperty(instance, key, descriptor);
+            }
+        });
     }
 
     readonly UniverInstanceType = UniverInstanceType;

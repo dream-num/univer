@@ -35,19 +35,6 @@ export class FEnum extends FBase {
         return instance;
     }
 
-    static extendEnum(Source: { new(): FEnum }): void {
-        const sourceInstance = new Source();
-
-        Object.getOwnPropertyNames(sourceInstance).forEach((key) => {
-            if (key === 'constructor') {
-                return;
-            }
-            const instance = this.get();
-            // @ts-ignore
-            instance[key] = sourceInstance[key];
-        });
-    }
-
     readonly UniverInstanceType = UniverInstanceType;
     readonly LifecycleStages = LifecycleStages;
 

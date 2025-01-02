@@ -22,28 +22,40 @@ export type SortColumnSpec = { column: number; ascending: boolean } | number;
 
 export interface IFRangeSort {
     /**
-     * Sort the range by the specified column(s) with specified order.
+     * Sorts the cells in the given range, by column(s) and order specified.
      *
-     * @async
+     * @param {SortColumnSpec | SortColumnSpec[]} column The column index with order or an array of column indexes with order. The column index starts from 1.
      *
-     * @return The range itself to chain other operations.
+     * @returns The range itself for chaining.
+     *
+     * @example
+     * ```typescript
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const range = activeSheet.getRange(0, 0, 10, 10);
+     * range.sort(1); // Sorts the range by the first column in ascending order.
+     * range.sort({ column: 1, ascending: false }); // Sorts the range by the first column in descending order.
+     * range.sort([{ column: 1, ascending: false }, 2]); // Sorts the range by the first column in descending order and the second column in ascending order.
+     * ```
      */
-    sort(column: SortColumnSpec | SortColumnSpec[]): Promise<FRange>;
+    sort(column: SortColumnSpec | SortColumnSpec[]): FRange;
 }
 
 export class FRangeSort extends FRange implements IFRangeSort {
-    override async sort(column: SortColumnSpec | SortColumnSpec[]): Promise<FRange> {
+    override sort(column: SortColumnSpec | SortColumnSpec[]): FRange {
+        const columnBase = this._range.startColumn - 1;
         const columns = Array.isArray(column) ? column : [column];
+
         const orderRules: IOrderRule[] = columns.map((c) => {
             if (typeof c === 'number') {
-                return { colIndex: c, type: SortType.ASC };
+                return { colIndex: c + columnBase, type: SortType.ASC };
             }
             return {
-                colIndex: c.column,
+                colIndex: c.column + columnBase,
                 type: c.ascending ? SortType.ASC : SortType.DESC,
             };
         });
-        await this._commandService.executeCommand(SortRangeCommand.id, {
+        this._commandService.syncExecuteCommand(SortRangeCommand.id, {
             orderRules,
             range: this._range,
             hasTitle: false,

@@ -24,19 +24,26 @@ export interface IFWorksheetSort {
     /**
      * Sort the worksheet by the specified column.
      *
-     * @async
+     * @param {number} colIndex The column index to sort by. which starts from 1.
+     * @param {boolean} [asc=true] The sort order. `true` for ascending, `false` for descending.
+     * @returns The worksheet itself for chaining.
      *
-     * @param colIndex The column index to sort by.
-     * @param asc Whether to sort in ascending order. Default is `true`.
-     * @returns The worksheet itself to chain calls.
+     * @example
+     * ```typescript
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * activeSheet.sort(1); // Sorts the worksheet by the first column in ascending order.
+     * activeSheet.sort(1, false); // Sorts the worksheet by the first column in descending order.
+     * ```
      */
-    sort(colIndex: number, asc?: boolean): Promise<FWorksheet>;
+    sort(colIndex: number, asc?: boolean): FWorksheet;
 }
 
 export class FWorksheetSort extends FWorksheet implements IFWorksheetSort {
-    override async sort(colIndex: number, asc = true): Promise<FWorksheet> {
+    override sort(colIndex: number, asc = true): FWorksheet {
         const orderRules: IOrderRule[] = [{
-            colIndex,
+            // real column index should be colIndex - 1.
+            colIndex: colIndex - 1,
             type: asc ? SortType.ASC : SortType.DESC,
         }];
 
@@ -47,7 +54,7 @@ export class FWorksheetSort extends FWorksheet implements IFWorksheetSort {
             endColumn: this._worksheet.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ALL,
         };
-        await this._commandService.executeCommand(SortRangeCommand.id, {
+        this._commandService.syncExecuteCommand(SortRangeCommand.id, {
             orderRules,
             range,
             hasTitle: false,

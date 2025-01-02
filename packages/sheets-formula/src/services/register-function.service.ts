@@ -15,15 +15,15 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
-import type { IFunctionInfo, PrimitiveValueType } from '@univerjs/engine-formula';
+import type { FormulaFunctionValueType, IFunctionInfo } from '@univerjs/engine-formula';
 import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
 import { CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
 import { IDescriptionService } from './description.service';
 import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';
 
 export type IRegisterFunction = (
-    ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
-) => PrimitiveValueType | PrimitiveValueType[][] | Promise<PrimitiveValueType | PrimitiveValueType[][]>;
+    ...arg: Array<FormulaFunctionValueType>
+) => FormulaFunctionValueType | Promise<FormulaFunctionValueType>;
 
 // [[Function, FunctionName, Description]]
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];

@@ -38,6 +38,18 @@ export abstract class FBase extends Disposable {
             }
         });
     }
+
+    static extendInstanceProperties(Source: { new(): FBase }, target: Record<string, unknown>): void {
+        const sourceInstance = new Source();
+
+        Object.getOwnPropertyNames(sourceInstance).forEach((key) => {
+            if (key === 'constructor') {
+                return;
+            }
+            // @ts-ignore
+            target[key] = sourceInstance[key];
+        });
+    }
 }
 
 export class FBaseInitialable extends Disposable {
@@ -53,7 +65,7 @@ export class FBaseInitialable extends Disposable {
         });
     }
 
-    _initialize(injector: Injector) {}
+    _initialize(injector: Injector) { }
 
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {

@@ -43,10 +43,8 @@ export class FEnum extends FBase {
                 return;
             }
             const instance = this.get();
-            const descriptor = Object.getOwnPropertyDescriptor(sourceInstance, key);
-            if (descriptor) {
-                Object.defineProperty(instance, key, descriptor);
-            }
+            // @ts-ignore
+            instance[key] = sourceInstance[key];
         });
     }
 

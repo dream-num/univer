@@ -20,14 +20,20 @@ import { SetSheetFilterRangeCommand, SheetsFilterService } from '@univerjs/sheet
 import { FRange } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
+// TODO: add jsdoc comments for the following API
+
 export interface IFRangeFilter {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
      *
-     * @async
-     *
      * @return The interface class to handle the filter. If the worksheet already has a filter,
      * this method would return `null`.
+     *
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveWorksheet();
+     * ```
      */
     createFilter(this: FRange): FFilter | null;
     /**
@@ -78,5 +84,5 @@ export class FRangeFilter extends FRange implements IFRangeFilter {
 FRange.extend(FRangeFilter);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeFilter {}
+    interface FRange extends IFRangeFilter { }
 }

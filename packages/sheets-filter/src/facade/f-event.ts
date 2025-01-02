@@ -20,10 +20,40 @@ import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName } from '@univerjs/core';
 import { FSheetEventName } from '@univerjs/sheets/facade';
 
+// TODO: add js comments for the following API
+
 export interface IFSheetFilterEventMixin {
+    /**
+     * Type of the event's parameters is {@link ISheetRangeFilteredParams}.
+     *
+     * ```typescript
+     * @example
+     * ```
+     */
     SheetRangeFiltered: 'SheetRangeFiltered';
+    /**
+     * Type of the event's parameters is {@link ISheetRangeFilteredParams}.
+     *
+     * ```typescript
+     * @example
+     * ```
+     */
     SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
+    /**
+     * Type of the event's parameters is {@link ISheetRangeFilterClearedEventParams}.
+     *
+     * ```typescript
+     * @example
+     * ```
+     */
     SheetRangeFilterCleared: 'SheetRangeFilterCleared';
+    /**
+     * Type of the event's parameters is {@link ISheetRangeFilterClearedEventParams}.
+     *
+     * ```typescript
+     * @example
+     * ```
+     */
     SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
 }
 
@@ -39,7 +69,7 @@ export interface ISheetRangeFilteredParams extends IEventBase, Pick<ISetSheetsFi
     worksheet: FWorksheet;
 }
 
-export interface ISheetRangeFilterClearedEventParams {
+export interface ISheetRangeFilterClearedEventParams extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
 }

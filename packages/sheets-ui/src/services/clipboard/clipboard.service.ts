@@ -23,6 +23,7 @@ import type {
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type {
+    ICellDataWithSpanInfo,
     IClipboardPropertyItem,
     IPasteTarget,
     ISheetClipboardHook,
@@ -305,8 +306,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const { startColumn, startRow, endColumn, endRow } = range;
 
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Both);
-        const matrixFragment = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
         let rowIndex = startRow;
+
+        const plainMatrix = new ObjectMatrix<ICellDataWithSpanAndDisplay>();
 
         const discreteRange: IDiscreteRange = { rows: [], cols: [] };
         for (let r = startRow; r <= endRow; r++) {
@@ -317,11 +320,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             for (let c = startColumn; c <= endColumn; c++) {
                 const cellData = matrix.getValue(r, c);
                 if (cellData) {
+                    plainMatrix.setValue(rowIndex - startRow, c - startColumn, {
+                        ...getEmptyCell(),
+                        ...Tools.deepClone(cellData),
+                    });
+
+                    delete cellData.displayV;
                     matrixFragment.setValue(rowIndex - startRow, c - startColumn, {
                         ...getEmptyCell(),
                         ...Tools.deepClone(cellData),
                     });
                 } else {
+                    plainMatrix.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
                     matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
                     matrix.setValue(r, c, getEmptyCell());
                 }
@@ -335,7 +345,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // convert matrix to html
         let html = this._usmToHtml.convert(matrix, discreteRange, hooks);
 
-        const plain = getMatrixPlainText(matrixFragment);
+        const plain = getMatrixPlainText(plainMatrix);
         const copyId = genId();
         html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
 

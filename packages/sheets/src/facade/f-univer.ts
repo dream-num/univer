@@ -17,7 +17,7 @@
 import type { IDisposable, IWorkbookData, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
-import { FUniver, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FUniver, IUniverInstanceService, LifecycleService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
 import { filter, take } from 'rxjs';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -131,7 +131,8 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
     }
 
     override _initialize(): void {
-        this._lifecycleService.lifecycle$.pipe(filter((stage) => stage > 0), take(1)).subscribe(() => {
+        const lifecycleService = this._injector.get(LifecycleService);
+        lifecycleService.lifecycle$.pipe(filter((stage) => stage > 0), take(1)).subscribe(() => {
             this._init();
         });
     }

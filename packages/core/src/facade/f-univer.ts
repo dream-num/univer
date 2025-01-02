@@ -58,15 +58,13 @@ export class FUniver extends FBase {
     }
 
     constructor(
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
-        super();
-    }
+        super(_injector);
 
-    override _initialize(): void {
         this.disposeWithMe(
             this._lifecycleService.lifecycle$.subscribe((stage) => {
                 this.fireEvent(this.Event.LifeCycleChanged, { stage });

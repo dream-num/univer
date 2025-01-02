@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@wendellhu/redi';
 import { Disposable } from '../shared';
 
 /**
@@ -24,7 +25,9 @@ import { Disposable } from '../shared';
 export abstract class FBase extends Disposable {
     private static _constructorQueue: Array<() => void> = [];
 
-    constructor() {
+    constructor(
+        protected _injector: Injector
+    ) {
         super();
         // eslint-disable-next-line ts/no-this-alias
         const self = this;

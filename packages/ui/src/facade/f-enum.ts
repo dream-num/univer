@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import { ColorBuilder } from '@univerjs/core';
-import { FWorkbook } from '@univerjs/sheets/facade';
+import { FEnum } from '@univerjs/core';
+import { BuiltInUIPart } from '@univerjs/ui';
 
-export interface IFWorkbookConditionalFormattingMixin {
-    /**
-     * @deprecated use `univerAPI.newColor()` as instead.
-     */
-    newColor(): ColorBuilder;
+interface IFUIEnumMixin {
+    get BuiltInUIPart(): typeof BuiltInUIPart;
 }
 
-export class FWorkbookConditionalFormattingMixin extends FWorkbook implements IFWorkbookConditionalFormattingMixin {
-    override newColor(): ColorBuilder {
-        return new ColorBuilder();
-    }
+export class FUIEnum extends FEnum implements IFUIEnumMixin {
+    override get BuiltInUIPart(): typeof BuiltInUIPart {
+        return BuiltInUIPart;
+    };
 }
 
-FWorkbook.extend(FWorkbookConditionalFormattingMixin);
-declare module '@univerjs/sheets/facade' {
+FEnum.extend(FUIEnum);
+
+declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookConditionalFormattingMixin { }
+    interface FEnum extends IFUIEnumMixin {}
 }

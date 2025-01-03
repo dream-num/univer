@@ -20,13 +20,13 @@ import type { CommandListener, IExecutionOptions } from '../services/command/com
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { Workbook } from '../sheets/workbook';
-import type { IDocumentData } from '../types/interfaces';
+import type { IDocumentData, IParagraphStyle, ITextStyle } from '../types/interfaces';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
 import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
 import { UniverInstanceType } from '../common/unit';
-import { RichTextBuilder } from '../docs/data-model/rich-text-builder';
+import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -298,23 +298,6 @@ export class FUniver extends FBaseInitialable {
         return this._injector.createInstance(FHooks);
     }
 
-    /**
-     * Create a new blob.
-     *
-     * @returns {FBlob} The new blob instance
-     * @example
-     * ```ts
-     * const blob = UniverApi.newBlob();
-     * ```
-     */
-    newBlob(): FBlob {
-        return this._injector.createInstance(FBlob);
-    }
-
-    newColor(): ColorBuilder {
-        return new ColorBuilder();
-    }
-
     get Enum() {
         return FEnum.get();
     }
@@ -362,7 +345,112 @@ export class FUniver extends FBaseInitialable {
         return this._injector.createInstance(FUserManager);
     }
 
+    /**
+     * Create a new blob.
+     *
+     * @returns {FBlob} The new blob instance
+     * @example
+     * ```ts
+     * const blob = UniverApi.newBlob();
+     * ```
+     */
+    newBlob(): FBlob {
+        return this._injector.createInstance(FBlob);
+    }
+
+    /**
+     * Create a new color.
+     *
+     * @returns {ColorBuilder} The new color instance
+     * @example
+     * ```ts
+     * const color = UniverApi.newColor();
+     * ```
+     */
+    newColor(): ColorBuilder {
+        return new ColorBuilder();
+    }
+
+    /**
+     * Create a new rich text.
+     *
+     * @returns {RichTextBuilder} The new rich text instance
+     * @example
+     * ```ts
+     * const richText = UniverApi.newRichText();
+     * ```
+     */
     newRichText(data?: IDocumentData): RichTextBuilder {
         return RichTextBuilder.create(data);
+    }
+
+    /**
+     * Create a new rich text value.
+     *
+     * @param data - The rich text data
+     * @returns {RichTextValue} The new rich text value instance
+     * @example
+     * ```ts
+     * const richTextValue = UniverApi.newRichTextValue();
+     * ```
+     */
+    newRichTextValue(data: IDocumentData): RichTextValue {
+        return RichTextValue.create(data);
+    }
+
+    /**
+     * Create a new paragraph style.
+     *
+     * @param style - The paragraph style
+     * @returns {ParagraphStyleBuilder} The new paragraph style instance
+     * @example
+     * ```ts
+     * const paragraphStyle = UniverApi.newParagraphStyle();
+     * ```
+     */
+    newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {
+        return ParagraphStyleBuilder.create(style);
+    }
+
+    /**
+     * Create a new paragraph style value.
+     *
+     * @param style - The paragraph style
+     * @returns {ParagraphStyleValue} The new paragraph style value instance
+     * @example
+     * ```ts
+     * const paragraphStyleValue = UniverApi.newParagraphStyleValue();
+     * ```
+     */
+    newParagraphStyleValue(style?: IParagraphStyle): ParagraphStyleValue {
+        return ParagraphStyleValue.create(style);
+    }
+
+    /**
+     * Create a new text style.
+     *
+     * @param style - The text style
+     * @returns {TextStyleBuilder} The new text style instance
+     * @example
+     * ```ts
+     * const textStyle = UniverApi.newTextStyle();
+     * ```
+     */
+    newTextStyle(style?: ITextStyle): TextStyleBuilder {
+        return TextStyleBuilder.create(style);
+    }
+
+    /**
+     * Create a new text style value.
+     *
+     * @param style - The text style
+     * @returns {TextStyleValue} The new text style value instance
+     * @example
+     * ```ts
+     * const textStyleValue = UniverApi.newTextStyleValue();
+     * ```
+     */
+    newTextStyleValue(style?: ITextStyle): TextStyleValue {
+        return TextStyleValue.create(style);
     }
 }

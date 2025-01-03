@@ -26,6 +26,11 @@ import { FBase } from './f-base';
 
 export class FEnum extends FBase {
     static _intance: FEnum | null;
+
+    constructor() {
+        super();
+    }
+
     static get() {
         if (this._intance) {
             return this._intance;

@@ -50,12 +50,12 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
             const target = event.target as Node;
 
             if (!triggerRef.current?.contains(target) && !overlayRef.current?.contains(target)) {
-                // As this function is a callback of a native event (not synthentic event of React) listener,
-                // calling updateShow() immediately will cause the toolbar button removed from the DOM
-                // in a synchronous way.
+                // As this function listens to mousedown event, while the Button components listens to
+                // click event, we can anticapte this event callback will be triggered first.
+                // If we hide the Dropdown in a synchronous way, the button's callback will never be triggered.
                 // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
                 // in a nested dropdown.
-                setTimeout(() => updateShow(false), 100);
+                setTimeout(() => updateShow(false), 200);
             }
         };
 

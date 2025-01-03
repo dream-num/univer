@@ -55,7 +55,7 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
                 // in a synchronous way.
                 // TODO: @jikkai: This is a temp fix. A more property fix would be detecting if the target is
                 // in a wrapped dropdown.
-                setTimeout(() => updateShow(false), 200);
+                setTimeout(() => updateShow(false), 100);
             }
         };
 

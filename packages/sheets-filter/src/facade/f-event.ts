@@ -29,7 +29,7 @@ export interface IFSheetFilterEventMixin {
      *
      * @example
      * ```typescript
-     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (event) => {
+     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
      * });
      * ```
@@ -41,7 +41,7 @@ export interface IFSheetFilterEventMixin {
      *
      * @example
      * ```typescript
-     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (event) => {
+     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
      * });
      * ```
@@ -53,7 +53,7 @@ export interface IFSheetFilterEventMixin {
      *
      * @example
      * ```typescript
-     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (event) => {
+     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
      *   const { workbook, worksheet } = params;
      * });
      * ```
@@ -65,7 +65,7 @@ export interface IFSheetFilterEventMixin {
      *
      * @example
      * ```typescript
-     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (event) => {
+     * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
      *   const { workbook, worksheet } = params;
      * });
      * ```

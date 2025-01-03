@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DropdownContext } from './DropdownContext';
 
 interface IDropdownProviderProps {
@@ -33,26 +33,35 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
     const isControlled = visible !== undefined;
     const show = isControlled ? visible : internalShow;
 
-    const updateShow = (newShow: boolean) => {
+    const updateShow = useCallback((newShow: boolean) => {
         if (disabled) return;
 
         if (!isControlled) {
             setInternalShow(newShow);
         }
         onVisibleChange?.(newShow);
-    };
+    }, [disabled, isControlled, onVisibleChange]);
 
     useEffect(() => {
+        // If the Dropdown is not visible, we do not add event listeners to boost performance.
+        if (!show) return;
+
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
+
             if (!triggerRef.current?.contains(target) && !overlayRef.current?.contains(target)) {
-                updateShow(false);
+                // As this function is a callback of a native event (not synthentic event of React) listener,
+                // calling updateShow() immediately will cause the toolbar button removed from the DOM
+                // in a synchronous way.
+                // TODO: @jikkai: This is a temp fix. A more property fix would be detecting if the target is
+                // in a wrapped dropdown.
+                setTimeout(() => updateShow(false), 200);
             }
         };
 
         window.addEventListener('mousedown', handleClickOutside, true);
         return () => window.removeEventListener('mousedown', handleClickOutside, true);
-    }, []);
+    }, [show, updateShow]);
 
     const contextValue = useMemo(() => ({ show, updateShow, disabled, triggerRef, overlayRef }), [show, disabled]);
 

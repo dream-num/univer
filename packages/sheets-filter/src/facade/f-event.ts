@@ -33,7 +33,7 @@ export interface IFSheetFilterEventMixin {
      * });
      * ```
      */
-    SheetRangeFiltered: 'SheetRangeFiltered';
+    readonly SheetRangeFiltered: 'SheetRangeFiltered';
     /**
      * This event will be emitted beftore the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
@@ -45,7 +45,7 @@ export interface IFSheetFilterEventMixin {
      * });
      * ```
      */
-    SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
+    readonly SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
     /**
      * This event will be emitted when the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
@@ -57,7 +57,7 @@ export interface IFSheetFilterEventMixin {
      * });
      * ```
      */
-    SheetRangeFilterCleared: 'SheetRangeFilterCleared';
+    readonly SheetRangeFilterCleared: 'SheetRangeFilterCleared';
     /**
      * This event will be emitted after the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
@@ -69,26 +69,14 @@ export interface IFSheetFilterEventMixin {
      * });
      * ```
      */
-    SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
+    readonly SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
 }
 
 export class FSheetFilterEventName extends FEventName implements IFSheetFilterEventMixin {
-    override readonly SheetRangeFiltered = 'SheetRangeFiltered' as const;
-    override readonly SheetBeforeRangeFilter = 'SheetBeforeRangeFilter' as const;
-    override readonly SheetRangeFilterCleared = 'SheetRangeFilterCleared' as const;
-    override readonly SheetBeforeRangeFilterClear = 'SheetBeforeRangeFilterClear' as const;
-}
-
-/**
- * The params of SheetRangeFiltered and SheetBeforeRangeFilter events.
- * @param workbook - The corresponding workbook wrapped in {@link FWorkbook}.
- * @param worksheet - The corresponding worksheet wrapped in {@link FWorksheet}.
- * @param col - The column on which the filter criteria is changed.
- * @param criteria - Raw filter criteria.
- */
-export interface ISheetRangeFilteredParams extends IEventBase, Pick<ISetSheetsFilterCriteriaCommandParams, 'criteria' | 'col'> {
-    workbook: FWorkbook;
-    worksheet: FWorksheet;
+    override get SheetBeforeRangeFilter(): 'SheetBeforeRangeFilter' { return 'SheetBeforeRangeFilter'; }
+    override get SheetRangeFiltered(): 'SheetRangeFiltered' { return 'SheetRangeFiltered'; }
+    override get SheetRangeFilterCleared(): 'SheetRangeFilterCleared' { return 'SheetRangeFilterCleared'; };
+    override get SheetBeforeRangeFilterClear(): 'SheetBeforeRangeFilterClear' { return 'SheetBeforeRangeFilterClear'; }
 }
 
 /**

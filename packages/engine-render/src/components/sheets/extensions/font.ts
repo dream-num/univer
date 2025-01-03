@@ -17,19 +17,20 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { HorizontalAlign, Range, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { clampRange, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { EXPAND_SIZE_FOR_RENDER_OVERFLOW, FONT_EXTENSION_Z_INDEX } from '../constants';
-import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
+import { getDocsSkeletonPageSize } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -53,9 +54,10 @@ interface IRenderFontContext {
     diffRanges: IRange[];
     spreadsheetSkeleton: SpreadsheetSkeleton;
     overflowRectangle: Nullable<IRange>;
-    cellData: Nullable<{
-        fontCache: Nullable<IFontCacheItem>;
-    }>;
+    cellData: {
+        fontCache?: Nullable<IFontCacheItem>;
+        cellDataInterceptor?: Nullable<ICellDataForSheetInterceptor>;
+    };
     startY: number;
     endY: number;
     startX: number;
@@ -108,6 +110,7 @@ export class Font extends SheetExtension {
             checkOutOfViewBound: checkOutOfViewBound || true,
             diffRanges,
             spreadsheetSkeleton,
+            cellData: {},
         } as IRenderFontContext;
         ctx.save();
 
@@ -205,8 +208,9 @@ export class Font extends SheetExtension {
         const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
         if (!visibleRow || !visibleCol) return true;
 
-        //spreadsheetSkeleton.worksheet.getCell(row, col)
-        if (fontCache.fontRenderExtension?.isSkip) {
+        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        renderFontCtx.cellData.cellDataInterceptor = cellData;
+        if (cellData.fontRenderExtension?.isSkip) {
             return true;
         }
 
@@ -216,7 +220,7 @@ export class Font extends SheetExtension {
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
         renderFontCtx.cellData = { fontCache };
-        this._setFontRenderBounds(renderFontCtx, row, col, fontCache);
+        this._setFontRenderBounds(renderFontCtx, row, col);
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
@@ -228,7 +232,7 @@ export class Font extends SheetExtension {
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, fontCache, 1);
+            this._setFontRenderBounds(renderFontCtx, row, col, 1);
             this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
@@ -239,7 +243,7 @@ export class Font extends SheetExtension {
         renderFontCtx.endX = 0;
         renderFontCtx.endY = 0;
         renderFontCtx.overflowRectangle = null;
-        renderFontCtx.cellData = null;
+        renderFontCtx.cellData = { fontCache: null };
         return false;
     };
 
@@ -321,13 +325,13 @@ export class Font extends SheetExtension {
      * @param col
      * @param fontCache
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontsConfig: IFontCacheItem, padding = 0) {
+    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
         // https://github.com/dream-num/univer-pro/issues/334
         // When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
-        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = fontsConfig;
+        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = cellData?.fontCache ?? {};
         let horizontalAlignOverFlow = horizontalAlign;
         if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
             if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
@@ -336,9 +340,10 @@ export class Font extends SheetExtension {
                 horizontalAlignOverFlow = HorizontalAlign.RIGHT;
             }
         }
-
-        const rightOffset = cellData?.fontCache?.fontRenderExtension?.rightOffset ?? 0;
-        const leftOffset = cellData?.fontCache?.fontRenderExtension?.leftOffset ?? 0;
+        // const cellDataForInterceptor = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        const cellDataInterceptor = cellData.cellDataInterceptor;
+        const rightOffset = cellDataInterceptor?.fontRenderExtension?.rightOffset ?? 0;
+        const leftOffset = cellDataInterceptor?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;
 
         if (vertexAngle === 0) {

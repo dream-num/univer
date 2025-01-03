@@ -16,7 +16,7 @@
 
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
 import { FWorkbook as FWorkbookBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';

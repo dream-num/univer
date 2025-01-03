@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DropdownContext } from './DropdownContext';
 
 interface IDropdownProviderProps {
@@ -33,26 +33,35 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
     const isControlled = visible !== undefined;
     const show = isControlled ? visible : internalShow;
 
-    const updateShow = (newShow: boolean) => {
+    const updateShow = useCallback((newShow: boolean) => {
         if (disabled) return;
 
         if (!isControlled) {
             setInternalShow(newShow);
         }
         onVisibleChange?.(newShow);
-    };
+    }, [disabled, isControlled, onVisibleChange]);
 
     useEffect(() => {
+        // If the Dropdown is not visible, we do not add event listeners to boost performance.
+        if (!show) return;
+
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
+
             if (!triggerRef.current?.contains(target) && !overlayRef.current?.contains(target)) {
-                updateShow(false);
+                // As this function listens to mousedown event, while the Button components listens to
+                // click event, we can anticapte this event callback will be triggered first.
+                // If we hide the Dropdown in a synchronous way, the button's callback will never be triggered.
+                // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
+                // in a nested dropdown.
+                requestAnimationFrame(() => updateShow(false));
             }
         };
 
-        window.addEventListener('mousedown', handleClickOutside, true);
-        return () => window.removeEventListener('mousedown', handleClickOutside, true);
-    }, []);
+        window.addEventListener('pointerup', handleClickOutside);
+        return () => window.removeEventListener('pointerup', handleClickOutside);
+    }, [show, updateShow]);
 
     const contextValue = useMemo(() => ({ show, updateShow, disabled, triggerRef, overlayRef }), [show, disabled]);
 

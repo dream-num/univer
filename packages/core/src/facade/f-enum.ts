@@ -26,19 +26,19 @@ import { DataValidationType } from '../types/enum/data-validation-type';
 import { FBase } from './f-base';
 
 export class FEnum extends FBase {
-    static _intance: FEnum | null;
+    static _instance: FEnum | null;
 
     constructor() {
         super();
     }
 
     static get() {
-        if (this._intance) {
-            return this._intance;
+        if (this._instance) {
+            return this._instance;
         }
 
         const instance = new FEnum();
-        this._intance = instance;
+        this._instance = instance;
         return instance;
     }
 

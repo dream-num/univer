@@ -26,12 +26,14 @@ import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
-import { FBaseInitialable } from './f-base';
+import { createFBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
+
+const FBaseInitialable = createFBaseInitialable();
 
 export class FUniver extends FBaseInitialable {
     /**

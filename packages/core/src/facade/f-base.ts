@@ -40,36 +40,40 @@ export abstract class FBase extends Disposable {
     }
 }
 
-export class FBaseInitialable extends Disposable {
-    private static _constructorQueue: Array<(_injector: Injector) => void> = [];
-    constructor(
-        protected _injector: Injector
-    ) {
-        super();
-        // eslint-disable-next-line ts/no-this-alias
-        const self = this;
-        FBaseInitialable._constructorQueue.forEach(function (fn) {
-            fn.apply(self, [_injector]);
-        });
+export function createFBaseInitialable() {
+    class FBaseInitialable extends Disposable {
+        private static _constructorQueue: Array<(_injector: Injector) => void> = [];
+        constructor(
+            protected _injector: Injector
+        ) {
+            super();
+            // eslint-disable-next-line ts/no-this-alias
+            const self = this;
+            FBaseInitialable._constructorQueue.forEach(function (fn) {
+                fn.apply(self, [_injector]);
+            });
+        }
+
+        _initialize(injector: Injector) {}
+
+        static extend(source: any): void {
+            Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+                if (name === '_initialize') {
+                    FBaseInitialable._constructorQueue.push(source.prototype._initialize);
+                } else if (name !== 'constructor') {
+                    // @ts-ignore
+                    this.prototype[name] = source.prototype[name];
+                }
+            });
+
+            Object.getOwnPropertyNames(source).forEach((name) => {
+                if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                    // @ts-ignore
+                    this[name] = source[name];
+                }
+            });
+        }
     }
 
-    _initialize(injector: Injector) {}
-
-    static extend(source: any): void {
-        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
-            if (name === '_initialize') {
-                FBaseInitialable._constructorQueue.push(source.prototype._initialize);
-            } else if (name !== 'constructor') {
-                // @ts-ignore
-                this.prototype[name] = source.prototype[name];
-            }
-        });
-
-        Object.getOwnPropertyNames(source).forEach((name) => {
-            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
-                // @ts-ignore
-                this[name] = source[name];
-            }
-        });
-    }
+    return FBaseInitialable;
 }

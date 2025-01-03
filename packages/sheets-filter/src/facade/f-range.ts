@@ -32,7 +32,8 @@ export interface IFRangeFilter {
      * @example
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();
-     * const worksheet = workbook.getActiveWorksheet();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getRange('A1:D14').createFilter();
      * ```
      */
     createFilter(this: FRange): FFilter | null;
@@ -41,6 +42,13 @@ export interface IFRangeFilter {
      *
      * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
+     *
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getFilter();
+     * ````
      */
     getFilter(): FFilter | null;
 }

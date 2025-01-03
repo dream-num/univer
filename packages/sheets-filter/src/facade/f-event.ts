@@ -19,11 +19,8 @@ import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName, FUniver, ICommandService } from '@univerjs/core';
-
 import { ClearSheetsFilterCriteriaCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { FSheetEventName } from '@univerjs/sheets/facade';
-
-// TODO: add js comments for the following API
 
 export interface IFSheetFilterEventMixin {
     /**

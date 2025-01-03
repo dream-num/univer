@@ -44,7 +44,6 @@ import type {
     Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
-import { debug } from 'node:console';
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -1025,7 +1024,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._rowHeightAccumulation.length;
     }
 
-    getOverflowPosition(
+    /**
+     * Called by _calculateOverflowCell in a render frame.
+     * @param contentSize
+     * @param horizontalAlign
+     * @param row
+     * @param column
+     * @param columnCount
+     */
+    _getOverflowPosition(
         contentSize: Required<ISize>,
         horizontalAlign: HorizontalAlign,
         row: number,
@@ -1610,13 +1617,15 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Calculate the overflow of cell text. If there is no value on either side of the cell,
-     * the text content of this cell can be drawn to both sides, not limited by the cell's width.
-     * Overflow on the left or right is aligned according to the text's horizontal alignment.
+     * Calculate the overflow of cell text and then set to _overflowCache.
+     * Called by _setFontStylesCache in a render frame.
      */
     // eslint-disable-next-line complexity, max-lines-per-function
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem): boolean {
         // wrap and angle handler
+        // If there is no value on either side of the cell, the text content of this cell can be drawn to both sides, not limited by the cell's width.
+        // Overflow on the left or right is aligned according to the text's horizontal alignment.
+
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
         const cell = this._cellData.getValue(row, column);
         const { t: cellValueType = CellValueType.STRING } = cell || {};
@@ -1672,7 +1681,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
             }
 
-            const position = this.getOverflowPosition(contentSize, horizontalAlignPos, row, column, this.getColumnCount());
+            const position = this._getOverflowPosition(contentSize, horizontalAlignPos, row, column, this.getColumnCount());
 
             const { startColumn, endColumn } = position;
 
@@ -1704,7 +1713,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return true;
             }
 
-            const { startColumn, endColumn } = this.getOverflowPosition(
+            const { startColumn, endColumn } = this._getOverflowPosition(
                 contentSize,
                 horizontalAlignPos,
                 row,
@@ -1845,7 +1854,16 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    //eslint-disable-next-line complexity
+    /**
+     * Call by getOverflowPosition in a render frame.
+     * @param row
+     * @param startColumn
+     * @param endColumn
+     * @param contentWidth
+     * @param horizontalAlign
+     * @returns number
+     */
+    // eslint-disable-next-line complexity
     private _getOverflowBound(
         row: number,
         startColumn: number,
@@ -1859,6 +1877,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this.worksheet.getCell(row, column);
+                // const cell = this._cellRenderingData.getValue(row, column);
                 if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
@@ -1888,6 +1907,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this.worksheet.getCell(row, column);
+            // const cell = this._cellRenderingData.getValue(row, column);
             if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
@@ -2160,6 +2180,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * pro/issues/344
+     *
+     * Call in a frame.
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
     private _setMergeBorderProps(type: BORDER_LTRB, cache: IStylesCache, mergeRange: IRange): void {
@@ -2201,7 +2223,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 row = i;
             }
 
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this._cellRenderingData.getValue(row, column);
             if (!cell) {
                 isAddBorders = false;
                 break;

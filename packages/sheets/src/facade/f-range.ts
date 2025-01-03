@@ -335,8 +335,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
-     * @param value
+     * Set new value for current cell, first cell in this range.
+     * @param {CellValue | ICellData} value The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      */
     setValue(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);
@@ -356,8 +356,8 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
-     * @param value
+     * Set new value for current cell, first cell in this range.
+     * @param {CellValue | ICellData} value  The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      */
     setValueForCell(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);

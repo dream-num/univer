@@ -20,13 +20,13 @@ import type { CommandListener, IExecutionOptions } from '../services/command/com
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { Workbook } from '../sheets/workbook';
-import type { IDocumentData, IParagraphStyle, ITextStyle } from '../types/interfaces';
+import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
 import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
 import { UniverInstanceType } from '../common/unit';
-import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
+import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -452,5 +452,9 @@ export class FUniver extends FBaseInitialable {
      */
     newTextStyleValue(style?: ITextStyle): TextStyleValue {
         return TextStyleValue.create(style);
+    }
+
+    newTextDecoration(decoration?: ITextDecoration): TextDecorationBuilder {
+        return new TextDecorationBuilder(decoration);
     }
 }

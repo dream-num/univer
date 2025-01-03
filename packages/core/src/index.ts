@@ -33,6 +33,7 @@ export {
 } from './common/const';
 export * from './common/di';
 export { shallowEqual } from './common/equal';
+export { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from './docs/data-model/rich-text-builder';
 export { CanceledError, CustomCommandExecutionError } from './common/error';
 export { throttle } from './common/function';
 export type { IAsyncInterceptor, ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';

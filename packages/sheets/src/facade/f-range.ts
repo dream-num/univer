@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type { CellValue, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, RichTextValue, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
@@ -103,14 +103,6 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Return first cell model data in this range
-     * @returns The cell model data
-     */
-    getCellData(): ICellData | null {
-        return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
-    }
-
-    /**
      * Return range whether this range is merged
      * @returns if true is merged
      */
@@ -122,7 +114,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Return first cell style data in this range
-     * @returns The cell style data
+     * @returns {IStyleData | null} The cell style data
      */
     getCellStyleData(): IStyleData | null {
         const cell = this.getCellData();
@@ -136,7 +128,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the value of the cell at the start of this range.
-     * @returns The value of the cell.
+     * @returns {CellValue | null} The value of the cell.
      */
     getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
@@ -145,7 +137,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the rectangular grid of values for this range.
      * Returns a two-dimensional array of values, indexed by row, then by column.
-     * @returns A two-dimensional array of values.
+     * @returns {Nullable<CellValue>[][]} A two-dimensional array of values.
      */
     getValues(): Nullable<CellValue>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
@@ -164,10 +156,26 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the cell data for the cells in the range.
-     * @returns A two-dimensional array of cell data.
+     * Return first cell model data in this range
+     * @returns {ICellData | null} The cell model data
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getCellData()
+     * ```
      */
-    getCellDataGrid(): Nullable<ICellData>[][] {
+    getCellData(): ICellData | null {
+        return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+    }
+
+    /**
+     * Returns the cell data for the cells in the range.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getCellDatas()
+     * ```
+     */
+    getCellDatas(): Nullable<ICellData>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Nullable<ICellData>[][] = [];
 
@@ -182,8 +190,74 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * @deprecated use `getCellDatas` instead.
+     */
+    getCellDataGrid(): Nullable<ICellData>[][] {
+        return this.getCellDatas();
+    }
+
+    /**
+     * Returns the rich text value for the cell at the start of this range.
+     * @returns {Nullable<RichTextValue>} The rich text value
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getRichTextValue()
+     * ```
+     */
+    getRichTextValue(): Nullable<RichTextValue> {
+        const data = this.getCellData();
+        if (data?.p) {
+            return new RichTextValue(data.p);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the rich text value for the cells in the range.
+     * @returns {Nullable<RichTextValue>[][]} A two-dimensional array of RichTextValue objects.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getRichTextValues()
+     * ```
+     */
+    getRichTextValues(): Nullable<RichTextValue>[][] {
+        const dataGrid = this.getCellDataGrid();
+        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
+    }
+
+    /**
+     * Returns the value and rich text value for the cell at the start of this range.
+     * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getValueAndRichTextValue()
+     * ```
+     */
+    getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
+        const cell = this.getCellData();
+        return cell?.p ? new RichTextValue(cell.p) : cell?.v;
+    }
+
+    /**
+     * Returns the value and rich text value for the cells in the range.
+     * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getValueAndRichTextValues()
+     * ```
+     */
+    getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
+        const dataGrid = this.getCellDatas();
+        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : data?.v));
+    }
+
+    /**
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.
-     * @returns A two-dimensional array of formulas in string format.
+     * @returns {string[][]} A two-dimensional array of formulas in string format.
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getFormulas()
+     * ```
      */
     getFormulas(): string[][] {
         const formulas: string[][] = [];
@@ -278,6 +352,81 @@ export class FRange extends FBaseInitialable {
             value: realValue,
         });
 
+        return this;
+    }
+
+    /**
+     * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * @param value
+     */
+    setValueForCell(value: CellValue | ICellData): FRange {
+        const realValue = covertCellValue(value);
+
+        if (!realValue) {
+            throw new Error('Invalid value');
+        }
+
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: {
+                startColumn: this._range.startColumn,
+                startRow: this._range.startRow,
+                endColumn: this._range.endColumn,
+                endRow: this._range.endRow,
+            },
+            value: realValue,
+        });
+
+        return this;
+    }
+
+    /**
+     * Set the rich text value for the cell at the start of this range.
+     * @param {RichTextValue | IDocumentData} value The rich text value
+     * @returns {FRange} The range
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setRichTextValueForCell(new RichTextValue())
+     * ```
+     */
+    setRichTextValueForCell(value: RichTextValue | IDocumentData): FRange {
+        const p = value instanceof RichTextValue ? value.getData() : value;
+        const params: ISetRangeValuesCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: {
+                startColumn: this._range.startColumn,
+                startRow: this._range.startRow,
+                endColumn: this._range.endColumn,
+                endRow: this._range.endRow,
+            },
+            value: { p },
+        };
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
+        return this;
+    }
+
+    /**
+     * Set the rich text value for the cells in the range.
+     * @param {RichTextValue[][]} values The rich text value
+     * @returns {FRange} The range
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setRichTextValues([[new RichTextValue()]])
+     * ```
+     */
+    setRichTextValues(values: (RichTextValue | IDocumentData)[][]): FRange {
+        const cellDatas = values.map((row) => row.map((item) => item && { p: item instanceof RichTextValue ? item.getData() : item }));
+        const realValue = covertCellValues(cellDatas, this._range);
+
+        const params: ISetRangeValuesCommandParams = {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            value: realValue,
+        };
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, params);
         return this;
     }
 

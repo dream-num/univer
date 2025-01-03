@@ -20,21 +20,35 @@ import { SetSheetFilterRangeCommand, SheetsFilterService } from '@univerjs/sheet
 import { FRange } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
+// TODO: add jsdoc comments for the following API
+
 export interface IFRangeFilter {
     /**
      * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
      *
-     * @async
-     *
      * @return The interface class to handle the filter. If the worksheet already has a filter,
      * this method would return `null`.
+     *
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getRange('A1:D14').createFilter();
+     * ```
      */
     createFilter(this: FRange): FFilter | null;
     /**
-     * Get the filter for the current range's worksheet.
+     * Get the filter for the current range's worksheet. Normally, you can directly call `getFilter` on {@link FWorksheet}.
      *
      * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
+     *
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getRange('A1:D14').getFilter();
+     * ````
      */
     getFilter(): FFilter | null;
 }
@@ -78,5 +92,5 @@ export class FRangeFilter extends FRange implements IFRangeFilter {
 FRange.extend(FRangeFilter);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeFilter {}
+    interface FRange extends IFRangeFilter { }
 }

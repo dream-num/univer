@@ -272,6 +272,14 @@ export interface ICellMarks {
     isSkip?: boolean;
 }
 
+export interface IFontRenderExtension {
+    leftOffset?: number;
+    rightOffset?: number;
+    topOffset?: number;
+    downOffset?: number;
+    isSkip?: boolean;
+}
+
 // TODO@weird94: should be moved outside of the core package
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
@@ -286,13 +294,10 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     coverable?: boolean;
     linkUrl?: string;
     linkId?: string;
-    fontRenderExtension?: {
-        leftOffset?: number;
-        rightOffset?: number;
-        topOffset?: number;
-        downOffset?: number;
-        isSkip?: boolean;
-    };
+    fontRenderExtension?: IFontRenderExtension;
+    // use for save the theme style, it  can not be composed directly
+    themeStyle?: Nullable<IStyleData>;
+
 }
 
 export function isICellData(value: any): value is ICellData {

@@ -15,6 +15,8 @@
  */
 
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
+import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
+import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
@@ -69,4 +71,6 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     SetWorksheetDefaultStyleMutation.id,
     SetRowDataMutation.id,
     SetColDataMutation.id,
+    SetWorksheetRangeThemeStyleMutation.id,
+    DeleteWorksheetRangeThemeStyleMutation.id,
 ];

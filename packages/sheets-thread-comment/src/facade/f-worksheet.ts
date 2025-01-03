@@ -33,6 +33,8 @@ export interface IFWorksheetCommentMixin {
      * Clear all comments in the current sheet
      */
     clearComments(): Promise<boolean>;
+
+    getCommentById(commentId: string): FThreadComment | undefined;
 }
 
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
@@ -61,6 +63,14 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
                 callback(params);
             }
         });
+    }
+
+    override getCommentById(commentId: string): FThreadComment | undefined {
+        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
+        const comment = sheetsTheadCommentModel.getComment(this._workbook.getUnitId(), this._worksheet.getSheetId(), commentId);
+        if (comment) {
+            return this._injector.createInstance(FThreadComment, comment);
+        }
     }
 }
 

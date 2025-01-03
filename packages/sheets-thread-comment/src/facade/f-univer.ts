@@ -14,15 +14,208 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
-import { FUniver, ICommandService } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, Injector } from '@univerjs/core';
+import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
+import { FUniver, ICommandService, RichTextValue } from '@univerjs/core';
+import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { FTheadCommentValue } from './f-thread-comment';
 
-export interface ICommentMixin {
+export interface IFUniverCommentMixin {
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentAdded, () => {})` as instead
+     */
+    onCommentAdded(callback: (event: ISheetCommentAddEvent) => void): IDisposable;
 
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentUpdated, () => {})` as instead
+     */
+    onCommentUpdated(callback: (event: ISheetCommentUpdateEvent) => void): IDisposable;
+
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentDeleted, () => {})` as instead
+     */
+    onCommentDeleted(callback: (event: ISheetCommentDeleteEvent) => void): IDisposable;
+
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentResolved, () => {})` as instead
+     */
+    onCommentResolved(callback: (event: ISheetCommentResolveEvent) => void): IDisposable;
 }
 
-export class FCommentUniver extends FUniver {
+export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin {
+    // eslint-disable-next-line complexity
+    private _handleCommentCommand(commandInfo: ICommandInfo): void {
+        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+        if (!params) return;
+        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        switch (commandInfo.id) {
+            case AddCommentCommand.id: {
+                const addParams = commandInfo.params as IAddCommentCommandParams;
+                const { comment } = addParams;
+                const threadComment = worksheet.getRange(comment.ref).getComment();
+                if (threadComment) {
+                    this.fireEvent(this.Event.CommentAdded, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()?.getRow() ?? 0,
+                        col: threadComment.getRange()?.getColumn() ?? 0,
+                        comment: threadComment,
+                    });
+                }
+                break;
+            }
+            case UpdateCommentCommand.id: {
+                const updateParams = commandInfo.params as IUpdateCommentCommandParams;
+                const { commentId } = updateParams.payload;
+                const threadComment = worksheet.getCommentById(commentId);
+                if (threadComment) {
+                    this.fireEvent(this.Event.CommentUpdated, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()?.getRow() ?? 0,
+                        col: threadComment.getRange()?.getColumn() ?? 0,
+                        comment: threadComment,
+                    });
+                }
+                break;
+            }
+            case DeleteCommentCommand.id: {
+                const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
+                const { commentId } = deleteParams;
+                this.fireEvent(this.Event.CommentDeleted, {
+                    workbook,
+                    worksheet,
+                    commentId,
+                });
+                break;
+            }
+            case ResolveCommentCommand.id: {
+                const resolveParams = commandInfo.params as IResolveCommentCommandParams;
+                const { commentId, resolved } = resolveParams;
+                const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
+                if (threadComment) {
+                    this.fireEvent(this.Event.CommentResolved, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()!.getRow() ?? 0,
+                        col: threadComment.getRange()!.getColumn() ?? 0,
+                        comment: threadComment,
+                        resolved,
+                    });
+                }
+                break;
+            }
+        }
+    }
+
+    // eslint-disable-next-line complexity
+    private _handleBeforeCommentCommand(commandInfo: ICommandInfo): void {
+        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+        if (!params) return;
+        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        switch (commandInfo.id) {
+            case AddCommentCommand.id: {
+                const addParams = commandInfo.params as IAddCommentCommandParams;
+                const { comment } = addParams;
+                const activeRange = worksheet.getActiveRange();
+                if (!activeRange) return;
+                this.fireEvent(this.Event.BeforeCommentAdd, {
+                    workbook,
+                    worksheet,
+                    row: activeRange.getRow() ?? 0,
+                    col: activeRange.getColumn() ?? 0,
+                    comment: FTheadCommentValue.create(comment),
+                });
+                break;
+            }
+            case UpdateCommentCommand.id: {
+                const updateParams = commandInfo.params as IUpdateCommentCommandParams;
+                const { commentId, text } = updateParams.payload;
+                const threadComment = worksheet.getCommentById(commentId);
+                if (threadComment) {
+                    this.fireEvent(this.Event.BeforeCommentUpdate, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()?.getRow() ?? 0,
+                        col: threadComment.getRange()?.getColumn() ?? 0,
+                        comment: threadComment,
+                        newContent: RichTextValue.createByBody(text),
+                    });
+                }
+                break;
+            }
+            case DeleteCommentCommand.id: {
+                const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
+                const { commentId } = deleteParams;
+                const threadComment = worksheet.getCommentById(commentId);
+                if (threadComment) {
+                    this.fireEvent(this.Event.BeforeCommentDeleted, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()?.getRow() ?? 0,
+                        col: threadComment.getRange()?.getColumn() ?? 0,
+                        comment: threadComment,
+                    });
+                }
+                break;
+            }
+            case ResolveCommentCommand.id: {
+                const resolveParams = commandInfo.params as IResolveCommentCommandParams;
+                const { commentId, resolved } = resolveParams;
+                const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
+                if (threadComment) {
+                    this.fireEvent(this.Event.BeforeCommentResolve, {
+                        workbook,
+                        worksheet,
+                        row: threadComment.getRange()!.getRow() ?? 0,
+                        col: threadComment.getRange()!.getColumn() ?? 0,
+                        comment: threadComment,
+                        resolved,
+                    });
+                }
+                break;
+            }
+        }
+    }
+
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
+        this.disposeWithMe(
+            commandService.onCommandExecuted((commandInfo) => {
+                this._handleCommentCommand(commandInfo);
+            })
+        );
+
+        this.disposeWithMe(
+            commandService.beforeCommandExecuted((commandInfo) => {
+                this._handleBeforeCommentCommand(commandInfo);
+            })
+        );
     }
+}
+
+FUniver.extend(FUniverCommentMixin);
+
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUniverCommentMixin {}
 }

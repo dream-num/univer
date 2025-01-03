@@ -22,8 +22,8 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 
-export class FTheadCommentBuilder {
-    private _comment: IThreadComment = {
+export class FTheadCommentValue {
+    protected _comment: IThreadComment = {
         id: generateRandomId(),
         ref: '',
         threadId: '',
@@ -35,8 +35,44 @@ export class FTheadCommentBuilder {
         subUnitId: '',
     };
 
-    create(): FTheadCommentBuilder {
-        return new FTheadCommentBuilder();
+    static create(comment?: IThreadComment): FTheadCommentValue {
+        return new FTheadCommentValue(comment);
+    }
+
+    constructor(comment?: IThreadComment) {
+        if (comment) {
+            this._comment = comment;
+        }
+    }
+
+    get personId(): string {
+        return this._comment.personId;
+    }
+
+    get dT(): string {
+        return this._comment.dT;
+    }
+
+    get content(): RichTextValue {
+        return RichTextValue.createByBody(this._comment.text);
+    }
+
+    get id(): string {
+        return this._comment.id;
+    }
+
+    get threadId(): string {
+        return this._comment.threadId;
+    }
+
+    copy(): FTheadCommentBuilder {
+        return FTheadCommentBuilder.create(this._comment);
+    }
+}
+
+export class FTheadCommentBuilder extends FTheadCommentValue {
+    static override create(comment?: IThreadComment): FTheadCommentBuilder {
+        return new FTheadCommentBuilder(comment);
     }
 
     setContent(content: IDocumentBody | RichTextValue): FTheadCommentBuilder {
@@ -66,26 +102,6 @@ export class FTheadCommentBuilder {
     setThreadId(threadId: string): FTheadCommentBuilder {
         this._comment.threadId = threadId;
         return this;
-    }
-
-    get personId(): string {
-        return this._comment.personId;
-    }
-
-    get dT(): string {
-        return this._comment.dT;
-    }
-
-    get content(): RichTextValue {
-        return RichTextValue.createByBody(this._comment.text);
-    }
-
-    get id(): string {
-        return this._comment.id;
-    }
-
-    get threadId(): string {
-        return this._comment.threadId;
     }
 
     build(): IThreadComment {

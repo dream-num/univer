@@ -16,10 +16,100 @@
 
 import type { FWorkbook, RichTextValue } from '@univerjs/core';
 import type { FWorksheet } from '@univerjs/sheets/facade';
-import type { FThreadComment } from './f-thread-comment';
+import type { FTheadCommentValue, FThreadComment } from './f-thread-comment';
 import { FEventName } from '@univerjs/core';
 
-const CommentEvent = {
+interface ICommentEventMixin {
+    /**
+     * Comment added event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.CommentAdded, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly CommentAdded: 'CommentAdded';
+
+    /**
+     * Before comment add event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.BeforeCommentAdd, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly BeforeCommentAdd: 'BeforeCommentAdd';
+
+    /**
+     * Comment updated event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.CommentUpdated, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly CommentUpdated: 'CommentUpdated';
+
+    /**
+     * Before comment update event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.BeforeCommentUpdate, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly BeforeCommentUpdate: 'BeforeCommentUpdate';
+
+    /**
+     * Comment deleted event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.CommentDeleted, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly CommentDeleted: 'CommentDeleted';
+
+    /**
+     * Before comment delete event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.BeforeCommentDeleted, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly BeforeCommentDeleted: 'BeforeCommentDeleted';
+
+    /**
+     * Comment resolved event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.CommentResolved, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly CommentResolved: 'CommentResolved';
+
+    /**
+     * Before comment resolve event
+     * @example
+     * ```ts
+     * univerAPI.addEventListener(CommentEvent.BeforeCommentResolve, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    readonly BeforeCommentResolve: 'BeforeCommentResolve';
+}
+
+const CommentEvent: ICommentEventMixin = {
     CommentAdded: 'CommentAdded',
     BeforeCommentAdd: 'BeforeCommentAdd',
 
@@ -34,107 +124,35 @@ const CommentEvent = {
 } as const;
 
 export class FCommentEvent extends FEventName {
-    /**
-     * Comment added event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentAdded, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get CommentAdded(): 'CommentAdded' {
+    override get CommentAdded(): 'CommentAdded' {
         return CommentEvent.CommentAdded;
     }
 
-    /**
-     * Before comment add event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentAdd, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get BeforeCommentAdd(): 'BeforeCommentAdd' {
+    override get BeforeCommentAdd(): 'BeforeCommentAdd' {
         return CommentEvent.BeforeCommentAdd;
     }
 
-    /**
-     * Comment updated event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentUpdated, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get CommentUpdated(): 'CommentUpdated' {
+    override get CommentUpdated(): 'CommentUpdated' {
         return CommentEvent.CommentUpdated;
     }
 
-    /**
-     * Before comment update event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentUpdate, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get BeforeCommentUpdate(): 'BeforeCommentUpdate' {
+    override get BeforeCommentUpdate(): 'BeforeCommentUpdate' {
         return CommentEvent.BeforeCommentUpdate;
     }
 
-    /**
-     * Comment deleted event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentDeleted, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get CommentDeleted(): 'CommentDeleted' {
+    override get CommentDeleted(): 'CommentDeleted' {
         return CommentEvent.CommentDeleted;
     }
 
-    /**
-     * Before comment delete event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentDeleted, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get BeforeCommentDeleted(): 'BeforeCommentDeleted' {
+    override get BeforeCommentDeleted(): 'BeforeCommentDeleted' {
         return CommentEvent.BeforeCommentDeleted;
     }
 
-    /**
-     * Comment resolved event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.CommentResolved, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get CommentResolved(): 'CommentResolved' {
+    override get CommentResolved(): 'CommentResolved' {
         return CommentEvent.CommentResolved;
     }
 
-    /**
-     * Before comment resolve event
-     * @example
-     * ```ts
-     * univerAPI.addEventListener(CommentEvent.BeforeCommentResolve, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get BeforeCommentResolve(): 'BeforeCommentResolve' {
+    override get BeforeCommentResolve(): 'BeforeCommentResolve' {
         return CommentEvent.BeforeCommentResolve;
     }
 }
@@ -147,22 +165,43 @@ export interface ISheetCommentAddEvent {
     comment: FThreadComment;
 }
 
+export interface IBeforeSheetCommentAddEvent {
+    workbook: FWorkbook;
+    worksheet: FWorksheet;
+    row: number;
+    col: number;
+    comment: FTheadCommentValue;
+}
+
 export interface ISheetCommentUpdateEvent {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
     col: number;
     comment: FThreadComment;
-    oldContent: RichTextValue;
-    newContent: RichTextValue;
 }
 
-export interface ISheetCommentDeleteEvent {
+export interface IBeforeSheetCommentUpdateEvent {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
     col: number;
     comment: FThreadComment;
+    newContent: RichTextValue;
+}
+
+export interface IBeforeSheetCommentDeleteEvent {
+    workbook: FWorkbook;
+    worksheet: FWorksheet;
+    row: number;
+    col: number;
+    comment: FThreadComment;
+}
+
+export interface ISheetCommentDeleteEvent {
+    workbook: FWorkbook;
+    worksheet: FWorksheet;
+    commentId: string;
 }
 
 export interface ISheetCommentResolveEvent {
@@ -174,3 +213,25 @@ export interface ISheetCommentResolveEvent {
     resolved: boolean;
 }
 
+export interface ISheetCommentEventConfig {
+    BeforeCommentAdd: IBeforeSheetCommentAddEvent;
+    CommentAdded: ISheetCommentAddEvent;
+
+    BeforeCommentUpdate: IBeforeSheetCommentUpdateEvent;
+    CommentUpdated: ISheetCommentUpdateEvent;
+
+    BeforeCommentDeleted: IBeforeSheetCommentDeleteEvent;
+    CommentDeleted: ISheetCommentDeleteEvent;
+
+    BeforeCommentResolve: ISheetCommentResolveEvent;
+    CommentResolved: ISheetCommentResolveEvent;
+}
+
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEventName extends ICommentEventMixin {
+    }
+
+    interface IEventParamConfig extends ISheetCommentEventConfig {
+    }
+}

@@ -55,12 +55,12 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
                 // If we hide the Dropdown in a synchronous way, the button's callback will never be triggered.
                 // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
                 // in a nested dropdown.
-                setTimeout(() => updateShow(false), 200);
+                requestAnimationFrame(() => updateShow(false));
             }
         };
 
-        window.addEventListener('mousedown', handleClickOutside, true);
-        return () => window.removeEventListener('mousedown', handleClickOutside, true);
+        window.addEventListener('pointerup', handleClickOutside);
+        return () => window.removeEventListener('pointerup', handleClickOutside);
     }, [show, updateShow]);
 
     const contextValue = useMemo(() => ({ show, updateShow, disabled, triggerRef, overlayRef }), [show, disabled]);

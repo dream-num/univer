@@ -1380,25 +1380,76 @@ export class ParagraphStyleBuilder extends ParagraphStyleValue {
         return this;
     }
 
+    /**
+     * Sets the widow control
+     * @param {boolean} value The widow control value
+     * @returns {ParagraphStyleBuilder} The paragraph style builder
+     * @example
+     * ```ts
+     * const style = ParagraphStyleValue.create({ textStyle: { ff: 'Arial', fs: 12, it: 1, bl: 1 } });
+     * const copy = style.copy();
+     * copy.setWidowControl(true);
+     * ```
+     */
     setWidowControl(value: boolean): ParagraphStyleBuilder {
         this._style.widowControl = value ? 1 : 0;
         return this;
     }
 
+    /**
+     * Sets the shading style
+     * @param {IShading} value The shading configuration
+     * @returns {ParagraphStyleBuilder} The paragraph style builder
+     * @example
+     * ```ts
+     * const style = ParagraphStyleValue.create({ textStyle: { ff: 'Arial', fs: 12, it: 1, bl: 1 } });
+     * const copy = style.copy();
+     * copy.setShading({ backgroundColor: '#f0f0f0' });
+     * ```
+     */
     setShading(value: IShading): ParagraphStyleBuilder {
         this._style.shading = value;
         return this;
     }
 
+    /**
+     * Sets whether to suppress hyphenation
+     * @param {boolean} value The suppress hyphenation value
+     * @returns {ParagraphStyleBuilder} The paragraph style builder
+     * @example
+     * ```ts
+     * const style = ParagraphStyleValue.create({ textStyle: { ff: 'Arial', fs: 12, it: 1, bl: 1 } });
+     * const copy = style.copy();
+     * copy.setSuppressHyphenation(true);
+     * ```
+     */
     setSuppressHyphenation(value: boolean): ParagraphStyleBuilder {
         this._style.suppressHyphenation = value ? 1 : 0;
         return this;
     }
 
+    /**
+     * Creates a copy of the current paragraph style builder
+     * @returns {ParagraphStyleBuilder} A new instance of ParagraphStyleBuilder with the same settings
+     * @example
+     * ```ts
+     * const style = ParagraphStyleValue.create({ textStyle: { ff: 'Arial', fs: 12, it: 1, bl: 1 } });
+     * const copy = style.copy();
+     * ```
+     */
     override copy(): ParagraphStyleBuilder {
         return ParagraphStyleBuilder.create(Tools.deepClone(this._style));
     }
 
+    /**
+     * Builds and returns the final paragraph style configuration
+     * @returns {IParagraphStyle} The constructed paragraph style object
+     * @example
+     * ```ts
+     * const style = ParagraphStyleValue.create({ textStyle: { ff: 'Arial', fs: 12, it: 1, bl: 1 } });
+     * const finalStyle = style.build();
+     * ```
+     */
     build(): IParagraphStyle {
         return this.getValue();
     }

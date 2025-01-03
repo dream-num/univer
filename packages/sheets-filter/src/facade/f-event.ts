@@ -30,10 +30,12 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
-    SheetRangeFiltered: 'SheetRangeFiltered';
+    readonly SheetRangeFiltered: 'SheetRangeFiltered';
     /**
      * This event will be emitted beftore the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
@@ -42,10 +44,12 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
-    SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
+    readonly SheetBeforeRangeFilter: 'SheetBeforeRangeFilter';
     /**
      * This event will be emitted when the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
@@ -54,10 +58,12 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
      *   const { workbook, worksheet } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
-    SheetRangeFilterCleared: 'SheetRangeFilterCleared';
+    readonly SheetRangeFilterCleared: 'SheetRangeFilterCleared';
     /**
      * This event will be emitted after the filter on a worksheet is cleared.
      * Type of the event is {@link ISheetRangeFilterClearedEventParams}.
@@ -66,17 +72,19 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
      *   const { workbook, worksheet } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
-    SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
+    readonly SheetBeforeRangeFilterClear: 'SheetBeforeRangeFilterClear';
 }
 
 export class FSheetFilterEventName extends FEventName implements IFSheetFilterEventMixin {
-    override readonly SheetRangeFiltered = 'SheetRangeFiltered' as const;
-    override readonly SheetBeforeRangeFilter = 'SheetBeforeRangeFilter' as const;
-    override readonly SheetRangeFilterCleared = 'SheetRangeFilterCleared' as const;
-    override readonly SheetBeforeRangeFilterClear = 'SheetBeforeRangeFilterClear' as const;
+    override get SheetBeforeRangeFilter(): 'SheetBeforeRangeFilter' { return 'SheetBeforeRangeFilter'; }
+    override get SheetRangeFiltered(): 'SheetRangeFiltered' { return 'SheetRangeFiltered'; }
+    override get SheetRangeFilterCleared(): 'SheetRangeFilterCleared' { return 'SheetRangeFilterCleared'; };
+    override get SheetBeforeRangeFilterClear(): 'SheetBeforeRangeFilterClear' { return 'SheetBeforeRangeFilterClear'; }
 }
 
 /**

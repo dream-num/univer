@@ -473,9 +473,13 @@ export class RichTextValue {
         this._data = data;
     }
 
-    slice(start: number, end: number): RichTextValue {
+    copy(): RichTextBuilder {
+        return RichTextBuilder.create(Tools.deepClone(this._data));
+    }
+
+    slice(start: number, end: number): RichTextBuilder {
         const { body, ...ext } = this._data;
-        return RichTextValue.create({
+        return RichTextBuilder.create({
             ...Tools.deepClone(ext),
             body: getBodySlice(body!, start, end),
         });
@@ -557,17 +561,5 @@ export class RichTextBuilder extends RichTextValue {
     insertParagraph(start?: number): RichTextBuilder {
         // Implementation logic here
         return this;
-    }
-
-    copy(): RichTextBuilder {
-        return RichTextBuilder.create(Tools.deepClone(this._data));
-    }
-
-    override slice(start: number, end: number): RichTextBuilder {
-        const { body, ...ext } = this._data;
-        return RichTextBuilder.create({
-            ...Tools.deepClone(ext),
-            body: getBodySlice(body!, start, end),
-        });
     }
 }

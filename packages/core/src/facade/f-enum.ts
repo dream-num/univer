@@ -17,6 +17,7 @@
 import { UniverInstanceType } from '../common/unit';
 import { CommandType } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
+import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../types/enum';
 import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
 import { DataValidationOperator } from '../types/enum/data-validation-operator';
 import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
@@ -71,5 +72,29 @@ export class FEnum extends FBase {
 
     get CommandType() {
         return CommandType;
+    }
+
+    get BaselineOffset() {
+        return BaselineOffset;
+    }
+
+    get BooleanNumber() {
+        return BooleanNumber;
+    }
+
+    get HorizontalAlign() {
+        return HorizontalAlign;
+    }
+
+    get TextDecoration() {
+        return TextDecoration;
+    }
+
+    get TextDirection() {
+        return TextDirection;
+    }
+
+    get VerticalAlign() {
+        return VerticalAlign;
     }
 }

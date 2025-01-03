@@ -40,25 +40,41 @@ export abstract class FBase extends Disposable {
     }
 }
 
+const InitializerSymbol = Symbol('initializers');
+
+type Initializers = Array<(injector: Injector) => void>;
+
 export class FBaseInitialable extends Disposable {
-    private static _constructorQueue: Array<(_injector: Injector) => void> = [];
+    declare private [InitializerSymbol]: Initializers | undefined;
+
     constructor(
         protected _injector: Injector
     ) {
         super();
+
         // eslint-disable-next-line ts/no-this-alias
         const self = this;
-        FBaseInitialable._constructorQueue.forEach(function (fn) {
-            fn.apply(self, [_injector]);
-        });
+
+        const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
+        if (initializers) {
+            initializers.forEach(function (fn: (_injector: Injector) => void) {
+                fn.apply(self, [_injector]);
+            });
+        }
     }
 
-    _initialize(injector: Injector) {}
+    _initialize(injector: Injector) { }
 
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name === '_initialize') {
-                FBaseInitialable._constructorQueue.push(source.prototype._initialize);
+                let initializers = this.prototype[InitializerSymbol];
+                if (!initializers) {
+                    initializers = [];
+                    this.prototype[InitializerSymbol] = initializers;
+                }
+
+                initializers.push(source.prototype._initialize);
             } else if (name !== 'constructor') {
                 // @ts-ignore
                 this.prototype[name] = source.prototype[name];

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import './f-filter';
-import './f-range';
-import './f-worksheet';
-import './f-enum';
-import './f-event';
+import { FEnum } from '@univerjs/core';
+import { CustomFilterOperator } from '@univerjs/sheets-filter';
 
-export type * from './f-enum';
-export type * from './f-event';
-export { FFilter } from './f-filter';
-export type * from './f-filter';
-export type * from './f-range';
-export type * from './f-worksheet';
+export interface IFSheetsFilterEnumMixin {
+    /** Please refer to {@link CustomFilterOperation}. */
+    CustomFilterOperator: CustomFilterOperator;
+}
+
+export class FSheetsFilterEnumMixin extends FEnum {
+    get CustomFilterOperation(): typeof CustomFilterOperator { return CustomFilterOperator; };
+}
+
+FEnum.extend(FSheetsFilterEnumMixin);
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEnum extends IFSheetsFilterEnumMixin { }
+}
+

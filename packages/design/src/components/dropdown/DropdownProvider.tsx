@@ -53,7 +53,7 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
                 // As this function is a callback of a native event (not synthentic event of React) listener,
                 // calling updateShow() immediately will cause the toolbar button removed from the DOM
                 // in a synchronous way.
-                // TODO: @jikkai: This is a temp fix. A more property fix would be detecting if the target is
+                // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
                 // in a wrapped dropdown.
                 setTimeout(() => updateShow(false), 100);
             }

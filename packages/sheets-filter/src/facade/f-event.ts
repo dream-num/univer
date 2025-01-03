@@ -88,6 +88,18 @@ export class FSheetFilterEventName extends FEventName implements IFSheetFilterEv
 }
 
 /**
+ * The params of SheetRangeFiltered and SheetBeforeRangeFilter events.
+ * @param workbook - The corresponding workbook wrapped in {@link FWorkbook}.
+ * @param worksheet - The corresponding worksheet wrapped in {@link FWorksheet}.
+ * @param col - The column on which the filter criteria is changed.
+ * @param criteria - Raw filter criteria.
+ */
+export interface ISheetRangeFilteredParams extends IEventBase, Pick<ISetSheetsFilterCriteriaCommandParams, 'criteria' | 'col'> {
+    workbook: FWorkbook;
+    worksheet: FWorksheet;
+}
+
+/**
  * The params of SheetRangeFilterCleared and SheetBeforeRangeFilterClear events.
  * @param workbook - The corresponding workbook wrapped in {@link FWorkbook}.
  * @param worksheet - The corresponding worksheet wrapped in {@link FWorksheet}.

@@ -19,9 +19,8 @@ import './f-workbook';
 import './f-worksheet';
 import './f-event';
 
-export { FThreadComment } from './f-thread-comment';
-
-// eslint-disable-next-line perfectionist/sort-exports
+export type * from './f-event';
 export type * from './f-range';
+export type * from './f-thread-comment';
 export type * from './f-workbook';
 export type * from './f-worksheet';

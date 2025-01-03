@@ -15,11 +15,11 @@
  */
 
 import type { ICommandInfo, IDisposable, Injector } from '@univerjs/core';
-import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
 import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerjs/core';
 import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { FTheadCommentValue } from './f-thread-comment';
+import { FTheadCommentBuilder, FTheadCommentValue } from './f-thread-comment';
 
 export interface IFUniverCommentMixin {
     /**
@@ -41,6 +41,16 @@ export interface IFUniverCommentMixin {
      * @deprecated use `univerAPI.addEvent(univerAPI.event.CommentResolved, () => {})` as instead
      */
     onCommentResolved(callback: (event: ISheetCommentResolveEvent) => void): IDisposable;
+
+    /**
+     * create a new thread comment
+     * @return {FTheadCommentBuilder} thead comment builder
+     * @example
+     * ```ts
+     * const comment = univerAPI.newTheadComment().setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * ```
+     */
+    newTheadComment(): FTheadCommentBuilder;
 }
 
 export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin {
@@ -235,6 +245,10 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 this._handleBeforeCommentCommand(commandInfo);
             })
         );
+    }
+
+    override newTheadComment(comment?: IThreadComment): FTheadCommentBuilder {
+        return new FTheadCommentBuilder(comment);
     }
 }
 

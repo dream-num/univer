@@ -20,12 +20,21 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { FFilter } from './f-filter';
 
-// TODO: add jsdoc for the following command, referencing google apps script
-
 export interface IFWorksheetFilter {
     /**
+     * Get the filter for the current worksheet.
      *
+     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
+     * this method would return `null`.
+     *
+     * @example
+     * ```typescript
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const filter = worksheet.getFilter();
+     * ````
      */
+
     getFilter(): FFilter | null;
 }
 

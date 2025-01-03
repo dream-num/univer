@@ -38,7 +38,7 @@ export interface IFRangeFilter {
      */
     createFilter(this: FRange): FFilter | null;
     /**
-     * Get the filter for the current range's worksheet.
+     * Get the filter for the current range's worksheet. Normally, you can directly call `getFilter` on {@link FWorksheet}.
      *
      * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
@@ -47,7 +47,7 @@ export interface IFRangeFilter {
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
-     * const filter = worksheet.getFilter();
+     * const filter = worksheet.getRange('A1:D14').getFilter();
      * ````
      */
     getFilter(): FFilter | null;

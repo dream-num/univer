@@ -60,6 +60,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
 
         switch (commandInfo.id) {
             case AddCommentCommand.id: {
+                if (!this._eventListend(this.Event.CommentAdded)) return;
                 const addParams = commandInfo.params as IAddCommentCommandParams;
                 const { comment } = addParams;
                 const threadComment = worksheet.getRange(comment.ref).getComment();
@@ -75,6 +76,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case UpdateCommentCommand.id: {
+                if (!this._eventListend(this.Event.CommentUpdated)) return;
                 const updateParams = commandInfo.params as IUpdateCommentCommandParams;
                 const { commentId } = updateParams.payload;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -90,6 +92,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case DeleteCommentCommand.id: {
+                if (!this._eventListend(this.Event.CommentDeleted)) return;
                 const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
                 const { commentId } = deleteParams;
                 this.fireEvent(this.Event.CommentDeleted, {
@@ -100,6 +103,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case ResolveCommentCommand.id: {
+                if (!this._eventListend(this.Event.CommentResolved)) return;
                 const resolveParams = commandInfo.params as IResolveCommentCommandParams;
                 const { commentId, resolved } = resolveParams;
                 const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
@@ -134,6 +138,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
 
         switch (commandInfo.id) {
             case AddCommentCommand.id: {
+                if (!this._eventListend(this.Event.BeforeCommentAdd)) return;
                 const addParams = commandInfo.params as IAddCommentCommandParams;
                 const { comment } = addParams;
                 const activeRange = worksheet.getActiveRange();
@@ -153,6 +158,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case UpdateCommentCommand.id: {
+                if (!this._eventListend(this.Event.BeforeCommentUpdate)) return;
                 const updateParams = commandInfo.params as IUpdateCommentCommandParams;
                 const { commentId, text } = updateParams.payload;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -173,6 +179,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case DeleteCommentCommand.id: {
+                if (!this._eventListend(this.Event.BeforeCommentDeleted)) return;
                 const deleteParams = commandInfo.params as IDeleteCommentCommandParams;
                 const { commentId } = deleteParams;
                 const threadComment = worksheet.getCommentById(commentId);
@@ -192,6 +199,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 break;
             }
             case ResolveCommentCommand.id: {
+                if (!this._eventListend(this.Event.BeforeCommentResolve)) return;
                 const resolveParams = commandInfo.params as IResolveCommentCommandParams;
                 const { commentId, resolved } = resolveParams;
                 const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);

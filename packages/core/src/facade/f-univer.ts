@@ -140,8 +140,8 @@ export class FUniver extends FBaseInitialable {
             this._commandService.beforeCommandExecuted((commandInfo) => {
                 if (
                     !this._eventRegistry.get(this.Event.BeforeRedo) &&
-                    this._eventRegistry.get(this.Event.BeforeUndo) &&
-                    this._eventRegistry.get(this.Event.BeforeCommandExecute)
+                    !this._eventRegistry.get(this.Event.BeforeUndo) &&
+                    !this._eventRegistry.get(this.Event.BeforeCommandExecute)
                 ) {
                     return;
                 }
@@ -170,8 +170,8 @@ export class FUniver extends FBaseInitialable {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (
                     !this._eventRegistry.get(this.Event.Redo) &&
-                    this._eventRegistry.get(this.Event.Undo) &&
-                    this._eventRegistry.get(this.Event.CommandExecuted)
+                    !this._eventRegistry.get(this.Event.Undo) &&
+                    !this._eventRegistry.get(this.Event.CommandExecuted)
                 ) {
                     return;
                 }
@@ -195,6 +195,10 @@ export class FUniver extends FBaseInitialable {
         this._injector.onDispose(() => {
             this.dispose();
         });
+    }
+
+    protected _eventListend(key: string) {
+        return this._eventRegistry.get(key);
     }
 
     /**

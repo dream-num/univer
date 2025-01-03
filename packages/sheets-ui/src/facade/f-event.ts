@@ -48,11 +48,11 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
 
 interface IBeforeClipboardChangeParam extends IEventBase {
     /**
-     * The workbook instance. {@link FWorkbook}
+     * The workbook instance currently being operated on. {@link FWorkbook}
      */
     workbook: FWorkbook;
     /**
-     * The worksheet instance. {@link FWorksheet}
+     * The worksheet instance currently being operated on. {@link FWorksheet}
      */
     worksheet: FWorksheet;
     /**
@@ -77,11 +77,11 @@ type IClipboardChangedParam = IBeforeClipboardChangeParam;
 
 interface IBeforeClipboardPasteParam extends IEventBase {
     /**
-     * The workbook instance. {@link FWorkbook}
+     * The workbook instance currently being operated on. {@link FWorkbook}
      */
     workbook: FWorkbook;
     /**
-     * The workbook instance. {@link FWorkbook}
+     * The worksheet instance currently being operated on. {@link FWorkbook}
      */
     worksheet: FWorksheet;
     /**

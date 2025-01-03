@@ -54,7 +54,7 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
                 // calling updateShow() immediately will cause the toolbar button removed from the DOM
                 // in a synchronous way.
                 // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
-                // in a wrapped dropdown.
+                // in a nested dropdown.
                 setTimeout(() => updateShow(false), 100);
             }
         };

@@ -1455,9 +1455,17 @@ export class ParagraphStyleBuilder extends ParagraphStyleValue {
     }
 }
 
+/**
+ * Represents a rich text value
+ */
 export class RichTextValue {
     protected _data: IDocumentData;
 
+    /**
+     * Creates a new RichTextValue instance
+     * @param {IDocumentData} data The initial data for the rich text value
+     * @returns {RichTextValue} A new RichTextValue instance
+     */
     public static create(data: IDocumentData): RichTextValue {
         return new RichTextValue(data);
     }
@@ -1469,10 +1477,20 @@ export class RichTextValue {
         this._data = data;
     }
 
+    /**
+     * Creates a copy of the current RichTextValue instance
+     * @returns {RichTextValue} A new instance of RichTextValue with the same data
+     */
     copy(): RichTextBuilder {
         return RichTextBuilder.create(Tools.deepClone(this._data));
     }
 
+    /**
+     * Slices the current RichTextValue instance
+     * @param {number} start The start index
+     * @param {number} end The end index
+     * @returns {RichTextBuilder} A new instance of RichTextBuilder with the sliced data
+     */
     slice(start: number, end: number): RichTextBuilder {
         const { body, ...ext } = this._data;
         return RichTextBuilder.create({
@@ -1481,18 +1499,34 @@ export class RichTextValue {
         });
     }
 
+    /**
+     * Converts the current RichTextValue instance to plain text
+     * @returns {string} The plain text representation of the current RichTextValue instance
+     */
     toPlainText(): string {
         return BuildTextUtils.transform.getPlainText(this._data.body?.dataStream ?? '');
     }
 
+    /**
+     * Gets the paragraph style of the current RichTextValue instance
+     * @returns {ParagraphStyleValue} The paragraph style of the current RichTextValue instance
+     */
     getParagraphStyle(): ParagraphStyleValue {
         return ParagraphStyleValue.create(this._data.body?.paragraphs?.[0].paragraphStyle);
     }
 
+    /**
+     * Gets the paragraph bullet of the current RichTextValue instance
+     * @returns {ParagraphBulletValue} The paragraph bullet of the current RichTextValue instance
+     */
     getParagraphBullet() {
         return this._data.body?.paragraphs?.[0].bullet;
     }
 
+    /**
+     * Gets the paragraphs of the current RichTextValue instance
+     * @returns {RichTextValue[]} The paragraphs of the current RichTextValue instance
+     */
     getParagraphs(): RichTextValue[] {
         const paragraphs = this._data.body?.paragraphs ?? [];
 
@@ -1504,6 +1538,10 @@ export class RichTextValue {
         });
     }
 
+    /**
+     * Gets the text runs of the current RichTextValue instance
+     * @returns {TextRunValue[]} The text runs of the current RichTextValue instance
+     */
     getTextRuns() {
         return (this._data.body?.textRuns ?? []).map((t) => ({
             ...t,
@@ -1511,16 +1549,32 @@ export class RichTextValue {
         }));
     }
 
+    /**
+     * Gets the links of the current RichTextValue instance
+     * @returns {LinkValue[]} The links of the current RichTextValue instance
+     */
     getLinks() {
         return this._data.body?.customRanges?.filter((r) => r.rangeType === CustomRangeType.HYPERLINK) ?? [];
     }
 
+    /**
+     * Gets the data of the current RichTextValue instance
+     * @returns {IDocumentData} The data of the current RichTextValue instance
+     */
     getData(): IDocumentData {
         return this._data;
     }
 }
 
+/**
+ * Represents a rich text builder
+ */
 export class RichTextBuilder extends RichTextValue {
+    /**
+     * Creates a new RichTextBuilder instance
+     * @param {IDocumentData} data The initial data for the rich text builder
+     * @returns {RichTextBuilder} A new RichTextBuilder instance
+     */
     public static override create(data: IDocumentData): RichTextBuilder {
         return new RichTextBuilder(data);
     }
@@ -1532,9 +1586,33 @@ export class RichTextBuilder extends RichTextValue {
         this._doc = new DocumentDataModel(data);
     }
 
-    insertText(start: string, style?: TextStyleBuilder): RichTextBuilder;
-    insertText(start: number, text: string, style?: TextStyleBuilder): RichTextBuilder;
-    insertText(start: string | number, text?: string | TextStyleBuilder, style?: TextStyleBuilder): RichTextBuilder {
+    /**
+     * Inserts text into the rich text builder at the specified start position
+     * @param start The start position of the text to insert
+     * @param text The text to insert
+     * @param style The style of the text to insert
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const newRichText = richText.insertText(0, 'World');
+     * ```
+     */
+    insertText(start: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
+    /**
+     * Inserts text into the rich text builder at the specified start position
+     * @param start The start position of the text to insert
+     * @param text The text to insert
+     * @param style The style of the text to insert
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const newRichText = richText.insertText(5, 'World', { ff: 'Arial', fs: 12 });
+     * ```
+     */
+    insertText(start: number, text: string, style?: TextStyleBuilder | ITextStyle): RichTextBuilder;
+    insertText(start: string | number, text?: string | TextStyleBuilder | ITextStyle, style?: TextStyleBuilder | ITextStyle): RichTextBuilder {
         let startIndex = (this._data.body?.dataStream.length ?? 2) - 2;
         let insertText;
         let insertStyle;
@@ -1546,16 +1624,16 @@ export class RichTextBuilder extends RichTextValue {
         }
 
         if (typeof text === 'object') {
-            insertStyle = text;
+            insertStyle = text instanceof TextStyleBuilder ? text.build() : text;
         } else {
-            insertStyle = style;
+            insertStyle = style instanceof TextStyleBuilder ? style.build() : style;
         }
         const newBody: IDocumentBody = {
             dataStream: insertText,
             textRuns: insertStyle
                 ? [
                     {
-                        ts: insertStyle?.build(),
+                        ts: insertStyle,
                         st: startIndex,
                         ed: startIndex + insertText.length,
                     },
@@ -1577,16 +1655,37 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
-    insertRichText(richText: RichTextValue): RichTextBuilder;
-    insertRichText(start: number, richText: RichTextValue): RichTextBuilder;
-    insertRichText(start: number | RichTextValue, richText?: RichTextValue): RichTextBuilder {
+    /**
+     * Inserts rich text into the rich text builder at the specified start position
+     * @param {RichTextValue} richText The rich text to insert
+     * @returns {RichTextValue | IDocumentData} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const newRichText = richText.insertRichText(RichTextValue.create({ body: { dataStream: 'World' } }));
+     * ```
+     */
+    insertRichText(richText: RichTextValue | IDocumentData): RichTextBuilder;
+    /**
+     *  Inserts rich text into the rich text builder at the specified start position
+     * @param {number} start The start position of the text to insert
+     * @param { RichTextValue | IDocumentData} richText The rich text to insert
+     * @returns {RichTextValue | IDocumentData} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello' } });
+     * const newRichText = richText.insertRichText(5, RichTextValue.create({ body: { dataStream: 'World' } }));
+     * ```
+     */
+    insertRichText(start: number, richText: RichTextValue | IDocumentData): RichTextBuilder;
+    insertRichText(start: number | RichTextValue | IDocumentData, richText?: RichTextValue | IDocumentData): RichTextBuilder {
         let startIndex = (this._data.body?.dataStream.length ?? 2) - 2;
         let insertText: IDocumentData;
         if (typeof start === 'object') {
-            insertText = start.getData();
+            insertText = start instanceof RichTextValue ? start.getData() : start;
         } else {
             startIndex = Math.min(start, startIndex);
-            insertText = richText!.getData();
+            insertText = richText instanceof RichTextValue ? richText.getData() : richText!;
         }
 
         const textX = BuildTextUtils.selection.replace({
@@ -1603,7 +1702,28 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    /**
+     * Deletes text from the rich text builder from the end.
+     * @param {number} count The number of characters to delete (optional)
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.delete(5);
+     * ```
+     */
     delete(count: number): RichTextBuilder;
+    /**
+     * Deletes text from the rich text builder at the specified start position
+     * @param {number} start The start position of the text to delete
+     * @param {number} [count] The number of characters to delete (optional)
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.delete(5, 5);
+     * ```
+     */
     delete(start: number, count: number): RichTextBuilder;
     delete(start: number, count?: number): RichTextBuilder {
         // Implementation logic here
@@ -1615,11 +1735,23 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
-    setStyle(start: number, end: number, style: TextStyleBuilder): RichTextBuilder {
+    /**
+     * Sets the style of the text at the specified start and end positions
+     * @param {number} start The start position of the text to set the style
+     * @param {number} end The end position of the text to set the style
+     * @param {TextStyleBuilder | ITextStyle} style The style to set
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.setStyle(5, 10, { ff: 'Arial', fs: 12 });
+     * ```
+     */
+    setStyle(start: number, end: number, style: TextStyleBuilder | ITextStyle): RichTextBuilder {
         const newBody: IDocumentBody = {
             dataStream: '',
             textRuns: [{
-                ts: style.build(),
+                ts: style instanceof TextStyleBuilder ? style.build() : style,
                 st: 0,
                 ed: end - start,
             }],
@@ -1629,6 +1761,18 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    /**
+     * Sets the link of the text at the specified start and end positions
+     * @param {number} start The start position of the text to set the link
+     * @param {number} end The end position of the text to set the link
+     * @param {string} link The link to set
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.setLink(5, 10, 'https://www.example.com');
+     * ```
+     */
     setLink(start: number, end: number, link: string): RichTextBuilder {
         const textX = BuildTextUtils.customRange.add({
             rangeType: CustomRangeType.HYPERLINK,
@@ -1646,7 +1790,52 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    /**
+     * Cancels the link of the text at the specified start and end positions
+     * @param {string} linkId The id of the link to cancel
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({
+     *      body: {
+     *          dataStream: 'Hello World',
+     *          customRanges: [
+     *              {
+     *                  rangeType: CustomRangeType.HYPERLINK,
+     *                  rangeId: 'linkId',
+     *                  properties: { url: 'https://www.example.com' },
+     *                  startIndex: 0,
+     *                  endIndex: 5
+     *          }]
+     *      }
+     * });
+     * const newRichText = richText.cancelLink('linkId');
+     * ```
+     */
     cancelLink(linkId: string): RichTextBuilder;
+    /**
+     * Cancels the link of the text at the specified start and end positions
+     * @param {number} start The start position of the text to cancel the link
+     * @param {number} end The end position of the text to cancel the link
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({
+     *      body: {
+     *          dataStream: 'Hello World',
+     *          customRanges: [
+     *              {
+     *                  rangeType: CustomRangeType.HYPERLINK,
+     *                  rangeId: 'linkId',
+     *                  properties: { url: 'https://www.example.com' },
+     *                  startIndex: 0,
+     *                  endIndex: 5
+     *          }]
+     *      }
+     * });
+     * const newRichText = richText.cancelLink(0, 10);
+     * ```
+     */
     cancelLink(start: number, end: number): RichTextBuilder;
     cancelLink(start: number | string, end?: number): RichTextBuilder {
         if (typeof start === 'string') {
@@ -1675,7 +1864,29 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    /**
+     * Inserts a new paragraph at the specified start position
+     * @param {number} start The start position of the paragraph to insert
+     * @param {ParagraphStyleBuilder} paragraphStyle The style of the paragraph to insert
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.insertParagraph();
+     * ```
+     */
     insertParagraph(paragraphStyle?: ParagraphStyleBuilder): RichTextBuilder;
+    /**
+     * Inserts a new paragraph at the specified start position
+     * @param {number} start The start position of the paragraph to insert
+     * @param {ParagraphStyleBuilder} paragraphStyle The style of the paragraph to insert
+     * @returns {RichTextBuilder} The current RichTextBuilder instance
+     * @example
+     * ```ts
+     * const richText = RichTextValue.create({ body: { dataStream: 'Hello World' } });
+     * const newRichText = richText.insertParagraph(5, { ff: 'Arial', fs: 12 });
+     * ```
+     */
     insertParagraph(start: number, paragraphStyle: ParagraphStyleBuilder): RichTextBuilder;
     insertParagraph(start?: number | ParagraphStyleBuilder, paragraphStyle?: ParagraphStyleBuilder): RichTextBuilder {
         let newBody: IDocumentBody;

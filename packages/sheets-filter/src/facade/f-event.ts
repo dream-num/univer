@@ -30,6 +30,8 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFiltered, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
@@ -42,6 +44,8 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilter, (params) => {
      *   const { workbook, worksheet, col, criteria } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
@@ -54,6 +58,8 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeFilterCleared, (params) => {
      *   const { workbook, worksheet } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */
@@ -66,6 +72,8 @@ export interface IFSheetFilterEventMixin {
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeFilterClear, (params) => {
      *   const { workbook, worksheet } = params;
+     *
+     *   // your custom logic
      * });
      * ```
      */

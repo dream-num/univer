@@ -15,12 +15,83 @@
  */
 
 import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
-import type { IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IAddCommentCommandParams, IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import { generateRandomId, ICommandService, Inject, Injector, IUniverInstanceService, RichTextBuilder, RichTextValue, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
-import { DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
+
+export class FTheadCommentBuilder {
+    private _comment: IThreadComment = {
+        id: generateRandomId(),
+        ref: '',
+        threadId: '',
+        dT: '',
+        personId: '',
+        text: RichTextBuilder.newEmptyData().body!,
+        attachments: [],
+        unitId: '',
+        subUnitId: '',
+    };
+
+    create(): FTheadCommentBuilder {
+        return new FTheadCommentBuilder();
+    }
+
+    setContent(content: IDocumentBody | RichTextValue): FTheadCommentBuilder {
+        if (content instanceof RichTextValue) {
+            this._comment.text = content.getData().body!;
+        } else {
+            this._comment.text = content;
+        }
+        return this;
+    }
+
+    setPersonId(userId: string): FTheadCommentBuilder {
+        this._comment.personId = userId;
+        return this;
+    }
+
+    setDT(date: Date): FTheadCommentBuilder {
+        this._comment.dT = getDT(date);
+        return this;
+    }
+
+    setId(id: string): FTheadCommentBuilder {
+        this._comment.id = id;
+        return this;
+    }
+
+    setThreadId(threadId: string): FTheadCommentBuilder {
+        this._comment.threadId = threadId;
+        return this;
+    }
+
+    get personId(): string {
+        return this._comment.personId;
+    }
+
+    get dT(): string {
+        return this._comment.dT;
+    }
+
+    get content(): RichTextValue {
+        return RichTextValue.createByBody(this._comment.text);
+    }
+
+    get id(): string {
+        return this._comment.id;
+    }
+
+    get threadId(): string {
+        return this._comment.threadId;
+    }
+
+    build(): IThreadComment {
+        return this._comment;
+    }
+}
 
 export class FThreadComment {
     constructor(
@@ -29,7 +100,8 @@ export class FThreadComment {
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsThreadCommentModel) private readonly _threadCommentModel: SheetsThreadCommentModel
+        @Inject(SheetsThreadCommentModel) private readonly _threadCommentModel: SheetsThreadCommentModel,
+        @Inject(UserManagerService) private readonly _userManagerService: UserManagerService
     ) {
     }
 
@@ -86,11 +158,15 @@ export class FThreadComment {
     }
 
     /**
-     * Get the content of the comment
-     * @returns The content of the comment
+     * @deprecated use `getRichText` as instead
      */
     getContent(): IDocumentBody {
         return this._thread.text;
+    }
+
+    getRichText(): RichTextValue {
+        const body = this._thread.text;
+        return RichTextValue.create({ body, documentStyle: {}, id: 'd' });
     }
 
     /**
@@ -167,6 +243,35 @@ export class FThreadComment {
                 commentId: this._thread.id,
                 resolved: resolved ?? !this._thread.resolved,
             } as IResolveCommentCommandParams
+        );
+    }
+
+    /**
+     * Reply to the comment
+     * @param comment The comment to reply to
+     * @returns success or not
+     */
+    async replyAsync(comment: FTheadCommentBuilder): Promise<boolean> {
+        const commentData = comment.build();
+        return this._commandService.executeCommand(
+            AddCommentCommand.id,
+            {
+                unitId: this._thread.unitId,
+                subUnitId: this._thread.subUnitId,
+                comment: {
+
+                    id: generateRandomId(),
+                    parentId: this._thread.id,
+                    threadId: this._thread.threadId,
+                    ref: this._parent?.ref,
+                    unitId: this._thread.unitId,
+                    subUnitId: this._thread.subUnitId,
+                    text: commentData.text,
+                    attachments: commentData.attachments,
+                    dT: commentData.dT || getDT(),
+                    personId: commentData.personId || this._userManagerService.getCurrentUser().userID,
+                },
+            } as IAddCommentCommandParams
         );
     }
 }

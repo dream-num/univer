@@ -1470,6 +1470,15 @@ export class RichTextValue {
         return new RichTextValue(data);
     }
 
+    /**
+     * Creates a new RichTextValue instance
+     * @param {IDocumentBody} data The initial data for the rich text value
+     * @returns {RichTextValue} A new RichTextValue instance
+     */
+    public static createByBody(data: IDocumentBody): RichTextValue {
+        return new RichTextValue({ body: data, id: 'd', documentStyle: {} });
+    }
+
     constructor(data: IDocumentData) {
         if (!data.body) {
             throw new Error('Invalid document data, body is required');

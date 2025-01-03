@@ -28,6 +28,11 @@ export interface IFWorksheetCommentMixin {
      * @returns all comments in the current sheet
      */
     getComments(): FThreadComment[];
+
+    /**
+     * Clear all comments in the current sheet
+     */
+    clearComments(): Promise<boolean>;
 }
 
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
@@ -35,6 +40,13 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
         const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
         const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
+    }
+
+    override clearComments(): Promise<boolean> {
+        const comments = this.getComments();
+        const promises = comments.map((comment) => comment.deleteAsync());
+
+        return Promise.all(promises).then(() => true);
     }
 
     /**

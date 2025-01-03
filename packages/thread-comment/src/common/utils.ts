@@ -16,6 +16,6 @@
 
 import { dayjs } from '@univerjs/core';
 
-export function getDT() {
-    return dayjs().format('YYYY/MM/DD HH:mm');
+export function getDT(date?: Date) {
+    return dayjs(date).format('YYYY/MM/DD HH:mm');
 }

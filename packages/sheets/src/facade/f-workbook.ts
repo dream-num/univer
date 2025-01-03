@@ -793,10 +793,10 @@ export class FWorkbook extends FBaseInitialable {
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
-     * fWorkbook.unRegisterRangeTheme('MyTheme');
+     * fWorkbook.unregisterRangeTheme('MyTheme');
      * ```
      */
-    unRegisterRangeTheme(themeName: string): void {
+    unregisterRangeTheme(themeName: string): void {
         this._commandService.syncExecuteCommand(UnregisterWorksheetRangeThemeStyleCommand.id, {
             unitId: this.getId(),
             themeName,

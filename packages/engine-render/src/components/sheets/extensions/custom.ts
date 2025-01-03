@@ -36,7 +36,7 @@ export class Custom extends SheetExtension {
     override uKey: string = UNIQUE_KEY;
 
     override draw(ctx: UniverRenderingContext, _parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[] | undefined): void {
-        const { worksheet, rowColumnSegment } = skeleton;
+        const { worksheet, rowColumnSegment, cellRenderingDataMatrix: cellDataInterceptor } = skeleton;
         if (!worksheet) {
             return;
         }
@@ -47,7 +47,7 @@ export class Custom extends SheetExtension {
             if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                 return;
             }
-            let cellData = worksheet.getCell(row, col);
+            let cellData = cellDataInterceptor.getValue(row, col);
             if (!cellData?.customRender) {
                 return;
             }
@@ -73,7 +73,7 @@ export class Custom extends SheetExtension {
                     row: mergeInfo.startRow,
                     col: mergeInfo.startColumn,
                 };
-                cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                cellData = cellDataInterceptor.getValue(mainCell.row, mainCell.col);
                 if (!cellData?.customRender) {
                     return;
                 }

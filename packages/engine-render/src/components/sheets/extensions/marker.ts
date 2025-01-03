@@ -41,7 +41,7 @@ export class Marker extends SheetExtension {
             return;
         }
 
-        const { worksheet, rowColumnSegment } = skeleton;
+        const { worksheet, rowColumnSegment, cellRenderingDataMatrix: cellDataInterceptor } = skeleton;
         if (!worksheet) {
             return;
         }
@@ -54,7 +54,7 @@ export class Marker extends SheetExtension {
                 return;
             }
 
-            let cellData = worksheet.getCell(row, col);
+            let cellData = cellDataInterceptor.getValue(row, col);
             const cellInfo = skeleton.getCellWithCoordByIndex(row, col, false);
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
             let { startY, endY, startX, endX } = cellInfo;
@@ -72,7 +72,7 @@ export class Marker extends SheetExtension {
                     col: mergeInfo.startColumn,
                 };
 
-                cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                cellData = cellDataInterceptor.getValue(mainCell.row, mainCell.col);
             }
 
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

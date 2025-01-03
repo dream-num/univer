@@ -29,32 +29,19 @@ export interface ICellHyperLink {
 
 export interface IFRangeHyperlinkMixin {
     /**
-     * Set hyperlink in the cell in the range.
-     * [!important] This method is async.
-     * @param url url
-     * @param label optional, label of the url
-     * @returns success or not
+     * @deprecated use `range.setRichTextValueForCell(univerAPI.newRichText().insertLink(label, url))` instead
      */
     setHyperLink(url: string, label?: string): Promise<boolean>;
     /**
-     * Get all hyperlinks in the cell in the range.
-     * @returns hyperlinks
+     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().getLinks())` instead
      */
     getHyperLinks(): ICellHyperLink[];
     /**
-     * Update hyperlink in the cell in the range.
-     * [!important] This method is async.
-     * @param id id of the hyperlink
-     * @param url url
-     * @param label optional, label of the url
-     * @returns success or not
+     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().updateLink(id, url))` instead
      */
     updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
     /**
-     * Cancel hyperlink in the cell in the range.
-     * [!important] This method is async.
-     * @param id id of the hyperlink
-     * @returns success or not
+     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().cancelLink(id))` instead
      */
     cancelHyperLink(id: string): boolean;
 }

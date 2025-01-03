@@ -1891,6 +1891,16 @@ export class RichTextBuilder extends RichTextValue {
         return this;
     }
 
+    updateLink(id: string, url: string): RichTextBuilder {
+        const current = this._data.body?.customRanges?.find((range) => range.rangeId === id);
+        if (!current) {
+            throw new Error('Link not found');
+        }
+
+        current.properties!.url = url;
+        return this;
+    }
+
     /**
      * Inserts a new paragraph at the specified start position
      * @param {number} start The start position of the paragraph to insert
@@ -1940,5 +1950,40 @@ export class RichTextBuilder extends RichTextValue {
 
         this.insertRichText(startIndex, RichTextValue.create({ body: newBody, id: 'd', documentStyle: {} }));
         return this;
+    }
+
+    /**
+     * Inserts a new link
+     * @param text
+     * @param url
+     * @returns
+     */
+    insertLink(text: string, url: string): RichTextBuilder;
+    insertLink(start: number, text: string, url: string): RichTextBuilder;
+    insertLink(start: number | string, text: string, url?: string): RichTextBuilder {
+        let textStr = '';
+        let textUrl = '';
+        if (typeof start === 'string') {
+            textStr = start;
+            textUrl = text;
+        } else {
+            textStr = text;
+            textUrl = url!;
+        }
+
+        const rich = RichTextBuilder.createByBody({
+            dataStream: textStr,
+            customRanges: [{
+                rangeType: CustomRangeType.HYPERLINK,
+                rangeId: generateRandomId(),
+                properties: {
+                    url: textUrl,
+                },
+                startIndex: 0,
+                endIndex: textStr.length - 1,
+            }],
+        });
+
+        return typeof start === 'number' ? this.insertRichText(start, rich) : this.insertRichText(rich);
     }
 }

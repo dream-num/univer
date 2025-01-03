@@ -43,7 +43,7 @@ export class FWorksheetSort extends FWorksheet implements IFWorksheetSort {
     override sort(colIndex: number, asc = true): FWorksheet {
         const orderRules: IOrderRule[] = [{
             // real column index should be colIndex - 1.
-            colIndex: colIndex - 1,
+            colIndex,
             type: asc ? SortType.ASC : SortType.DESC,
         }];
 

@@ -43,7 +43,7 @@ export interface IFRangeSort {
 
 export class FRangeSort extends FRange implements IFRangeSort {
     override sort(column: SortColumnSpec | SortColumnSpec[]): FRange {
-        const columnBase = this._range.startColumn - 1;
+        const columnBase = this._range.startColumn;
         const columns = Array.isArray(column) ? column : [column];
 
         const orderRules: IOrderRule[] = columns.map((c) => {

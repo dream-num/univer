@@ -1570,13 +1570,31 @@ export class RichTextValue {
  * Represents a rich text builder
  */
 export class RichTextBuilder extends RichTextValue {
+    public static newEmptyData(): IDocumentData {
+        return {
+            id: 'd',
+            documentStyle: {},
+            drawings: {},
+            drawingsOrder: [],
+            body: {
+                dataStream: '\r\n',
+                customBlocks: [],
+                customRanges: [],
+                paragraphs: [{ startIndex: 0 }],
+                textRuns: [],
+                tables: [],
+                sectionBreaks: [],
+            },
+        };
+    }
+
     /**
      * Creates a new RichTextBuilder instance
      * @param {IDocumentData} data The initial data for the rich text builder
      * @returns {RichTextBuilder} A new RichTextBuilder instance
      */
-    public static override create(data: IDocumentData): RichTextBuilder {
-        return new RichTextBuilder(data);
+    public static override create(data?: IDocumentData): RichTextBuilder {
+        return new RichTextBuilder(data ?? RichTextBuilder.newEmptyData());
     }
 
     private _doc: DocumentDataModel;

@@ -26,6 +26,7 @@ import { Inject, Injector } from '../common/di';
 import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
 import { UniverInstanceType } from '../common/unit';
+import { RichTextBuilder } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -359,5 +360,9 @@ export class FUniver extends FBaseInitialable {
 
     getUserManager(): FUserManager {
         return this._injector.createInstance(FUserManager);
+    }
+
+    newRichText(data?: IDocumentData): RichTextBuilder {
+        return RichTextBuilder.create(data);
     }
 }

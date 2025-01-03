@@ -228,7 +228,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     title: this._localeService.t('clipboard.shortCutNotify.title'),
                     content: this._localeService.t('clipboard.shortCutNotify.useShortCutInstead'),
                 });
-                return false;
+                // Pasting should not be allowed here.
+                // After the pop-up window prompts, can paste the contents of the clipboard as much as possible.
             }
 
             return this._pasteHTML(html, pasteType);

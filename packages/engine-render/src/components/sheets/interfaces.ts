@@ -17,9 +17,11 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
+    ICellDataForSheetInterceptor,
     ICellWithCoord,
     IFontRenderExtension,
     ImageCacheMap,
+    Nullable,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -53,7 +55,6 @@ export interface IFontCacheItem {
     wrapStrategy: WrapStrategy;
     // content?: string;
     imageCacheMap: ImageCacheMap;
-    fontRenderExtension?: IFontRenderExtension;
 }
 
 type colorString = string;

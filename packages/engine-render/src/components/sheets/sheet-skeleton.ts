@@ -44,6 +44,7 @@ import type {
     Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
+import { debug } from 'node:console';
 import {
     addLinkToDocumentModel,
     BooleanNumber,
@@ -235,6 +236,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         border: new ObjectMatrix<BorderCache>(),
     };
 
+    // private _cellDataCache: ObjectMatrix<ICellDataForSheetInterceptor> = new ObjectMatrix();
+
     /** A matrix to store if a (row, column) position has render cache. */
     private _handleBgMatrix = new ObjectMatrix<boolean>();
     private _handleBorderMatrix = new ObjectMatrix<boolean>();
@@ -259,6 +262,11 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     private _worksheetData: IWorksheetData;
     private _cellData: ObjectMatrix<Nullable<ICellData>>;
+    /**
+     * Value from worksheet.getCell(r, c), value include all interceptors.
+     * Only update in a frame.
+     */
+    private _cellRenderingData: ObjectMatrix<Nullable<ICellDataForSheetInterceptor>> = new ObjectMatrix();
 
     constructor(
         readonly worksheet: Worksheet,
@@ -328,6 +336,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     get stylesCache(): IStylesCache {
         return this._stylesCache;
+    }
+
+    get cellRenderingDataMatrix(): ObjectMatrix<Nullable<ICellDataForSheetInterceptor>> {
+        return this._cellRenderingData;
     }
 
     get overflowCache(): ObjectMatrix<IRange> {
@@ -469,13 +481,13 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
+     * Called by spreadsheet each render, if dirty.
      * Set border background and font to this._stylesCache by visible range, which derives from bounds)
      * @param vpInfo viewBounds
      */
     setStylesCache(vpInfo?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         if (!this._worksheetData) return;
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) return;
-
         this.updateVisibleRange(vpInfo);
 
         const rowColumnSegment = this._drawingRange;
@@ -2028,7 +2040,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
             documentSkeleton.calculate();
 
-            const config: IFontCacheItem = {
+            const fontCache: IFontCacheItem = {
                 documentSkeleton,
                 vertexAngle,
                 centerAngle,
@@ -2036,10 +2048,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 horizontalAlign,
                 wrapStrategy,
                 imageCacheMap: this._imageCacheMap,
-                fontRenderExtension: cell?.fontRenderExtension,
             };
-            this._stylesCache.fontMatrix.setValue(row, col, config);
-            this._calculateOverflowCell(row, col, config);
+            this._stylesCache.fontMatrix.setValue(row, col, fontCache);
+            this._calculateOverflowCell(row, col, fontCache);
         }
     }
 
@@ -2054,13 +2065,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
-        const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+        // const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+        // const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+        // const handledFontCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
 
         // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
-        if (handledBgCell && handledBorderCell) {
-            return;
-        }
+        // if (handledBgCell && handledBorderCell) {
+        //     return;
+        // }
 
         if (!options) {
             options = { cacheItem: { bg: true, border: true } };
@@ -2084,6 +2096,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
 
+        this._cellRenderingData.setValue(row, col, cell);
         const cellStyle = this._styles.getStyleByCell(cell);
         const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
@@ -2095,7 +2108,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-
         this._setFontStylesCache(row, col, { ...cell, ...{ s: style } });
     }
 

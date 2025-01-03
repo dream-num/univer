@@ -23,7 +23,7 @@ export interface IFSheetsFilterEnumMixin {
 }
 
 export class FSheetsFilterEnumMixin extends FEnum {
-    CustomFilterOperation = CustomFilterOperator;
+    get CustomFilterOperation(): typeof CustomFilterOperator { return CustomFilterOperator; };
 }
 
 FEnum.extend(FSheetsFilterEnumMixin);

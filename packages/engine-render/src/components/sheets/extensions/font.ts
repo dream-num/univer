@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellWithCoord, IDocDrawingBase, ImageSourceType, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -53,7 +53,9 @@ interface IRenderFontContext {
     diffRanges: IRange[];
     spreadsheetSkeleton: SpreadsheetSkeleton;
     overflowRectangle: Nullable<IRange>;
-    cellData: Nullable<ICellDataForSheetInterceptor>;
+    cellData: Nullable<{
+        fontCache: Nullable<IFontCacheItem>;
+    }>;
     startY: number;
     endY: number;
     startX: number;
@@ -134,7 +136,6 @@ export class Font extends SheetExtension {
 
             Range.foreach(range, (row, col) => {
                 const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
-                // put all merged cells to another pass to render. -1 means not merged.
                 if (index !== -1) {
                     return;
                 }
@@ -181,8 +182,8 @@ export class Font extends SheetExtension {
 
         //#endregion
 
-        const fontsConfig = fontMatrix.getValue(row, col);
-        if (!fontsConfig) return true;
+        const fontCache = fontMatrix.getValue(row, col);
+        if (!fontCache) return true;
 
         //#region overflow
         // If the cell is overflowing, but the overflowRectangle has not been set,
@@ -204,8 +205,8 @@ export class Font extends SheetExtension {
         const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
         if (!visibleRow || !visibleCol) return true;
 
-        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        if (cellData.fontRenderExtension?.isSkip) {
+        //spreadsheetSkeleton.worksheet.getCell(row, col)
+        if (fontCache.fontRenderExtension?.isSkip) {
             return true;
         }
 
@@ -214,21 +215,21 @@ export class Font extends SheetExtension {
 
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
-        renderFontCtx.cellData = cellData;
-        this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix);
+        renderFontCtx.cellData = { fontCache };
+        this._setFontRenderBounds(renderFontCtx, row, col, fontCache);
         //#endregion
 
         ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        this._renderDocuments(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY, row, col, spreadsheetSkeleton.overflowCache);
+        this._renderDocuments(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY, row, col, spreadsheetSkeleton.overflowCache);
 
         ctx.closePath();
         ctx.restore();
-        const documentDataModel = fontsConfig.documentSkeleton.getViewModel().getDataModel();
+        const documentDataModel = fontCache.documentSkeleton.getViewModel().getDataModel();
         if (documentDataModel.getDrawingsOrder()?.length) {
             ctx.save();
             ctx.beginPath();
-            this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix, 1);
-            this._renderImages(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
+            this._setFontRenderBounds(renderFontCtx, row, col, fontCache, 1);
+            this._renderImages(ctx, fontCache, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY);
             ctx.closePath();
             ctx.restore();
         }
@@ -318,15 +319,14 @@ export class Font extends SheetExtension {
      * @param renderFontContext
      * @param row
      * @param col
-     * @param fontMatrix
+     * @param fontCache
      */
-    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>, padding = 0) {
+    private _setFontRenderBounds(renderFontContext: IRenderFontContext, row: number, col: number, fontsConfig: IFontCacheItem, padding = 0) {
         const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
         let { startX, endX, startY, endY } = renderFontContext;
 
         // https://github.com/dream-num/univer-pro/issues/334
         // When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
-        const fontsConfig = fontMatrix.getValue(row, col)!;
         const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = fontsConfig;
         let horizontalAlignOverFlow = horizontalAlign;
         if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
@@ -337,8 +337,8 @@ export class Font extends SheetExtension {
             }
         }
 
-        const rightOffset = cellData?.fontRenderExtension?.rightOffset ?? 0;
-        const leftOffset = cellData?.fontRenderExtension?.leftOffset ?? 0;
+        const rightOffset = cellData?.fontCache?.fontRenderExtension?.rightOffset ?? 0;
+        const leftOffset = cellData?.fontCache?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;
 
         if (vertexAngle === 0) {

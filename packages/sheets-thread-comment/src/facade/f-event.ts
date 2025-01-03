@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { FWorkbook, RichTextValue } from '@univerjs/core';
+import type { FWorkbook, IEventBase, RichTextValue } from '@univerjs/core';
 import type { FWorksheet } from '@univerjs/sheets/facade';
 import type { FTheadCommentValue, FThreadComment } from './f-thread-comment';
 import { FEventName } from '@univerjs/core';
@@ -165,7 +165,7 @@ export interface ISheetCommentAddEvent {
     comment: FThreadComment;
 }
 
-export interface IBeforeSheetCommentAddEvent {
+export interface IBeforeSheetCommentAddEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -181,7 +181,7 @@ export interface ISheetCommentUpdateEvent {
     comment: FThreadComment;
 }
 
-export interface IBeforeSheetCommentUpdateEvent {
+export interface IBeforeSheetCommentUpdateEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -190,7 +190,7 @@ export interface IBeforeSheetCommentUpdateEvent {
     newContent: RichTextValue;
 }
 
-export interface IBeforeSheetCommentDeleteEvent {
+export interface IBeforeSheetCommentDeleteEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -204,7 +204,7 @@ export interface ISheetCommentDeleteEvent {
     commentId: string;
 }
 
-export interface ISheetCommentResolveEvent {
+export interface ISheetCommentResolveEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;

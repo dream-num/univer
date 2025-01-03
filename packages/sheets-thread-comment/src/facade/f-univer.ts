@@ -16,8 +16,8 @@
 
 import type { ICommandInfo, IDisposable, Injector } from '@univerjs/core';
 import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import type { ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
-import { FUniver, ICommandService, RichTextValue } from '@univerjs/core';
+import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
+import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerjs/core';
 import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { FTheadCommentValue } from './f-thread-comment';
 
@@ -118,7 +118,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         }
     }
 
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     private _handleBeforeCommentCommand(commandInfo: ICommandInfo): void {
         const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
         if (!params) return;
@@ -138,13 +138,18 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 const { comment } = addParams;
                 const activeRange = worksheet.getActiveRange();
                 if (!activeRange) return;
-                this.fireEvent(this.Event.BeforeCommentAdd, {
+                const eventParams: IBeforeSheetCommentAddEvent = {
                     workbook,
                     worksheet,
                     row: activeRange.getRow() ?? 0,
                     col: activeRange.getColumn() ?? 0,
                     comment: FTheadCommentValue.create(comment),
-                });
+                };
+
+                this.fireEvent(this.Event.BeforeCommentAdd, eventParams);
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                };
                 break;
             }
             case UpdateCommentCommand.id: {
@@ -152,14 +157,18 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 const { commentId, text } = updateParams.payload;
                 const threadComment = worksheet.getCommentById(commentId);
                 if (threadComment) {
-                    this.fireEvent(this.Event.BeforeCommentUpdate, {
+                    const eventParams: IBeforeSheetCommentUpdateEvent = {
                         workbook,
                         worksheet,
                         row: threadComment.getRange()?.getRow() ?? 0,
                         col: threadComment.getRange()?.getColumn() ?? 0,
                         comment: threadComment,
                         newContent: RichTextValue.createByBody(text),
-                    });
+                    };
+                    this.fireEvent(this.Event.BeforeCommentUpdate, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    };
                 }
                 break;
             }
@@ -168,13 +177,17 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 const { commentId } = deleteParams;
                 const threadComment = worksheet.getCommentById(commentId);
                 if (threadComment) {
-                    this.fireEvent(this.Event.BeforeCommentDeleted, {
+                    const eventParams: IBeforeSheetCommentDeleteEvent = {
                         workbook,
                         worksheet,
                         row: threadComment.getRange()?.getRow() ?? 0,
                         col: threadComment.getRange()?.getColumn() ?? 0,
                         comment: threadComment,
-                    });
+                    };
+                    this.fireEvent(this.Event.BeforeCommentDeleted, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    };
                 }
                 break;
             }
@@ -183,14 +196,18 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                 const { commentId, resolved } = resolveParams;
                 const threadComment = worksheet.getComments().find((c) => c.getCommentData().id === commentId);
                 if (threadComment) {
-                    this.fireEvent(this.Event.BeforeCommentResolve, {
+                    const eventParams: ISheetCommentResolveEvent = {
                         workbook,
                         worksheet,
                         row: threadComment.getRange()!.getRow() ?? 0,
                         col: threadComment.getRange()!.getColumn() ?? 0,
                         comment: threadComment,
                         resolved,
-                    });
+                    };
+                    this.fireEvent(this.Event.BeforeCommentResolve, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
                 }
                 break;
             }

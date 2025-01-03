@@ -100,3 +100,10 @@ export interface IAddWorksheetMergeMutationParams {
     subUnitId: string;
     ranges: IRange[];
 }
+/** Params of AddWorksheetMergeMutation */
+export interface IWorksheetRangeThemeStyleMutationParams {
+    unitId: string;
+    subUnitId: string;
+    range: IRange;
+    themeName: string;
+}

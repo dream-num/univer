@@ -63,7 +63,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         const range = snapshot.body?.customRanges?.find((range) => `${range.rangeId}` === id);
         if (!range) return false;
 
-        const textX = BuildTextUtils.customRange.delete(accessor, { documentDataModel: doc.documentModel, rangeId: range.rangeId });
+        const textX = BuildTextUtils.customRange.delete({ documentDataModel: doc.documentModel, rangeId: range.rangeId });
         if (!textX) return false;
 
         const newBody = TextX.apply(snapshot.body!, textX.serialize());

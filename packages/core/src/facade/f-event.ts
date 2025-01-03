@@ -79,42 +79,132 @@ export class FEventName extends FBase {
         return instance;
     }
 
+    /**
+     * BeforeUnitCreate event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeUnitCreate, (params) => {
+     *     console.log('before unit created', params);
+     * });
+     * ```
+     */
     get BeforeUnitCreate() {
         return 'BeforeUnitCreate' as const;
     }
 
+    /**
+     * UnitCreated event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
     get UnitCreated() {
         return 'UnitCreated' as const;
     }
 
+    /**
+     * UnitDisposed event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.UnitDisposed, (params) => {
+     *     console.log('unit disposed', params);
+     * });
+     * ```
+     */
     get UnitDisposed() {
         return 'UnitDisposed' as const;
     }
 
+    /**
+     * LifeCycleChanged event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.LifeCycleChanged, (params) => {
+     *     console.log('life cycle changed', params);
+     * });
+     * ```
+     */
     get LifeCycleChanged() {
         return 'LifeCycleChanged' as const;
     }
 
+    /**
+     * Redo event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.Redo, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get Redo() {
         return 'Redo' as const;
     }
 
+    /**
+     * Undo event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.Undo, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get Undo() {
         return 'Undo' as const;
     }
 
+    /**
+     * BeforeRedo event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeRedo, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get BeforeRedo() {
         return 'BeforeRedo' as const;
     }
 
+    /**
+     * BeforeUndo event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeUndo, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get BeforeUndo() {
         return 'BeforeUndo' as const;
     }
 
+    /**
+     * CommandExecuted event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get CommandExecuted() {
         return 'CommandExecuted' as const;
     }
 
+    /**
+     * BeforeCommandExecute event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (params) => {
+     *     console.log('command executed', params);
+     * });
+     * ```
+     */
     get BeforeCommandExecute() {
         return 'BeforeCommandExecute' as const;
     }

@@ -58,6 +58,15 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Gets the ID of the worksheet
+     *
+     * @return The ID of the worksheet
+     */
+    getSheetId(): string {
+        return this._worksheet.getSheetId();
+    }
+
+    /**
      * Gets the area where the statement is applied
      *
      * @return The area where the statement is applied

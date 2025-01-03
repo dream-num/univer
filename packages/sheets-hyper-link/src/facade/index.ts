@@ -15,6 +15,7 @@
  */
 
 import './f-workbook';
+import './f-worksheet';
 import './f-range';
 
 export { FWorkbookHyperLinkMixin } from './f-workbook';

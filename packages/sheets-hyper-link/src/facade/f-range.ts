@@ -16,7 +16,7 @@
 
 import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId } from '@univerjs/core';
-import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkCommand, CancelHyperLinkCommand, SheetsHyperLinkParserService, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { FRange } from '@univerjs/sheets/facade';
 
 export interface ICellHyperLink {
@@ -44,11 +44,19 @@ export interface IFRangeHyperlinkMixin {
      * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().cancelLink(id))` instead
      */
     cancelHyperLink(id: string): boolean;
+
+    /**
+     * Get the url of this range
+     */
+    getUrl(): string;
 }
 
 export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
+    /**
+     * @deprecated
+     */
     override setHyperLink(url: string, label?: string): Promise<boolean> {
         const params: IAddHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -66,8 +74,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     }
 
     /**
-     * Get all hyperlinks in the cell in the range.
-     * @returns hyperlinks
+     * @deprecated
      */
     override getHyperLinks(): ICellHyperLink[] {
         const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
@@ -87,12 +94,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     }
 
     /**
-     * Update hyperlink in the cell in the range.
-     * [!important] This method is async.
-     * @param id id of the hyperlink
-     * @param url url
-     * @param label optional, label of the url
-     * @returns success or not
+     * @deprecated
      */
     override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
         const params: IUpdateHyperLinkCommandParams = {
@@ -111,9 +113,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     }
 
     /**
-     * Cancel hyperlink in the cell in the range.
-     * @param id id of the hyperlink
-     * @returns success or not
+     * @deprecated
      */
     override cancelHyperLink(id: string): boolean {
         const params: ICancelHyperLinkCommandParams = {
@@ -125,6 +125,11 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         };
 
         return this._commandService.syncExecuteCommand(CancelHyperLinkCommand.id, params);
+    }
+
+    override getUrl(): string {
+        const parserService = this._injector.get(SheetsHyperLinkParserService);
+        return parserService.buildHyperLink(this.getUnitId(), this.getSheetId(), this.getRange());
     }
 
     // #endregion

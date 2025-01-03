@@ -15,7 +15,6 @@
  */
 
 import type { ICommandInfo, IEventBase, Injector } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName, FUniver, ICommandService } from '@univerjs/core';
@@ -126,7 +125,7 @@ class FUniverSheetsFilterEventMixin extends FUniver {
                     this._beforeRangeFilter(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
                     break;
                 case ClearSheetsFilterCriteriaCommand.id:
-                    this._beforeRangeFilterClear(commandInfo as Readonly<ICommandInfo<ISheetCommandSharedParams>>);
+                    this._beforeRangeFilterClear();
                     break;
             }
         }));
@@ -137,7 +136,7 @@ class FUniverSheetsFilterEventMixin extends FUniver {
                     this._onRangeFiltered(commandInfo as Readonly<ICommandInfo<ISetSheetsFilterCriteriaCommandParams>>);
                     break;
                 case ClearSheetsFilterCriteriaCommand.id:
-                    this._onRangeFilterCleared(commandInfo as Readonly<ICommandInfo<ISheetCommandSharedParams>>);
+                    this._onRangeFilterCleared();
                     break;
             }
         }));
@@ -175,12 +174,13 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         }
     }
 
-    private _beforeRangeFilterClear(commandInfo: Readonly<ICommandInfo<ISheetCommandSharedParams>>): void {
-        const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+    private _beforeRangeFilterClear(): void {
+        const fWorkbook = this.getActiveWorkbook();
+        if (!fWorkbook) return;
+
         const eventParams: ISheetRangeFilterClearedEventParams = {
             workbook: fWorkbook,
-            worksheet: fWorkbook.getSheetBySheetId(params.subUnitId)!,
+            worksheet: fWorkbook.getActiveSheet(),
         };
 
         this.fireEvent(this.Event.SheetBeforeRangeFilterClear, eventParams);
@@ -189,12 +189,13 @@ class FUniverSheetsFilterEventMixin extends FUniver {
         }
     }
 
-    private _onRangeFilterCleared(commandInfo: Readonly<ICommandInfo<ISheetCommandSharedParams>>): void {
-        const params = commandInfo.params!;
-        const fWorkbook = this.getUniverSheet(params.unitId)!;
+    private _onRangeFilterCleared(): void {
+        const fWorkbook = this.getActiveWorkbook();
+        if (!fWorkbook) return;
+
         const eventParams: ISheetRangeFilterClearedEventParams = {
             workbook: fWorkbook,
-            worksheet: fWorkbook.getSheetBySheetId(params.subUnitId)!,
+            worksheet: fWorkbook.getActiveSheet(),
         };
 
         this.fireEvent(this.Event.SheetRangeFilterCleared, eventParams);

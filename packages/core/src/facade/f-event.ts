@@ -18,7 +18,6 @@ import type { UniverInstanceType } from '../common/unit';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
-import { FBase } from './f-base';
 
 export interface ISheetCreateParam {
     unitId: string;
@@ -42,7 +41,7 @@ export interface IEventBase {
 export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
 export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
 
-export class FEventName extends FBase {
+export class FEventName {
     static _intance: FEventName | null;
     static get() {
         if (this._intance) {
@@ -52,6 +51,29 @@ export class FEventName extends FBase {
         const instance = new FEventName();
         this._intance = instance;
         return instance;
+    }
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+
+    constructor() {
+        for (const key in FEventName.prototype) {
+            // @ts-ignore
+            this[key] = FEventName.prototype[key];
+        }
     }
 
     get UnitCreated() {

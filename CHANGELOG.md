@@ -1,4 +1,38 @@
+# Changelog
 
+## [0.5.3](https://github.com/dream-num/univer/compare/v0.5.2...v0.5.3) (2025-01-04)
+
+
+### Bug Fixes
+
+* canvas crash when draw broken image ([#4388](https://github.com/dream-num/univer/issues/4388)) ([09fd432](https://github.com/dream-num/univer/commit/09fd43220cd746e152fbf3157d077ba44fec3e3d))
+* **design:** fix dropdown on nested situation ([#4416](https://github.com/dream-num/univer/issues/4416)) ([05896c0](https://github.com/dream-num/univer/commit/05896c0a39974e5c498f83020e86fa276e637448))
+* extend feventname ([#4426](https://github.com/dream-num/univer/issues/4426)) ([86e4e8e](https://github.com/dream-num/univer/commit/86e4e8e23e732fe7f2c3cd4b6eeaa036fe8cb572))
+* **facade:** f-event & f-enum extend error ([#4424](https://github.com/dream-num/univer/issues/4424)) ([be77c47](https://github.com/dream-num/univer/commit/be77c479ebc9363cde6610f369ed512eb5c3cb94))
+* **filter:** fix event API export ([#4422](https://github.com/dream-num/univer/issues/4422)) ([5738128](https://github.com/dream-num/univer/commit/57381280398a813ba3eab2e9bcb72f952b798749))
+* fix snapshot after cut & paste ([#4405](https://github.com/dream-num/univer/issues/4405)) ([52990cc](https://github.com/dream-num/univer/commit/52990cc049f536ce58146ab5bbd3901e07ce94b0))
+* **formula:** use different isNullCell for formula modules ([#4395](https://github.com/dream-num/univer/issues/4395)) ([72e8192](https://github.com/dream-num/univer/commit/72e81922a0ec41d5d7a123d8c9afbb788dbab757))
+* **range-selector:** remove dataStream ([#4191](https://github.com/dream-num/univer/issues/4191)) ([a90779e](https://github.com/dream-num/univer/commit/a90779efbf26fdec934c4884967bc5f59c859c01))
+* **sheet:** fix spell error ([#4425](https://github.com/dream-num/univer/issues/4425)) ([430f338](https://github.com/dream-num/univer/commit/430f338d3209b15e156c849f4272c61d61250496))
+* **ui:** update animation class condition to improve Ribbon styling ([#4392](https://github.com/dream-num/univer/issues/4392)) ([0124730](https://github.com/dream-num/univer/commit/0124730e028149e5326337d95d5133e8aa53888d))
+* vp start sheet view column ([#4396](https://github.com/dream-num/univer/issues/4396)) ([868e4b2](https://github.com/dream-num/univer/commit/868e4b2a81fae12e5a522c85b95b6e6d4690d2c4))
+* **watermark:** fix invalid plugin configuration ([#4389](https://github.com/dream-num/univer/issues/4389)) ([e3930bb](https://github.com/dream-num/univer/commit/e3930bbdea12de3e222879e2dad0ecc2d43a64b9))
+
+
+### Features
+
+* add api for ui and f-enum ([#4406](https://github.com/dream-num/univer/issues/4406)) ([51ed14e](https://github.com/dream-num/univer/commit/51ed14e80c22cfe9fe8b08dc8e7e2f53ee74f8ad))
+* **facade:** facade-namespace & global addEvent ([#4346](https://github.com/dream-num/univer/issues/4346)) ([612c981](https://github.com/dream-num/univer/commit/612c981b2fd403bf0ebce316e4b3f9fed5d59d68))
+* **facade:** make facade api sync and chainable ([#4329](https://github.com/dream-num/univer/issues/4329)) ([c5fcf3e](https://github.com/dream-num/univer/commit/c5fcf3eccd1632bce2396238fa3bdebb87d214ff))
+* fetchThroughInterceptors support filter function ([#4385](https://github.com/dream-num/univer/issues/4385)) ([e909093](https://github.com/dream-num/univer/commit/e90909302d857d19bfc0b3df2f95092ef287ba3e))
+* **filter:** update filter facade to add events and enums ([#4403](https://github.com/dream-num/univer/issues/4403)) ([9ad9d48](https://github.com/dream-num/univer/commit/9ad9d4851039d98070e177695a466e7fb76089f5))
+* **formula:** add register async function ([#4399](https://github.com/dream-num/univer/issues/4399)) ([c8d287b](https://github.com/dream-num/univer/commit/c8d287b2a49447e7f68b9b233663d826976258a7))
+* **sheet:** support range theme template ([#4369](https://github.com/dream-num/univer/issues/4369)) ([28ff41a](https://github.com/dream-num/univer/commit/28ff41a3a2db56d19854efcfadd1494e2812ab59))
+
+
+### Reverts
+
+* get fontExtension from cache,  revert to worksheet.getCell ([#4417](https://github.com/dream-num/univer/issues/4417)) ([5c03dff](https://github.com/dream-num/univer/commit/5c03dff81221fe4933cb33ffb83b650ddef8b91a))
 
 ## [0.5.2](https://github.com/dream-num/univer/compare/v0.5.1...v0.5.2) (2024-12-28)
 

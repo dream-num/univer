@@ -19,6 +19,7 @@ import './f-workbook';
 import './f-worksheet';
 import './f-permission';
 import './f-sheet-hooks';
+import './f-event';
 
 export { type IFComponentKey, transformComponentKey } from './f-range';
 

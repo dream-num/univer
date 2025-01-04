@@ -563,10 +563,17 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merge cells in a range into one merged cell
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0, 0, 2, 2);
+     * const merge = range.merge();
+     * const isMerged = merge.isMerged();
+     * console.log('debugger', isMerged);
+     * ```
      */
     merge(defaultMerge: boolean = true): FRange {
         const unitId = this._workbook.getUnitId();
@@ -579,10 +586,17 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range horizontally.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(2, 2, 2, 2);
+     * const merge = range.mergeAcross();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
+     * ```
      */
     mergeAcross(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
@@ -596,10 +610,17 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range vertically.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(4, 4, 2, 2);
+     * const merge = range.mergeVertically();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
+     * ```
      */
     mergeVertically(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
@@ -614,6 +635,16 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns true if cells in the current range overlap a merged cell.
      * @returns {boolean} is overlap with a merged cell
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0,0,2,2);
+     * const merge = range.merge();
+     * const anchor = worksheet.getRange(0,0);
+     * const isPartOfMerge = anchor.isPartOfMerge();
+     * console.log('debugger, isPartOfMerge) // true
+     * ```
      */
     isPartOfMerge(): boolean {
         const { startRow, startColumn, endRow, endColumn } = this._range;
@@ -623,6 +654,19 @@ export class FRange extends FBaseInitialable {
     /**
      * Break all horizontally- or vertically-merged cells contained within the range list into individual cells again.
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0,0,2,2);
+     * const merge = range.merge();
+     * const anchor = worksheet.getRange(0,0);
+     * const isPartOfMergeFirst = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeFirst) // true
+     * range.breakApart();
+     * const isPartOfMergeSecond = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeSecond) // false
+     * ```
      */
     breakApart(): FRange {
         this._commandService.executeCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });

@@ -314,13 +314,4 @@ export class FPermission extends FBase {
             });
         }
     }
-
-    /**
-     * Set visibility of unauthorized pop-up window
-     *
-     * @param {boolean} visible
-     */
-    setPermissionDialogVisible(visible: boolean): void {
-        this._permissionService.setShowComponents(visible);
-    }
 }

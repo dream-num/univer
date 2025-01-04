@@ -62,7 +62,7 @@ export interface IFSheetEventMixin {
     get WorkbookDisposed(): 'WorkbookDisposed';
 }
 
-export interface IWorkbookCreateParam {
+export interface IWorkbookCreateParam extends IEventBase {
     unitId: string;
     type: UniverInstanceType.UNIVER_SHEET;
     workbook: FWorkbook;

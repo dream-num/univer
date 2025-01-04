@@ -22,5 +22,6 @@ import './f-event';
 export type * from './f-event';
 export type * from './f-range';
 export type * from './f-thread-comment';
+export { FThreadComment } from './f-thread-comment';
 export type * from './f-workbook';
 export type * from './f-worksheet';

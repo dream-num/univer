@@ -37,6 +37,7 @@ export class FUnvierDataValidationMixin extends FUniver {
 
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
+        if (!injector.has(SheetDataValidationModel)) return;
         const sheetDataValidationModel = injector.get(SheetDataValidationModel);
         const commadnService = injector.get(ICommandService);
 

@@ -213,6 +213,7 @@ export interface ISheetCommentResolveEvent extends IEventBase {
     resolved: boolean;
 }
 
+FEventName.extend(FCommentEvent);
 export interface ISheetCommentEventConfig {
     BeforeCommentAdd: IBeforeSheetCommentAddEvent;
     CommentAdded: ISheetCommentAddEvent;

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { DataValidationStatus, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IEventBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { DataValidationChangeType, IRuleChange } from '@univerjs/data-validation';
 import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FDataValidation } from './f-data-validation';
-import { type DataValidationStatus, FEventName, type IDataValidationRule, type IDataValidationRuleBase, type IDataValidationRuleOptions, type IRange, type ISheetDataValidationRule } from '@univerjs/core';
+import { FEventName } from '@univerjs/core';
 
-export interface ISheetDataValidationChangedEvent {
+export interface ISheetDataValidationChangedEvent extends IEventBase {
     origin: IRuleChange;
     worksheet: FWorksheet;
     workbook: FWorkbook;
@@ -28,7 +29,7 @@ export interface ISheetDataValidationChangedEvent {
     rule: FDataValidation;
 }
 
-export interface ISheetDataValidatorStatusChangedEvent {
+export interface ISheetDataValidatorStatusChangedEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     row: number;
@@ -37,20 +38,20 @@ export interface ISheetDataValidatorStatusChangedEvent {
     rule: FDataValidation;
 }
 
-export interface IBeforeSheetDataValidationAddEvent {
+export interface IBeforeSheetDataValidationAddEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     rule: ISheetDataValidationRule;
 }
 
-export interface IBeforeSheetDataValidationDeleteEvent {
+export interface IBeforeSheetDataValidationDeleteEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     ruleId: string;
     rule: FDataValidation;
 }
 
-export interface IBeforeSheetDataValidationCriteriaUpdateEvent {
+export interface IBeforeSheetDataValidationCriteriaUpdateEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     ruleId: string;
@@ -58,7 +59,7 @@ export interface IBeforeSheetDataValidationCriteriaUpdateEvent {
     newCriteria: IDataValidationRuleBase;
 }
 
-export interface IBeforeSheetDataValidationRangeUpdateEvent {
+export interface IBeforeSheetDataValidationRangeUpdateEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     ruleId: string;
@@ -66,7 +67,7 @@ export interface IBeforeSheetDataValidationRangeUpdateEvent {
     newRanges: IRange[];
 }
 
-export interface IBeforeSheetDataValidationOptionsUpdateEvent {
+export interface IBeforeSheetDataValidationOptionsUpdateEvent extends IEventBase {
     worksheet: FWorksheet;
     workbook: FWorkbook;
     ruleId: string;

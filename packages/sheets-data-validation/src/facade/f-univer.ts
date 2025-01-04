@@ -15,8 +15,10 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import { FUniver } from '@univerjs/core';
-import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import type { IAddSheetDataValidationCommandParams } from '@univerjs/sheets-data-validation';
+import type { IBeforeSheetDataValidationAddEvent } from './f-event';
+import { FUniver, ICommandService } from '@univerjs/core';
+import { AddSheetDataValidationCommand, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { FDataValidation } from './f-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
@@ -35,6 +37,7 @@ export class FUnvierDataValidationMixin extends FUniver {
 
     override _initialize(injector: Injector): void {
         const sheetDataValidationModel = injector.get(SheetDataValidationModel);
+        const commadnService = injector.get(ICommandService);
 
         this.disposeWithMe(sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
             const { unitId, subUnitId, rule, oldRule, type } = ruleChange;
@@ -74,6 +77,32 @@ export class FUnvierDataValidationMixin extends FUniver {
                 rule,
                 status,
             });
+        }));
+
+        this.disposeWithMe(commadnService.beforeCommandExecuted((commandInfo) => {
+            switch (commandInfo.id) {
+                case AddSheetDataValidationCommand.id: {
+                    const params = commandInfo.params as IAddSheetDataValidationCommandParams;
+                    const target = this.getSheetTarget(params.unitId, params.subUnitId);
+                    if (!target) {
+                        return;
+                    }
+                    const { workbook, worksheet } = target;
+                    const eventParams: IBeforeSheetDataValidationAddEvent = {
+                        worksheet,
+                        workbook,
+                        rule: params.rule,
+                    };
+                    this.fireEvent(this.Event.BeforeSheetDataValidationAdd, eventParams);
+                    if (eventParams.cancel) {
+                        // throw new CanceledError();
+                    }
+                    break;
+                }
+
+                default:
+                    break;
+            }
         }));
     }
 }

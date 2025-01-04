@@ -87,6 +87,12 @@ export class FSheetFilterEventName extends FEventName implements IFSheetFilterEv
     override get SheetBeforeRangeFilterClear(): 'SheetBeforeRangeFilterClear' { return 'SheetBeforeRangeFilterClear'; }
 }
 
+FEventName.extend(FSheetFilterEventName);
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEventName extends IFSheetFilterEventMixin { }
+}
+
 /**
  * The params of SheetRangeFiltered and SheetBeforeRangeFilter events.
  * @param workbook - The corresponding workbook wrapped in {@link FWorkbook}.

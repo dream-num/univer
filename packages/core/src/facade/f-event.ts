@@ -83,6 +83,7 @@ export class FEventName {
 
     /**
      * DocCreated event
+     * @see {@link IDocCreatedParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocCreated, (params) => {
@@ -96,6 +97,7 @@ export class FEventName {
 
     /**
      * DocDisposed event
+     * @see {@link IDocDisposedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocDisposed, (params) => {
@@ -109,6 +111,7 @@ export class FEventName {
 
     /**
      * LifeCycleChanged event
+     * @see {@link ILifeCycleChangedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.LifeCycleChanged, (params) => {
@@ -122,6 +125,7 @@ export class FEventName {
 
     /**
      * Redo event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.Redo, (params) => {
@@ -135,6 +139,7 @@ export class FEventName {
 
     /**
      * Undo event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.Undo, (params) => {
@@ -148,6 +153,7 @@ export class FEventName {
 
     /**
      * BeforeRedo event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeRedo, (params) => {
@@ -161,6 +167,7 @@ export class FEventName {
 
     /**
      * BeforeUndo event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeUndo, (params) => {
@@ -174,6 +181,7 @@ export class FEventName {
 
     /**
      * CommandExecuted event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.CommandExecuted, (params) => {
@@ -187,6 +195,7 @@ export class FEventName {
 
     /**
      * BeforeCommandExecute event
+     * @see {@link ICommandEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (params) => {

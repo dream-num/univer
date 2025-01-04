@@ -106,6 +106,7 @@ interface IDataValidationEvent {
 export class FDataValidationEvent implements IDataValidationEvent {
     /**
      * SheetDataValidationChanged event
+     * @see {@link ISheetDataValidationChangedEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.SheetDataValidationChanged, (event) => {
@@ -119,6 +120,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * SheetDataValidatorStatusChanged event
+     * @see {@link ISheetDataValidatorStatusChangedEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
@@ -131,20 +133,8 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * SheetDataValidationChanging event
-     * @example
-     * ```ts
-     * univerAPI.on(univerAPI.Event.SheetDataValidationChanging, (event) => {
-     *     console.log(event);
-     * });
-     * ```
-     */
-    get SheetDataValidationChanging(): 'SheetDataValidationChanging' {
-        return 'SheetDataValidationChanging';
-    }
-
-    /**
      * BeforeSheetDataValidationAdd event
+     * @see {@link IBeforeSheetDataValidationAddEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
@@ -158,6 +148,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * BeforeSheetDataValidationDelete event
+     * @see {@link IBeforeSheetDataValidationDeleteEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
@@ -171,6 +162,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * BeforeSheetDataValidationDeleteAll event
+     * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
@@ -184,6 +176,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * BeforeSheetDataValidationCriteriaUpdate event
+     * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
@@ -197,6 +190,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * BeforeSheetDataValidationRangeUpdate event
+     * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
@@ -210,6 +204,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
 
     /**
      * BeforeSheetDataValidationOptionsUpdate event
+     * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {

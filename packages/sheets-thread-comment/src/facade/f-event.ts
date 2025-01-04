@@ -22,6 +22,7 @@ import { FEventName } from '@univerjs/core';
 interface ICommentEventMixin {
     /**
      * Comment added event
+     * @see {@link ICommentAddedEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentAdded, (event) => {
@@ -33,6 +34,7 @@ interface ICommentEventMixin {
 
     /**
      * Before comment add event
+     * @see {@link IBeforeCommentAddEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentAdd, (event) => {
@@ -44,6 +46,7 @@ interface ICommentEventMixin {
 
     /**
      * Comment updated event
+     * @see {@link ICommentUpdatedEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentUpdated, (event) => {
@@ -55,6 +58,7 @@ interface ICommentEventMixin {
 
     /**
      * Before comment update event
+     * @see {@link IBeforeCommentUpdateEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentUpdate, (event) => {
@@ -66,6 +70,7 @@ interface ICommentEventMixin {
 
     /**
      * Comment deleted event
+     * @see {@link ICommentDeletedEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentDeleted, (event) => {
@@ -77,6 +82,7 @@ interface ICommentEventMixin {
 
     /**
      * Before comment delete event
+     * @see {@link IBeforeCommentDeleteEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentDeleted, (event) => {
@@ -88,6 +94,7 @@ interface ICommentEventMixin {
 
     /**
      * Comment resolved event
+     * @see {@link ICommentResolvedEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentResolved, (event) => {
@@ -99,6 +106,7 @@ interface ICommentEventMixin {
 
     /**
      * Before comment resolve event
+     * @see {@link IBeforeCommentResolveEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentResolve, (event) => {

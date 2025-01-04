@@ -79,6 +79,7 @@ export interface ISheetEditStartedEventParams extends IEventBase {
     column: number;
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
+    isZenEditor: boolean;
 }
 
 export interface ISheetEditEndedEventParams extends IEventBase {
@@ -88,6 +89,7 @@ export interface ISheetEditEndedEventParams extends IEventBase {
     column: number;
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
+    isZenEditor: boolean;
 }
 
 export interface ISheetEditChangingEventParams extends IEventBase {
@@ -96,6 +98,7 @@ export interface ISheetEditChangingEventParams extends IEventBase {
     row: number;
     column: number;
     value: RichTextValue;
+    isZenEditor: boolean;
 }
 
 export interface IBeforeSheetEditStartEventParams extends IEventBase {
@@ -105,6 +108,7 @@ export interface IBeforeSheetEditStartEventParams extends IEventBase {
     column: number;
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
+    isZenEditor: boolean;
 }
 
 export interface IBeforeSheetEditEndEventParams extends IEventBase {
@@ -115,6 +119,7 @@ export interface IBeforeSheetEditEndEventParams extends IEventBase {
     value: RichTextValue;
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
+    isZenEditor: boolean;
 }
 
 export interface ISheetUIEventConfig {

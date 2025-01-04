@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, RichTextValue, WrapStrategy } from '@univerjs/core';
@@ -169,7 +169,10 @@ export class FRange extends FBaseInitialable {
      * @returns {ICellData | null} The cell model data
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getCellData()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellData()
      * ```
      */
     getCellData(): ICellData | null {
@@ -181,7 +184,10 @@ export class FRange extends FBaseInitialable {
      * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getCellDatas()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellDatas()
      * ```
      */
     getCellDatas(): Nullable<ICellData>[][] {
@@ -210,7 +216,10 @@ export class FRange extends FBaseInitialable {
      * @returns {Nullable<RichTextValue>} The rich text value
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getRichTextValue()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getRichTextValue()
      * ```
      */
     getRichTextValue(): Nullable<RichTextValue> {
@@ -226,7 +235,10 @@ export class FRange extends FBaseInitialable {
      * @returns {Nullable<RichTextValue>[][]} A two-dimensional array of RichTextValue objects.
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getRichTextValues()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getRichTextValues()
      * ```
      */
     getRichTextValues(): Nullable<RichTextValue>[][] {
@@ -239,7 +251,10 @@ export class FRange extends FBaseInitialable {
      * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getValueAndRichTextValue()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValueAndRichTextValue()
      * ```
      */
     getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
@@ -252,7 +267,10 @@ export class FRange extends FBaseInitialable {
      * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getValueAndRichTextValues()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValueAndRichTextValues()
      * ```
      */
     getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
@@ -265,7 +283,10 @@ export class FRange extends FBaseInitialable {
      * @returns {string[][]} A two-dimensional array of formulas in string format.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getFormulas()
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getFormulas()
      * ```
      */
     getFormulas(): string[][] {
@@ -305,6 +326,38 @@ export class FRange extends FBaseInitialable {
         return transformCoreVerticalAlignment(this._worksheet.getRange(this._range).getVerticalAlignment());
     }
 
+    /**
+     * Set custom meta data for first cell in current range.
+     * @param {CustomData} data The custom meta data
+     * @returns {FRange} This range, for chaining
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setCustomMetaData({ key: 'value' });
+     * ```
+     */
+    setCustomMetaData(data: CustomData): FRange {
+        return this.setValue({
+            custom: data,
+        });
+    }
+
+    /**
+     * Set custom meta data for current range.
+     * @param {CustomData[][]} datas The custom meta data
+     * @returns {FRange} This range, for chaining
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setCustomMetaDatas([[{ key: 'value' }]]);
+     * ```
+     */
+    setCustomMetaDatas(datas: CustomData[][]): FRange {
+        return this.setValues(datas.map((row) => row.map((data) => ({ custom: data }))));
+    }
+
     // #region editing
 
     /**
@@ -312,7 +365,10 @@ export class FRange extends FBaseInitialable {
      * @param color {string}
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setBackgroundColor('red')
      * ```
      */
     setBackgroundColor(color: string): FRange {
@@ -367,6 +423,12 @@ export class FRange extends FBaseInitialable {
     /**
      * Set new value for current cell, first cell in this range.
      * @param {CellValue | ICellData} value  The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setValueForCell(1);
+     * ```
      */
     setValueForCell(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);
@@ -396,7 +458,10 @@ export class FRange extends FBaseInitialable {
      * @returns {FRange} The range
      * @example
      * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setRichTextValueForCell(new RichTextValue())
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setRichTextValueForCell(new RichTextValue().insertText('Hello'));
      * ```
      */
     setRichTextValueForCell(value: RichTextValue | IDocumentData): FRange {
@@ -421,8 +486,12 @@ export class FRange extends FBaseInitialable {
      * @param {RichTextValue[][]} values The rich text value
      * @returns {FRange} The range
      * @example
-     * ```
-     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setRichTextValues([[new RichTextValue()]])
+     * ```ts
+     * univerAPI
+     *  .getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setRichTextValues([[new RichTextValue().insertText('Hello')]]);
      * ```
      */
     setRichTextValues(values: (RichTextValue | IDocumentData)[][]): FRange {

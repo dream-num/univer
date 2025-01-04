@@ -37,7 +37,7 @@ export interface IFSheetFilterEventMixin {
      */
     readonly SheetRangeFiltered: 'SheetRangeFiltered';
     /**
-     * This event will be emitted beftore the filter criteria on a column is changed.
+     * This event will be emitted before the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
      *
      * @example

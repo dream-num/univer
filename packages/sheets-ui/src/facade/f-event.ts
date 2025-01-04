@@ -25,6 +25,7 @@ interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (param) => {
+     *   const {text, html} = param;
      *   console.log('debugger', param);
      *   // if want to cancel the clipboard change
      *   param.cancel = true;
@@ -39,6 +40,7 @@ interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (param) => {
+     *  const {text, html} = param;
      *  console.log('debugger', param);
      * })
      * ```
@@ -64,6 +66,7 @@ interface IFSheetsUIEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (param) => {
+     *  const {text, html} = param;
      *  console.log('debugger', param);
      * })
      * ```

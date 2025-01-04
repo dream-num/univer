@@ -222,7 +222,7 @@ export class FUniver extends FBaseInitialable {
     /**
      * Fire an event, used in internal only.
      * @param event {string} key of event
-     * @param params {any} parmas of event
+     * @param params {any} params of event
      * @returns {boolean} should cancel
      * @example
      * ```ts

@@ -251,12 +251,12 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private async _beforeClipboardPasteAsync(): Promise<void> {
+        if (!this.hasEventCallback(this.Event.BeforeClipboardPaste)) {
+            return;
+        }
         if (!supportClipboardAPI()) {
             const logService = this._injector.get(ILogService);
             logService.warn('[Facade]: The navigator object only supports the browser environment');
-            return;
-        }
-        if (!this.hasEventCallback(this.Event.BeforeClipboardPaste)) {
             return;
         }
         const eventParams = await this._generateClipboardPasteParamAsync();
@@ -268,12 +268,12 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private async _clipboardPasteAsync(): Promise<void> {
+        if (!this.hasEventCallback(this.Event.ClipboardPasted)) {
+            return;
+        }
         if (!supportClipboardAPI()) {
             const logService = this._injector.get(ILogService);
             logService.warn('[Facade]: The navigator object only supports the browser environment');
-            return;
-        }
-        if (!this.hasEventCallback(this.Event.ClipboardPasted)) {
             return;
         }
         const eventParams = await this._generateClipboardPasteParamAsync();

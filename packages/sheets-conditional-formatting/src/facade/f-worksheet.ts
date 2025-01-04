@@ -36,7 +36,7 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Gets all the conditional formatting for the current sheet
-     * @return {*}  {IConditionFormattingRule[]}
+     * @returns {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -48,7 +48,7 @@ export interface IFWorksheetConditionalFormattingMixin {
     /**
      * @deprecated use newConditionalFormattingRule instead.
      * Creates a constructor for conditional formatting
-     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @returns {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -68,7 +68,7 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Creates a constructor for conditional formatting
-     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @returns {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -110,7 +110,6 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Delete conditional format according to `cfId`
-     *
      * @param {string} cfId
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof IFWorksheetConditionalFormattingMixin

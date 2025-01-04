@@ -36,9 +36,7 @@ import { FUserManager } from './f-usermanager';
 export class FUniver extends FBaseInitialable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
-     *
      * @static
-     *
      * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
      * @returns {FUniver} - The FUniver instance.
      */
@@ -78,7 +76,6 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
-     *
      * @param unitId The unit id of the UniverSheet.
      * @returns Whether the Univer instance is disposed successfully.
      */
@@ -88,7 +85,6 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Get the current lifecycle stage.
-     *
      * @returns {LifecycleStages} - The current lifecycle stage.
      */
     getCurrentLifecycleStage(): LifecycleStages {
@@ -98,7 +94,6 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Undo an editing on the currently focused document.
-     *
      * @returns {Promise<boolean>} undo result
      */
     undo(): Promise<boolean> {
@@ -107,7 +102,6 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Redo an editing on the currently focused document.
-     *
      * @returns {Promise<boolean>} redo result
      */
     redo(): Promise<boolean> {
@@ -179,7 +173,6 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Create a new blob.
-     *
      * @returns {FBlob} The new blob instance
      * @example
      * ```ts

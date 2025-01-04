@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
@@ -267,7 +267,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Returns the current number of columns in the sheet, regardless of content.
-     * @return The maximum columns count of the sheet
+     * @returns {number} The maximum columns count of the sheet
      */
     getMaxColumns(): number {
         return this._worksheet.getMaxColumns();
@@ -275,7 +275,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Returns the current number of rows in the sheet, regardless of content.
-     * @return The maximum rows count of the sheet
+     * @returns {number}The maximum rows count of the sheet
      */
     getMaxRows(): number {
         return this._worksheet.getMaxRows();
@@ -283,8 +283,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row after the given row position.
-     * @param afterPosition The row after which the new row should be added, starting at 0 for the first row.
-     * @returns This sheet, for chaining.
+     * @param {number} afterPosition The row after which the new row should be added, starting at 0 for the first row.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     insertRowAfter(afterPosition: number): FWorksheet {
         return this.insertRowsAfter(afterPosition, 1);
@@ -292,8 +292,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Inserts a row before the given row position.
-     * @param beforePosition The row before which the new row should be added, starting at 0 for the first row.
-     * @returns This sheet, for chaining.
+     * @param {number} beforePosition The row before which the new row should be added, starting at 0 for the first row.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     insertRowBefore(beforePosition: number): FWorksheet {
         return this.insertRowsBefore(beforePosition, 1);
@@ -461,9 +461,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides one or more consecutive rows starting at the given index. Use 0-index for this method.
-     * @param rowIndex The starting index of the rows to hide.
-     * @param numRows The number of rows to hide.
-     * @returns This sheet, for chaining.
+     * @param {number} rowIndex The starting index of the rows to hide.
+     * @param {number} numRows The number of rows to hide.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     hideRows(rowIndex: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
@@ -486,8 +486,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Make the row in the given range visible.
-     * @param row The range to unhide, if hidden.
-     * @returns This sheet, for chaining.
+     * @param {FRange} row The range to unhide, if hidden.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     unhideRow(row: FRange): FWorksheet {
         const unitId = this._workbook.getUnitId();
@@ -505,9 +505,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Scrolling sheet to make specific rows visible.
-     * @param rowIndex The starting index of the rows
-     * @param numRows The number of rows
-     * @returns This sheet, for chaining.
+     * @param {number} rowIndex The starting index of the rows
+     * @param {number} numRows The number of rows
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     showRows(rowIndex: number, numRows: number = 1): FWorksheet {
         const unitId = this._workbook.getUnitId();
@@ -531,9 +531,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the row height of the given row in pixels. By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
-     * @param rowPosition The row position to change.
-     * @param height The height in pixels to set it to.
-     * @returns This sheet, for chaining.
+     * @param {number} rowPosition The row position to change.
+     * @param {number} height The height in pixels to set it to.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     setRowHeight(rowPosition: number, height: number): FWorksheet {
         return this.setRowHeights(rowPosition, 1, height);
@@ -542,10 +542,10 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Sets the height of the given rows in pixels.
      * By default, rows grow to fit cell contents. If you want to force rows to a specified height, use setRowHeightsForced(startRow, numRows, height).
-     * @param startRow The starting row position to change.
-     * @param numRows The number of rows to change.
-     * @param height The height in pixels to set it to.
-     * @returns This sheet, for chaining.
+     * @param {number} startRow The starting row position to change.
+     * @param {number} numRows The number of rows to change.
+     * @param {number} height The height in pixels to set it to.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     setRowHeights(startRow: number, numRows: number, height: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
@@ -594,10 +594,10 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the height of the given rows in pixels. By default, rows grow to fit cell contents. When you use setRowHeightsForced, rows are forced to the specified height even if the cell contents are taller than the row height.
-     * @param startRow The starting row position to change.
-     * @param numRows The number of rows to change.
-     * @param height The height in pixels to set it to.
-     * @returns This sheet, for chaining.
+     * @param {number} startRow The starting row position to change.
+     * @param {number} numRows The number of rows to change.
+     * @param {number} height The height in pixels to set it to.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     setRowHeightsForced(startRow: number, numRows: number, height: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
@@ -1006,7 +1006,8 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Sets the active selection region for this sheet.
-     * @param range The range to set as the active selection.
+     * @param {FRange} range The range to set as the active selection.
+     * @returns {FWorksheet} This sheet, for chaining.
      */
     setActiveRange(range: FRange): FWorksheet {
         const { unitId, sheetId } = range.getRange();
@@ -1029,7 +1030,6 @@ export class FWorksheet extends FBaseInitialable {
      * Sets the frozen state of the current sheet.
      * @param freeze - the scrolling viewport start range and count of freezed rows and columns.
      * that means if you want to freeze the first 3 rows and 2 columns, you should set freeze as { startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 }
-     *
      * @deprecated use `setFrozenRows` and `setFrozenColumns` instead.
      * @returns True if the command was successful, false otherwise.
      */
@@ -1060,7 +1060,6 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Get the freeze state of the current sheet.
      * @returns The freeze state of the current sheet.
-     *
      * @deprecated use `getRowFreezeStatus` and `getColumnFreezeStatus` instead.
      */
     getFreeze(): IFreeze {
@@ -1078,7 +1077,6 @@ export class FWorksheet extends FBaseInitialable {
      * Set freeze column, then the range from startColumn to endColumn will be fixed.
      * e.g. setFrozenColumns(0, 2) will fix the column range from 0 to 2.
      * e.g. setFrozenColumns(2, 3) will fix the column range from 2 to 3, And column from 0 to 1 will be invisible.
-     *
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1088,6 +1086,7 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      * @param startColumn
      * @param endColumn
+     * @returns {FWorksheet} This FWorksheet instance.
      */
     setFrozenColumns(startColumn: number, endColumn: number): FWorksheet;
     setFrozenColumns(...args: [number] | [number, number]): FWorksheet {
@@ -1129,7 +1128,6 @@ export class FWorksheet extends FBaseInitialable {
      * e.g. setFrozenRows(2, 3) will fix the row range from 2 to 3, And row from 0 to 1 will be invisible.
      * @param startRow
      * @param endRow
-     *
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1193,8 +1191,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get freezed rows.
+     * @returns {IRowRange} The range of the frozen rows.
      */
-    getFrozenRowRange(): Partial<IRange> {
+    getFrozenRowRange(): IRowRange {
         const cfg = this._worksheet.getFreeze();
         return {
             startRow: cfg.startRow - cfg.ySplit,
@@ -1204,8 +1203,9 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Get freezed columns
+     * @returns {IColumnRange} The range of the frozen columns.
      */
-    getFrozenColumnRange(): Partial<IRange> {
+    getFrozenColumnRange(): IColumnRange {
         const cfg = this._worksheet.getFreeze();
         return {
             startColumn: cfg.startColumn - cfg.xSplit,
@@ -1233,6 +1233,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Hides or reveals the sheet gridlines.
      * @param {boolean} hidden If `true`, hide gridlines in this sheet; otherwise show the gridlines.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1378,6 +1379,7 @@ export class FWorksheet extends FBaseInitialable {
 
     /**
      * Hides this sheet. Has no effect if the sheet is already hidden. If this method is called on the only visible sheet, it throws an exception.
+     * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

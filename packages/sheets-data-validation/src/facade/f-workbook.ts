@@ -52,8 +52,8 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(IRuleChange): void} callback - Callback function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      */
     onDataValidationChange(
         callback: (ruleChange: IRuleChange) => void
@@ -61,8 +61,8 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(IValidStatusChange): void} callback - Callback function that will be called when the event is fired
+     * @returns {IDisposable}  A disposable object that can be used to unsubscribe from the event
      */
     onDataValidationStatusChange(
         callback: (statusChange: IValidStatusChange) => void
@@ -70,8 +70,8 @@ export interface IFWorkbookDataValidationMixin {
 
     /**
      * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(IAddSheetDataValidationCommandParams, IExecutionOptions | undefined): void | false} callback - Callback function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      */
     onBeforeAddDataValidation(
         this: FWorkbook,
@@ -145,11 +145,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
     }
 
     // region DataValidationHooks
-    /**
-     * The onDataValidationChange event is fired when the data validation rule of this sheet is changed.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onDataValidationChange(
         callback: (ruleChange: IRuleChange) => void
     ): IDisposable {
@@ -159,11 +154,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
             .subscribe(callback));
     }
 
-    /**
-     * The onDataValidationStatusChange event is fired when the data validation status of this sheet is changed.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onDataValidationStatusChange(
         callback: (statusChange: IValidStatusChange) => void
     ): IDisposable {
@@ -172,11 +162,6 @@ export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkboo
             .subscribe(callback));
     }
 
-    /**
-     * The onBeforeAddDataValidation event is fired before the data validation rule is added.
-     * @param callback - Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
-     */
     override onBeforeAddDataValidation(
         callback: (params: IAddSheetDataValidationCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable {

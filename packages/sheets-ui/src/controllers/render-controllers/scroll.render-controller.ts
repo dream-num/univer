@@ -285,8 +285,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
      *
      * if column A ~ B is frozen. set second param to 0 would make viewMain start at column C.
      * set second param to 2 would make viewMain start at column E.
-     * @param row
-     * @param column
+     * @param {number} row - Cell row
+     * @param {number} column - Cell column
+     * @returns {boolean} - true if scroll is successful
      */
     scrollToCell(row: number, column: number) {
         const worksheet = this._context.unit.getActiveSheet();

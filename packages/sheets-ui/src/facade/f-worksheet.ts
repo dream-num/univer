@@ -56,15 +56,22 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Return visible range, sum view range of 4 viewports.
-     * @returns IRange
+     * @returns {IRange} - visible range
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const visibleRange = fWorksheet.getVisibleRange();
+     * ```
      */
     getVisibleRange(): IRange;
 
     /**
      * Scroll spreadsheet(viewMain) to cell position. Make the cell at topleft of current viewport.
      * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
+     * @param {number} row - Cell row index
+     * @param {number} column - Cell column index
+     * @returns {FWorksheet} - Current worksheet
      * @example
      * ``` ts
      * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
@@ -84,7 +91,8 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Invoked when scrolling the sheet.
-     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @param {function(Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @returns {IDisposable} The disposable object to remove the event listener.
      * @example
      * ``` ts
      * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})

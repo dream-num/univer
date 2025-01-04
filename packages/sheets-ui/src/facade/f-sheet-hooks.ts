@@ -24,8 +24,8 @@ import { FSheetHooks } from '@univerjs/sheets/facade';
 export interface IFSheetHooksUIMixin {
     /**
      * The onCellPointerMove event is fired when a pointer changes coordinates.
-     * @param {function(cellPos: Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
      * ```
      * univerAPI.getSheetHooks().onCellPointerMove((cellPos) => { console.log(cellPos)});
@@ -35,8 +35,8 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellPointerOver event is fired when a pointer is moved into a cell's hit test boundaries.
-     * @param {function(cellPos: Nullable<IHoverCellPosition>): void} Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
      * ```
      * univerAPI.getSheetHooks().onCellPointerOver((cellPos) => { console.log(cellPos)});
@@ -46,8 +46,8 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellDragOver event is fired when an element or text selection is being dragged into a cell's hit test boundaries.
-     * @param {function (cellPos: Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function (Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
      * ```
      * univerAPI.getSheetHooks().onCellDragOver((cellPos) => { console.log(cellPos)});
@@ -57,8 +57,8 @@ export interface IFSheetHooksUIMixin {
 
     /**
      * The onCellDrop event is fired when an element or text selection is being dropped on the cell.
-     * @param {function(cellPos: Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @param {function(Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
      * ```
      * univerAPI.getSheetHooks().onCellDrop((cellPos) => { console.log(cellPos)});
@@ -71,7 +71,7 @@ export interface IFSheetHooksUIMixin {
      * @param {Nullable<ICellCustomRender[]>} customRender Custom render function
      * @param {InterceptorEffectEnum} [effect] The effect of the interceptor
      * @param {number} priority The priority of the interceptor
-     * @returns A disposable object that can be used to unsubscribe from the event
+     * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
      * ```
         univerAPI.getSheetHooks().onCellRender([{

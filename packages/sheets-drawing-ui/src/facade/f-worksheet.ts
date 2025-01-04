@@ -70,11 +70,8 @@ export interface IFWorksheetLegacy {
      *  const imageBuilder = activeSheet.newOverGridImage();
      *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
      *  activeSheet.insertImages([param]);
-     *
-     *
      *  const image = activeSheet.getImageById(param.drawingId);
      *  console.log(image);
-
      *  setTimeout(async ()=>{
      *   const builder = image.toBuilder();
      *   const param = await builder.setHeight(50).setWidth(100).build();
@@ -118,11 +115,8 @@ export interface IFWorksheetLegacy {
      *  const imageBuilder = activeSheet.newOverGridImage();
      *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
      *  activeSheet.insertImages([param]);
-     *
-     *
      *  const image = activeSheet.getImageById(param.drawingId);
      *  console.log(image);
-
      *  setTimeout(async ()=>{
      *   const builder = image.toBuilder();
      *   const param = await builder.setHeight(50).setWidth(100).build();

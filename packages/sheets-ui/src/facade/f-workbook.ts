@@ -27,9 +27,7 @@ import { filter } from 'rxjs';
 export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.
-     *
      * @deprecated
-     *
      * @param params the sidebar options
      * @returns the disposable object
      */
@@ -37,9 +35,7 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Open a dialog.
-     *
      * @deprecated
-     *
      * @param dialog the dialog options
      * @returns the disposable object
      */
@@ -47,7 +43,6 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Subscribe to cell click events
-     *
      * @param callback - The callback function to be called when a cell is clicked
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -55,7 +50,6 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Subscribe cell hover events
-     *
      * @param callback - The callback function to be called when a cell is hovered
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -103,9 +97,8 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * @async
-     * @param save - Whether to save the changes, default is true
-     * @returns A promise that resolves to a boolean value
-     * @param save
+     * @param {boolean} save - Whether to save the changes, default is true
+     * @returns {Promise<boolean>} A promise that resolves to a boolean value
      */
     endEditingAsync(save?: boolean): Promise<boolean>;
     /*
@@ -120,6 +113,7 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Disable selection. After disabled, there would be no response for selection.
+     * @returns {FWorkbook} FWorkbook instance
      * @example
      * ```
      * univerAPI.getActiveWorkbook().disableSelection();
@@ -255,6 +249,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     /**
      * Get scroll state of specified sheet.
+     * @param sheetId
      * @returns {IScrollState} scroll state
      * @example
      * ``` ts

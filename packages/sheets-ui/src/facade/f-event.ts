@@ -20,7 +20,7 @@ import { FEventName } from '@univerjs/core';
 
 interface IFSheetsUIEventNameMixin {
     /**
-     * This event is triggered before the clipboard content is changed.
+     * Trigger this event before the clipboard content changes.
      * Type of the event parameter is {@link IBeforeClipboardChangeParam}
      * @example
      * ```ts
@@ -34,7 +34,7 @@ interface IFSheetsUIEventNameMixin {
     readonly BeforeClipboardChange: 'BeforeClipboardChange';
 
     /**
-     * This event is triggered after the clipboard content is changed.
+     * Trigger this event after the clipboard content changes.
      * Type of the event parameter is {@link IClipboardChangedParam}
      * @example
      * ```ts
@@ -45,7 +45,7 @@ interface IFSheetsUIEventNameMixin {
      */
     readonly ClipboardChanged: 'ClipboardChanged';
     /**
-     * This event is triggered before the clipboard content is pasted.
+     * Trigger this event before pasting.
      * Type of the event parameter is {@link IBeforeClipboardPasteParam}
      * @example
      * ```ts
@@ -59,7 +59,7 @@ interface IFSheetsUIEventNameMixin {
      */
     readonly BeforeClipboardPaste: 'BeforeClipboardPaste';
     /**
-     * This event is triggered after the clipboard content is pasted.
+     * Trigger this event after pasting.
      * Type of the event parameter is {@link IClipboardPastedParam}
      * @example
      * ```ts

@@ -92,13 +92,15 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     private _initSheetUIEvent(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
-            const target = this.getCommandSheetTarget(commandInfo);
-            if (!target) {
-                return;
-            }
-            const { workbook, worksheet } = target;
-
             if (commandInfo.id === SetCellEditVisibleOperation.id) {
+                if (!this._eventListend(this.Event.BeforeSheetEditStart) && !this._eventListend(this.Event.BeforeSheetEditEnd)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
                 const editorBridgeService = injector.get(IEditorBridgeService);
                 const univerInstanceService = injector.get(IUniverInstanceService);
                 const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
@@ -138,13 +140,16 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         }));
 
         this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
-            const target = this.getCommandSheetTarget(commandInfo);
-            if (!target) {
-                return;
-            }
-            const { workbook, worksheet } = target;
-
             if (commandInfo.id === SetCellEditVisibleOperation.id) {
+                if (!this._eventListend(this.Event.SheetEditStarted) && !this._eventListend(this.Event.SheetEditEnded)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
+
                 const editorBridgeService = injector.get(IEditorBridgeService);
                 const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
                 const { visible, keycode, eventType } = params;
@@ -175,6 +180,14 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             }
 
             if (commandInfo.id === RichTextEditingMutation.id) {
+                if (!this._eventListend(this.Event.SheetEditChanging)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
                 const editorBridgeService = injector.get(IEditorBridgeService);
                 const univerInstanceService = injector.get(IUniverInstanceService);
                 const params = commandInfo.params as IRichTextEditingMutationParams;

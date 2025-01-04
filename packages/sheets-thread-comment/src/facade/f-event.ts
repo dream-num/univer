@@ -157,7 +157,7 @@ export class FCommentEvent extends FEventName {
     }
 }
 
-export interface ISheetCommentAddEvent {
+export interface ISheetCommentAddEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -173,7 +173,7 @@ export interface IBeforeSheetCommentAddEvent extends IEventBase {
     comment: FTheadCommentItem;
 }
 
-export interface ISheetCommentUpdateEvent {
+export interface ISheetCommentUpdateEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     row: number;
@@ -198,7 +198,7 @@ export interface IBeforeSheetCommentDeleteEvent extends IEventBase {
     comment: FThreadComment;
 }
 
-export interface ISheetCommentDeleteEvent {
+export interface ISheetCommentDeleteEvent extends IEventBase {
     workbook: FWorkbook;
     worksheet: FWorksheet;
     commentId: string;

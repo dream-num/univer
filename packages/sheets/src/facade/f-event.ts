@@ -22,6 +22,7 @@ import { FEventName } from '@univerjs/core';
 export interface IFSheetEventMixin {
     /**
      * SheetCreated event
+     * @see {@link ISheetCreatedEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.SheetCreated, (params) => {
@@ -32,6 +33,7 @@ export interface IFSheetEventMixin {
     get SheetCreated(): 'SheetCreated' ;
     /**
      * BeforeSheetCreate event
+     * @see {@link IBeforeSheetCreateEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeSheetCreate, (params) => {
@@ -42,6 +44,7 @@ export interface IFSheetEventMixin {
     get BeforeSheetCreate(): 'BeforeSheetCreate';
     /**
      * WorkbookCreated event
+     * @see {@link IWorkbookCreateParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.WorkbookCreated, (params) => {
@@ -52,6 +55,7 @@ export interface IFSheetEventMixin {
     get WorkbookCreated(): 'WorkbookCreated';
     /**
      * WorkbookDisposed event
+     * @see {@link IWorkbookDisposedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.WorkbookDisposed, (params) => {

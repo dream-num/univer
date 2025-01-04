@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Injector, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
     IRowsHeaderCfgParam,
@@ -24,9 +25,12 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import { FUniver, toDisposable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
+import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, IUniverInstanceService, RichTextValue, toDisposable } from '@univerjs/core';
+import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation, SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 
 export interface IFUniverSheetsUIMixin {
@@ -78,14 +82,119 @@ export interface IFUniverSheetsUIMixin {
     registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
 
     /**
-     * Get sheet hooks.
-     *
-     * @returns {FSheetHooks} FSheetHooks instance
+     * @deprecated use `univerAPI.addEvent` as instead.
      */
     getSheetHooks(): FSheetHooks;
 }
 
 export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
+    // eslint-disable-next-line max-lines-per-function
+    private _initSheetUIEvent(injector: Injector): void {
+        const commandService = injector.get(ICommandService);
+        this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
+            const target = this.getCommandSheetTarget(commandInfo);
+            if (!target) {
+                return;
+            }
+            const { workbook, worksheet } = target;
+
+            if (commandInfo.id === SetCellEditVisibleOperation.id) {
+                const editorBridgeService = injector.get(IEditorBridgeService);
+                const univerInstanceService = injector.get(IUniverInstanceService);
+                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                const { visible, keycode, eventType } = params;
+                const loc = editorBridgeService.getEditLocation()!;
+                if (visible) {
+                    const eventParams: IBeforeSheetEditStartEventParams = {
+                        row: loc.row,
+                        column: loc.column,
+                        eventType,
+                        keycode,
+                        workbook,
+                        worksheet,
+                    };
+                    this.fireEvent(this.Event.BeforeSheetEditStart, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                } else {
+                    const eventParams: IBeforeSheetEditEndEventParams = {
+                        row: loc.row,
+                        column: loc.column,
+                        eventType,
+                        keycode,
+                        workbook,
+                        worksheet,
+                        value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                    };
+                    this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
+                    if (eventParams.cancel) {
+                        throw new CanceledError();
+                    }
+                }
+            }
+        }));
+
+        this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
+            const target = this.getCommandSheetTarget(commandInfo);
+            if (!target) {
+                return;
+            }
+            const { workbook, worksheet } = target;
+
+            if (commandInfo.id === SetCellEditVisibleOperation.id) {
+                const editorBridgeService = injector.get(IEditorBridgeService);
+                const params = commandInfo.params as IEditorBridgeServiceVisibleParam;
+                const { visible, keycode, eventType } = params;
+                const loc = editorBridgeService.getEditLocation()!;
+                if (visible) {
+                    const eventParams: ISheetEditStartedEventParams = {
+                        row: loc.row,
+                        column: loc.column,
+                        eventType,
+                        keycode,
+                        workbook,
+                        worksheet,
+                    };
+                    this.fireEvent(this.Event.SheetEditStarted, eventParams);
+                } else {
+                    const eventParams: ISheetEditEndedEventParams = {
+                        row: loc.row,
+                        column: loc.column,
+                        eventType,
+                        keycode,
+                        workbook,
+                        worksheet,
+                    };
+                    this.fireEvent(this.Event.SheetEditEnded, eventParams);
+                }
+            }
+
+            if (commandInfo.id === RichTextEditingMutation.id) {
+                const editorBridgeService = injector.get(IEditorBridgeService);
+                const univerInstanceService = injector.get(IUniverInstanceService);
+                const params = commandInfo.params as IRichTextEditingMutationParams;
+                if (!editorBridgeService.isVisible().visible) return;
+                const { unitId } = params;
+                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    const { row, column } = editorBridgeService.getEditLocation()!;
+                    const eventParams: ISheetEditChangingEventParams = {
+                        workbook,
+                        worksheet,
+                        row,
+                        column,
+                        value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                    };
+                    this.fireEvent(this.Event.SheetEditChanging, eventParams);
+                }
+            }
+        }));
+    }
+
+    override _initialize(injector: Injector): void {
+        this._initSheetUIEvent(injector);
+    }
+
     override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
         const wb = this.getActiveWorkbook();
         if (!wb) {

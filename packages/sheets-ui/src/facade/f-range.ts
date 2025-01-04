@@ -19,9 +19,9 @@ import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
 import { DisposableCollection, generateRandomId, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FRange } from '@univerjs/sheets/facade';
 import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { FRange } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 
 export interface IFComponentKey {

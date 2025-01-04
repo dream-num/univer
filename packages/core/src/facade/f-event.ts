@@ -42,14 +42,14 @@ export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreate
 export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
 
 export class FEventName {
-    static _intance: FEventName | null;
+    static _instance: FEventName | null;
     static get() {
-        if (this._intance) {
-            return this._intance;
+        if (this._instance) {
+            return this._instance;
         }
 
         const instance = new FEventName();
-        this._intance = instance;
+        this._instance = instance;
         return instance;
     }
 

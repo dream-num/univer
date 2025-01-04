@@ -21,7 +21,6 @@ import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
 import type { FWorkbook } from './f-workbook';
 import type { FDoc } from './FDoc';
-import { FBase } from './f-base';
 
 export interface ISheetCreateParam {
     unitId: string;
@@ -67,7 +66,7 @@ export interface ICommandEvent extends IEventBase {
     type: CommandType;
 }
 
-export class FEventName extends FBase {
+export class FEventName {
     static _intance: FEventName | null;
     static get() {
         if (this._intance) {
@@ -77,6 +76,29 @@ export class FEventName extends FBase {
         const instance = new FEventName();
         this._intance = instance;
         return instance;
+    }
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+
+    constructor() {
+        for (const key in FEventName.prototype) {
+            // @ts-ignore
+            this[key] = FEventName.prototype[key];
+        }
     }
 
     /**

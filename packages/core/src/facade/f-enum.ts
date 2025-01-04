@@ -23,14 +23,9 @@ import { DataValidationOperator } from '../types/enum/data-validation-operator';
 import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
 import { DataValidationStatus } from '../types/enum/data-validation-status';
 import { DataValidationType } from '../types/enum/data-validation-type';
-import { FBase } from './f-base';
 
-export class FEnum extends FBase {
+export class FEnum {
     static _instance: FEnum | null;
-
-    constructor() {
-        super();
-    }
 
     static get() {
         if (this._instance) {
@@ -40,6 +35,29 @@ export class FEnum extends FBase {
         const instance = new FEnum();
         this._instance = instance;
         return instance;
+    }
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+
+    constructor() {
+        for (const key in FEnum.prototype) {
+            // @ts-ignore
+            this[key] = FEnum.prototype[key];
+        }
     }
 
     get UniverInstanceType() {

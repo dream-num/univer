@@ -152,6 +152,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private _beforeClipboardChange(): void {
+        if (!this.hasEventCallback(this.Event.BeforeClipboardChange)) {
+            return;
+        }
         const eventParams = this._generateClipboardCopyParam();
         if (!eventParams) return;
 
@@ -162,6 +165,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private _clipboardChanged(): void {
+        if (!this.hasEventCallback(this.Event.ClipboardChanged)) {
+            return;
+        }
         const eventParams = this._generateClipboardCopyParam();
         if (!eventParams) return;
 
@@ -221,6 +227,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private _beforeClipboardPaste(params?: ISheetPasteByShortKeyParams): void {
+        if (!this.hasEventCallback(this.Event.BeforeClipboardPaste)) {
+            return;
+        }
         const eventParams = this._generateClipboardPasteParam(params);
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
@@ -230,6 +239,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private _clipboardPaste(params?: ISheetPasteByShortKeyParams): void {
+        if (!this.hasEventCallback(this.Event.BeforeClipboardPaste)) {
+            return;
+        }
         const eventParams = this._generateClipboardPasteParam(params);
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
@@ -244,6 +256,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             logService.warn('[Facade]: The navigator object only supports the browser environment');
             return;
         }
+        if (!this.hasEventCallback(this.Event.BeforeClipboardPaste)) {
+            return;
+        }
         const eventParams = await this._generateClipboardPasteParamAsync();
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
@@ -256,6 +271,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (!supportClipboardAPI()) {
             const logService = this._injector.get(ILogService);
             logService.warn('[Facade]: The navigator object only supports the browser environment');
+            return;
+        }
+        if (!this.hasEventCallback(this.Event.ClipboardPasted)) {
             return;
         }
         const eventParams = await this._generateClipboardPasteParamAsync();

@@ -237,6 +237,15 @@ export class FUniver extends FBaseInitialable {
         return params.cancel;
     }
 
+    /**
+     * Get the callback map corresponding to the event
+     * @returns {number} The number of callbacks
+     */
+    protected hasEventCallback(event: keyof IEventParamConfig): boolean {
+        const eventCallbackLens = this._eventRegistry.get(event)?.getData().length ?? 0;
+        return eventCallbackLens > 0;
+    }
+
     getUserManager(): FUserManager {
         return this._injector.createInstance(FUserManager);
     }

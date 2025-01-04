@@ -47,6 +47,10 @@ export class FWorksheet extends FBaseInitialable {
         super(_injector);
     }
 
+    getSheet(): Worksheet {
+        return this._worksheet;
+    }
+
     /**
      * Returns the injector
      * @returns The injector

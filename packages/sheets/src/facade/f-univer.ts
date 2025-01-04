@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
+import type { FWorksheet } from './f-worksheet';
 import { FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -76,9 +77,35 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     newDefinedName(): FDefinedNameBuilder;
+
+    /**
+     * Get the target of the sheet.
+     * @param {string} unitId - The unitId of the sheet.
+     * @param {string} subUnitId - The subUnitId of the sheet.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @example
+     * ```ts
+     * univerAPI.getSheetTarget('unitId', 'subUnitId');
+     * ```
+     */
+    getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
+    override getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+        const workbook = this.getUniverSheet(unitId);
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+
+        return { workbook, worksheet };
+    }
+
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(

@@ -26,11 +26,11 @@ import type {
 } from '@univerjs/engine-render';
 import type { ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam } from './f-event';
-import { FUniver, ICommandService, toDisposable } from '@univerjs/core';
+import { FUniver, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISheetClipboardService, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
-import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 
 export interface IFUniverSheetsUIMixin {
     /**
@@ -239,6 +239,11 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private async _beforeClipboardPasteAsync(): Promise<void> {
+        if (!supportClipboardAPI()) {
+            const logService = this._injector.get(ILogService);
+            logService.warn('[Facade]: The navigator object only supports the browser environment');
+            return;
+        }
         const eventParams = await this._generateClipboardPasteParamAsync();
         if (!eventParams) return;
         this.fireEvent(this.Event.BeforeClipboardPaste, eventParams);
@@ -248,6 +253,11 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private async _clipboardPasteAsync(): Promise<void> {
+        if (!supportClipboardAPI()) {
+            const logService = this._injector.get(ILogService);
+            logService.warn('[Facade]: The navigator object only supports the browser environment');
+            return;
+        }
         const eventParams = await this._generateClipboardPasteParamAsync();
         if (!eventParams) return;
         this.fireEvent(this.Event.ClipboardPasted, eventParams);

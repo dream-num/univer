@@ -569,8 +569,10 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
-     * const range = worksheet.getRange(0,0,2,2);
+     * const range = worksheet.getRange(0, 0, 2, 2);
      * const merge = range.merge();
+     * const isMerged = merge.isMerged();
+     * console.log('debugger', isMerged);
      * ```
      */
     merge(defaultMerge: boolean = true): FRange {
@@ -590,8 +592,10 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
-     * const range = worksheet.getRange(2,2,2,2);
+     * const range = worksheet.getRange(2, 2, 2, 2);
      * const merge = range.mergeAcross();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
      * ```
      */
     mergeAcross(defaultMerge: boolean = true): FRange {
@@ -612,8 +616,10 @@ export class FRange extends FBaseInitialable {
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getActiveSheet();
-     * const range = worksheet.getRange(4,4,2,2);
+     * const range = worksheet.getRange(4, 4, 2, 2);
      * const merge = range.mergeVertically();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
      * ```
      */
     mergeVertically(defaultMerge: boolean = true): FRange {
@@ -636,7 +642,8 @@ export class FRange extends FBaseInitialable {
      * const range = worksheet.getRange(0,0,2,2);
      * const merge = range.merge();
      * const anchor = worksheet.getRange(0,0);
-     * const isPartOfMerge = anchor.isPartOfMerge(); // true
+     * const isPartOfMerge = anchor.isPartOfMerge();
+     * console.log('debugger, isPartOfMerge) // true
      * ```
      */
     isPartOfMerge(): boolean {
@@ -654,9 +661,11 @@ export class FRange extends FBaseInitialable {
      * const range = worksheet.getRange(0,0,2,2);
      * const merge = range.merge();
      * const anchor = worksheet.getRange(0,0);
-     * const isPartOfMergeFirst = anchor.isPartOfMerge(); // true
+     * const isPartOfMergeFirst = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeFirst) // true
      * range.breakApart();
-     * const isPartOfMergeSecond = anchor.isPartOfMerge(); // false
+     * const isPartOfMergeSecond = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeSecond) // false
      * ```
      */
     breakApart(): FRange {

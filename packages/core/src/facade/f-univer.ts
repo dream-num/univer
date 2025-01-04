@@ -35,12 +35,12 @@ import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
+import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 import { FWorkbook } from './f-workbook';
-import { FDoc } from './FDoc';
 
 export class FUniver extends FBaseInitialable {
     /**

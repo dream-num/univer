@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable } from '../common/di';
+import type { DocumentDataModel } from '../docs';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
@@ -22,6 +23,7 @@ import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
 import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
+import { UniverInstanceType } from '../common/unit';
 import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
@@ -31,6 +33,7 @@ import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
+import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
@@ -130,9 +133,49 @@ export class FUniver extends FBaseInitialable {
             })
         );
 
+        this._initUnitEvent(this._injector);
         this._injector.onDispose(() => {
             this.dispose();
         });
+    }
+
+    private _initUnitEvent(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        this.disposeWithMe(
+            univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.DocDisposed)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    this.fireEvent(this.Event.DocDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IDocumentData,
+
+                        }
+                    );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.DocCreated)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    const doc = unit as DocumentDataModel;
+                    const docUnit = injector.createInstance(FDoc, doc);
+                    this.fireEvent(this.Event.DocCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            doc: docUnit,
+                            unit: docUnit,
+                        }
+                    );
+                }
+            })
+        );
     }
 
     protected _eventListend(key: string) {

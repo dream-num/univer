@@ -41,7 +41,6 @@ export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FWorkbook } from './facade/f-workbook';
 export { FBase, FBaseInitialable } from './facade/f-base';
 export { FUniver } from './facade/f-univer';
 export { FHooks } from './facade/f-hooks';

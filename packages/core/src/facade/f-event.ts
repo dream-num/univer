@@ -17,39 +17,17 @@
 import type { UniverInstanceType } from '../common/unit';
 import type { CommandType } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
 import type { FDoc } from './f-doc';
-import type { FWorkbook } from './f-workbook';
-
-export interface ISheetCreateParam {
-    unitId: string;
-    type: UniverInstanceType.UNIVER_SHEET;
-    workbook: FWorkbook;
-    unit: FWorkbook;
-}
-
-export interface IDocumentCreateParam {
-    unitId: string;
-    type: UniverInstanceType.UNIVER_DOC;
-    doc: FDoc;
-    unit: FDoc;
-}
 
 export interface IEventBase {
     cancel?: boolean;
 }
-
-export interface ILifeCycleChangedEvent extends IEventBase {
-    stage: LifecycleStages;
-}
-
-export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
-
-export interface ISheetDisposedEvent extends IEventBase {
+export interface IDocCreatedParam extends IEventBase {
     unitId: string;
-    unitType: UniverInstanceType.UNIVER_SHEET;
-    snapshot: IWorkbookData;
+    type: UniverInstanceType.UNIVER_DOC;
+    doc: FDoc;
+    unit: FDoc;
 }
 
 export interface IDocDisposedEvent extends IEventBase {
@@ -58,7 +36,9 @@ export interface IDocDisposedEvent extends IEventBase {
     snapshot: IDocumentData;
 }
 
-export type IUnitDisposeEvent = ISheetDisposedEvent | IDocDisposedEvent;
+export interface ILifeCycleChangedEvent extends IEventBase {
+    stage: LifecycleStages;
+}
 
 export interface ICommandEvent extends IEventBase {
     params: any;
@@ -99,6 +79,32 @@ export class FEventName {
             // @ts-ignore
             this[key] = FEventName.prototype[key];
         }
+    }
+
+    /**
+     * DocCreated event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.DocCreated, (params) => {
+     *     console.log('doc created', params);
+     * });
+     * ```
+     */
+    get DocCreated() {
+        return 'DocCreated' as const;
+    }
+
+    /**
+     * DocDisposed event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.DocDisposed, (params) => {
+     *     console.log('doc disposed', params);
+     * });
+     * ```
+     */
+    get DocDisposed() {
+        return 'DocDisposed' as const;
     }
 
     /**
@@ -195,8 +201,8 @@ export class FEventName {
 
 export interface IEventParamConfig {
     LifeCycleChanged: ILifeCycleChangedEvent;
-    UnitDisposed: IUnitDisposeEvent;
-    UnitCreated: IUnitCreateEvent;
+    DocDisposed: IDocDisposedEvent;
+    DocCreated: IDocCreatedParam;
     Redo: ICommandEvent;
     Undo: ICommandEvent;
     BeforeRedo: ICommandEvent;

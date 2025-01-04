@@ -19,9 +19,53 @@ import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { FEventName } from '@univerjs/core';
 
 interface IFSheetsUIEventNameMixin {
+    /**
+     * This event is triggered before the clipboard content is changed.
+     * Type of the event parameter is {@link IBeforeClipboardChangeParam}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardChange, (param) => {
+     *   console.log('debugger', param);
+     *   // if want to cancel the clipboard change
+     *   param.cancel = true;
+     * })
+     * ```
+     */
     readonly BeforeClipboardChange: 'BeforeClipboardChange';
+
+    /**
+     * This event is triggered after the clipboard content is changed.
+     * Type of the event parameter is {@link IClipboardChangedParam}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.ClipboardChanged, (param) => {
+     *  console.log('debugger', param);
+     * })
+     */
     readonly ClipboardChanged: 'ClipboardChanged';
+    /**
+     * This event is triggered before the clipboard content is pasted.
+     * Type of the event parameter is {@link IBeforeClipboardPasteParam}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeClipboardPaste, (param) => {
+     *  const {text, html} = param;
+     *  console.log('debugger', text, html);
+     *  // if want to cancel the clipboard paste
+     *  param.cancel = true;
+     * })
+     * ```
+     */
     readonly BeforeClipboardPaste: 'BeforeClipboardPaste';
+    /**
+     * This event is triggered after the clipboard content is pasted.
+     * Type of the event parameter is {@link IClipboardPastedParam}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.ClipboardPasted, (param) => {
+     *  console.log('debugger', param);
+     * })
+     */
     readonly ClipboardPasted: 'ClipboardPasted';
 }
 

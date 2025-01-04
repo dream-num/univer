@@ -111,20 +111,16 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 case SheetPasteShortKeyCommand.id:
                     this._clipboardPaste();
                     break;
+                case PasteCommand.id:
+                    this._clipboardPasteAsync();
+                    break;
             }
         }));
         // async listeners
         this.disposeWithMe(commandService.beforeCommandExecuted(async (commandInfo) => {
             switch (commandInfo.id) {
                 case PasteCommand.id:
-                    this._beforeClipboardPasteAsync();
-                    break;
-            }
-        }));
-        this.disposeWithMe(commandService.onCommandExecuted(async (commandInfo) => {
-            switch (commandInfo.id) {
-                case PasteCommand.id:
-                    this._clipboardPasteAsync();
+                    await this._beforeClipboardPasteAsync();
                     break;
             }
         }));

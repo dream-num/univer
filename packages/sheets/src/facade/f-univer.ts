@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
 import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
@@ -79,6 +79,22 @@ export interface IFUniverSheetsMixin {
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
+    protected _getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: Workbook }> {
+        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+        if (!params) return;
+        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        return { workbook, worksheet };
+    }
+
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(

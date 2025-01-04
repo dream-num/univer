@@ -46,7 +46,7 @@ export interface IFRangeHyperlinkMixin {
     cancelHyperLink(id: string): boolean;
 
     /**
-     * Get the url of this range
+     * Get the url of this range.
      */
     getUrl(): string;
 }

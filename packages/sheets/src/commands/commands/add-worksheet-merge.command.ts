@@ -281,7 +281,7 @@ export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId:
         throw new Error('The ranges to be merged overlap with the existing merged cells');
     }
     const commandService = injector.get(ICommandService);
-    commandService.syncExecuteCommand(AddWorksheetMergeCommand.id, {
+    commandService.executeCommand(AddWorksheetMergeCommand.id, {
         unitId,
         subUnitId,
         selections: ranges,

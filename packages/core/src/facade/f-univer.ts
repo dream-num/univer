@@ -311,7 +311,7 @@ export class FUniver extends FBaseInitialable {
     /**
      * Fire an event, used in internal only.
      * @param event {string} key of event
-     * @param params {any} parmas of event
+     * @param params {any} params of event
      * @returns {boolean} should cancel
      * @example
      * ```ts
@@ -324,6 +324,15 @@ export class FUniver extends FBaseInitialable {
         });
 
         return params.cancel;
+    }
+
+    /**
+     * Get the callback map corresponding to the event
+     * @returns {number} The number of callbacks
+     */
+    protected hasEventCallback(event: keyof IEventParamConfig): boolean {
+        const eventCallbackLens = this._eventRegistry.get(event)?.getData().length ?? 0;
+        return eventCallbackLens > 0;
     }
 
     getUserManager(): FUserManager {

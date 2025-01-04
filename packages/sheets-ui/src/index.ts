@@ -114,6 +114,7 @@ export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetB
 // #region - all commands
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
+    type ISheetPasteByShortKeyParams,
     type ISheetPasteParams,
     SheetCopyCommand,
     SheetCutCommand,

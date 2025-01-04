@@ -1713,17 +1713,17 @@ export class FWorksheet extends FBaseInitialable {
         this._fWorkbook.insertDefinedNameBuilder(param);
     }
 
-     /**
-      * Get all the defined names in the worksheet.
-      * @returns {FDefinedName[]} All the defined names in the worksheet
-      * @example
-      * ```ts
-      * // The code below gets all the defined names in the worksheet
-      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
-      * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
-      * const definedNames = sheet1.getDefinedNames();
-      * ```
-      */
+    /**
+     * Get all the defined names in the worksheet.
+     * @returns {FDefinedName[]} All the defined names in the worksheet
+     * @example
+     * ```ts
+     * // The code below gets all the defined names in the worksheet
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const sheet1 = activeSpreadsheet.getSheetByName('Sheet1');
+     * const definedNames = sheet1.getDefinedNames();
+     * ```
+     */
     getDefinedNames(): FDefinedName[] {
         const names = this._fWorkbook.getDefinedNames();
         return names.filter((name) => name.getLocalSheetId() === this.getSheetId());
@@ -1804,5 +1804,24 @@ export class FWorksheet extends FBaseInitialable {
      */
     getColumnCustomMetadata(index: number): CustomData | undefined {
         return this._worksheet.getColumnManager().getCustomMetadata(index);
+    }
+
+    /**
+     * Get all merged cells in the current worksheet
+     * @returns {FRange[]} All the merged cells in the worksheet
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const rangeFirst = worksheet.getRange(0, 0, 2, 2);
+     * const mergeFirst = rangeFirst.merge();
+     * const rangeSecond = worksheet.getRange(5, 0, 2, 2);
+     * const mergeSecond = rangeSecond.merge();
+     * const mergeData = worksheet.getMergeData();
+     * console.log('debugger', mergeData);
+     * ```
+     */
+    getMergeData(): FRange[] {
+        return this._worksheet.getMergeData().map((merge) => this._injector.createInstance(FRange, this._workbook, this._worksheet, merge));
     }
 }

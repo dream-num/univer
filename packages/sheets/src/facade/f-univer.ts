@@ -17,6 +17,7 @@
 import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
+import type { FWorksheet } from './f-worksheet';
 import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -79,7 +80,7 @@ export interface IFUniverSheetsMixin {
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
-    protected _getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: Workbook }> {
+    protected _getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
         const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
         if (!params) return;
         const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();

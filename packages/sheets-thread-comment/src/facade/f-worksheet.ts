@@ -26,14 +26,33 @@ export interface IFWorksheetCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
+     * ```ts
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comments = worksheet.getComments();
+     * ```
      */
     getComments(): FThreadComment[];
 
     /**
      * Clear all comments in the current sheet
+     * ```ts
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * await worksheet.clearComments();
+     * ```
      */
     clearComments(): Promise<boolean>;
 
+    /**
+     * get comment by comment id
+     * @param {string} commentId comment id
+     * ```ts
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comment = worksheet.getCommentById(commentId);
+     * ```
+     */
     getCommentById(commentId: string): FThreadComment | undefined;
 }
 

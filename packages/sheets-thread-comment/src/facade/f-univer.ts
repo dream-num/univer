@@ -19,7 +19,7 @@ import type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCom
 import type { IBeforeSheetCommentAddEvent, IBeforeSheetCommentDeleteEvent, IBeforeSheetCommentUpdateEvent, ISheetCommentAddEvent, ISheetCommentDeleteEvent, ISheetCommentResolveEvent, ISheetCommentUpdateEvent } from './f-event';
 import { CanceledError, FUniver, ICommandService, RichTextValue } from '@univerjs/core';
 import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { FTheadCommentBuilder, FTheadCommentValue } from './f-thread-comment';
+import { FTheadCommentBuilder, FTheadCommentItem } from './f-thread-comment';
 
 export interface IFUniverCommentMixin {
     /**
@@ -158,7 +158,7 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
                     worksheet,
                     row: activeRange.getRow() ?? 0,
                     col: activeRange.getColumn() ?? 0,
-                    comment: FTheadCommentValue.create(comment),
+                    comment: FTheadCommentItem.create(comment),
                 };
 
                 this.fireEvent(this.Event.BeforeCommentAdd, eventParams);

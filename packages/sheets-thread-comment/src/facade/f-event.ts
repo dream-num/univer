@@ -16,7 +16,7 @@
 
 import type { FWorkbook, IEventBase, RichTextValue } from '@univerjs/core';
 import type { FWorksheet } from '@univerjs/sheets/facade';
-import type { FTheadCommentValue, FThreadComment } from './f-thread-comment';
+import type { FTheadCommentItem, FThreadComment } from './f-thread-comment';
 import { FEventName } from '@univerjs/core';
 
 interface ICommentEventMixin {
@@ -170,7 +170,7 @@ export interface IBeforeSheetCommentAddEvent extends IEventBase {
     worksheet: FWorksheet;
     row: number;
     col: number;
-    comment: FTheadCommentValue;
+    comment: FTheadCommentItem;
 }
 
 export interface ISheetCommentUpdateEvent {

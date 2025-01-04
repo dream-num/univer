@@ -264,7 +264,7 @@ export class FRange extends FBaseInitialable {
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.
      * @returns {string[][]} A two-dimensional array of formulas in string format.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().getFormulas()
      * ```
      */

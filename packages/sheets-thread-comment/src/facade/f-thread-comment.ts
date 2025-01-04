@@ -22,7 +22,7 @@ import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, UpdateCommentCommand } from '@univerjs/thread-comment';
 
-export class FTheadCommentValue {
+export class FTheadCommentItem {
     protected _comment: IThreadComment = {
         id: generateRandomId(),
         ref: '',
@@ -35,8 +35,8 @@ export class FTheadCommentValue {
         subUnitId: '',
     };
 
-    static create(comment?: IThreadComment): FTheadCommentValue {
-        return new FTheadCommentValue(comment);
+    static create(comment?: IThreadComment): FTheadCommentItem {
+        return new FTheadCommentItem(comment);
     }
 
     constructor(comment?: IThreadComment) {
@@ -49,7 +49,7 @@ export class FTheadCommentValue {
         return this._comment.personId;
     }
 
-    get dT(): string {
+    get dateTime(): string {
         return this._comment.dT;
     }
 
@@ -70,7 +70,7 @@ export class FTheadCommentValue {
     }
 }
 
-export class FTheadCommentBuilder extends FTheadCommentValue {
+export class FTheadCommentBuilder extends FTheadCommentItem {
     static override create(comment?: IThreadComment): FTheadCommentBuilder {
         return new FTheadCommentBuilder(comment);
     }
@@ -89,7 +89,7 @@ export class FTheadCommentBuilder extends FTheadCommentValue {
         return this;
     }
 
-    setDT(date: Date): FTheadCommentBuilder {
+    setDateTime(date: Date): FTheadCommentBuilder {
         this._comment.dT = getDT(date);
         return this;
     }

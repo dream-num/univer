@@ -15,17 +15,13 @@
  */
 
 import type { IDisposable } from '../common/di';
-import type { DocumentDataModel } from '../docs';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IWorkbookData } from '../sheets/typedef';
-import type { Workbook } from '../sheets/workbook';
 import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
 import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
 import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
-import { UniverInstanceType } from '../common/unit';
 import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
@@ -35,12 +31,10 @@ import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
-import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
-import { FWorkbook } from './f-workbook';
 
 export class FUniver extends FBaseInitialable {
     /**
@@ -66,7 +60,6 @@ export class FUniver extends FBaseInitialable {
         return this._eventRegistry.get(event)!;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     constructor(
         @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -78,61 +71,6 @@ export class FUniver extends FBaseInitialable {
         this.disposeWithMe(
             this._lifecycleService.lifecycle$.subscribe((stage) => {
                 this.fireEvent(this.Event.LifeCycleChanged, { stage });
-            })
-        );
-
-        this.disposeWithMe(
-            this._univerInstanceService.unitDisposed$.subscribe((unit) => {
-                if (!this._eventRegistry.get(this.Event.UnitDisposed)) return;
-
-                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
-                    this.fireEvent(this.Event.UnitDisposed,
-                        {
-                            unitId: unit.getUnitId(),
-                            unitType: unit.type,
-                            snapshot: unit.getSnapshot() as IWorkbookData,
-
-                        }
-                    );
-                } else if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    this.fireEvent(this.Event.UnitDisposed,
-                        {
-                            unitId: unit.getUnitId(),
-                            unitType: unit.type,
-                            snapshot: unit.getSnapshot() as IDocumentData,
-                        }
-                    );
-                }
-            })
-        );
-
-        this.disposeWithMe(
-            this._univerInstanceService.unitAdded$.subscribe((unit) => {
-                if (!this._eventRegistry.get(this.Event.UnitCreated)) return;
-
-                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
-                    const workbook = unit as Workbook;
-                    const workbookUnit = this._injector.createInstance(FWorkbook, workbook);
-                    this.fireEvent(this.Event.UnitCreated,
-                        {
-                            unitId: unit.getUnitId(),
-                            type: unit.type,
-                            workbook: workbookUnit,
-                            unit: workbookUnit,
-                        }
-                    );
-                } else if (unit.type === UniverInstanceType.UNIVER_DOC) {
-                    const doc = unit as DocumentDataModel;
-                    const docUnit = this._injector.createInstance(FDoc, doc);
-                    this.fireEvent(this.Event.UnitCreated,
-                        {
-                            unitId: unit.getUnitId(),
-                            type: unit.type,
-                            doc: docUnit,
-                            unit: docUnit,
-                        }
-                    );
-                }
             })
         );
 

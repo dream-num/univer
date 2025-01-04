@@ -96,6 +96,45 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         return { workbook, worksheet };
     }
 
+    private _initUnitEvent(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        this.disposeWithMe(
+            univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.WorkbookDisposed)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    this.fireEvent(this.Event.WorkbookDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IWorkbookData,
+
+                        }
+                    );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.WorkbookCreated)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    const workbook = unit as Workbook;
+                    const workbookUnit = injector.createInstance(FWorkbook, workbook);
+                    this.fireEvent(this.Event.WorkbookCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            workbook: workbookUnit,
+                            unit: workbookUnit,
+                        }
+                    );
+                }
+            })
+        );
+    }
+
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(
@@ -160,6 +199,8 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 }
             })
         );
+
+        this._initUnitEvent(injector);
     }
 
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {

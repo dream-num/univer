@@ -102,45 +102,6 @@ export class FEventName {
     }
 
     /**
-     * BeforeUnitCreate event
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeUnitCreate, (params) => {
-     *     console.log('before unit created', params);
-     * });
-     * ```
-     */
-    get BeforeUnitCreate() {
-        return 'BeforeUnitCreate' as const;
-    }
-
-    /**
-     * UnitCreated event
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *     console.log('unit created', params);
-     * });
-     * ```
-     */
-    get UnitCreated() {
-        return 'UnitCreated' as const;
-    }
-
-    /**
-     * UnitDisposed event
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitDisposed, (params) => {
-     *     console.log('unit disposed', params);
-     * });
-     * ```
-     */
-    get UnitDisposed() {
-        return 'UnitDisposed' as const;
-    }
-
-    /**
      * LifeCycleChanged event
      * @example
      * ```ts

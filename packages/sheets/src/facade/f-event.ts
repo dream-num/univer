@@ -14,19 +14,83 @@
  * limitations under the License.
  */
 
-import type { IEventBase, IWorksheetData } from '@univerjs/core';
+import type { IEventBase, IWorkbookData, IWorksheetData, UniverInstanceType } from '@univerjs/core';
 import type { FWorkbook } from './f-workbook';
 import type { FWorksheet } from './f-worksheet';
 import { FEventName } from '@univerjs/core';
 
 export interface IFSheetEventMixin {
+    /**
+     * SheetCreated event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.SheetCreated, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
     get SheetCreated(): 'SheetCreated' ;
+    /**
+     * BeforeSheetCreate event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeSheetCreate, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
     get BeforeSheetCreate(): 'BeforeSheetCreate';
+    /**
+     * WorkbookCreated event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.WorkbookCreated, (params) => {
+     *     console.log('unit created', params);
+     * });
+     * ```
+     */
+    get WorkbookCreated(): 'WorkbookCreated';
+    /**
+     * WorkbookDisposed event
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.WorkbookDisposed, (params) => {
+     *     console.log('unit disposed', params);
+     * });
+     * ```
+     */
+    get WorkbookDisposed(): 'WorkbookDisposed';
+}
+
+export interface IWorkbookCreateParam {
+    unitId: string;
+    type: UniverInstanceType.UNIVER_SHEET;
+    workbook: FWorkbook;
+    unit: FWorkbook;
+}
+
+export interface IWorkbookDisposedEvent extends IEventBase {
+    unitId: string;
+    unitType: UniverInstanceType.UNIVER_SHEET;
+    snapshot: IWorkbookData;
 }
 
 export class FSheetEventName extends FEventName implements IFSheetEventMixin {
-    override get SheetCreated(): 'SheetCreated' { return 'SheetCreated' as const; }
-    override get BeforeSheetCreate(): 'BeforeSheetCreate' { return 'BeforeSheetCreate' as const; }
+    override get SheetCreated(): 'SheetCreated' {
+        return 'SheetCreated' as const;
+    }
+
+    override get BeforeSheetCreate(): 'BeforeSheetCreate' {
+        return 'BeforeSheetCreate' as const;
+    }
+
+    override get WorkbookCreated(): 'WorkbookCreated' {
+        return 'WorkbookCreated' as const;
+    }
+
+    override get WorkbookDisposed(): 'WorkbookDisposed' {
+        return 'WorkbookDisposed' as const;
+    }
 }
 
 export interface IBeforeSheetCreateEventParams extends IEventBase {
@@ -43,6 +107,8 @@ export interface ISheetCreatedEventParams extends IEventBase {
 export interface ISheetEventParamConfig {
     SheetCreated: ISheetCreatedEventParams;
     BeforeSheetCreate: IBeforeSheetCreateEventParams;
+    WorkbookCreated: IWorkbookCreateParam;
+    WorkbookDisposed: IWorkbookDisposedEvent;
 }
 
 FEventName.extend(FSheetEventName);

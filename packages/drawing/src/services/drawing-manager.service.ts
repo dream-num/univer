@@ -87,6 +87,7 @@ export interface IUnitNormalDrawingService<T extends IDrawingParam> {
  * Responsible for operations related to drawing focus, including observers,broadcasting
  */
 export interface IUnitFocusDrawingService {
+    readonly beforeFocus$: Observable<{ oldSelectedDrawings: IDrawingParam[]; selectedDrawings: IDrawingParam[] }>;
     readonly focus$: Observable<IDrawingParam[]>;
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void;

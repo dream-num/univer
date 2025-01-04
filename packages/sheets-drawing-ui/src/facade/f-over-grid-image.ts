@@ -343,7 +343,7 @@ export class FOverGridImage extends FBase {
     /**
      * Set the source of the image, change image display.
      * @param source  The source of the image
-     * @param sourceType The source type of the image
+     * @param sourceType The source type of the image, {@link ImageSourceType}
      * @returns success or not
      */
     setSource(source: string, sourceType?: ImageSourceType): boolean;
@@ -375,6 +375,15 @@ export class FOverGridImage extends FBase {
      * @param row  The sheet start row of the image
      * @param rowOffset  The offset of the start row
      * @param columnOffset  The offset of the start column
+     * @returns success or not
+     * @example
+     * ```ts
+     * // set the position of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set position state is ', image.setPosition(5, 5, 10, 10));
+     * ```
      */
     setPosition(row: number, column: number, rowOffset?: number, columnOffset?: number): boolean;
     setPosition(row: number, column: number, rowOffset?: number, columnOffset?: number): boolean {
@@ -395,6 +404,13 @@ export class FOverGridImage extends FBase {
      * @param width  The width of the image
      * @param height  The height of the image
      * @returns success or not
+     * @example
+     * ```ts
+     * // set the size of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set size state is ', image.setSize(50, 120));
      */
     setSize(width: number, height: number): boolean {
         const builder = this.toBuilder();
@@ -457,6 +473,14 @@ export class FOverGridImage extends FBase {
      * Set the rotation angle of the image
      * @param angle Degree of rotation of the image, for example, 90, 180, 270, etc.
      * @returns success or not
+     * @example
+     * ```ts
+     * // set the rotation angle of the image
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages[0];
+     * console.log('Set rotate state is ', image.setRotate(90));
+     * ```
      */
     setRotate(angle: number): boolean {
         this._image.sheetTransform.angle = angle;

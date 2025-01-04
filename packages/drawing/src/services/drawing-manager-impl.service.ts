@@ -78,6 +78,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     // private readonly _externalUpdate$ = new Subject<T[]>();
     // readonly externalUpdate$ = this._externalUpdate$.asObservable();
 
+    private _beforeFocus$ = new Subject<{ oldSelectedDrawings: T[]; selectedDrawings: T[] }>();
+    beforeFocus$: Observable<{ oldSelectedDrawings: T[]; selectedDrawings: T[] }> = this._beforeFocus$.asObservable();
+
     private _focus$ = new Subject<T[]>();
     focus$: Observable<T[]> = this._focus$.asObservable();
 
@@ -471,6 +474,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void {
         if (params == null) {
+            this._beforeFocus$.next({ oldSelectedDrawings: this._focusDrawings, selectedDrawings: [] });
             this._focusDrawings = [];
             this._focus$.next([]);
             return;
@@ -486,6 +490,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         });
 
         if (drawingParams.length > 0) {
+            this._beforeFocus$.next({ oldSelectedDrawings: this._focusDrawings, selectedDrawings: drawingParams });
             this._focusDrawings = drawingParams;
             this._focus$.next(drawingParams);
         }

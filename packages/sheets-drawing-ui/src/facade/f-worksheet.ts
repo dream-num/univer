@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
-import { ImageSourceType, toDisposable } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
@@ -261,6 +261,9 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const images: FOverGridImage[] = [];
         for (const drawingId in drawingData) {
             const drawing = drawingData[drawingId];
+            if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                continue;
+            }
             images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
         }
         return images;
@@ -269,7 +272,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     override getImageById(id: string): FOverGridImage | null {
         const sheetDrawingService = this._injector.get(ISheetDrawingService);
         const drawing = sheetDrawingService.getDrawingByParam({ unitId: this._fWorkbook.getId(), subUnitId: this.getSheetId(), drawingId: id });
-        if (drawing) {
+        if (drawing && drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
             return this._injector.createInstance(FOverGridImage, drawing as ISheetImage);
         }
         return null;

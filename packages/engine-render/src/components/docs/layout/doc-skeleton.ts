@@ -1156,7 +1156,7 @@ export class DocumentSkeleton extends Skeleton {
 
             ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
-            if (sectionType === SectionType.CONTINUOUS) {
+            if (sectionType === SectionType.CONTINUOUS && curSkeletonPage) {
                 updateBlockIndex(allSkeletonPages);
                 this._addNewSectionByContinuous(
                     curSkeletonPage,

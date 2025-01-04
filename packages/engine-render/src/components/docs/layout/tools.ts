@@ -1013,7 +1013,16 @@ const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
     columnProperties: [],
     columnSeparatorType: ColumnSeparatorType.NONE,
     equalWidth: BooleanNumber.FALSE,
-    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    sectionType: SectionType.CONTINUOUS,
+    pageSize: {
+        width: ptToPixel(595),
+        height: Number.POSITIVE_INFINITY,
+    },
+    pageOrient: PageOrientType.PORTRAIT,
+    marginTop: ptToPixel(50),
+    marginBottom: ptToPixel(50),
+    marginRight: ptToPixel(50),
+    marginLeft: ptToPixel(50),
 };
 
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {

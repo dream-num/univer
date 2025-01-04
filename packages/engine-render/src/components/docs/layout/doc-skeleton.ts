@@ -1176,7 +1176,7 @@ export class DocumentSkeleton extends Skeleton {
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    curSkeletonPage?.pageNumber ?? pageNumberStart
+                    curSkeletonPage ? curSkeletonPage.pageNumber + 1 : pageNumberStart
                 );
             }
 

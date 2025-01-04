@@ -94,6 +94,7 @@ export function createSkeletonPage(
 
     let headerId = defaultHeaderId ?? '';
     let footerId = defaultFooterId ?? '';
+
     if (pageNumber === pageNumberStart && useFirstPageHeaderFooter === BooleanNumber.TRUE) {
         headerId = firstPageHeaderId ?? '';
         footerId = firstPageFooterId ?? '';

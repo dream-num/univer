@@ -89,7 +89,7 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * save workbook snapshot data, including conditional formatting, data validation, and other plugin data.
+     * Save workbook snapshot data, including conditional formatting, data validation, and other plugin data.
      * @returns {IWorkbookData} Workbook snapshot data
      * @example
      * ```ts
@@ -566,7 +566,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * @deprecated use setSpreadsheetLocale instead.
-     * @param locale
+     * @param {LocaleType} locale - The locale to set
      */
     setLocale(locale: LocaleType): void {
         this._localeService.setLocale(locale);

@@ -117,7 +117,7 @@ export class FWorksheet extends FBaseInitialable {
     /**
      * Get the default style of the worksheet column
      * @param {number} index The column index
-     * @param  {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
+     * @param {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
      * @returns {Nullable<IStyleData> | string} The default style of the worksheet column name or style data
      */
     getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
@@ -1078,14 +1078,14 @@ export class FWorksheet extends FBaseInitialable {
      * e.g. setFrozenColumns(0, 2) will fix the column range from 0 to 2.
      * e.g. setFrozenColumns(2, 3) will fix the column range from 2 to 3, And column from 0 to 1 will be invisible.
      * @example
-     * ``` ts
+     * ```typescript
      * const fWorkbook = univerAPI.getActiveWorkbook();
      * const fWorkSheet = fWorkbook.getActiveSheet();
      * // freeze the first too columns.
      * fWorkSheet.setFrozenColumns(0, 2);
      * ```
-     * @param startColumn
-     * @param endColumn
+     * @param startColumn - The start column of the range to freeze.
+     * @param endColumn - The end column of the range to freeze.
      * @returns {FWorksheet} This FWorksheet instance.
      */
     setFrozenColumns(startColumn: number, endColumn: number): FWorksheet;
@@ -1126,8 +1126,8 @@ export class FWorksheet extends FBaseInitialable {
      * Set freeze row, then the range from startRow to endRow will be fixed.
      * e.g. setFrozenRows(0, 2) will fix the row range from 0 to 2.
      * e.g. setFrozenRows(2, 3) will fix the row range from 2 to 3, And row from 0 to 1 will be invisible.
-     * @param startRow
-     * @param endRow
+     * @param startRow - The start row of the range to freeze.
+     * @param endRow - The end row of the range to freeze.
      * @example
      * ``` ts
      * const fWorkbook = univerAPI.getActiveWorkbook();
@@ -1167,7 +1167,6 @@ export class FWorksheet extends FBaseInitialable {
      * Get the number of frozen columns.
      * @returns The number of frozen columns, returns 0 if no columns are frozen.
      */
-    // Same as Google App script.
     getFrozenColumns(): number {
         const freeze = this.getFreeze();
         if (freeze.startColumn === -1) {
@@ -1180,7 +1179,6 @@ export class FWorksheet extends FBaseInitialable {
      * Get the number of frozen rows.
      * @returns The number of frozen rows. returns 0 if no rows are frozen.
      */
-    // Same as Google App script.
     getFrozenRows(): number {
         const freeze = this.getFreeze();
         if (freeze.startRow === -1) {

@@ -41,10 +41,10 @@ import { filter } from 'rxjs';
 
 export interface IFWorkbookDataValidationMixin {
     /**
-     * get data validation validator status for current workbook
+     * Get data validation validator status for current workbook.
      * @returns A promise that resolves to a matrix of validator status.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().getValidatorStatus().then((status) => { console.log(status) })
      * ```
      */

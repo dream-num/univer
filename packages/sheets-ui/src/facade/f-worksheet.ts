@@ -191,8 +191,8 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
         if (!render) return emptyScrollState;
-        const scm = render.with(SheetScrollManagerService);
-        const scrollState = scm.getScrollStateByParam({ unitId, sheetId });
+        const sheetScrollManagerService = render.with(SheetScrollManagerService);
+        const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
         return scrollState || emptyScrollState;
     }
 

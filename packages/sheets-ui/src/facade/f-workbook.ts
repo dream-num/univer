@@ -75,7 +75,7 @@ export interface IFWorkbookSheetsUIMixin {
      * Start the editing process
      * @returns A boolean value
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().startEditing();
      * ```
      */
@@ -115,7 +115,7 @@ export interface IFWorkbookSheetsUIMixin {
      * Disable selection. After disabled, there would be no response for selection.
      * @returns {FWorkbook} FWorkbook instance
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().disableSelection();
      * ```
      */
@@ -124,7 +124,7 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Enable selection. After this you can select range.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().enableSelection();
      * ```
      */
@@ -133,7 +133,7 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().transparentSelection();
      * ```
      */
@@ -142,7 +142,7 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Set selection visible.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().showSelection();
      * ```
      */
@@ -249,7 +249,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     /**
      * Get scroll state of specified sheet.
-     * @param sheetId
+     * @param {string} sheetId - sheet id
      * @returns {IScrollState} scroll state
      * @example
      * ``` ts

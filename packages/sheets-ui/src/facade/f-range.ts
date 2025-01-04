@@ -45,8 +45,8 @@ interface IFRangeSheetsUIMixin {
      * @returns {ICellWithCoord} cell location and coordinate.
      * @example
      * ``` ts
-     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
-     * s.getRange(5, 7).getCell();
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * sheet.getRange(5, 7).getCell();
      * ```
      */
     getCell(this: FRange): ICellWithCoord;
@@ -56,8 +56,8 @@ interface IFRangeSheetsUIMixin {
      * @returns coordinates of the cell， top, right, bottom, left
      * @example
      * ``` ts
-     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
-     * s.getRange(5, 7).getCellRect();
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * sheet.getRange(5, 7).getCellRect();
      * ```
      */
     getCellRect(this: FRange): DOMRect;
@@ -66,8 +66,8 @@ interface IFRangeSheetsUIMixin {
      * Generate HTML content for the range.
      * @example
      * ``` ts
-     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
-     * s.getRange(5, 7).generateHTML();
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * sheet.getRange(5, 7).generateHTML();
      * ```
      */
     generateHTML(this: FRange): string;
@@ -80,9 +80,9 @@ interface IFRangeSheetsUIMixin {
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
      * @example
     ```
-        let s = univerAPI.getActiveWorkbook().getActiveSheet();
-        let r = s.getRange(2, 2, 3, 3);
-        let disposable = r.attachPopup({
+        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        let range = sheet.getRange(2, 2, 3, 3);
+        let disposable = range.attachPopup({
         componentKey: 'univer.sheet.cell-alert',
         extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
         });
@@ -95,10 +95,10 @@ interface IFRangeSheetsUIMixin {
      * @param alert The alert to attach
      * @returns The disposable object to detach the alert.
      * @example
-     * ```
-     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let r = s.getRange(2, 2, 3, 3);
-     * r.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
+     * ```ts
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * let range = sheet.getRange(2, 2, 3, 3);
+     * range.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
      * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
@@ -108,10 +108,10 @@ interface IFRangeSheetsUIMixin {
      * @param style - style for highlight range.
      * @param primary - primary cell for highlight range.
      * @example
-     * ```
-     * let s = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let r = s.getRange(2, 2, 3, 3);
-     * r.highlight({ stroke: 'red' }, { startRow: 2, startColumn: 2 });
+     * ```ts
+     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     * let range = sheet.getRange(2, 2, 3, 3);
+     * range.highlight({ stroke: 'red' }, { startRow: 2, startColumn: 2 });
      * ```
      */
     highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable;
@@ -208,6 +208,11 @@ declare module '@univerjs/sheets/facade' {
     interface FRange extends IFRangeSheetsUIMixin {}
 }
 
+/**
+ * Transform component key
+ * @param {IFComponentKey} component - The component key to transform.
+ * @param {ComponentManager} componentManager - The component manager to use for registration.
+ */
 export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
     const { componentKey, isVue3 } = component;
     let key: string;

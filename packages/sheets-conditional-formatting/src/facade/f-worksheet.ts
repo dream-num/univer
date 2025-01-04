@@ -48,7 +48,7 @@ export interface IFWorksheetConditionalFormattingMixin {
     /**
      * @deprecated use newConditionalFormattingRule instead.
      * Creates a constructor for conditional formatting
-     * @returns {*}  {ConditionalFormatRuleBuilder}
+     * @returns {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -68,7 +68,7 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Creates a constructor for conditional formatting
-     * @returns {*}  {ConditionalFormatRuleBuilder}
+     * @returns {ConditionalFormatRuleBuilder}@example
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts

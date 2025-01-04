@@ -22,12 +22,12 @@ import { FDataValidation } from './f-data-validation';
 
 export interface IFWorksheetDataValidationMixin {
     /**
-     * get all data validation rules in current sheet
+     * Get all data validation rules in current sheet.
      * @returns all data validation rules
      */
     getDataValidations(): FDataValidation[];
     /**
-     * get data validation validator status for current sheet
+     * Get data validation validator status for current sheet.
      * @returns matrix of validator status
      */
     getValidatorStatus(): Promise<ObjectMatrix<Nullable<DataValidationStatus>>>;

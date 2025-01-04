@@ -70,7 +70,7 @@ export class FBlob extends FBase {
     }
 
     /**
-     * get the blob as a string
+     * Get the blob as a string.
      * @returns
      * @example
      * ```ts
@@ -81,7 +81,7 @@ export class FBlob extends FBase {
      */
     getDataAsString(): Promise<string>;
     /**
-     * get the blob as a string
+     * Get the blob as a string.
      * @param charset the charset
      * @returns the blob content as a string
      * @example

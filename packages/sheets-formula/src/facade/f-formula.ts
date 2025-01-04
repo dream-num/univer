@@ -32,7 +32,6 @@ export interface IFFormulaSheetsMixin {
 
     /**
      * Register a custom synchronous formula function.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param description - A string describing the function's purpose and usage
@@ -64,12 +63,10 @@ export interface IFFormulaSheetsMixin {
 
     /**
      * Register a custom synchronous formula function with localization support.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param options - Object containing locales and description
      * @returns A disposable object that will unregister the function when disposed
-     *
      * @example
      * ```js
      * univerAPI.getFormula().registerFunction('HELLO',
@@ -106,11 +103,9 @@ export interface IFFormulaSheetsMixin {
 
    /**
     * Register a custom asynchronous formula function.
-    *
     * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
     * @param func - The async implementation of the function
     * @returns A disposable object that will unregister the function when disposed
-    *
     * @example
     * ```js
     * univerAPI.getFormula().registerAsyncFunction('RANDOM_DELAYED',
@@ -129,12 +124,10 @@ export interface IFFormulaSheetsMixin {
     registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description?: string): IDisposable;
     /**
      * Register a custom asynchronous formula function with description.
-     *
      * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
      * @param func - The async implementation of the function
      * @param description - A string describing the function's purpose and usage
      * @returns A disposable object that will unregister the function when disposed
-     *
      * @example
      * ```js
      * // Mock a user score fetching function
@@ -175,13 +168,12 @@ export interface IFFormulaSheetsMixin {
 
 export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixin {
     /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     * RegisterFunction may be executed multiple times, triggering multiple formula forced refreshes.
      */
     declare private _debouncedFormulaCalculation: () => void;
 
     /**
      * Initialize the FUniver instance.
-     *
      * @private
      */
     override _initialize(): void {

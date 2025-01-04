@@ -41,8 +41,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Get the unit ID of the current workbook
-     *
-     * @return The unit ID of the workbook
+     * @returns The unit ID of the workbook
      */
     getUnitId(): string {
         return this._workbook.getUnitId();
@@ -50,8 +49,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the name of the worksheet
-     *
-     * @return The name of the worksheet
+     * @returns The name of the worksheet
      */
     getSheetName(): string {
         return this._worksheet.getName();
@@ -59,8 +57,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the area where the statement is applied
-     *
-     * @return The area where the statement is applied
+     * @returns The area where the statement is applied
      */
     getRange(): IRange {
         return this._range;
@@ -68,8 +65,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the starting row number of the applied area
-     *
-     * @return The starting row number of the area
+     * @returns The starting row number of the area
      */
     getRow(): number {
         return this._range.startRow;
@@ -77,8 +73,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the starting column number of the applied area
-     *
-     * @return The starting column number of the area
+     * @returns The starting column number of the area
      */
     getColumn(): number {
         return this._range.startColumn;
@@ -86,8 +81,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the width of the applied area
-     *
-     * @return The width of the area
+     * @returns The width of the area
      */
     getWidth(): number {
         return this._range.endColumn - this._range.startColumn + 1;
@@ -95,8 +89,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the height of the applied area
-     *
-     * @return The height of the area
+     * @returns The height of the area
      */
     getHeight(): number {
         return this._range.endRow - this._range.startRow + 1;
@@ -228,7 +221,7 @@ export class FRange extends FBaseInitialable {
      * Set background color for current range.
      * @param color {string}
      * @example
-     * ```
+     * ```typescript
      * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
      * ```
      */
@@ -250,7 +243,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Set background color for current range.
      * @example
-     * ```
+     * ```typescript
      * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')
      * ```
      * @param color {string}
@@ -284,6 +277,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Set the cell wrap of the given range.
      * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
+     * @param isWrapEnabled
      */
     setWrap(isWrapEnabled: boolean): FRange {
         this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
@@ -298,6 +292,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the text wrapping strategy for the cells in the range.
+     * @param strategy
      */
     setWrapStrategy(strategy: WrapStrategy): FRange {
         this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
@@ -312,6 +307,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
+     * @param alignment
      */
     setVerticalAlignment(alignment: FVerticalAlignment): FRange {
         this._commandService.syncExecuteCommand(SetVerticalTextAlignCommand.id, {
@@ -326,6 +322,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
+     * @param alignment
      */
     setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {
         this._commandService.syncExecuteCommand(SetHorizontalTextAlignCommand.id, {
@@ -458,6 +455,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font underline style of the given ITextDecoration
+     * @param value
      */
     private _setFontUnderline(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
@@ -476,6 +474,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font strikethrough style of the given ITextDecoration
+     * @param value
      */
     private _setFontStrikethrough(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
@@ -563,9 +562,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merge cells in a range into one merged cell
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
      */
     merge(defaultMerge: boolean = true): FRange {
@@ -579,9 +576,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range horizontally.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
      */
     mergeAcross(defaultMerge: boolean = true): FRange {
@@ -596,9 +591,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range vertically.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
      */
     mergeVertically(defaultMerge: boolean = true): FRange {
@@ -658,6 +651,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns a string description of the range, in A1 notation.
+     * @param withSheet
      * @returns {string} The A1 notation of the range.
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

@@ -21,7 +21,7 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 
 interface IFWorkbookHyperlinkUIMixin {
     /**
-     * navigate to the sheet hyperlink
+     * Navigate to the sheet hyperlink.
      * @param hyperlink the hyperlink string
      * @example
      * ``` ts

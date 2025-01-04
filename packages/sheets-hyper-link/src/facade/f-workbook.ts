@@ -26,15 +26,16 @@ export interface IFWorkbookHyperlinkMixin {
      * @param range the range to link, or define-name id
      * @returns the hyperlink string
      * @example
-     * ```
-     * let r = univerAPI.getActiveWorkbook().getActiveSheet().getRange(5, 5);
-     * univerAPI.getActiveWorkbook().createSheetHyperlink('sheet_Id', r.getRange()) // return something like '#gid=sheet_Id&range=F6'
+     * ```ts
+     * let range = univerAPI.getActiveWorkbook().getActiveSheet().getRange(5, 5);
+     * // return something like '#gid=sheet_Id&range=F6'
+     * univerAPI.getActiveWorkbook().createSheetHyperlink('sheet_Id', r.getRange());
      * ```
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
 
     /**
-     * parse the hyperlink string to get the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
      * @param hyperlink the hyperlink string
      * @returns the hyperlink info
      * @example
@@ -52,7 +53,7 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 
     /**
-     * parse the hyperlink string to get the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
      * @param {string} hyperlink the hyperlink string
      * @returns {ISheetHyperLinkInfo} the hyperlink info
      */

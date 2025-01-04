@@ -27,7 +27,7 @@ export interface IFSheetHooksUIMixin {
      * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onCellPointerMove((cellPos) => { console.log(cellPos)});
      * ```
      */
@@ -38,7 +38,7 @@ export interface IFSheetHooksUIMixin {
      * @param {function(Nullable<IHoverCellPosition>): void} callback - function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onCellPointerOver((cellPos) => { console.log(cellPos)});
      * ```
      */
@@ -49,7 +49,7 @@ export interface IFSheetHooksUIMixin {
      * @param {function (Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onCellDragOver((cellPos) => { console.log(cellPos)});
      * ```
      */
@@ -60,7 +60,7 @@ export interface IFSheetHooksUIMixin {
      * @param {function(Nullable<IDragCellPosition>): void} callback Callback function that will be called when the event is fired
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onCellDrop((cellPos) => { console.log(cellPos)});
      * ```
      */
@@ -73,7 +73,7 @@ export interface IFSheetHooksUIMixin {
      * @param {number} priority The priority of the interceptor
      * @returns {IDisposable} A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
         univerAPI.getSheetHooks().onCellRender([{
             drawWith: (ctx, info) => {
                 const { row, col } = info;
@@ -94,7 +94,7 @@ export interface IFSheetHooksUIMixin {
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onBeforeCellEdit((params) => {console.log(params)})
      * ```
      */
@@ -105,7 +105,7 @@ export interface IFSheetHooksUIMixin {
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      * @example
-     * ```
+     * ```ts
      * univerAPI.getSheetHooks().onAfterCellEdit((params) => {console.log(params)})
      * ```
      */

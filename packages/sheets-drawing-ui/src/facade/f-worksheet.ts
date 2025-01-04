@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable, type IFBlobSource, ImageSourceType, type Nullable, toDisposable } from '@univerjs/core';
+import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import { ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
@@ -26,7 +27,7 @@ export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' 
 
 export interface IFWorksheetLegacy {
     /**
-     * add a float dom to position
+     * Add a float dom to position.
      * @param layer float dom config
      * @param id float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
@@ -84,19 +85,18 @@ export interface IFWorksheetLegacy {
      * Get all images in current sheet.
      * @returns FOverGridImage[]
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
      * ```
      */
-    // Same as Google App script.
     getImages(): FOverGridImage[];
 
     /**
      * Get image by drawing id
-     * @param id
+     * @param id - The drawing id of the image
      * @returns FOverGridImage | null
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().getActiveSheet().getImageById('xxxx');
      * ```
      */
@@ -129,7 +129,7 @@ export interface IFWorksheetLegacy {
      * Get all images in current sheet.
      * @returns FOverGridImage[]
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
      * ```
      */
@@ -137,25 +137,25 @@ export interface IFWorksheetLegacy {
 
     /**
      * Hook when a image is inserted.
-     * @param callback
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is inserted.
      */
     onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
     /**
      * Hook when a image is deleted.
-     * @param callback
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is deleted.
      */
     onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
     /**
      * Hook when a image is changed.
-     * @param callback
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is changed.
      */
     onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable;
 
      /**
       * Create a new over grid image builder.
-      * @returns The builder
+      * @returns {FOverGridImageBuilder} The builder
       * @example
       * ```ts
       * // create a new over grid image builder.

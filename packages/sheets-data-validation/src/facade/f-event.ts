@@ -75,11 +75,18 @@ export interface IBeforeSheetDataValidationOptionsUpdateEvent extends IEventBase
     newOptions: IDataValidationRuleOptions;
 }
 
+export interface IBeforeSheetDataValidationDeleteAllEvent extends IEventBase {
+    worksheet: FWorksheet;
+    workbook: FWorkbook;
+    rules: FDataValidation[];
+}
+
 export interface IDataValidationEventParamConfig {
     SheetDataValidationChanged: ISheetDataValidationChangedEvent;
     SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;
     BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEvent;
     BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEvent;
+    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEvent;
     BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEvent;
     BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEvent;
     BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEvent;
@@ -90,6 +97,7 @@ interface IDataValidationEvent {
     readonly SheetDataValidatorStatusChanged: 'SheetDataValidatorStatusChanged';
     readonly BeforeSheetDataValidationAdd: 'BeforeSheetDataValidationAdd';
     readonly BeforeSheetDataValidationDelete: 'BeforeSheetDataValidationDelete';
+    readonly BeforeSheetDataValidationDeleteAll: 'BeforeSheetDataValidationDeleteAll';
     readonly BeforeSheetDataValidationCriteriaUpdate: 'BeforeSheetDataValidationCriteriaUpdate';
     readonly BeforeSheetDataValidationRangeUpdate: 'BeforeSheetDataValidationRangeUpdate';
     readonly BeforeSheetDataValidationOptionsUpdate: 'BeforeSheetDataValidationOptionsUpdate';
@@ -162,6 +170,19 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
+     * BeforeSheetDataValidationDeleteAll event
+     * @example
+     * ```ts
+     * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
+     *     console.log(event);
+     * });
+     * ```
+     */
+    get BeforeSheetDataValidationDeleteAll(): 'BeforeSheetDataValidationDeleteAll' {
+        return 'BeforeSheetDataValidationDeleteAll';
+    }
+
+    /**
      * BeforeSheetDataValidationCriteriaUpdate event
      * @example
      * ```ts
@@ -206,6 +227,7 @@ export interface IDataValidationEventConfig {
     SheetDataValidatorStatusChanged: ISheetDataValidatorStatusChangedEvent;
     BeforeSheetDataValidationAdd: IBeforeSheetDataValidationAddEvent;
     BeforeSheetDataValidationDelete: IBeforeSheetDataValidationDeleteEvent;
+    BeforeSheetDataValidationDeleteAll: IBeforeSheetDataValidationDeleteAllEvent;
     BeforeSheetDataValidationCriteriaUpdate: IBeforeSheetDataValidationCriteriaUpdateEvent;
     BeforeSheetDataValidationRangeUpdate: IBeforeSheetDataValidationRangeUpdateEvent;
     BeforeSheetDataValidationOptionsUpdate: IBeforeSheetDataValidationOptionsUpdateEvent;

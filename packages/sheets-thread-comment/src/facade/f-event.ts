@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { FWorkbook, IEventBase, RichTextValue } from '@univerjs/core';
-import type { FWorksheet } from '@univerjs/sheets/facade';
+import type { IEventBase, RichTextValue } from '@univerjs/core';
+import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FTheadCommentItem, FThreadComment } from './f-thread-comment';
 import { FEventName } from '@univerjs/core';
 

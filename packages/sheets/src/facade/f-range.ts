@@ -358,6 +358,38 @@ export class FRange extends FBaseInitialable {
         return this.setValues(datas.map((row) => row.map((data) => ({ custom: data }))));
     }
 
+    /**
+     * Returns the custom meta data for the cell at the start of this range.
+     * @returns {CustomData | null} The custom meta data
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCustomMetaData()
+     * ```
+     */
+    getCustomMetaData(): CustomData | null {
+        const cell = this.getCellData();
+        return cell?.custom ?? null;
+    }
+
+    /**
+     * Returns the custom meta data for the cells in the range.
+     * @returns {CustomData[][]} A two-dimensional array of custom meta data
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCustomMetaDatas()
+     * ```
+     */
+    getCustomMetaDatas(): Nullable<CustomData>[][] {
+        const dataGrid = this.getCellDataGrid();
+        return dataGrid.map((row) => row.map((data) => data?.custom ?? null));
+    }
+
     // #region editing
 
     /**

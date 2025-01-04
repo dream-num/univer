@@ -74,6 +74,11 @@ export interface IWorkbookData {
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
      */
     resources?: IResources;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 /**
@@ -143,6 +148,11 @@ export interface IWorksheetData {
     gridlinesColor?: string;
 
     rightToLeft: BooleanNumber;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 export type CustomData = Nullable<Record<string, any>>;

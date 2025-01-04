@@ -45,6 +45,10 @@ export class FWorkbook extends FBaseInitialable {
         this.id = this._workbook.getUnitId();
     }
 
+    getWorkbook(): Workbook {
+        return this._workbook;
+    }
+
     /**
      * Get the id of the workbook.
      * @returns {string} The id of the workbook.

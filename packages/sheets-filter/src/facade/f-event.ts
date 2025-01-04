@@ -37,7 +37,7 @@ export interface IFSheetFilterEventMixin {
      */
     readonly SheetRangeFiltered: 'SheetRangeFiltered';
     /**
-     * This event will be emitted beftore the filter criteria on a column is changed.
+     * This event will be emitted before the filter criteria on a column is changed.
      * Type of the event is {@link ISheetRangeFilteredParams}.
      *
      * @example
@@ -85,6 +85,12 @@ export class FSheetFilterEventName extends FEventName implements IFSheetFilterEv
     override get SheetRangeFiltered(): 'SheetRangeFiltered' { return 'SheetRangeFiltered'; }
     override get SheetRangeFilterCleared(): 'SheetRangeFilterCleared' { return 'SheetRangeFilterCleared'; };
     override get SheetBeforeRangeFilterClear(): 'SheetBeforeRangeFilterClear' { return 'SheetBeforeRangeFilterClear'; }
+}
+
+FEventName.extend(FSheetFilterEventName);
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEventName extends IFSheetFilterEventMixin { }
 }
 
 /**

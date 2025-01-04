@@ -21,7 +21,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { getRuleOptions, getRuleSetting } from '../common/util';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
 
-type DataValidationChangeType = 'update' | 'add' | 'remove';
+export type DataValidationChangeType = 'update' | 'add' | 'remove';
 export type DataValidationChangeSource = 'command' | 'patched';
 
 export interface IRuleChange {

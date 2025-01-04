@@ -77,10 +77,37 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     newDefinedName(): FDefinedNameBuilder;
+
+    /**
+     * Get the target of the sheet.
+     * @param {string} unitId - The unitId of the sheet.
+     * @param {string} subUnitId - The subUnitId of the sheet.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @example
+     * ```ts
+     * univerAPI.getSheetTarget('unitId', 'subUnitId');
+     * ```
+     */
+    getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+
+    /**
+     * Get the target of the sheet.
+     * @param {ICommandInfo<object>} commandInfo - The commandInfo of the command.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (commandInfo) => {
+     *      const target = univerAPI.getCommandSheetTarget(commandInfo);
+     *      if (!target) return;
+     *      const { workbook, worksheet } = target;
+     * });
+     * ```
+     */
+    getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
-    protected _getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+    override getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
         const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
         if (!params) return;
         const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
@@ -96,7 +123,21 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         return { workbook, worksheet };
     }
 
-    private _initUnitEvent(injector: Injector): void {
+    override getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+        const workbook = this.getUniverSheet(unitId);
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+
+        return { workbook, worksheet };
+    }
+
+    private _initWorkbookEvent(injector: Injector): void {
         const univerInstanceService = injector.get(IUniverInstanceService);
         this.disposeWithMe(
             univerInstanceService.unitDisposed$.subscribe((unit) => {
@@ -200,7 +241,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
             })
         );
 
-        this._initUnitEvent(injector);
+        this._initWorkbookEvent(injector);
     }
 
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {

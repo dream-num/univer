@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, Nullable } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import type { Nullable } from 'vitest';
-import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
-
+import { BooleanNumber, Disposable, DocumentFlavor, generateRandomId, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
@@ -48,7 +46,11 @@ interface IHeaderFooterCreate {
 }
 
 // TODO: @JOCS also need to check sectionBreak config in the future.
-function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: DocumentEditArea, segmentPage: number): IHeaderFooterCreate {
+function checkCreateHeaderFooterType(
+    viewModel: DocumentViewModel,
+    editArea: DocumentEditArea,
+    segmentPage: number
+): IHeaderFooterCreate {
     const { documentStyle } = viewModel.getDataModel().getSnapshot();
     const {
         defaultHeaderId,
@@ -150,21 +152,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
     // Close header footer panel when switch mode.
     private _listenSwitchMode() {
-        // this.disposeWithMe(
-        //     this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-        //         if (SwitchDocModeCommand.id === command.id) {
-        //             const viewModel = this._docSkeletonManagerService.getViewModel();
-        //             const editArea = viewModel.getEditArea();
-
-        //             if (editArea !== DocumentEditArea.BODY) {
-        //                 this._commandService.executeCommand(CloseHeaderFooterCommand.id, {
-        //                     unitId: this._context.unitId,
-        //                 });
-        //             }
-        //         }
-        //     })
-        // );
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (RichTextEditingMutation.id === command.id) {
@@ -255,7 +242,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             } else {
                 if (createType != null) {
                     const SEGMENT_ID_LEN = 6;
-                    const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
+                    const segmentId = generateRandomId(SEGMENT_ID_LEN);
                     this._docSelectionRenderService.setSegment(segmentId);
                     this._docSelectionRenderService.setSegmentPage(pageNumber);
 

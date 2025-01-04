@@ -141,7 +141,13 @@ export function createSkeletonPage(
                 false
             );
 
-            skeFooters.set(footerId, new Map([[pageWidth, footer]]));
+            let footerMap = skeFooters.get(footerId);
+            if (footerMap == null) {
+                footerMap = new Map();
+                skeFooters.set(footerId, footerMap);
+            }
+
+            footerMap.set(pageWidth, footer);
         }
         page.footerId = footerId;
     }

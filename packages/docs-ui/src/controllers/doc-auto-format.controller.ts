@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from 'vitest';
+import type { Nullable } from '@univerjs/core';
 import type { ITabCommandParams } from '../commands/commands/auto-format.command';
 import { Disposable, Inject, QuickListTypeMap } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';

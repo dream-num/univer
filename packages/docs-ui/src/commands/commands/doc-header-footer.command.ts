@@ -29,7 +29,7 @@ function getEmptyHeaderFooterBody(): IDocumentBody {
         dataStream: '\r\n',
         textRuns: [{
             st: 0,
-            ed: 0,
+            ed: 1,
             ts: {
                 fs: 9, // The default header footer text size.
             },

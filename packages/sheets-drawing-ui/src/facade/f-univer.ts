@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
+import type { IDrawingSearch, Injector } from '@univerjs/core';
 import type { ISheetImage } from '@univerjs/sheets-drawing';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
+import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams, ISetDrawingCommandParams } from '@univerjs/sheets-drawing-ui';
+import type { IBeforeOverGridImageChangeParamObject } from './f-event';
 import { FUniver, ICommandService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
@@ -38,6 +39,7 @@ export class FUniverDrawingMixin extends FUniver implements IFUniverDrawingMixin
                     this._beforeOverGridImageRemove(commandInfo.params as IDeleteDrawingCommandParams);
                     break;
                 case SetSheetDrawingCommand.id:
+                    this._beforeOverGridImageChange(commandInfo.params as ISetDrawingCommandParams);
                     break;
             }
         }));
@@ -47,8 +49,10 @@ export class FUniverDrawingMixin extends FUniver implements IFUniverDrawingMixin
                     this._overGridImageInserted(commandInfo.params as IInsertDrawingCommandParams);
                     break;
                 case RemoveSheetDrawingCommand.id:
+                    this._overGridImageRemoved(commandInfo.params as IDeleteDrawingCommandParams);
                     break;
                 case SetSheetDrawingCommand.id:
+                    this._overGridImageChanged(commandInfo.params as ISetDrawingCommandParams);
                     break;
             }
         }));
@@ -130,6 +134,63 @@ export class FUniverDrawingMixin extends FUniver implements IFUniverDrawingMixin
         this.fireEvent(this.Event.OverGridImageRemoved, {
             workbook,
             removeImageParams: drawings,
+        });
+    }
+
+    private _beforeOverGridImageChange(params: ISetDrawingCommandParams): void {
+        if (!this.hasEventCallback(this.Event.BeforeOverGridImageChange)) {
+            return;
+        }
+
+        const workbook = this.getActiveUniverSheet();
+        if (workbook == null || params == null) {
+            return;
+        }
+
+        const { drawings } = params;
+
+        const drawingManagerService = this._injector.get(IDrawingManagerService);
+
+        const images: IBeforeOverGridImageChangeParamObject[] = [];
+        drawings.forEach((drawing) => {
+            const image = drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage;
+            if (image == null) {
+                return;
+            }
+
+            images.push({
+                changeParam: drawing,
+                image: this._injector.createInstance(FOverGridImage, image),
+            });
+        });
+
+        this.fireEvent(this.Event.BeforeOverGridImageChange, {
+            workbook,
+            images,
+        });
+    }
+
+    private _overGridImageChanged(params: ISetDrawingCommandParams): void {
+        if (!this.hasEventCallback(this.Event.OverGridImageChanged)) {
+            return;
+        }
+
+        const workbook = this.getActiveUniverSheet();
+        if (workbook == null || params == null) {
+            return;
+        }
+
+        const { drawings } = params;
+
+        const drawingManagerService = this._injector.get(IDrawingManagerService);
+
+        const images = drawings.map((drawing) => {
+            return this._injector.createInstance(FOverGridImage, drawingManagerService.getDrawingByParam(drawing as IDrawingSearch) as ISheetImage);
+        });
+
+        this.fireEvent(this.Event.OverGridImageChanged, {
+            workbook,
+            images,
         });
     }
 

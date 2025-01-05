@@ -225,7 +225,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             imageBuilder.setRowOffset(0);
         }
 
-        const param = await imageBuilder.build();
+        const param = await imageBuilder.buildAsync();
 
         return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }

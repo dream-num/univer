@@ -168,11 +168,11 @@ export class FDrawingEventNameMixin extends FEventName implements IFDrawingEvent
     }
 }
 
-interface IBeforeOverGridImageChangeParamObject {
+export interface IBeforeOverGridImageChangeParamObject {
     /**
      * Parameters of the image to be updated. {@link ISheetImage}
      */
-    changeParam: ISheetImage;
+    changeParam: Partial<ISheetImage>;
 
     /**
      * Instance of the image to be updated. {@link FOverGridImage}
@@ -277,8 +277,8 @@ export interface IOverGridImageSelectedParam extends IEventBase {
 }
 
 interface IFSheetsUIEventParamConfig {
-    BeforeClipboardChange: IBeforeOverGridImageChangeParam;
-    ClipboardChanged: IOverGridImageChangedParam;
+    BeforeOverGridImageChange: IBeforeOverGridImageChangeParam;
+    OverGridImageChanged: IOverGridImageChangedParam;
 
     BeforeOverGridImageInsert: IBeforeOverGridImageInsertParam;
     OverGridImageInserted: IOverGridImageInsertedParam;

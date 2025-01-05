@@ -155,6 +155,8 @@ export interface IFindReplaceService {
 
     replace(): Promise<boolean>;
     replaceAll(): Promise<IReplaceAllResult>;
+
+    getProviders(): Set<IFindReplaceProvider>;
 }
 export const IFindReplaceService = createIdentifier<IFindReplaceService>('find-replace.service');
 

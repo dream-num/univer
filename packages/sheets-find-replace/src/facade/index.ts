@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-// import './f-text-finder';
-// import './f-range';
-// import './f-worksheet';
+import './f-text-finder';
+import './f-univer';
 
-// export { FFilter } from './f-text-finder';
-
-// export type * from './f-text-finder';
-// export type * from './f-range';
-// export type * from './f-worksheet';
+export type * from './f-text-finder';
+export type * from './f-univer';

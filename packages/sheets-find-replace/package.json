@@ -23,7 +23,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",

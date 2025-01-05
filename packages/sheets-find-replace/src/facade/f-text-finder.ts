@@ -14,77 +14,217 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import type { IFindComplete, IFindReplaceProvider } from '@univerjs/find-replace';
-import { Inject, Injector } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IFindComplete, IFindMatch, IFindReplaceState } from '@univerjs/find-replace';
+import { Disposable, Inject, Injector, IUniverInstanceService } from '@univerjs/core';
 import { createInitFindReplaceState, FindBy, FindReplaceModel, FindReplaceState, IFindReplaceService } from '@univerjs/find-replace';
+import { FRange } from '@univerjs/sheets/facade';
 
 export interface IFTextFinder {
-    findAll(): Promise<IRange[]>;
-    findNext(): Promise<Nullable<IRange>>;
-    findPrevious(): Promise< Nullable<IRange>>;
-    getCurrentMatch(): Promise<Nullable<IRange>>;
-    matchCase(matchCase: boolean): Promise<IFTextFinder>;
+    /**
+     * get all the matched range in the univer
+     * @returns all the matched range
+     * @throws if the find operation is not completed
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const ranges = textFinder.findAll();
+     * ranges.forEach((range) => {
+     *    console.log(range.getA1Notation());
+     * });
+     * ```
+     */
+    findAll(): FRange[];
+    /**
+     * find the next matched range in the univer
+     * @returns the next matched range
+     * @throws if the find operation is not completed
+     * @returns null if no more match
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const range = textFinder.findNext();
+     * if (range) {
+     *   console.log(range.getA1Notation());
+     * }
+     * ```
+     */
+    findNext(): Nullable<FRange>;
+    /**
+     * find the previous matched range in the univer
+     * @returns the previous matched range
+     * @throws if the find operation is not completed
+     * @returns null if no more match
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const range = textFinder.findPrevious();
+     * if (range) {
+     *  console.log(range.getA1Notation());
+     * }
+     * ```
+     */
+    findPrevious(): Nullable<FRange>;
+    /**
+     * get the current matched range in the univer
+     * @returns the current matched range
+     * @throws if the find operation is not completed
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const range = textFinder.getCurrentMatch();
+     * if (range) {
+     * console.log(range.getA1Notation());
+     * }
+     * ```
+     */
+    getCurrentMatch(): Nullable<FRange>;
 
-    matchEntireCell(matchEntireCell: boolean): Promise<IFTextFinder>;
-    matchFormulaText(matchFormulaText: boolean): Promise<IFTextFinder>;
-
-    replaceAllWith(replaceText: string): Promise<number>;
-    replaceWith(replaceText: string): Promise<boolean>;
-
-    //startFrom(startRange: IRange): IFTextFinder;
-    //useRegularExpression(useRegularExpression: boolean): IFTextFinder;
-
+    /**
+     * set the match case option
+     * @param {boolean} matchCase whether to match case
+     * @returns text-finder instance
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * await textFinder.matchCaseAsync(true);
+     * ```
+     */
+    matchCaseAsync(matchCase: boolean): Promise<IFTextFinder>;
+    /**
+     * set the match entire cell option
+     * @param {boolean} matchEntireCell whether to match entire cell
+     * @returns text-finder instance
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * await textFinder.matchEntireCellAsync(true);
+     * ```
+     */
+    matchEntireCellAsync(matchEntireCell: boolean): Promise<IFTextFinder>;
+    /**
+     * set the match formula text option
+     * @param {boolean} matchFormulaText whether to match formula text
+     * @returns text-finder instance
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * await textFinder.matchFormulaTextAsync(true);
+     * ```
+     */
+    matchFormulaTextAsync(matchFormulaText: boolean): Promise<IFTextFinder>;
+    /**
+     * replace all the matched text with the given text
+     * @param {string} replaceText the text to replace
+     * @returns the number of replaced text
+     * @throws if the find operation is not completed
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const replacedCount = await textFinder.replaceAllWithAsync('world');
+     * console.log(replacedCount);
+     * ```
+     */
+    replaceAllWithAsync(replaceText: string): Promise<number>;
+    /**
+     * replace the current matched text with the given text
+     * @param {string} replaceText the text to replace
+     * @returns whether the replace is successful
+     * @throws if the find operation is not completed
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const replaced = await textFinder.replaceWithAsync('world');
+     * console.log(replaced);
+     * ```
+     */
+    replaceWithAsync(replaceText: string): Promise<boolean>;
+    /**
+     * ensure the find operation is completed
+     * @returns the find complete result
+     *
+     * @example
+     * ```typescript
+     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const complete = await textFinder.ensureCompleteAsync();
+     * console.log(complete);
+     * ```
+     */
+    ensureCompleteAsync(): Promise<Nullable<IFindComplete>>;
 }
 
 /**
- * This interface class provides methods to modify the filter settings of a worksheet.
+ * This interface class provides methods to find and replace text in the univer.
  */
-export class FTextFinder implements IFTextFinder {
-    private readonly _providers = new Set<IFindReplaceProvider>();
+export class FTextFinder extends Disposable implements IFTextFinder {
     private readonly _state = new FindReplaceState();
     private _model: Nullable<FindReplaceModel>;
     private _complete: Nullable<IFindComplete>;
     constructor(
+        _initialState: Partial<IFindReplaceState>,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(IFindReplaceService) private readonly _findReplaceService: IFindReplaceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IFindReplaceService private readonly _findReplaceService: IFindReplaceService
     ) {
-        this._model = this._injector.createInstance(FindReplaceModel, this._state, this._providers);
-        const newState = createInitFindReplaceState();
+        super();
+        const providers = this._findReplaceService.getProviders();
+        this._model = this._injector.createInstance(FindReplaceModel, this._state, providers);
+        const newState = {
+            ...createInitFindReplaceState(),
+            ..._initialState,
+        };
         this._state.changeState(newState);
-        this.ensureComplete();
     }
 
-    async findAll(): Promise<IRange[]> {
-        const complete = await this.ensureComplete();
-        if (!complete) {
+    findAll(): FRange[] {
+        if (!this._state.findCompleted || !this._complete) {
             return [];
         }
-        return complete.results.map((result) => {
-            return result.range as IRange;
+        return this._complete.results.map((result) => {
+            return this._findMatchToFRange(result);
         });
     }
 
-    async findNext(): Promise<Nullable<IRange>> {
-        const complete = await this.ensureComplete();
-        if (!complete) {
+    findNext(): Nullable<FRange> {
+        if (!this._state.findCompleted || !this._complete) {
             return null;
         }
-        return this._model?.moveToNextMatch()?.range as IRange ?? null;
+        const match = this._model?.moveToNextMatch();
+        if (!match) {
+            return null;
+        }
+        return this._findMatchToFRange(match);
     }
 
-    async findPrevious(): Promise<Nullable<IRange>> {
-        return this._model?.moveToPreviousMatch()?.range as IRange ?? null;
+    findPrevious(): Nullable<FRange> {
+        const match = this._model?.moveToPreviousMatch();
+        if (!match) {
+            return null;
+        }
+        return this._findMatchToFRange(match);
     }
 
-    async getCurrentMatch(): Promise<Nullable<IRange>> {
+    getCurrentMatch(): Nullable<FRange> {
         if (!this._state.findCompleted || !this._complete) {
             throw new Error('Find operation is not completed.');
         }
-        return this._model?.currentMatch$.value?.range as IRange ?? null;
+        const match = this._model?.currentMatch$.value;
+        if (!match) {
+            return null;
+        }
+        return this._findMatchToFRange(match);
     }
 
-    async matchCase(matchCase: boolean): Promise<IFTextFinder> {
+    async matchCaseAsync(matchCase: boolean): Promise<IFTextFinder> {
         this._state.changeState({ caseSensitive: matchCase });
         return new Promise((resolve) => {
             const subscribe = this._state.stateUpdates$.subscribe((state) => {
@@ -96,7 +236,7 @@ export class FTextFinder implements IFTextFinder {
         });
     }
 
-    async matchEntireCell(matchEntireCell: boolean): Promise<IFTextFinder> {
+    async matchEntireCellAsync(matchEntireCell: boolean): Promise<IFTextFinder> {
         this._state.changeState({ matchesTheWholeCell: matchEntireCell });
         return new Promise((resolve) => {
             const subscribe = this._state.stateUpdates$.subscribe((state) => {
@@ -108,7 +248,7 @@ export class FTextFinder implements IFTextFinder {
         });
     }
 
-    async matchFormulaText(matchFormulaText: boolean): Promise<IFTextFinder> {
+    async matchFormulaTextAsync(matchFormulaText: boolean): Promise<IFTextFinder> {
         this._state.changeState({ findBy: matchFormulaText ? FindBy.FORMULA : FindBy.VALUE });
         return new Promise((resolve) => {
             const subscribe = this._state.stateUpdates$.subscribe((state) => {
@@ -120,24 +260,33 @@ export class FTextFinder implements IFTextFinder {
         });
     }
 
-    async replaceAllWith(replaceText: string): Promise<number> {
+    async replaceAllWithAsync(replaceText: string): Promise<number> {
         await this._state.changeState({ replaceRevealed: true, replaceString: replaceText });
         const res = (await this._model?.replaceAll())?.success ?? 0;
         this._state.changeState({ replaceRevealed: false });
         return res;
     }
 
-    async replaceWith(replaceText: string): Promise<boolean> {
+    async replaceWithAsync(replaceText: string): Promise<boolean> {
         await this._state.changeState({ replaceRevealed: true, replaceString: replaceText });
         await this._model?.replace();
         this._state.changeState({ replaceRevealed: false });
         return true;
     }
 
-    async ensureComplete(): Promise<Nullable<IFindComplete>> {
+    async ensureCompleteAsync(): Promise<Nullable<IFindComplete>> {
         if (!this._state.findCompleted || !this._complete) {
             this._complete = await this._model?.start();
         }
         return this._complete;
     };
+
+    private _findMatchToFRange(match: IFindMatch): FRange {
+        const { unitId } = match;
+        const { subUnitId, range } = match.range as { subUnitId: string; range: IRange };
+        const workbook = this._univerInstanceService.getUnit(unitId) as Workbook;
+        const worksheet = workbook.getSheetBySheetId(subUnitId)!;
+        return this._injector.createInstance(FRange, workbook, worksheet, range);
+    }
 }
+

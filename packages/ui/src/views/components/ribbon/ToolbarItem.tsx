@@ -15,8 +15,8 @@
  */
 
 import type { IDropdownLegacyProps } from '@univerjs/design';
-import type { Ref } from 'react';
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
+import type { ITooltipWrapperRef } from './TooltipButtonWrapper';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -33,9 +33,7 @@ import { useToolbarItemStatus } from './hook';
 import styles from './index.module.less';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 
-export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownLegacyProps['align'] }, ref: Ref<any>) => {
-    const { align } = props;
-
+export const ToolbarItem = forwardRef<ITooltipWrapperRef, IDisplayMenuItem<IMenuItem> & { align?: IDropdownLegacyProps['align'] }>((props, ref) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
@@ -109,13 +107,23 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         if (menuType === MenuItemType.BUTTON_SELECTOR) {
             return (
                 <div
-                    className={clsx(styles.toolbarItemSelectButton, {
-                        [styles.toolbarItemSelectButtonDisabled]: disabled,
-                        [styles.toolbarItemSelectButtonActivated]: activated,
+                    className={clsx(styles.toolbarItemSelectButton, `
+                      univer-pr-5 univer-h-6 univer-group univer-transition-colors
+                      hover:univer-bg-gray-100
+                    `, {
+                        'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                     })}
                     data-disabled={disabled}
                 >
-                    <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
+                    <div
+                        className={clsx(styles.toolbarItemSelectButtonLabel, `
+                          univer-transition-colors
+                          hover:univer-bg-gray-200
+                        `, {
+                            'univer-bg-gray-200': activated,
+                        })}
+                        onClick={handleClick}
+                    >
                         <CustomLabel
                             icon={iconToDisplay}
                             title={title!}
@@ -124,11 +132,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                             onChange={handleSelectionsValueChange}
                         />
                     </div>
+
                     <DropdownWrapper
                         disabled={disabled}
-                        align={align ?? {
-                            targetOffset: [32, -12],
-                        }}
+                        offset={{ x: -24 }}
                         overlay={(
                             <Menu
                                 overViewport="scroll"
@@ -140,13 +147,18 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                         )}
                     >
                         <div
-                            className={clsx(styles.toolbarItemSelectButtonArrow, {
-                                [styles.toolbarItemSelectButtonArrowDisabled]: disabled,
-                                [styles.toolbarItemSelectButtonArrowActivated]: activated,
+                            className={clsx(`
+                              univer-absolute univer-top-0 univer-right-0 univer-box-border text-gray-400
+                              univer-transition-colors univer-w-5 univer-flex univer-justify-center univer-items-center
+                              univer-h-6
+                              hover:univer-bg-gray-200
+                            `, {
+                                'univer-cursor-not-allowed univer-text-gray-400 univer-pointer-events-none': disabled,
+                                'univer-bg-gray-200': activated,
                             })}
                             data-disabled={disabled}
                         >
-                            <MoreDownSingle style={{ height: '100%' }} />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </DropdownWrapper>
                 </div>
@@ -167,7 +179,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                 >
                     <div
                         className={clsx(styles.toolbarItemSelect, {
-                            [styles.toolbarItemSelectDisabled]: disabled,
+                            'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                             [styles.toolbarItemSelectActivated]: activated,
                         })}
                     >
@@ -180,10 +192,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                         />
                         <div
                             className={clsx(styles.toolbarItemSelectArrow, {
-                                [styles.toolbarItemSelectArrowDisabled]: disabled,
+                                'univer-cursor-not-allowed univer-text-gray-200 univer-pointer-events-none': disabled,
                             })}
                         >
-                            <MoreDownSingle />
+                            <MoreDownSingle className="univer-text-gray-400" />
                         </div>
                     </div>
                 </DropdownWrapper>
@@ -228,7 +240,11 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
     }
 
     return !hidden && (
-        <TooltipWrapper ref={ref} title={tooltipTitle} placement="bottom">
+        <TooltipWrapper
+            ref={ref}
+            title={tooltipTitle}
+            placement="bottom"
+        >
             {renderItem()}
         </TooltipWrapper>
     );

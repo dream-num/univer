@@ -308,7 +308,7 @@ export const SheetPermissionPanelList = () => {
                                     <div className={styles.sheetPermissionListItemContent}>
                                         <div className={styles.sheetPermissionListItemContentEdit}>
 
-                                            <Tooltip title={item.creator?.name}>
+                                            <Tooltip title={item.creator?.name ?? ''}>
                                                 <div>
                                                     <Avatar src={item.creator?.avatar} style={{ marginRight: 6 }} size={24} />
                                                 </div>

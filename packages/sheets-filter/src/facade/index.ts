@@ -17,9 +17,12 @@
 import './f-filter';
 import './f-range';
 import './f-worksheet';
+import './f-enum';
+import './f-event';
 
+export type * from './f-enum';
+export type * from './f-event';
 export { FFilter } from './f-filter';
-
 export type * from './f-filter';
 export type * from './f-range';
 export type * from './f-worksheet';

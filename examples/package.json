@@ -30,7 +30,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.2.7",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -69,10 +68,10 @@
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "@univerjs/watermark": "workspace:*",
-        "monaco-editor": "0.52.0",
+        "monaco-editor": "0.52.2",
         "react": "18.3.1",
         "react-dom": "18.3.1",
-        "react-mosaic-component": "^6.1.0"
+        "react-mosaic-component": "^6.1.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
@@ -80,7 +79,7 @@
         "@types/react-dom": "^18.3.1",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^1.6.1",
-        "esbuild": "^0.24.0",
+        "esbuild": "^0.24.2",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
@@ -89,7 +88,8 @@
         "less": "^4.2.1",
         "minimist": "^1.2.8",
         "postcss": "^8.4.49",
-        "tailwindcss": "^3.4.16",
+        "tailwindcss": "^3.4.17",
+        "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.7.2"
     }
 }

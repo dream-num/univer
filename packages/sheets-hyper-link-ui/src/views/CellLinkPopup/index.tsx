@@ -85,7 +85,7 @@ export const CellLinkPopupPure = (props: ICellLinkPopupPureProps) => {
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>
-                <Tooltip showIfEllipsis title={linkObj.name}>
+                <Tooltip showIfEllipsis title={linkObj.name} asChild>
                     <span className={styles.cellLinkUrl}>{linkObj.name}</span>
                 </Tooltip>
             </div>

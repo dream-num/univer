@@ -22,6 +22,7 @@ import type {
 
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import {
+    CellModeEnum,
     CommandType,
     Dimension,
     ICommandService,
@@ -105,7 +106,7 @@ function getClearContentMutationParamsForRanges(
 
 function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
-    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
+    const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, CellModeEnum.Intercepted);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData && (row !== startRow || col !== startColumn)) {
@@ -120,7 +121,7 @@ export const AddWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge',
 
-    handler: async (accessor: IAccessor, params: IAddMergeCommandParams) => {
+    handler: (accessor: IAccessor, params: IAddMergeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -265,7 +266,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     },
 };
 
-export async function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean) {
+export function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean) {
     const univerInstanceService = injector.get(IUniverInstanceService);
     const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
     if (!target) return;
@@ -280,7 +281,7 @@ export async function addMergeCellsUtil(injector: Injector, unitId: string, subU
         throw new Error('The ranges to be merged overlap with the existing merged cells');
     }
     const commandService = injector.get(ICommandService);
-    await commandService.executeCommand(AddWorksheetMergeCommand.id, {
+    commandService.executeCommand(AddWorksheetMergeCommand.id, {
         unitId,
         subUnitId,
         selections: ranges,

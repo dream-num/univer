@@ -14,4 +14,22 @@
  * limitations under the License.
  */
 
-export { type ITextareaProps, Textarea } from './Textarea';
+import { FEnum } from '@univerjs/core';
+import { BuiltInUIPart } from '@univerjs/ui';
+
+interface IFUIEnumMixin {
+    get BuiltInUIPart(): typeof BuiltInUIPart;
+}
+
+export class FUIEnum extends FEnum implements IFUIEnumMixin {
+    override get BuiltInUIPart(): typeof BuiltInUIPart {
+        return BuiltInUIPart;
+    };
+}
+
+FEnum.extend(FUIEnum);
+
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FEnum extends IFUIEnumMixin {}
+}

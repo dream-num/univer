@@ -57,7 +57,7 @@ export class WorksheetPermissionService extends RxDisposable {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.addPermissionPoint(instance);
                 });
-                this._logService.log('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
+                this._logService.debug('[WorksheetPermissionService]', 'Initialization completed', unitId, subUnitId);
             };
             workbook.getSheets().forEach((worksheet) => {
                 handleWorksheet(worksheet);

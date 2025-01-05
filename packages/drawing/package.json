@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "0.5.1",
+    "version": "0.5.3",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,20 +66,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.2",
-        "vite": "^6.0.3",
+        "vite": "^6.0.6",
         "vitest": "^2.1.8"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.5.1",
+    "version": "0.5.3",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,6 +66,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
@@ -88,20 +89,7 @@
         "jsdom": "^24.1.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.2",
-        "vite": "^6.0.3",
+        "vite": "^6.0.6",
         "vitest": "^2.1.8"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
     }
 }

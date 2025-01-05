@@ -25,6 +25,7 @@ import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverComman
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
+import { DarkModeOperation } from '../commands/operations/dark-mode.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
@@ -66,6 +67,29 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Tiếng Việt',
                 value: LocaleType.VI_VN,
+            },
+        ],
+    };
+}
+
+export function DarkModeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: DarkModeOperation.id,
+        title: '🌓',
+        tooltip: 'Dark Mode',
+        type: MenuItemType.SELECTOR,
+        selections: [
+            {
+                label: 'System',
+                value: 'auto',
+            },
+            {
+                label: 'Light',
+                value: 'light',
+            },
+            {
+                label: 'Dark',
+                value: 'dark',
             },
         ],
     };

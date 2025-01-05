@@ -272,6 +272,14 @@ export interface ICellMarks {
     isSkip?: boolean;
 }
 
+export interface IFontRenderExtension {
+    leftOffset?: number;
+    rightOffset?: number;
+    topOffset?: number;
+    downOffset?: number;
+    isSkip?: boolean;
+}
+
 // TODO@weird94: should be moved outside of the core package
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
@@ -286,13 +294,10 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     coverable?: boolean;
     linkUrl?: string;
     linkId?: string;
-    fontRenderExtension?: {
-        leftOffset?: number;
-        rightOffset?: number;
-        topOffset?: number;
-        downOffset?: number;
-        isSkip?: boolean;
-    };
+    fontRenderExtension?: IFontRenderExtension;
+    // use for save the theme style, it  can not be composed directly
+    themeStyle?: Nullable<IStyleData>;
+
 }
 
 export function isICellData(value: any): value is ICellData {
@@ -328,7 +333,7 @@ export function isNullCell(cell: Nullable<ICellData>) {
         return true;
     }
 
-    const { v, f, si, p, s, custom } = cell;
+    const { v, f, si, p, custom } = cell;
 
     if (!(v == null || (typeof v === 'string' && v.length === 0))) {
         return false;
@@ -354,9 +359,22 @@ export function isCellV(cell: Nullable<ICellData | CellValue>) {
 }
 
 export interface IFreeze {
+    /**
+     * count of fixed cols
+     */
     xSplit: number;
+    /**
+     * count of fixed rows
+     */
     ySplit: number;
+    /**
+     * scrollable start row
+     */
     startRow: number;
+
+    /**
+     * scrollable start column
+     */
     startColumn: number;
 }
 
@@ -665,7 +683,7 @@ export interface ISelectionCell extends IRange, ISingleCell { }
 /**
  * ICellInfo has the same properties as ISelectionCell, but the name ICellInfo might be more semantically appropriate in some contexts.
  */
-export interface ICellInfo extends ISelectionCell {}
+export interface ICellInfo extends ISelectionCell { }
 
 export interface ISelection {
     /**
@@ -770,4 +788,12 @@ export function getCellInfoInMergeData(row: number, column: number, mergeData?: 
         startRow: mergeRow,
         startColumn: mergeColumn,
     };
+}
+
+export type ICellDataWithSpanAndDisplay = ICellData & { rowSpan?: number; colSpan?: number; displayV?: string };
+
+export enum CellModeEnum {
+    Raw = 'raw',
+    Intercepted = 'intercepted',
+    Both = 'both',
 }

@@ -32,3 +32,7 @@ export enum InterceptCellContentPriority {
     NUMFMT = 10,
     CELL_IMAGE = 11,
 }
+// used for define the range theme interceptor, it will also use to ignore the range theme interceptor
+export const RangeThemeInterceptorId = 'sheet.interceptor.range-theme-id';
+
+export const IgnoreRangeThemeInterceptorKey = 'sheet.interceptor.ignore-range-theme';

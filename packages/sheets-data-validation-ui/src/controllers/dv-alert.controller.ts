@@ -49,7 +49,10 @@ export class DataValidationAlertController extends Disposable {
                 const worksheet = workbook.getSheetBySheetId(cellPos.location.subUnitId);
                 if (!worksheet) return;
                 const rule = this._dataValidationModel.getRuleByLocation(cellPos.location.unitId, cellPos.location.subUnitId, cellPos.location.row, cellPos.location.col);
-                if (!rule) return;
+                if (!rule) {
+                    this._cellAlertManagerService.removeAlert(ALERT_KEY);
+                    return;
+                }
 
                 const validStatus = this._dataValidationModel.validator(rule, { ...cellPos.location, workbook, worksheet });
                 if (validStatus === DataValidationStatus.INVALID) {
@@ -62,11 +65,13 @@ export class DataValidationAlertController extends Disposable {
                         currentLoc.subUnitId === cellPos.location.subUnitId &&
                         currentLoc.unitId === cellPos.location.unitId
                     ) {
+                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
                         return;
                     }
 
                     const validator = this._dataValidationModel.getValidator(rule.type) as BaseDataValidator;
                     if (!validator) {
+                        this._cellAlertManagerService.removeAlert(ALERT_KEY);
                         return;
                     }
                     this._cellAlertManagerService.showAlert({

@@ -86,7 +86,7 @@ export class RuleMatrix {
             return;
         }
 
-        const ranges = _ranges.map((range) => Range.transformRange(range, this._worksheet!));
+        const ranges = Rectangle.mergeRanges(_ranges.map((range) => Range.transformRange(range, this._worksheet!)));
 
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);

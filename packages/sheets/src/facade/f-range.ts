@@ -17,9 +17,9 @@
 import type { CellValue, ICellData, IColorStyle, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetHorizontalTextAlignCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBase, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -27,16 +27,16 @@ export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
-export class FRange extends FBase {
+export class FRange extends FBaseInitialable {
     constructor(
         protected readonly _workbook: Workbook,
         protected readonly _worksheet: Worksheet,
         protected readonly _range: IRange,
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,
         @Inject(FormulaDataModel) protected readonly _formulaDataModel: FormulaDataModel
     ) {
-        super();
+        super(_injector);
     }
 
     /**
@@ -223,13 +223,17 @@ export class FRange extends FBase {
     }
 
     // #region editing
+
     /**
      * Set background color for current range.
-     * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
      * @param color {string}
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackgroundColor('red')
+     * ```
      */
-    setBackgroundColor(color: string): Promise<boolean> {
-        return this._commandService.executeCommand(SetStyleCommand.id, {
+    setBackgroundColor(color: string): FRange {
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
@@ -240,83 +244,98 @@ export class FRange extends FBase {
                 },
             },
         } as ISetStyleCommandParams<IColorStyle>);
+        return this;
     }
 
     /**
      * Set background color for current range.
-     * e.g. `univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')`
+     * @example
+     * ```
+     * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')
+     * ```
      * @param color {string}
      */
-    setBackground(color: string): Promise<boolean> {
-        return this.setBackgroundColor(color);
+    setBackground(color: string): FRange {
+        this.setBackgroundColor(color);
+        return this;
     }
 
     /**
      * The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
      * @param value
      */
-    setValue(value: CellValue | ICellData): Promise<boolean> {
+    setValue(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);
 
         if (!realValue) {
             throw new Error('Invalid value');
         }
 
-        return this._commandService.executeCommand(SetRangeValuesCommand.id, {
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
         });
+
+        return this;
     }
 
     /**
      * Set the cell wrap of the given range.
      * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
      */
-    setWrap(isWrapEnabled: boolean): Promise<boolean> {
-        return this._commandService.executeCommand(SetTextWrapCommand.id, {
+    setWrap(isWrapEnabled: boolean): FRange {
+        this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: isWrapEnabled ? WrapStrategy.WRAP : WrapStrategy.UNSPECIFIED,
         } as ISetTextWrapCommandParams);
+
+        return this;
     }
 
     /**
      * Sets the text wrapping strategy for the cells in the range.
      */
-    setWrapStrategy(strategy: WrapStrategy): Promise<boolean> {
-        return this._commandService.executeCommand(SetTextWrapCommand.id, {
+    setWrapStrategy(strategy: WrapStrategy): FRange {
+        this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: strategy,
         } as ISetTextWrapCommandParams);
+
+        return this;
     }
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
      */
-    setVerticalAlignment(alignment: FVerticalAlignment): Promise<boolean> {
-        return this._commandService.executeCommand(SetVerticalTextAlignCommand.id, {
+    setVerticalAlignment(alignment: FVerticalAlignment): FRange {
+        this._commandService.syncExecuteCommand(SetVerticalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: transformFacadeVerticalAlignment(alignment),
         } as ISetVerticalTextAlignCommandParams);
+
+        return this;
     }
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
      */
-    setHorizontalAlignment(alignment: FHorizontalAlignment): Promise<boolean> {
-        return this._commandService.executeCommand(SetHorizontalTextAlignCommand.id, {
+    setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {
+        this._commandService.syncExecuteCommand(SetHorizontalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: transformFacadeHorizontalAlignment(alignment),
         } as ISetHorizontalTextAlignCommandParams);
+
+        return this;
     }
 
     /**
@@ -329,15 +348,17 @@ export class FRange extends FBase {
             | IObjectMatrixPrimitiveType<CellValue>
             | ICellData[][]
             | IObjectMatrixPrimitiveType<ICellData>
-    ): Promise<boolean> {
+    ): FRange {
         const realValue = covertCellValues(value, this._range);
 
-        return this._commandService.executeCommand(SetRangeValuesCommand.id, {
+        this._commandService.syncExecuteCommand(SetRangeValuesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
             value: realValue,
         });
+
+        return this;
     }
 
     /**
@@ -542,50 +563,71 @@ export class FRange extends FBase {
 
     /**
      * Merge cells in a range into one merged cell
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0, 0, 2, 2);
+     * const merge = range.merge();
+     * const isMerged = merge.isMerged();
+     * console.log('debugger', isMerged);
+     * ```
      */
-    async merge(defaultMerge: boolean = true): Promise<FRange> {
+    merge(defaultMerge: boolean = true): FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
 
         return this;
     }
 
     /**
      * Merges cells in a range horizontally.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(2, 2, 2, 2);
+     * const merge = range.mergeAcross();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
+     * ```
      */
-    async mergeAcross(defaultMerge: boolean = true): Promise<FRange> {
+    mergeAcross(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }
 
     /**
      * Merges cells in a range vertically.
-     *
      * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     *
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(4, 4, 2, 2);
+     * const merge = range.mergeVertically();
+     * const allMerge = worksheet.getMergeData();
+     * console.log(allMerge.length); // There will be two merged cells.
+     * ```
      */
-    async mergeVertically(defaultMerge: boolean = true): Promise<FRange> {
+    mergeVertically(defaultMerge: boolean = true): FRange {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
+        addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }
@@ -593,6 +635,16 @@ export class FRange extends FBase {
     /**
      * Returns true if cells in the current range overlap a merged cell.
      * @returns {boolean} is overlap with a merged cell
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0,0,2,2);
+     * const merge = range.merge();
+     * const anchor = worksheet.getRange(0,0);
+     * const isPartOfMerge = anchor.isPartOfMerge();
+     * console.log('debugger, isPartOfMerge) // true
+     * ```
      */
     isPartOfMerge(): boolean {
         const { startRow, startColumn, endRow, endColumn } = this._range;
@@ -602,6 +654,19 @@ export class FRange extends FBase {
     /**
      * Break all horizontally- or vertically-merged cells contained within the range list into individual cells again.
      * @returns This range, for chaining
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const range = worksheet.getRange(0,0,2,2);
+     * const merge = range.merge();
+     * const anchor = worksheet.getRange(0,0);
+     * const isPartOfMergeFirst = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeFirst) // true
+     * range.breakApart();
+     * const isPartOfMergeSecond = anchor.isPartOfMerge();
+     * console.log('debugger' isPartOfMergeSecond) // false
+     * ```
      */
     breakApart(): FRange {
         this._commandService.executeCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
@@ -751,6 +816,74 @@ export class FRange extends FBase {
             delimiter,
             customDelimiter,
             treatMultipleDelimitersAsOne,
+        });
+    }
+
+    /**
+     * Set the theme style for the range.
+     * @param {string|undefined} themeName The name of the theme style to apply.If a undefined value is passed, the theme style will be removed if it exist.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.useThemeStyle('default');
+     * ```
+     */
+    useThemeStyle(themeName: string | undefined): void {
+        if (themeName === null || themeName === undefined) {
+            const usedThemeName = this.getUsedThemeStyle();
+            if (usedThemeName) {
+                this.removeThemeStyle(usedThemeName);
+            }
+        } else {
+            this._commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
+                unitId: this._workbook.getUnitId(),
+                subUnitId: this._worksheet.getSheetId(),
+                range: this._range,
+                themeName,
+            });
+        }
+    }
+
+    /**
+     * Remove the theme style for the range.
+     * @param {string} themeName The name of the theme style to remove.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.removeThemeStyle('default');
+     * ```
+     */
+    removeThemeStyle(themeName: string): void {
+        this._commandService.executeCommand(DeleteWorksheetRangeThemeStyleCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
+            themeName,
+        });
+    }
+
+    /**
+     * Gets the theme style applied to the range.
+     * @returns {string | undefined} The name of the theme style applied to the range or not exist.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fRange = fWorksheet.getRange('A1:E20');
+     * fRange.useThemeStyle('default');
+     * const themeStyle = fRange.getUsedThemeStyle();
+     * console.log(themeStyle); // 'default'
+     * ```
+     */
+    getUsedThemeStyle(): string | undefined {
+        return this._injector.get(SheetRangeThemeService).getAppliedRangeThemeStyle({
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            range: this._range,
         });
     }
 }

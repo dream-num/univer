@@ -1,4 +1,128 @@
+# Changelog
 
+## [0.5.3](https://github.com/dream-num/univer/compare/v0.5.2...v0.5.3) (2025-01-04)
+
+
+### Bug Fixes
+
+* canvas crash when draw broken image ([#4388](https://github.com/dream-num/univer/issues/4388)) ([09fd432](https://github.com/dream-num/univer/commit/09fd43220cd746e152fbf3157d077ba44fec3e3d))
+* **design:** fix dropdown on nested situation ([#4416](https://github.com/dream-num/univer/issues/4416)) ([05896c0](https://github.com/dream-num/univer/commit/05896c0a39974e5c498f83020e86fa276e637448))
+* extend feventname ([#4426](https://github.com/dream-num/univer/issues/4426)) ([86e4e8e](https://github.com/dream-num/univer/commit/86e4e8e23e732fe7f2c3cd4b6eeaa036fe8cb572))
+* **facade:** f-event & f-enum extend error ([#4424](https://github.com/dream-num/univer/issues/4424)) ([be77c47](https://github.com/dream-num/univer/commit/be77c479ebc9363cde6610f369ed512eb5c3cb94))
+* **filter:** fix event API export ([#4422](https://github.com/dream-num/univer/issues/4422)) ([5738128](https://github.com/dream-num/univer/commit/57381280398a813ba3eab2e9bcb72f952b798749))
+* fix snapshot after cut & paste ([#4405](https://github.com/dream-num/univer/issues/4405)) ([52990cc](https://github.com/dream-num/univer/commit/52990cc049f536ce58146ab5bbd3901e07ce94b0))
+* **formula:** use different isNullCell for formula modules ([#4395](https://github.com/dream-num/univer/issues/4395)) ([72e8192](https://github.com/dream-num/univer/commit/72e81922a0ec41d5d7a123d8c9afbb788dbab757))
+* **range-selector:** remove dataStream ([#4191](https://github.com/dream-num/univer/issues/4191)) ([a90779e](https://github.com/dream-num/univer/commit/a90779efbf26fdec934c4884967bc5f59c859c01))
+* **sheet:** fix spell error ([#4425](https://github.com/dream-num/univer/issues/4425)) ([430f338](https://github.com/dream-num/univer/commit/430f338d3209b15e156c849f4272c61d61250496))
+* **ui:** update animation class condition to improve Ribbon styling ([#4392](https://github.com/dream-num/univer/issues/4392)) ([0124730](https://github.com/dream-num/univer/commit/0124730e028149e5326337d95d5133e8aa53888d))
+* vp start sheet view column ([#4396](https://github.com/dream-num/univer/issues/4396)) ([868e4b2](https://github.com/dream-num/univer/commit/868e4b2a81fae12e5a522c85b95b6e6d4690d2c4))
+* **watermark:** fix invalid plugin configuration ([#4389](https://github.com/dream-num/univer/issues/4389)) ([e3930bb](https://github.com/dream-num/univer/commit/e3930bbdea12de3e222879e2dad0ecc2d43a64b9))
+
+
+### Features
+
+* add api for ui and f-enum ([#4406](https://github.com/dream-num/univer/issues/4406)) ([51ed14e](https://github.com/dream-num/univer/commit/51ed14e80c22cfe9fe8b08dc8e7e2f53ee74f8ad))
+* **facade:** facade-namespace & global addEvent ([#4346](https://github.com/dream-num/univer/issues/4346)) ([612c981](https://github.com/dream-num/univer/commit/612c981b2fd403bf0ebce316e4b3f9fed5d59d68))
+* **facade:** make facade api sync and chainable ([#4329](https://github.com/dream-num/univer/issues/4329)) ([c5fcf3e](https://github.com/dream-num/univer/commit/c5fcf3eccd1632bce2396238fa3bdebb87d214ff))
+* fetchThroughInterceptors support filter function ([#4385](https://github.com/dream-num/univer/issues/4385)) ([e909093](https://github.com/dream-num/univer/commit/e90909302d857d19bfc0b3df2f95092ef287ba3e))
+* **filter:** update filter facade to add events and enums ([#4403](https://github.com/dream-num/univer/issues/4403)) ([9ad9d48](https://github.com/dream-num/univer/commit/9ad9d4851039d98070e177695a466e7fb76089f5))
+* **formula:** add register async function ([#4399](https://github.com/dream-num/univer/issues/4399)) ([c8d287b](https://github.com/dream-num/univer/commit/c8d287b2a49447e7f68b9b233663d826976258a7))
+* **sheet:** support range theme template ([#4369](https://github.com/dream-num/univer/issues/4369)) ([28ff41a](https://github.com/dream-num/univer/commit/28ff41a3a2db56d19854efcfadd1494e2812ab59))
+
+
+### Reverts
+
+* get fontExtension from cache,  revert to worksheet.getCell ([#4417](https://github.com/dream-num/univer/issues/4417)) ([5c03dff](https://github.com/dream-num/univer/commit/5c03dff81221fe4933cb33ffb83b650ddef8b91a))
+
+## [0.5.2](https://github.com/dream-num/univer/compare/v0.5.1...v0.5.2) (2024-12-28)
+
+
+### Bug Fixes
+
+*  better disable selection ---> transparent selection ([#4372](https://github.com/dream-num/univer/issues/4372)) ([46b403c](https://github.com/dream-num/univer/commit/46b403cd0d9f31b2df7cfcbcda088f208aa3d2d4))
+* border stylecache in sheet skeleton ([#4276](https://github.com/dream-num/univer/issues/4276)) ([af3eece](https://github.com/dream-num/univer/commit/af3eecefb46049c92763803b0c65fda4b72f3c6a))
+* cell link postion should clear primary ([#4241](https://github.com/dream-num/univer/issues/4241)) ([7fe6a76](https://github.com/dream-num/univer/commit/7fe6a768fe7b73e6e1865b5ea40115b10b8ad1ba))
+* **cell:** fix cell format of rich text ([#4261](https://github.com/dream-num/univer/issues/4261)) ([91c201a](https://github.com/dream-num/univer/commit/91c201aa0aaeb9f8018b306fb0c67452bb9a213e))
+* **chart:** fix delete drawing not dispose popup ([#4194](https://github.com/dream-num/univer/issues/4194)) ([b653da5](https://github.com/dream-num/univer/commit/b653da51d286ae4de7946591f262182b2aa24930))
+* **conditional-formatting:** add onlyLocal to formula mutations ([#4323](https://github.com/dream-num/univer/issues/4323)) ([80e6f37](https://github.com/dream-num/univer/commit/80e6f374f0b4eced0a22fbcc7eaa5e829f76359a))
+* **conditional-formatting:** memory leak ([#4212](https://github.com/dream-num/univer/issues/4212)) ([1de083c](https://github.com/dream-num/univer/commit/1de083c588cdeae7d244a4d03df3358e2aac05f7))
+* copy cell should generate html & plain ([#4366](https://github.com/dream-num/univer/issues/4366)) ([e2edd07](https://github.com/dream-num/univer/commit/e2edd0782a713de7c6cce4454a906b4d030b25b4))
+* copy plain should get cell value ([#4344](https://github.com/dream-num/univer/issues/4344)) ([7e36387](https://github.com/dream-num/univer/commit/7e36387d775941eb6dcab2e5cbba48fac207881a))
+* **core:** url regexper ([#4237](https://github.com/dream-num/univer/issues/4237)) ([182f7c5](https://github.com/dream-num/univer/commit/182f7c5320512ba60a051ec638f8a5208e8f0c2c))
+* cross selection failed ([#4226](https://github.com/dream-num/univer/issues/4226)) ([cbc58ea](https://github.com/dream-num/univer/commit/cbc58ea94a58e6a7cca769cef093792fba9fadc6))
+* **definedName:** set current sheet name ([#4204](https://github.com/dream-num/univer/issues/4204)) ([456c4a2](https://github.com/dream-num/univer/commit/456c4a2a50151ce4ff69c3db481145b0bf83c148))
+* **drawing:** chart can custom backgroud ([#4251](https://github.com/dream-num/univer/issues/4251)) ([1be91c8](https://github.com/dream-num/univer/commit/1be91c8b1433ab82d5cbe39e214424bad29708f6))
+* **dv:** detail panel not diposing correctly ([#4308](https://github.com/dream-num/univer/issues/4308)) ([0a0e723](https://github.com/dream-num/univer/commit/0a0e723a96604338e3287f20f26bfdf29953bdcc))
+* **examples:** fix external worker not terminated on Univer disposing ([#4218](https://github.com/dream-num/univer/issues/4218)) ([1cce071](https://github.com/dream-num/univer/commit/1cce07112d4a4ce40cad92a5ced1bbb99f49f366))
+* **facade:** calculate the correct number of displayable sheet ([#4335](https://github.com/dream-num/univer/issues/4335)) ([7fcb50a](https://github.com/dream-num/univer/commit/7fcb50ad4d6a6af69ee20e9845ee0ffb350df2b6))
+* **facade:** fix hyperlink update and remove command ([#4287](https://github.com/dream-num/univer/issues/4287)) ([e60e45f](https://github.com/dream-num/univer/commit/e60e45fa6e53c36726eb3131005e63efd00dc793))
+* **facade:** fix setNumberFormat facade ([#4202](https://github.com/dream-num/univer/issues/4202)) ([9fcbea8](https://github.com/dream-num/univer/commit/9fcbea8472f762c1b1a9349626a6f61cf99e6628))
+* fix become rich text when end edit ([#4309](https://github.com/dream-num/univer/issues/4309)) ([d57f88b](https://github.com/dream-num/univer/commit/d57f88b9dad20fd19aa5dafc71f0c82cf71a3ecb))
+* fix clipboard when dispose ([#4253](https://github.com/dream-num/univer/issues/4253)) ([f06ab86](https://github.com/dream-num/univer/commit/f06ab868f05b8977368e1ba527df6514484291f1))
+* fix facade API not implemented ([#4259](https://github.com/dream-num/univer/issues/4259)) ([d0d264f](https://github.com/dream-num/univer/commit/d0d264fa8ca44ebf4c4f4aeec53ec287963a4ab9))
+* fix facade not exported ([#4285](https://github.com/dream-num/univer/issues/4285)) ([ac3cc27](https://github.com/dream-num/univer/commit/ac3cc27e156ccd6d2730fca8c4a0a48a07bc20e0))
+* fix last memory leak and make memory CI more strict ([#4229](https://github.com/dream-num/univer/issues/4229)) ([1e0d548](https://github.com/dream-num/univer/commit/1e0d5487445b4557d661dd754fae9bb27ba2ca3d))
+* fix merge with move bad case ([#4274](https://github.com/dream-num/univer/issues/4274)) ([e9de991](https://github.com/dream-num/univer/commit/e9de991def633ab2d75a16aa2f02e768aed6004b))
+* fix paste besides border should keep rich text ([#4316](https://github.com/dream-num/univer/issues/4316)) ([2763f02](https://github.com/dream-num/univer/commit/2763f02ca57b71da3526e3960026e3748459e7e9))
+* **formula:** fix compare of range and criteria in related formulas ([#4216](https://github.com/dream-num/univer/issues/4216)) ([ebf12d6](https://github.com/dream-num/univer/commit/ebf12d67b7c1d6aa5d33495ced2e68e86e238117))
+* **formula:** fix product formula ([#4273](https://github.com/dream-num/univer/issues/4273)) ([a9ea9e1](https://github.com/dream-num/univer/commit/a9ea9e14287144d06a78940707912d6b586a487d))
+* **formula:** fix xlookup formula ([#4263](https://github.com/dream-num/univer/issues/4263)) ([ae576a7](https://github.com/dream-num/univer/commit/ae576a7703df7c9a0700d42d5f40acc0b88e2c77))
+* **formula:** formula auto fill up ([#4227](https://github.com/dream-num/univer/issues/4227)) ([e7126ae](https://github.com/dream-num/univer/commit/e7126ae1ffd896d34977eeee56775e90cc8b2b23))
+* **formula:** formula dependency ([#4224](https://github.com/dream-num/univer/issues/4224)) ([6dd4b16](https://github.com/dream-num/univer/commit/6dd4b16642ac52486c8180fb41c9620a86369314))
+* **formula:** indirect dependency ([#4245](https://github.com/dream-num/univer/issues/4245)) ([ebda4c3](https://github.com/dream-num/univer/commit/ebda4c37453ac71f3d968fff7c8adeefcd3f2fac))
+* **formula:** some formulas need to be tested in dev ([#4116](https://github.com/dream-num/univer/issues/4116)) ([4ff30b1](https://github.com/dream-num/univer/commit/4ff30b1bb95f79727abd05e3ad9e9b6861be611a))
+* merge default plugin configuration with existing config in multiple plugins ([#4370](https://github.com/dream-num/univer/issues/4370)) ([4900e66](https://github.com/dream-num/univer/commit/4900e664a526f79bd8f0ca1c39975099baedd6b1))
+* mult rows need to be pasted into multiple cells ([#4319](https://github.com/dream-num/univer/issues/4319)) ([17a92a8](https://github.com/dream-num/univer/commit/17a92a865f7fad273731787f6294d32fb2fa431c))
+* **network:** work in ancestor env ([#4296](https://github.com/dream-num/univer/issues/4296)) ([2502caf](https://github.com/dream-num/univer/commit/2502caf05a03b441e11ac1add99955e6c90cc01c))
+* only change the style when have ts ([#4365](https://github.com/dream-num/univer/issues/4365)) ([57467da](https://github.com/dream-num/univer/commit/57467da8774b42cedc8e88f9a78296d98487ff06))
+* paste should clear target cell value ([#4268](https://github.com/dream-num/univer/issues/4268)) ([3babc2f](https://github.com/dream-num/univer/commit/3babc2fd0c0ea936b5a24cec5d4d9eec37f14ce4))
+* **permission:** range selector blur ([#4310](https://github.com/dream-num/univer/issues/4310)) ([92c7577](https://github.com/dream-num/univer/commit/92c757742e267b73f0da9ab9ac26d01b2756c754))
+* replace deprecated deepMerge method with merge from @univerjs/core ([#4374](https://github.com/dream-num/univer/issues/4374)) ([a5949ae](https://github.com/dream-num/univer/commit/a5949aecfbc5891b09a4fa6d644bec7e59e4d9ab))
+* row col selection for merged cell ([#4345](https://github.com/dream-num/univer/issues/4345)) ([b724a46](https://github.com/dream-num/univer/commit/b724a46f1f32b80a4a2ef39b9a01b18cf72a9fc3))
+* rpc support multiple params ([#4271](https://github.com/dream-num/univer/issues/4271)) ([1dae650](https://github.com/dream-num/univer/commit/1dae650da82e50282bdc7757c1e211e539caab46))
+* selection expand with shift  ([#4166](https://github.com/dream-num/univer/issues/4166)) ([22facae](https://github.com/dream-num/univer/commit/22facae1557f421703bd818c893c8d5417e9b26f))
+* **selection:** fix multiple selection use tab not right issue ([#4288](https://github.com/dream-num/univer/issues/4288)) ([2a01076](https://github.com/dream-num/univer/commit/2a010766baef35bcbb08bf2419469950d7446f4b))
+* sheet e2e too long ([#4267](https://github.com/dream-num/univer/issues/4267)) ([c9c1e5d](https://github.com/dream-num/univer/commit/c9c1e5dd72fd32958d38ae7f0f13c658c9803718))
+* **sheet:** resizeObserver disconnect when unmount in sheetBarTabs ([#4228](https://github.com/dream-num/univer/issues/4228)) ([2df1862](https://github.com/dream-num/univer/commit/2df18629415efdfd287d725f2d1c7346474ebdb4))
+* **sheets-data-validation:** data-validation range set error ([#4378](https://github.com/dream-num/univer/issues/4378)) ([6ed7d84](https://github.com/dream-num/univer/commit/6ed7d8406bb1fcc377cc08eb3d08523814df6f15))
+* **sheets-data-validation:** error relayout on ref-range change ([#4376](https://github.com/dream-num/univer/issues/4376)) ([70f82d0](https://github.com/dream-num/univer/commit/70f82d02ab749d44668b7e493e10422863f18844))
+* **sheets-drawing-ui:** add missing `DocsDrawingController` dependency ([#4203](https://github.com/dream-num/univer/issues/4203)) ([5a13fd1](https://github.com/dream-num/univer/commit/5a13fd1e0b68256b5c6c6aec13d22c60238687d2))
+* **sheets-hyper-link-ui:** number link popup hover position error ([#4223](https://github.com/dream-num/univer/issues/4223)) ([3d051ad](https://github.com/dream-num/univer/commit/3d051ade7086f3aac1e06dd9804c66b380354f63))
+* **sheets-hyper-link:** hyper-link-facade ([#4337](https://github.com/dream-num/univer/issues/4337)) ([eb530d8](https://github.com/dream-num/univer/commit/eb530d8549192ab05026b7c86f8a4a18b653d6f3))
+* **sheets-ui:** hover-manager-service memory leak ([#4213](https://github.com/dream-num/univer/issues/4213)) ([3ce3b27](https://github.com/dream-num/univer/commit/3ce3b275c160b92cb5b98c42f52fb4745008df7f))
+* **sheets-ui:** resolve issue where text color could not be reset ([#4234](https://github.com/dream-num/univer/issues/4234)) ([39c7d0e](https://github.com/dream-num/univer/commit/39c7d0ece7a94abb11d105cd10f424e98ae17c0c))
+* **sheets-ui:** types field not specificed ([#4301](https://github.com/dream-num/univer/issues/4301)) ([f6c7811](https://github.com/dream-num/univer/commit/f6c7811d33f9732858bc2fb889ac7f899369f0b9))
+* some bugs on clipboard facade API ([#4332](https://github.com/dream-num/univer/issues/4332)) ([4b51483](https://github.com/dream-num/univer/commit/4b51483509cd3a6fdd20cbb048d5e8bbfd4c42a8))
+* some rendering issues in doc ([#4219](https://github.com/dream-num/univer/issues/4219)) ([0dd4f3d](https://github.com/dream-num/univer/commit/0dd4f3de3a85735562e49fb30f038c9a0f938e8b))
+* toolbar width ([#4053](https://github.com/dream-num/univer/issues/4053)) ([#4208](https://github.com/dream-num/univer/issues/4208)) ([f23a024](https://github.com/dream-num/univer/commit/f23a0246007bb93b486aac78ae5833448e933c9b))
+* **ui:** if two messages share the same key, the later should replace the earlier ([#4293](https://github.com/dream-num/univer/issues/4293)) ([dc60cb3](https://github.com/dream-num/univer/commit/dc60cb373cba8fdc3f5b265e01daeb954765b5cc))
+* update merge logic to create new objects instead of mutating existing ones ([#4375](https://github.com/dream-num/univer/issues/4375)) ([d40873d](https://github.com/dream-num/univer/commit/d40873dde210d4cdec782c63807af19767474279))
+* use drawing range not visible range ([#4341](https://github.com/dream-num/univer/issues/4341)) ([1f2a84b](https://github.com/dream-num/univer/commit/1f2a84b0afc8caee20326dcd6698fa8fdc68595e))
+
+
+### Features
+
+* add methods to telemetry service ([#4289](https://github.com/dream-num/univer/issues/4289)) ([8619410](https://github.com/dream-num/univer/commit/861941046801970778a54916ac81e510f0ca209c))
+* add set scrolling & get scrollInfo & better freeze API for facade ([#4290](https://github.com/dream-num/univer/issues/4290)) ([1bd1325](https://github.com/dream-num/univer/commit/1bd1325ce32b3c24992f5c2b29f448c579c56077))
+* add sort facade API ([#4312](https://github.com/dream-num/univer/issues/4312)) ([38be2cf](https://github.com/dream-num/univer/commit/38be2cf6a3e525c2f465d88688f17448bc3b1596))
+* **conditional-formatting:** add test and jsdoc ([#4303](https://github.com/dream-num/univer/issues/4303)) ([7abd39d](https://github.com/dream-num/univer/commit/7abd39d5c7bd577537bcd6a942a511b754333cd8))
+* **conditional-formatting:** support facade api ([#4300](https://github.com/dream-num/univer/issues/4300)) ([baa5201](https://github.com/dream-num/univer/commit/baa5201da1595adca2b4aef2aebb4e04ceafb7bc))
+* **facade:** add facade comments ([#4264](https://github.com/dream-num/univer/issues/4264)) ([b808f98](https://github.com/dream-num/univer/commit/b808f9830ad50697c1c487ead47008670b531633))
+* **facade:** add range to-string api & fix data-validation api ([#4325](https://github.com/dream-num/univer/issues/4325)) ([47773f8](https://github.com/dream-num/univer/commit/47773f8d997375540241c24cbe5ad4c08718c467))
+* **facade:** update data validation facade ([#4275](https://github.com/dream-num/univer/issues/4275)) ([ff8be23](https://github.com/dream-num/univer/commit/ff8be23c168ee1d871cff4ef87525507c1d21fd6))
+* **image:** facade api ([#4322](https://github.com/dream-num/univer/issues/4322)) ([b41e499](https://github.com/dream-num/univer/commit/b41e499057d4d63c1fb952310a1d4d8a1034ade1))
+* **network:** add network FacadeAPI ([#4294](https://github.com/dream-num/univer/issues/4294)) ([0509114](https://github.com/dream-num/univer/commit/0509114aa87499fd275b33ed1091bfbdff36a5d7))
+* **sheet:** add defined name api ([#4282](https://github.com/dream-num/univer/issues/4282)) ([fb9bfcd](https://github.com/dream-num/univer/commit/fb9bfcda25d3ba150b9109bc7cb918b1e1173bdc))
+* **sheet:** add facade api ([#4279](https://github.com/dream-num/univer/issues/4279)) ([50db7a3](https://github.com/dream-num/univer/commit/50db7a3e1f234c8670653f3f044830fbe2d92a01))
+* **sheet:** add user header part ([#4333](https://github.com/dream-num/univer/issues/4333)) ([35c55d3](https://github.com/dream-num/univer/commit/35c55d3e92304804db18e0e8aec24a995b5c2c51))
+* **sparkline:** add render extension ([#4233](https://github.com/dream-num/univer/issues/4233)) ([96efb3d](https://github.com/dream-num/univer/commit/96efb3d361e27d4a78fed1aae7e526851dbcc251))
+* **textsplit:** support text split util function ([#4302](https://github.com/dream-num/univer/issues/4302)) ([f5d1c79](https://github.com/dream-num/univer/commit/f5d1c794e478ba4dc68ae1d721c11b6611d23711))
+* **ui:** add more facade ([#4291](https://github.com/dream-num/univer/issues/4291)) ([3254073](https://github.com/dream-num/univer/commit/3254073688bd66629fcb58bd9fc08e732829bdb2))
+* **ui:** add URL facade ([#4305](https://github.com/dream-num/univer/issues/4305)) ([a1da277](https://github.com/dream-num/univer/commit/a1da277021ca786684771d97020bd86346ec5b14))
+* **ui:** export shortcut facade API ([#4324](https://github.com/dream-num/univer/issues/4324)) ([ceff4eb](https://github.com/dream-num/univer/commit/ceff4eb3050001f72a92f2ebc3c3dff0982965b6))
+* **ui:** support no icon toolbar button ([#4328](https://github.com/dream-num/univer/issues/4328)) ([2a9bdd3](https://github.com/dream-num/univer/commit/2a9bdd3ad9a7530545625dd748183157c55ae0e8))
+* **ui:** support ui menu facade ([#4304](https://github.com/dream-num/univer/issues/4304)) ([34fc17d](https://github.com/dream-num/univer/commit/34fc17d5d51dea73d14ebef45240899a84f78796))
+* user facade api & onCommented  & cellPointerdown & hide selection ([#4342](https://github.com/dream-num/univer/issues/4342)) ([f13e573](https://github.com/dream-num/univer/commit/f13e573aa7eca371baaa4646d14538e3958b41c1))
 
 ## [0.5.1](https://github.com/dream-num/univer/compare/v0.5.0...v0.5.1) (2024-11-30)
 

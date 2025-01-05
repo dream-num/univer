@@ -42,7 +42,7 @@ export interface ICopySheetCommandParams {
 export const CopySheetCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.copy-sheet',
-    handler: async (accessor: IAccessor, params?: ICopySheetCommandParams) => {
+    handler: (accessor: IAccessor, params?: ICopySheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

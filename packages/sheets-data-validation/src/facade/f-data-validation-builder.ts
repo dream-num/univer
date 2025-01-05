@@ -446,6 +446,11 @@ export class FDataValidationBuilder {
         return this;
     }
 
+    setAllowBlank(allowBlank: boolean): FDataValidationBuilder {
+        this._rule.allowBlank = allowBlank;
+        return this;
+    }
+
     /**
      * Sets the options for the data validation rule.
      * For details of options, please refer to https://univer.ai/typedoc/@univerjs/core/interfaces/IDataValidationRuleOptions

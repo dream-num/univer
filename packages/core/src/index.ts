@@ -40,10 +40,12 @@ export { AsyncInterceptorManager, composeInterceptors, createAsyncInterceptorKey
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FBase } from './facade/f-base';
+export { FBase, FBaseInitialable } from './facade/f-base';
 export { FUniver } from './facade/f-univer';
 export { FHooks } from './facade/f-hooks';
 export { FBlob, type IFBlobSource } from './facade/f-blob';
+export { FEventName, type IEventBase, type IEventParamConfig } from './facade/f-event';
+export { FEnum } from './facade/f-enum';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
@@ -167,7 +169,7 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { Styles } from './sheets/styles';
 export * from './sheets/typedef';
-export { addLinkToDocumentModel, isRangesEqual, isUnitRangesEqual } from './sheets/util';
+export { addLinkToDocumentModel, isNotNullOrUndefined, isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
 export { createDocumentModelWithStyle } from './sheets/util';
 export { ImageCacheMap } from './shared/cache/image-cache';

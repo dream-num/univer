@@ -67,7 +67,8 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     id: MoveRowsCommandId,
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
             fromRange: { startRow: fromRow },
@@ -212,7 +213,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     id: MoveColsCommandId,
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
             fromRange: { startColumn: fromCol },

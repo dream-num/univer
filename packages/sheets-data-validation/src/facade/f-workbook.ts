@@ -24,7 +24,6 @@ import type { IAddSheetDataValidationCommandParams,
     IValidStatusChange } from '@univerjs/sheets-data-validation';
 import { type DataValidationStatus, type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
 
-import { FWorkbook } from '@univerjs/sheets/facade';
 import { AddSheetDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
     RemoveSheetDataValidationCommand,
@@ -34,6 +33,7 @@ import { AddSheetDataValidationCommand,
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationSettingCommand,
 } from '@univerjs/sheets-data-validation';
+import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
 
 export interface IFWorkbookDataValidationMixin {

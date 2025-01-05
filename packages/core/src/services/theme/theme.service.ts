@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-
-import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { Nullable } from '../../shared/types';
+
+import { BehaviorSubject } from 'rxjs';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 
 export interface IStyleSheet {
     [key: string]: string;

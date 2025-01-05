@@ -14,34 +14,21 @@
  * limitations under the License.
  */
 
-import type { Meta } from '@storybook/react';
-import React from 'react';
+import type { IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, ILocalStorageService } from '@univerjs/core';
 
-import { Textarea } from './Textarea';
+export interface IDarkModeCommandParams {
+    value?: 'dark' | 'light' | 'auto';
+}
 
-const meta: Meta<typeof Textarea> = {
-    title: 'Components / Textarea',
-    component: Textarea,
-    parameters: {
-        layout: 'centered',
-    },
-    tags: ['autodocs'],
-};
+export const DarkModeOperation: ICommand = {
+    id: 'debugger.operation.dark-mode',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: IDarkModeCommandParams) => {
+        const localStorageService = accessor.get(ILocalStorageService);
+        localStorageService.setItem('local.darkMode', params.value);
+        window.location.reload();
 
-export default meta;
-
-export const TextareaBasic = {
-    render() {
-        return (
-            <>
-                <Textarea autoSize={{ minRows: 4 }} />
-            </>
-        );
-    },
-};
-
-export const TextareaDisabled = {
-    render() {
-        return <Textarea disabled />;
+        return true;
     },
 };

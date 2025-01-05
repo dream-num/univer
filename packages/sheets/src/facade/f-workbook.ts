@@ -16,21 +16,22 @@
 
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { ISetSelectionsOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
+import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+
 import { IDefinedNamesService } from '@univerjs/engine-formula';
-import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
-export class FWorkbook extends FBase {
+export class FWorkbook extends FBaseInitialable {
     readonly id: string;
 
     constructor(
         protected readonly _workbook: Workbook,
-        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(Injector) protected override readonly _injector: Injector,
         @Inject(IResourceLoaderService) protected readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SheetsSelectionsService) protected readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
@@ -40,7 +41,7 @@ export class FWorkbook extends FBase {
         @Inject(LocaleService) protected readonly _localeService: LocaleService,
         @IDefinedNamesService protected readonly _definedNamesService: IDefinedNamesService
     ) {
-        super();
+        super(_injector);
 
         this.id = this._workbook.getUnitId();
     }
@@ -292,10 +293,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.deleteSheet(sheet);
      * ```
      */
-    deleteSheet(sheet: FWorksheet): Promise<boolean> {
+    deleteSheet(sheet: FWorksheet): boolean {
         const unitId = this.id;
         const subUnitId = sheet.getSheetId();
-        return this._commandService.executeCommand(RemoveSheetCommand.id, {
+        return this._commandService.syncExecuteCommand(RemoveSheetCommand.id, {
             unitId,
             subUnitId,
         });
@@ -312,9 +313,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.undo();
      * ```
      */
-    undo(): Promise<boolean> {
+    undo(): FWorkbook {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(UndoCommand.id);
+        this._commandService.syncExecuteCommand(UndoCommand.id);
+        return this;
     }
 
     /**
@@ -327,9 +329,10 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.redo();
      * ```
      */
-    redo(): Promise<boolean> {
+    redo(): FWorkbook {
         this._univerInstanceService.focusUnit(this.id);
-        return this._commandService.executeCommand(RedoCommand.id);
+        this._commandService.syncExecuteCommand(RedoCommand.id);
+        return this;
     }
 
     /**
@@ -484,7 +487,7 @@ export class FWorkbook extends FBase {
      * const sheet = univerAPI.getActiveWorkbook().deleteActiveSheet();
      * ```
      */
-    deleteActiveSheet(): Promise<boolean> {
+    deleteActiveSheet(): boolean {
         const sheet = this.getActiveSheet();
         return this.deleteSheet(sheet);
     }
@@ -492,7 +495,7 @@ export class FWorkbook extends FBase {
     /**
      * Duplicates the given worksheet.
      * @param {FWorksheet} sheet The worksheet to duplicate.
-     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
+     * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
      * // The code below duplicates the given worksheet
@@ -501,16 +504,18 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.duplicateSheet(activeSheet);
      * ```
      */
-    duplicateSheet(sheet: FWorksheet): Promise<boolean> {
-        return this._commandService.executeCommand(CopySheetCommand.id, {
+    duplicateSheet(sheet: FWorksheet): FWorksheet {
+        this._commandService.syncExecuteCommand(CopySheetCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             subUnitId: sheet.getSheetId(),
         });
+
+        return this._injector.createInstance(FWorksheet, this, this._workbook, this._workbook.getActiveSheet());
     }
 
     /**
      * Duplicates the active sheet.
-     * @returns {Promise<boolean>} true if the sheet was duplicated, false otherwise
+     * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
      * // The code below duplicates the active sheet
@@ -518,7 +523,7 @@ export class FWorkbook extends FBase {
      *  activeSpreadsheet.duplicateActiveSheet();
      * ```
      */
-    duplicateActiveSheet(): Promise<boolean> {
+    duplicateActiveSheet(): FWorksheet {
         const sheet = this.getActiveSheet();
         return this.duplicateSheet(sheet);
     }
@@ -584,7 +589,7 @@ export class FWorkbook extends FBase {
      * Move the sheet to the specified index.
      * @param {FWorksheet} sheet The sheet to move
      * @param {number} index The index to move the sheet to
-     * @returns {Promise<boolean>} true if the sheet was moved, false otherwise
+     * @returns {FWorkbook} This workbook, for chaining
      * @example
      * ```ts
      * // The code below moves the sheet to the specified index
@@ -593,24 +598,26 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveSheet(sheet, 1);
      * ```
      */
-    moveSheet(sheet: FWorksheet, index: number): Promise<boolean> {
+    moveSheet(sheet: FWorksheet, index: number): FWorkbook {
         let sheetIndexVal = index;
         if (sheetIndexVal < 0) {
             sheetIndexVal = 0;
         } else if (sheetIndexVal > this._workbook.getSheets().length - 1) {
             sheetIndexVal = this._workbook.getSheets().length - 1;
         }
-        return this._commandService.executeCommand(SetWorksheetOrderCommand.id, {
+        this._commandService.syncExecuteCommand(SetWorksheetOrderCommand.id, {
             unitId: sheet.getWorkbook().getUnitId(),
             order: sheetIndexVal,
             subUnitId: sheet.getSheetId(),
         });
+
+        return this;
     }
 
     /**
      * Move the active sheet to the specified index.
      * @param {number} index The index to move the active sheet to
-     * @returns {Promise<boolean>} true if the sheet was moved, false otherwise
+     * @returns {FWorkbook} This workbook, for chaining
      * @example
      * ```ts
      * // The code below moves the active sheet to the specified index
@@ -618,7 +625,7 @@ export class FWorkbook extends FBase {
      * activeSpreadsheet.moveActiveSheet(1);
      * ```
      */
-    moveActiveSheet(index: number): Promise<boolean> {
+    moveActiveSheet(index: number): FWorkbook {
         const sheet = this.getActiveSheet();
         return this.moveSheet(sheet, index);
     }
@@ -738,10 +745,61 @@ export class FWorkbook extends FBase {
      * const builder = activeSpreadsheet.getDefinedName('MyDefinedName').toBuilder();
      * builder.setRef('Sheet1!A2').setName('MyDefinedName1').build();
      * activeSpreadsheet.updateDefinedNameBuilder(param);
-     *
      * ```
      */
     updateDefinedNameBuilder(param: ISetDefinedNameMutationParam): void {
         this._commandService.syncExecuteCommand(SetDefinedNameCommand.id, param);
+    }
+
+    /**
+     * Gets the registered range themes.
+     * @returns {string[]} The name list of registered range themes.
+     * @example
+     * ```ts
+     * // The code below gets the registered range themes
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const themes = activeSpreadsheet.getRegisteredRangeThemes();
+     * console.log(themes);
+     * ```
+     */
+    getRegisteredRangeThemes(): string[] {
+        return this._injector.get(SheetRangeThemeService).getRegisteredRangeThemes();
+    }
+
+    /**
+     * Register a custom range theme style.
+     * @example
+     * ```ts
+     * // import {RangeThemeStyle} from '@univerjs/sheets';
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const rangeThemeStyle = new RangeThemeStyle('MyTheme');
+     * rangeThemeStyle.setSecondRowStyle({
+     *    bg: {
+     *       rgb: 'rgb(214,231,241)',
+     *    },
+     * });
+     * fWorkbook.registerRangeTheme(rangeThemeStyle);
+     * ```
+     */
+    registerRangeTheme(rangeThemeStyle: RangeThemeStyle): void {
+        this._commandService.syncExecuteCommand(RegisterWorksheetRangeThemeStyleCommand.id, {
+            unitId: this.getId(),
+            rangeThemeStyle,
+        });
+    }
+
+    /**
+     * Unregister a custom range theme style.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.unregisterRangeTheme('MyTheme');
+     * ```
+     */
+    unregisterRangeTheme(themeName: string): void {
+        this._commandService.syncExecuteCommand(UnregisterWorksheetRangeThemeStyleCommand.id, {
+            unitId: this.getId(),
+            themeName,
+        });
     }
 }

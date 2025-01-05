@@ -30,7 +30,7 @@ describe('test cell-content', () => {
     let testBed: any;
     let commandService: ICommandService;
     beforeEach(() => {
-        testBed = createTestBed([[SheetsNumfmtCellContentController]]);
+        testBed = createTestBed(undefined, [[SheetsNumfmtCellContentController]]);
         unitId = testBed.unitId;
         subUnitId = testBed.subUnitId;
         commandService = testBed.get(ICommandService);

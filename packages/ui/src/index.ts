@@ -45,6 +45,7 @@ export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand, SheetPasteShortKeyCommandName } from './services/clipboard/clipboard.command';
+export { supportClipboardAPI } from './services/clipboard/clipboard-utils';
 export {
     BrowserClipboardService,
     FILE__BMP_CLIPBOARD_MIME_TYPE,

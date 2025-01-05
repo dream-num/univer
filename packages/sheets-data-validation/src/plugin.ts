@@ -19,6 +19,7 @@ import {
     DependentOn,
     ICommandService,
     IConfigService,
+    merge,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -59,8 +60,12 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration..
-        const { ...rest } = this._config;
+        // Manage the plugin configuration.
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         this._configService.setConfig(SHEETS_DATA_VALIDATION_PLUGIN_CONFIG_KEY, rest);
     }
 

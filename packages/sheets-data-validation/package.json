@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.5.1",
+    "version": "0.5.3",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -71,7 +71,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.39",
+        "@univerjs/protocol": "0.1.40",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*"
     },
@@ -80,25 +80,7 @@
         "less": "^4.2.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.7.2",
-        "vite": "^6.0.3",
+        "vite": "^6.0.6",
         "vitest": "^2.1.8"
-    },
-    "space": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./facade": {
-            "import": "./lib/es/facade.js",
-            "require": "./lib/cjs/facade.js",
-            "types": "./lib/types/facade/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
     }
 }

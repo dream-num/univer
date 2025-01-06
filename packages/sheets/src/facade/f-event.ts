@@ -101,21 +101,44 @@ export class FSheetEventName extends FEventName implements IFSheetEventMixin {
     }
 }
 
+/**
+ * Event interface triggered before creating a new worksheet
+ * @interface IBeforeSheetCreateEventParams
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetCreateEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Optional index where the new sheet will be inserted */
     index?: number;
+    /** Optional initial worksheet data */
     sheet?: IWorksheetData;
 }
 
+/**
+ * Event interface triggered after a worksheet is created
+ * @interface ISheetCreatedEventParams
+ * @augments {IEventBase}
+ */
 export interface ISheetCreatedEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The newly created worksheet */
     worksheet: FWorksheet;
 }
 
+/**
+ * Configuration interface for sheet-related events
+ * @interface ISheetEventParamConfig
+ */
 export interface ISheetEventParamConfig {
+    /** Event fired after a worksheet is created */
     SheetCreated: ISheetCreatedEventParams;
+    /** Event fired before creating a worksheet */
     BeforeSheetCreate: IBeforeSheetCreateEventParams;
+    /** Event fired after a workbook is created */
     WorkbookCreated: IWorkbookCreateParam;
+    /** Event fired when a workbook is disposed */
     WorkbookDisposed: IWorkbookDisposedEvent;
 }
 
@@ -125,4 +148,3 @@ declare module '@univerjs/core' {
     interface FEventName extends IFSheetEventMixin { }
     interface IEventParamConfig extends ISheetEventParamConfig { }
 }
-

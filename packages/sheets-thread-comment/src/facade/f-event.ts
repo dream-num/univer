@@ -173,59 +173,129 @@ export class FCommentEvent extends FEventName {
     }
 }
 
+/**
+ * Event interface triggered after a comment is added to a sheet
+ * @interface ISheetCommentAddEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetCommentAddEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet where the comment is added */
     worksheet: FWorksheet;
+    /** Row index of the comment */
     row: number;
+    /** Column index of the comment */
     col: number;
+    /** The added comment object */
     comment: FThreadComment;
 }
 
+/**
+ * Event interface triggered before a comment is added to a sheet
+ * @interface IBeforeSheetCommentAddEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetCommentAddEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet where the comment will be added */
     worksheet: FWorksheet;
+    /** Row index for the new comment */
     row: number;
+    /** Column index for the new comment */
     col: number;
+    /** The comment item to be added */
     comment: FTheadCommentItem;
 }
 
+/**
+ * Event interface triggered after a comment is updated in a sheet
+ * @interface ISheetCommentUpdateEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetCommentUpdateEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet containing the updated comment */
     worksheet: FWorksheet;
+    /** Row index of the comment */
     row: number;
+    /** Column index of the comment */
     col: number;
+    /** The updated comment object */
     comment: FThreadComment;
 }
 
+/**
+ * Event interface triggered before a comment is updated in a sheet
+ * @interface IBeforeSheetCommentUpdateEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetCommentUpdateEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet containing the comment */
     worksheet: FWorksheet;
+    /** Row index of the comment */
     row: number;
+    /** Column index of the comment */
     col: number;
+    /** The current comment object */
     comment: FThreadComment;
+    /** The new content to replace the existing comment */
     newContent: RichTextValue;
 }
 
+/**
+ * Event interface triggered before a comment is deleted from a sheet
+ * @interface IBeforeSheetCommentDeleteEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetCommentDeleteEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet containing the comment */
     worksheet: FWorksheet;
+    /** Row index of the comment */
     row: number;
+    /** Column index of the comment */
     col: number;
+    /** The comment to be deleted */
     comment: FThreadComment;
 }
 
+/**
+ * Event interface triggered after a comment is deleted from a sheet
+ * @interface ISheetCommentDeleteEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetCommentDeleteEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet that contained the comment */
     worksheet: FWorksheet;
+    /** The ID of the deleted comment */
     commentId: string;
 }
 
+/**
+ * Event interface triggered when a comment's resolve status changes
+ * @interface ISheetCommentResolveEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetCommentResolveEvent extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet containing the comment */
     worksheet: FWorksheet;
+    /** Row index of the comment */
     row: number;
+    /** Column index of the comment */
     col: number;
+    /** The comment object */
     comment: FThreadComment;
+    /** The new resolve status */
     resolved: boolean;
 }
 

@@ -20,64 +20,141 @@ import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { FDataValidation } from './f-data-validation';
 import { FEventName } from '@univerjs/core';
 
+/**
+ * Event interface triggered when a data validation rule is changed
+ * @interface ISheetDataValidationChangedEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetDataValidationChangedEvent extends IEventBase {
+    /** The source of the rule change */
     origin: IRuleChange;
+    /** The worksheet containing the validation rule */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Type of change made to the validation rule */
     changeType: DataValidationChangeType;
+    /** The previous validation rule, if it exists */
     oldRule?: IDataValidationRule;
+    /** The new or modified validation rule */
     rule: FDataValidation;
 }
 
+/**
+ * Event interface triggered when a data validation status changes
+ * @interface ISheetDataValidatorStatusChangedEvent
+ * @augments {IEventBase}
+ */
 export interface ISheetDataValidatorStatusChangedEvent extends IEventBase {
+    /** The worksheet containing the validation */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Row index of the validated cell */
     row: number;
+    /** Column index of the validated cell */
     column: number;
+    /** Current validation status */
     status: DataValidationStatus;
+    /** The validation rule that was checked */
     rule: FDataValidation;
 }
 
+/**
+ * Event interface triggered before adding a new data validation rule
+ * @interface IBeforeSheetDataValidationAddEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationAddEvent extends IEventBase {
+    /** The worksheet to add the validation to */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The validation rule to be added */
     rule: ISheetDataValidationRule;
 }
 
+/**
+ * Event interface triggered before deleting a data validation rule
+ * @interface IBeforeSheetDataValidationDeleteEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationDeleteEvent extends IEventBase {
+    /** The worksheet containing the validation */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Unique identifier of the rule to be deleted */
     ruleId: string;
+    /** The validation rule to be deleted */
     rule: FDataValidation;
 }
 
+/**
+ * Event interface triggered before updating a data validation rule's criteria
+ * @interface IBeforeSheetDataValidationCriteriaUpdateEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationCriteriaUpdateEvent extends IEventBase {
+    /** The worksheet containing the validation */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Unique identifier of the rule to be updated */
     ruleId: string;
+    /** The current validation rule */
     rule: FDataValidation;
+    /** The new criteria to be applied */
     newCriteria: IDataValidationRuleBase;
 }
 
+/**
+ * Event interface triggered before updating a data validation rule's ranges
+ * @interface IBeforeSheetDataValidationRangeUpdateEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationRangeUpdateEvent extends IEventBase {
+    /** The worksheet containing the validation */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Unique identifier of the rule to be updated */
     ruleId: string;
+    /** The current validation rule */
     rule: FDataValidation;
+    /** The new ranges to be applied */
     newRanges: IRange[];
 }
 
+/**
+ * Event interface triggered before updating a data validation rule's options
+ * @interface IBeforeSheetDataValidationOptionsUpdateEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationOptionsUpdateEvent extends IEventBase {
+    /** The worksheet containing the validation */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Unique identifier of the rule to be updated */
     ruleId: string;
+    /** The current validation rule */
     rule: FDataValidation;
+    /** The new options to be applied */
     newOptions: IDataValidationRuleOptions;
 }
 
+/**
+ * Event interface triggered before deleting all data validation rules
+ * @interface IBeforeSheetDataValidationDeleteAllEvent
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetDataValidationDeleteAllEvent extends IEventBase {
+    /** The worksheet containing the validations */
     worksheet: FWorksheet;
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** Array of all validation rules to be deleted */
     rules: FDataValidation[];
 }
 
@@ -93,17 +170,6 @@ export interface IDataValidationEventParamConfig {
 }
 
 interface IDataValidationEvent {
-    readonly SheetDataValidationChanged: 'SheetDataValidationChanged';
-    readonly SheetDataValidatorStatusChanged: 'SheetDataValidatorStatusChanged';
-    readonly BeforeSheetDataValidationAdd: 'BeforeSheetDataValidationAdd';
-    readonly BeforeSheetDataValidationDelete: 'BeforeSheetDataValidationDelete';
-    readonly BeforeSheetDataValidationDeleteAll: 'BeforeSheetDataValidationDeleteAll';
-    readonly BeforeSheetDataValidationCriteriaUpdate: 'BeforeSheetDataValidationCriteriaUpdate';
-    readonly BeforeSheetDataValidationRangeUpdate: 'BeforeSheetDataValidationRangeUpdate';
-    readonly BeforeSheetDataValidationOptionsUpdate: 'BeforeSheetDataValidationOptionsUpdate';
-}
-
-export class FDataValidationEvent implements IDataValidationEvent {
     /**
      * Event fired when a rule is added, deleted, or modified
      * @see {@link ISheetDataValidationChangedEvent}
@@ -115,10 +181,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get SheetDataValidationChanged(): 'SheetDataValidationChanged' {
-        return 'SheetDataValidationChanged';
-    }
-
+    readonly SheetDataValidationChanged: 'SheetDataValidationChanged';
     /**
      * Event fired when a cell validator status is changed
      * @see {@link ISheetDataValidatorStatusChangedEvent}
@@ -130,10 +193,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get SheetDataValidatorStatusChanged(): 'SheetDataValidatorStatusChanged' {
-        return 'SheetDataValidatorStatusChanged';
-    }
-
+    readonly SheetDataValidatorStatusChanged: 'SheetDataValidatorStatusChanged';
     /**
      * Event fired before a rule is added
      * @see {@link IBeforeSheetDataValidationAddEvent}
@@ -145,10 +205,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get BeforeSheetDataValidationAdd(): 'BeforeSheetDataValidationAdd' {
-        return 'BeforeSheetDataValidationAdd';
-    }
-
+    readonly BeforeSheetDataValidationAdd: 'BeforeSheetDataValidationAdd';
     /**
      * Event fired before a rule is deleted
      * @see {@link IBeforeSheetDataValidationDeleteEvent}
@@ -160,10 +217,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get BeforeSheetDataValidationDelete(): 'BeforeSheetDataValidationDelete' {
-        return 'BeforeSheetDataValidationDelete';
-    }
-
+    readonly BeforeSheetDataValidationDelete: 'BeforeSheetDataValidationDelete';
     /**
      * Event fired before all rules are deleted
      * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
@@ -175,10 +229,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get BeforeSheetDataValidationDeleteAll(): 'BeforeSheetDataValidationDeleteAll' {
-        return 'BeforeSheetDataValidationDeleteAll';
-    }
-
+    readonly BeforeSheetDataValidationDeleteAll: 'BeforeSheetDataValidationDeleteAll';
     /**
      * Event fired before the criteria of a rule are updated
      * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
@@ -190,10 +241,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get BeforeSheetDataValidationCriteriaUpdate(): 'BeforeSheetDataValidationCriteriaUpdate' {
-        return 'BeforeSheetDataValidationCriteriaUpdate';
-    }
-
+    readonly BeforeSheetDataValidationCriteriaUpdate: 'BeforeSheetDataValidationCriteriaUpdate';
     /**
      * Event fired before the range of a rule is updated
      * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
@@ -205,10 +253,7 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
-    get BeforeSheetDataValidationRangeUpdate(): 'BeforeSheetDataValidationRangeUpdate' {
-        return 'BeforeSheetDataValidationRangeUpdate';
-    }
-
+    readonly BeforeSheetDataValidationRangeUpdate: 'BeforeSheetDataValidationRangeUpdate';
     /**
      * Event fired before the options of a rule are updated
      * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
@@ -220,6 +265,38 @@ export class FDataValidationEvent implements IDataValidationEvent {
      * });
      * ```
      */
+    readonly BeforeSheetDataValidationOptionsUpdate: 'BeforeSheetDataValidationOptionsUpdate';
+}
+
+export class FDataValidationEvent implements IDataValidationEvent {
+    get SheetDataValidationChanged(): 'SheetDataValidationChanged' {
+        return 'SheetDataValidationChanged';
+    }
+
+    get SheetDataValidatorStatusChanged(): 'SheetDataValidatorStatusChanged' {
+        return 'SheetDataValidatorStatusChanged';
+    }
+
+    get BeforeSheetDataValidationAdd(): 'BeforeSheetDataValidationAdd' {
+        return 'BeforeSheetDataValidationAdd';
+    }
+
+    get BeforeSheetDataValidationDelete(): 'BeforeSheetDataValidationDelete' {
+        return 'BeforeSheetDataValidationDelete';
+    }
+
+    get BeforeSheetDataValidationDeleteAll(): 'BeforeSheetDataValidationDeleteAll' {
+        return 'BeforeSheetDataValidationDeleteAll';
+    }
+
+    get BeforeSheetDataValidationCriteriaUpdate(): 'BeforeSheetDataValidationCriteriaUpdate' {
+        return 'BeforeSheetDataValidationCriteriaUpdate';
+    }
+
+    get BeforeSheetDataValidationRangeUpdate(): 'BeforeSheetDataValidationRangeUpdate' {
+        return 'BeforeSheetDataValidationRangeUpdate';
+    }
+
     get BeforeSheetDataValidationOptionsUpdate(): 'BeforeSheetDataValidationOptionsUpdate' {
         return 'BeforeSheetDataValidationOptionsUpdate';
     }

@@ -20,29 +20,66 @@ import type { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { IDocumentData } from '../types/interfaces';
 import type { FDoc } from './f-doc';
 
+/**
+ * Base interface for all event parameters
+ * @interface IEventBase
+ */
 export interface IEventBase {
+    /** Flag to cancel the event if supported */
     cancel?: boolean;
 }
+
+/**
+ * Event interface triggered when a document is created
+ * @interface IDocCreatedParam
+ * @augments {IEventBase}
+ */
 export interface IDocCreatedParam extends IEventBase {
+    /** Unique identifier of the document unit */
     unitId: string;
+    /** Type identifier for document instances */
     type: UniverInstanceType.UNIVER_DOC;
+    /** The created document instance */
     doc: FDoc;
+    /** Reference to the document unit */
     unit: FDoc;
 }
 
+/**
+ * Event interface triggered when a document is disposed
+ * @interface IDocDisposedEvent
+ * @augments {IEventBase}
+ */
 export interface IDocDisposedEvent extends IEventBase {
+    /** Unique identifier of the disposed document unit */
     unitId: string;
+    /** Type identifier for document instances */
     unitType: UniverInstanceType.UNIVER_DOC;
+    /** Final state snapshot of the disposed document */
     snapshot: IDocumentData;
 }
 
+/**
+ * Event interface for lifecycle stage changes
+ * @interface ILifeCycleChangedEvent
+ * @augments {IEventBase}
+ */
 export interface ILifeCycleChangedEvent extends IEventBase {
+    /** Current stage of the lifecycle */
     stage: LifecycleStages;
 }
 
+/**
+ * Event interface for command execution
+ * @interface ICommandEvent
+ * @augments {IEventBase}
+ */
 export interface ICommandEvent extends IEventBase {
+    /** Parameters passed to the command */
     params: any;
+    /** Unique identifier of the command */
     id: string;
+    /** Type of the command */
     type: CommandType;
 }
 

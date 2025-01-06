@@ -19,55 +19,117 @@ import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName, type IEventBase, type RichTextValue } from '@univerjs/core';
 
+/**
+ * Event interface triggered when cell editing starts
+ * @interface ISheetEditStartedEventParams
+ * @augments {IEventBase}
+ */
 export interface ISheetEditStartedEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet being edited */
     worksheet: FWorksheet;
+    /** Row index of the editing cell */
     row: number;
+    /** Column index of the editing cell */
     column: number;
+    /** Type of input device event that triggered the edit */
     eventType: DeviceInputEventType;
+    /** Optional keycode that triggered the edit */
     keycode?: KeyCode;
+    /** Whether the edit is happening in zen editor mode */
     isZenEditor: boolean;
 }
 
+/**
+ * Event interface triggered when cell editing ends
+ * @interface ISheetEditEndedEventParams
+ * @augments {IEventBase}
+ */
 export interface ISheetEditEndedEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet being edited */
     worksheet: FWorksheet;
+    /** Row index of the edited cell */
     row: number;
+    /** Column index of the edited cell */
     column: number;
+    /** Type of input device event that triggered the edit end */
     eventType: DeviceInputEventType;
+    /** Optional keycode that triggered the edit end */
     keycode?: KeyCode;
+    /** Whether the edit happened in zen editor mode */
     isZenEditor: boolean;
+    /** Whether the edit was confirmed or cancelled */
     isConfirm: boolean;
 }
 
+/**
+ * Event interface triggered while cell content is being changed
+ * @interface ISheetEditChangingEventParams
+ * @augments {IEventBase}
+ */
 export interface ISheetEditChangingEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet being edited */
     worksheet: FWorksheet;
+    /** Row index of the editing cell */
     row: number;
+    /** Column index of the editing cell */
     column: number;
+    /** Current value being edited */
     value: RichTextValue;
+    /** Whether the edit is happening in zen editor mode */
     isZenEditor: boolean;
 }
 
+/**
+ * Event interface triggered before cell editing starts
+ * @interface IBeforeSheetEditStartEventParams
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetEditStartEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet to be edited */
     worksheet: FWorksheet;
+    /** Row index of the cell to be edited */
     row: number;
+    /** Column index of the cell to be edited */
     column: number;
+    /** Type of input device event triggering the edit */
     eventType: DeviceInputEventType;
+    /** Optional keycode triggering the edit */
     keycode?: KeyCode;
+    /** Whether the edit will happen in zen editor mode */
     isZenEditor: boolean;
 }
 
+/**
+ * Event interface triggered before cell editing ends
+ * @interface IBeforeSheetEditEndEventParams
+ * @augments {IEventBase}
+ */
 export interface IBeforeSheetEditEndEventParams extends IEventBase {
+    /** The workbook instance */
     workbook: FWorkbook;
+    /** The worksheet being edited */
     worksheet: FWorksheet;
+    /** Row index of the editing cell */
     row: number;
+    /** Column index of the editing cell */
     column: number;
+    /** Current value being edited */
     value: RichTextValue;
+    /** Type of input device event triggering the edit end */
     eventType: DeviceInputEventType;
+    /** Optional keycode triggering the edit end */
     keycode?: KeyCode;
+    /** Whether the edit is happening in zen editor mode */
     isZenEditor: boolean;
+    /** Whether the edit will be confirmed or cancelled */
     isConfirm: boolean;
 }
 
@@ -290,4 +352,3 @@ declare module '@univerjs/core' {
     interface FEventName extends IFSheetsUIEventNameMixin { }
     interface IEventParamConfig extends IFSheetsUIEventParamConfig { }
 }
-

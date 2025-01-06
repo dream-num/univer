@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '../docs';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '../common/di';
 import { FBaseInitialable } from './f-base';
 
 export class FDoc extends FBaseInitialable {

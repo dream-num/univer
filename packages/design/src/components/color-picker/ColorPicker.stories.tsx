@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { ColorPicker } from './ColorPicker';
 
@@ -33,6 +33,14 @@ export default meta;
 
 export const Playground = {
     render() {
-        return <ColorPicker />;
+        const [value, setValue] = useState('rgba(100,150,200,0.8)');
+        const [format] = useState<'hex' | 'rgb' | 'hsl'>('rgb');
+
+        return (
+            <>
+                {value}
+                <ColorPicker value={value} onChange={setValue} />
+            </>
+        );
     },
 };

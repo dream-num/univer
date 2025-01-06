@@ -14,51 +14,112 @@
  * limitations under the License.
  */
 
-import type { Color } from '@rc-component/color-picker';
-import RcColorPicker, { ColorBlock } from '@rc-component/color-picker';
-import React from 'react';
+// import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AlphaSlider } from './AlphaSlider';
+import { hsvToRgb, parseRgba, rgbToHsv } from './color-conversion';
+import { ColorInput } from './ColorInput';
+import { ColorPresets } from './ColorPresets';
+import { ColorSpectrum } from './ColorSpectrum';
+import { HueSlider } from './HueSlider';
 
-import styles from './index.module.less';
-import { colorPresets } from './presets';
+const MemoizedColorSpectrum = React.memo(ColorSpectrum);
+const MemoizedHueSlider = React.memo(HueSlider);
+const MemoizedAlphaSlider = React.memo(AlphaSlider);
+const MemoizedColorInput = React.memo(ColorInput);
+const MemoizedColorPresets = React.memo(ColorPresets);
 
-export interface IColorPickerProps {
-    color?: string;
-
-    onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-
+interface IColorPickerProps {
+    value?: string;
+    showAlpha?: boolean;
     onChange?: (value: string) => void;
 }
 
-export function ColorPicker(props: IColorPickerProps) {
-    const { onChange } = props;
+function debounce(func: (value: string) => void, wait: number) {
+    let timeout: NodeJS.Timeout;
+    return (value: string) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func(value);
+        }, wait);
+    };
+}
 
-    function handleStopPropagation(e: React.MouseEvent) {
-        e.stopPropagation();
-    }
+export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
+    const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
+    const [alpha, setAlpha] = useState(1);
 
-    function handleChange(color: Color | string) {
-        const value = (typeof color === 'string' ? color : color.toHexString()) ?? '';
+    const debouncedOnChange = useCallback(
+        debounce((value: string) => {
+            onChange?.(value);
+        }, 16),
+        [onChange]
+    );
 
-        onChange?.(value);
-    }
+    useEffect(() => {
+        try {
+            const [r, g, b, a] = parseRgba(value);
+            const [h, s, v] = rgbToHsv(r, g, b);
+            setHsv([h, s, v]);
+            setAlpha(a);
+        } catch (error) {
+            console.error('Invalid RGBA value:', error);
+        }
+    }, [value]);
+
+    const currentRgb = useMemo(() => {
+        return hsvToRgb(hsv[0], hsv[1], hsv[2]);
+    }, [hsv]);
+
+    const handleColorChange = useCallback((h: number, s: number, v: number) => {
+        setHsv([h, s, v]);
+        const [r, g, b] = currentRgb;
+        debouncedOnChange(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+    }, [currentRgb, alpha, debouncedOnChange]);
+
+    const handleAlphaChange = useCallback((a: number) => {
+        setAlpha(a);
+        const [r, g, b] = currentRgb;
+        debouncedOnChange(`rgba(${r}, ${g}, ${b}, ${a})`);
+    }, [currentRgb, debouncedOnChange]);
 
     return (
-        <section>
-            <div>
-                <div className={styles.colorPickerColorBlocks}>
-                    {colorPresets.map((color) => (
-                        <ColorBlock
-                            key={color}
-                            prefixCls={styles.colorPicker}
-                            color={color}
-                            onClick={() => handleChange(color)}
-                        />
-                    ))}
-                </div>
-            </div>
-            <section onClick={handleStopPropagation}>
-                <RcColorPicker prefixCls={styles.colorPicker} disabledAlpha onChangeComplete={handleChange} />
-            </section>
-        </section>
+        <div
+            className={`
+              univer-space-y-4 univer-rounded-lg univer-bg-white univer-cursor-default
+              dark:univer-bg-gray-700
+            `}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <MemoizedColorSpectrum
+                hsv={hsv}
+                onChange={handleColorChange}
+            />
+
+            <MemoizedHueSlider
+                hsv={hsv}
+                onChange={useCallback((h) => handleColorChange(h, hsv[1], hsv[2]), [hsv, handleColorChange])}
+            />
+
+            {showAlpha && (
+                <MemoizedAlphaSlider
+                    hsv={hsv}
+                    alpha={alpha}
+                    onChange={handleAlphaChange}
+                />
+            )}
+
+            <MemoizedColorInput
+                hsv={hsv}
+                alpha={alpha}
+                showAlpha={showAlpha}
+                onChangeColor={handleColorChange}
+                onChangeAlpha={handleAlphaChange}
+            />
+
+            <MemoizedColorPresets
+                onChange={handleColorChange}
+            />
+        </div>
     );
 }

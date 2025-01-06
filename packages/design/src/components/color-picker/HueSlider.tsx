@@ -1,0 +1,113 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+interface IHueSliderProps {
+    hsv: [number, number, number];
+    onChange: (hue: number) => void;
+}
+
+export function HueSlider({ hsv, onChange }: IHueSliderProps) {
+    const [isDragging, setIsDragging] = useState(false);
+    const sliderRef = useRef<HTMLDivElement>(null);
+    const thumbRef = useRef<HTMLDivElement>(null);
+
+    const thumbSize = useMemo(() => {
+        return thumbRef.current?.clientWidth ?? 0;
+    }, [thumbRef.current]);
+
+    const calculateHue = useCallback((clientX: number) => {
+        const slider = sliderRef.current;
+        if (!slider) return;
+
+        const rect = slider.getBoundingClientRect();
+        // 考虑指示器宽度调整可拖动范围
+        const maxX = rect.width - thumbSize;
+
+        // 限制x的范围，考虑指示器宽度
+        const x = Math.max(0, Math.min(clientX - rect.left, maxX));
+
+        // 将受限制的位置映射到色相值
+        const newHue = Math.round((x / maxX) * 360);
+        onChange(newHue);
+    }, [thumbSize, onChange]);
+
+    const handlePointerMove = useCallback((e: PointerEvent) => {
+        if (!isDragging) return;
+        calculateHue(e.clientX);
+    }, [isDragging, calculateHue]);
+
+    const handlePointerUp = useCallback(() => {
+        setIsDragging(false);
+    }, []);
+
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener('pointermove', handlePointerMove);
+            window.addEventListener('pointerup', handlePointerUp);
+        }
+
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+        };
+    }, [isDragging, handlePointerMove, handlePointerUp]);
+
+    const getThumbPosition = () => {
+        const safeHue = Math.min(Math.max(hsv[0], 0), 360);
+        return `${(safeHue / 360) * (100 - (thumbSize / sliderRef.current?.clientWidth! * 100))}%`;
+    };
+
+    return (
+        <div className="univer-relative univer-w-full univer-select-none">
+            <div
+                ref={sliderRef}
+                className={`
+                  univer-relative univer-h-2 univer-w-full univer-cursor-pointer univer-rounded-full univer-shadow-inner
+                `}
+                style={{
+                    background: `linear-gradient(to right,
+                        hsl(0, 100%, 50%),
+                        hsl(60, 100%, 50%),
+                        hsl(120, 100%, 50%),
+                        hsl(180, 100%, 50%),
+                        hsl(240, 100%, 50%),
+                        hsl(300, 100%, 50%),
+                        hsl(360, 100%, 50%))`,
+                }}
+                onPointerDown={(e) => {
+                    setIsDragging(true);
+                    calculateHue(e.clientX);
+                }}
+            >
+                <div
+                    ref={thumbRef}
+                    className={`
+                      univer-box-border univer-absolute univer-top-1/2 univer-size-2 univer-rounded-full univer-ring-2
+                      univer-ring-white univer-bg-transparent univer-shadow-md univer-transition-transform
+                      univer-duration-75 univer-will-change-transform
+                    `}
+                    style={{
+                        left: getThumbPosition(),
+                        transform: 'translateY(-50%)',
+                        transition: isDragging ? 'none' : 'all 0.1s ease-out',
+                    }}
+                />
+            </div>
+        </div>
+    );
+};

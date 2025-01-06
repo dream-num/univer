@@ -125,51 +125,56 @@ interface IFSheetsUIEventNameMixin {
     readonly ClipboardPasted: 'ClipboardPasted';
 
     /**
-     * BeforeSheetEditStart event
+     * Event fired before a cell is edited
      * @see {@link IBeforeSheetEditStartEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeSheetEditStart, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
     readonly BeforeSheetEditStart: 'BeforeSheetEditStart';
     /**
-     * SheetEditStarted event
-     * @see {@link ISheetEditStartedEventParams}
+     * Event fired after a cell is edited
+     * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.SheetEditStarted, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
     readonly SheetEditStarted: 'SheetEditStarted';
     /**
-     * SheetEditChanging event
+     * Event fired when a cell is being edited
      * @see {@link ISheetEditChangingEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.SheetEditChanging, (params) => {
+     *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
      * });
      * ```
      */
     readonly SheetEditChanging: 'SheetEditChanging';
     /**
-     * BeforeSheetEditEnd event
+     * Event fired before a cell edit ends
      * @see {@link IBeforeSheetEditEndEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeSheetEditEnd, (params) => {
+     *      const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */
     readonly BeforeSheetEditEnd: 'BeforeSheetEditEnd';
     /**
-     * SheetEditEnded event
+     * Event fired after a cell edit ends
      * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.SheetEditEnded, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
      */

@@ -43,8 +43,6 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
-import '@univerjs/sheets-ui/lib/index.css';
-import '@univerjs/ui/lib/index.css';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
@@ -62,6 +60,7 @@ import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '../global.css';
+import './styles';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;

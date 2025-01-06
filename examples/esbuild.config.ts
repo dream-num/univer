@@ -73,9 +73,8 @@ const skipLibCssEsbuildPlugin = {
     },
 };
 
-// Add this function to generate aliases
 /**
- *
+ * Add this function to generate aliases
  */
 function generateAliases() {
     const aliases = {};
@@ -141,7 +140,7 @@ function generateAliases() {
 }
 
 /**
- *
+ * Build monaco editor's resources for web worker
  */
 function monacoBuildTask() {
     return esbuild.build({
@@ -267,7 +266,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
 };
 
 /**
- *
+ * Build the project
  */
 async function main() {
     if (args.watch) {

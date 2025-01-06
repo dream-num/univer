@@ -34,13 +34,13 @@ import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 
 import { SetCfCommand } from '../../../commands/commands/set-cf.command';
 import styleBase from '../index.module.less';
-import { ColorScaleStyleEditor } from './colorScale';
-import { DataBarStyleEditor } from './dataBar';
-import { FormulaStyleEditor } from './formula';
-import { HighlightCellStyleEditor } from './highlightCell';
-import { IconSet } from './iconSet';
+import { ColorScaleStyleEditor } from './ColorScale';
+import { DataBarStyleEditor } from './DataBar';
+import { FormulaStyleEditor } from './Formula';
+import { HighlightCellStyleEditor } from './HighlightCell';
+import { IconSet } from './IconSet';
 import styles from './index.module.less';
-import { RankStyleEditor } from './rank';
+import { RankStyleEditor } from './Rank';
 import { beforeSubmit, submit } from './type';
 
 interface IRuleEditProps {

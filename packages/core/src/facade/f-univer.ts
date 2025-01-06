@@ -38,6 +38,7 @@ import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
+import { FUtil } from './f-util';
 
 export class FUniver extends FBaseInitialable {
     /**
@@ -283,6 +284,10 @@ export class FUniver extends FBaseInitialable {
 
     get Event() {
         return FEventName.get();
+    }
+
+    get Util() {
+        return FUtil.get();
     }
 
     /**

@@ -21,44 +21,48 @@ import { FEventName } from '@univerjs/core';
 
 export interface IFSheetEventMixin {
     /**
-     * SheetCreated event
+     * Event fired after a sheet is created
      * @see {@link ISheetCreatedEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.SheetCreated, (params) => {
+     *      const { workbook, worksheet } = params;
      *     console.log('unit created', params);
      * });
      * ```
      */
     get SheetCreated(): 'SheetCreated' ;
     /**
-     * BeforeSheetCreate event
+     * Event fired before a sheet is created
      * @see {@link IBeforeSheetCreateEventParams}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.BeforeSheetCreate, (params) => {
+     *      const { workbook, index, sheet } = params;
      *     console.log('unit created', params);
      * });
      * ```
      */
     get BeforeSheetCreate(): 'BeforeSheetCreate';
     /**
-     * WorkbookCreated event
+     * Event fired after a workbook is created
      * @see {@link IWorkbookCreateParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.WorkbookCreated, (params) => {
+     *      const { unitId, type, workbook, unit } = params;
      *     console.log('unit created', params);
      * });
      * ```
      */
     get WorkbookCreated(): 'WorkbookCreated';
     /**
-     * WorkbookDisposed event
+     * Event fired after a workbook is disposed
      * @see {@link IWorkbookDisposedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.WorkbookDisposed, (params) => {
+     *      const { unitId, unitType, snapshot } = params;
      *     console.log('unit disposed', params);
      * });
      * ```

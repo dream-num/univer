@@ -96,7 +96,6 @@ export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { SheetBar } from './views/sheet-bar/SheetBar';
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
-export { SheetPermissionInitController } from '@univerjs/sheets/controllers/permission/sheet-permission-init.controller.js';
 export { type IUniverSheetsUIConfig } from './controllers/config.schema';
 
 export { getCellRealRange } from './common/utils';

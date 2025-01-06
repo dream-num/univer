@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITransformState } from '../types/interfaces/i-document-data';
+import type { ITransformState } from '../types/interfaces/i-drawing';
 import type { Nullable } from './types';
 
 export const MOVE_BUFFER_VALUE = 2;

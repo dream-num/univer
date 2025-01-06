@@ -17,10 +17,10 @@
 import type { IRotationSkewFlipTransform, ISize } from '@univerjs/core';
 import type { ICellOverGridPosition } from '@univerjs/sheets';
 import type { ISheetImage, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
-import { DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
+import { ArrangeTypeEnum, DrawingTypeEnum, FBase, generateRandomId, ICommandService, ImageSourceType, Inject, Injector } from '@univerjs/core';
 import { getImageSize } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
+import { SetDrawingArrangeCommand, SetSheetDrawingCommand } from '@univerjs/sheets-drawing-ui';
 import { convertPositionCellToSheetOverGrid, convertPositionSheetOverGridToAbsolute, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 'transform'>, ICellOverGridPosition, IRotationSkewFlipTransform, Required<ISize> {
@@ -499,7 +499,7 @@ export class FOverGridImage extends FBase {
      * // remove the image from the sheet
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Delete state is ', image?.remove());
      * ```
      */
@@ -515,7 +515,7 @@ export class FOverGridImage extends FBase {
      * // convert the image to a builder
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * const builder = image.toBuilder();
      * const param = await builder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).buildAsync();
      * activeSheet.updateImages([param]);
@@ -536,7 +536,7 @@ export class FOverGridImage extends FBase {
      * // set the source of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set source state is ', image.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4'));
      */
     setSource(source: string): boolean;
@@ -564,7 +564,7 @@ export class FOverGridImage extends FBase {
      *  // set the position of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set position state is ', image.setPosition(5, 5));
      * ```
      */
@@ -581,7 +581,7 @@ export class FOverGridImage extends FBase {
      * // set the position of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set position state is ', image.setPosition(5, 5, 10, 10));
      * ```
      */
@@ -610,7 +610,7 @@ export class FOverGridImage extends FBase {
      * // set the size of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set size state is ', image.setSize(50, 120));
      */
     async setSizeAsync(width: number, height: number): Promise<boolean> {
@@ -633,7 +633,7 @@ export class FOverGridImage extends FBase {
      * // set the crop of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set crop state is ', image.setCrop(10, 10, 10, 10));
      * ```
      */
@@ -680,12 +680,96 @@ export class FOverGridImage extends FBase {
      * // set the rotation angle of the image
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();
      * const activeSheet = activeSpreadsheet.getActiveSheet();
-     * const image = activeSheet.getImages[0];
+     * const image = activeSheet.getImages()[0];
      * console.log('Set rotate state is ', image.setRotate(90));
      * ```
      */
     setRotate(angle: number): boolean {
         this._image.sheetTransform.angle = angle;
         return this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._image.unitId, drawings: [this._image] });
+    }
+
+    /**
+     * 让图片的图层上移一层
+     * @returns success or not
+     * @example
+     * ```ts
+     * // move the image forward
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages()[0];
+     * console.log('Move forward state is ', image.setForward());
+     * ```
+     */
+    setForward(): boolean {
+        return this._commandService.syncExecuteCommand(SetDrawingArrangeCommand.id, {
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingIds: [this._image.drawingId],
+            arrangeType: ArrangeTypeEnum.forward,
+        });
+    }
+
+    /**
+     * 让图片的图层下移一层
+     * @returns success or not
+     * @example
+     * ```ts
+     * // move the image backward
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages()[0];
+     * console.log('Move backward state is ', image.setBackward());
+     * ```
+     */
+    setBackward(): boolean {
+        return this._commandService.syncExecuteCommand(SetDrawingArrangeCommand.id, {
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingIds: [this._image.drawingId],
+            arrangeType: ArrangeTypeEnum.backward,
+        });
+    }
+
+    /**
+     * 让图片的图层置于最底层
+     * @returns success or not
+     * @example
+     * ```ts
+     * // move the image to the back
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages()[0];
+     * console.log('Move back state is ', image.setBack());
+     * ```
+     */
+    setBack(): boolean {
+        return this._commandService.syncExecuteCommand(SetDrawingArrangeCommand.id, {
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingIds: [this._image.drawingId],
+            arrangeType: ArrangeTypeEnum.back,
+        });
+    }
+
+    /**
+     * 让图片的图层置于最顶层
+     * @returns success or not
+     * @example
+     * ```ts
+     * // move the image to the front
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const activeSheet = activeSpreadsheet.getActiveSheet();
+     * const image = activeSheet.getImages()[0];
+     * console.log('Move front state is ', image.setFront());
+     * ```
+     */
+    setFront(): boolean {
+        return this._commandService.syncExecuteCommand(SetDrawingArrangeCommand.id, {
+            unitId: this._image.unitId,
+            subUnitId: this._image.subUnitId,
+            drawingIds: [this._image.drawingId],
+            arrangeType: ArrangeTypeEnum.front,
+        });
     }
 }

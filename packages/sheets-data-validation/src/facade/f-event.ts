@@ -105,11 +105,12 @@ interface IDataValidationEvent {
 
 export class FDataValidationEvent implements IDataValidationEvent {
     /**
-     * SheetDataValidationChanged event
+     * Event fired when a rule is added, deleted, or modified
      * @see {@link ISheetDataValidationChangedEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.SheetDataValidationChanged, (event) => {
+     *     const { worksheet, workbook, changeType, oldRule, rule } = event;
      *     console.log(event);
      * });
      * ```
@@ -119,11 +120,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * SheetDataValidatorStatusChanged event
+     * Event fired when a cell validator status is changed
      * @see {@link ISheetDataValidatorStatusChangedEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.SheetDataValidatorStatusChanged, (event) => {
+     *     const { worksheet, workbook, row, column, status, rule } = event;
      *     console.log(event);
      * });
      * ```
@@ -133,11 +135,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationAdd event
+     * Event fired before a rule is added
      * @see {@link IBeforeSheetDataValidationAddEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationAdd, (event) => {
+     *      const { worksheet, workbook, rule } = event;
      *     console.log(event);
      * });
      * ```
@@ -147,11 +150,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationDelete event
+     * Event fired before a rule is deleted
      * @see {@link IBeforeSheetDataValidationDeleteEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDelete, (event) => {
+     *     const { worksheet, workbook, rule } = event;
      *     console.log(event);
      * });
      * ```
@@ -161,11 +165,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationDeleteAll event
+     * Event fired before all rules are deleted
      * @see {@link IBeforeSheetDataValidationDeleteAllEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationDeleteAll, (event) => {
+     *     const { worksheet, workbook, rules } = event;
      *     console.log(event);
      * });
      * ```
@@ -175,11 +180,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationCriteriaUpdate event
+     * Event fired before the criteria of a rule are updated
      * @see {@link IBeforeSheetDataValidationCriteriaUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationCriteriaUpdate, (event) => {
+     *     const { worksheet, workbook, rule, newCriteria } = event;
      *     console.log(event);
      * });
      * ```
@@ -189,11 +195,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationRangeUpdate event
+     * Event fired before the range of a rule is updated
      * @see {@link IBeforeSheetDataValidationRangeUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationRangeUpdate, (event) => {
+     *     const { worksheet, workbook, rule, newRanges } = event;
      *     console.log(event);
      * });
      * ```
@@ -203,11 +210,12 @@ export class FDataValidationEvent implements IDataValidationEvent {
     }
 
     /**
-     * BeforeSheetDataValidationOptionsUpdate event
+     * Event fired before the options of a rule are updated
      * @see {@link IBeforeSheetDataValidationOptionsUpdateEvent}
      * @example
      * ```ts
      * univerAPI.on(univerAPI.Event.BeforeSheetDataValidationOptionsUpdate, (event) => {
+     *     const { worksheet, workbook, rule, newOptions } = event;
      *     console.log(event);
      * });
      * ```

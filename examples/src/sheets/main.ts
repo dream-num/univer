@@ -43,6 +43,8 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
+import '@univerjs/sheets-ui/lib/index.css';
+import '@univerjs/ui/lib/index.css';
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';

@@ -84,6 +84,7 @@
         "esbuild-plugin-copy": "^2.1.1",
         "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
+        "fast-glob": "^3.3.3",
         "fs-extra": "^11.2.0",
         "less": "^4.2.1",
         "minimist": "^1.2.8",

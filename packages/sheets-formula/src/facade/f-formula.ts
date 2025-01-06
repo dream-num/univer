@@ -19,7 +19,8 @@ import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FFormula, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 export interface IFFormulaSheetsMixin {
@@ -213,7 +214,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         }, 10);
     }
 
-    override setInitialFormulaComputing(calculationMode: CalculationMode): void {
+    setInitialFormulaComputing(calculationMode: CalculationMode): void {
         const lifecycleService = this._injector.get(LifecycleService);
         const lifecycleStage = lifecycleService.stage;
 
@@ -233,9 +234,9 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         config.initialFormulaComputing = calculationMode;
     }
 
-    override registerFunction(name: string, func: IRegisterFunction): IDisposable;
-    override registerFunction(name: string, func: IRegisterFunction, description: string): IDisposable;
-    override registerFunction(
+    registerFunction(name: string, func: IRegisterFunction): IDisposable;
+    registerFunction(name: string, func: IRegisterFunction, description: string): IDisposable;
+    registerFunction(
         name: string,
         func: IRegisterFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
@@ -259,9 +260,9 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         return functionsDisposable;
     }
 
-    override registerAsyncFunction(name: string, func: IRegisterAsyncFunction): IDisposable;
-    override registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description: string): IDisposable;
-    override registerAsyncFunction(
+    registerAsyncFunction(name: string, func: IRegisterAsyncFunction): IDisposable;
+    registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description: string): IDisposable;
+    registerAsyncFunction(
         name: string,
         func: IRegisterAsyncFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }

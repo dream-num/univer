@@ -22,8 +22,6 @@ import { UnitAction } from '@univerjs/protocol';
 import { getSheetCommandTarget, RangeProtectionCache, WorksheetViewPermission } from '@univerjs/sheets';
 import { StatusBarController } from '../status-bar.controller';
 
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
-
 export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 

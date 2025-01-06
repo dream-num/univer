@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import type { IWorksheetProtectionRenderCellData } from '../../services/permission/worksheet-permission/type';
 import { Disposable, Inject, InterceptorEffectEnum, IPermissionService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-import { INTERCEPTOR_POINT, RangeProtectionCache, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionCache } from '../../model/range-protection.cache';
+import { WorksheetEditPermission, WorksheetViewPermission } from '../../services/permission/permission-point';
+import { WorksheetProtectionRuleModel } from '../../services/permission/worksheet-permission';
+import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 export class SheetPermissionViewModelController extends Disposable {
     constructor(

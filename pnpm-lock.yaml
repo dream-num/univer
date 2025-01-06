@@ -59,6 +59,9 @@ importers:
       eslint-plugin-header:
         specifier: ^3.1.1
         version: 3.1.1(eslint@9.17.0(jiti@2.4.2))
+      eslint-plugin-jsdoc:
+        specifier: ^50.6.1
+        version: 50.6.1(eslint@9.17.0(jiti@2.4.2))
       eslint-plugin-no-barrel-import:
         specifier: ^0.0.2
         version: 0.0.2(eslint@9.17.0(jiti@2.4.2))
@@ -12037,7 +12040,7 @@ snapshots:
       '@microsoft/tsdoc': 0.15.1
       ajv: 8.12.0
       jju: 1.4.0
-      resolve: 1.22.8
+      resolve: 1.22.10
 
   '@microsoft/tsdoc@0.15.1': {}
 
@@ -12462,14 +12465,14 @@ snapshots:
       fs-extra: 7.0.1
       import-lazy: 4.0.0
       jju: 1.4.0
-      resolve: 1.22.8
+      resolve: 1.22.10
       semver: 7.5.4
     optionalDependencies:
       '@types/node': 22.10.2
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
-      resolve: 1.22.8
+      resolve: 1.22.10
       strip-json-comments: 3.1.1
 
   '@rushstack/terminal@0.14.4(@types/node@22.10.2)':
@@ -15053,7 +15056,7 @@ snapshots:
     dependencies:
       debug: 3.2.7
       is-core-module: 2.15.1
-      resolve: 1.22.8
+      resolve: 1.22.10
     transitivePeerDependencies:
       - supports-color
 
@@ -17264,7 +17267,7 @@ snapshots:
   normalize-package-data@2.5.0:
     dependencies:
       hosted-git-info: 2.8.9
-      resolve: 1.22.8
+      resolve: 1.22.10
       semver: 5.7.2
       validate-npm-package-license: 3.0.4
 
@@ -17522,7 +17525,7 @@ snapshots:
 
   parse-imports@2.2.1:
     dependencies:
-      es-module-lexer: 1.5.4
+      es-module-lexer: 1.6.0
       slashes: 3.0.12
 
   parse-json@5.2.0:
@@ -18210,7 +18213,7 @@ snapshots:
 
   rechoir@0.6.2:
     dependencies:
-      resolve: 1.22.8
+      resolve: 1.22.10
 
   redent@3.0.0:
     dependencies:
@@ -18348,7 +18351,7 @@ snapshots:
   resolve-package-path@3.1.0:
     dependencies:
       path-root: 0.1.1
-      resolve: 1.22.8
+      resolve: 1.22.10
 
   resolve-pkg-maps@1.0.0: {}
 

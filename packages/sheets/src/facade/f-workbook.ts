@@ -89,8 +89,8 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * save workbook snapshot data, including conditional formatting, data validation, and other plugin data.
-     * @return Workbook snapshot data
+     * Save workbook snapshot data, including conditional formatting, data validation, and other plugin data.
+     * @returns {IWorkbookData} Workbook snapshot data
      * @example
      * ```ts
      * // The code below saves the workbook snapshot data
@@ -105,7 +105,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * @deprecated use 'save' instead.
-     * @return {*}  {IWorkbookData} Workbook snapshot data
+     * @returns {*}  {IWorkbookData} Workbook snapshot data
      * @memberof FWorkbook
      */
     getSnapshot(): IWorkbookData {
@@ -115,7 +115,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get the active sheet of the workbook.
-     * @returns The active sheet of the workbook
+     * @returns {FWorksheet} The active sheet of the workbook
      * @example
      * ```ts
      * // The code below gets the active sheet of the workbook
@@ -130,7 +130,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Gets all the worksheets in this workbook
-     * @returns An array of all the worksheets in the workbook
+     * @returns {FWorksheet[]} An array of all the worksheets in the workbook
      * @example
      * ```ts
      * // The code below gets all the worksheets in the workbook
@@ -186,7 +186,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Get a worksheet by sheet id.
      * @param sheetId The id of the sheet to get.
-     * @return The worksheet with given sheet id
+     * @returns The worksheet with given sheet id
      * @example
      * ```ts
      * // The code below gets a worksheet by sheet id
@@ -285,6 +285,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Deletes the specified worksheet.
      * @param sheet The worksheet to delete.
+     * @returns {boolean} True if the worksheet was deleted, false otherwise.
      * @example
      * ```ts
      * // The code below deletes the specified worksheet
@@ -305,7 +306,7 @@ export class FWorkbook extends FBaseInitialable {
     // #region editing
     /**
      * Undo the last action.
-     * @returns A promise that resolves to true if the undo was successful, false otherwise.
+     * @returns {FWorkbook} A promise that resolves to true if the undo was successful, false otherwise.
      * @example
      * ```ts
      * // The code below undoes the last action
@@ -394,7 +395,6 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Callback for selection changes.
-     *
      * @callback onSelectionChangeCallback
      * @param {IRange[]} selections The new selection.
      */
@@ -424,21 +424,25 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Used to modify the editing permissions of the workbook. When the value is false, editing is not allowed.
      * @param {boolean} value  editable value want to set
+     * @returns {FWorkbook} FWorkbook instance
      */
-    setEditable(value: boolean): void {
+    setEditable(value: boolean): FWorkbook {
         const instance = new WorkbookEditablePermission(this._workbook.getUnitId());
         const editPermissionPoint = this._permissionService.getPermissionPoint(instance.id);
         if (!editPermissionPoint) {
             this._permissionService.addPermissionPoint(instance);
         }
         this._permissionService.updatePermissionPoint(instance.id, value);
+
+        return this;
     }
 
     /**
-     * Sets the active selection region for this sheet.
+     * Sets the selection region for active sheet.
      * @param range The range to set as the active selection.
+     * @returns {FWorkbook} FWorkbook instance
      */
-    setActiveRange(range: FRange): void {
+    setActiveRange(range: FRange): FWorkbook {
         // In theory, FRange should belong to a specific context, rather than getting the currently active sheet
         const sheet = this.getActiveSheet();
         const sheetId = range.getRange().sheetId || sheet.getSheetId();
@@ -461,12 +465,15 @@ export class FWorkbook extends FBaseInitialable {
         };
 
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+
+        return this;
     }
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range.
      * @returns the active range
      */
+    // could sheet have no active range ?
     getActiveRange(): FRange | null {
         const activeSheet = this._workbook.getActiveSheet();
         const selections = this._selectionManagerService.getCurrentSelections();
@@ -480,6 +487,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Deletes the currently active sheet.
+     * @returns {boolean} true if the sheet was deleted, false otherwise
      * @example
      * ```ts
      * // The code below deletes the currently active sheet and stores the new active
@@ -557,8 +565,17 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
+     * @deprecated use setSpreadsheetLocale instead.
+     * @param {LocaleType} locale - The locale to set
+     */
+    setLocale(locale: LocaleType): void {
+        this._localeService.setLocale(locale);
+    }
+
+    /**
      * Set the locale of the workbook.
      * @param {LocaleType} locale The locale to set
+     * @returns {FWorkbook} This workbook, for chaining
      * @example
      * ```ts
      * // The code below sets the locale of the workbook
@@ -566,9 +583,9 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.setLocale(LocaleType.EN_US);
      * ```
      */
-
-    setLocale(locale: LocaleType): void {
+    setSpreadsheetLocale(locale: LocaleType): FWorkbook {
         this._localeService.setLocale(locale);
+        return this;
     }
 
     /**
@@ -610,7 +627,6 @@ export class FWorkbook extends FBaseInitialable {
             order: sheetIndexVal,
             subUnitId: sheet.getSheetId(),
         });
-
         return this;
     }
 
@@ -632,7 +648,6 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get the PermissionInstance.
-     *
      * @returns {FPermission} - The PermissionInstance.
      */
     getPermission(): FPermission {
@@ -683,6 +698,7 @@ export class FWorkbook extends FBaseInitialable {
      * Insert a defined name.
      * @param {string} name The name of the defined name to insert
      * @param {string} formulaOrRefString The formula(=sum(A2:b10)) or reference(A1) string of the defined name to insert
+     * @returns {FWorkbook} The current FWorkbook instance
      * @example
      * ```ts
      * // The code below inserts a defined name
@@ -690,11 +706,12 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.insertDefinedName('MyDefinedName', 'Sheet1!A1');
      * ```
      */
-    insertDefinedName(name: string, formulaOrRefString: string): void {
+    insertDefinedName(name: string, formulaOrRefString: string): FWorkbook {
         const definedNameBuilder = this._injector.createInstance(FDefinedNameBuilder);
         const param = definedNameBuilder.setName(name).setRef(formulaOrRefString).build();
         param.localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME;
         this.insertDefinedNameBuilder(param);
+        return this;
     }
 
     /**
@@ -719,7 +736,7 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     /**
-     * insert a defined name by builder param
+     * Insert a defined name by builder param.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
      * @example
      * ```ts
@@ -768,6 +785,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Register a custom range theme style.
+     * @param rangeThemeStyle
      * @example
      * ```ts
      * // import {RangeThemeStyle} from '@univerjs/sheets';
@@ -790,6 +808,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Unregister a custom range theme style.
+     * @param themeName
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

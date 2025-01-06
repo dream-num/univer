@@ -22,19 +22,19 @@ import { FDataValidation } from './f-data-validation';
 
 export interface IFRangeDataValidationMixin {
     /**
-     * set a data validation rule to current range
+     * Set a data validation rule to current range.
      * @param rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
      */
     setDataValidation(this: FRange, rule: Nullable<FDataValidation>): FRange;
     /**
-     * get first data validation rule in current range
+     * Get first data validation rule in current range.
      * @returns data validation rule
      */
     getDataValidation(this: FRange): Nullable<FDataValidation>;
 
     /**
-     * get all data validation rules in current range
+     * Get all data validation rules in current range.
      * @returns all data validation rules
      */
     getDataValidations(this: FRange): FDataValidation[];

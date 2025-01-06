@@ -30,11 +30,19 @@ export interface IScrollState {
      */
     offsetY: number;
     /**
-     * current start row in viewport visible area
+     * Current start row in viewportMain in canvas, NOT the first row of visible area of current viewport after freeze.
+     * e.g. If no freeze, it's the same as startRow in current viewport.
+     * If freeze, this value is smaller than the first row of visible area.  Just pretend that viewMainTop does not exist.
+     *
+     * e.g. If row 1 ~ 2 is frozen, the first row if viewMain is 3, but sheetViewStartRow still 0.
      */
     sheetViewStartRow: number;
     /**
-     * current start column in viewport visible area
+     * Current start column in viewportMain in canvas, NOT the first column of visible area of current viewport after freeze.
+     * e.g. If no freeze, it's the same as startColumn in current viewport.
+     * If freeze, this value is smaller than the first column of visible area.  Just pretend that viewMainLeft does not exist.
+     *
+     * e.g. If column A ~ C is frozen, the first column of viewMain is D, but sheetViewStartColumn still 0.
      */
     sheetViewStartColumn: number;
 }

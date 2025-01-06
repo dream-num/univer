@@ -36,7 +36,7 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Gets all the conditional formatting for the current sheet
-     * @return {*}  {IConditionFormattingRule[]}
+     * @returns {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -44,9 +44,11 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```
      */
     getConditionalFormattingRules(): IConditionFormattingRule[];
+
     /**
+     * @deprecated use newConditionalFormattingRule instead.
      * Creates a constructor for conditional formatting
-     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @returns {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -63,6 +65,26 @@ export interface IFWorksheetConditionalFormattingMixin {
      * ```
      */
     createConditionalFormattingRule(): FConditionalFormattingBuilder;
+
+    /**
+     * Creates a constructor for conditional formatting
+     * @returns {ConditionalFormatRuleBuilder}@example
+     * @memberof IFWorksheetConditionalFormattingMixin
+     * @example
+     * ```ts
+     *  const workbook = univerAPI.getActiveWorkbook();
+     *  const worksheet = workbook?.getActiveSheet();
+     *  const rule = worksheet?.createConditionalFormattingRule()
+     *      .whenCellNotEmpty()
+     *      .setRanges([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }])
+     *      .setItalic(true)
+     *      .setItalic(true)
+     *      .setBackground('red')
+     *      .setFontColor('green')
+     *      .build();
+     * ```
+     */
+    newConditionalFormattingRule(): FConditionalFormattingBuilder;
 
     /**
      * Add a new conditional format
@@ -88,7 +110,6 @@ export interface IFWorksheetConditionalFormattingMixin {
 
     /**
      * Delete conditional format according to `cfId`
-     *
      * @param {string} cfId
      * @returns {FWorksheet} Returns the current worksheet instance for method chaining
      * @memberof IFWorksheetConditionalFormattingMixin
@@ -150,6 +171,10 @@ export class FWorksheetConditionalFormattingMixin extends FWorksheet implements 
     }
 
     override createConditionalFormattingRule(): FConditionalFormattingBuilder {
+        return new FConditionalFormattingBuilder();
+    }
+
+    override newConditionalFormattingRule(): FConditionalFormattingBuilder {
         return new FConditionalFormattingBuilder();
     }
 

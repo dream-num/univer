@@ -21,16 +21,27 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookHyperlinkMixin {
     /**
-     * create a hyperlink for the sheet
+     * Create a hyperlink for the sheet.
      * @param sheetId the sheet id to link
      * @param range the range to link, or define-name id
      * @returns the hyperlink string
+     * @example
+     * ```ts
+     * let range = univerAPI.getActiveWorkbook().getActiveSheet().getRange(5, 5);
+     * // return something like '#gid=sheet_Id&range=F6'
+     * univerAPI.getActiveWorkbook().createSheetHyperlink('sheet_Id', r.getRange());
+     * ```
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
+
     /**
-     * parse the hyperlink string to get the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
      * @param hyperlink the hyperlink string
      * @returns the hyperlink info
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().parseSheetHyperlink('#gid=sheet_Id&range=F6')
+     * ```
      */
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
@@ -42,9 +53,9 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 
     /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
+     * @param {string} hyperlink the hyperlink string
+     * @returns {ISheetHyperLinkInfo} the hyperlink info
      */
     override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
         const resolverService = this._injector.get(SheetsHyperLinkParserService);

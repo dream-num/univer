@@ -28,6 +28,16 @@ export interface IFWorksheetCommentMixin {
      * @returns all comments in the current sheet
      */
     getComments(): FThreadComment[];
+
+    /**
+     * Subscribe to comment events.
+     * @param callback (cellPos: Nullable<IHoverCellPosition>) => void Callback function, param contains comment info and target cell.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onCommented((params) => {...})
+     * ```
+     */
+    onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable;
 }
 
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
@@ -37,11 +47,7 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
     }
 
-    /**
-     * Subscribe to comment events.
-     * @param callback Callback function, param contains comment info and target cell.
-     */
-    onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
+    override onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
         return commandService.onCommandExecuted((command) => {
             if (command.id === AddCommentCommand.id) {

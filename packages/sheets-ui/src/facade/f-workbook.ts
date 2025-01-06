@@ -27,9 +27,7 @@ import { filter } from 'rxjs';
 export interface IFWorkbookSheetsUIMixin {
     /**
      * Open a sidebar.
-     *
      * @deprecated
-     *
      * @param params the sidebar options
      * @returns the disposable object
      */
@@ -37,9 +35,7 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Open a dialog.
-     *
      * @deprecated
-     *
      * @param dialog the dialog options
      * @returns the disposable object
      */
@@ -47,7 +43,6 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Subscribe to cell click events
-     *
      * @param callback - The callback function to be called when a cell is clicked
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -55,7 +50,6 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Subscribe cell hover events
-     *
      * @param callback - The callback function to be called when a cell is hovered
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -80,20 +74,31 @@ export interface IFWorkbookSheetsUIMixin {
     /**
      * Start the editing process
      * @returns A boolean value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().startEditing();
+     * ```
      */
     startEditing(): boolean;
 
     /**
      * Use endEditingAsync as instead
      * @deprecated
+     * End the editing process
+     * @async
+     * @param save - Whether to save the changes
+     * @returns A promise that resolves to a boolean value
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().endEditing(true);
+     * ```
      */
     endEditing(save?: boolean): Promise<boolean>;
 
     /**
      * @async
-     * @param save - Whether to save the changes, default is true
-     * @returns A promise that resolves to a boolean value
-     * @param save
+     * @param {boolean} save - Whether to save the changes, default is true
+     * @returns {Promise<boolean>} A promise that resolves to a boolean value
      */
     endEditingAsync(save?: boolean): Promise<boolean>;
     /*
@@ -108,39 +113,40 @@ export interface IFWorkbookSheetsUIMixin {
 
     /**
      * Disable selection. After disabled, there would be no response for selection.
+     * @returns {FWorkbook} FWorkbook instance
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().disableSelection();
      * ```
      */
-    disableSelection(): void;
+    disableSelection(): FWorkbook;
 
     /**
      * Enable selection. After this you can select range.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().enableSelection();
      * ```
      */
-    enableSelection(): void;
+    enableSelection(): FWorkbook;
 
     /**
      * Set selection invisible, Unlike disableSelection, selection still works, you just can not see them.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().transparentSelection();
      * ```
      */
-    transparentSelection(): void;
+    transparentSelection(): FWorkbook;
 
     /**
      * Set selection visible.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook().showSelection();
      * ```
      */
-    showSelection(): void;
+    showSelection(): FWorkbook;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -243,6 +249,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     /**
      * Get scroll state of specified sheet.
+     * @param {string} sheetId - sheet id
      * @returns {IScrollState} scroll state
      * @example
      * ``` ts
@@ -258,40 +265,44 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         return scm.getScrollStateByParam({ unitId, sheetId });
     }
 
-    override disableSelection(): void {
+    override disableSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).disableSelection();
         }
+        return this;
     }
 
-    override enableSelection(): void {
+    override enableSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).enableSelection();
         }
+        return this;
     }
 
-    override transparentSelection(): void {
+    override transparentSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).transparentSelection();
         }
+        return this;
     }
 
-    override showSelection(): void {
+    override showSelection(): FWorkbook {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const render = renderManagerService.getRenderById(unitId);
         if (render) {
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
+        return this;
     }
 }
 

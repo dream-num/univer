@@ -37,29 +37,24 @@ import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceS
 export interface IFUniverSheetsUIMixin {
     /**
      * Customize the column header of the spreadsheet.
-     *
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
-     *
      * @example
      * ```typescript
-     * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * univerAPI.customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
     /**
      * Customize the row header of the spreadsheet.
-     *
      * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
-     *
      * @example
      * ```typescript
-     * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * univerAPI.customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
     customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
     /**
      * Register sheet row header render extensions.
-     *
      * @param {string} unitId The unit id of the spreadsheet.
      * @param {SheetExtension[]} extensions The extensions to register.
      * @returns {IDisposable} The disposable instance.
@@ -67,7 +62,6 @@ export interface IFUniverSheetsUIMixin {
     registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
     /**
      * Register sheet column header render extensions.
-     *
      * @param {string} unitId The unit id of the spreadsheet.
      * @param {SheetExtension[]} extensions The extensions to register.
      * @returns {IDisposable} The disposable instance.
@@ -75,7 +69,6 @@ export interface IFUniverSheetsUIMixin {
     registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
     /**
      * Register sheet main render extensions.
-     *
      * @param {string} unitId The unit id of the spreadsheet.
      * @param {SheetExtension[]} extensions The extensions to register.
      * @returns {IDisposable} The disposable instance.
@@ -460,9 +453,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
     /**
      * Get sheet render component from render by unitId and view key.
-     *
      * @private
-     *
      * @param {string} unitId The unit id of the spreadsheet.
      * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
      * @returns {Nullable<RenderComponentType>} The render component.
@@ -486,7 +477,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
     /**
      * Get sheet hooks.
-     *
      * @returns {FSheetHooks} FSheetHooks instance
      */
     override getSheetHooks(): FSheetHooks {

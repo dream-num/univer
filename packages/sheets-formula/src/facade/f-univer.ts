@@ -33,13 +33,12 @@ export interface IFUniverSheetsFormulaMixin {
 
 export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
     /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     * RegisterFunction may be executed multiple times, triggering multiple formula forced refreshes.
      */
     declare private _debouncedFormulaCalculation: () => void;
 
     /**
      * Initialize the FUniver instance.
-     *
      * @private
      */
     override _initialize(): void {

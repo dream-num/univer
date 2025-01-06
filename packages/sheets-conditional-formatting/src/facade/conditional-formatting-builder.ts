@@ -110,9 +110,8 @@ class ConditionalFormatRuleBaseBuilder {
     }
 
     /**
-     * deep clone a current builder.
-     *
-     * @return {*}
+     * Deep clone a current builder.
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     copy() {
@@ -121,7 +120,7 @@ class ConditionalFormatRuleBaseBuilder {
 
     /**
      * Gets the scope of the current conditional format
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     getRanges() {
@@ -136,8 +135,8 @@ class ConditionalFormatRuleBaseBuilder {
     }
 
     /**
-     * create a conditional format ID.
-     * @return {*}
+     * Create a conditional format ID.
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     createCfId() {
@@ -147,7 +146,7 @@ class ConditionalFormatRuleBaseBuilder {
     /**
      * Sets the scope for conditional formatting
      * @param {IRange[]} ranges
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setRanges(ranges: IRange[]) {
@@ -168,7 +167,6 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Set average rule
-     *
      * @param {IAverageHighlightCell['operator']} operator
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
@@ -182,7 +180,6 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Set uniqueValues rule
-     *
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setUniqueValues() {
@@ -194,7 +191,6 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Set duplicateValues rule
-     *
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setDuplicateValues() {
@@ -206,8 +202,10 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Set rank rule
-     *
      * @param {{ isBottom: boolean, isPercent: boolean, value: number }} config
+     * @param config.isBottom
+     * @param config.isPercent
+     * @param config.value
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setRank(config: { isBottom: boolean; isPercent: boolean; value: number }) {
@@ -223,7 +221,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Sets the background color
      * @param {string} [color]
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setBackground(color?: string) {
@@ -242,7 +240,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Set Bold
      * @param {boolean} isBold
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setBold(isBold: boolean) {
@@ -257,7 +255,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Sets the font color
      * @param {string} [color]
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setFontColor(color?: string) {
@@ -276,7 +274,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Set the text to italic
      * @param {boolean} isItalic
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setItalic(isItalic: boolean) {
@@ -290,7 +288,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Set the strikethrough
      * @param {boolean} isStrikethrough
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setStrikethrough(isStrikethrough: boolean) {
@@ -304,7 +302,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
     /**
      * Set the underscore
      * @param {boolean} isUnderline
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setUnderline(isUnderline: boolean) {
@@ -329,7 +327,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Sets the conditional formatting rule to fire when the cell is not empty
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     whenCellNotEmpty() {
@@ -343,9 +341,8 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Highlight when the date is in a time period, custom time is not supported.
-     *
      * @param {CFTimePeriodOperator} date
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     whenDate(date: CFTimePeriodOperator) {
@@ -388,7 +385,6 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Sets the conditional formatting rule to fire when the number equals the given value
-     *
      * @param {number} value
      * @memberof ConditionalFormatRuleBuilder
      */
@@ -476,6 +472,7 @@ class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBui
 
     /**
      * Sets the conditional formatting rule to fire when a number does not equal a given value.
+     * @param value
      * @memberof ConditionalFormatRuleBuilder
      */
     whenNumberNotEqualTo(value: number) {
@@ -564,7 +561,6 @@ class ConditionalFormatDataBarRuleBuilder extends ConditionalFormatRuleBaseBuild
 
     /**
      * Data bar settings
-     *
      * @param {{
      *         min: IValueConfig;
      *         max: IValueConfig;
@@ -573,6 +569,12 @@ class ConditionalFormatDataBarRuleBuilder extends ConditionalFormatRuleBaseBuild
      *         nativeColor: string;
      *         isShowValue?: boolean;
      *     }} config
+     * @param config.min
+     * @param config.max
+     * @param config.isGradient
+     * @param config.positiveColor
+     * @param config.nativeColor
+     * @param config.isShowValue
      * @memberof ConditionalFormatRuleBuilder
      */
     setDataBar(config: {
@@ -624,6 +626,8 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
      *
      * Icon Set
      * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config
+     * @param config.iconConfigs
+     * @param config.isShowValue
      * @memberof ConditionalFormatRuleBuilder
      */
     setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }) {
@@ -646,7 +650,6 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set average rule
-     *
      * @param {IAverageHighlightCell['operator']} operator
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
@@ -656,7 +659,6 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set uniqueValues rule
-     *
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setUniqueValues() {
@@ -665,7 +667,6 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set duplicateValues rule
-     *
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setDuplicateValues() {
@@ -674,8 +675,10 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set rank rule
-     *
      * @param {{ isBottom: boolean, isPercent: boolean, value: number }} config
+     * @param config.isBottom
+     * @param config.isPercent
+     * @param config.value
      * @memberof ConditionalFormatHighlightRuleBuilder
      */
     setRank(config: { isBottom: boolean; isPercent: boolean; value: number }) {
@@ -686,6 +689,8 @@ export class FConditionalFormattingBuilder {
      *
      * Set iconSet rule
      * @param {{ iconConfigs: IIconSet['config'], isShowValue: boolean }} config
+     * @param config.iconConfigs
+     * @param config.isShowValue
      * @memberof ConditionalFormatRuleBuilder
      */
     setIconSet(config: { iconConfigs: IIconSet['config']; isShowValue: boolean }) {
@@ -703,7 +708,6 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Set dataBar rule
-     *
      * @param {{
      *         min: IValueConfig;
      *         max: IValueConfig;
@@ -712,6 +716,12 @@ export class FConditionalFormattingBuilder {
      *         nativeColor: string;
      *         isShowValue?: boolean;
      *     }} config
+     * @param config.min
+     * @param config.max
+     * @param config.isGradient
+     * @param config.positiveColor
+     * @param config.nativeColor
+     * @param config.isShowValue
      * @memberof ConditionalFormatRuleBuilder
      */
     setDataBar(config: {
@@ -728,7 +738,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Sets the background color
      * @param {string} [color]
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setBackground(color?: string) {
@@ -738,7 +748,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Set Bold
      * @param {boolean} isBold
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setBold(isBold: boolean) {
@@ -748,7 +758,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Sets the font color
      * @param {string} [color]
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setFontColor(color?: string) {
@@ -758,7 +768,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Set the text to italic
      * @param {boolean} isItalic
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setItalic(isItalic: boolean) {
@@ -768,7 +778,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Set the strikethrough
      * @param {boolean} isStrikethrough
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setStrikethrough(isStrikethrough: boolean) {
@@ -778,7 +788,7 @@ export class FConditionalFormattingBuilder {
     /**
      * Set the underscore
      * @param {boolean} isUnderline
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     setUnderline(isUnderline: boolean) {
@@ -794,7 +804,7 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Sets the conditional formatting rule to fire when the cell is not empty
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     whenCellNotEmpty() {
@@ -803,9 +813,8 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Highlight when the date is in a time period, custom time is not supported.
-     *
      * @param {CFTimePeriodOperator} date
-     * @return {*}
+     * @returns {*}
      * @memberof ConditionalFormatRuleBuilder
      */
     whenDate(date: CFTimePeriodOperator) {
@@ -833,7 +842,6 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Sets the conditional formatting rule to fire when the number equals the given value
-     *
      * @param {number} value
      * @memberof ConditionalFormatRuleBuilder
      */
@@ -889,6 +897,7 @@ export class FConditionalFormattingBuilder {
 
     /**
      * Sets the conditional formatting rule to fire when a number does not equal a given value.
+     * @param value
      * @memberof ConditionalFormatRuleBuilder
      */
     whenNumberNotEqualTo(value: number) {

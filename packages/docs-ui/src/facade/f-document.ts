@@ -68,7 +68,7 @@ export class FDocument {
 
     /**
      * Adds the specified text to the end of this text region.
-     * @param text
+     * @param text - The text to be added to the end of this text region.
      */
     appendText(text: string): Promise<boolean> {
         const unitId = this.id;
@@ -102,10 +102,8 @@ export class FDocument {
 
     /**
      * Sets the selection to a specified text range in the document.
-     *
      * @param startOffset - The starting offset of the selection in the document.
      * @param endOffset - The ending offset of the selection in the document.
-     *
      * @example
      * ```typescript
      * document.setSelection(10, 20);

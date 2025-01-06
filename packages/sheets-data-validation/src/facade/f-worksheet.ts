@@ -22,7 +22,7 @@ import { FDataValidation } from './f-data-validation';
 
 export interface IFWorksheetDataValidationMixin {
     /**
-     * get all data validation rules in current sheet
+     * Get all data validation rules in current sheet.
      * @returns all data validation rules
      * ```ts
      * const workbook = univerAPI.getActiveUniverSheet();
@@ -32,7 +32,7 @@ export interface IFWorksheetDataValidationMixin {
      */
     getDataValidations(): FDataValidation[];
     /**
-     * get data validation validator status for current sheet
+     * Get data validation validator status for current sheet.
      * @returns matrix of validator status
      * ```ts
      * const workbook = univerAPI.getActiveUniverSheet();

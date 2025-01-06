@@ -281,14 +281,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
-     * @returns
+     * Scroll spreadsheet(viewMain) to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     *
+     * if column A ~ B is frozen. set second param to 0 would make viewMain start at column C.
+     * set second param to 2 would make viewMain start at column E.
+     * @param {number} row - Cell row
+     * @param {number} column - Cell column
+     * @returns {boolean} - true if scroll is successful
      */
     scrollToCell(row: number, column: number) {
         const worksheet = this._context.unit.getActiveSheet();
-        // if (!worksheet) return false;
         const {
             ySplit: freezeYSplit,
             xSplit: freezeXSplit,

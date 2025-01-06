@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import { normalizeTextRuns, Tools } from '@univerjs/core';
 import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
+import { normalizeTextRuns, Tools } from '@univerjs/core';
 
+/**
+ *
+ * @param styles
+ * @param oldVal
+ * @param newVal
+ */
 export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
     // use null to clear style
     const oldStyle = styles.getStyleByCell(oldVal);
@@ -36,6 +42,13 @@ export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData
     // then remove null
     if (merge) {
         Tools.removeNull(merge);
+
+        // remove empty object
+        Object.entries(merge).forEach(([key, val]) => {
+            if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) {
+                delete merge[key as keyof IStyleData];
+            }
+        });
     }
 
     if (Tools.isEmptyObject(merge)) {
@@ -58,6 +71,8 @@ export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData
 /**
  * Convert old style data for storage
  * @param style
+ * @param oldStyle
+ * @param newStyle
  */
 export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
     // If there is no newly set style, directly store the historical style
@@ -82,6 +97,8 @@ export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullabl
 /**
  * Convert old style border for storage
  * @param style
+ * @param oldBorders
+ * @param newBorders
  */
 function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderData>): IBorderData {
     // If there is no newly set border, directly store the historical border
@@ -104,6 +121,7 @@ function transformBorders(oldBorders: IBorderData, newBorders: Nullable<IBorderD
  * merge new style to old style
  * @param oldStyle
  * @param newStyle
+ * @param isRichText
  */
 function mergeStyle(
     oldStyle: Nullable<IStyleData>,
@@ -147,6 +165,11 @@ function mergeStyle(
     return backupStyle;
 }
 
+/**
+ *
+ * @param paragraphs
+ * @param offset
+ */
 function skipParagraphs(paragraphs: IParagraph[], offset: number): number {
     if (paragraphs.some((p) => p.startIndex === offset)) {
         return skipParagraphs(paragraphs, offset + 1);

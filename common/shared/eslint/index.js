@@ -1,3 +1,4 @@
+const jsdoc = require('eslint-plugin-jsdoc');
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
 const noSelfPackageImports = require('./plugins/no-self-package-imports');
@@ -210,6 +211,15 @@ exports.specPreset = () => {
         ],
         rules: {
             'ts/explicit-function-return-type': 'off',
+        },
+    };
+};
+
+exports.jsdocPreset = () => {
+    return {
+        files: ['**/*.{ts,tsx}'],
+        rules: {
+            ...jsdoc.configs.recommended.rules,
         },
     };
 };

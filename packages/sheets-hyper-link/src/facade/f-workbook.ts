@@ -37,10 +37,15 @@ export interface IFWorkbookHyperlinkMixin {
      * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
+
     /**
-     * parse the hyperlink string to get the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
      * @param hyperlink the hyperlink string
      * @returns the hyperlink info
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().parseSheetHyperlink('#gid=sheet_Id&range=F6')
+     * ```
      */
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
@@ -52,9 +57,9 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 
     /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
+     * @param {string} hyperlink the hyperlink string
+     * @returns {ISheetHyperLinkInfo} the hyperlink info
      */
     override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
         const resolverService = this._injector.get(SheetsHyperLinkParserService);

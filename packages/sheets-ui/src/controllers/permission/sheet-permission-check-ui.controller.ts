@@ -19,6 +19,7 @@
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Workbook } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
+import type { IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
 import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
@@ -26,7 +27,7 @@ import { IMEInputCommand, InsertCommand } from '@univerjs/docs-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SheetPermissionCheckController, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
-import { AutoFillCommand, IAutoFillCommandParams } from '../../commands/commands/auto-fill.command';
+import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';

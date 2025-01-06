@@ -21,11 +21,12 @@ import { FEventName } from '@univerjs/core';
 
 interface ICommentEventMixin {
     /**
-     * Comment added event
-     * @see {@link ICommentAddedEvent}
+     * Event fired after comment added
+     * @see {@link ISheetCommentAddEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentAdded, (event) => {
+     *     const { comment, workbook, worksheet, row, col } = event;
      *     console.log(event);
      * });
      * ```
@@ -33,11 +34,12 @@ interface ICommentEventMixin {
     readonly CommentAdded: 'CommentAdded';
 
     /**
-     * Before comment add event
-     * @see {@link IBeforeCommentAddEvent}
+     * Event fired before comment added
+     * @see {@link IBeforeSheetCommentAddEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentAdd, (event) => {
+     *     const { comment, workbook, worksheet, row, col } = event;
      *     console.log(event);
      * });
      * ```
@@ -45,11 +47,12 @@ interface ICommentEventMixin {
     readonly BeforeCommentAdd: 'BeforeCommentAdd';
 
     /**
-     * Comment updated event
-     * @see {@link ICommentUpdatedEvent}
+     * Event fired after comment updated
+     * @see {@link ISheetCommentUpdateEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentUpdated, (event) => {
+     *     const { comment, workbook, worksheet, row, col } = event;
      *     console.log(event);
      * });
      * ```
@@ -57,11 +60,12 @@ interface ICommentEventMixin {
     readonly CommentUpdated: 'CommentUpdated';
 
     /**
-     * Before comment update event
-     * @see {@link IBeforeCommentUpdateEvent}
+     * Event fired before comment update
+     * @see {@link IBeforeSheetCommentUpdateEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentUpdate, (event) => {
+     *     const { comment, workbook, worksheet, row, col, newContent } = event;
      *     console.log(event);
      * });
      * ```
@@ -69,11 +73,12 @@ interface ICommentEventMixin {
     readonly BeforeCommentUpdate: 'BeforeCommentUpdate';
 
     /**
-     * Comment deleted event
-     * @see {@link ICommentDeletedEvent}
+     * Event fired after comment deleted
+     * @see {@link ISheetCommentDeleteEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentDeleted, (event) => {
+     *     const { commentId, workbook, worksheet } = event;
      *     console.log(event);
      * });
      * ```
@@ -81,11 +86,12 @@ interface ICommentEventMixin {
     readonly CommentDeleted: 'CommentDeleted';
 
     /**
-     * Before comment delete event
-     * @see {@link IBeforeCommentDeleteEvent}
+     * Event fired before comment delete
+     * @see {@link IBeforeSheetCommentDeleteEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentDeleted, (event) => {
+     *     const { commentId, workbook, worksheet } = event;
      *     console.log(event);
      * });
      * ```
@@ -93,11 +99,12 @@ interface ICommentEventMixin {
     readonly BeforeCommentDeleted: 'BeforeCommentDeleted';
 
     /**
-     * Comment resolved event
-     * @see {@link ICommentResolvedEvent}
+     * Event fired after comment resolve
+     * @see {@link ISheetCommentResolveEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.CommentResolved, (event) => {
+     *     const { comment, row, col, resolved, workbook, worksheet } = event;
      *     console.log(event);
      * });
      * ```
@@ -105,11 +112,12 @@ interface ICommentEventMixin {
     readonly CommentResolved: 'CommentResolved';
 
     /**
-     * Before comment resolve event
-     * @see {@link IBeforeCommentResolveEvent}
+     * Event fired before comment resolve
+     * @see {@link ISheetCommentResolveEvent}
      * @example
      * ```ts
      * univerAPI.addEventListener(CommentEvent.BeforeCommentResolve, (event) => {
+     *     const { comment, row, col, resolved, workbook, worksheet } = event;
      *     console.log(event);
      * });
      * ```

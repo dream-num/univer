@@ -60,58 +60,100 @@ export class FEnum {
         }
     }
 
+    /**
+     *  Defines different types of Univer instances
+     */
     get UniverInstanceType() {
         return UniverInstanceType;
     }
 
+    /**
+     * Represents different stages in the lifecycle
+     */
     get LifecycleStages() {
         return LifecycleStages;
     }
 
+    /**
+     * Different types of data validation
+     */
     get DataValidationType() {
         return DataValidationType;
     }
 
+    /**
+     * Different error display styles
+     */
     get DataValidationErrorStyle() {
         return DataValidationErrorStyle;
     }
 
+    /**
+     * Different validation rendering modes
+     */
     get DataValidationRenderMode() {
         return DataValidationRenderMode;
     }
 
+    /**
+     * Different validation operators
+     */
     get DataValidationOperator() {
         return DataValidationOperator;
     }
 
+    /**
+     * Different validation states
+     */
     get DataValidationStatus() {
         return DataValidationStatus;
     }
 
+    /**
+     * Different types of commands
+     */
     get CommandType() {
         return CommandType;
     }
 
+    /**
+     * Different baseline offsets for text baseline positioning
+     */
     get BaselineOffset() {
         return BaselineOffset;
     }
 
+    /**
+     * Boolean number representations
+     */
     get BooleanNumber() {
         return BooleanNumber;
     }
 
+    /**
+     * Different horizontal text alignment options
+     */
     get HorizontalAlign() {
         return HorizontalAlign;
     }
 
+    /**
+     * Different text decoration styles
+     */
     get TextDecoration() {
         return TextDecoration;
     }
 
+    /**
+     * Different text direction options
+     */
     get TextDirection() {
         return TextDirection;
     }
 
+    /**
+     * Different vertical text alignment options
+     */
     get VerticalAlign() {
         return VerticalAlign;
     }

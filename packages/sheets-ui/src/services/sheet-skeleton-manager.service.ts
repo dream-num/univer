@@ -18,9 +18,11 @@ import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@un
 import type { IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { SheetSkeletonService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { attachRangeWithCoord } from './selection/util';
 
+ // Why need this SkParam? what is Param used for? Could unitId & sheetId & dirty in skeleton itself ?
 export interface ISheetSkeletonManagerParam {
     unitId: string;
     sheetId: string;
@@ -40,7 +42,8 @@ export interface ISheetSkeletonManagerSearch {
 export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _sheetId: string = '';
 
-    private _sheetSkeletonStore: Map<string, ISheetSkeletonManagerParam> = new Map();
+    // @TODO lumixraku, why need this?  How about put dirty & sheetId & unitId in skeleton itself z?
+    private _sheetSkeletonParamStore: Map<string, ISheetSkeletonManagerParam> = new Map();
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
@@ -53,7 +56,9 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SheetSkeletonService) private readonly _sheetSkService: SheetSkeletonService
+
     ) {
         // empty
         super();
@@ -61,7 +66,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this.disposeWithMe(() => {
             this._currentSkeletonBefore$.complete();
             this._currentSkeleton$.complete();
-            this._sheetSkeletonStore = new Map();
+            this._sheetSkeletonParamStore = new Map();
         });
 
         this._initRemoveSheet();
@@ -131,6 +136,11 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._setCurrent(searchParam.sheetId);
     }
 
+    setSkeletonParam(sheetId: string, skp: ISheetSkeletonManagerParam) {
+        this._sheetSkService.setSkeleton(skp.unitId, sheetId, skp.skeleton);
+        this._sheetSkeletonParamStore.set(sheetId, skp);
+    }
+
     private _setCurrent(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
         this._sheetId = sheetId;
         const skParam = this._getSkeletonParam(sheetId);
@@ -146,7 +156,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
             const scene = this._context.scene;
             const skeleton = this._buildSkeleton(worksheet, scene);
-            this._sheetSkeletonStore.set(sheetId, {
+            this.setSkeletonParam(sheetId, {
                 unitId,
                 sheetId,
                 skeleton,
@@ -159,6 +169,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         this._currentSkeleton$.next(sheetSkeletonManagerParam);
     }
 
+    // @TODO why need this? How about caller get skeleton and call sk.calculate()?
     reCalculate(param?: ISheetSkeletonManagerParam) {
         if (!param) {
             param = this.getCurrentParam();
@@ -207,7 +218,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }
 
         const newSkeleton = this._buildSkeleton(worksheet);
-        this._sheetSkeletonStore.set(sheetId, {
+        this.setSkeletonParam(sheetId, {
             unitId: this._context.unitId,
             sheetId,
             skeleton: newSkeleton,
@@ -221,7 +232,8 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         const skParam = this.getSkeletonParam(sheetId);
         if (skParam) {
             skParam.skeleton.dispose();
-            this._sheetSkeletonStore.delete(sheetId);
+            this._sheetSkeletonParamStore.delete(sheetId);
+            this._sheetSkService.deleteSkeleton(skParam.unitId, sheetId);
         }
     }
 
@@ -234,8 +246,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     private _getSkeletonParam(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        // const item = this._sheetSkeletonStore.find((param) => param.sheetId === searchParm.sheetId);
-        const item = this._sheetSkeletonStore.get(sheetId);
+        const item = this._sheetSkeletonParamStore.get(sheetId);
         return item;
     }
 

@@ -434,4 +434,6 @@ export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } 
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from './controllers/defined-name-data.controller';
 export type { ICellOverGridPosition, ISheetOverGridPosition } from './basics/cell-position';
+
+export { SheetSkeletonService } from './skeleton/skeleton.service';
 // #endregion

@@ -489,7 +489,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
-        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrentSkeleton() ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
 

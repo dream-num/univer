@@ -721,6 +721,15 @@ describe('lexer nodeMaker test', () => {
 
             result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, 1, true);
             expect(result).toStrictEqual("=SUM( 'dv-test'!F27)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, -1, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!F25)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!G26)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
         });
     });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { numfmt, Rectangle } from '../shared';
+import { numfmt, Rectangle, Tools } from '../shared';
 
 export class FUtil {
     static _instance: FUtil | null;
@@ -56,5 +56,12 @@ export class FUtil {
      */
     get numfmt() {
         return numfmt;
+    }
+
+    /**
+     * common tools
+     */
+    get tools() {
+        return Tools;
     }
 }

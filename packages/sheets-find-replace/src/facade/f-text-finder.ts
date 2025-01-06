@@ -28,7 +28,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const ranges = textFinder.findAll();
      * ranges.forEach((range) => {
      *    console.log(range.getA1Notation());
@@ -44,7 +44,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const range = textFinder.findNext();
      * if (range) {
      *   console.log(range.getA1Notation());
@@ -60,7 +60,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const range = textFinder.findPrevious();
      * if (range) {
      *  console.log(range.getA1Notation());
@@ -75,7 +75,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const range = textFinder.getCurrentMatch();
      * if (range) {
      * console.log(range.getA1Notation());
@@ -91,7 +91,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * await textFinder.matchCaseAsync(true);
      * ```
      */
@@ -103,7 +103,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * await textFinder.matchEntireCellAsync(true);
      * ```
      */
@@ -115,7 +115,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * await textFinder.matchFormulaTextAsync(true);
      * ```
      */
@@ -128,7 +128,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const replacedCount = await textFinder.replaceAllWithAsync('world');
      * console.log(replacedCount);
      * ```
@@ -142,7 +142,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const replaced = await textFinder.replaceWithAsync('world');
      * console.log(replaced);
      * ```
@@ -154,7 +154,7 @@ export interface IFTextFinder {
      *
      * @example
      * ```typescript
-     * const textFinder = await univerAPI.createTextFinder('hello');
+     * const textFinder = await univerAPI.createTextFinderAsync('hello');
      * const complete = await textFinder.ensureCompleteAsync();
      * console.log(complete);
      * ```

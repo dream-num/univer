@@ -176,6 +176,7 @@ exports.facadePreset = () => {
         rules: {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
+            ...jsdoc.configs.recommended.rules,
         },
     };
 };
@@ -211,15 +212,6 @@ exports.specPreset = () => {
         ],
         rules: {
             'ts/explicit-function-return-type': 'off',
-        },
-    };
-};
-
-exports.jsdocPreset = () => {
-    return {
-        files: ['**/*.{ts,tsx}'],
-        rules: {
-            ...jsdoc.configs.recommended.rules,
         },
     };
 };

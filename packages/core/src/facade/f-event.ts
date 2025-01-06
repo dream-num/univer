@@ -82,11 +82,12 @@ export class FEventName {
     }
 
     /**
-     * DocCreated event
+     * Event fired when a document is created
      * @see {@link IDocCreatedParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocCreated, (params) => {
+     *     const { unitId, type, doc, unit } = params;
      *     console.log('doc created', params);
      * });
      * ```
@@ -96,11 +97,12 @@ export class FEventName {
     }
 
     /**
-     * DocDisposed event
+     * Event fired when a document is disposed
      * @see {@link IDocDisposedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.DocDisposed, (params) => {
+     *     const { unitId, unitType, snapshot } = params;
      *     console.log('doc disposed', params);
      * });
      * ```
@@ -110,11 +112,12 @@ export class FEventName {
     }
 
     /**
-     * LifeCycleChanged event
+     * Event fired when life cycle is changed
      * @see {@link ILifeCycleChangedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.event.LifeCycleChanged, (params) => {
+     *      const { stage } = params;
      *     console.log('life cycle changed', params);
      * });
      * ```
@@ -124,12 +127,13 @@ export class FEventName {
     }
 
     /**
-     * Redo event
+     * Event fired when a redo command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.Redo, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.Redo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */
@@ -138,12 +142,13 @@ export class FEventName {
     }
 
     /**
-     * Undo event
+     * Event fired when an undo command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.Undo, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.Undo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */
@@ -152,12 +157,13 @@ export class FEventName {
     }
 
     /**
-     * BeforeRedo event
+     * Event fired before a redo command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeRedo, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.BeforeRedo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */
@@ -166,12 +172,13 @@ export class FEventName {
     }
 
     /**
-     * BeforeUndo event
+     * Event fired before an undo command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeUndo, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.BeforeUndo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */
@@ -180,12 +187,13 @@ export class FEventName {
     }
 
     /**
-     * CommandExecuted event
+     * Event fired when a command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */
@@ -194,12 +202,13 @@ export class FEventName {
     }
 
     /**
-     * BeforeCommandExecute event
+     * Event fired before a command is executed
      * @see {@link ICommandEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (params) => {
-     *     console.log('command executed', params);
+     * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
      * });
      * ```
      */

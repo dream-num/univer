@@ -29,7 +29,7 @@ import fs from 'fs-extra';
 import minimist from 'minimist';
 import tailwindcss from 'tailwindcss';
 
-const LINK_PRESET_TO_LIB = process.env.LINK_PRESET_TO_LIB === 'true';
+const LINK_TO_LIB = process.env.LINK_TO_LIB === 'true';
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 const args = minimist(process.argv.slice(2));
@@ -243,7 +243,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
                 to: ['./'],
             },
         }),
-        ...(LINK_PRESET_TO_LIB ? [] : [skipLibCssEsbuildPlugin]),
+        ...(LINK_TO_LIB ? [] : [skipLibCssEsbuildPlugin]),
         stylePlugin({
             postcss: {
                 plugins: [tailwindcss],
@@ -263,7 +263,7 @@ const config: SameShape<BuildOptions, BuildOptions> = {
     entryPoints,
     outdir: './local',
     define,
-    alias: LINK_PRESET_TO_LIB ? generateAliases() : {},
+    alias: LINK_TO_LIB ? generateAliases() : {},
 };
 
 /**

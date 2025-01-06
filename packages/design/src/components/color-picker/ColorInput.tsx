@@ -35,6 +35,12 @@ interface IInputProps {
     onChange?: (h: number, s: number, v: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
 function HexInput({ hsv, onChange }: IInputProps) {
     const [inputValue, setInputValue] = useState('');
     const hexValue = hsvToHex(hsv[0], hsv[1], hsv[2]);
@@ -95,6 +101,12 @@ function HexInput({ hsv, onChange }: IInputProps) {
     );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
 function RgbInput({ hsv, onChange }: IInputProps) {
     const [localValues, setLocalValues] = useState({ r: 0, g: 0, b: 0 });
 
@@ -161,6 +173,12 @@ function RgbInput({ hsv, onChange }: IInputProps) {
     );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
 function HslInput({ hsv, onChange }: IInputProps) {
     // Local state for HSL values
     const [localValues, setLocalValues] = useState({ h: 0, s: 0, l: 0 });
@@ -250,6 +268,12 @@ interface IAlphaInputProps {
     onChange?: (alpha: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.alpha
+ * @param root0.onChange
+ */
 function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
     // Local state for input value (0-100)
     const [localValue, setLocalValue] = useState('');
@@ -307,9 +331,22 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
     );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.alpha
+ * @param root0.showAlpha
+ * @param root0.onChangeColor
+ * @param root0.onChangeAlpha
+ */
 export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha }: IColorInputProps) {
     const [format, setFormat] = useState<ColorFormat>('hex');
 
+    /**
+     *
+     * @param format
+     */
     function renderInput(format: ColorFormat) {
         switch (format) {
             case 'hex':
@@ -330,7 +367,8 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
               [&_input]:univer-h-8 [&_input]:univer-border-gray-200 [&_input]:univer-border
               [&_input]:univer-border-solid [&_input]:univer-box-border [&_input]:univer-px-1.5 [&_input]:univer-rounded
               [&_input]:univer-text-gray-700 [&_input]:univer-text-sm [&_input]:univer-flex
-              [&_input]:univer-items-center [&_input]:univer-outline-none
+              [&_input]:univer-items-center [&_input]:univer-outline-none [&_input]:univer-bg-transparent
+              dark:[&_input]:univer-text-white dark:[&_input]:univer-border-gray-600
             `}
         >
             <DropdownProvider>
@@ -340,6 +378,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                           univer-h-8 univer-border-gray-200 univer-border univer-border-solid univer-box-border
                           univer-px-1.5 univer-rounded univer-text-gray-700 univer-text-sm univer-cursor-pointer
                           univer-flex univer-items-center univer-flex-1
+                          dark:univer-text-white dark:univer-border-gray-600
                         `}
                     >
                         {format.toUpperCase()}
@@ -350,6 +389,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                         className={`
                           univer-grid
                           [&>a]:univer-text-sm [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-cursor-pointer
+                          dark:univer-text-white
                         `}
                     >
                         <a onClick={() => setFormat('hex')}>HEX</a>

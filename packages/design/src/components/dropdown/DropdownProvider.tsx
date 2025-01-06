@@ -25,6 +25,14 @@ interface IDropdownProviderProps {
     onVisibleChange?: (visible: boolean) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.visible
+ * @param root0.children
+ * @param root0.disabled
+ * @param root0.onVisibleChange
+ */
 export function DropdownProvider({ visible, children, disabled = false, onVisibleChange }: IDropdownProviderProps) {
     const triggerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -55,7 +63,7 @@ export function DropdownProvider({ visible, children, disabled = false, onVisibl
                 // If we hide the Dropdown in a synchronous way, the button's callback will never be triggered.
                 // TODO: @jikkai: This is a temp fix. A more appropriate fix would be detecting if the target is
                 // in a nested dropdown.
-                requestAnimationFrame(() => updateShow(false));
+                updateShow(false);
             }
         };
 

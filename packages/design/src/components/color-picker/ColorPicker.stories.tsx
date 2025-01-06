@@ -39,7 +39,7 @@ export const Playground = {
         return (
             <>
                 {value}
-                <ColorPicker value={value} onChange={setValue} />
+                <ColorPicker showAlpha value={value} onChange={setValue} />
             </>
         );
     },

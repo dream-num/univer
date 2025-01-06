@@ -21,6 +21,12 @@ interface IHueSliderProps {
     onChange: (hue: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
 export function HueSlider({ hsv, onChange }: IHueSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
@@ -59,11 +65,13 @@ export function HueSlider({ hsv, onChange }: IHueSliderProps) {
         if (isDragging) {
             window.addEventListener('pointermove', handlePointerMove);
             window.addEventListener('pointerup', handlePointerUp);
+            window.addEventListener('mouseup', handlePointerUp);
         }
 
         return () => {
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('mouseup', handlePointerUp);
         };
     }, [isDragging, handlePointerMove, handlePointerUp]);
 

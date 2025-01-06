@@ -15,18 +15,28 @@
  */
 
 import React, { useCallback } from 'react';
-import { hexToHsv } from './color-conversion';
+import { clsx } from '../../helper/clsx';
+import { hexToHsv, hsvToHex } from './color-conversion';
 import { colorPresets } from './presets';
 
 interface IColorPresetsProps {
+    hsv: [number, number, number];
     onChange: (h: number, s: number, v: number) => void;
 }
 
-export function ColorPresets({ onChange }: IColorPresetsProps) {
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
+export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
     const handleSelectPreset = useCallback((color: string) => {
         const [h, s, v] = hexToHsv(color);
         onChange(h, s, v);
     }, [onChange]);
+
+    const currentColor = hsvToHex(hsv[0], hsv[1], hsv[2]);
 
     return (
         <div className="univer-grid univer-content-center univer-gap-2">
@@ -39,10 +49,12 @@ export function ColorPresets({ onChange }: IColorPresetsProps) {
                         <button
                             key={j}
                             type="button"
-                            className={`
+                            className={clsx(`
                               univer-w-5 univer-h-5 univer-rounded-full univer-bg-gray-300 univer-border-none
-                              univer-cursor-pointer
-                            `}
+                              univer-cursor-pointer univer-transition-shadow
+                            `, {
+                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:univer-ring-offset-gray-600 dark:univer-ring-primary-600': color.toUpperCase() === currentColor.toUpperCase(),
+                            })}
                             style={{ backgroundColor: color }}
                             onClick={() => handleSelectPreset(color)}
                         />

@@ -29,6 +29,13 @@ export interface IDropdownOverlayProps {
     };
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.children
+ * @param root0.className
+ * @param root0.offset
+ */
 export function DropdownOverlay({ children, className, offset }: IDropdownOverlayProps) {
     if (!canUseDom) {
         return null;
@@ -96,6 +103,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 left: position.left,
             }}
             onClick={hideAfterClick}
+            onPointerUpCapture={(e) => e.stopPropagation()}
         >
             {children}
         </div>,

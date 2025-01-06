@@ -21,6 +21,12 @@ interface IColorSpectrumProps {
     onChange: (h: number, s: number, v: number) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.hsv
+ * @param root0.onChange
+ */
 export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -89,10 +95,12 @@ export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
             setIsDragging(false);
         };
 
-        document.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('mouseup', handlePointerUp);
 
         return () => {
-            document.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('mouseup', handlePointerUp);
         };
     }, []);
 

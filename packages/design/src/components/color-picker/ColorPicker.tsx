@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AlphaSlider } from './AlphaSlider';
 import { hsvToRgb, parseRgba, rgbToHsv } from './color-conversion';
 import { ColorInput } from './ColorInput';
@@ -29,31 +29,50 @@ const MemoizedAlphaSlider = React.memo(AlphaSlider);
 const MemoizedColorInput = React.memo(ColorInput);
 const MemoizedColorPresets = React.memo(ColorPresets);
 
-interface IColorPickerProps {
+export interface IColorPickerProps {
     value?: string;
     showAlpha?: boolean;
     onChange?: (value: string) => void;
 }
 
-function debounce(func: (value: string) => void, wait: number) {
-    let timeout: NodeJS.Timeout;
-    return (value: string) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            func(value);
-        }, wait);
+/**
+ *
+ * @param fn
+ * @param delay
+ */
+function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
+    let timer: number;
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+        clearTimeout(timer);
+        timer = window.setTimeout(() => fn.apply(this, args), delay);
     };
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.value
+ * @param root0.showAlpha
+ * @param root0.onChange
+ */
 export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
+    if (!canUseDom) return null;
+
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
 
+    // 移除 currentRgb 的 useMemo
+    // 在需要时直接计算 RGB 值
+    const getRgb = useCallback((h: number, s: number, v: number) => {
+        return hsvToRgb(h, s, v);
+    }, []);
+
     const debouncedOnChange = useCallback(
-        debounce((value: string) => {
-            onChange?.(value);
+        debounce((hsv: [number, number, number], alpha: number) => {
+            const [r, g, b] = getRgb(hsv[0], hsv[1], hsv[2]);
+            onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
         }, 16),
-        [onChange]
+        [onChange, getRgb]
     );
 
     useEffect(() => {
@@ -67,21 +86,17 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
         }
     }, [value]);
 
-    const currentRgb = useMemo(() => {
-        return hsvToRgb(hsv[0], hsv[1], hsv[2]);
-    }, [hsv]);
-
     const handleColorChange = useCallback((h: number, s: number, v: number) => {
         setHsv([h, s, v]);
-        const [r, g, b] = currentRgb;
-        debouncedOnChange(`rgba(${r}, ${g}, ${b}, ${alpha})`);
-    }, [currentRgb, alpha, debouncedOnChange]);
+        // 传递新的 HSV 值给 debounced 函数
+        debouncedOnChange([h, s, v], alpha);
+    }, [alpha, debouncedOnChange]);
 
     const handleAlphaChange = useCallback((a: number) => {
         setAlpha(a);
-        const [r, g, b] = currentRgb;
-        debouncedOnChange(`rgba(${r}, ${g}, ${b}, ${a})`);
-    }, [currentRgb, debouncedOnChange]);
+        // 传递当前 HSV 值和新的 alpha 值给 debounced 函数
+        debouncedOnChange(hsv, a);
+    }, [hsv, debouncedOnChange]);
 
     return (
         <div
@@ -118,6 +133,7 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
             />
 
             <MemoizedColorPresets
+                hsv={hsv}
                 onChange={handleColorChange}
             />
         </div>

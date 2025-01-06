@@ -18,8 +18,10 @@ import './f-over-grid-image';
 import './f-worksheet';
 import './f-enum';
 import './f-event';
+import './f-univer';
 
 export type * from './f-enum';
 export type * from './f-event';
 export type * from './f-over-grid-image';
+export type * from './f-univer';
 export type * from './f-worksheet';

@@ -23,7 +23,7 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { BooleanNumber, BuildTextUtils, createDocumentModelWithStyle, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
@@ -36,13 +36,27 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
+/**
+ * Calculate the bounding box after rotation
+ * @param width  Width
+ * @param height Height
+ * @param angleDegrees Rotation angle in degrees
+ */
 function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
-    const angle = angleDegrees * Math.PI / 180; // 将角度转换为弧度
+    const angle = angleDegrees * Math.PI / 180; // Convert angle to radians
     const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
     const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
     return { rotatedWidth, rotatedHeight };
 }
 
+/**
+ * Get the size of the drawing within the cell
+ * @param accessor
+ * @param location Cell location
+ * @param originImageWidth Original image width
+ * @param originImageHeight Original image height
+ * @param angle Rotation angle
+ */
 export function getDrawingSizeByCell(
     accessor: IAccessor,
     location: ISheetLocationBase,
@@ -477,7 +491,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this.disposeWithMe(this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
             const { unitId, subUnitId, drawingId } = params[0].parent;
-            this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
+            this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
         }));
 
         this.disposeWithMe(this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {

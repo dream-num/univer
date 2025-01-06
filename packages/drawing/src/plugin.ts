@@ -17,7 +17,8 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
 
-import { IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';
 import { defaultPluginConfig, DRAWING_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingManagerService } from './services/drawing-manager-impl.service';
 import { IDrawingManagerService } from './services/drawing-manager.service';
@@ -32,7 +33,8 @@ export class UniverDrawingPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverDrawingConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -43,6 +45,8 @@ export class UniverDrawingPlugin extends Plugin {
             this._config
         );
         this._configService.setConfig(DRAWING_PLUGIN_CONFIG_KEY, rest);
+
+        this._initCommands();
     }
 
     override onStarting(): void {
@@ -57,5 +61,11 @@ export class UniverDrawingPlugin extends Plugin {
 
         const dependency = mergeOverrideWithDependencies(dependencies, this._config?.override);
         dependency.forEach((d) => this._injector.add(d));
+    }
+
+    private _initCommands() {
+        [
+            SetDrawingSelectedOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

@@ -17,24 +17,19 @@
 import type { IAccessor, IDrawingSearch, IOperation } from '@univerjs/core';
 import {
     CommandType,
-    ICommandService,
 } from '@univerjs/core';
-import { SetDrawingSelectedOperation } from '@univerjs/drawing';
-import { SidebarSheetDrawingOperation } from './open-drawing-panel.operation';
+import { IDrawingManagerService } from '../../services/drawing-manager.service';
 
-export const EditSheetDrawingOperation: IOperation<IDrawingSearch> = {
-    id: 'sheet.operation.edit-sheet-image',
+export const SetDrawingSelectedOperation: IOperation<IDrawingSearch[]> = {
+    id: 'drawing.operation.set-drawing-selected',
     type: CommandType.OPERATION,
-    handler: (accessor: IAccessor, params?: IDrawingSearch) => {
-        // const drawingManagerService = accessor.get(IDrawingManagerService);
-        const commandService = accessor.get(ICommandService);
+    handler: (accessor: IAccessor, params?: IDrawingSearch[]) => {
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
         if (params == null) {
             return false;
         }
-
-        commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [params]);
-        commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' });
+        drawingManagerService.focusDrawing(params);
         return true;
     },
 };

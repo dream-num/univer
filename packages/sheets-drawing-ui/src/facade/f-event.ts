@@ -30,6 +30,8 @@ interface IFDrawingEventNameMixin {
      *    const { workbook, insertImageParams } = param;
      *    // do something
      *    console.log(workbook, insertImageParams);
+     *    // Cancel the insertion operation
+     *    param.cancel = true;
      * })
      * ```
      */
@@ -58,6 +60,8 @@ interface IFDrawingEventNameMixin {
      *  const { workbook, images } = param;
      * // do something
      * console.log(workbook, images);
+     * // Cancel the removal operation
+     * param.cancel = true;
      * })
      * ```
      */
@@ -83,9 +87,11 @@ interface IFDrawingEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageChange, (param) => {
-     * const { workbook, images } = param;
-     * // do something
-     * console.log(workbook, images);
+     *   const { workbook, images } = param;
+     *   // do something
+     *   console.log(workbook, images);
+     *   // Cancel the image change
+     *   param.cancel = true;
      * })
      * ```
      */
@@ -111,9 +117,11 @@ interface IFDrawingEventNameMixin {
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeOverGridImageSelect, (param) => {
-     * const { workbook, selectedImages } = param;
-     * // do something
-     * console.log(workbook, selectedImages);
+     *   const { workbook, selectedImages, oldSelectedImages } = param;
+     *   // do something
+     *   console.log(workbook, selectedImages, oldSelectedImages);
+     *   // cancel the event
+     *   param.cancel = true;
      * })
      * ```
      */

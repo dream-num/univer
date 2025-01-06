@@ -17,8 +17,8 @@
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
-import { connectInjector, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { connectInjector, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -39,7 +39,8 @@ export class DrawingPopupMenuController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService
+        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -136,12 +137,6 @@ export class DrawingPopupMenuController extends RxDisposable {
                             menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
                         },
                     }));
-
-                    this._drawingManagerService.focusDrawing([{
-                        unitId,
-                        subUnitId,
-                        drawingId,
-                    }]);
                 })
             )
         );
@@ -149,7 +144,7 @@ export class DrawingPopupMenuController extends RxDisposable {
             transformer.clearControl$.subscribe(() => {
                 singletonPopupDisposer?.dispose();
                 this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                this._drawingManagerService.focusDrawing(null);
+                this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
             })
         );
         this.disposeWithMe(

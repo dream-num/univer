@@ -32,7 +32,7 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
-import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
+import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 
 export interface IFUniverSheetsUIMixin {
     /**
@@ -124,6 +124,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         worksheet,
                         isZenEditor: false,
                         value: RichTextValue.create(univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!.getSnapshot()),
+                        isConfirm: keycode !== KeyCode.ESC,
                     };
                     this.fireEvent(this.Event.BeforeSheetEditEnd, eventParams);
                     if (eventParams.cancel) {
@@ -168,6 +169,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         workbook,
                         worksheet,
                         isZenEditor: false,
+                        isConfirm: keycode !== KeyCode.ESC,
                     };
                     this.fireEvent(this.Event.SheetEditEnded, eventParams);
                 }

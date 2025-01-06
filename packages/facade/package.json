@@ -75,6 +75,7 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {

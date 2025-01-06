@@ -37,6 +37,7 @@ export interface ISheetEditEndedEventParams extends IEventBase {
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
     isZenEditor: boolean;
+    isConfirm: boolean;
 }
 
 export interface ISheetEditChangingEventParams extends IEventBase {
@@ -67,6 +68,7 @@ export interface IBeforeSheetEditEndEventParams extends IEventBase {
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
     isZenEditor: boolean;
+    isConfirm: boolean;
 }
 
 interface IFSheetsUIEventNameMixin {
@@ -129,7 +131,7 @@ interface IFSheetsUIEventNameMixin {
      * @see {@link IBeforeSheetEditStartEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeSheetEditStart, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
      *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
@@ -140,7 +142,7 @@ interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.SheetEditStarted, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
      *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```
@@ -151,7 +153,7 @@ interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetEditChangingEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.SheetEditChanging, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
      *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
      * });
      * ```
@@ -162,7 +164,7 @@ interface IFSheetsUIEventNameMixin {
      * @see {@link IBeforeSheetEditEndEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeSheetEditEnd, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
      *      const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
      * });
      * ```
@@ -173,7 +175,7 @@ interface IFSheetsUIEventNameMixin {
      * @see {@link ISheetEditEndedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.SheetEditEnded, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
      *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
      * });
      * ```

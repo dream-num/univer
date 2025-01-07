@@ -20,3 +20,10 @@ export class CustomCommandExecutionError extends Error {
         this.name = 'CustomCommandExecutionError';
     }
 }
+
+export class CanceledError extends Error {
+    constructor() {
+        super('Canceled by facade');
+        this.name = 'CanceledError';
+    }
+}

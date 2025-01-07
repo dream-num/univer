@@ -16,16 +16,6 @@
 
 import './f-univer';
 import './f-workbook';
-import './f-worksheet';
-import './f-permission';
-import './f-sheet-hooks';
-import './f-event';
 
-export type * from './f-event';
-
-export type * from './f-permission';
-export { type IFComponentKey, transformComponentKey } from './f-range';
-export type * from './f-sheet-hooks';
 export type * from './f-univer';
 export type * from './f-workbook';
-export type * from './f-worksheet';

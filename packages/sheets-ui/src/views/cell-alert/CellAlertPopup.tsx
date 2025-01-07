@@ -22,6 +22,11 @@ import React from 'react';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
 import styles from './index.module.less';
 
+/**
+ *
+ * @param root0
+ * @param root0.popup
+ */
 export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const alert = popup.extraProps?.alert;
 

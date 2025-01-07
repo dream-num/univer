@@ -25,7 +25,6 @@ export interface IFTextFinder {
      * get all the matched range in the univer
      * @returns all the matched range
      * @throws if the find operation is not completed
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -41,7 +40,6 @@ export interface IFTextFinder {
      * @returns the next matched range
      * @throws if the find operation is not completed
      * @returns null if no more match
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -57,7 +55,6 @@ export interface IFTextFinder {
      * @returns the previous matched range
      * @throws if the find operation is not completed
      * @returns null if no more match
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -72,7 +69,6 @@ export interface IFTextFinder {
      * get the current matched range in the univer
      * @returns the current matched range
      * @throws if the find operation is not completed
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -88,7 +84,6 @@ export interface IFTextFinder {
      * set the match case option
      * @param {boolean} matchCase whether to match case
      * @returns text-finder instance
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -100,7 +95,6 @@ export interface IFTextFinder {
      * set the match entire cell option
      * @param {boolean} matchEntireCell whether to match entire cell
      * @returns text-finder instance
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -112,7 +106,6 @@ export interface IFTextFinder {
      * set the match formula text option
      * @param {boolean} matchFormulaText whether to match formula text
      * @returns text-finder instance
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -125,7 +118,6 @@ export interface IFTextFinder {
      * @param {string} replaceText the text to replace
      * @returns the number of replaced text
      * @throws if the find operation is not completed
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -139,7 +131,6 @@ export interface IFTextFinder {
      * @param {string} replaceText the text to replace
      * @returns whether the replace is successful
      * @throws if the find operation is not completed
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');
@@ -151,7 +142,6 @@ export interface IFTextFinder {
     /**
      * ensure the find operation is completed
      * @returns the find complete result
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('hello');

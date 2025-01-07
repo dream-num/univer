@@ -17,9 +17,10 @@
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
+import type { CustomData, IColumnData, IRange, IWorksheetData } from './typedef';
 import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
-import { type IColumnData, type IRange, type IWorksheetData, RANGE_TYPE } from './typedef';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -225,5 +226,16 @@ export class ColumnManager {
         const create = {};
         this._columnData[columnPos] = create;
         return create;
+    }
+
+    setCustomMetadata(index: number, custom: CustomData | undefined) {
+        const row = this.getColumn(index);
+        if (row) {
+            row.custom = custom;
+        }
+    }
+
+    getCustomMetadata(index: number): CustomData | undefined {
+        return this.getColumn(index)?.custom;
     }
 }

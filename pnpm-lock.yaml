@@ -1789,6 +1789,9 @@ importers:
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
+      '@univerjs/sheets-zen-editor':
+        specifier: workspace:*
+        version: link:../sheets-zen-editor
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -3008,6 +3011,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui

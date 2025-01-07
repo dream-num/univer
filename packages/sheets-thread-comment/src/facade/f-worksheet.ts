@@ -26,18 +26,34 @@ export interface IFWorksheetCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
+     * ```ts
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comments = worksheet.getComments();
+     * ```
      */
     getComments(): FThreadComment[];
 
     /**
-     * Subscribe to comment events.
-     * @param callback (cellPos: Nullable<IHoverCellPosition>) => void Callback function, param contains comment info and target cell.
-     * @example
+     * Clear all comments in the current sheet
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onCommented((params) => {...})
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * await worksheet.clearComments();
      * ```
      */
-    onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable;
+    clearComments(): Promise<boolean>;
+
+    /**
+     * get comment by comment id
+     * @param {string} commentId comment id
+     * ```ts
+     * const workbook = univerAPI.getActiveUniverSheet();
+     * const worksheet = workbook.getSheetById(sheetId);
+     * const comment = worksheet.getCommentById(commentId);
+     * ```
+     */
+    getCommentById(commentId: string): FThreadComment | undefined;
 }
 
 export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCommentMixin {
@@ -47,7 +63,18 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
         return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
     }
 
-    override onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
+    override clearComments(): Promise<boolean> {
+        const comments = this.getComments();
+        const promises = comments.map((comment) => comment.deleteAsync());
+
+        return Promise.all(promises).then(() => true);
+    }
+
+    /**
+     * Subscribe to comment events.
+     * @param callback Callback function, param contains comment info and target cell.
+     */
+    onCommented(callback: (params: IAddCommentCommandParams) => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
         return commandService.onCommandExecuted((command) => {
             if (command.id === AddCommentCommand.id) {
@@ -55,6 +82,14 @@ export class FWorksheetCommentMixin extends FWorksheet implements IFWorksheetCom
                 callback(params);
             }
         });
+    }
+
+    override getCommentById(commentId: string): FThreadComment | undefined {
+        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
+        const comment = sheetsTheadCommentModel.getComment(this._workbook.getUnitId(), this._worksheet.getSheetId(), commentId);
+        if (comment) {
+            return this._injector.createInstance(FThreadComment, comment);
+        }
     }
 }
 

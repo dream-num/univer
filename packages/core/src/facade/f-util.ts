@@ -14,6 +14,54 @@
  * limitations under the License.
  */
 
+import { numfmt, Rectangle, Tools } from '../shared';
+
 export class FUtil {
-    static Range = Range;
+    static _instance: FUtil | null;
+    static get() {
+        if (this._instance) {
+            return this._instance;
+        }
+
+        const instance = new FUtil();
+        this._instance = instance;
+        return instance;
+    }
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+
+    /**
+     * Rectangle utils, including range operations likes merge, subtract, split
+     */
+    get rectangle() {
+        return Rectangle;
+    }
+
+    /**
+     * Number format utils, including parse and strigify about date, price, etc
+     */
+    get numfmt() {
+        return numfmt;
+    }
+
+    /**
+     * common tools
+     */
+    get tools() {
+        return Tools;
+    }
 }

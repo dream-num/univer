@@ -111,7 +111,6 @@ export interface IFindReplaceService {
     /**
      * Register a find replace provider to the service. The provider is the actual bearer to
      * perform the find in different kinds of documents or different environments.
-     *
      * @param provider the find replace provider
      */
     registerFindReplaceProvider(provider: IFindReplaceProvider): IDisposable;
@@ -123,7 +122,6 @@ export interface IFindReplaceService {
 
     /**
      * Start a find & replace session.
-     *
      * @returns execution result
      */
     start(revealReplace?: boolean): boolean;
@@ -174,6 +172,10 @@ export interface IFindQuery extends Pick<
     | 'matchesTheWholeCell'
 > { }
 
+/**
+ *
+ * @param statusUpdate
+ */
 function shouldStateUpdateTriggerResearch(statusUpdate: Partial<IFindReplaceState>): boolean {
     if (typeof statusUpdate.findString !== 'undefined') return true;
     if (typeof statusUpdate.inputtingFindString !== 'undefined') return true;
@@ -500,6 +502,9 @@ export interface IFindReplaceState {
     findBy: FindBy;
 }
 
+/**
+ *
+ */
 export function createInitFindReplaceState(): IFindReplaceState {
     return {
         caseSensitive: false,

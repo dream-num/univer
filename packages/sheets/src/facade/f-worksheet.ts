@@ -47,6 +47,10 @@ export class FWorksheet extends FBaseInitialable {
         super(_injector);
     }
 
+    getSheet(): Worksheet {
+        return this._worksheet;
+    }
+
     /**
      * Returns the injector
      * @returns The injector
@@ -1720,6 +1724,83 @@ export class FWorksheet extends FBaseInitialable {
     getDefinedNames(): FDefinedName[] {
         const names = this._fWorkbook.getDefinedNames();
         return names.filter((name) => name.getLocalSheetId() === this.getSheetId());
+    }
+
+    /**
+     * Set custom metadata of worksheet
+     * @param {CustomData | undefined} custom custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * fWorkSheet.setCustomMetadata({ key: 'value' });
+     * ```
+     */
+    setCustomMetadata(custom: CustomData | undefined): FWorksheet {
+        this._worksheet.setCustomMetadata(custom);
+        return this;
+    }
+
+    /**
+     * Set custom metadata of row
+     * @param {number} index row index
+     * @param {CustomData | undefined} custom custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * fWorkSheet.setRowCustomMetadata(0, { key: 'value' });
+     * ```
+     */
+    setRowCustomMetadata(index: number, custom: CustomData | undefined): FWorksheet {
+        this._worksheet.getRowManager().setCustomMetadata(index, custom);
+        return this;
+    }
+
+    /**
+     * Set custom metadata of column
+     * @param {number} index column index
+     * @param {CustomData | undefined} custom custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * fWorkSheet.setColumnCustomMetadata(0, { key: 'value' });
+     * ```
+     */
+    setColumnCustomMetadata(index: number, custom: CustomData | undefined): FWorksheet {
+        this._worksheet.getColumnManager().setCustomMetadata(index, custom);
+        return this;
+    }
+
+    /**
+     * Get custom metadata of row
+     * @param {number} index row index
+     * @returns {CustomData | undefined} custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const custom = fWorkSheet.getRowCustomMetadata(0);
+     * ```
+     */
+    getRowCustomMetadata(index: number): CustomData | undefined {
+        return this._worksheet.getRowManager().getCustomMetadata(index);
+    }
+
+    /**
+     * Get custom metadata of column
+     * @param {number} index column index
+     * @returns {CustomData | undefined} custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorkSheet = fWorkbook.getActiveSheet();
+     * const custom = fWorkSheet.getColumnCustomMetadata(0);
+     * ```
+     */
+    getColumnCustomMetadata(index: number): CustomData | undefined {
+        return this._worksheet.getColumnManager().getCustomMetadata(index);
     }
 
     /**

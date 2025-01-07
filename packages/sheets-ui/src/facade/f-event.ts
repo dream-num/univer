@@ -14,9 +14,124 @@
  * limitations under the License.
  */
 
-import type { IEventBase } from '@univerjs/core';
+import type { DeviceInputEventType } from '@univerjs/engine-render';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-import { FEventName } from '@univerjs/core';
+import type { KeyCode } from '@univerjs/ui';
+import { FEventName, type IEventBase, type RichTextValue } from '@univerjs/core';
+
+/**
+ * Event interface triggered when cell editing starts
+ * @interface ISheetEditStartedEventParams
+ * @augments {IEventBase}
+ */
+export interface ISheetEditStartedEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The worksheet being edited */
+    worksheet: FWorksheet;
+    /** Row index of the editing cell */
+    row: number;
+    /** Column index of the editing cell */
+    column: number;
+    /** Type of input device event that triggered the edit */
+    eventType: DeviceInputEventType;
+    /** Optional keycode that triggered the edit */
+    keycode?: KeyCode;
+    /** Whether the edit is happening in zen editor mode */
+    isZenEditor: boolean;
+}
+
+/**
+ * Event interface triggered when cell editing ends
+ * @interface ISheetEditEndedEventParams
+ * @augments {IEventBase}
+ */
+export interface ISheetEditEndedEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The worksheet being edited */
+    worksheet: FWorksheet;
+    /** Row index of the edited cell */
+    row: number;
+    /** Column index of the edited cell */
+    column: number;
+    /** Type of input device event that triggered the edit end */
+    eventType: DeviceInputEventType;
+    /** Optional keycode that triggered the edit end */
+    keycode?: KeyCode;
+    /** Whether the edit happened in zen editor mode */
+    isZenEditor: boolean;
+    /** Whether the edit was confirmed or cancelled */
+    isConfirm: boolean;
+}
+
+/**
+ * Event interface triggered while cell content is being changed
+ * @interface ISheetEditChangingEventParams
+ * @augments {IEventBase}
+ */
+export interface ISheetEditChangingEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The worksheet being edited */
+    worksheet: FWorksheet;
+    /** Row index of the editing cell */
+    row: number;
+    /** Column index of the editing cell */
+    column: number;
+    /** Current value being edited */
+    value: RichTextValue;
+    /** Whether the edit is happening in zen editor mode */
+    isZenEditor: boolean;
+}
+
+/**
+ * Event interface triggered before cell editing starts
+ * @interface IBeforeSheetEditStartEventParams
+ * @augments {IEventBase}
+ */
+export interface IBeforeSheetEditStartEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The worksheet to be edited */
+    worksheet: FWorksheet;
+    /** Row index of the cell to be edited */
+    row: number;
+    /** Column index of the cell to be edited */
+    column: number;
+    /** Type of input device event triggering the edit */
+    eventType: DeviceInputEventType;
+    /** Optional keycode triggering the edit */
+    keycode?: KeyCode;
+    /** Whether the edit will happen in zen editor mode */
+    isZenEditor: boolean;
+}
+
+/**
+ * Event interface triggered before cell editing ends
+ * @interface IBeforeSheetEditEndEventParams
+ * @augments {IEventBase}
+ */
+export interface IBeforeSheetEditEndEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The worksheet being edited */
+    worksheet: FWorksheet;
+    /** Row index of the editing cell */
+    row: number;
+    /** Column index of the editing cell */
+    column: number;
+    /** Current value being edited */
+    value: RichTextValue;
+    /** Type of input device event triggering the edit end */
+    eventType: DeviceInputEventType;
+    /** Optional keycode triggering the edit end */
+    keycode?: KeyCode;
+    /** Whether the edit is happening in zen editor mode */
+    isZenEditor: boolean;
+    /** Whether the edit will be confirmed or cancelled */
+    isConfirm: boolean;
+}
 
 interface IFSheetsUIEventNameMixin {
     /**
@@ -72,6 +187,62 @@ interface IFSheetsUIEventNameMixin {
      * ```
      */
     readonly ClipboardPasted: 'ClipboardPasted';
+
+    /**
+     * Event fired before a cell is edited
+     * @see {@link IBeforeSheetEditStartEventParams}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditStart, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     * });
+     * ```
+     */
+    readonly BeforeSheetEditStart: 'BeforeSheetEditStart';
+    /**
+     * Event fired after a cell is edited
+     * @see {@link ISheetEditEndedEventParams}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetEditStarted, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     * });
+     * ```
+     */
+    readonly SheetEditStarted: 'SheetEditStarted';
+    /**
+     * Event fired when a cell is being edited
+     * @see {@link ISheetEditChangingEventParams}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetEditChanging, (params) => {
+     *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     * });
+     * ```
+     */
+    readonly SheetEditChanging: 'SheetEditChanging';
+    /**
+     * Event fired before a cell edit ends
+     * @see {@link IBeforeSheetEditEndEventParams}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetEditEnd, (params) => {
+     *      const { worksheet, workbook, row, column, value, eventType, keycode, isZenEditor } = params;
+     * });
+     * ```
+     */
+    readonly BeforeSheetEditEnd: 'BeforeSheetEditEnd';
+    /**
+     * Event fired after a cell edit ends
+     * @see {@link ISheetEditEndedEventParams}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetEditEnded, (params) => {
+     *      const { worksheet, workbook, row, column, eventType, keycode, isZenEditor } = params;
+     * });
+     * ```
+     */
+    readonly SheetEditEnded: 'SheetEditEnded';
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -89,6 +260,26 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
 
     override get ClipboardPasted(): 'ClipboardPasted' {
         return 'ClipboardPasted' as const;
+    }
+
+    override get BeforeSheetEditStart(): 'BeforeSheetEditStart' {
+        return 'BeforeSheetEditStart';
+    }
+
+    override get SheetEditStarted(): 'SheetEditStarted' {
+        return 'SheetEditStarted';
+    }
+
+    override get SheetEditChanging(): 'SheetEditChanging' {
+        return 'SheetEditChanging';
+    }
+
+    override get BeforeSheetEditEnd(): 'BeforeSheetEditEnd' {
+        return 'BeforeSheetEditEnd';
+    }
+
+    override get SheetEditEnded(): 'SheetEditEnded' {
+        return 'SheetEditEnded';
     }
 }
 
@@ -147,6 +338,12 @@ interface IFSheetsUIEventParamConfig {
     ClipboardChanged: IClipboardChangedParam;
     BeforeClipboardPaste: IBeforeClipboardPasteParam;
     ClipboardPasted: IClipboardPastedParam;
+
+    BeforeSheetEditStart: IBeforeSheetEditStartEventParams;
+    SheetEditStarted: ISheetEditStartedEventParams;
+    SheetEditChanging: ISheetEditChangingEventParams;
+    BeforeSheetEditEnd: IBeforeSheetEditEndEventParams;
+    SheetEditEnded: ISheetEditEndedEventParams;
 }
 
 FEventName.extend(FSheetsUIEventName);
@@ -155,4 +352,3 @@ declare module '@univerjs/core' {
     interface FEventName extends IFSheetsUIEventNameMixin { }
     interface IEventParamConfig extends IFSheetsUIEventParamConfig { }
 }
-

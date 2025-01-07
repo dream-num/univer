@@ -14,51 +14,112 @@
  * limitations under the License.
  */
 
-import type { Color } from '@rc-component/color-picker';
-import RcColorPicker, { ColorBlock } from '@rc-component/color-picker';
-import React from 'react';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AlphaSlider } from './AlphaSlider';
+import { hsvToRgb, parseRgba, rgbToHsv } from './color-conversion';
+import { ColorInput } from './ColorInput';
+import { ColorPresets } from './ColorPresets';
+import { ColorSpectrum } from './ColorSpectrum';
+import { HueSlider } from './HueSlider';
 
-import styles from './index.module.less';
-import { colorPresets } from './presets';
+const MemoizedColorSpectrum = React.memo(ColorSpectrum);
+const MemoizedHueSlider = React.memo(HueSlider);
+const MemoizedAlphaSlider = React.memo(AlphaSlider);
+const MemoizedColorInput = React.memo(ColorInput);
+const MemoizedColorPresets = React.memo(ColorPresets);
 
 export interface IColorPickerProps {
-    color?: string;
-
-    onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-
+    value?: string;
+    showAlpha?: boolean;
     onChange?: (value: string) => void;
 }
 
-export function ColorPicker(props: IColorPickerProps) {
-    const { onChange } = props;
+function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
+    let timer: number;
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+        clearTimeout(timer);
+        timer = window.setTimeout(() => fn.apply(this, args), delay);
+    };
+}
 
-    function handleStopPropagation(e: React.MouseEvent) {
-        e.stopPropagation();
-    }
+export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
+    if (!canUseDom) return null;
 
-    function handleChange(color: Color | string) {
-        const value = (typeof color === 'string' ? color : color.toHexString()) ?? '';
+    const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
+    const [alpha, setAlpha] = useState(1);
 
-        onChange?.(value);
-    }
+    const getRgb = useCallback((h: number, s: number, v: number) => {
+        return hsvToRgb(h, s, v);
+    }, []);
+
+    const debouncedOnChange = useCallback(
+        debounce((hsv: [number, number, number], alpha: number) => {
+            const [r, g, b] = getRgb(hsv[0], hsv[1], hsv[2]);
+            onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+        }, 16),
+        [onChange, getRgb]
+    );
+
+    useEffect(() => {
+        try {
+            const [r, g, b, a] = parseRgba(value);
+            const [h, s, v] = rgbToHsv(r, g, b);
+            setHsv([h, s, v]);
+            setAlpha(a);
+        } catch (error) {
+            console.error('Invalid RGBA value:', error);
+        }
+    }, [value]);
+
+    const handleColorChange = useCallback((h: number, s: number, v: number) => {
+        setHsv([h, s, v]);
+        debouncedOnChange([h, s, v], alpha);
+    }, [alpha, debouncedOnChange]);
+
+    const handleAlphaChange = useCallback((a: number) => {
+        setAlpha(a);
+        debouncedOnChange(hsv, a);
+    }, [hsv, debouncedOnChange]);
 
     return (
-        <section>
-            <div>
-                <div className={styles.colorPickerColorBlocks}>
-                    {colorPresets.map((color) => (
-                        <ColorBlock
-                            key={color}
-                            prefixCls={styles.colorPicker}
-                            color={color}
-                            onClick={() => handleChange(color)}
-                        />
-                    ))}
-                </div>
-            </div>
-            <section onClick={handleStopPropagation}>
-                <RcColorPicker prefixCls={styles.colorPicker} disabledAlpha onChangeComplete={handleChange} />
-            </section>
-        </section>
+        <div
+            className={`
+              univer-w-[292px] univer-cursor-default univer-space-y-4 univer-rounded-lg univer-bg-white
+              dark:univer-bg-gray-700
+            `}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <MemoizedColorSpectrum
+                hsv={hsv}
+                onChange={handleColorChange}
+            />
+
+            <MemoizedHueSlider
+                hsv={hsv}
+                onChange={useCallback((h) => handleColorChange(h, hsv[1], hsv[2]), [hsv, handleColorChange])}
+            />
+
+            {showAlpha && (
+                <MemoizedAlphaSlider
+                    hsv={hsv}
+                    alpha={alpha}
+                    onChange={handleAlphaChange}
+                />
+            )}
+
+            <MemoizedColorInput
+                hsv={hsv}
+                alpha={alpha}
+                showAlpha={showAlpha}
+                onChangeColor={handleColorChange}
+                onChangeAlpha={handleAlphaChange}
+            />
+
+            <MemoizedColorPresets
+                hsv={hsv}
+                onChange={handleColorChange}
+            />
+        </div>
     );
 }

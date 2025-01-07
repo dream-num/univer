@@ -32,6 +32,10 @@ interface IProps {
     unitId: string;
 }
 
+/**
+ *
+ * @param props
+ */
 export default function ArrangePanel(props: IProps) {
     const { pageId, unitId } = props;
 
@@ -52,6 +56,10 @@ export default function ArrangePanel(props: IProps) {
 
     const [color, setColor] = React.useState<string>(object.fill?.toString() ?? '');
 
+    /**
+     *
+     * @param color
+     */
     function handleChangeColor(color: string) {
         object?.setProps({
             fill: color,
@@ -91,7 +99,7 @@ export default function ArrangePanel(props: IProps) {
                             overlay={(
                                 <section className={styles.slidePanelColorPicker}>
                                     <ColorPicker
-                                        color="#fff"
+                                        value="#fff"
                                         onChange={handleChangeColor}
                                     />
                                 </section>

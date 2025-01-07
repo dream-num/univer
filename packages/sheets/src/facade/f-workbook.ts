@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
 import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
-
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
@@ -44,6 +43,10 @@ export class FWorkbook extends FBaseInitialable {
         super(_injector);
 
         this.id = this._workbook.getUnitId();
+    }
+
+    getWorkbook(): Workbook {
+        return this._workbook;
     }
 
     /**
@@ -820,5 +823,32 @@ export class FWorkbook extends FBaseInitialable {
             unitId: this.getId(),
             themeName,
         });
+    }
+
+    /**
+     * Set custom metadata of workbook
+     * @param {CustomData | undefined} custom custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * fWorkbook.setCustomMetadata({ key: 'value' });
+     * ```
+     */
+    setCustomMetadata(custom: CustomData | undefined): FWorkbook {
+        this._workbook.setCustomMetadata(custom);
+        return this;
+    }
+
+    /**
+     * Get custom metadata of workbook
+     * @returns {CustomData | undefined} custom metadata
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const custom = fWorkbook.getCustomMetadata();
+     * ```
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._workbook.getCustomMetadata();
     }
 }

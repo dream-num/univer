@@ -18,7 +18,7 @@ import type { IInterceptor } from '../common/interceptor';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
+import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
@@ -1220,6 +1220,22 @@ export class Worksheet {
             displayRawFormula: true,
             ignoreTextRotation: true,
         });
+    }
+
+    /**
+     * Get custom metadata of worksheet
+     * @returns {CustomData | undefined} custom metadata
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._snapshot.custom;
+    }
+
+    /**
+     * Set custom metadata of workbook
+     * @param {CustomData | undefined} custom custom metadata
+     */
+    setCustomMetadata(custom: CustomData | undefined) {
+        this._snapshot.custom = custom;
     }
 }
 

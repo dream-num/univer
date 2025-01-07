@@ -18,6 +18,7 @@ import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
 import '@univerjs/docs-ui/facade';
 import '@univerjs/sheets-ui/facade';
+import '@univerjs/sheets-zen-editor/facade';
 import '@univerjs/sheets-data-validation/facade';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets-filter/facade';

@@ -23,7 +23,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
@@ -47,6 +48,11 @@
                 "require": "./lib/cjs/locale/*.js",
                 "types": "./lib/types/locale/*.d.ts"
             },
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
             "./lib/*": "./lib/*"
         }
     },
@@ -69,9 +75,10 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.10",
+        "@univerjs/icons": "^0.2.11",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

@@ -15,11 +15,16 @@
  */
 
 import type { IDisposable } from '../common/di';
+import type { DocumentDataModel } from '../docs';
 import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IEventParamConfig } from './f-event';
+import type { IDocumentData, IParagraphStyle, ITextDecoration, ITextStyle } from '../types/interfaces';
+import type { ICommandEvent, IEventParamConfig } from './f-event';
 import { Inject, Injector } from '../common/di';
+import { CanceledError } from '../common/error';
 import { Registry } from '../common/registry';
+import { UniverInstanceType } from '../common/unit';
+import { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from '../docs/data-model/rich-text-builder';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -28,10 +33,12 @@ import { ColorBuilder, toDisposable } from '../shared';
 import { Univer } from '../univer';
 import { FBaseInitialable } from './f-base';
 import { FBlob } from './f-blob';
+import { FDoc } from './f-doc';
 import { FEnum } from './f-enum';
 import { FEventName } from './f-event';
 import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
+import { FUtil } from './f-util';
 
 export class FUniver extends FBaseInitialable {
     /**
@@ -45,9 +52,9 @@ export class FUniver extends FBaseInitialable {
         return injector.createInstance(FUniver);
     }
 
-    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+    protected _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
 
-    private _ensureEventRegistry(event: string) {
+    protected _ensureEventRegistry(event: string) {
         if (!this._eventRegistry.has(event)) {
             this._eventRegistry.set(event, new Registry());
         }
@@ -69,9 +76,109 @@ export class FUniver extends FBaseInitialable {
             })
         );
 
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((commandInfo) => {
+                if (
+                    !this._eventRegistry.get(this.Event.BeforeRedo) &&
+                    !this._eventRegistry.get(this.Event.BeforeUndo) &&
+                    !this._eventRegistry.get(this.Event.BeforeCommandExecute)
+                ) {
+                    return;
+                }
+                const { id, type: propType, params } = commandInfo;
+                const type = propType!;
+                const eventParams: ICommandEvent = { id, type, params };
+                switch (commandInfo.id) {
+                    case RedoCommand.id:
+                        this.fireEvent(this.Event.BeforeRedo, eventParams);
+                        break;
+                    case UndoCommand.id:
+                        this.fireEvent(this.Event.BeforeUndo, eventParams);
+                        break;
+                    default:
+                        this.fireEvent(this.Event.BeforeCommandExecute, eventParams);
+                        break;
+                }
+
+                if (eventParams.cancel) {
+                    throw new CanceledError();
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (
+                    !this._eventRegistry.get(this.Event.Redo) &&
+                    !this._eventRegistry.get(this.Event.Undo) &&
+                    !this._eventRegistry.get(this.Event.CommandExecuted)
+                ) {
+                    return;
+                }
+                const { id, type: propType, params } = commandInfo;
+                const type = propType!;
+                const eventParams: ICommandEvent = { id, type, params };
+                switch (commandInfo.id) {
+                    case RedoCommand.id:
+                        this.fireEvent(this.Event.Redo, eventParams);
+                        break;
+                    case UndoCommand.id:
+                        this.fireEvent(this.Event.Undo, eventParams);
+                        break;
+                    default:
+                        this.fireEvent(this.Event.CommandExecuted, eventParams);
+                        break;
+                }
+            })
+        );
+
+        this._initUnitEvent(this._injector);
         this._injector.onDispose(() => {
             this.dispose();
         });
+    }
+
+    private _initUnitEvent(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        this.disposeWithMe(
+            univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.DocDisposed)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    this.fireEvent(this.Event.DocDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IDocumentData,
+
+                        }
+                    );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.DocCreated)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_DOC) {
+                    const doc = unit as DocumentDataModel;
+                    const docUnit = injector.createInstance(FDoc, doc);
+                    this.fireEvent(this.Event.DocCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            doc: docUnit,
+                            unit: docUnit,
+                        }
+                    );
+                }
+            })
+        );
+    }
+
+    protected _eventListend(key: string) {
+        return this._eventRegistry.get(key);
     }
 
     /**
@@ -171,28 +278,16 @@ export class FUniver extends FBaseInitialable {
         return this._injector.createInstance(FHooks);
     }
 
-    /**
-     * Create a new blob.
-     * @returns {FBlob} The new blob instance
-     * @example
-     * ```ts
-     * const blob = univerAPI.newBlob();
-     * ```
-     */
-    newBlob(): FBlob {
-        return this._injector.createInstance(FBlob);
-    }
-
-    newColor(): ColorBuilder {
-        return new ColorBuilder();
-    }
-
     get Enum() {
         return FEnum.get();
     }
 
     get Event() {
         return FEventName.get();
+    }
+
+    get Util() {
+        return FUtil.get();
     }
 
     /**
@@ -232,6 +327,7 @@ export class FUniver extends FBaseInitialable {
 
     /**
      * Get the callback map corresponding to the event
+     * @param event
      * @returns {number} The number of callbacks
      */
     protected hasEventCallback(event: keyof IEventParamConfig): boolean {
@@ -241,5 +337,111 @@ export class FUniver extends FBaseInitialable {
 
     getUserManager(): FUserManager {
         return this._injector.createInstance(FUserManager);
+    }
+
+    /**
+     * Create a new blob.
+     * @returns {FBlob} The new blob instance
+     * @example
+     * ```ts
+     * const blob = univerApi.newBlob();
+     * ```
+     */
+    newBlob(): FBlob {
+        return this._injector.createInstance(FBlob);
+    }
+
+    /**
+     * Create a new color.
+     * @returns {ColorBuilder} The new color instance
+     * @example
+     * ```ts
+     * const color = univerApi.newColor();
+     * ```
+     */
+    newColor(): ColorBuilder {
+        return new ColorBuilder();
+    }
+
+    /**
+     * Create a new rich text.
+     * @param data
+     * @returns {RichTextBuilder} The new rich text instance
+     * @example
+     * ```ts
+     * const richText = univerApi.newRichText();
+     * ```
+     */
+    newRichText(data?: IDocumentData): RichTextBuilder {
+        return RichTextBuilder.create(data);
+    }
+
+    /**
+     * Create a new rich text value.
+     * @param data - The rich text data
+     * @returns {RichTextValue} The new rich text value instance
+     * @example
+     * ```ts
+     * const richTextValue = univerApi.newRichTextValue();
+     * ```
+     */
+    newRichTextValue(data: IDocumentData): RichTextValue {
+        return RichTextValue.create(data);
+    }
+
+    /**
+     * Create a new paragraph style.
+     * @param style - The paragraph style
+     * @returns {ParagraphStyleBuilder} The new paragraph style instance
+     * @example
+     * ```ts
+     * const paragraphStyle = univerApi.newParagraphStyle();
+     * ```
+     */
+    newParagraphStyle(style?: IParagraphStyle): ParagraphStyleBuilder {
+        return ParagraphStyleBuilder.create(style);
+    }
+
+    /**
+     * Create a new paragraph style value.
+     * @param style - The paragraph style
+     * @returns {ParagraphStyleValue} The new paragraph style value instance
+     * @example
+     * ```ts
+     * const paragraphStyleValue = univerApi.newParagraphStyleValue();
+     * ```
+     */
+    newParagraphStyleValue(style?: IParagraphStyle): ParagraphStyleValue {
+        return ParagraphStyleValue.create(style);
+    }
+
+    /**
+     * Create a new text style.
+     * @param style - The text style
+     * @returns {TextStyleBuilder} The new text style instance
+     * @example
+     * ```ts
+     * const textStyle = univerApi.newTextStyle();
+     * ```
+     */
+    newTextStyle(style?: ITextStyle): TextStyleBuilder {
+        return TextStyleBuilder.create(style);
+    }
+
+    /**
+     * Create a new text style value.
+     * @param style - The text style
+     * @returns {TextStyleValue} The new text style value instance
+     * @example
+     * ```ts
+     * const textStyleValue = univerApi.newTextStyleValue();
+     * ```
+     */
+    newTextStyleValue(style?: ITextStyle): TextStyleValue {
+        return TextStyleValue.create(style);
+    }
+
+    newTextDecoration(decoration?: ITextDecoration): TextDecorationBuilder {
+        return new TextDecorationBuilder(decoration);
     }
 }

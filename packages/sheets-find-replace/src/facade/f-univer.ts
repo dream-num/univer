@@ -21,11 +21,8 @@ import { FTextFinder } from './f-text-finder';
 export interface IFUniverFindReplaceMixin {
     /**
      * Create a text-finder for the current univer.
-     *
      * @param {string} text - The text to find.
-     *
      * @returns {Promise<FTextFinder | null>} A promise that resolves to the text-finder instance.
-     *
      * @example
      * ```typescript
      * const textFinder = await univerAPI.createTextFinderAsync('Hello');

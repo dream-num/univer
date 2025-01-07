@@ -38,7 +38,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 }
 
 // TODO: get from page width.
-const DEFAULT_TABLE_WIDTH = 600;
+const DEFAULT_TABLE_WIDTH = 660;
 
 interface ITableCache {
     table: ITable;

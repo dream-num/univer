@@ -83,11 +83,11 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
             className={clsx(
                 `
                   univer-fixed univer-z-[1071] univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
-                  univer-shadow-md univer-opacity-0
+                  univer-opacity-0 univer-shadow-md
                   dark:univer-bg-gray-700
                 `,
                 {
-                    'univer-opacity-100 univer-slide-in-from-top-2 univer-animate-in': mounted,
+                    'univer-opacity-100 univer-animate-in univer-slide-in-from-top-2': mounted,
                 },
                 className
             )}
@@ -96,6 +96,7 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 left: position.left,
             }}
             onClick={hideAfterClick}
+            onPointerUpCapture={(e) => e.stopPropagation()}
         >
             {children}
         </div>,

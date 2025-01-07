@@ -15,31 +15,73 @@
  */
 
 import type { UniverInstanceType } from '../common/unit';
+import type { CommandType } from '../services/command/command.service';
 import type { LifecycleStages } from '../services/lifecycle/lifecycle';
-import type { IWorkbookData } from '../sheets/typedef';
 import type { IDocumentData } from '../types/interfaces';
+import type { FDoc } from './f-doc';
 
-export interface ISheetCreateParam {
-    unitId: string;
-    type: UniverInstanceType.UNIVER_SHEET;
-    data: IWorkbookData;
-}
-
-export interface IDocumentCreateParam {
-    unitId: string;
-    type: UniverInstanceType.UNIVER_DOC;
-    data: IDocumentData;
-}
-
-export interface ILifeCycleChangedParam {
-    stage: LifecycleStages;
-}
+/**
+ * Base interface for all event parameters
+ * @interface IEventBase
+ */
 export interface IEventBase {
+    /** Flag to cancel the event if supported */
     cancel?: boolean;
 }
 
-export type IUnitCreateEvent = IEventBase & (ISheetCreateParam | IDocumentCreateParam);
-export type ILifeCycleChangedEvent = IEventBase & ILifeCycleChangedParam;
+/**
+ * Event interface triggered when a document is created
+ * @interface IDocCreatedParam
+ * @augments {IEventBase}
+ */
+export interface IDocCreatedParam extends IEventBase {
+    /** Unique identifier of the document unit */
+    unitId: string;
+    /** Type identifier for document instances */
+    type: UniverInstanceType.UNIVER_DOC;
+    /** The created document instance */
+    doc: FDoc;
+    /** Reference to the document unit */
+    unit: FDoc;
+}
+
+/**
+ * Event interface triggered when a document is disposed
+ * @interface IDocDisposedEvent
+ * @augments {IEventBase}
+ */
+export interface IDocDisposedEvent extends IEventBase {
+    /** Unique identifier of the disposed document unit */
+    unitId: string;
+    /** Type identifier for document instances */
+    unitType: UniverInstanceType.UNIVER_DOC;
+    /** Final state snapshot of the disposed document */
+    snapshot: IDocumentData;
+}
+
+/**
+ * Event interface for lifecycle stage changes
+ * @interface ILifeCycleChangedEvent
+ * @augments {IEventBase}
+ */
+export interface ILifeCycleChangedEvent extends IEventBase {
+    /** Current stage of the lifecycle */
+    stage: LifecycleStages;
+}
+
+/**
+ * Event interface for command execution
+ * @interface ICommandEvent
+ * @augments {IEventBase}
+ */
+export interface ICommandEvent extends IEventBase {
+    /** Parameters passed to the command */
+    params: any;
+    /** Unique identifier of the command */
+    id: string;
+    /** Type of the command */
+    type: CommandType;
+}
 
 export class FEventName {
     static _instance: FEventName | null;
@@ -76,16 +118,150 @@ export class FEventName {
         }
     }
 
-    get UnitCreated() {
-        return 'UnitCreated' as const;
+    /**
+     * Event fired when a document is created
+     * @see {@link IDocCreatedParam}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.DocCreated, (params) => {
+     *     const { unitId, type, doc, unit } = params;
+     *     console.log('doc created', params);
+     * });
+     * ```
+     */
+    get DocCreated() {
+        return 'DocCreated' as const;
     }
 
+    /**
+     * Event fired when a document is disposed
+     * @see {@link IDocDisposedEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.DocDisposed, (params) => {
+     *     const { unitId, unitType, snapshot } = params;
+     *     console.log('doc disposed', params);
+     * });
+     * ```
+     */
+    get DocDisposed() {
+        return 'DocDisposed' as const;
+    }
+
+    /**
+     * Event fired when life cycle is changed
+     * @see {@link ILifeCycleChangedEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.LifeCycleChanged, (params) => {
+     *      const { stage } = params;
+     *     console.log('life cycle changed', params);
+     * });
+     * ```
+     */
     get LifeCycleChanged() {
         return 'LifeCycleChanged' as const;
+    }
+
+    /**
+     * Event fired when a redo command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.Redo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get Redo() {
+        return 'Redo' as const;
+    }
+
+    /**
+     * Event fired when an undo command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.Undo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get Undo() {
+        return 'Undo' as const;
+    }
+
+    /**
+     * Event fired before a redo command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeRedo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get BeforeRedo() {
+        return 'BeforeRedo' as const;
+    }
+
+    /**
+     * Event fired before an undo command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeUndo, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get BeforeUndo() {
+        return 'BeforeUndo' as const;
+    }
+
+    /**
+     * Event fired when a command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get CommandExecuted() {
+        return 'CommandExecuted' as const;
+    }
+
+    /**
+     * Event fired before a command is executed
+     * @see {@link ICommandEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.BeforeCommandExecute, (event) => {
+     *     const { params, id, type } = event;
+     *     console.log('command executed', event);
+     * });
+     * ```
+     */
+    get BeforeCommandExecute() {
+        return 'BeforeCommandExecute' as const;
     }
 }
 
 export interface IEventParamConfig {
-    // UnitCreated: IUnitCreateEvent;
     LifeCycleChanged: ILifeCycleChangedEvent;
+    DocDisposed: IDocDisposedEvent;
+    DocCreated: IDocCreatedParam;
+    Redo: ICommandEvent;
+    Undo: ICommandEvent;
+    BeforeRedo: ICommandEvent;
+    BeforeUndo: ICommandEvent;
+    CommandExecuted: ICommandEvent;
+    BeforeCommandExecute: ICommandEvent;
 }

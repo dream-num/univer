@@ -70,7 +70,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.10",
+        "@univerjs/icons": "^0.2.11",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",

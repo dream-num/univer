@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import type { IInsertSheetCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
-import { FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { FWorksheet } from './f-worksheet';
+import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
@@ -76,9 +77,105 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     newDefinedName(): FDefinedNameBuilder;
+
+    /**
+     * Get the target of the sheet.
+     * @param {string} unitId - The unitId of the sheet.
+     * @param {string} subUnitId - The subUnitId of the sheet.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @example
+     * ```ts
+     * univerAPI.getSheetTarget('unitId', 'subUnitId');
+     * ```
+     */
+    getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+
+    /**
+     * Get the target of the sheet.
+     * @param {ICommandInfo<object>} commandInfo - The commandInfo of the command.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} - The target of the sheet.
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.event.CommandExecuted, (commandInfo) => {
+     *      const target = univerAPI.getCommandSheetTarget(commandInfo);
+     *      if (!target) return;
+     *      const { workbook, worksheet } = target;
+     * });
+     * ```
+     */
+    getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
+    override getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+        const params = commandInfo.params as { unitId: string; subUnitId: string; sheetId: string };
+        if (!params) return;
+        const workbook = params.unitId ? this.getUniverSheet(params.unitId) : this.getActiveWorkbook?.();
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(params.subUnitId || params.sheetId) || workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        return { workbook, worksheet };
+    }
+
+    override getSheetTarget(unitId: string, subUnitId: string): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+        const workbook = this.getUniverSheet(unitId);
+        if (!workbook) {
+            return;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+
+        return { workbook, worksheet };
+    }
+
+    private _initWorkbookEvent(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        this.disposeWithMe(
+            univerInstanceService.unitDisposed$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.WorkbookDisposed)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    this.fireEvent(this.Event.WorkbookDisposed,
+                        {
+                            unitId: unit.getUnitId(),
+                            unitType: unit.type,
+                            snapshot: unit.getSnapshot() as IWorkbookData,
+
+                        }
+                    );
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            univerInstanceService.unitAdded$.subscribe((unit) => {
+                if (!this._eventRegistry.get(this.Event.WorkbookCreated)) return;
+
+                if (unit.type === UniverInstanceType.UNIVER_SHEET) {
+                    const workbook = unit as Workbook;
+                    const workbookUnit = injector.createInstance(FWorkbook, workbook);
+                    this.fireEvent(this.Event.WorkbookCreated,
+                        {
+                            unitId: unit.getUnitId(),
+                            type: unit.type,
+                            workbook: workbookUnit,
+                            unit: workbookUnit,
+                        }
+                    );
+                }
+            })
+        );
+    }
+
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(
@@ -102,7 +199,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         );
                         // cancel this command
                         if (eventParams.cancel) {
-                            throw new Error('Sheet create canceled by facade api.');
+                            throw new CanceledError();
                         }
                         break;
                     }
@@ -143,6 +240,8 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                 }
             })
         );
+
+        this._initWorkbookEvent(injector);
     }
 
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {

@@ -68,11 +68,10 @@
         "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0"
     },
     "dependencies": {
-        "@radix-ui/react-tooltip": "^1.1.6",
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.5",
         "@types/react-mentions": "^4.4.0",
-        "@univerjs/icons": "^0.2.10",
+        "@univerjs/icons": "^0.2.11",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",

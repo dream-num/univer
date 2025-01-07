@@ -47,6 +47,14 @@ import { isRichText } from '../editor/editing.render-controller';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
+/**
+ *
+ * @param pasteFrom
+ * @param pasteTo
+ * @param data
+ * @param payload
+ * @param accessor
+ */
 export function getDefaultOnPasteCellMutations(
     pasteFrom: ISheetDiscreteRangeLocation,
     pasteTo: ISheetDiscreteRangeLocation,
@@ -101,6 +109,18 @@ export function getDefaultOnPasteCellMutations(
     };
 }
 
+/**
+ *
+ * @param from
+ * @param from.unitId
+ * @param from.subUnitId
+ * @param from.range
+ * @param to
+ * @param to.unitId
+ * @param to.subUnitId
+ * @param to.range
+ * @param accessor
+ */
 export function getMoveRangeMutations(
     from: {
         unitId: string;
@@ -292,6 +312,13 @@ export function getMoveRangeMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param pasteFrom
+ * @param matrix
+ * @param accessor
+ */
 export function getSetCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
@@ -350,6 +377,13 @@ export function getSetCellValueMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param pasteFrom
+ * @param matrix
+ * @param accessor
+ */
 export function getSetCellCustomMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
@@ -397,6 +431,13 @@ export function getSetCellCustomMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ * @param withRichFormat
+ */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -480,6 +521,12 @@ export function getSetCellStyleMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -525,6 +572,12 @@ export function getClearCellStyleMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -566,6 +619,12 @@ export function getClearCellValueMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearAndSetMergeMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -662,6 +721,10 @@ export function getClearAndSetMergeMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param text
+ */
 export function generateBody(text: string): IDocumentBody {
     if (!text.includes('\r') && Tools.isLegalUrl(text)) {
         const id = generateRandomId();

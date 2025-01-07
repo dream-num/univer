@@ -8,6 +8,7 @@
         "streetsidesoftware.code-spell-checker",
         "tldraw-org.tldraw-vscode",
         "usernamehw.errorlens",
-        "vitest.explorer"
+        "vitest.explorer",
+        "davidanson.vscode-markdownlint"
     ]
 }

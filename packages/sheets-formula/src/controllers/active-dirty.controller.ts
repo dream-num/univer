@@ -29,6 +29,8 @@ import type {
     IRemoveSheetMutationParams,
     IReorderRangeMutationParams,
     ISetRangeValuesMutationParams,
+    ISetRowHiddenMutationParams,
+    ISetRowVisibleMutationParams,
 } from '@univerjs/sheets';
 import {
     Dimension,
@@ -50,6 +52,8 @@ import {
     RemoveSheetMutation,
     ReorderRangeMutation,
     SetRangeValuesMutation,
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
 
@@ -90,6 +94,8 @@ export class ActiveDirtyController extends Disposable {
         this._initialMove();
 
         this._initialRowAndColumn();
+
+        this._initialHideRow();
 
         this._initialSheet();
 
@@ -209,6 +215,37 @@ export class ActiveDirtyController extends Disposable {
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IInsertRowMutationParams;
                 return {
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+    }
+
+    private _initialHideRow() {
+        this._activeDirtyManagerService.register(SetRowHiddenMutation.id, {
+            commandId: SetRowHiddenMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetRowHiddenMutationParams;
+                return {
+                    dirtyRanges: this._getHideRowMutation(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+        this._activeDirtyManagerService.register(SetRowVisibleMutation.id, {
+            commandId: SetRowVisibleMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetRowVisibleMutationParams;
+                return {
+                    dirtyRanges: this._getHideRowMutation(params),
                     clearDependencyTreeCache: {
                         [params.unitId]: {
                             [params.subUnitId]: '1',
@@ -424,6 +461,20 @@ export class ActiveDirtyController extends Disposable {
         dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrixData));
 
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrixData));
+
+        return dirtyRanges;
+    }
+
+    private _getHideRowMutation(params: ISetRowHiddenMutationParams) {
+        const { subUnitId, unitId, ranges } = params;
+
+        const dirtyRanges: IUnitRange[] = [];
+
+        // covert ranges to dirtyRanges
+        ranges.forEach((range) => {
+            const matrix = this._rangeToMatrix(range).getMatrix();
+            dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, subUnitId, matrix));
+        });
 
         return dirtyRanges;
     }

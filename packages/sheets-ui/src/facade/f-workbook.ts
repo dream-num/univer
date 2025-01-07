@@ -15,14 +15,15 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import type { IMouseEvent, IPointerEvent, RenderManagerService } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
+import { CellFEventName, type ICellEventParam, type IFSheetsUIEventParamConfig, type IUIEventBase } from './f-event';
 
 export interface IFWorkbookSheetsUIMixin {
     /**
@@ -59,17 +60,21 @@ export interface IFWorkbookSheetsUIMixin {
      * Subscribe to pointer move events on workbook. Just like onCellHover, but with event information.
      * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
      */
-    onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable;
+    onCellPointerMove(callback: (cell: ICellPosWithEvent, event: IPointerEvent | IMouseEvent) => void): IDisposable;
     /**
      * Subscribe to cell pointer down events.
      * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
      */
-    onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+    onCellPointerDown(callback: (cell: ICellPosWithEvent) => void): IDisposable;
     /**
      * Subscribe to cell pointer up events.
      * @param {function(ICellPosWithEvent): any} callback The callback function accept cell location and event.
      */
-    onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable;
+    onCellPointerUp(callback: (cell: ICellPosWithEvent) => void): IDisposable;
+
+    onDragOver(callback: (cell: IDragCellPosition) => void): IDisposable;
+
+    onDrop(callback: (cell: IDragCellPosition) => void): IDisposable;
 
     /**
      * Start the editing process
@@ -177,12 +182,85 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         logService.warn('[FWorkbook]', `${name} is deprecated. Please use the function of the same name on "FUniver".`);
     }
 
+    override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): IDisposable {
+        const worksheet = this.getActiveSheet();
+        const baseParams: IUIEventBase = {
+            workbook: this,
+            worksheet,
+        };
+
+        switch (event) {
+            case CellFEventName.CellClicked:
+                this.onCellClick((cell) => {
+                    this.fireEvent(this.Event.CellClicked, {
+                        row: cell.location.row,
+                        column: cell.location.col,
+                        ...baseParams,
+                    } as ICellEventParam);
+                });
+                break;
+            case CellFEventName.CellPointerDown:
+                this.onCellPointerDown((cell) => {
+                    this.fireEvent(this.Event.CellPointerDown, this.generateCellParams(cell));
+                });
+                break;
+            case CellFEventName.CellPointerUp:
+                this.onCellPointerUp((cell) => {
+                    this.fireEvent(this.Event.CellPointerUp, this.generateCellParams(cell));
+                });
+                break;
+            case CellFEventName.CellPointerMove:
+                this.onCellPointerMove((cell) => {
+                    this.fireEvent(this.Event.CellPointerMove, this.generateCellParams(cell));
+                });
+                break;
+            case CellFEventName.CellHover:
+                this.onCellHover((cell) => {
+                    this.fireEvent(this.Event.CellHover, this.generateCellParams(cell));
+                });
+                break;
+            case CellFEventName.DragOver:
+                this.onDragOver((cell) => {
+                    this.fireEvent(this.Event.DragOver, {
+                        row: cell.location.row,
+                        column: cell.location.col,
+                        ...baseParams,
+                    });
+                });
+                break;
+            case CellFEventName.Drop:
+                this.onDrop((cell) => {
+                    this.fireEvent(this.Event.Drop, {
+                        row: cell.location.row,
+                        column: cell.location.col,
+                        ...baseParams,
+                    });
+                });
+        }
+
+        return toDisposable(() => {
+            //
+        });
+    }
+
+    generateCellParams(cell: IHoverRichTextPosition | ICellPosWithEvent): ICellEventParam {
+        const worksheet = this.getActiveSheet();
+        return {
+            row: cell.row,
+            column: cell.col,
+            workbook: this,
+            worksheet,
+        };
+    }
+
     override onCellClick(callback: (cell: IHoverRichTextInfo) => void): IDisposable {
         const hoverManagerService = this._injector.get(HoverManagerService);
         return toDisposable(
             hoverManagerService.currentClickedCell$
                 .pipe(filter((cell) => !!cell))
-                .subscribe(callback)
+                .subscribe((cell) => {
+                    callback(cell);
+                })
         );
     }
 
@@ -195,27 +273,49 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         );
     }
 
-    override onCellPointerDown(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+    override onCellPointerDown(callback: (cell: ICellPosWithEvent) => void): IDisposable {
         const hoverManagerService = this._injector.get(HoverManagerService);
         return toDisposable(
             hoverManagerService.currentPointerDownCell$.subscribe(callback)
         );
     }
 
-    override onCellPointerUp(callback: (cell: Nullable<ICellPosWithEvent>) => void): IDisposable {
+    override onCellPointerUp(callback: (cell: ICellPosWithEvent) => void): IDisposable {
         const hoverManagerService = this._injector.get(HoverManagerService);
         return toDisposable(
             hoverManagerService.currentPointerUpCell$.subscribe(callback)
         );
     }
 
-    override onPointerMove(callback: (cell: Nullable<ICellPosWithEvent>, buttons: number) => void): IDisposable {
+    override onCellPointerMove(callback: (cell: ICellPosWithEvent, event: IPointerEvent | IMouseEvent) => void): IDisposable {
         const hoverManagerService = this._injector.get(HoverManagerService);
         return toDisposable(
             hoverManagerService.currentCellPosWithEvent$
                 .pipe(filter((cell) => !!cell))
                 .subscribe((cell: ICellPosWithEvent) => {
-                    callback(cell, cell.event.buttons);
+                    callback(cell, cell.event);
+                })
+        );
+    }
+
+    override onDragOver(callback: (cell: IDragCellPosition) => void): IDisposable {
+        const dragManagerService = this._injector.get(DragManagerService);
+        return toDisposable(
+            dragManagerService.currentCell$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: IDragCellPosition) => {
+                    callback(cell);
+                })
+        );
+    }
+
+    override onDrop(callback: (cell: IDragCellPosition) => void): IDisposable {
+        const dragManagerService = this._injector.get(DragManagerService);
+        return toDisposable(
+            dragManagerService.endCell$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: IDragCellPosition) => {
+                    callback(cell);
                 })
         );
     }

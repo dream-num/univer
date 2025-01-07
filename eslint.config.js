@@ -1,5 +1,5 @@
 import antfu from '@antfu/eslint-config';
-import { baseRules, facadePreset, jsdocPreset, specPreset, tailwindcssPreset, typescriptPreset, univerSourcePreset } from '@univerjs-infra/shared/eslint';
+import { baseRules, facadePreset, specPreset, tailwindcssPreset, typescriptPreset, univerSourcePreset } from '@univerjs-infra/shared/eslint';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
 import penetrating from 'eslint-plugin-no-penetrating-import';
@@ -102,6 +102,5 @@ export default antfu(
     univerSourcePreset(),
     facadePreset(),
     tailwindcssPreset(),
-    specPreset(),
-    jsdocPreset()
+    specPreset()
 );

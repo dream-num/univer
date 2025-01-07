@@ -28,7 +28,7 @@ import { type BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 
 const FORMULA_CACHE_LRU_COUNT = 5000;
 
-const FORMULA_AST_CACHE = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
+export const FORMULA_AST_CACHE = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
 
 export function generateAstNode(unitId: string, formulaString: string, lexer: Lexer, astTreeBuilder: AstTreeBuilder, currentConfigService: IFormulaCurrentConfigService): AstRootNode {
     // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0

@@ -470,7 +470,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void {
-        if (params == null) {
+        if (params == null || params.length === 0) {
             this._focusDrawings = [];
             this._focus$.next([]);
             return;

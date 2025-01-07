@@ -18,9 +18,12 @@ import type { Observable } from 'rxjs';
 import type { Nullable } from '../../shared/types';
 import { createIdentifier } from '../../common/di';
 
+/**
+ * The type of image data source
+ */
 export enum ImageSourceType {
     /**
-     * The image source is a URL, for example: http://www.univer.ai/
+     * The image source is a URL, for example: https://avatars.githubusercontent.com/u/61444807?s=48&v=4
      */
     URL = 'URL',
     /**

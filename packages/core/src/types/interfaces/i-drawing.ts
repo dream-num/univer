@@ -18,6 +18,9 @@ import type { IAbsoluteTransform } from '../../shared/shape';
 import type { Nullable } from '../../shared/types';
 import type { BooleanNumber } from '../enum/text-style';
 
+/**
+ * The layer type of Drawing, used to distinguish between forward, backward, front, and back
+ */
 export enum ArrangeTypeEnum {
     /**
      * Move the current object one layer up, possibly covering other objects
@@ -37,6 +40,9 @@ export enum ArrangeTypeEnum {
     back,
 }
 
+/**
+ * Types of drawings, used to distinguish between images, shapes, charts, tables, SmartArt, videos, DrawingGroup, Unit, Dom, etc.
+ */
 export enum DrawingTypeEnum {
     /**
      * Unrecognized drawing type, requires user to determine

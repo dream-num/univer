@@ -27,6 +27,12 @@ export interface IFOverGridImage extends Omit<ISheetImage, 'sheetTransform' | 't
 
 }
 
+/**
+ * Convert the image parameter to a FOverGridImage
+ * @param {ISheetImage} sheetImage The image parameter
+ * @param {SheetSkeletonManagerService} sheetSkeletonManagerService The skeleton manager service
+ * @returns {IFOverGridImage} The FOverGridImage {@link IFOverGridImage}
+ */
 function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeletonManagerService: SheetSkeletonManagerService): IFOverGridImage {
     const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = sheetImage.sheetTransform;
 
@@ -54,6 +60,13 @@ function convertSheetImageToFOverGridImage(sheetImage: ISheetImage, sheetSkeleto
     };
 }
 
+/**
+ * Convert the FOverGridImage to a ISheetImage
+ * @param {IFOverGridImage} fOverGridImage The FOverGridImage
+ * @param {ISheetSelectionRenderService} selectionRenderService The selection render service
+ * @param {SheetSkeletonManagerService} sheetSkeletonManagerService The skeleton manager service
+ * @returns {ISheetImage} The ISheetImage {@link ISheetImage}
+ */
 function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, selectionRenderService: ISheetSelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): ISheetImage {
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0, width, height } = fOverGridImage;
 
@@ -128,7 +141,7 @@ export class FOverGridImageBuilder {
      *    subUnitId: activeSheet.getSheetId(),
      * }).setColumn(5).setRow(5).buildAsync();
      * activeSheet.insertImages([param]);
-     *
+     * ```
      */
     setImage(image: ISheetImage): FOverGridImageBuilder {
         const renderManagerService = this._injector.get(IRenderManagerService);

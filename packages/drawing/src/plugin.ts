@@ -45,11 +45,10 @@ export class UniverDrawingPlugin extends Plugin {
             this._config
         );
         this._configService.setConfig(DRAWING_PLUGIN_CONFIG_KEY, rest);
-
-        this._initCommands();
     }
 
     override onStarting(): void {
+        this._initCommands();
         this._initDependencies();
     }
 

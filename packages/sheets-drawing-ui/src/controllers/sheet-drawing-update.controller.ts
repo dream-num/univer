@@ -38,11 +38,12 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 
 /**
  * Calculate the bounding box after rotation
- * @param width  Width
- * @param height Height
- * @param angleDegrees Rotation angle in degrees
+ * @param {number} width  Width
+ * @param {number} height Height
+ * @param {number} angleDegrees Rotation angle in degrees (0-360)
+ * @returns {{ rotatedWidth: number; rotatedHeight: number }} Rotated width and height
  */
-function rotatedBoundingBox(width: number, height: number, angleDegrees: number) {
+function rotatedBoundingBox(width: number, height: number, angleDegrees: number): { rotatedWidth: number; rotatedHeight: number } {
     const angle = angleDegrees * Math.PI / 180; // Convert angle to radians
     const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
     const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
@@ -51,11 +52,12 @@ function rotatedBoundingBox(width: number, height: number, angleDegrees: number)
 
 /**
  * Get the size of the drawing within the cell
- * @param accessor
- * @param location Cell location
- * @param originImageWidth Original image width
- * @param originImageHeight Original image height
- * @param angle Rotation angle
+ * @param {IAccessor} accessor Accessor
+ * @param {ISheetLocationBase} location Cell location
+ * @param {number} originImageWidth Original image width
+ * @param {number} originImageHeight Original image height
+ * @param {number} angle Rotation angle in degrees (0-360)
+ * @returns {{ width: number; height: number }} Drawing size
  */
 export function getDrawingSizeByCell(
     accessor: IAccessor,

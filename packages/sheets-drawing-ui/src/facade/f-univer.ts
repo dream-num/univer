@@ -206,6 +206,7 @@ export class FUniverDrawingMixin extends FUniver {
         this.fireEvent(this.Event.BeforeOverGridImageChange, eventParams);
 
         if (eventParams.cancel) {
+            drawingManagerService.updateNotification(drawings as IDrawingSearch[]);
             throw new Error('Canceled by BeforeOverGridImageChange event');
         }
     }
@@ -235,6 +236,10 @@ export class FUniverDrawingMixin extends FUniver {
     }
 
     private _beforeOverGridImageSelect(drawings: IDrawingSearch[]): void {
+        if (!this.hasEventCallback(this.Event.BeforeOverGridImageSelect)) {
+            return;
+        }
+
         const drawingManagerService = this._injector.get(IDrawingManagerService);
 
         const workbook = this.getActiveUniverSheet();
@@ -263,6 +268,10 @@ export class FUniverDrawingMixin extends FUniver {
     }
 
     private _overGridImageSelected(drawings: IDrawingSearch[]): void {
+        if (!this.hasEventCallback(this.Event.OverGridImageSelected)) {
+            return;
+        }
+
         const workbook = this.getActiveUniverSheet();
         const drawingManagerService = this._injector.get(IDrawingManagerService);
 

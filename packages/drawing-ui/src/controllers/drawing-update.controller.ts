@@ -663,6 +663,8 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+
+                    scene.getTransformer()?.debounceRefreshControls();
                 });
             })
         );

@@ -380,11 +380,11 @@ describe('Test FUniver', () => {
         expect(range.getComment()).toBeNull();
     });
 
-    it('Function registerFunction should handle async function', () => {
-        const functionName = 'ASYNCFUNC';
+    it('Function registerFunction should handle function', () => {
+        const functionName = 'CUSTOMFUNC';
         const functionsDisposable = univerAPI.getFormula().registerFunction(functionName, () => {
             return 42;
-        }, 'Async custom function');
+        }, 'Custom function');
 
         const descriptionService = get(IDescriptionService);
         const functionInfo = descriptionService.getFunctionInfo(functionName);

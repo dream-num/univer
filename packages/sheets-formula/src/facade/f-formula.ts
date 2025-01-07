@@ -89,6 +89,8 @@ export interface IFFormulaSheetsMixin {
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
      * @example
      * ```js
@@ -149,7 +151,9 @@ export interface IFFormulaSheetsMixin {
      * Register a custom asynchronous formula function with description.
      * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
      * @param func - The async implementation of the function
-     * @param description - A string describing the function's purpose and usage
+     * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
      * @example
      * ```js
@@ -214,7 +218,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         }, 10);
     }
 
-    setInitialFormulaComputing(calculationMode: CalculationMode): void {
+    override setInitialFormulaComputing(calculationMode: CalculationMode): void {
         const lifecycleService = this._injector.get(LifecycleService);
         const lifecycleStage = lifecycleService.stage;
 
@@ -234,9 +238,9 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         config.initialFormulaComputing = calculationMode;
     }
 
-    registerFunction(name: string, func: IRegisterFunction): IDisposable;
-    registerFunction(name: string, func: IRegisterFunction, description: string): IDisposable;
-    registerFunction(
+    override registerFunction(name: string, func: IRegisterFunction): IDisposable;
+    override registerFunction(name: string, func: IRegisterFunction, description: string): IDisposable;
+    override registerFunction(
         name: string,
         func: IRegisterFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
@@ -260,9 +264,9 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
         return functionsDisposable;
     }
 
-    registerAsyncFunction(name: string, func: IRegisterAsyncFunction): IDisposable;
-    registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description: string): IDisposable;
-    registerAsyncFunction(
+    override registerAsyncFunction(name: string, func: IRegisterAsyncFunction): IDisposable;
+    override registerAsyncFunction(name: string, func: IRegisterAsyncFunction, description: string): IDisposable;
+    override registerAsyncFunction(
         name: string,
         func: IRegisterAsyncFunction,
         options?: string | { locales?: ILocales; description?: string | IFunctionInfo }
@@ -288,7 +292,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
 }
 
 FFormula.extend(FFormulaSheetsMixin);
-declare module '@univerjs/engine-formula' {
+declare module '@univerjs/engine-formula/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FFormula extends IFFormulaSheetsMixin {}
 }

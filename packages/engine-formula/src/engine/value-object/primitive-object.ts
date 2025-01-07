@@ -28,6 +28,7 @@ import { BaseValueObject, ErrorValueObject } from './base-value-object';
 export type PrimitiveValueType = string | boolean | number | null;
 
 export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
+export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
 
 export class NullValueObject extends BaseValueObject {
     private static _instance: NullValueObject;

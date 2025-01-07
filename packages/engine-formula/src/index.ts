@@ -99,7 +99,7 @@ export { handleRefStringInfo } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
-export type { FormulaFunctionValueType, PrimitiveValueType } from './engine/value-object/primitive-object';
+export type { FormulaFunctionResultValueType, FormulaFunctionValueType, PrimitiveValueType } from './engine/value-object/primitive-object';
 export { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './engine/value-object/primitive-object';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';

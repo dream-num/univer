@@ -19,7 +19,7 @@ import type { IFunctionNames } from '../basics/function';
 import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { FormulaFunctionValueType } from '../engine/value-object/primitive-object';
+import type { FormulaFunctionResultValueType, FormulaFunctionValueType } from '../engine/value-object/primitive-object';
 import type { FormulaDataModel } from '../models/formula-data.model';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 import { ErrorType } from '../basics/error-type';
@@ -193,7 +193,7 @@ export class BaseFunction {
 
     calculateCustom(
         ...arg: Array<FormulaFunctionValueType>
-    ): FormulaFunctionValueType | Promise<FormulaFunctionValueType> {
+    ): FormulaFunctionResultValueType | Promise<FormulaFunctionResultValueType> {
         return null;
     }
 

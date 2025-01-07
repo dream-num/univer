@@ -23,7 +23,7 @@ import type {
     BaseReferenceObject,
     FunctionVariantType,
     NodeValueType } from '../reference-object/base-reference-object';
-import type { FormulaFunctionValueType } from '../value-object/primitive-object';
+import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
 import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -206,7 +206,7 @@ export class FunctionNode extends BaseAstNode {
     /**
      * Transform the result of a custom function to a NodeValueType.
      */
-    private _handleCustomResult(resultVariantCustom: FormulaFunctionValueType): NodeValueType {
+    private _handleCustomResult(resultVariantCustom: FormulaFunctionResultValueType): NodeValueType {
         if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
             return ValueObjectFactory.create(resultVariantCustom);
         }
@@ -262,7 +262,7 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.isCustom()) {
             const resultVariantCustom = this._functionExecutor.calculateCustom(
                 ...this._mapVariantsToValues(variants)
-            ) as FormulaFunctionValueType;
+            ) as FormulaFunctionResultValueType;
 
             resultVariant = this._handleCustomResult(resultVariantCustom);
         } else {

@@ -21,12 +21,6 @@ interface IHueSliderProps {
     onChange: (hue: number) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 export function HueSlider({ hsv, onChange }: IHueSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
@@ -105,8 +99,8 @@ export function HueSlider({ hsv, onChange }: IHueSliderProps) {
                 <div
                     ref={thumbRef}
                     className={`
-                      univer-box-border univer-absolute univer-top-1/2 univer-size-2 univer-rounded-full univer-ring-2
-                      univer-ring-white univer-bg-transparent univer-shadow-md univer-transition-transform
+                      univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
+                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-white univer-transition-transform
                       univer-duration-75 univer-will-change-transform
                     `}
                     style={{

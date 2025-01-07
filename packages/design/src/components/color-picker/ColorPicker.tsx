@@ -35,11 +35,6 @@ export interface IColorPickerProps {
     onChange?: (value: string) => void;
 }
 
-/**
- *
- * @param fn
- * @param delay
- */
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
     let timer: number;
     return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
@@ -48,21 +43,12 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
     };
 }
 
-/**
- *
- * @param root0
- * @param root0.value
- * @param root0.showAlpha
- * @param root0.onChange
- */
 export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
     if (!canUseDom) return null;
 
     const [hsv, setHsv] = useState<[number, number, number]>([0, 100, 100]);
     const [alpha, setAlpha] = useState(1);
 
-    // 移除 currentRgb 的 useMemo
-    // 在需要时直接计算 RGB 值
     const getRgb = useCallback((h: number, s: number, v: number) => {
         return hsvToRgb(h, s, v);
     }, []);
@@ -88,20 +74,18 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
 
     const handleColorChange = useCallback((h: number, s: number, v: number) => {
         setHsv([h, s, v]);
-        // 传递新的 HSV 值给 debounced 函数
         debouncedOnChange([h, s, v], alpha);
     }, [alpha, debouncedOnChange]);
 
     const handleAlphaChange = useCallback((a: number) => {
         setAlpha(a);
-        // 传递当前 HSV 值和新的 alpha 值给 debounced 函数
         debouncedOnChange(hsv, a);
     }, [hsv, debouncedOnChange]);
 
     return (
         <div
             className={`
-              univer-space-y-4 univer-rounded-lg univer-bg-white univer-cursor-default
+              univer-w-[292px] univer-cursor-default univer-space-y-4 univer-rounded-lg univer-bg-white
               dark:univer-bg-gray-700
             `}
             onClick={(e) => e.stopPropagation()}

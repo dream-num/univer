@@ -29,13 +29,6 @@ export interface IDropdownOverlayProps {
     };
 }
 
-/**
- *
- * @param root0
- * @param root0.children
- * @param root0.className
- * @param root0.offset
- */
 export function DropdownOverlay({ children, className, offset }: IDropdownOverlayProps) {
     if (!canUseDom) {
         return null;
@@ -90,11 +83,11 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
             className={clsx(
                 `
                   univer-fixed univer-z-[1071] univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
-                  univer-shadow-md univer-opacity-0
+                  univer-opacity-0 univer-shadow-md
                   dark:univer-bg-gray-700
                 `,
                 {
-                    'univer-opacity-100 univer-slide-in-from-top-2 univer-animate-in': mounted,
+                    'univer-opacity-100 univer-animate-in univer-slide-in-from-top-2': mounted,
                 },
                 className
             )}

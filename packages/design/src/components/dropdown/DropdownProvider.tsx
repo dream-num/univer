@@ -25,14 +25,6 @@ interface IDropdownProviderProps {
     onVisibleChange?: (visible: boolean) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.visible
- * @param root0.children
- * @param root0.disabled
- * @param root0.onVisibleChange
- */
 export function DropdownProvider({ visible, children, disabled = false, onVisibleChange }: IDropdownProviderProps) {
     const triggerRef = useRef<HTMLDivElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);

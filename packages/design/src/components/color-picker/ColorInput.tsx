@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ChevronSortSingle } from '@univerjs/icons';
 import React, { useEffect, useState } from 'react';
 import { DropdownOverlay } from '../dropdown/DropdownOverlay';
 import { DropdownProvider } from '../dropdown/DropdownProvider';
@@ -35,12 +36,6 @@ interface IInputProps {
     onChange?: (h: number, s: number, v: number) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 function HexInput({ hsv, onChange }: IInputProps) {
     const [inputValue, setInputValue] = useState('');
     const hexValue = hsvToHex(hsv[0], hsv[1], hsv[2]);
@@ -80,8 +75,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
         <>
             <input
                 className={`
-                  univer-w-full !univer-pl-4 univer-px-2 univer-uppercase
-                  focus:univer-outline-none focus:univer-border-blue-500
+                  univer-w-full univer-px-2 !univer-pl-4 univer-uppercase
+                  focus:univer-border-blue-500 focus:univer-outline-none
                 `}
                 value={inputValue}
                 onChange={handleChange}
@@ -91,8 +86,8 @@ function HexInput({ hsv, onChange }: IInputProps) {
             />
             <span
                 className={`
-                  univer-absolute univer-left-1.5 univer-text-sm univer-text-gray-400 univer-top-1/2
-                  -univer-translate-y-1/2
+                  univer-absolute univer-left-1.5 univer-top-1/2 -univer-translate-y-1/2 univer-text-sm
+                  univer-text-gray-400
                 `}
             >
                 #
@@ -101,12 +96,6 @@ function HexInput({ hsv, onChange }: IInputProps) {
     );
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 function RgbInput({ hsv, onChange }: IInputProps) {
     const [localValues, setLocalValues] = useState({ r: 0, g: 0, b: 0 });
 
@@ -147,8 +136,8 @@ function RgbInput({ hsv, onChange }: IInputProps) {
     return (
         <div
             className={`
-              univer-flex univer-gap-2 univer-items-center
-              [&>input]:univer-w-12
+              univer-flex univer-items-center univer-gap-2
+              [&>input]:univer-w-11
             `}
         >
             <input
@@ -173,12 +162,6 @@ function RgbInput({ hsv, onChange }: IInputProps) {
     );
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 function HslInput({ hsv, onChange }: IInputProps) {
     // Local state for HSL values
     const [localValues, setLocalValues] = useState({ h: 0, s: 0, l: 0 });
@@ -229,8 +212,8 @@ function HslInput({ hsv, onChange }: IInputProps) {
     return (
         <div
             className={`
-              univer-flex univer-gap-2 univer-items-center
-              [&>input]:univer-w-12
+              univer-flex univer-items-center univer-gap-2
+              [&>input]:univer-w-11
             `}
         >
             {/* Hue input (0-360) */}
@@ -268,12 +251,6 @@ interface IAlphaInputProps {
     onChange?: (alpha: number) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.alpha
- * @param root0.onChange
- */
 function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
     // Local state for input value (0-100)
     const [localValue, setLocalValue] = useState('');
@@ -311,7 +288,7 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
     return (
         <div className="univer-relative">
             <input
-                className="univer-w-16 !univer-pr-5 univer-text-right"
+                className="univer-w-14 !univer-pr-5 univer-text-right"
                 value={localValue}
                 onChange={(e) => handleChange(e.target.value)}
                 onBlur={handleBlur}
@@ -321,8 +298,8 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
             />
             <span
                 className={`
-                  univer-absolute univer-text-gray-400 univer-text-sm univer-right-1.5 univer-top-1/2
-                  -univer-translate-y-1/2 univer-pointer-events-none
+                  univer-pointer-events-none univer-absolute univer-right-1.5 univer-top-1/2 -univer-translate-y-1/2
+                  univer-text-sm univer-text-gray-400
                 `}
             >
                 %
@@ -331,15 +308,6 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
     );
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.alpha
- * @param root0.showAlpha
- * @param root0.onChangeColor
- * @param root0.onChangeAlpha
- */
 export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha }: IColorInputProps) {
     const [format, setFormat] = useState<ColorFormat>('hex');
 
@@ -364,31 +332,32 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
         <div
             className={`
               univer-flex univer-gap-2
-              [&_input]:univer-h-8 [&_input]:univer-border-gray-200 [&_input]:univer-border
-              [&_input]:univer-border-solid [&_input]:univer-box-border [&_input]:univer-px-1.5 [&_input]:univer-rounded
-              [&_input]:univer-text-gray-700 [&_input]:univer-text-sm [&_input]:univer-flex
-              [&_input]:univer-items-center [&_input]:univer-outline-none [&_input]:univer-bg-transparent
-              dark:[&_input]:univer-text-white dark:[&_input]:univer-border-gray-600
+              [&_input]:univer-box-border [&_input]:univer-flex [&_input]:univer-h-8 [&_input]:univer-items-center
+              [&_input]:univer-rounded [&_input]:univer-border [&_input]:univer-border-solid
+              [&_input]:univer-border-gray-200 [&_input]:univer-bg-transparent [&_input]:univer-px-1.5
+              [&_input]:univer-text-sm [&_input]:univer-text-gray-700 [&_input]:univer-outline-none
+              dark:[&_input]:univer-border-gray-600 dark:[&_input]:univer-text-white
             `}
         >
             <DropdownProvider>
                 <DropdownTrigger>
                     <a
                         className={`
-                          univer-h-8 univer-border-gray-200 univer-border univer-border-solid univer-box-border
-                          univer-px-1.5 univer-rounded univer-text-gray-700 univer-text-sm univer-cursor-pointer
-                          univer-flex univer-items-center univer-flex-1
-                          dark:univer-text-white dark:univer-border-gray-600
+                          univer-box-border univer-flex univer-h-8 univer-flex-1 univer-cursor-pointer
+                          univer-items-center univer-justify-between univer-gap-1 univer-rounded univer-border
+                          univer-border-solid univer-border-gray-200 univer-px-1.5 univer-text-sm univer-text-gray-700
+                          dark:univer-border-gray-600 dark:univer-text-white
                         `}
                     >
-                        {format.toUpperCase()}
+                        <span>{format.toUpperCase()}</span>
+                        <ChevronSortSingle className="univer-size-5 univer-text-gray-400" />
                     </a>
                 </DropdownTrigger>
                 <DropdownOverlay>
                     <div
                         className={`
                           univer-grid
-                          [&>a]:univer-text-sm [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-cursor-pointer
+                          [&>a]:univer-cursor-pointer [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-text-sm
                           dark:univer-text-white
                         `}
                     >
@@ -399,7 +368,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                 </DropdownOverlay>
             </DropdownProvider>
 
-            <div className="univer-flex univer-gap-2 univer-relative">
+            <div className="univer-relative univer-flex univer-gap-2">
                 {renderInput(format)}
             </div>
 

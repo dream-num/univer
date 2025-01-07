@@ -21,12 +21,6 @@ interface IColorSpectrumProps {
     onChange: (h: number, s: number, v: number) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -111,7 +105,7 @@ export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
         >
             <canvas
                 ref={canvasRef}
-                className="univer-h-[148px] univer-min-w-[260px] univer-w-full univer-cursor-crosshair univer-rounded"
+                className="univer-h-[148px] univer-w-full univer-min-w-[260px] univer-cursor-crosshair univer-rounded"
                 onPointerDown={(e) => {
                     setIsDragging(true);
                     handlePointerEvent(e);
@@ -122,9 +116,9 @@ export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
             {/* Indicator */}
             <div
                 className={`
-                  univer-pointer-events-none univer-absolute univer-size-4 univer-rounded-full univer-border-2
-                  univer-border-white univer-shadow-md univer-ring-2 univer-ring-white univer-will-change-transform
-                  univer-top-0 univer-left-0
+                  univer-pointer-events-none univer-absolute univer-left-0 univer-top-0 univer-size-4
+                  univer-rounded-full univer-border-2 univer-border-white univer-shadow-md univer-ring-2
+                  univer-ring-white univer-will-change-transform
                 `}
                 style={getIndicatorStyles()}
             />

@@ -24,12 +24,6 @@ interface IColorPresetsProps {
     onChange: (h: number, s: number, v: number) => void;
 }
 
-/**
- *
- * @param root0
- * @param root0.hsv
- * @param root0.onChange
- */
 export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
     const handleSelectPreset = useCallback((color: string) => {
         const [h, s, v] = hexToHsv(color);
@@ -43,17 +37,17 @@ export function ColorPresets({ hsv, onChange }: IColorPresetsProps) {
             {colorPresets.map((row, i) => (
                 <div
                     key={i}
-                    className="univer-grid univer-grid-flow-col univer-gap-2 univer-items-center univer-justify-between"
+                    className="univer-grid univer-grid-flow-col univer-items-center univer-justify-between univer-gap-2"
                 >
                     {row.map((color, j) => (
                         <button
                             key={j}
                             type="button"
                             className={clsx(`
-                              univer-w-5 univer-h-5 univer-rounded-full univer-bg-gray-300 univer-border-none
-                              univer-cursor-pointer univer-transition-shadow
+                              univer-h-5 univer-w-5 univer-cursor-pointer univer-rounded-full univer-border-none
+                              univer-bg-gray-300 univer-transition-shadow
                             `, {
-                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:univer-ring-offset-gray-600 dark:univer-ring-primary-600': color.toUpperCase() === currentColor.toUpperCase(),
+                                'univer-ring-2 univer-ring-offset-2 univer-ring-offset-white dark:univer-ring-primary-600 dark:univer-ring-offset-gray-600': color.toUpperCase() === currentColor.toUpperCase(),
                             })}
                             style={{ backgroundColor: color }}
                             onClick={() => handleSelectPreset(color)}

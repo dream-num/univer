@@ -703,7 +703,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * 让图片的图层上移一层
+     * Move the image layer forward by one level
      * @returns success or not
      * @example
      * ```ts
@@ -724,7 +724,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * 让图片的图层下移一层
+     * Move the image layer backward by one level
      * @returns success or not
      * @example
      * ```ts
@@ -745,7 +745,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * 让图片的图层置于最底层
+     * Move the image layer to the back
      * @returns success or not
      * @example
      * ```ts
@@ -766,7 +766,7 @@ export class FOverGridImage extends FBase {
     }
 
     /**
-     * 让图片的图层置于最顶层
+     * Move the image layer to the front
      * @returns success or not
      * @example
      * ```ts

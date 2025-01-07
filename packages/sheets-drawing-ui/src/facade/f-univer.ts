@@ -45,11 +45,7 @@ interface IBeforeOverGridImageSelectParam extends IEventBase {
     oldSelectedImages: FOverGridImage[];
 }
 
-export interface IFUniverDrawingMixin {
-
-}
-
-export class FUniverDrawingMixin extends FUniver implements IFUniverDrawingMixin {
+export class FUniverDrawingMixin extends FUniver {
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(commandService.beforeCommandExecuted((commandInfo) => {
@@ -292,8 +288,3 @@ export class FUniverDrawingMixin extends FUniver implements IFUniverDrawingMixin
 }
 
 FUniver.extend(FUniverDrawingMixin);
-
-declare module '@univerjs/core' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverDrawingMixin { }
-}

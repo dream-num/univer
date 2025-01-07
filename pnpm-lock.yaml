@@ -2686,6 +2686,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-numfmt':
+        specifier: workspace:*
+        version: link:../engine-numfmt
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets

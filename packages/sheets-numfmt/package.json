@@ -68,6 +68,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

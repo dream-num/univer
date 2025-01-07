@@ -1456,7 +1456,18 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     const nextCurrentString = formulaStringArray[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
+                        // handle 'Sheet'1'!A1
+
+                        // Add the first single quotation
+                        this._pushSegment(currentString);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
+
+                        // Add the second single quotation
+                        this._pushSegment(nextCurrentString);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                        cur++;
+                        continue;
                     } else {
                         this._closeSingleQuotation();
                     }

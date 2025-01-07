@@ -27,8 +27,6 @@ export interface IFUniverSheetsFormulaMixin {
      * @returns {IDisposable} The disposable instance.
      */
     registerFunction(config: IRegisterFunctionParams): IDisposable;
-
-    // TODO@Dushusir: this API should be implemented on FFormula.
 }
 
 export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {

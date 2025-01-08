@@ -43,7 +43,7 @@ export function calcHighlightRanges(opts: {
     unitId: string;
     subUnitId?: string;
     refSelections: IRefSelection[];
-    editor: Editor;
+    editor: Editor | undefined;
     refSelectionsService: SheetsSelectionsService;
     refSelectionsRenderService: RefSelectionsRenderService | undefined;
     sheetSkeletonManagerService: SheetSkeletonManagerService | undefined;
@@ -100,12 +100,14 @@ export function calcHighlightRanges(opts: {
         endIndexes.push(endIndex);
     }
 
-    const cursor = editor.getSelectionRanges()?.[0]?.startOffset;
-    const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
-    if (activeIndex !== -1) {
-        refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
-    } else {
-        refSelectionsRenderService?.resetActiveSelectionIndex();
+    if (editor) {
+        const cursor = editor.getSelectionRanges()?.[0]?.startOffset;
+        const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
+        if (activeIndex !== -1) {
+            refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
+        } else {
+            refSelectionsRenderService?.resetActiveSelectionIndex();
+        }
     }
 
     return selectionWithStyle;
@@ -126,7 +128,7 @@ export function useSheetHighlight(unitId: string, subUnitId?: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = useCallback((refSelections: IRefSelection[], editor: Editor) => {
+    const highlightSheet = useCallback((refSelections: IRefSelection[], editor?: Editor) => {
         const selectionWithStyle = calcHighlightRanges({
             unitId,
             subUnitId,

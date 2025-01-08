@@ -15,11 +15,10 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { ISequenceNode } from '@univerjs/engine-formula';
 import { Injector, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { isFormulaLexerToken, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, filter, map } from 'rxjs';
@@ -42,15 +41,14 @@ export enum FormulaSelectingType {
     CAN_EDIT = 2,
 }
 
-export function useFormulaSelecting(editorId: string, isFocus: boolean, nodes: (string | ISequenceNode)[]) {
+export function useFormulaSelecting(editorId: string, isFocus: boolean) {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const injector = useDependency(Injector);
     const [isSelecting, setIsSelecting] = useState<FormulaSelectingType>(FormulaSelectingType.NOT_SELECT);
-    const nodesRef = useRef(nodes);
-    nodesRef.current = nodes;
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isDisabledByPointer = useRef(true);
     const isSelectingRef = useRef(isSelecting);
     isSelectingRef.current = isSelecting;
@@ -70,9 +68,10 @@ export function useFormulaSelecting(editorId: string, isFocus: boolean, nodes: (
                 const config = getCurrentBodyDataStreamAndOffset(injector);
                 if (!config) return;
                 const dataStream = config?.dataStream?.slice(0, -2);
-                const char = dataStream[index - 1 + config.offset];
-                const nextChar = dataStream[index + config.offset];
-                const focusingIndex = nodesRef.current.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
+                const nodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream) ?? [];
+                const char = dataStream[index - 1];
+                const nextChar = dataStream[index];
+                const focusingIndex = nodes.findIndex((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && index === node.endIndex + 2);
                 const adding = (char && matchRefDrawToken(char)) && (!nextChar || (isFormulaLexerToken(nextChar) && nextChar !== matchToken.OPEN_BRACKET));
                 const editing = focusingIndex > -1;
 
@@ -92,7 +91,7 @@ export function useFormulaSelecting(editorId: string, isFocus: boolean, nodes: (
             });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector]);
+    }, [docSelectionManagerService.textSelection$, docSelectionRenderService, editorId, injector, lexerTreeBuilder]);
 
     useEffect(() => {
         if (!isFocus) {

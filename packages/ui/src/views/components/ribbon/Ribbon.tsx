@@ -154,8 +154,8 @@ export function Ribbon(props: IRibbonProps) {
             <header className="univer-relative univer-select-none">
                 <div
                     className={clsx(`
-                      univer-animate-in univer-flex univer-gap-2 univer-justify-center univer-items-center univer-h-0
-                      univer-transition-all univer-overflow-hidden
+                      univer-animate-in univer-flex univer-h-0 univer-items-center univer-justify-center univer-gap-2
+                      univer-overflow-hidden univer-transition-all
                     `, {
                         'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
                     })}
@@ -164,8 +164,8 @@ export function Ribbon(props: IRibbonProps) {
                         <a
                             key={group.key}
                             className={clsx(`
-                              univer-text-gray-700 univer-text-sm univer-rounded univer-px-2 univer-py-0.5
-                              univer-cursor-pointer univer-transition-colors univer-box-border
+                              univer-box-border univer-cursor-pointer univer-rounded univer-px-2 univer-py-0.5
+                              univer-text-sm univer-text-gray-700 univer-transition-colors
                               hover:univer-bg-gray-300
                             `, {
                                 'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
@@ -180,10 +180,10 @@ export function Ribbon(props: IRibbonProps) {
                 {(headerMenuComponents && headerMenuComponents.size > 0) && (
                     <div
                         className={`
-                          univer-absolute univer-top-0 univer-right-2 univer-h-full univer-flex univer-gap-2
-                          univer-items-center
-                          [&>*]:univer-inline-flex [&>*]:univer-items-center [&>*]:univer-rounded
-                          [&>*]:univer-transition-colors [&>*]:univer-px-1 [&>*]:univer-h-6
+                          univer-absolute univer-right-2 univer-top-0 univer-flex univer-h-full univer-items-center
+                          univer-gap-2
+                          [&>*]:univer-inline-flex [&>*]:univer-h-6 [&>*]:univer-items-center [&>*]:univer-rounded
+                          [&>*]:univer-px-1 [&>*]:univer-transition-colors
                           hover:[&>*]:univer-bg-gray-300
                         `}
                     >

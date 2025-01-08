@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Nullable, Workbook } from '@univerjs/core';
+import type { ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -45,7 +45,7 @@ export interface IRefSelection {
  * @param {IRefSelection[]} refSelections
  */
 
-export function useSheetHighlight(unitId: string) {
+export function useSheetHighlight(unitId: string, subUnitId?: string) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);
@@ -54,7 +54,8 @@ export function useSheetHighlight(unitId: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    const highlightSheet = useCallback((refSelections: IRefSelection[], focusingRef: Nullable<IRefSelection>) => {
+    // eslint-disable-next-line complexity
+    const highlightSheet = useCallback((refSelections: IRefSelection[], editor: Editor) => {
         const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getActiveSheet();
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -68,9 +69,10 @@ export function useSheetHighlight(unitId: string) {
         const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
         if (!skeleton) return;
 
+        const endIndexes: number[] = [];
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
-            const { themeColor, token, refIndex } = refSelection;
+            const { themeColor, token, refIndex, endIndex } = refSelection;
 
             const unitRangeName = deserializeRangeWithSheet(token);
             const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
@@ -80,7 +82,7 @@ export function useSheetHighlight(unitId: string) {
 
             const refSheetId = getSheetIdByName(sheetName);
 
-            if (refSheetId && refSheetId !== currentSheetId) {
+            if ((refSheetId && refSheetId !== currentSheetId) || (!refSheetId && currentSheetId !== subUnitId)) {
                 continue;
             }
 
@@ -90,6 +92,7 @@ export function useSheetHighlight(unitId: string) {
                 primary: null,
                 style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
+            endIndexes.push(endIndex);
         }
 
         const allControls = refSelectionsRenderService?.getSelectionControls() || [];
@@ -99,12 +102,14 @@ export function useSheetHighlight(unitId: string) {
             refSelectionsService.setSelections(selectionWithStyle);
         }
 
-        if (focusingRef) {
-            refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
+        const cursor = editor.getSelectionRanges()?.[0]?.startOffset;
+        const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
+        if (activeIndex !== -1) {
+            refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
         } else {
             refSelectionsRenderService?.resetActiveSelectionIndex();
         }
-    }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, univerInstanceService]);
+    }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, subUnitId, univerInstanceService]);
 
     useEffect(() => {
         return () => {

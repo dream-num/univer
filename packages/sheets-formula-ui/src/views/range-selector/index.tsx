@@ -35,7 +35,6 @@ import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
-import { getFocusingReference } from '../formula-editor/hooks/util';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useFirstHighlightDoc } from './hooks/useFirstHighlightDoc';
 import { useFocus } from './hooks/useFocus';
@@ -192,7 +191,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const sequenceNodes = useMemo(() => getFormulaToken(rangeString), [rangeString]);
 
     const highlightDoc = useDocHight();
-    const highlightSheet = useSheetHighlight(unitId);
+    const highlightSheet = useSheetHighlight(unitId, subUnitId);
     const highligh = useEvent((text: string, isNeedResetSelection: boolean = true, showSelection = true) => {
         if (!editorRef.current) {
             return;
@@ -201,7 +200,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         const ranges = highlightDoc(editorRef.current, sequenceNodes, isNeedResetSelection);
         refSelections.current = ranges;
         if (showSelection) {
-            highlightSheet(ranges, getFocusingReference(editorRef.current, ranges));
+            highlightSheet(ranges, editorRef.current);
         }
     });
 

@@ -23,7 +23,6 @@ import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEv
 import type { FormulaSelectingType } from './hooks/useFormulaSelection';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent, useUpdateEffect } from '@univerjs/ui';
@@ -42,7 +41,6 @@ import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaSelecting } from './hooks/useFormulaSelection';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
-import { getFocusingReference } from './hooks/util';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/getFormulaText';
@@ -98,8 +96,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     } = props;
 
     const editorService = useDependency(IEditorService);
-    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
     // init actions
@@ -144,7 +140,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [formulaText, onChange]);
 
     const highlightDoc = useDocHight('=');
-    const highlightSheet = useSheetHighlight(unitId);
+    const highlightSheet = useSheetHighlight(unitId, subUnitId);
     const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
         if (!editorRef.current) {
             return;
@@ -162,7 +158,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         refSelections.current = ranges;
 
         if (isEnd) {
-            highlightSheet(isFocus ? ranges : [], getFocusingReference(editorRef.current, ranges));
+            highlightSheet(isFocus ? ranges : [], editorRef.current);
         }
     });
 

@@ -38,6 +38,14 @@ export class FFormula extends FBase {
     }
 
     /**
+     * The tree builder for formula string.
+     * @type {LexerTreeBuilder}
+     */
+    get lexerTreeBuilder(): LexerTreeBuilder {
+        return this._lexerTreeBuilder;
+    }
+
+    /**
      * Offsets the formula
      * @param {string} formulaString
      * @param {number} refOffsetX
@@ -54,7 +62,7 @@ export class FFormula extends FBase {
     /**
      * Resolves the formula string to a 'node' node
      * @param {string} formulaString
-     * @return {*}  {((string | ISequenceNode)[])}
+     * @returns {*}  {((string | ISequenceNode)[])}
      * @memberof FFormula
      */
     sequenceNodesBuilder(formulaString: string): (string | ISequenceNode)[] {
@@ -77,6 +85,7 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation starts.
+     * @param callback
      */
     calculationStart(callback: (forceCalculation: boolean) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -89,6 +98,7 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation ends.
+     * @param callback
      */
     calculationEnd(callback: (functionsExecutedState: FormulaExecutedStateType) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -121,6 +131,7 @@ export class FFormula extends FBase {
 
     /**
      * Listening calculation processing.
+     * @param callback
      */
     calculationProcessing(callback: (stageInfo: IExecutionInProgressParams) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {

@@ -18,33 +18,31 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 interface IHueSliderProps {
     hsv: [number, number, number];
-    onChange: (hue: number) => void;
+    onChange: (h: number, s: number, v: number) => void;
+    onChanged?: (h: number, s: number, v: number) => void;
 }
 
-export function HueSlider({ hsv, onChange }: IHueSliderProps) {
+export function HueSlider({ hsv, onChange, onChanged }: IHueSliderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
 
     const thumbSize = useMemo(() => {
         return thumbRef.current?.clientWidth ?? 0;
-    }, [thumbRef.current]);
+    }, []);
 
     const calculateHue = useCallback((clientX: number) => {
         const slider = sliderRef.current;
         if (!slider) return;
 
         const rect = slider.getBoundingClientRect();
-        // 考虑指示器宽度调整可拖动范围
         const maxX = rect.width - thumbSize;
 
-        // 限制x的范围，考虑指示器宽度
         const x = Math.max(0, Math.min(clientX - rect.left, maxX));
 
-        // 将受限制的位置映射到色相值
         const newHue = Math.round((x / maxX) * 360);
-        onChange(newHue);
-    }, [thumbSize, onChange]);
+        onChange(newHue, hsv[1], hsv[2]);
+    }, [hsv, thumbSize, onChange]);
 
     const handlePointerMove = useCallback((e: PointerEvent) => {
         if (!isDragging) return;
@@ -53,7 +51,8 @@ export function HueSlider({ hsv, onChange }: IHueSliderProps) {
 
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-    }, []);
+        onChanged?.(hsv[0], hsv[1], hsv[2]);
+    }, [hsv, onChanged]);
 
     useEffect(() => {
         if (isDragging) {

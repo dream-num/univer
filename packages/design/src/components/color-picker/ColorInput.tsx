@@ -15,7 +15,7 @@
  */
 
 import { ChevronSortSingle } from '@univerjs/icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DropdownOverlay } from '../dropdown/DropdownOverlay';
 import { DropdownProvider } from '../dropdown/DropdownProvider';
 import { DropdownTrigger } from '../dropdown/DropdownTrigger';
@@ -38,7 +38,7 @@ interface IInputProps {
 
 function HexInput({ hsv, onChange }: IInputProps) {
     const [inputValue, setInputValue] = useState('');
-    const hexValue = hsvToHex(hsv[0], hsv[1], hsv[2]);
+    const hexValue = useMemo(() => hsvToHex(hsv[0], hsv[1], hsv[2]), [hsv]);
 
     useEffect(() => {
         setInputValue(hexValue.replace(/^#/, ''));
@@ -311,10 +311,6 @@ function AlphaInput({ alpha, onChange }: IAlphaInputProps) {
 export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha }: IColorInputProps) {
     const [format, setFormat] = useState<ColorFormat>('hex');
 
-    /**
-     *
-     * @param format
-     */
     function renderInput(format: ColorFormat) {
         switch (format) {
             case 'hex':
@@ -356,7 +352,7 @@ export function ColorInput({ hsv, alpha, showAlpha, onChangeColor, onChangeAlpha
                 <DropdownOverlay>
                     <div
                         className={`
-                          univer-grid
+                          univer-grid univer-w-16
                           [&>a]:univer-cursor-pointer [&>a]:univer-px-2 [&>a]:univer-py-1 [&>a]:univer-text-sm
                           dark:univer-text-white
                         `}

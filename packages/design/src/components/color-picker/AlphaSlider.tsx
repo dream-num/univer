@@ -21,9 +21,10 @@ interface IAlphaSliderProps {
     hsv: [number, number, number];
     alpha: number; // 0-1
     onChange: (alpha: number) => void;
+    onChanged?: (alpha: number) => void;
 }
 
-export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange }) => {
+export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange, onChanged }) => {
     const [isDragging, setIsDragging] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const thumbRef = useRef<HTMLDivElement>(null);
@@ -49,7 +50,8 @@ export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange 
 
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
-    }, []);
+        onChanged?.(alpha);
+    }, [alpha]);
 
     useEffect(() => {
         if (isDragging) {
@@ -102,8 +104,8 @@ export const AlphaSlider: React.FC<IAlphaSliderProps> = ({ hsv, alpha, onChange 
                 <div
                     ref={thumbRef}
                     className={`
-                      univer-box-border univer-absolute univer-top-1/2 univer-size-2 univer-rounded-full univer-ring-2
-                      univer-ring-white univer-bg-transparent univer-shadow-md univer-transition-transform
+                      univer-absolute univer-top-1/2 univer-box-border univer-size-2 univer-rounded-full
+                      univer-bg-transparent univer-shadow-md univer-ring-2 univer-ring-white univer-transition-transform
                       univer-duration-75 univer-will-change-transform
                     `}
                     style={{

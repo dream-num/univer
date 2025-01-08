@@ -35,14 +35,6 @@ export interface IColorPickerProps {
     onChange?: (value: string) => void;
 }
 
-function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
-    let timer: number;
-    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
-        clearTimeout(timer);
-        timer = window.setTimeout(() => fn.apply(this, args), delay);
-    };
-}
-
 export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChange }: IColorPickerProps) {
     if (!canUseDom) return null;
 
@@ -52,14 +44,6 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
     const getRgb = useCallback((h: number, s: number, v: number) => {
         return hsvToRgb(h, s, v);
     }, []);
-
-    const debouncedOnChange = useCallback(
-        debounce((hsv: [number, number, number], alpha: number) => {
-            const [r, g, b] = getRgb(hsv[0], hsv[1], hsv[2]);
-            onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
-        }, 16),
-        [onChange, getRgb]
-    );
 
     useEffect(() => {
         try {
@@ -72,15 +56,22 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
         }
     }, [value]);
 
-    const handleColorChange = useCallback((h: number, s: number, v: number) => {
+    function handleColorChange(h: number, s: number, v: number) {
         setHsv([h, s, v]);
-        debouncedOnChange([h, s, v], alpha);
-    }, [alpha, debouncedOnChange]);
+    }
 
-    const handleAlphaChange = useCallback((a: number) => {
+    function handleColorChanged(h: number, s: number, v: number) {
+        const [r, g, b] = getRgb(h, s, v);
+        onChange?.(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+    }
+
+    function handleAlphaChange(a: number) {
         setAlpha(a);
-        debouncedOnChange(hsv, a);
-    }, [hsv, debouncedOnChange]);
+    }
+
+    function handleAlphaChanged(a: number) {
+        onChange?.(`rgba(${getRgb(hsv[0], hsv[1], hsv[2]).join(', ')}, ${a})`);
+    }
 
     return (
         <div
@@ -93,11 +84,13 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
             <MemoizedColorSpectrum
                 hsv={hsv}
                 onChange={handleColorChange}
+                onChanged={handleColorChanged}
             />
 
             <MemoizedHueSlider
                 hsv={hsv}
-                onChange={useCallback((h) => handleColorChange(h, hsv[1], hsv[2]), [hsv, handleColorChange])}
+                onChange={handleColorChange}
+                onChanged={handleColorChanged}
             />
 
             {showAlpha && (
@@ -105,6 +98,7 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
                     hsv={hsv}
                     alpha={alpha}
                     onChange={handleAlphaChange}
+                    onChanged={handleAlphaChanged}
                 />
             )}
 
@@ -112,13 +106,16 @@ export function ColorPicker({ value = 'rgba(0,0,0,1)', showAlpha = false, onChan
                 hsv={hsv}
                 alpha={alpha}
                 showAlpha={showAlpha}
-                onChangeColor={handleColorChange}
-                onChangeAlpha={handleAlphaChange}
+                onChangeColor={handleColorChanged}
+                onChangeAlpha={handleAlphaChanged}
             />
 
             <MemoizedColorPresets
                 hsv={hsv}
-                onChange={handleColorChange}
+                onChange={(h, s, v) => {
+                    handleColorChange(h, s, v);
+                    handleColorChanged(h, s, v);
+                }}
             />
         </div>
     );

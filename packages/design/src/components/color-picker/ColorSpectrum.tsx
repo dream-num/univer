@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface IColorSpectrumProps {
     hsv: [number, number, number];
     onChange: (h: number, s: number, v: number) => void;
+    onChanged?: (h: number, s: number, v: number) => void;
 }
 
-export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
+export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -61,11 +62,21 @@ export function ColorSpectrum({ hsv, onChange }: IColorSpectrumProps) {
         onChange(hsv[0], s, v);
     };
 
+    const handlePointerUp = useCallback((e: MouseEvent) => {
+        if (isDragging) {
+            onChanged?.(hsv[0], hsv[1], hsv[2]);
+        }
+        setIsDragging(false);
+    }, [hsv]);
+
     useEffect(() => {
-        const handlePointerUp = () => setIsDragging(false);
         window.addEventListener('pointerup', handlePointerUp);
-        return () => window.removeEventListener('pointerup', handlePointerUp);
-    }, []);
+        window.addEventListener('mouseup', handlePointerUp);
+        return () => {
+            window.removeEventListener('pointerup', handlePointerUp);
+            window.removeEventListener('mouseup', handlePointerUp);
+        };
+    }, [hsv]);
 
     // Calculate the position of the indicator
     const getIndicatorStyles = () => {

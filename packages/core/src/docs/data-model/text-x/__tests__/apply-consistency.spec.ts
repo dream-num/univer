@@ -48,6 +48,26 @@ function getDefaultDocWithCustomRange() {
     return doc;
 }
 
+function getEmptyDoc() {
+    const doc: IDocumentBody = {
+        dataStream: '\r\n',
+        textRuns: [],
+        tables: [],
+        paragraphs: [
+            {
+                startIndex: 0,
+            },
+        ],
+        sectionBreaks: [
+            {
+                startIndex: 1,
+            },
+        ],
+    };
+
+    return doc;
+}
+
 describe('apply consistency', () => {
     it('should get the same result when compose delete action with body', () => {
         const actionsA: TextXAction[] = [
@@ -151,5 +171,127 @@ describe('apply consistency', () => {
         expect(resultC).toEqual(resultD);
         expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should pass test when compose inert table and insert text', () => {
+        const actionA: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 1,
+            body: {
+                dataStream: '\r',
+                paragraphs: [
+                    {
+                        startIndex: 0,
+                        paragraphStyle: {
+                            spaceAbove: {
+                                v: 10,
+                            },
+                            lineSpacing: 2,
+                            spaceBelow: {
+                                v: 0,
+                            },
+                        },
+                    },
+                ],
+            },
+        }, {
+            t: TextXActionType.INSERT,
+            body: {
+                dataStream: '\u001A\u001B\u001C\r\n\u001D\u001C\r\n\u001D\u000E\u000F',
+                paragraphs: [
+                    {
+                        startIndex: 3,
+                        paragraphStyle: {
+                            spaceAbove: {
+                                v: 3,
+                            },
+                            lineSpacing: 2,
+                            spaceBelow: {
+                                v: 0,
+                            },
+                        },
+                    },
+                    {
+                        startIndex: 7,
+                        paragraphStyle: {
+                            spaceAbove: {
+                                v: 3,
+                            },
+                            lineSpacing: 2,
+                            spaceBelow: {
+                                v: 0,
+                            },
+                        },
+                    },
+                ],
+                sectionBreaks: [
+                    {
+                        startIndex: 4,
+                    },
+                    {
+                        startIndex: 8,
+                    },
+                ],
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 12,
+                        ts: {
+                            ff: 'Arial',
+                            fs: 11,
+                        },
+                    },
+                ],
+                tables: [
+                    {
+                        startIndex: 0,
+                        endIndex: 12,
+                        tableId: 'JfhiKo',
+                    },
+                ],
+            },
+            len: 12,
+        }];
+        const actionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 4,
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            body: {
+                dataStream: 'w',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            ff: 'Arial',
+                            fs: 11,
+                        },
+                    },
+                ],
+                tables: [{
+                    startIndex: 0,
+                    endIndex: 1,
+                    tableId: 'JfhiKo',
+                }],
+                customRanges: [],
+                customDecorations: [],
+            },
+        }];
+
+        const doc1 = getEmptyDoc();
+        const doc2 = getEmptyDoc();
+
+        // console.log(JSON.stringify(TextX.compose(actionA, actionB), null, 2));
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionA), actionB);
+        const resultB = TextX.apply(doc2, TextX.compose(actionA, actionB));
+        // console.log('result 1');
+        // console.log(JSON.stringify(resultA, null, 2));
+        // console.log('result 2');
+        // console.log(JSON.stringify(resultB, null, 2));
+
+        expect(resultA).toEqual(resultB);
     });
 });

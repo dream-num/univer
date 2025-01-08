@@ -19,24 +19,24 @@
 import type { Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISelectionWithCoord, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import type { IRefSelection } from '../../range-selector/hooks/useHighlight';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
-import { DisposableCollection, ICommandService, IUniverInstanceService, useDependency, useObservable } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, ThemeService, useDependency, useObservable } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { calcHighlightRanges, type IRefSelection } from '../../range-selector/hooks/useHighlight';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
 import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToText';
 import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
 import { useStateRef } from '../hooks/useStateRef';
 import { useSelectionAdd } from './useSelectionAdd';
-import { getFocusingReference } from './util';
 
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
@@ -55,7 +55,7 @@ export const useSheetSelectionChange = (
     const commandService = useDependency(ICommandService);
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
-
+    const themeService = useDependency(ThemeService);
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
@@ -65,6 +65,7 @@ export const useSheetSelectionChange = (
     const contextRef = useStateRef({ activeSheet, sheetName });
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+    const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const isScalingRef = useRef(false);
 
@@ -356,17 +357,21 @@ export const useSheetSelectionChange = (
             return;
         }
         const sub = docSelectionManagerService.textSelection$.subscribe((e) => {
-            const { unitId } = e;
-            if (unitId !== editor.getEditorId()) {
+            if (e.unitId !== editor.getEditorId()) {
                 return;
             }
 
-            const focusingRef = getFocusingReference(editor, refSelectionRef.current);
-            if (focusingRef) {
-                refSelectionsRenderService?.setActiveSelectionIndex(focusingRef.index);
-            } else {
-                refSelectionsRenderService?.resetActiveSelectionIndex();
-            }
+            calcHighlightRanges({
+                unitId,
+                subUnitId,
+                refSelections: refSelectionRef.current,
+                editor,
+                refSelectionsService,
+                refSelectionsRenderService,
+                sheetSkeletonManagerService,
+                themeService,
+                univerInstanceService,
+            });
         });
 
         return () => sub.unsubscribe();

@@ -17,9 +17,9 @@
 import type { ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
+import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import type { INode } from './useFormulaToken';
-import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
+import { getBodySlice, ICommandService, IUniverInstanceService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ReplaceTextRunsCommand } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -39,6 +39,78 @@ export interface IRefSelection {
     index: number;
 }
 
+export function calcHighlightRanges(opts: {
+    unitId: string;
+    subUnitId?: string;
+    refSelections: IRefSelection[];
+    editor: Editor;
+    refSelectionsService: SheetsSelectionsService;
+    refSelectionsRenderService: RefSelectionsRenderService | undefined;
+    sheetSkeletonManagerService: SheetSkeletonManagerService | undefined;
+    themeService: ThemeService;
+    univerInstanceService: IUniverInstanceService;
+}) {
+    const {
+        unitId,
+        subUnitId,
+        refSelections,
+        editor,
+        refSelectionsService,
+        refSelectionsRenderService,
+        sheetSkeletonManagerService,
+        themeService,
+        univerInstanceService,
+    } = opts;
+    const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+    const worksheet = workbook?.getActiveSheet();
+    const selectionWithStyle: ISelectionWithStyle[] = [];
+    if (!workbook || !worksheet) {
+        refSelectionsService.setSelections(selectionWithStyle);
+        return;
+    }
+    const currentSheetId = worksheet.getSheetId();
+    const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
+
+    const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
+    if (!skeleton) return;
+
+    const endIndexes: number[] = [];
+    for (let i = 0, len = refSelections.length; i < len; i++) {
+        const refSelection = refSelections[i];
+        const { themeColor, token, refIndex, endIndex } = refSelection;
+
+        const unitRangeName = deserializeRangeWithSheet(token);
+        const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
+        if (refUnitId && unitId !== refUnitId) {
+            continue;
+        }
+
+        const refSheetId = getSheetIdByName(sheetName);
+
+        if ((refSheetId && refSheetId !== currentSheetId) || (!refSheetId && currentSheetId !== subUnitId)) {
+            continue;
+        }
+
+        const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
+        selectionWithStyle.push({
+            range,
+            primary: null,
+            style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
+        });
+        endIndexes.push(endIndex);
+    }
+
+    const cursor = editor.getSelectionRanges()?.[0]?.startOffset;
+    const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
+    if (activeIndex !== -1) {
+        refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
+    } else {
+        refSelectionsRenderService?.resetActiveSelectionIndex();
+    }
+
+    return selectionWithStyle;
+}
+
 /**
  * @param {string} unitId
  * @param {string} subUnitId 打开面板的时候传入的 sheetId
@@ -54,60 +126,25 @@ export function useSheetHighlight(unitId: string, subUnitId?: string) {
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
-    // eslint-disable-next-line complexity
     const highlightSheet = useCallback((refSelections: IRefSelection[], editor: Editor) => {
-        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-        const worksheet = workbook?.getActiveSheet();
-        const selectionWithStyle: ISelectionWithStyle[] = [];
-        if (!workbook || !worksheet) {
-            refSelectionsService.setSelections(selectionWithStyle);
-            return;
-        }
-        const currentSheetId = worksheet.getSheetId();
-        const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
+        const selectionWithStyle = calcHighlightRanges({
+            unitId,
+            subUnitId,
+            refSelections,
+            editor,
+            refSelectionsService,
+            refSelectionsRenderService,
+            sheetSkeletonManagerService,
+            themeService,
+            univerInstanceService,
+        });
 
-        const skeleton = sheetSkeletonManagerService?.getWorksheetSkeleton(currentSheetId)?.skeleton;
-        if (!skeleton) return;
-
-        const endIndexes: number[] = [];
-        for (let i = 0, len = refSelections.length; i < len; i++) {
-            const refSelection = refSelections[i];
-            const { themeColor, token, refIndex, endIndex } = refSelection;
-
-            const unitRangeName = deserializeRangeWithSheet(token);
-            const { unitId: refUnitId, sheetName, range: rawRange } = unitRangeName;
-            if (refUnitId && unitId !== refUnitId) {
-                continue;
-            }
-
-            const refSheetId = getSheetIdByName(sheetName);
-
-            if ((refSheetId && refSheetId !== currentSheetId) || (!refSheetId && currentSheetId !== subUnitId)) {
-                continue;
-            }
-
-            const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
-            selectionWithStyle.push({
-                range,
-                primary: null,
-                style: genFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
-            });
-            endIndexes.push(endIndex);
-        }
-
+        if (!selectionWithStyle) return;
         const allControls = refSelectionsRenderService?.getSelectionControls() || [];
         if (allControls.length === selectionWithStyle.length) {
             refSelectionsRenderService?.resetSelectionsByModelData(selectionWithStyle);
         } else {
             refSelectionsService.setSelections(selectionWithStyle);
-        }
-
-        const cursor = editor.getSelectionRanges()?.[0]?.startOffset;
-        const activeIndex = endIndexes.findIndex((end) => end + 2 === cursor);
-        if (activeIndex !== -1) {
-            refSelectionsRenderService?.setActiveSelectionIndex(activeIndex);
-        } else {
-            refSelectionsRenderService?.resetActiveSelectionIndex();
         }
     }, [refSelectionsRenderService, refSelectionsService, sheetSkeletonManagerService, themeService, unitId, subUnitId, univerInstanceService]);
 

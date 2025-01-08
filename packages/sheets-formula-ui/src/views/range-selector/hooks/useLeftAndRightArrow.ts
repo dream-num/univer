@@ -111,8 +111,8 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
             id: operationId,
             type: CommandType.OPERATION,
             handler(_event, params) {
-                const { keyCode } = params as { eventType: DeviceInputEventType; keyCode: KeyCode };
-                handleKeycode(keyCode);
+                const { keyCode, metaKey } = params as { eventType: DeviceInputEventType; keyCode: KeyCode; metaKey?: MetaKeys };
+                handleKeycode(keyCode, metaKey);
             },
         }));
 
@@ -144,6 +144,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: Formu
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
                     keyCode,
+                    metaKey,
                 },
             };
         }).forEach((item) => {

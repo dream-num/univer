@@ -148,7 +148,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 d2.unsubscribe();
             };
         }
-    }, [isNeed, filterReferenceNodes, refSelectionsRenderService, isSupportAcrossSheet, isOnlyOneRange, handleRangeChange]);
+    }, [isNeed, filterReferenceNodes, refSelectionsRenderService, isSupportAcrossSheet, isOnlyOneRange, handleRangeChange, univerInstanceService, unitId]);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
@@ -218,5 +218,5 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 clearTimeout(time);
             };
         }
-    }, [isNeed, refSelectionsRenderService, filterReferenceNodes, handleRangeChange]);
+    }, [isNeed, refSelectionsRenderService, filterReferenceNodes, handleRangeChange, univerInstanceService, unitId, isSupportAcrossSheet]);
 };

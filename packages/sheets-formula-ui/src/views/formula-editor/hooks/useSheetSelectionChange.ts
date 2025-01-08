@@ -26,6 +26,7 @@ import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeR
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { useEvent } from '@univerjs/ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -59,8 +60,8 @@ export const useSheetSelectionChange = (
     const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-    const getSheetNameById = (sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '';
-    const sheetName = useMemo(() => getSheetNameById(subUnitId), [subUnitId]);
+    const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
+    const sheetName = useMemo(() => getSheetNameById(subUnitId), [getSheetNameById, subUnitId]);
     const activeSheet = useObservable(workbook?.activeSheet$);
     const contextRef = useStateRef({ activeSheet, sheetName });
     const render = renderManagerService.getRenderById(unitId);
@@ -201,7 +202,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed]);
+    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, getIsNeedAddSelection, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService && editor) {
@@ -295,7 +296,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [isNeed, refSelectionsRenderService, editor]);
+    }, [isNeed, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, sequenceNodesRef, handleRangeChange, isSupportAcrossSheet, unitId]);
 
     useEffect(() => {
         if (listenSelectionSet) {
@@ -350,7 +351,7 @@ export const useSheetSelectionChange = (
                 d.dispose();
             };
         }
-    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef]);
+    }, [commandService, getSheetNameById, handleRangeChange, isSupportAcrossSheet, listenSelectionSet, sequenceNodesRef, sheetName, subUnitId, unitId]);
 
     useEffect(() => {
         if (!editor) {
@@ -375,5 +376,5 @@ export const useSheetSelectionChange = (
         });
 
         return () => sub.unsubscribe();
-    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, sequenceNodesRef]);
+    }, [docSelectionManagerService.textSelection$, editor, refSelectionRef, refSelectionsRenderService, refSelectionsService, sequenceNodesRef, sheetSkeletonManagerService, subUnitId, themeService, unitId, univerInstanceService]);
 };

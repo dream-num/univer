@@ -32,7 +32,7 @@ import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/s
 import { useEvent } from '@univerjs/ui';
 import cl from 'clsx';
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { noop, throttleTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useEditorInput } from './hooks/useEditorInput';
@@ -217,25 +217,23 @@ export function RangeSelector(props: IRangeSelectorProps) {
         return () => sub.dispose();
     }, [commandService, editor, editorId, onChange]);
 
-    const handleSheetSelectionChange = useMemo(() => {
-        return (text: string, offset: number, isEnd: boolean) => {
-            highligh(text);
-            rangeStringSet(text);
-            if (isEnd) {
-                focus();
-                if (offset !== -1) {
+    const handleSheetSelectionChange = useEvent((text: string, offset: number, isEnd: boolean) => {
+        highligh(text);
+        rangeStringSet(text);
+        if (isEnd) {
+            focus();
+            if (offset !== -1) {
                     // 在渲染结束之后再设置选区
-                    setTimeout(() => {
-                        const range = { startOffset: offset, endOffset: offset };
-                        editor?.setSelectionRanges([range]);
-                        const docBackScrollRenderController = editor?.render.with(DocBackScrollRenderController);
-                        docBackScrollRenderController?.scrollToRange({ ...range, collapsed: true });
-                    }, 50);
-                }
-                checkScrollBar();
+                setTimeout(() => {
+                    const range = { startOffset: offset, endOffset: offset };
+                    editor?.setSelectionRanges([range]);
+                    const docBackScrollRenderController = editor?.render.with(DocBackScrollRenderController);
+                    docBackScrollRenderController?.scrollToRange({ ...range, collapsed: true });
+                }, 50);
             }
-        };
-    }, [editor]);
+            checkScrollBar();
+        }
+    });
 
     useSheetSelectionChange(isNeed, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
 
@@ -481,7 +479,7 @@ function RangeSelectorDialog(props: {
         });
     };
 
-    const handleSheetSelectionChange = useCallback((rangeText: string) => {
+    const handleSheetSelectionChange = useEvent((rangeText: string) => {
         refSelectionsRenderService?.setSkipLastEnabled(false);
         const ranges = rangeText.split(matchToken.COMMA).filter((e) => !!e);
         if (isOnlyOneRange) {
@@ -489,7 +487,7 @@ function RangeSelectorDialog(props: {
         } else {
             rangesSet(ranges);
         }
-    }, [focusIndex, isOnlyOneRange]);
+    });
 
     const highlightSheet = useSheetHighlight(unitId);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);

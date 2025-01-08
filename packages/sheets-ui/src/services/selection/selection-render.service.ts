@@ -206,12 +206,14 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                     this._renderDisposable = null;
                     this._reset();
                 } else {
-                    this._renderDisposable = toDisposable(
-                        //TODO @lumixraku ! these would only show the last selection, not all
-                        this.selectionMoveEnd$.subscribe((params) => {
-                            this._updateSelections(params, SelectionMoveType.MOVE_END);
-                        })
-                    );
+                    //TODO @lumixraku ! these would only show the last selection, not all
+
+                    // #univer-pro/issues/3763
+                    // this._renderDisposable = toDisposable(
+                    //     this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
+                    //         this._updateSelections(params, SelectionMoveType.MOVE_END);
+                    //     })
+                    // );
                 }
             }));
 
@@ -234,6 +236,10 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     /**
      * Update selectionData to selectionDataModel (WorkBookSelections) by SetSelectionsOperation.
+     *
+     * Unlike baseSelectionRenderService@resetSelectionsByModelData, this method is for update WorkbookSelectionModel.
+     *
+     *
      * @param selectionDataWithStyleList
      * @param type
      */

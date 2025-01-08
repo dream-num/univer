@@ -38,7 +38,7 @@ import { Lexer } from '../analysis/lexer';
 import { AstTreeBuilder } from '../analysis/parser';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
-import { generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
+import { FORMULA_AST_CACHE, generateAstNode, includeDefinedName } from '../utils/generate-ast-node';
 import { FormulaDependencyTree, FormulaDependencyTreeType, FormulaDependencyTreeVirtual } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 5000;
@@ -82,6 +82,7 @@ export class FormulaDependencyGenerator extends Disposable {
     override dispose(): void {
         this._updateRangeFlattenCache.clear();
         this._dependencyRTreeCacheForAddressFunction.clear();
+        FORMULA_AST_CACHE.clear();
     }
 
     async generate() {

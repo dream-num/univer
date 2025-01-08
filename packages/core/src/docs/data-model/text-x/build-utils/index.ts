@@ -20,7 +20,7 @@ import { addDrawing } from './drawings';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
-import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX } from './text-x-utils';
+import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX, retainSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
     static customRange = {
@@ -42,6 +42,7 @@ export class BuildTextUtils {
         normalizeSelection,
         delete: deleteSelectionTextX,
         replaceTextRuns: replaceSelectionTextRuns,
+        retain: retainSelectionTextX,
     };
 
     static range = {

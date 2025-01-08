@@ -16,7 +16,7 @@
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
 import {
     Disposable,
     Inject,
@@ -115,7 +115,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
         }
     ) {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -135,8 +135,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+        ];
+
         if (
-            ![PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER].includes(
+            !specialPastes.includes(
                 copyInfo.pasteType
             )
         ) {
@@ -202,33 +206,33 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
 
         repeatRange.forEach((item) => {
             matrix &&
-            matrix.forValue((row, col, copyRangeCfIdList) => {
-                const range = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    item.startRange
-                );
+                matrix.forValue((row, col, copyRangeCfIdList) => {
+                    const range = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            endRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                        },
+                        item.startRange
+                    );
 
-                const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
+                    const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
 
-                copyRangeCfIdList.forEach((cfId) => {
-                    if (!effectedConditionalFormattingRuleMatrix[cfId]) {
-                        const rule = getCurrentSheetCfRule(cfId);
-                        const ruleMatrix = new ObjectMatrix<1>();
-                        effectedConditionalFormattingRuleMatrix[cfId] = ruleMatrix;
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                ruleMatrix.setValue(row, col, 1);
+                    copyRangeCfIdList.forEach((cfId) => {
+                        if (!effectedConditionalFormattingRuleMatrix[cfId]) {
+                            const rule = getCurrentSheetCfRule(cfId);
+                            const ruleMatrix = new ObjectMatrix<1>();
+                            effectedConditionalFormattingRuleMatrix[cfId] = ruleMatrix;
+                            rule.ranges.forEach((range) => {
+                                Range.foreach(range, (row, col) => {
+                                    ruleMatrix.setValue(row, col, 1);
+                                });
                             });
-                        });
-                    }
-                    effectedConditionalFormattingRuleMatrix[cfId].setValue(_row, _col, 1);
+                        }
+                        effectedConditionalFormattingRuleMatrix[cfId].setValue(_row, _col, 1);
+                    });
                 });
-            });
         });
         const redos = [];
         const undos = [];

@@ -17,7 +17,7 @@
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
@@ -107,7 +107,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
             unitId: string;
             subUnitId: string;
         }
@@ -116,16 +116,13 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        if (
-            [
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
-            ].includes(
-                copyInfo.pasteType
-            )
-        ) {
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+        ];
+        if (specialPastes.includes(copyInfo.pasteType)) {
             return { redos: [], undos: [] };
         }
 

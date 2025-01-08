@@ -16,10 +16,11 @@
 
 import type { Nullable } from '../shared/types';
 import type { IStyleData } from '../types/interfaces';
+import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
 import type { SheetViewModel } from './view-model';
 import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
-import { type IRange, type IRowData, type IWorksheetData, RANGE_TYPE } from './typedef';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -215,5 +216,16 @@ export class RowManager {
      */
     getSize(): number {
         return getArrayLength(this._rowData);
+    }
+
+    setCustomMetadata(index: number, custom: CustomData | undefined) {
+        const row = this.getRow(index);
+        if (row) {
+            row.custom = custom;
+        }
+    }
+
+    getCustomMetadata(index: number): CustomData | undefined {
+        return this.getRow(index)?.custom;
     }
 }

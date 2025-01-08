@@ -15,12 +15,12 @@
  */
 
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import clsx from '../../helper/clsx';
+import { clsx } from '../../helper/clsx';
 import { useDropdown } from './DropdownContext';
 
-interface IDropdownOverlayProps {
+export interface IDropdownOverlayProps {
     children: React.ReactNode;
     className?: string;
     offset?: {
@@ -34,11 +34,12 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
         return null;
     }
 
-    const { isOpen, setIsOpen, overlayRef, triggerRef } = useDropdown();
+    const { show, updateShow, overlayRef, triggerRef } = useDropdown();
+    const [mounted, setMounted] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
-        if (isOpen && triggerRef.current && overlayRef.current) {
+        if (show && triggerRef.current && overlayRef.current) {
             const triggerRect = triggerRef.current.getBoundingClientRect();
             const overlayRect = overlayRef.current.getBoundingClientRect();
             const viewportWidth = document.documentElement.clientWidth;
@@ -62,26 +63,40 @@ export function DropdownOverlay({ children, className, offset }: IDropdownOverla
                 top: top + (offset?.y ?? 0),
                 left: left + (offset?.x ?? 0),
             });
-        }
-    }, [isOpen, offset?.x, offset?.y, overlayRef, triggerRef]);
 
-    if (!isOpen) return null;
+            requestAnimationFrame(() => {
+                setMounted(true);
+            });
+        }
+    }, [show, offset?.x, offset?.y, overlayRef, triggerRef]);
+
+    const hideAfterClick = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        updateShow(false);
+    }, []);
+
+    if (!show) return null;
 
     return createPortal(
         <div
             ref={overlayRef}
             className={clsx(
                 `
-                  univer-fixed univer-z-50 univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
-                  univer-shadow-md univer-animate-in univer-fade-in-0 univer-zoom-in-95
+                  univer-fixed univer-z-[1071] univer-overflow-hidden univer-rounded-md univer-border univer-bg-white
+                  univer-opacity-0 univer-shadow-md
+                  dark:univer-bg-gray-700
                 `,
+                {
+                    'univer-opacity-100 univer-animate-in univer-slide-in-from-top-2': mounted,
+                },
                 className
             )}
             style={{
                 top: position.top,
                 left: position.left,
             }}
-            onClick={() => setIsOpen(false)}
+            onClick={hideAfterClick}
+            onPointerUpCapture={(e) => e.stopPropagation()}
         >
             {children}
         </div>,

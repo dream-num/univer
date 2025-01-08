@@ -2036,6 +2036,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 horizontalAlign,
                 wrapStrategy,
                 imageCacheMap: this._imageCacheMap,
+                fontRenderExtension: cell?.fontRenderExtension,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
@@ -2088,11 +2089,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
         const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
 
-        const style = this._isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
+        const style = this._isRowStylePrecedeColumnStyle
+            ? composeStyles(defaultStyle, columnStyle, rowStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle)
+            : composeStyles(defaultStyle, rowStyle, columnStyle, (cell as ICellDataForSheetInterceptor)?.themeStyle, cellStyle);
 
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-        this._setFontStylesCache(row, col, cell);
+
+        this._setFontStylesCache(row, col, { ...cell, ...{ s: style } });
     }
 
     private _updateConfigAndGetDocumentModel(
@@ -2298,5 +2302,25 @@ export class SpreadsheetSkeleton extends Skeleton {
         const arr = this._columnWidthAccumulation;
         const i = Math.max(0, col - 1);
         return arr[i];
+    }
+
+    getHiddenRowsInRange(range: IRowRange) {
+        const hiddenRows = [];
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (!this.worksheet.getRowVisible(i)) {
+                hiddenRows.push(i);
+            }
+        }
+        return hiddenRows;
+    }
+
+    getHiddenColumnsInRange(range: IColumnRange) {
+        const hiddenCols = [];
+        for (let i = range.startColumn; i <= range.endColumn; i++) {
+            if (!this.worksheet.getColVisible(i)) {
+                hiddenCols.push(i);
+            }
+        }
+        return hiddenCols;
     }
 }

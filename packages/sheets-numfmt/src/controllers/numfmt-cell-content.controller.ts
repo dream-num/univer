@@ -26,6 +26,7 @@ import {
     ICommandService,
     Inject,
     InterceptorEffectEnum,
+    isRealNum,
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
@@ -33,6 +34,7 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
@@ -52,6 +54,13 @@ export class SheetsNumfmtCellContentController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     private _initInterceptorCellContent() {
+        const TEXT_FORMAT_MARK = {
+            tl: {
+                size: 6,
+                color: '#409f11',
+            },
+        };
+
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
@@ -61,11 +70,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 let numfmtValue;
                 const originCellValue = cell;
                 if (!originCellValue) {
-                    return next(cell);
-                }
-
-                // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
                     return next(cell);
                 }
 
@@ -79,7 +83,24 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (!numfmtValue) {
                     numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
                 }
+
                 if (!numfmtValue) {
+                    return next(cell);
+                }
+
+                // Add error marker to text format number
+                if (numfmtValue.pattern === DEFAULT_TEXT_FORMAT && originCellValue.v && isRealNum(originCellValue.v)) {
+                    return next({
+                        ...cell,
+                        markers: {
+                            ...cell?.markers,
+                            ...TEXT_FORMAT_MARK,
+                        },
+                    });
+                }
+
+                // just handle number
+                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
                     return next(cell);
                 }
 

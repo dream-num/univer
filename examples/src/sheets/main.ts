@@ -56,14 +56,16 @@ import '@univerjs/sheets-hyper-link-ui/facade';
 
 import '@univerjs/sheets-thread-comment/facade';
 import '@univerjs/sheets-conditional-formatting/facade';
+import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
+import '@univerjs/sheets-zen-editor/facade';
 import '../global.css';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
-const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
-const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 3_000;
+const LOAD_LAZY_PLUGINS_TIMEOUT = 100;
+const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 1_000;
 
 export const mockUser = {
     userID: 'Owner_qxVnhPbQ',

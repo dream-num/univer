@@ -19,8 +19,8 @@ import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 
 import { ICommandService, Inject, Injector } from '@univerjs/core';
-import { FRange } from '@univerjs/sheets/facade';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+import { FRange } from '@univerjs/sheets/facade';
 
 /**
  * This interface class provides methods to modify the filter settings of a worksheet.
@@ -56,30 +56,32 @@ export class FFilter {
     /**
      * Clear the filter criteria of a column.
      * @param {number} col The column number.
-     * @returns {Promise<boolean>} If the filter criteria is cleared.
+     * @returns {FFilter} The interface class to handle the filter.
      */
-    removeColumnFilterCriteria(col: number): Promise<boolean> {
-        return this._commandSrv.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+    removeColumnFilterCriteria(col: number): FFilter {
+        this._commandSrv.syncExecuteCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             col,
             criteria: null,
         } as ISetSheetsFilterCriteriaCommandParams);
+        return this;
     }
 
     /**
      * Set the filter criteria of a column.
      * @param {number} col  The column number.
      * @param {ISetSheetsFilterCriteriaCommandParams['criteria']} criteria The new filter criteria.
-     * @returns {Promise<boolean>} If the filter criteria is set.
+     * @returns {FFilter} The interface class to handle the filter.
      */
-    setColumnFilterCriteria(col: number, criteria: ISetSheetsFilterCriteriaCommandParams['criteria']): Promise<boolean> {
-        return this._commandSrv.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+    setColumnFilterCriteria(col: number, criteria: ISetSheetsFilterCriteriaCommandParams['criteria']): FFilter {
+        this._commandSrv.syncExecuteCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             col,
             criteria,
         } as ISetSheetsFilterCriteriaCommandParams);
+        return this;
     }
 
     /**
@@ -95,16 +97,17 @@ export class FFilter {
      * Remove the filter criteria of all columns.
      * @returns {Promise<boolean>} If the filter criteria is removed.
      */
-    removeFilterCriteria(): Promise<boolean> {
-        return this._commandSrv.executeCommand(ClearSheetsFilterCriteriaCommand.id);
+    removeFilterCriteria(): FFilter {
+        this._commandSrv.syncExecuteCommand(ClearSheetsFilterCriteriaCommand.id);
+        return this;
     }
 
     /**
      * Remove the filter from the worksheet.
-     * @returns {Promise<boolean>} If the filter is removed.
+     * @returns {boolean} If the filter is removed.
      */
-    remove(): Promise<boolean> {
-        return this._commandSrv.executeCommand(RemoveSheetFilterCommand.id, {
+    remove(): boolean {
+        return this._commandSrv.syncExecuteCommand(RemoveSheetFilterCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
         } as ISheetCommandSharedParams);

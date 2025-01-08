@@ -20,7 +20,7 @@ import type { BaseObject, Scene } from '@univerjs/engine-render';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { filter, switchMap } from 'rxjs';
@@ -262,7 +262,7 @@ export class ImageCropperController extends Disposable {
                 transformer?.refreshControls();
                 imageCropperObject.makeDirty(true);
 
-                this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
+                this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
             })
         );
     }

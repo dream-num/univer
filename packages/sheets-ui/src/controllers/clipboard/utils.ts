@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+
+import type { IAccessor, IBorderData, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, IStyleData, Nullable } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
@@ -45,6 +47,14 @@ import { isRichText } from '../editor/editing.render-controller';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
+/**
+ *
+ * @param pasteFrom
+ * @param pasteTo
+ * @param data
+ * @param payload
+ * @param accessor
+ */
 export function getDefaultOnPasteCellMutations(
     pasteFrom: ISheetDiscreteRangeLocation,
     pasteTo: ISheetDiscreteRangeLocation,
@@ -99,7 +109,18 @@ export function getDefaultOnPasteCellMutations(
     };
 }
 
-// eslint-disable-next-line max-lines-per-function
+/**
+ *
+ * @param from
+ * @param from.unitId
+ * @param from.subUnitId
+ * @param from.range
+ * @param to
+ * @param to.unitId
+ * @param to.subUnitId
+ * @param to.range
+ * @param accessor
+ */
 export function getMoveRangeMutations(
     from: {
         unitId: string;
@@ -291,6 +312,13 @@ export function getMoveRangeMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param pasteFrom
+ * @param matrix
+ * @param accessor
+ */
 export function getSetCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
@@ -349,6 +377,13 @@ export function getSetCellValueMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param pasteFrom
+ * @param matrix
+ * @param accessor
+ */
 export function getSetCellCustomMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
@@ -396,6 +431,13 @@ export function getSetCellCustomMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ * @param withRichFormat
+ */
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -418,6 +460,22 @@ export function getSetCellStyleMutations(
                 cl: null,
             }, value.s),
         };
+
+        // Here I don't know why when setting the border, an empty object is also assigned to the adjacent cells without borders.
+        // This is the fundamental cause of the problem. This should be unreasonable, so I bypassed this problem first.
+        const cellBd = (newValue.s as IStyleData).bd as IBorderData;
+        if (cellBd) {
+            const isValid = Object.keys(cellBd).length > 0;
+            if (!isValid) {
+                (newValue.s as IStyleData)!.bd = {
+                    b: null,
+                    l: null,
+                    r: null,
+                    t: null,
+                };
+            }
+        }
+
         const content = String(value.v);
         const numfmtValue = numfmt.parseValue(content);
         if (numfmtValue?.z) {
@@ -463,6 +521,12 @@ export function getSetCellStyleMutations(
     };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -474,14 +538,12 @@ export function getClearCellStyleMutations(
     const { unitId, subUnitId, range } = pasteTo;
     const { mapFunc } = virtualizeDiscreteRanges([range]);
 
-    matrix.forValue((row, col, value) => {
-        // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
-        // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
-        // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
-        if (value.s) {
-            const { row: actualRow, col: actualCol } = mapFunc(row, col);
+    matrix.forEach((rowIndex, row) => {
+        Object.keys(row).forEach((colIndexStr) => {
+            const colIndex = Number(colIndexStr);
+            const { row: actualRow, col: actualCol } = mapFunc(rowIndex, colIndex);
             clearStyleMatrix.setValue(actualRow, actualCol, { s: null });
-        }
+        });
     });
     // clear style
     if (clearStyleMatrix.getLength() > 0) {
@@ -510,6 +572,12 @@ export function getClearCellStyleMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearCellValueMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -551,6 +619,12 @@ export function getClearCellValueMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param pasteTo
+ * @param matrix
+ * @param accessor
+ */
 export function getClearAndSetMergeMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
@@ -647,6 +721,10 @@ export function getClearAndSetMergeMutations(
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }
 
+/**
+ *
+ * @param text
+ */
 export function generateBody(text: string): IDocumentBody {
     if (!text.includes('\r') && Tools.isLegalUrl(text)) {
         const id = generateRandomId();

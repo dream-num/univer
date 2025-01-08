@@ -25,11 +25,16 @@ import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/con
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
+import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
+
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
-import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { SheetRangeThemeModel } from './model/range-theme-model';
 
+import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
@@ -37,6 +42,7 @@ import { RangeProtectionRefRangeService } from './services/permission/range-perm
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
+import { SheetRangeThemeService } from './services/range-theme-service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
@@ -85,6 +91,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
+            [SheetRangeThemeService],
 
             // controllers
             [BasicWorksheetController],
@@ -96,6 +103,12 @@ export class UniverSheetsPlugin extends Plugin {
             [WorksheetPermissionService],
             [WorksheetProtectionRuleModel],
             [WorksheetProtectionPointModel],
+            [SheetPermissionViewModelController],
+            [SheetPermissionInitController],
+            [SheetPermissionCheckController],
+
+            // range theme
+            [SheetRangeThemeModel],
 
             // range protection
             [RangeProtectionRenderModel],
@@ -128,12 +141,14 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
             [WorkbookPermissionService],
             [WorksheetPermissionService],
+            [SheetPermissionViewModelController],
         ]);
     }
 
     override onRendered(): void {
         touchDependencies(this._injector, [
             [INumfmtService],
+            [SheetPermissionInitController],
         ]);
     }
 
@@ -141,10 +156,12 @@ export class UniverSheetsPlugin extends Plugin {
         touchDependencies(this._injector, [
             [CalculateResultApplyController],
             [DefinedNameDataController],
+            [SheetRangeThemeModel],
             [NumberCellDisplayController],
             [RangeProtectionRenderModel],
             [RangeProtectionRefRangeService],
             [RefRangeService],
+            [SheetPermissionCheckController],
         ]);
     }
 }

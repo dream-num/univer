@@ -128,8 +128,7 @@ export class SheetsSelectionsService extends RxDisposable {
     ): void {
         if (typeof unitIdOrSelections === 'string' && typeof worksheetIdOrType === 'string') {
             const unitId = unitIdOrSelections as string;
-            const selectionModel = this.getWorkbookSelections(unitId);
-            selectionModel.setSelections(
+            this._ensureWorkbookSelection(unitId).setSelections(
                 worksheetIdOrType,
                 selectionDatas || [],
                 type ?? SelectionMoveType.ONLY_SET

@@ -111,7 +111,7 @@ export class FSelection {
      * console.log(newSelection.getActiveRange().getA1Notation()); // A1
      * ```
      */
-    async updatePrimaryCell(cell: FRange): Promise<FSelection> {
+    updatePrimaryCell(cell: FRange): FSelection {
         const commandService = this._injector.get(ICommandService);
         let newSelections = [];
         let hasSetPrimary = false;
@@ -147,7 +147,7 @@ export class FSelection {
             selections: newSelections,
         };
 
-        await commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+        commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
         return new FSelection(this._workbook, this._worksheet, newSelections, this._injector);
     }
 

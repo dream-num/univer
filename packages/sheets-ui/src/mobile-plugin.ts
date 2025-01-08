@@ -36,8 +36,7 @@ import { ForceStringRenderController } from './controllers/force-string-render.c
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
-import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
-import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
+import { SheetPermissionCheckUIController } from './controllers/permission/sheet-permission-check-ui.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
@@ -119,8 +118,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetPermissionUserManagerService],
                 [WorksheetProtectionRenderController],
                 [SheetPermissionInterceptorClipboardController],
-                [SheetPermissionInterceptorBaseController],
-                [SheetPermissionInitController],
+                [SheetPermissionCheckUIController],
                 [SheetPermissionRenderManagerController],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));

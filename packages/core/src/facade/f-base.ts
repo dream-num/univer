@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
+import type { Injector } from '@wendellhu/redi';
+import { Disposable } from '../shared';
+
 /**
  * `FBase` is a base class for all facade classes.
  * It provides a way to extend classes with static and instance methods.
  * The `_initialize` as a special method that will be called after the constructor. You should never call it directly.
  */
-export abstract class FBase {
-    private static _constructorQueue: Array<() => void> = [];
-
-    constructor() {
-        // eslint-disable-next-line ts/no-this-alias
-        const self = this;
-        FBase._constructorQueue.forEach(function (fn) {
-            fn.apply(self);
-        });
-    }
-
-    _initialize() { }
-
+export abstract class FBase extends Disposable {
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
-            if (name === '_initialize') {
-                FBase._constructorQueue.push(source.prototype._initialize);
-            } else if (name !== 'constructor') {
+            if (name !== 'constructor') {
                 // @ts-ignore
                 this.prototype[name] = source.prototype[name];
             }
@@ -51,3 +40,52 @@ export abstract class FBase {
     }
 }
 
+const InitializerSymbol = Symbol('initializers');
+
+type Initializers = Array<(injector: Injector) => void>;
+
+export class FBaseInitialable extends Disposable {
+    declare private [InitializerSymbol]: Initializers | undefined;
+
+    constructor(
+        protected _injector: Injector
+    ) {
+        super();
+
+        // eslint-disable-next-line ts/no-this-alias
+        const self = this;
+
+        const initializers = Object.getPrototypeOf(this)[InitializerSymbol];
+        if (initializers) {
+            initializers.forEach(function (fn: (_injector: Injector) => void) {
+                fn.apply(self, [_injector]);
+            });
+        }
+    }
+
+    _initialize(injector: Injector) { }
+
+    static extend(source: any): void {
+        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
+            if (name === '_initialize') {
+                let initializers = this.prototype[InitializerSymbol];
+                if (!initializers) {
+                    initializers = [];
+                    this.prototype[InitializerSymbol] = initializers;
+                }
+
+                initializers.push(source.prototype._initialize);
+            } else if (name !== 'constructor') {
+                // @ts-ignore
+                this.prototype[name] = source.prototype[name];
+            }
+        });
+
+        Object.getOwnPropertyNames(source).forEach((name) => {
+            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+                // @ts-ignore
+                this[name] = source[name];
+            }
+        });
+    }
+}

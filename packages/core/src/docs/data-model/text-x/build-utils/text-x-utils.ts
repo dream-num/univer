@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
-import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
+import { type Nullable, Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { textDiff } from '../../../../shared/text-diff';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -34,7 +33,7 @@ export interface IDeleteCustomRangeParam {
     insert?: Nullable<IDocumentBody>;
 }
 
-export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+export function deleteCustomRangeTextX(params: IDeleteCustomRangeParam) {
     const { rangeId, segmentId, documentDataModel, insert } = params;
     const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
@@ -230,6 +229,34 @@ export function deleteSelectionTextX(
             });
         }
     }
+
+    return dos;
+}
+
+export function retainSelectionTextX(selections: ITextRange[], body: IDocumentBody, memoryCursor: number = 0) {
+    const dos: Array<TextXAction> = [];
+    let cursor = memoryCursor;
+    selections.forEach((selection) => {
+        const { startOffset, endOffset } = selection;
+        if (startOffset > cursor) {
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: startOffset - cursor,
+            });
+            cursor = startOffset;
+        }
+        if (endOffset > cursor) {
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: endOffset - cursor,
+                body: {
+                    ...Tools.deepClone(body),
+                    dataStream: '',
+                },
+            });
+            cursor = endOffset;
+        }
+    });
 
     return dos;
 }

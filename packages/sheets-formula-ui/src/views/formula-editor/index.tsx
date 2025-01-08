@@ -23,6 +23,7 @@ import type { IKeyboardEventConfig } from '../range-selector/hooks/useKeyboardEv
 import type { FormulaSelectingType } from './hooks/useFormulaSelection';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DocBackScrollRenderController, DocSelectionRenderService, IEditorService } from '@univerjs/docs-ui';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import { useEvent, useUpdateEffect } from '@univerjs/ui';
@@ -97,6 +98,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     } = props;
 
     const editorService = useDependency(IEditorService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const onChange = useEvent(propOnChange);
     // init actions

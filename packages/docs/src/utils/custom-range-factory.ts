@@ -158,7 +158,7 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
     };
 
     const jsonX = JSONX.getInstance();
-    const textX = BuildTextUtils.customRange.delete(accessor, {
+    const textX = BuildTextUtils.customRange.delete({
         documentDataModel,
         rangeId: params.rangeId,
         insert,

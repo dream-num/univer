@@ -327,6 +327,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const handleConfirm = (ranges: IUnitRangeName[]) => {
         const text = unitRangesToText(ranges, isSupportAcrossSheet).join(matchToken.COMMA);
+        if (!text) {
+            editor?.setDocumentData({ ...editor.getDocumentData(), body: { dataStream: '\r\n', textRuns: [] } });
+        }
         highligh(text);
         rangeStringSet(text);
         rangeDialogVisibleSet(false);

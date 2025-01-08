@@ -23,7 +23,7 @@ interface IDropdownTriggerProps {
 }
 
 export function DropdownTrigger({ children }: IDropdownTriggerProps) {
-    const { setIsOpen, isOpen, triggerRef } = useDropdown();
+    const { show, updateShow, triggerRef } = useDropdown();
 
     if (!isValidElement(children)) {
         throw new Error('DropdownTrigger children must be a valid React element');
@@ -34,7 +34,7 @@ export function DropdownTrigger({ children }: IDropdownTriggerProps) {
         ref: triggerRef,
         onClick: (e: React.MouseEvent) => {
             e.stopPropagation();
-            setIsOpen(!isOpen);
+            updateShow(!show);
             // eslint-disable-next-line ts/no-explicit-any
             (children.props as React.HTMLProps<HTMLElement>)?.onClick?.(e as any);
         },

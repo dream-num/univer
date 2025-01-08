@@ -26,7 +26,7 @@ export interface IFWorksheetSkeletonMixin {
     /**
      * Refresh the canvas.
      */
-    refreshCanvas(): void;
+    refreshCanvas(): FWorksheet;
     /**
      * Set zoom ratio of the worksheet.
      * @param {number} zoomRatio The zoom ratio to set.It should be in the range of 10 to 400.
@@ -40,7 +40,7 @@ export interface IFWorksheetSkeletonMixin {
      * console.log(zoomRatio); // 200
      * ```
      */
-    zoom(zoomRatio: number): Promise<boolean>;
+    zoom(zoomRatio: number): FWorksheet;
     /**
      * Get the zoom ratio of the worksheet.
      * @returns The zoom ratio of the worksheet.
@@ -56,16 +56,28 @@ export interface IFWorksheetSkeletonMixin {
 
     /**
      * Return visible range, sum view range of 4 viewports.
-     * @returns IRange
+     * @returns {IRange} - visible range
+     * @example
+     * ``` ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const visibleRange = fWorksheet.getVisibleRange();
+     * ```
      */
     getVisibleRange(): IRange;
 
     /**
-     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
+     * Scroll spreadsheet(viewMain) to cell position. Make the cell at topleft of current viewport.
+     * Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     * @param {number} row - Cell row index
+     * @param {number} column - Cell column index
+     * @returns {FWorksheet} - Current worksheet
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().scrollToCell(1, 1);
+     * ```
      */
-    scrollToCell(row: number, column: number): void;
+    scrollToCell(row: number, column: number): FWorksheet;
 
     /**
      * Get scroll state of current sheet.
@@ -75,11 +87,12 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().getScrollState()
      * ```
      */
-    getScrollState(): Nullable<IScrollState>;
+    getScrollState(): IScrollState;
 
     /**
      * Invoked when scrolling the sheet.
-     * @param {function(params: Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @param {function(Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @returns {IDisposable} The disposable object to remove the event listener.
      * @example
      * ``` ts
      * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
@@ -90,7 +103,7 @@ export interface IFWorksheetSkeletonMixin {
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
-    override refreshCanvas(): void {
+    override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
         const render = renderManagerService.getRenderById(unitId);
@@ -108,15 +121,18 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         }
 
         mainComponent.makeDirty();
+
+        return this;
     }
 
-    override zoom(zoomRatio: number): Promise<boolean> {
+    override zoom(zoomRatio: number): FWorksheet {
         const commandService = this._injector.get(ICommandService);
-        return commandService.executeCommand(ChangeZoomRatioCommand.id, {
+        commandService.syncExecuteCommand(ChangeZoomRatioCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             zoomRatio,
         });
+        return this;
     }
 
     override getZoom(): number {
@@ -152,7 +168,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return range;
     }
 
-    override scrollToCell(row: number, column: number): void {
+    override scrollToCell(row: number, column: number): FWorksheet {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
@@ -160,16 +176,24 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             const scrollRenderController = render?.with(SheetsScrollRenderController);
             scrollRenderController.scrollToCell(row, column);
         }
+        return this;
     }
 
-    override getScrollState(): Nullable<IScrollState> {
+    override getScrollState(): IScrollState {
+        const emptyScrollState: IScrollState = {
+            offsetX: 0,
+            offsetY: 0,
+            sheetViewStartColumn: 0,
+            sheetViewStartRow: 0,
+        };
         const unitId = this._workbook.getUnitId();
         const sheetId = this._worksheet.getSheetId();
         const renderManagerService = this._injector.get(IRenderManagerService);
         const render = renderManagerService.getRenderById(unitId);
-        if (!render) return null;
-        const scm = render.with(SheetScrollManagerService);
-        return scm.getScrollStateByParam({ unitId, sheetId });
+        if (!render) return emptyScrollState;
+        const sheetScrollManagerService = render.with(SheetScrollManagerService);
+        const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
+        return scrollState || emptyScrollState;
     }
 
     override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {

@@ -16,10 +16,10 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { BuiltInUIPart, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { FUniver } from '@univerjs/core';
-import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, PasteCommand } from '@univerjs/ui';
+import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
@@ -44,7 +44,6 @@ export interface IFUniverUIMixin {
     /**
      * Create a menu build object. You can insert new menus into the UI.
      * @param {IFacadeMenuItem} menuItem the menu item
-     *
      * @example
      * ```ts
      * univerAPI.createMenu({
@@ -53,14 +52,12 @@ export interface IFUniverUIMixin {
      *   action: () => {},
      * }).appendTo('ribbon.start.others');
      * ```
-     *
      * @returns the {@link FMenu} object
      */
     createMenu(menuItem: IFacadeMenuItem): FMenu;
     /**
      * Create a menu that contains submenus, and later you can append this menu and its submenus to the UI.
      * @param submenuItem the submenu item
-     *
      * @example
      * ```ts
      * univerAPI.createSubmenu({ id: 'custom-submenu', title: 'Custom Submenu' })
@@ -71,13 +68,11 @@ export interface IFUniverUIMixin {
      *   )
      *   .appendTo('contextMenu.others');
      * ```
-     *
      * @returns the {@link FSubmenu} object
      */
     createSubmenu(submenuItem: IFacadeSubmenuItem): FSubmenu;
     /**
      * Open a sidebar.
-     *
      * @deprecated Please use `openSidebar` instead.
      * @param params the sidebar options
      * @returns the disposable object
@@ -85,7 +80,6 @@ export interface IFUniverUIMixin {
     openSiderbar(params: ISidebarMethodOptions): IDisposable;
     /**
      * Open a sidebar.
-     *
      * @deprecated Please use `openSidebar` instead.
      * @param params the sidebar options
      * @returns the disposable object
@@ -104,7 +98,6 @@ export interface IFUniverUIMixin {
     getComponentManager(): ComponentManager;
     /**
      * Show a message.
-     *
      * @example
      * ```ts
      * const message = univerAPI.showMessage({ key: 'my-message', content: 'Warning', duration: 0 });
@@ -113,6 +106,29 @@ export interface IFUniverUIMixin {
      * ```
      */
     showMessage(options: IMessageProps): void;
+
+    /**
+     * Set the visibility of a built-in UI part.
+     * @param key the built-in UI part
+     * @param visible the visibility
+     * @returns the {@link FUniver} object
+     * example
+     * ```ts
+     * univerAPI.setUIVisible(BuiltInUIPart.HEADER, false);
+     * ```
+     */
+    setUIVisible(key: BuiltInUIPart, visible: boolean): FUniver;
+
+    /**
+     * Get the visibility of a built-in UI part.
+     * @param key the built-in UI part
+     * @returns the visibility
+     * example
+     * ```ts
+     * univerAPI.isUIVisible(BuiltInUIPart.HEADER);
+     * ```
+     */
+    isUIVisible(key: BuiltInUIPart): boolean;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -164,9 +180,21 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return this._injector.get(ComponentManager);
     }
 
-    override showMessage(options: IMessageProps): void {
+    override showMessage(options: IMessageProps): FUniver {
         const messageService = this._injector.get(IMessageService);
         messageService.show(options);
+        return this;
+    }
+
+    override setUIVisible(ui: BuiltInUIPart, visible: boolean): FUniver {
+        const uiPartService = this._injector.get(IUIPartsService);
+        uiPartService.setUIVisible(ui, visible);
+        return this;
+    }
+
+    override isUIVisible(ui: BuiltInUIPart): boolean {
+        const uiPartService = this._injector.get(IUIPartsService);
+        return uiPartService.isUIVisible(ui);
     }
 }
 

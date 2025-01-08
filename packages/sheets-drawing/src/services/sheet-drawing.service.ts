@@ -20,8 +20,19 @@ import { createIdentifier } from '@univerjs/core';
 import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
+    /**
+     * Only the position of the drawing follows the cell changes. When rows or columns are inserted or deleted, the position of the drawing changes, but the size remains the same.
+     */
     Position = '0',
+
+    /**
+     * The size and position of the drawing follow the cell changes. When rows or columns are inserted or deleted, the size and position of the drawing change accordingly.
+     */
     Both = '1',
+
+    /**
+     * The size and position of the drawing do not follow the cell changes. When rows or columns are inserted or deleted, the position and size of the drawing remain unchanged.
+     */
     None = '2',
 }
 

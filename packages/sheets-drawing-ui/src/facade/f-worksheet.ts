@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IFBlobSource, ImageSourceType, type Nullable } from '@univerjs/core';
+import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
@@ -26,7 +27,7 @@ export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' 
 
 export interface IFWorksheetLegacy {
     /**
-     * add a float dom to position
+     * Add a float dom to position.
      * @param layer float dom config
      * @param id float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
@@ -70,24 +71,38 @@ export interface IFWorksheetLegacy {
      *  const imageBuilder = activeSheet.newOverGridImage();
      *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
      *  activeSheet.insertImages([param]);
-     *
-     *
      *  const image = activeSheet.getImageById(param.drawingId);
      *  console.log(image);
-
      *  setTimeout(async ()=>{
      *   const builder = image.toBuilder();
      *   const param = await builder.setHeight(50).setWidth(100).build();
      *   activeSheet.updateImages([param]);
      *  }, 4000);
      */
-    insertImages(sheetImages: ISheetImage[]): void;
+    insertImages(sheetImages: ISheetImage[]): FWorksheet;
 
+    /**
+     * Get all images in current sheet.
+     * @returns FOverGridImage[]
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
+     * ```
+     */
     getImages(): FOverGridImage[];
 
+    /**
+     * Get image by drawing id
+     * @param id - The drawing id of the image
+     * @returns FOverGridImage | null
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().getImageById('xxxx');
+     * ```
+     */
     getImageById(id: string): FOverGridImage | null;
 
-    deleteImages(sheetImages: FOverGridImage[]): void;
+    deleteImages(sheetImages: FOverGridImage[]): FWorksheet;
 
     /**
      * Update images to the sheet
@@ -100,34 +115,51 @@ export interface IFWorksheetLegacy {
      *  const imageBuilder = activeSheet.newOverGridImage();
      *  const param = await imageBuilder.setSource('https://avatars.githubusercontent.com/u/61444807?s=48&v=4').setColumn(5).setRow(5).setWidth(500).setHeight(300).build();
      *  activeSheet.insertImages([param]);
-     *
-     *
      *  const image = activeSheet.getImageById(param.drawingId);
      *  console.log(image);
-
      *  setTimeout(async ()=>{
      *   const builder = image.toBuilder();
      *   const param = await builder.setHeight(50).setWidth(100).build();
      *   activeSheet.updateImages([param]);
      *  }, 4000);
      */
-    updateImages(sheetImages: ISheetImage[]): void;
+    updateImages(sheetImages: ISheetImage[]): FWorksheet;
 
+    /**
+     * Get all images in current sheet.
+     * @returns FOverGridImage[]
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().getImages();
+     * ```
+     */
     getActiveImages(): FOverGridImage[];
 
-    onImageInserted(callback: (images: FOverGridImage[]) => void): void;
+    /**
+     * Hook when a image is inserted.
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is inserted.
+     */
+    onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
-    onImageDeleted(callback: (images: FOverGridImage[]) => void): void;
+    /**
+     * Hook when a image is deleted.
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is deleted.
+     */
+    onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable;
 
-    onImageChanged(callback: (images: FOverGridImage[]) => void): void;
+    /**
+     * Hook when a image is changed.
+     * @param {function(FOverGridImage[]: void)} callback - The callback function when a image is changed.
+     */
+    onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable;
 
      /**
       * Create a new over grid image builder.
-      * @returns The builder
+      * @returns {FOverGridImageBuilder} The builder
       * @example
       * ```ts
       * // create a new over grid image builder.
-      * const builder = UniverApi.newOverGridImage();
+      * const builder = univerAPI.newOverGridImage();
       * ```
       */
     newOverGridImage(): FOverGridImageBuilder;
@@ -193,12 +225,12 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             imageBuilder.setRowOffset(0);
         }
 
-        const param = await imageBuilder.build();
+        const param = await imageBuilder.buildAsync();
 
         return this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: [param] });
     }
 
-    override insertImages(sheetImages: ISheetImage[]): void {
+    override insertImages(sheetImages: ISheetImage[]): FWorksheet {
         const param = sheetImages.map((image) => {
             image.unitId = this._fWorkbook.getId();
             image.subUnitId = this.getSheetId();
@@ -206,9 +238,10 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         });
 
         this._commandService.syncExecuteCommand(InsertSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: param });
+        return this;
     }
 
-    override deleteImages(sheetImages: FOverGridImage[]): void {
+    override deleteImages(sheetImages: FOverGridImage[]): FWorksheet {
         const drawings = sheetImages.map((image) => {
             return {
                 unitId: this._fWorkbook.getId(),
@@ -218,6 +251,8 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
             };
         });
         this._commandService.syncExecuteCommand(RemoveSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings });
+
+        return this;
     }
 
     override getImages(): FOverGridImage[] {
@@ -226,6 +261,9 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const images: FOverGridImage[] = [];
         for (const drawingId in drawingData) {
             const drawing = drawingData[drawingId];
+            if (drawing.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                continue;
+            }
             images.push(this._injector.createInstance(FOverGridImage, drawing as ISheetImage));
         }
         return images;
@@ -234,7 +272,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     override getImageById(id: string): FOverGridImage | null {
         const sheetDrawingService = this._injector.get(ISheetDrawingService);
         const drawing = sheetDrawingService.getDrawingByParam({ unitId: this._fWorkbook.getId(), subUnitId: this.getSheetId(), drawingId: id });
-        if (drawing) {
+        if (drawing && drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
             return this._injector.createInstance(FOverGridImage, drawing as ISheetImage);
         }
         return null;
@@ -251,38 +289,39 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return images;
     }
 
-    override updateImages(sheetImages: ISheetImage[]): void {
+    override updateImages(sheetImages: ISheetImage[]): FWorksheet {
         this._commandService.syncExecuteCommand(SetSheetDrawingCommand.id, { unitId: this._fWorkbook.getId(), drawings: sheetImages });
+        return this;
     }
 
-    override onImageInserted(callback: (images: FOverGridImage[]) => void): void {
+    override onImageInserted(callback: (images: FOverGridImage[]) => void): IDisposable {
         const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        sheetDrawingService.add$.subscribe((drawingSearches) => {
+        return toDisposable(sheetDrawingService.add$.subscribe((drawingSearches) => {
             const drawings = drawingSearches.map(
                 (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
             );
             callback(drawings);
-        });
+        }));
     }
 
-    override onImageDeleted(callback: (images: FOverGridImage[]) => void): void {
+    override onImageDeleted(callback: (images: FOverGridImage[]) => void): IDisposable {
         const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        sheetDrawingService.remove$.subscribe((drawingSearches) => {
+        return toDisposable(sheetDrawingService.remove$.subscribe((drawingSearches) => {
             const drawings = drawingSearches.map(
                 (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
             );
             callback(drawings);
-        });
+        }));
     }
 
-    override onImageChanged(callback: (images: FOverGridImage[]) => void): void {
+    override onImageChanged(callback: (images: FOverGridImage[]) => void): IDisposable {
         const sheetDrawingService = this._injector.get(ISheetDrawingService);
-        sheetDrawingService.update$.subscribe((drawingSearches) => {
+        return toDisposable(sheetDrawingService.update$.subscribe((drawingSearches) => {
             const drawings = drawingSearches.map(
                 (drawingSearch) => this._injector.createInstance(FOverGridImage, sheetDrawingService.getDrawingByParam(drawingSearch) as ISheetImage)
             );
             callback(drawings);
-        });
+        }));
     }
 
     override newOverGridImage(): FOverGridImageBuilder {

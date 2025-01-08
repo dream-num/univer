@@ -112,7 +112,7 @@ export function cleanupPkgPlugin(): Plugin {
                 };
             }
             pkg.publishConfig.exports['./lib/*'] = './lib/*';
-            pkg.space = pkg.publishConfig.exports;
+            delete pkg.space;
 
             if (Object.keys(optionalDeps).length > 0) {
                 pkg.optionalDependencies = sortKeys(optionalDeps);

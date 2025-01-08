@@ -38,7 +38,7 @@ export interface IFRangeConditionalFormattingMixin {
 
     /**
      * Gets all the conditional formatting for the current range
-     * @return {*}  {IConditionFormattingRule[]}
+     * @returns {*}  {IConditionFormattingRule[]}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -51,7 +51,7 @@ export interface IFRangeConditionalFormattingMixin {
     getConditionalFormattingRules(): IConditionFormattingRule[];
     /**
      * Creates a constructor for conditional formatting
-     * @return {*}  {ConditionalFormatRuleBuilder}
+     * @returns {*}  {ConditionalFormatRuleBuilder}
      * @memberof IFWorksheetConditionalFormattingMixin
      * @example
      * ```ts
@@ -74,17 +74,16 @@ export interface IFRangeConditionalFormattingMixin {
     /**
      * Add a new conditional format
      * @param {IConditionFormattingRule} rule
-     * @return {*}  {Promise<boolean>}
-     * @memberof IFWorksheetConditionalFormattingMixin
+     * @returns {FRange} Returns the current range instance for method chaining
+     * @memberof IFRangeConditionalFormattingMixin
      */
-    addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean>;
+    addConditionalFormattingRule(rule: IConditionFormattingRule): FRange;
 
     /**
      * Delete conditional format according to `cfId`
-     *
      * @param {string} cfId
-     * @return {*}  {Promise<boolean>}
-     * @memberof IFWorksheetConditionalFormattingMixin
+     * @returns {FRange} Returns the current range instance for method chaining
+     * @memberof IFRangeConditionalFormattingMixin
      * @example
      * ```ts
      *  const workbook = univerAPI.getActiveWorkbook();
@@ -93,14 +92,15 @@ export interface IFRangeConditionalFormattingMixin {
      *  worksheet?.deleteConditionalFormattingRule(rules![0].cfId);
      * ```
      */
-    deleteConditionalFormattingRule(cfId: string): Promise<boolean>;
+    deleteConditionalFormattingRule(cfId: string): FRange;
 
     /**
      * Modify the priority of the conditional format
      * @param {string} cfId Rules that need to be moved
      * @param {string} toCfId Target rule
      * @param {IAnchor['type']} [type] After the default move to the destination rule, if type = before moves to the front, the default value is after
-     * @memberof FWorksheetConditionalFormattingMixin
+     * @returns {FRange} Returns the current range instance for method chaining
+     * @memberof FRangeConditionalFormattingMixin
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
@@ -111,14 +111,14 @@ export interface IFRangeConditionalFormattingMixin {
      * worksheet?.moveConditionalFormattingRule(rule.cfId, targetRule.cfId, 'before');
      * ```
      */
-    moveConditionalFormattingRule(cfId: string, toCfId: string, type?: IAnchor['type']): Promise<boolean>;
+    moveConditionalFormattingRule(cfId: string, toCfId: string, type?: IAnchor['type']): FRange;
 
     /**
      * Set the conditional format according to `cfId`
      * @param {string} cfId
      * @param {IConditionFormattingRule} rule
-     * @return {*}  {Promise<boolean>}
-     * @memberof IFWorksheetConditionalFormattingMixin
+     * @returns {FRange} Returns the current range instance for method chaining
+     * @memberof IFRangeConditionalFormattingMixin
      * @example
      * ```ts
      *   const workbook = univerAPI.getActiveWorkbook();
@@ -128,7 +128,7 @@ export interface IFRangeConditionalFormattingMixin {
      *   worksheet?.setConditionalFormattingRule(rule.cfId, { ...rule, ranges: [] });
      * ```
      */
-    setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): Promise<boolean>;
+    setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FRange;
 }
 
 export class FRangeConditionalFormattingMixin extends FRange implements IFRangeConditionalFormattingMixin {
@@ -145,36 +145,40 @@ export class FRangeConditionalFormattingMixin extends FRange implements IFRangeC
         return new FConditionalFormattingBuilder({ ranges: [this._range] });
     }
 
-    override addConditionalFormattingRule(rule: IConditionFormattingRule): Promise<boolean> {
+    override addConditionalFormattingRule(rule: IConditionFormattingRule): FRange {
         const params: IAddConditionalRuleMutationParams = {
             rule, unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
         };
-        return this._commandService.executeCommand(AddConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(AddConditionalRuleMutation.id, params);
+        return this;
     }
 
-    override deleteConditionalFormattingRule(cfId: string): Promise<boolean> {
+    override deleteConditionalFormattingRule(cfId: string): FRange {
         const params: IDeleteConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             cfId,
         };
-        return this._commandService.executeCommand(DeleteConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(DeleteConditionalRuleMutation.id, params);
+        return this;
     }
 
-    override moveConditionalFormattingRule(cfId: string, toCfId: string, type: IAnchor['type'] = 'after'): Promise<boolean> {
+    override moveConditionalFormattingRule(cfId: string, toCfId: string, type: IAnchor['type'] = 'after'): FRange {
         const params: IMoveConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             start: { id: cfId, type: 'self' }, end: { id: toCfId, type },
         };
-        return this._commandService.executeCommand(MoveConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, params);
+        return this;
     }
 
-    override setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): Promise<boolean> {
+    override setConditionalFormattingRule(cfId: string, rule: IConditionFormattingRule): FRange {
         const params: ISetConditionalRuleMutationParams = {
             unitId: this._workbook.getUnitId(), subUnitId: this._worksheet.getSheetId(),
             rule,
             cfId,
         };
-        return this._commandService.executeCommand(SetConditionalRuleMutation.id, params);
+        this._commandService.syncExecuteCommand(SetConditionalRuleMutation.id, params);
+        return this;
     }
 }
 

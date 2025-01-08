@@ -14,25 +14,39 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link';
-import { FWorkbook } from '@univerjs/sheets/facade';
+import type { FRange } from '@univerjs/sheets/facade';
+import { Inject, type IRange } from '@univerjs/core';
 import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
+import { FWorkbook } from '@univerjs/sheets/facade';
+
+export class SheetHyperLinkBuilder {
+    constructor(
+        private _workbook: FWorkbook,
+        @Inject(SheetsHyperLinkParserService) private readonly _parserService: SheetsHyperLinkParserService
+    ) {}
+
+    getRangeUrl(range: FRange): this {
+        this._parserService.buildHyperLink(this._workbook.getId(), range.getSheetId(), range.getRange());
+        return this;
+    }
+}
 
 export interface IFWorkbookHyperlinkMixin {
     /**
-     * create a hyperlink for the sheet
-     * @param sheetId the sheet id to link
-     * @param range the range to link, or define-name id
-     * @returns the hyperlink string
+     * @deprecated use `getUrl` method in `FRange` or `FWorksheet` instead.
      */
     createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
+
     /**
-     * parse the hyperlink string to get the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
      * @param hyperlink the hyperlink string
      * @returns the hyperlink info
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().parseSheetHyperlink('#gid=sheet_Id&range=F6')
+     * ```
      */
-    // TODO@weird94: this should be moved to hyperlink plugin
     parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
 }
 
@@ -43,9 +57,9 @@ export class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHype
     }
 
     /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
+     * Parse the hyperlink string to get the hyperlink info.
+     * @param {string} hyperlink the hyperlink string
+     * @returns {ISheetHyperLinkInfo} the hyperlink info
      */
     override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
         const resolverService = this._injector.get(SheetsHyperLinkParserService);

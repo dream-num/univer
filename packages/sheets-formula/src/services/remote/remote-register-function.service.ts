@@ -15,11 +15,12 @@
  */
 
 import type { BaseFunction } from '@univerjs/engine-formula';
-import { CustomFunction, IFunctionService } from '@univerjs/engine-formula';
 import { createIdentifier } from '@univerjs/core';
+import { AsyncCustomFunction, CustomFunction, IFunctionService } from '@univerjs/engine-formula';
 
 export interface IRemoteRegisterFunctionService {
     registerFunctions(serializedFuncs: Array<[string, string]>): Promise<void>;
+    registerAsyncFunctions(serializedFuncs: Array<[string, string]>): Promise<void>;
     unregisterFunctions(names: string[]): Promise<void>;
 }
 
@@ -42,6 +43,14 @@ export class RemoteRegisterFunctionService implements IRemoteRegisterFunctionSer
         this._functionService.registerExecutors(...functionList);
     }
 
+    async registerAsyncFunctions(serializedFuncs: Array<[string, string]>): Promise<void> {
+        const functionList = serializedFuncs.map(([func, name]) => {
+            return createAsyncFunction(func, name);
+        });
+
+        this._functionService.registerExecutors(...functionList);
+    }
+
     async unregisterFunctions(names: string[]): Promise<void> {
         this._functionService.unregisterDescriptions(...names);
     }
@@ -52,6 +61,13 @@ function createFunction(functionString: string, functionName: string) {
     // eslint-disable-next-line no-new-func
     const functionCalculate = new Function(`return ${functionString}`)();
     instance.calculateCustom = functionCalculate;
+    return instance as BaseFunction;
+}
 
+function createAsyncFunction(functionString: string, functionName: string) {
+    const instance = new AsyncCustomFunction(functionName);
+    // eslint-disable-next-line no-new-func
+    const functionCalculate = new Function(`return ${functionString}`)();
+    instance.calculateCustom = functionCalculate;
     return instance as BaseFunction;
 }

@@ -1,3 +1,4 @@
+const jsdoc = require('eslint-plugin-jsdoc');
 const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
 const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
 const noSelfPackageImports = require('./plugins/no-self-package-imports');
@@ -175,6 +176,7 @@ exports.facadePreset = () => {
         rules: {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
+            ...jsdoc.configs.recommended.rules,
         },
     };
 };

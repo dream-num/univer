@@ -96,7 +96,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     };
 
     return (
-        <div className="univer-w-[300px] univer-bg-white">
+        <div className="univer-w-[300px]">
             <ul
                 className={`
                   univer-max-h-[360px] univer-overflow-y-auto univer-scrollbar-thin univer-scrollbar-thumb-gray-300
@@ -109,6 +109,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
                             key={index}
                             className={`
                               univer-px-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                              dark:hover:univer-bg-gray-600
                               hover:univer-bg-gray-100
                             `}
                             onClick={() => { focusDefinedName(definedName); }}
@@ -146,6 +147,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
             <div
                 className={`
                   univer-p-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                  dark:hover:univer-bg-gray-600
                   hover:univer-bg-gray-100
                 `}
                 onClick={openSlider}

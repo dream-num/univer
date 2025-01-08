@@ -22,24 +22,21 @@ import { type IRegisterFunctionParams, IRegisterFunctionService, RegisterFunctio
 export interface IFUniverSheetsFormulaMixin {
     /**
      * Register a function to the spreadsheet.
-     *
+     * @deprecated Use `univerAPI.getFormula().registerFunction` instead.
      * @param {IRegisterFunctionParams} config The configuration of the function.
      * @returns {IDisposable} The disposable instance.
      */
     registerFunction(config: IRegisterFunctionParams): IDisposable;
-
-    // TODO@Dushusir: this API should be implemented on FFormula.
 }
 
 export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheetsFormulaMixin {
     /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     * RegisterFunction may be executed multiple times, triggering multiple formula forced refreshes.
      */
     declare private _debouncedFormulaCalculation: () => void;
 
     /**
      * Initialize the FUniver instance.
-     *
      * @private
      */
     override _initialize(): void {

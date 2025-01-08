@@ -17,10 +17,10 @@
 import type { ComponentType } from 'react';
 import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, useDependency } from '@univerjs/core';
-import { MoreFunctionSingle } from '@univerjs/icons';
-import clsx from 'clsx';
+import { clsx } from '@univerjs/design';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { MoreFunctionSingle } from '@univerjs/icons';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { ComponentContainer } from '../ComponentContainer';
@@ -40,11 +40,16 @@ export function Ribbon(props: IRibbonProps) {
     const localeService = useDependency(LocaleService);
 
     const toolbarRef = useRef<HTMLDivElement>(null);
-    const toolbarItemRefs = useRef<Record<string, { el: HTMLDivElement;key: string }>>({});
+    const toolbarItemRefs = useRef<Record<string, { el: HTMLSpanElement; key: string }>>({});
 
     const [ribbon, setRibbon] = useState<IMenuSchema[]>([]);
-    const [category, setCategory] = useState<string>(RibbonPosition.START);
+    const [activatedTab, setActivatedTab] = useState<string>(RibbonPosition.START);
     const [collapsedIds, setCollapsedIds] = useState<string[]>([]);
+
+    const handleSelectTab = useCallback((group: IMenuSchema) => {
+        toolbarItemRefs.current = {};
+        setActivatedTab(group.key);
+    }, []);
 
     // subscribe to menu changes
     useEffect(() => {
@@ -64,22 +69,28 @@ export function Ribbon(props: IRibbonProps) {
     // resize observer
     useEffect(() => {
         const observer = new ResizeObserver((entries) => {
-            const toolbar = entries[0].target;
-            const toolbarWidth = toolbar.clientWidth;
-            const toolbarItems = Object.values(toolbarItemRefs.current);
-            const collapsedIds: string[] = [];
-            let totalWidth = 90;
+            requestAnimationFrame(() => {
+                const toolbar = entries[0].target;
+                const toolbarWidth = toolbar.clientWidth;
+                const toolbarItems = Object.values(toolbarItemRefs.current);
+                const collapsedIds: string[] = [];
+                let totalWidth = 0;
 
-            for (const { el, key } of toolbarItems) {
-                if (!el) continue;
+                const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
+                const a = [];
 
-                totalWidth += el.clientWidth + 8;
-                if (totalWidth > toolbarWidth) {
-                    collapsedIds.push(key);
+                for (const { el, key } of toolbarItems) {
+                    if (!el) continue;
+                    a.push(el);
+
+                    totalWidth += el.getBoundingClientRect().width + 8;
+                    if (totalWidth > toolbarWidth - 32 - 8 * (allGroups.length - 1)) {
+                        collapsedIds.push(key);
+                    }
                 }
-            }
 
-            setCollapsedIds(collapsedIds);
+                setCollapsedIds(collapsedIds);
+            });
         });
 
         if (toolbarRef.current) {
@@ -89,13 +100,10 @@ export function Ribbon(props: IRibbonProps) {
         return () => {
             observer.disconnect();
         };
-    }, [ribbon]);
-
-    // Should the header when there is at least one header menu components or menu groups.
-    const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || ribbon.length > 1, [headerMenuComponents, ribbon]);
+    }, [ribbon, activatedTab]);
 
     const activeGroup = useMemo(() => {
-        const allGroups = ribbon.find((group) => group.key === category)?.children ?? [];
+        const allGroups = ribbon.find((group) => group.key === activatedTab)?.children ?? [];
         const visibleGroups: IMenuSchema[] = [];
         const hiddenGroups: IMenuSchema[] = [];
 
@@ -115,7 +123,7 @@ export function Ribbon(props: IRibbonProps) {
             visibleGroups,
             hiddenGroups,
         };
-    }, [ribbon, category, collapsedIds]);
+    }, [ribbon, activatedTab, collapsedIds]);
 
     const fakeToolbarContent = useMemo(() => (
         activeGroup.allGroups.map((groupItem) => (
@@ -124,13 +132,15 @@ export function Ribbon(props: IRibbonProps) {
                     child.item && (
                         <ToolbarItem
                             key={child.key}
-                            ref={(ref) => {
-                                toolbarItemRefs.current[child.key] = {
-                                    el: ref?.nativeElement as HTMLDivElement,
-                                    key: child.key,
-                                };
-                            }}
                             {...child.item}
+                            ref={(ref) => {
+                                if (ref?.el) {
+                                    toolbarItemRefs.current[child.key] = {
+                                        el: ref.el,
+                                        key: child.key,
+                                    };
+                                }
+                            }}
                         />
                     )
                 ))}
@@ -141,30 +151,48 @@ export function Ribbon(props: IRibbonProps) {
     return (
         <>
             {/* header */}
-            {hasHeaderMenu && (
-                <header className={styles.headerbar}>
-                    <div className={styles.menubar}>
-                        {ribbon.length > 1 && ribbon.map((group) => (
-                            <a
-                                key={group.key}
-                                className={clsx(styles.menubarItem, {
-                                    [styles.menubarItemActive]: group.key === category,
-                                })}
-                                onClick={() => {
-                                    setCategory(group.key);
-                                }}
-                            >
-                                {localeService.t(group.key)}
-                            </a>
-                        ))}
-                    </div>
-                    <div className={styles.headerMenu}>
+            <header className="univer-relative univer-select-none">
+                <div
+                    className={clsx(`
+                      univer-animate-in univer-flex univer-gap-2 univer-justify-center univer-items-center univer-h-0
+                      univer-transition-all univer-overflow-hidden
+                    `, {
+                        'univer-h-8 univer-slide-in-from-top-full': ribbon.length > 1 || (headerMenuComponents && headerMenuComponents.size > 0),
+                    })}
+                >
+                    {ribbon.length > 1 && ribbon.map((group) => (
+                        <a
+                            key={group.key}
+                            className={clsx(`
+                              univer-text-gray-700 univer-text-sm univer-rounded univer-px-2 univer-py-0.5
+                              univer-cursor-pointer univer-transition-colors univer-box-border
+                              hover:univer-bg-gray-300
+                            `, {
+                                'univer-bg-primary-500 univer-text-white hover:!univer-bg-primary-500': group.key === activatedTab,
+                            })}
+                            onClick={() => handleSelectTab(group)}
+                        >
+                            {localeService.t(group.key)}
+                        </a>
+                    ))}
+                </div>
+
+                {(headerMenuComponents && headerMenuComponents.size > 0) && (
+                    <div
+                        className={`
+                          univer-absolute univer-top-0 univer-right-2 univer-h-full univer-flex univer-gap-2
+                          univer-items-center
+                          [&>*]:univer-inline-flex [&>*]:univer-items-center [&>*]:univer-rounded
+                          [&>*]:univer-transition-colors [&>*]:univer-px-1 [&>*]:univer-h-6
+                          hover:[&>*]:univer-bg-gray-300
+                        `}
+                    >
                         <ComponentContainer components={headerMenuComponents} />
                     </div>
-                </header>
-            )}
+                )}
+            </header>
 
-            <section role="ribbon" className={styles.toolbar}>
+            <section role="toolbar" className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>
                     {activeGroup.visibleGroups.map((groupItem) => (groupItem.children?.length || groupItem.item) && (
                         <div key={groupItem.key} className={styles.toolbarGroup}>
@@ -182,7 +210,6 @@ export function Ribbon(props: IRibbonProps) {
                     {collapsedIds.length > 0 && (
                         <TooltipWrapper title={localeService.t('ribbon.more')} placement="bottom">
                             <DropdownWrapper
-                                forceRender
                                 overlay={(
                                     <div className={styles.toolbarMoreContainer}>
                                         {activeGroup.hiddenGroups.map((groupItem) => (
@@ -210,6 +237,7 @@ export function Ribbon(props: IRibbonProps) {
 
             {/* fake toolbar for calculating overflow width */}
             <div
+                aria-hidden
                 ref={toolbarRef}
                 className={styles.toolbarContainer}
                 style={{
@@ -217,9 +245,6 @@ export function Ribbon(props: IRibbonProps) {
                     top: -9999,
                     left: 0,
                     right: 0,
-                    // top: 0,
-                    // left: 0,
-                    // opacity: 1,
                 }}
             >
                 {fakeToolbarContent}

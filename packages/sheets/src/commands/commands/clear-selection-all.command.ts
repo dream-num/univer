@@ -42,7 +42,7 @@ interface IClearSelectionAllCommandParams {
 export const ClearSelectionAllCommand: ICommand = {
     id: 'sheet.command.clear-selection-all',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: IClearSelectionAllCommandParams) => {
+    handler: (accessor: IAccessor, params: IClearSelectionAllCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

@@ -267,9 +267,9 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Update the corresponding selectionControl based on selectionsData.
-     * selectionData[i] syncs selectionControls[i]
-     * @param selectionsWithCoord
+     * Update the corresponding selectionControl based on selectionsData from WorkbookSelectionModel
+     * selectionData[i] --> selectionControls[i]
+     * @param selectionsWithStyleList {ISelectionWithStyle[]} selectionsData from WorkbookSelectionModel
      */
     resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void {
         const allSelectionControls = this.getSelectionControls();

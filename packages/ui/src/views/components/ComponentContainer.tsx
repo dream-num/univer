@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
+import type { Injector } from '@univerjs/core';
 import type { ComponentType } from 'react';
+import type { ComponentRenderer } from '../../services/parts/parts.service';
+import { useDependency } from '@univerjs/core';
 import React, { useMemo, useRef } from 'react';
 import { debounceTime, filter, map, startWith } from 'rxjs';
-import type { Injector } from '@univerjs/core';
 import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
 
@@ -44,8 +45,11 @@ export function ComponentContainer(props: IComponentContainerProps) {
  * @param injector The injector to get the service. It is optional. However, you should not change this prop in a given
  * component.
  */
-export function useComponentsOfPart(part: string, injector?: Injector) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useComponentsOfPart(part: string, injector?: Injector): Set<ComponentRenderer> {
     const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
+    const uiVisibleChange$ = useMemo(() => uiPartsService.uiVisibleChange$.pipe(filter((ui) => ui.ui === part)), [part, uiPartsService]);
+    useObservable(uiVisibleChange$);
 
     const updateCounterRef = useRef<number>(0);
     const componentPartUpdateCount = useObservable(
@@ -61,5 +65,5 @@ export function useComponentsOfPart(part: string, injector?: Injector) {
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
+    return useMemo(() => uiPartsService.isUIVisible(part) ? uiPartsService.getComponents(part) : new Set(), [componentPartUpdateCount]);
 }

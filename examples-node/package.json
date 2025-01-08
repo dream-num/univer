@@ -37,7 +37,7 @@
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@univerjs-infra/shared": "workspace:*",
-        "esbuild": "^0.24.0",
+        "esbuild": "^0.24.2",
         "fs-extra": "^11.2.0",
         "typescript": "^5.7.2"
     }

@@ -74,6 +74,11 @@ export interface IWorkbookData {
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
      */
     resources?: IResources;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 /**
@@ -143,6 +148,11 @@ export interface IWorksheetData {
     gridlinesColor?: string;
 
     rightToLeft: BooleanNumber;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 export type CustomData = Nullable<Record<string, any>>;
@@ -272,6 +282,14 @@ export interface ICellMarks {
     isSkip?: boolean;
 }
 
+export interface IFontRenderExtension {
+    leftOffset?: number;
+    rightOffset?: number;
+    topOffset?: number;
+    downOffset?: number;
+    isSkip?: boolean;
+}
+
 // TODO@weird94: should be moved outside of the core package
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
@@ -286,13 +304,10 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     coverable?: boolean;
     linkUrl?: string;
     linkId?: string;
-    fontRenderExtension?: {
-        leftOffset?: number;
-        rightOffset?: number;
-        topOffset?: number;
-        downOffset?: number;
-        isSkip?: boolean;
-    };
+    fontRenderExtension?: IFontRenderExtension;
+    // use for save the theme style, it  can not be composed directly
+    themeStyle?: Nullable<IStyleData>;
+
 }
 
 export function isICellData(value: any): value is ICellData {
@@ -328,7 +343,7 @@ export function isNullCell(cell: Nullable<ICellData>) {
         return true;
     }
 
-    const { v, f, si, p, s, custom } = cell;
+    const { v, f, si, p, custom } = cell;
 
     if (!(v == null || (typeof v === 'string' && v.length === 0))) {
         return false;
@@ -354,9 +369,22 @@ export function isCellV(cell: Nullable<ICellData | CellValue>) {
 }
 
 export interface IFreeze {
+    /**
+     * count of fixed cols
+     */
     xSplit: number;
+    /**
+     * count of fixed rows
+     */
     ySplit: number;
+    /**
+     * scrollable start row
+     */
     startRow: number;
+
+    /**
+     * scrollable start column
+     */
     startColumn: number;
 }
 

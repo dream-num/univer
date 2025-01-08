@@ -32,7 +32,18 @@ export interface ISetScrollRelativeCommandParams {
 export interface IScrollCommandParams {
     offsetX?: number;
     offsetY?: number;
+    /**
+     * The index of row in spreadsheet.
+     * e.g. if row start 10 at current viewport after freeze, and scroll value is zero, startRow is 0.
+     * e.g. if scrolled about 2 rows, now top is 12, then sheetViewStartRow is 2.
+     */
     sheetViewStartRow?: number;
+
+    /**
+     * Not the index of col in spreadsheet, but index of first column in current viewport.
+     * e.g. if col start C at current viewport after freeze, and scroll value is zero, startColumn is 0.
+     * e.g. if scrolled about 2 columns, now left is E, then sheetViewStartColumn is 2.
+     */
     sheetViewStartColumn?: number;
 }
 
@@ -65,9 +76,15 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             offsetY: currentOffsetY = 0,
         } = currentScroll || {};
         // the receiver is scroll.operation.ts
+        // const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
+
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
+
+            // why + ySplit? receiver - ySplit in scroll.operation.ts
+            // sheetViewStartRow: sheetViewStartRow + ySplit,
+            // sheetViewStartColumn: sheetViewStartColumn + xSplit,
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max
@@ -110,13 +127,17 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetX: currentOffsetX,
             offsetY: currentOffsetY,
         } = currentScroll || {};
-
+        const { xSplit, ySplit } = target.worksheet.getConfig().freeze;
         const commandService = accessor.get(ICommandService);
+
         return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
-            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0),
-            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0),
+            // why + ySplit? receiver - ySplit in scroll.operation.ts
+            // sheetViewStartRow: sheetViewStartRow + ySplit,
+            // sheetViewStartColumn: sheetViewStartColumn + xSplit,
+            sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0 + ySplit),
+            sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0 + xSplit),
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
         });

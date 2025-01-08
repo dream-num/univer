@@ -17,10 +17,11 @@
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IScrollCommandParams } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import {
     Direction,
     Disposable,
@@ -214,17 +215,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
                 const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
-                const freeze = this._getFreeze();
-
                 const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
                     viewportScrollX,
                     viewportScrollY
                 );
 
                 // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
+                // const freeze = this._getFreeze();
                 this._commandService.executeCommand(ScrollCommand.id, {
-                    sheetViewStartRow: row + (freeze?.ySplit || 0),
-                    sheetViewStartColumn: column + (freeze?.xSplit || 0),
+                    sheetViewStartRow: row,
+                    sheetViewStartColumn: column,
                     offsetX: columnOffset,
                     offsetY: rowOffset,
                 });
@@ -281,15 +281,23 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     /**
-     * Scroll spreadsheet to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
-     * @param row
-     * @param column
-     * @returns
+     * Scroll spreadsheet(viewMain) to cell position. Based on the limitations of viewport and the number of rows and columns, you can only scroll to the maximum scrollable range.
+     *
+     * if column A ~ B is frozen. set second param to 0 would make viewMain start at column C.
+     * set second param to 2 would make viewMain start at column E.
+     * @param {number} row - Cell row
+     * @param {number} column - Cell column
+     * @returns {boolean} - true if scroll is successful
      */
     scrollToCell(row: number, column: number) {
+        const worksheet = this._context.unit.getActiveSheet();
+        const {
+            ySplit: freezeYSplit,
+            xSplit: freezeXSplit,
+        } = worksheet.getFreeze();
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: row,
-            sheetViewStartColumn: column,
+            sheetViewStartRow: row - freezeYSplit,
+            sheetViewStartColumn: column - freezeXSplit,
             offsetX: 0,
             offsetY: 0,
         });
@@ -470,9 +478,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return skeleton.getRangeByViewBound(vpInfo.viewBound);
     }
 
-    // why so complicated?  ScrollRenderController@scrollToCell do the same thing, including the scenario of freezing.
+    // For arrow key to active cell cause scrolling.
     // eslint-disable-next-line max-lines-per-function, complexity
-    private _scrollToCell(row: number, column: number, forceTop?: boolean, forceLeft?: boolean): boolean {
+    private _scrollToCell(row: number, column: number, forceTop = false, forceLeft = false) {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
@@ -493,36 +501,40 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         column = Tools.clamp(column, 0, columnWidthAccumulation.length - 1);
 
         const {
-            startColumn: freezeStartColumn,
-            startRow: freezeStartRow,
-            ySplit: freezeYSplit,
-            xSplit: freezeXSplit,
+            startColumn: scrollableStartCol,
+            startRow: scrollableStartRow,
+            ySplit: freezedRowCount,
+            xSplit: freezedColCount,
         } = worksheet.getFreeze();
 
         const bounds = this._getViewportBounding();
         if (bounds == null) return false;
 
         const {
-            startRow: viewportStartRow,
-            startColumn: viewportStartColumn,
-            endRow: viewportEndRow,
-            endColumn: viewportEndColumn,
+            startRow: viewMainStartRow,
+            startColumn: viewMainStartColumn,
+            endRow: viewMainEndRow,
+            endColumn: viewMainEndColumn,
         } = bounds;
+        const visibleRangeOfViewMain = skeleton.getVisibleRangeByViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
+        // why undefined?
         let startSheetViewRow: number | undefined;
         let startSheetViewColumn: number | undefined;
 
         // vertical overflow only happens when the selection's row is in not the freeze area
-        if (row >= freezeStartRow && column >= freezeStartColumn - freezeXSplit) {
-            // top overflow
-            if (row <= viewportStartRow) {
+        // row >= scrollableStartRow means row is in scrollable area.
+        if (row >= scrollableStartRow && column >= scrollableStartCol - freezedRowCount) {
+            // top overflow: to row above first row in curr viewMain.
+            if (row <= viewMainStartRow) {
                 startSheetViewRow = row;
+                forceTop = true;
             }
 
-            // bottom overflow
-            if (row >= viewportEndRow) {
+            // bottom overflow: to row below last row.
+            if (row >= viewMainEndRow) {
                 const minRowAccumulation = rowHeightAccumulation[row] - viewport.height!;
-                for (let r = viewportStartRow; r <= row; r++) {
+                for (let r = viewMainStartRow; r <= row; r++) {
                     startSheetViewRow = r + 1;
                     if (rowHeightAccumulation[r] >= minRowAccumulation) {
                         break;
@@ -530,17 +542,19 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 }
             }
         }
-        // horizontal overflow only happens when the selection's column is in not the freeze area
-        if (column >= freezeStartColumn && row >= freezeStartRow - freezeYSplit) {
+        // why need row >= scrollableStartRow - freezedRowCount ?? we are handling column here, why need row?
+        // column >= scrollableStartCol means column is in scrollable area.
+        if (column >= scrollableStartCol && row >= scrollableStartRow - freezedRowCount) {
             // left overflow
-            if (column <= viewportStartColumn) {
+            if (column <= viewMainStartColumn) {
                 startSheetViewColumn = column;
+                forceLeft = true;
             }
 
             // right overflow
-            if (column >= viewportEndColumn) {
+            if (column >= viewMainEndColumn) {
                 const minColumnAccumulation = columnWidthAccumulation[column] - viewport.width!;
-                for (let c = viewportStartColumn; c <= column; c++) {
+                for (let c = viewMainStartColumn; c <= column; c++) {
                     startSheetViewColumn = c + 1;
                     if (columnWidthAccumulation[c] >= minColumnAccumulation) {
                         break;
@@ -551,16 +565,41 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollState() || {};
+        let { offsetX, offsetY, sheetViewStartRow: preSheetViewStartRow, sheetViewStartColumn: preSheetViewStartColumn } = this._scrollManagerService.getCurrentScrollState() || {};
 
-        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : startSheetViewRow;
-        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
+        // startSheetViewRow is undefined means not top overflow or bottom overflow.
+        // means keep current scroll state.
+        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : preSheetViewStartRow + freezedRowCount; ;
+        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : preSheetViewStartColumn + freezedColCount;
+
+        if (forceLeft) {
+            offsetX = 0;
+            startSheetViewColumn = column;
+            // for hidden columns
+            const hiddenColumns = skeleton.getHiddenColumnsInRange({ startColumn: startSheetViewColumn - freezedColCount, endColumn: startSheetViewColumn });
+            startSheetViewColumn = startSheetViewColumn - hiddenColumns.length;
+        }
+
+        if (forceTop) {
+            offsetY = 0;
+            startSheetViewRow = row;
+            // for hidden rows, consider hidden rows above the viewport visible area(not in scrollable area)
+            const hiddenRows = skeleton.getHiddenRowsInRange({ startRow: startSheetViewRow - freezedRowCount, endRow: startSheetViewRow });
+            startSheetViewRow = startSheetViewRow - hiddenRows.length;
+        }
 
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
-            sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : startSheetViewRow,
-            sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : startSheetViewColumn,
-            offsetX: startSheetViewColumn === undefined ? offsetX : 0,
-            offsetY: startSheetViewRow === undefined ? offsetY : 0,
-        });
+            // sheetViewStartRow & offsetX should never be undefined, it's rendering, there should always be a value!
+
+            // sheetViewStartRow: forceTop ? Math.max(0, row - freezeYSplit) : ((startSheetViewRow ?? 0) - freezeYSplit),
+            // sheetViewStartColumn: forceLeft ? Math.max(0, column - freezeXSplit) : ((startSheetViewColumn ?? 0) - freezeXSplit),
+            // offsetX: startSheetViewColumn === undefined ? offsetX : 0,
+            // offsetY: startSheetViewRow === undefined ? offsetY : 0,
+
+            sheetViewStartRow: Math.max(0, startSheetViewRow - freezedRowCount),
+            sheetViewStartColumn: Math.max(0, startSheetViewColumn - freezedColCount),
+            offsetX,
+            offsetY,
+        } as IScrollCommandParams);
     }
 }

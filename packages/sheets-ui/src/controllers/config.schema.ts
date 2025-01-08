@@ -31,6 +31,10 @@ export interface IUniverSheetsUIConfig {
      * Whether to show the formula bar.
      */
     formulaBar?: boolean;
+
+    clipboardConfig?: {
+        hidePasteOptions?: boolean;
+    };
 }
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {

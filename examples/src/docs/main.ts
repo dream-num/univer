@@ -29,6 +29,8 @@ import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, zhCN } from '../locales';
 
+import '../global.css';
+
 /* eslint-disable node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 

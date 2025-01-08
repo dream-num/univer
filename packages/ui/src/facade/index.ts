@@ -17,6 +17,7 @@
 import './f-univer';
 import './f-hooks';
 import './f-menu-builder';
+import './f-enum';
 
 export type * from './f-hooks';
 export type * from './f-menu-builder';

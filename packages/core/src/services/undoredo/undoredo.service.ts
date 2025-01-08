@@ -111,7 +111,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = UndoCommandId;
 
-    async handler(accessor: IAccessor) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
         const element = undoRedoService.pitchTopUndoElement();
 
@@ -136,7 +136,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
 
     readonly id = RedoCommandId;
 
-    async handler(accessor: IAccessor) {
+    handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
         const element = undoRedoService.pitchTopRedoElement();
         if (!element) {

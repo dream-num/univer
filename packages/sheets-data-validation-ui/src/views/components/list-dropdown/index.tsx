@@ -27,9 +27,9 @@ import { Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { KeyCode, RectPopup, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
@@ -58,8 +58,8 @@ const SelectList = (props: ISelectListProps) => {
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
     const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(SHEETS_DATA_VALIDATION_UI_PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
-    const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
-    const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
+    const sheetPermissionCheckController = useDependency(SheetPermissionCheckController);
+    const hasPermission = useMemo(() => sheetPermissionCheckController.permissionCheckWithRanges(
         {
             workbookTypes: [WorkbookEditablePermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -68,7 +68,7 @@ const SelectList = (props: ISelectListProps) => {
         [{ startColumn: col, startRow: row, endColumn: col, endRow: row }],
         unitId,
         subUnitId
-    ), [sheetPermissionInterceptorBaseController, col, row, unitId, subUnitId]);
+    ), [sheetPermissionCheckController, col, row, unitId, subUnitId]);
 
     return (
         <div className={styles.dvListDropdown} style={style}>

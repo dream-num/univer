@@ -151,8 +151,6 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
 
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-        const clientWidth = document.body.clientWidth;
-
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
             // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
@@ -162,7 +160,9 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             };
         }
 
-        documentDataModel?.updateDocumentDataPageSize((clientWidth - startX - canvasOffset.left) / scaleX);
+        const maxSize = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, documentLayoutObject.horizontalAlign);
+        if (!maxSize) return;
+        documentDataModel?.updateDocumentDataPageSize(maxSize.width / scaleX);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();

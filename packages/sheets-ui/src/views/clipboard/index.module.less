@@ -1,0 +1,51 @@
+.sheet-paste-options {
+    &-wrapper {
+        position: absolute;
+        display: flex;
+        background-color: #fff;
+        z-index: 10;
+        border-radius: 4px;
+    }
+
+    &-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 1px solid rgb(var(--grey-200, #e5e5e5));
+        border-radius: 4px;
+        padding: 3px;
+    }
+
+    &-menu {
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 8px;
+        }
+
+        border: 1px solid rgb(var(--grey-200, #e5e5e5));
+        box-shadow: var(--box-shadow-base);
+        border-radius: 4px;
+
+        &-item {
+            padding: 8px 4px;
+            cursor: pointer;
+            position: relative;
+
+            &:hover {
+                background-color: rgb(var(--grey-100, #f5f5f5));
+            }
+
+            &-title {
+                font-size: 13px;
+                color: rgb(var(--black, #35322b));
+                margin-left: 20px;
+            }
+
+            &-icon {
+                position: absolute;
+            }
+        }
+    }
+}

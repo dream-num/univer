@@ -16,6 +16,7 @@
 
 import type { ICellData, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type { PREDEFINED_HOOK_NAME } from './clipboard.service';
 
 export enum COPY_TYPE {
     COPY = 'COPY',
@@ -49,7 +50,7 @@ export interface IParsedCellValueByClipboard {
 
 export interface IUniverSheetCopyDataModel {
     rowProperties?: IClipboardPropertyItem[];
-    colProperties?: IClipboardPropertyItem[] | null;
+    colProperties?: IClipboardPropertyItem[];
     cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>;
 }
 
@@ -62,7 +63,7 @@ export interface IPasteTarget {
 export interface ICopyPastePayload {
     copyType?: COPY_TYPE;
     copyId?: string;
-    pasteType: string;
+    pasteType: IPasteHookValueType;
 }
 
 export interface ISheetDiscreteRangeLocation {
@@ -180,3 +181,17 @@ export interface ISheetClipboardHook {
      */
     getFilteredOutRows?(range: IRange): number[];
 }
+
+export interface IPasteOptionCache {
+    target: IPasteTarget;
+    source?: IPasteSource;
+    cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>;
+    rowProperties?: IClipboardPropertyItem[];
+    colProperties?: IClipboardPropertyItem[];
+    pasteType: IPasteHookValueType;
+}
+
+export type IPasteSource = ISheetDiscreteRangeLocation & { copyId: string; copyType: COPY_TYPE };
+export type IPasteHookKeyType = Exclude<keyof typeof PREDEFINED_HOOK_NAME, 'default-copy'>;
+export type IPasteHookValueTypeWithoutDefaultCopy = typeof PREDEFINED_HOOK_NAME[IPasteHookKeyType];
+export type IPasteHookValueType = Exclude<IPasteHookValueTypeWithoutDefaultCopy, 'default-copy'>;

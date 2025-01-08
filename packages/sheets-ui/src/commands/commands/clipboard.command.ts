@@ -136,3 +136,13 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
         });
     },
 };
+
+export const SheetOptionalPasteCommand: ICommand = {
+    id: 'sheet.command.optional-paste',
+    type: CommandType.COMMAND,
+    handler: async (accessor, { type }: { type: keyof typeof PREDEFINED_HOOK_NAME }) => {
+        const clipboardService = accessor.get(ISheetClipboardService);
+
+        return clipboardService.rePasteWithPasteType(type);
+    },
+};

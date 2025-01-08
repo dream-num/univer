@@ -23,7 +23,7 @@ import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, merge, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, skip, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
@@ -209,11 +209,11 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
                     //TODO @lumixraku ! these would only show the last selection, not all
 
                     // #univer-pro/issues/3763
-                    // this._renderDisposable = toDisposable(
-                    //     this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
-                    //         this._updateSelections(params, SelectionMoveType.MOVE_END);
-                    //     })
-                    // );
+                    this._renderDisposable = toDisposable(
+                        this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
+                            this._updateSelections(params, SelectionMoveType.MOVE_END);
+                        })
+                    );
                 }
             }));
 

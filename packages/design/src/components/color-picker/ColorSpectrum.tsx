@@ -62,17 +62,21 @@ export function ColorSpectrum({ hsv, onChange, onChanged }: IColorSpectrumProps)
         onChange(hsv[0], s, v);
     };
 
-    const handlePointerUp = useCallback((e: MouseEvent) => {
-        if (isDragging) {
-            onChanged?.(hsv[0], hsv[1], hsv[2]);
-        }
+    const handlePointerUp = useCallback(() => {
         setIsDragging(false);
     }, [hsv]);
 
+    function handleChange() {
+        onChanged?.(hsv[0], hsv[1], hsv[2]);
+    }
+
     useEffect(() => {
+        containerRef.current?.addEventListener('mouseup', handleChange);
         window.addEventListener('pointerup', handlePointerUp);
         window.addEventListener('mouseup', handlePointerUp);
+
         return () => {
+            containerRef.current?.removeEventListener('mouseup', handleChange);
             window.removeEventListener('pointerup', handlePointerUp);
             window.removeEventListener('mouseup', handlePointerUp);
         };

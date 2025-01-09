@@ -260,7 +260,7 @@ export const useSheetSelectionChange = (
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
-                handleRangeChange(result, -1, false);
+                handleRangeChange(result, -1, true);
                 scalingOptionRef.current = { result, offset };
             };
 

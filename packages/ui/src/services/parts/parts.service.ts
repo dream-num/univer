@@ -32,6 +32,9 @@ export enum BuiltInUIPart {
     FLOATING = 'floating',
     UNIT = 'unit',
     CUSTOM_HEADER = 'custom-header',
+    CUSTOM_LEFT = 'custom-left',
+    CUSTOM_RIGHT = 'custom-right',
+    CUSTOM_FOOTER = 'custom-footer',
 }
 
 export interface IUIPartsService {

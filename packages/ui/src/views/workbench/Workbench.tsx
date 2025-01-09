@@ -26,7 +26,6 @@ import { createPortal } from 'react-dom';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
 import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
-import { Ribbon } from '../components/ribbon/Ribbon';
 
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
@@ -61,6 +60,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
+    const toolbarComponents = useComponentsOfPart(BuiltInUIPart.TOOLBAR);
 
     const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
 
@@ -141,7 +141,13 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                 {/* header */}
                 {header && toolbar && (
                     <header className={styles.workbenchContainerHeader}>
-                        <Ribbon headerMenuComponents={headerMenuComponents} />
+                        <ComponentContainer
+                            key="toolbar"
+                            components={toolbarComponents}
+                            sharedProps={{
+                                headerMenuComponents,
+                            }}
+                        />
                     </header>
                 )}
 

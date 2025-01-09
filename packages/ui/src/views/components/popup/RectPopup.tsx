@@ -19,6 +19,7 @@ import type { RefObject } from 'react';
 import type { Observable } from 'rxjs';
 import { useEvent } from 'rc-util';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './index.module.less';
 
 interface IAbsolutePosition {
@@ -50,6 +51,7 @@ export interface IRectPopupProps {
     onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
     onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
+    portal?: boolean;
 }
 
 export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
@@ -108,7 +110,7 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect$, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
+    const { portal, children, anchorRect$, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
     const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
@@ -195,7 +197,7 @@ function RectPopup(props: IRectPopupProps) {
         };
     }, [contextMenuFn]);
 
-    return (
+    const ele = (
         <section
             onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
@@ -210,6 +212,8 @@ function RectPopup(props: IRectPopupProps) {
             </RectPopupContext.Provider>
         </section>
     );
+
+    return !portal ? ele : createPortal(ele, document.getElementById('univer-popup-portal')!);
 }
 
 RectPopup.calcPopupPosition = calcPopupPosition;

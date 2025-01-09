@@ -193,7 +193,7 @@ function SearchFunctionFactory(props: ISearchFunctionProps, ref: any) {
     }, []);
 
     return searchList.length > 0 && visible && (
-        <RectPopup anchorRect$={position$} direction="vertical">
+        <RectPopup portal anchorRect$={position$} direction="vertical">
             <ul
                 className={styles.formulaSearchFunction}
                 ref={(v) => {

@@ -107,7 +107,7 @@ export function HelpFunction(props: IHelpFunctionProps) {
 
     return visible && functionInfo
         ? (
-            <RectPopup onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
+            <RectPopup portal onClickOutside={() => reset()} anchorRect$={position$} direction="vertical">
                 <div className={styles.formulaHelpFunction}>
                     <div className={styles.formulaHelpFunctionTitle}>
                         <Help

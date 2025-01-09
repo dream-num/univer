@@ -340,8 +340,8 @@ export class Font extends SheetExtension {
                 horizontalAlignOverFlow = HorizontalAlign.RIGHT;
             }
         }
-        // const cellDataForInterceptor = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
-        const cellDataInterceptor = cellData.cellDataInterceptor;
+        const cellDataInterceptor = renderFontContext.spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        // const cellDataInterceptor = cellData.cellDataInterceptor;
         const rightOffset = cellDataInterceptor?.fontRenderExtension?.rightOffset ?? 0;
         const leftOffset = cellDataInterceptor?.fontRenderExtension?.leftOffset ?? 0;
         let isOverflow = true;

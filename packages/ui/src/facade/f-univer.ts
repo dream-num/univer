@@ -134,8 +134,12 @@ export interface IFUniverUIMixin {
      * register an component to a built-in UI part
      * @param key the built-in UI part
      * @param component the react component
+     * @example
+     * ```ts
+     * univerAPI.registerUIPart(BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
+     * ```
      */
-    registerUIPart(key: BuiltInUIPart, component: any): void;
+    registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -204,9 +208,9 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
         return uiPartService.isUIVisible(ui);
     }
 
-    override registerUIPart(key: BuiltInUIPart, component: any): void {
+    override registerUIPart(key: BuiltInUIPart, component: any): IDisposable {
         const uiPartService = this._injector.get(IUIPartsService);
-        uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
+        return uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
     }
 }
 

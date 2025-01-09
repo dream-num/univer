@@ -184,7 +184,7 @@ export const useSheetSelectionChange = (
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
                     const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
                     const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, newOffset ?? result.length, true);
+                    handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, true);
                 }
             };
             const disposableCollection = new DisposableCollection();

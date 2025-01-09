@@ -32,7 +32,8 @@ import { rangePreProcess } from '../utils/rangePreProcess';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
 
-export const useSheetSelectionChange = (isNeed: boolean,
+export const useSheetSelectionChange = (
+    isNeed: boolean,
     unitId: string,
     _subUnitId: string,
     sequenceNodes: INode[],

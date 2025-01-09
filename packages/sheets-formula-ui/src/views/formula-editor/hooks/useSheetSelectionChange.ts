@@ -42,6 +42,7 @@ import { useSelectionAdd } from './useSelectionAdd';
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
     isNeed: boolean,
+    isFocus: boolean,
     unitId: string,
     subUnitId: string,
     sequenceNodes: INode[],
@@ -79,7 +80,7 @@ export const useSheetSelectionChange = (
             let isFirst = true;
             // eslint-disable-next-line complexity
             const handleSelectionsChange = (selections: ISelectionWithCoord[]) => {
-                if (isFirst || isScalingRef.current) {
+                if (isFirst) {
                     isFirst = false;
                     return;
                 }
@@ -189,13 +190,8 @@ export const useSheetSelectionChange = (
             };
             const disposableCollection = new DisposableCollection();
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+                if (isScalingRef.current) return;
                 handleSelectionsChange(selections);
-                isScalingRef.current = false;
-                if (scalingOptionRef.current) {
-                    const { result, offset } = scalingOptionRef.current;
-                    handleRangeChange(result, offset || -1, true);
-                    scalingOptionRef.current = undefined;
-                }
             }));
 
             return () => {
@@ -205,7 +201,7 @@ export const useSheetSelectionChange = (
     }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, getIsNeedAddSelection, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
 
     useEffect(() => {
-        if (isNeed && refSelectionsRenderService && editor) {
+        if (isFocus && refSelectionsRenderService && editor) {
             const disposableCollection = new DisposableCollection();
             const handleSequenceNodeReplace = (token: string, index: number) => {
                 let currentIndex = 0;
@@ -267,6 +263,7 @@ export const useSheetSelectionChange = (
                 handleRangeChange(result, -1, false);
                 scalingOptionRef.current = { result, offset };
             };
+
             const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
@@ -282,11 +279,21 @@ export const useSheetSelectionChange = (
                         handleSequenceNodeReplace(rangeText, index);
                     }));
                 });
+
+                disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+                    isScalingRef.current = false;
+                    if (scalingOptionRef.current) {
+                        const { result, offset } = scalingOptionRef.current;
+                        handleRangeChange(result, offset || -1, true);
+                        scalingOptionRef.current = undefined;
+                    }
+                }));
             };
             const dispose = merge(
                 editor.input$,
                 refSelectionsService.selectionSet$,
-                refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)
+                refSelectionsRenderService.selectionMoveEnd$
+            ).pipe(debounceTime(50)
             ).subscribe(() => {
                 reListen();
             });
@@ -296,7 +303,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [isNeed, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, sequenceNodesRef, handleRangeChange, isSupportAcrossSheet, unitId]);
+    }, [isFocus, refSelectionsRenderService, editor, refSelectionsService.selectionSet$, contextRef, sequenceNodesRef, handleRangeChange, isSupportAcrossSheet, unitId]);
 
     useEffect(() => {
         if (listenSelectionSet) {

@@ -255,6 +255,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     useSheetSelectionChange(
         isFocus && Boolean(isSelecting && docFocusing),
+        isFocus,
         unitId,
         subUnitId,
         sequenceNodes,

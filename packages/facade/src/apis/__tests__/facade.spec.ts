@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, Nullable } from '@univerjs/core';
+import type { LambdaValueObjectObject, PrimitiveValueType } from '@univerjs/engine-formula';
 import type {
     ColumnHeaderLayout,
     RenderComponentType,
@@ -24,8 +25,8 @@ import type {
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
 import type { FUniver } from '../everything';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
@@ -178,10 +179,21 @@ describe('Test FUniver', () => {
 
     it('Function registerFunction', () => {
         const funcionName = 'CUSTOMSUM';
+
         const functionsDisposable = univerAPI.registerFunction({
             calculate: [
                 [function (...variants) {
                     let sum = 0;
+
+                    const last = variants[variants.length - 1] as LambdaValueObjectObject;
+
+                    if (last.isLambda()) {
+                        variants.pop();
+
+                        const variantsList = variants.map((variant) => Array.isArray(variant) ? variant[0][0] : variant) as PrimitiveValueType[];
+
+                        sum += +last.executeCustom(...variantsList).getValue();
+                    }
 
                     for (const variant of variants) {
                         sum += Number(variant) || 0;

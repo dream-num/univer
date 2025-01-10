@@ -58,6 +58,28 @@ export interface IFFormulaSheetsMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().getRange('A2').setValue({ f: '=DISCOUNT(A1, 20)' });
      * // A2 will display: 80
      * ```
+     * @example
+     * ```typescript
+     * // Registered formulas support lambda functions
+     * univerAPI.getFormula().registerFunction('CUSTOMSUM', (...variants) => {
+     *      let sum = 0;
+     *
+     *      const last = variants[variants.length - 1];
+     *      if (last.isLambda && last.isLambda()) {
+     *          variants.pop();
+     *
+     *          const variantsList = variants.map((variant) => Array.isArray(variant) ? variant[0][0]: variant);
+     *
+     *          sum += last.executeCustom(...variantsList).getValue();
+     *      }
+     *
+     *      for (const variant of variants) {
+     *          sum += Number(variant) || 0;
+     *      }
+     *
+     *      return sum;
+     * }, 'Adds its arguments');
+     * ```
      */
     registerFunction(name: string, func: IRegisterFunction, description?: string): IDisposable;
 

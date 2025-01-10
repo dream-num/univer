@@ -61,7 +61,7 @@ export interface IFFormulaSheetsMixin {
      * @example
      * ```typescript
      * // Registered formulas support lambda functions
-     * univerAPI.getFormula().registerFunction('CUSTOMSUM',(...variants) => {
+     * univerAPI.getFormula().registerFunction('CUSTOMSUM', (...variants) => {
      *      let sum = 0;
      *
      *      const last = variants[variants.length - 1];

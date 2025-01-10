@@ -26,6 +26,7 @@
         "prepare": "husky install",
         "pre-commit": "lint-staged",
         "dev": "turbo dev:demo",
+        "dev:libs": "pnpm --filter univer-examples dev:demo-libs",
         "dev:e2e": "pnpm --filter univer-examples dev:e2e",
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",

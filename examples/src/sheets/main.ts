@@ -60,6 +60,7 @@ import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
 import '../global.css';
+import './styles';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;

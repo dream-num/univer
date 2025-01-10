@@ -19,7 +19,8 @@ import type { IDisposable, ILocales } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import type { CalculationMode, IRegisterAsyncFunction, IRegisterFunction, ISingleFunctionRegisterParams, IUniverSheetsFormulaBaseConfig } from '@univerjs/sheets-formula';
 import { debounce, IConfigService, ILogService, LifecycleService, LifecycleStages } from '@univerjs/core';
-import { FFormula, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { FFormula } from '@univerjs/engine-formula/facade';
 import { IRegisterFunctionService, PLUGIN_CONFIG_KEY_BASE, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 export interface IFFormulaSheetsMixin {
@@ -88,6 +89,8 @@ export interface IFFormulaSheetsMixin {
      * @param name - The name of the function to register. This will be used in formulas (e.g., =MYFUNC())
      * @param func - The implementation of the function
      * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
      * @example
      * ```js
@@ -148,7 +151,9 @@ export interface IFFormulaSheetsMixin {
      * Register a custom asynchronous formula function with description.
      * @param name - The name of the function to register. This will be used in formulas (e.g., =ASYNCFUNC())
      * @param func - The async implementation of the function
-     * @param description - A string describing the function's purpose and usage
+     * @param options - Object containing locales and description
+     * @param options.locales - Object containing locales
+     * @param options.description - Object containing description
      * @returns A disposable object that will unregister the function when disposed
      * @example
      * ```js
@@ -287,7 +292,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
 }
 
 FFormula.extend(FFormulaSheetsMixin);
-declare module '@univerjs/engine-formula' {
+declare module '@univerjs/engine-formula/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FFormula extends IFFormulaSheetsMixin {}
 }

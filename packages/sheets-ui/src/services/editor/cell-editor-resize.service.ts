@@ -265,8 +265,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
         const viewportMain = editorScene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign);
-        if (!info) return;
+        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset, horizontalAlign)!;
+
         const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
 
         let physicHeight = editorHeight;

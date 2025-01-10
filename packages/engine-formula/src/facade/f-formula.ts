@@ -38,6 +38,14 @@ export class FFormula extends FBase {
     }
 
     /**
+     * The tree builder for formula string.
+     * @type {LexerTreeBuilder}
+     */
+    get lexerTreeBuilder(): LexerTreeBuilder {
+        return this._lexerTreeBuilder;
+    }
+
+    /**
      * Offsets the formula
      * @param {string} formulaString
      * @param {number} refOffsetX

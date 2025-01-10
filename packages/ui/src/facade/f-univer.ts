@@ -18,7 +18,7 @@ import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
 import type { BuiltInUIPart, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
-import { FUniver } from '@univerjs/core';
+import { connectInjector, FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
@@ -129,6 +129,17 @@ export interface IFUniverUIMixin {
      * ```
      */
     isUIVisible(key: BuiltInUIPart): boolean;
+
+    /**
+     * register an component to a built-in UI part
+     * @param key the built-in UI part
+     * @param component the react component
+     * @example
+     * ```ts
+     * univerAPI.registerUIPart(BuiltInUIPart.CUSTOM_HEADER, () => React.createElement('h1', null, 'Custom Header'));
+     * ```
+     */
+    registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -195,6 +206,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override isUIVisible(ui: BuiltInUIPart): boolean {
         const uiPartService = this._injector.get(IUIPartsService);
         return uiPartService.isUIVisible(ui);
+    }
+
+    override registerUIPart(key: BuiltInUIPart, component: any): IDisposable {
+        const uiPartService = this._injector.get(IUIPartsService);
+        return uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
     }
 }
 

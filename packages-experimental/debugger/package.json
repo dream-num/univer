@@ -61,7 +61,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.2.11",
+        "@univerjs/icons": "^0.2.12",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
@@ -76,8 +76,9 @@
         "@univerjs-infra/shared": "workspace:*",
         "postcss": "^8.4.49",
         "rxjs": "^7.8.1",
+        "tailwindcss": "^3.4.17",
         "typescript": "^5.7.2",
-        "vite": "^6.0.6",
+        "vite": "^6.0.7",
         "vitest": "^2.1.8",
         "vue": "^3.5.12"
     }

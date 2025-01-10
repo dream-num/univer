@@ -49,7 +49,7 @@ importers:
         version: link:packages/design
       '@vitejs/plugin-react':
         specifier: ^4.3.4
-        version: 4.3.4(vite@6.0.6(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
+        version: 4.3.4(vite@6.0.7(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
       eslint:
         specifier: 9.17.0
         version: 9.17.0(jiti@2.4.2)
@@ -111,14 +111,14 @@ importers:
   common/shared:
     dependencies:
       '@typescript-eslint/parser':
-        specifier: ^8.19.0
-        version: 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
+        specifier: ^8.19.1
+        version: 8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
-        version: 4.3.4(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
+        version: 4.3.4(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
       '@vitejs/plugin-vue':
         specifier: ^5.2.1
-        version: 5.2.1(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))(vue@3.4.38(typescript@5.7.2))
+        version: 5.2.1(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))(vue@3.4.38(typescript@5.7.2))
       '@vitest/coverage-istanbul':
         specifier: ^2.1.8
         version: 2.1.8(vitest@2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0))
@@ -147,11 +147,11 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vite-plugin-dts:
         specifier: ^4.4.0
-        version: 4.4.0(@types/node@22.10.5)(rollup@4.29.1)(typescript@5.7.2)(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
+        version: 4.4.0(@types/node@22.10.5)(rollup@4.30.1)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
       vite-plugin-external:
         specifier: ^4.3.1
         version: 4.3.1
@@ -163,11 +163,11 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/icons-svg':
-        specifier: ^0.2.10
-        version: 0.2.10
+        specifier: ^0.2.12
+        version: 0.2.12
       '@univerjs/protocol':
         specifier: 0.1.40
         version: 0.1.40(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -635,8 +635,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -665,12 +665,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -690,8 +693,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../../mockdata
@@ -727,12 +730,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -773,12 +779,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -799,8 +808,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -820,8 +829,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
@@ -856,12 +865,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -881,8 +893,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs-ui
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -914,12 +926,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -933,8 +948,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides-ui':
         specifier: workspace:*
         version: link:../../packages/slides-ui
@@ -966,12 +981,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -994,8 +1012,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -1033,12 +1051,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1101,8 +1122,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1129,8 +1150,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1144,8 +1165,8 @@ importers:
         specifier: ^2.2.5
         version: 2.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1225,6 +1246,9 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
@@ -1232,8 +1256,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1257,8 +1281,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1279,8 +1303,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1312,8 +1336,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1336,12 +1360,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1362,8 +1389,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1389,8 +1416,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1410,12 +1437,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1453,12 +1483,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1478,8 +1511,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -1505,12 +1538,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1536,8 +1572,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1563,12 +1599,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1592,8 +1631,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1613,8 +1652,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1637,12 +1676,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1675,8 +1717,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1690,8 +1732,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1730,8 +1772,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1818,8 +1860,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1836,8 +1878,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1857,12 +1899,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1883,8 +1928,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1905,8 +1950,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1930,8 +1975,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1964,8 +2009,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -1989,8 +2034,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/icons-svg':
-        specifier: ^0.2.10
-        version: 0.2.10
+        specifier: ^0.2.12
+        version: 0.2.12
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1998,8 +2043,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2019,8 +2064,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2067,12 +2112,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2086,8 +2134,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2116,12 +2164,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2160,8 +2211,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2190,8 +2241,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2229,12 +2280,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2258,8 +2312,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2288,8 +2342,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2321,12 +2375,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2350,8 +2407,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2368,8 +2425,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2407,12 +2464,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2445,8 +2505,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2479,8 +2539,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2506,8 +2566,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2539,12 +2599,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2568,8 +2631,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2602,8 +2665,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2629,8 +2692,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2665,12 +2728,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2697,8 +2763,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2711,6 +2777,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/engine-numfmt':
         specifier: workspace:*
         version: link:../engine-numfmt
@@ -2718,8 +2787,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2736,9 +2805,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
       less:
         specifier: ^4.2.1
         version: 4.2.1
@@ -2751,12 +2817,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2780,8 +2849,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2798,8 +2867,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2834,12 +2903,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2869,8 +2941,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2887,8 +2959,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2923,12 +2995,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -2957,8 +3032,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
         specifier: 0.1.40
         version: 0.1.40(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
@@ -2990,12 +3065,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3015,8 +3093,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3045,12 +3123,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3071,8 +3152,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3098,8 +3179,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../slides
@@ -3125,12 +3206,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3148,8 +3232,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3173,8 +3257,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3197,8 +3281,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -3224,12 +3308,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3246,8 +3333,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.2.11
-        version: 0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.2.12
+        version: 0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3266,11 +3353,8 @@ importers:
         version: 3.4.38(typescript@5.7.2)
     devDependencies:
       '@testing-library/react':
-        specifier: ^16.0.1
-        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@testing-library/react-hooks':
-        specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^16.1.0
+        version: 16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -3289,12 +3373,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3335,12 +3422,15 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.17
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -3367,8 +3457,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^6.0.6
-        version: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
@@ -4566,8 +4656,18 @@ packages:
     cpu: [arm]
     os: [android]
 
+  '@rollup/rollup-android-arm-eabi@4.30.1':
+    resolution: {integrity: sha512-pSWY+EVt3rJ9fQ3IqlrEUtXh3cGqGtPDH1FQlNZehO2yYxCHEX1SPsz1M//NXwYfbTlcKr9WObLnJX9FsS9K1Q==}
+    cpu: [arm]
+    os: [android]
+
   '@rollup/rollup-android-arm64@4.29.1':
     resolution: {integrity: sha512-CaRfrV0cd+NIIcVVN/jx+hVLN+VRqnuzLRmfmlzpOzB87ajixsN/+9L5xNmkaUUvEbI5BmIKS+XTwXsHEb65Ew==}
+    cpu: [arm64]
+    os: [android]
+
+  '@rollup/rollup-android-arm64@4.30.1':
+    resolution: {integrity: sha512-/NA2qXxE3D/BRjOJM8wQblmArQq1YoBVJjrjoTSBS09jgUisq7bqxNHJ8kjCHeV21W/9WDGwJEWSN0KQ2mtD/w==}
     cpu: [arm64]
     os: [android]
 
@@ -4576,8 +4676,18 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
+  '@rollup/rollup-darwin-arm64@4.30.1':
+    resolution: {integrity: sha512-r7FQIXD7gB0WJ5mokTUgUWPl0eYIH0wnxqeSAhuIwvnnpjdVB8cRRClyKLQr7lgzjctkbp5KmswWszlwYln03Q==}
+    cpu: [arm64]
+    os: [darwin]
+
   '@rollup/rollup-darwin-x64@4.29.1':
     resolution: {integrity: sha512-j/Ej1oanzPjmN0tirRd5K2/nncAhS9W6ICzgxV+9Y5ZsP0hiGhHJXZ2JQ53iSSjj8m6cRY6oB1GMzNn2EUt6Ng==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@rollup/rollup-darwin-x64@4.30.1':
+    resolution: {integrity: sha512-x78BavIwSH6sqfP2xeI1hd1GpHL8J4W2BXcVM/5KYKoAD3nNsfitQhvWSw+TFtQTLZ9OmlF+FEInEHyubut2OA==}
     cpu: [x64]
     os: [darwin]
 
@@ -4586,8 +4696,18 @@ packages:
     cpu: [arm64]
     os: [freebsd]
 
+  '@rollup/rollup-freebsd-arm64@4.30.1':
+    resolution: {integrity: sha512-HYTlUAjbO1z8ywxsDFWADfTRfTIIy/oUlfIDmlHYmjUP2QRDTzBuWXc9O4CXM+bo9qfiCclmHk1x4ogBjOUpUQ==}
+    cpu: [arm64]
+    os: [freebsd]
+
   '@rollup/rollup-freebsd-x64@4.29.1':
     resolution: {integrity: sha512-hEioiEQ9Dec2nIRoeHUP6hr1PSkXzQaCUyqBDQ9I9ik4gCXQZjJMIVzoNLBRGet+hIUb3CISMh9KXuCcWVW/8w==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@rollup/rollup-freebsd-x64@4.30.1':
+    resolution: {integrity: sha512-1MEdGqogQLccphhX5myCJqeGNYTNcmTyaic9S7CG3JhwuIByJ7J05vGbZxsizQthP1xpVx7kd3o31eOogfEirw==}
     cpu: [x64]
     os: [freebsd]
 
@@ -4596,8 +4716,18 @@ packages:
     cpu: [arm]
     os: [linux]
 
+  '@rollup/rollup-linux-arm-gnueabihf@4.30.1':
+    resolution: {integrity: sha512-PaMRNBSqCx7K3Wc9QZkFx5+CX27WFpAMxJNiYGAXfmMIKC7jstlr32UhTgK6T07OtqR+wYlWm9IxzennjnvdJg==}
+    cpu: [arm]
+    os: [linux]
+
   '@rollup/rollup-linux-arm-musleabihf@4.29.1':
     resolution: {integrity: sha512-RiWpGgbayf7LUcuSNIbahr0ys2YnEERD4gYdISA06wa0i8RALrnzflh9Wxii7zQJEB2/Eh74dX4y/sHKLWp5uQ==}
+    cpu: [arm]
+    os: [linux]
+
+  '@rollup/rollup-linux-arm-musleabihf@4.30.1':
+    resolution: {integrity: sha512-B8Rcyj9AV7ZlEFqvB5BubG5iO6ANDsRKlhIxySXcF1axXYUyqwBok+XZPgIYGBgs7LDXfWfifxhw0Ik57T0Yug==}
     cpu: [arm]
     os: [linux]
 
@@ -4606,8 +4736,18 @@ packages:
     cpu: [arm64]
     os: [linux]
 
+  '@rollup/rollup-linux-arm64-gnu@4.30.1':
+    resolution: {integrity: sha512-hqVyueGxAj3cBKrAI4aFHLV+h0Lv5VgWZs9CUGqr1z0fZtlADVV1YPOij6AhcK5An33EXaxnDLmJdQikcn5NEw==}
+    cpu: [arm64]
+    os: [linux]
+
   '@rollup/rollup-linux-arm64-musl@4.29.1':
     resolution: {integrity: sha512-fOHRtF9gahwJk3QVp01a/GqS4hBEZCV1oKglVVq13kcK3NeVlS4BwIFzOHDbmKzt3i0OuHG4zfRP0YoG5OF/rA==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rollup/rollup-linux-arm64-musl@4.30.1':
+    resolution: {integrity: sha512-i4Ab2vnvS1AE1PyOIGp2kXni69gU2DAUVt6FSXeIqUCPIR3ZlheMW3oP2JkukDfu3PsexYRbOiJrY+yVNSk9oA==}
     cpu: [arm64]
     os: [linux]
 
@@ -4616,8 +4756,18 @@ packages:
     cpu: [loong64]
     os: [linux]
 
+  '@rollup/rollup-linux-loongarch64-gnu@4.30.1':
+    resolution: {integrity: sha512-fARcF5g296snX0oLGkVxPmysetwUk2zmHcca+e9ObOovBR++9ZPOhqFUM61UUZ2EYpXVPN1redgqVoBB34nTpQ==}
+    cpu: [loong64]
+    os: [linux]
+
   '@rollup/rollup-linux-powerpc64le-gnu@4.29.1':
     resolution: {integrity: sha512-9b4Mg5Yfz6mRnlSPIdROcfw1BU22FQxmfjlp/CShWwO3LilKQuMISMTtAu/bxmmrE6A902W2cZJuzx8+gJ8e9w==}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@rollup/rollup-linux-powerpc64le-gnu@4.30.1':
+    resolution: {integrity: sha512-GLrZraoO3wVT4uFXh67ElpwQY0DIygxdv0BNW9Hkm3X34wu+BkqrDrkcsIapAY+N2ATEbvak0XQ9gxZtCIA5Rw==}
     cpu: [ppc64]
     os: [linux]
 
@@ -4626,8 +4776,18 @@ packages:
     cpu: [riscv64]
     os: [linux]
 
+  '@rollup/rollup-linux-riscv64-gnu@4.30.1':
+    resolution: {integrity: sha512-0WKLaAUUHKBtll0wvOmh6yh3S0wSU9+yas923JIChfxOaaBarmb/lBKPF0w/+jTVozFnOXJeRGZ8NvOxvk/jcw==}
+    cpu: [riscv64]
+    os: [linux]
+
   '@rollup/rollup-linux-s390x-gnu@4.29.1':
     resolution: {integrity: sha512-WM9lIkNdkhVwiArmLxFXpWndFGuOka4oJOZh8EP3Vb8q5lzdSCBuhjavJsw68Q9AKDGeOOIHYzYm4ZFvmWez5g==}
+    cpu: [s390x]
+    os: [linux]
+
+  '@rollup/rollup-linux-s390x-gnu@4.30.1':
+    resolution: {integrity: sha512-GWFs97Ruxo5Bt+cvVTQkOJ6TIx0xJDD/bMAOXWJg8TCSTEK8RnFeOeiFTxKniTc4vMIaWvCplMAFBt9miGxgkA==}
     cpu: [s390x]
     os: [linux]
 
@@ -4636,8 +4796,18 @@ packages:
     cpu: [x64]
     os: [linux]
 
+  '@rollup/rollup-linux-x64-gnu@4.30.1':
+    resolution: {integrity: sha512-UtgGb7QGgXDIO+tqqJ5oZRGHsDLO8SlpE4MhqpY9Llpzi5rJMvrK6ZGhsRCST2abZdBqIBeXW6WPD5fGK5SDwg==}
+    cpu: [x64]
+    os: [linux]
+
   '@rollup/rollup-linux-x64-musl@4.29.1':
     resolution: {integrity: sha512-xufkSNppNOdVRCEC4WKvlR1FBDyqCSCpQeMMgv9ZyXqqtKBfkw1yfGMTUTs9Qsl6WQbJnsGboWCp7pJGkeMhKA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@rollup/rollup-linux-x64-musl@4.30.1':
+    resolution: {integrity: sha512-V9U8Ey2UqmQsBT+xTOeMzPzwDzyXmnAoO4edZhL7INkwQcaW1Ckv3WJX3qrrp/VHaDkEWIBWhRwP47r8cdrOow==}
     cpu: [x64]
     os: [linux]
 
@@ -4646,13 +4816,28 @@ packages:
     cpu: [arm64]
     os: [win32]
 
+  '@rollup/rollup-win32-arm64-msvc@4.30.1':
+    resolution: {integrity: sha512-WabtHWiPaFF47W3PkHnjbmWawnX/aE57K47ZDT1BXTS5GgrBUEpvOzq0FI0V/UYzQJgdb8XlhVNH8/fwV8xDjw==}
+    cpu: [arm64]
+    os: [win32]
+
   '@rollup/rollup-win32-ia32-msvc@4.29.1':
     resolution: {integrity: sha512-rYRe5S0FcjlOBZQHgbTKNrqxCBUmgDJem/VQTCcTnA2KCabYSWQDrytOzX7avb79cAAweNmMUb/Zw18RNd4mng==}
     cpu: [ia32]
     os: [win32]
 
+  '@rollup/rollup-win32-ia32-msvc@4.30.1':
+    resolution: {integrity: sha512-pxHAU+Zv39hLUTdQQHUVHf4P+0C47y/ZloorHpzs2SXMRqeAWmGghzAhfOlzFHHwjvgokdFAhC4V+6kC1lRRfw==}
+    cpu: [ia32]
+    os: [win32]
+
   '@rollup/rollup-win32-x64-msvc@4.29.1':
     resolution: {integrity: sha512-+10CMg9vt1MoHj6x1pxyjPSMjHTIlqs8/tBztXvPAx24SKs9jwVnKqHJumlH/IzhaPUaj3T6T6wfZr8okdXaIg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@rollup/rollup-win32-x64-msvc@4.30.1':
+    resolution: {integrity: sha512-D6qjsXGcvhTjv0kI4fU8tUuBDF/Ueee4SVX79VfNDXZa64TfCW1Slkb6Z7O1p7vflqZjcmOVdZlqf8gvJxc6og==}
     cpu: [x64]
     os: [win32]
 
@@ -4986,37 +5171,6 @@ packages:
     resolution: {integrity: sha512-xGGHpBXYSHUUr6XsKBfs85TWlYKpTc37cSBBVrXcib2MkHLboWlkClhWF37JKlDb9KEq3dHs+f2xR7XJEWGBxA==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
 
-  '@testing-library/react-hooks@8.0.1':
-    resolution: {integrity: sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      '@types/react': ^16.9.0 || ^17.0.0
-      react: ^16.9.0 || ^17.0.0
-      react-dom: ^16.9.0 || ^17.0.0
-      react-test-renderer: ^16.9.0 || ^17.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react-dom:
-        optional: true
-      react-test-renderer:
-        optional: true
-
-  '@testing-library/react@16.0.1':
-    resolution: {integrity: sha512-dSmwJVtJXmku+iocRhWOUFbrERC76TX2Mnf0ATODz8brzAZrMBbzLwQixlBSanZxR6LddK3eiwpSFZgDET1URg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@testing-library/dom': ^10.0.0
-      '@types/react': ^18.0.0
-      '@types/react-dom': ^18.0.0
-      react: ^18.0.0
-      react-dom: ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-
   '@testing-library/react@16.1.0':
     resolution: {integrity: sha512-Q2ToPvg0KsVL0ohND9A3zLJWcOXXcO8IDu3fj11KhNt0UlCWyFyvnCIBkd12tidB2lkiVRG8VFqdhcqhqnAQtg==}
     engines: {node: '>=18'}
@@ -5202,8 +5356,8 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <5.8.0'
 
-  '@typescript-eslint/parser@8.19.0':
-    resolution: {integrity: sha512-6M8taKyOETY1TKHp0x8ndycipTVgmp4xtg5QpEZzXxDhNvvHOJi5rLRkLr8SK3jTgD5l4fTlvBiRdfsuWydxBw==}
+  '@typescript-eslint/parser@8.19.1':
+    resolution: {integrity: sha512-67gbfv8rAwawjYx3fYArwldTQKoYfezNUT4D5ioWetr/xCrxXxvleo3uuiFuKfejipvq+og7mjz3b0G2bVyUCw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -5215,6 +5369,10 @@ packages:
 
   '@typescript-eslint/scope-manager@8.19.0':
     resolution: {integrity: sha512-hkoJiKQS3GQ13TSMEiuNmSCvhz7ujyqD1x3ShbaETATHrck+9RaDdUbt+osXaUuns9OFwrDTTrjtwsU8gJyyRA==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/scope-manager@8.19.1':
+    resolution: {integrity: sha512-60L9KIuN/xgmsINzonOcMDSB8p82h95hoBfSBtXuO4jlR1R9L1xSkmVZKgCPVfavDlXihh4ARNjXhh1gGnLC7Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript-eslint/type-utils@8.19.0':
@@ -5232,6 +5390,10 @@ packages:
     resolution: {integrity: sha512-8XQ4Ss7G9WX8oaYvD4OOLCjIQYgRQxO+qCiR2V2s2GxI9AUpo7riNwo6jDhKtTcaJjT8PY54j2Yb33kWtSJsmA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@typescript-eslint/types@8.19.1':
+    resolution: {integrity: sha512-JBVHMLj7B1K1v1051ZaMMgLW4Q/jre5qGK0Ew6UgXz1Rqh+/xPzV1aW581OM00X6iOfyr1be+QyW8LOUf19BbA==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   '@typescript-eslint/typescript-estree@8.16.0':
     resolution: {integrity: sha512-E2+9IzzXMc1iaBy9zmo+UYvluE3TW7bCGWSF41hVWUE01o8nzr1rvOQYSxelxr6StUvRcTMe633eY8mXASMaNw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5243,6 +5405,12 @@ packages:
 
   '@typescript-eslint/typescript-estree@8.19.0':
     resolution: {integrity: sha512-WW9PpDaLIFW9LCbucMSdYUuGeFUz1OkWYS/5fwZwTA+l2RwlWFdJvReQqMUMBw4yJWJOfqd7An9uwut2Oj8sLw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '>=4.8.4 <5.8.0'
+
+  '@typescript-eslint/typescript-estree@8.19.1':
+    resolution: {integrity: sha512-jk/TZwSMJlxlNnqhy0Eod1PNEvCkpY6MXOXE/WLlblZ6ibb32i2We4uByoKPv1d0OD2xebDv4hbs3fm11SMw8Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '>=4.8.4 <5.8.0'
@@ -5272,11 +5440,15 @@ packages:
     resolution: {integrity: sha512-mCFtBbFBJDCNCWUl5y6sZSCHXw1DEFEk3c/M3nRK2a4XUB8StGFtmcEMizdjKuBzB6e/smJAAWYug3VrdLMr1w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons-svg@0.2.10':
-    resolution: {integrity: sha512-dHnnb2mbDvZ6OyMdUnfWZybUM4zzt20x1CB1/WxPueTaUf1+TzUo+dmXakqt/J/B+Gy+8J99dixxVMuG02KeXw==}
+  '@typescript-eslint/visitor-keys@8.19.1':
+    resolution: {integrity: sha512-fzmjU8CHK853V/avYZAvuVut3ZTfwN5YtMaoi+X9Y9MA9keaWNHC3zEQ9zvyX/7Hj+5JkNyK1l7TOR2hevHB6Q==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@univerjs/icons@0.2.11':
-    resolution: {integrity: sha512-8hNcJb/br/RwYnGVRaPeVXjs3KU/0uStoe1EBl2ObwT41e1x3grWeL+4Uf8HnphvysSeNPt0w8PBR5ESoZ5bnw==}
+  '@univerjs/icons-svg@0.2.12':
+    resolution: {integrity: sha512-jsJ2m/A/gG54tKX7FFaliRNHKRxD7PgLpOm60tcb0v7+1Uq1TjVZgUjdVKWBeSF9h/VQXU1/6iiSNJ5pkhomHw==}
+
+  '@univerjs/icons@0.2.12':
+    resolution: {integrity: sha512-1NaLAveIFpo9uPIS13gZ1W1nK8yeatr1HBsI65E8HkKF6jMML1JHxj/fcc6t95c7hN4jt0AmxwilB4BGK3S8Og==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -9425,12 +9597,6 @@ packages:
       react: '>= 16.3.0'
       react-dom: '>= 16.3.0'
 
-  react-error-boundary@3.1.4:
-    resolution: {integrity: sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==}
-    engines: {node: '>=10', npm: '>=6'}
-    peerDependencies:
-      react: '>=16.13.1'
-
   react-grid-layout@1.4.4:
     resolution: {integrity: sha512-7+Lg8E8O8HfOH5FrY80GCIR1SHTn2QnAYKh27/5spoz+OHhMmEhU/14gIkRzJOtympDPaXcVRX/nT1FjmeOUmQ==}
     peerDependencies:
@@ -9655,6 +9821,11 @@ packages:
 
   rollup@4.29.1:
     resolution: {integrity: sha512-RaJ45M/kmJUzSWDs1Nnd5DdV4eerC98idtUOVr6FfKcgxqvjwHmxc5upLF9qZU9EpsVzzhleFahrT3shLuJzIw==}
+    engines: {node: '>=18.0.0', npm: '>=8.0.0'}
+    hasBin: true
+
+  rollup@4.30.1:
+    resolution: {integrity: sha512-mlJ4glW020fPuLi7DkM/lN97mYEZGWeqBnrljzN0gs7GLctqX3lNWxKQ7Gl712UAX+6fog/L3jh4gb7R6aVi3w==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -10554,8 +10725,8 @@ packages:
       terser:
         optional: true
 
-  vite@6.0.6:
-    resolution: {integrity: sha512-NSjmUuckPmDU18bHz7QZ+bTYhRR0iA72cs2QAxCqDpafJ0S6qetco0LB3WW2OxlMHS0JmAv+yZ/R3uPmMyGTjQ==}
+  vite@6.0.7:
+    resolution: {integrity: sha512-RDt8r/7qx9940f8FcOIAH9PTViRrghKaK2K1jY3RaAURrEUbm9Du1mJ72G+jlhtG3WwodnfzY8ORQZbBavZEAQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
     peerDependencies:
@@ -10901,8 +11072,8 @@ snapshots:
       '@eslint-community/eslint-plugin-eslint-comments': 4.4.1(eslint@9.17.0(jiti@2.4.2))
       '@eslint/markdown': 6.2.1
       '@stylistic/eslint-plugin': 2.12.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
-      '@typescript-eslint/eslint-plugin': 8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
-      '@typescript-eslint/parser': 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 8.19.0(@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
+      '@typescript-eslint/parser': 8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
       '@vitest/eslint-plugin': 1.1.22(@typescript-eslint/utils@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)(vitest@2.1.8(@types/node@22.10.2)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0))
       eslint: 9.17.0(jiti@2.4.2)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.17.0(jiti@2.4.2))
@@ -10919,7 +11090,7 @@ snapshots:
       eslint-plugin-regexp: 2.7.0(eslint@9.17.0(jiti@2.4.2))
       eslint-plugin-toml: 0.12.0(eslint@9.17.0(jiti@2.4.2))
       eslint-plugin-unicorn: 56.0.1(eslint@9.17.0(jiti@2.4.2))
-      eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))
+      eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))
       eslint-plugin-vue: 9.32.0(eslint@9.17.0(jiti@2.4.2))
       eslint-plugin-yml: 1.16.0(eslint@9.17.0(jiti@2.4.2))
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.17.0(jiti@2.4.2))
@@ -12003,69 +12174,126 @@ snapshots:
       - conventional-commits-filter
       - conventional-commits-parser
 
-  '@rollup/pluginutils@5.1.4(rollup@4.29.1)':
+  '@rollup/pluginutils@5.1.4(rollup@4.30.1)':
     dependencies:
       '@types/estree': 1.0.6
       estree-walker: 2.0.2
       picomatch: 4.0.2
     optionalDependencies:
-      rollup: 4.29.1
+      rollup: 4.30.1
 
   '@rollup/rollup-android-arm-eabi@4.29.1':
+    optional: true
+
+  '@rollup/rollup-android-arm-eabi@4.30.1':
     optional: true
 
   '@rollup/rollup-android-arm64@4.29.1':
     optional: true
 
+  '@rollup/rollup-android-arm64@4.30.1':
+    optional: true
+
   '@rollup/rollup-darwin-arm64@4.29.1':
+    optional: true
+
+  '@rollup/rollup-darwin-arm64@4.30.1':
     optional: true
 
   '@rollup/rollup-darwin-x64@4.29.1':
     optional: true
 
+  '@rollup/rollup-darwin-x64@4.30.1':
+    optional: true
+
   '@rollup/rollup-freebsd-arm64@4.29.1':
+    optional: true
+
+  '@rollup/rollup-freebsd-arm64@4.30.1':
     optional: true
 
   '@rollup/rollup-freebsd-x64@4.29.1':
     optional: true
 
+  '@rollup/rollup-freebsd-x64@4.30.1':
+    optional: true
+
   '@rollup/rollup-linux-arm-gnueabihf@4.29.1':
+    optional: true
+
+  '@rollup/rollup-linux-arm-gnueabihf@4.30.1':
     optional: true
 
   '@rollup/rollup-linux-arm-musleabihf@4.29.1':
     optional: true
 
+  '@rollup/rollup-linux-arm-musleabihf@4.30.1':
+    optional: true
+
   '@rollup/rollup-linux-arm64-gnu@4.29.1':
+    optional: true
+
+  '@rollup/rollup-linux-arm64-gnu@4.30.1':
     optional: true
 
   '@rollup/rollup-linux-arm64-musl@4.29.1':
     optional: true
 
+  '@rollup/rollup-linux-arm64-musl@4.30.1':
+    optional: true
+
   '@rollup/rollup-linux-loongarch64-gnu@4.29.1':
+    optional: true
+
+  '@rollup/rollup-linux-loongarch64-gnu@4.30.1':
     optional: true
 
   '@rollup/rollup-linux-powerpc64le-gnu@4.29.1':
     optional: true
 
+  '@rollup/rollup-linux-powerpc64le-gnu@4.30.1':
+    optional: true
+
   '@rollup/rollup-linux-riscv64-gnu@4.29.1':
+    optional: true
+
+  '@rollup/rollup-linux-riscv64-gnu@4.30.1':
     optional: true
 
   '@rollup/rollup-linux-s390x-gnu@4.29.1':
     optional: true
 
+  '@rollup/rollup-linux-s390x-gnu@4.30.1':
+    optional: true
+
   '@rollup/rollup-linux-x64-gnu@4.29.1':
+    optional: true
+
+  '@rollup/rollup-linux-x64-gnu@4.30.1':
     optional: true
 
   '@rollup/rollup-linux-x64-musl@4.29.1':
     optional: true
 
+  '@rollup/rollup-linux-x64-musl@4.30.1':
+    optional: true
+
   '@rollup/rollup-win32-arm64-msvc@4.29.1':
+    optional: true
+
+  '@rollup/rollup-win32-arm64-msvc@4.30.1':
     optional: true
 
   '@rollup/rollup-win32-ia32-msvc@4.29.1':
     optional: true
 
+  '@rollup/rollup-win32-ia32-msvc@4.30.1':
+    optional: true
+
   '@rollup/rollup-win32-x64-msvc@4.29.1':
+    optional: true
+
+  '@rollup/rollup-win32-x64-msvc@4.30.1':
     optional: true
 
   '@rushstack/node-core-library@5.10.1(@types/node@22.10.5)':
@@ -12509,25 +12737,6 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
 
-  '@testing-library/react-hooks@8.0.1(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/runtime': 7.26.0
-      react: 18.3.1
-      react-error-boundary: 3.1.4(react@18.3.1)
-    optionalDependencies:
-      '@types/react': 18.3.12
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/runtime': 7.26.0
-      '@testing-library/dom': 10.4.0
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    optionalDependencies:
-      '@types/react': 18.3.12
-      '@types/react-dom': 18.3.1
-
   '@testing-library/react@16.1.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.26.0
@@ -12704,10 +12913,10 @@ snapshots:
 
   '@types/validator@13.12.0': {}
 
-  '@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)':
+  '@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
-      '@typescript-eslint/parser': 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
+      '@typescript-eslint/parser': 8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
       '@typescript-eslint/scope-manager': 8.19.0
       '@typescript-eslint/type-utils': 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
       '@typescript-eslint/utils': 8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
@@ -12721,12 +12930,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)':
+  '@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.19.0
-      '@typescript-eslint/types': 8.19.0
-      '@typescript-eslint/typescript-estree': 8.19.0(typescript@5.7.2)
-      '@typescript-eslint/visitor-keys': 8.19.0
+      '@typescript-eslint/scope-manager': 8.19.1
+      '@typescript-eslint/types': 8.19.1
+      '@typescript-eslint/typescript-estree': 8.19.1(typescript@5.7.2)
+      '@typescript-eslint/visitor-keys': 8.19.1
       debug: 4.4.0
       eslint: 9.17.0(jiti@2.4.2)
       typescript: 5.7.2
@@ -12743,6 +12952,11 @@ snapshots:
       '@typescript-eslint/types': 8.19.0
       '@typescript-eslint/visitor-keys': 8.19.0
 
+  '@typescript-eslint/scope-manager@8.19.1':
+    dependencies:
+      '@typescript-eslint/types': 8.19.1
+      '@typescript-eslint/visitor-keys': 8.19.1
+
   '@typescript-eslint/type-utils@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)':
     dependencies:
       '@typescript-eslint/typescript-estree': 8.19.0(typescript@5.7.2)
@@ -12757,6 +12971,8 @@ snapshots:
   '@typescript-eslint/types@8.16.0': {}
 
   '@typescript-eslint/types@8.19.0': {}
+
+  '@typescript-eslint/types@8.19.1': {}
 
   '@typescript-eslint/typescript-estree@8.16.0(typescript@5.7.2)':
     dependencies:
@@ -12783,6 +12999,20 @@ snapshots:
       minimatch: 9.0.5
       semver: 7.6.3
       ts-api-utils: 1.4.2(typescript@5.7.2)
+      typescript: 5.7.2
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/typescript-estree@8.19.1(typescript@5.7.2)':
+    dependencies:
+      '@typescript-eslint/types': 8.19.1
+      '@typescript-eslint/visitor-keys': 8.19.1
+      debug: 4.4.0
+      fast-glob: 3.3.2
+      is-glob: 4.0.3
+      minimatch: 9.0.5
+      semver: 7.6.3
+      ts-api-utils: 2.0.0(typescript@5.7.2)
       typescript: 5.7.2
     transitivePeerDependencies:
       - supports-color
@@ -12820,9 +13050,14 @@ snapshots:
       '@typescript-eslint/types': 8.19.0
       eslint-visitor-keys: 4.2.0
 
-  '@univerjs/icons-svg@0.2.10': {}
+  '@typescript-eslint/visitor-keys@8.19.1':
+    dependencies:
+      '@typescript-eslint/types': 8.19.1
+      eslint-visitor-keys: 4.2.0
 
-  '@univerjs/icons@0.2.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@univerjs/icons-svg@0.2.12': {}
+
+  '@univerjs/icons@0.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -12832,31 +13067,31 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
-  '@vitejs/plugin-react@4.3.4(vite@6.0.6(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))':
+  '@vitejs/plugin-react@4.3.4(vite@6.0.7(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))':
     dependencies:
       '@babel/core': 7.26.0
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.0)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.0)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 6.0.6(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vite: 6.0.7(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@4.3.4(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))':
+  '@vitejs/plugin-react@4.3.4(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))':
     dependencies:
       '@babel/core': 7.26.0
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.0)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.0)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vite: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-vue@5.2.1(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))(vue@3.4.38(typescript@5.7.2))':
+  '@vitejs/plugin-vue@5.2.1(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))(vue@3.4.38(typescript@5.7.2))':
     dependencies:
-      vite: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vite: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
       vue: 3.4.38(typescript@5.7.2)
 
   '@vitest/coverage-istanbul@2.1.8(vitest@2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0))':
@@ -15073,11 +15308,11 @@ snapshots:
       semver: 7.6.3
       strip-indent: 3.0.0
 
-  eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2)):
+  eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2)):
     dependencies:
       eslint: 9.17.0(jiti@2.4.2)
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
+      '@typescript-eslint/eslint-plugin': 8.19.0(@typescript-eslint/parser@8.19.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2))(eslint@9.17.0(jiti@2.4.2))(typescript@5.7.2)
 
   eslint-plugin-vue@9.32.0(eslint@9.17.0(jiti@2.4.2)):
     dependencies:
@@ -17765,11 +18000,6 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-error-boundary@3.1.4(react@18.3.1):
-    dependencies:
-      '@babel/runtime': 7.26.0
-      react: 18.3.1
-
   react-grid-layout@1.4.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       clsx: 2.1.1
@@ -18093,6 +18323,31 @@ snapshots:
       '@rollup/rollup-win32-arm64-msvc': 4.29.1
       '@rollup/rollup-win32-ia32-msvc': 4.29.1
       '@rollup/rollup-win32-x64-msvc': 4.29.1
+      fsevents: 2.3.3
+
+  rollup@4.30.1:
+    dependencies:
+      '@types/estree': 1.0.6
+    optionalDependencies:
+      '@rollup/rollup-android-arm-eabi': 4.30.1
+      '@rollup/rollup-android-arm64': 4.30.1
+      '@rollup/rollup-darwin-arm64': 4.30.1
+      '@rollup/rollup-darwin-x64': 4.30.1
+      '@rollup/rollup-freebsd-arm64': 4.30.1
+      '@rollup/rollup-freebsd-x64': 4.30.1
+      '@rollup/rollup-linux-arm-gnueabihf': 4.30.1
+      '@rollup/rollup-linux-arm-musleabihf': 4.30.1
+      '@rollup/rollup-linux-arm64-gnu': 4.30.1
+      '@rollup/rollup-linux-arm64-musl': 4.30.1
+      '@rollup/rollup-linux-loongarch64-gnu': 4.30.1
+      '@rollup/rollup-linux-powerpc64le-gnu': 4.30.1
+      '@rollup/rollup-linux-riscv64-gnu': 4.30.1
+      '@rollup/rollup-linux-s390x-gnu': 4.30.1
+      '@rollup/rollup-linux-x64-gnu': 4.30.1
+      '@rollup/rollup-linux-x64-musl': 4.30.1
+      '@rollup/rollup-win32-arm64-msvc': 4.30.1
+      '@rollup/rollup-win32-ia32-msvc': 4.30.1
+      '@rollup/rollup-win32-x64-msvc': 4.30.1
       fsevents: 2.3.3
 
   rrweb-cssom@0.6.0: {}
@@ -19048,10 +19303,10 @@ snapshots:
       - supports-color
       - terser
 
-  vite-plugin-dts@4.4.0(@types/node@22.10.5)(rollup@4.29.1)(typescript@5.7.2)(vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)):
+  vite-plugin-dts@4.4.0(@types/node@22.10.5)(rollup@4.30.1)(typescript@5.7.2)(vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)):
     dependencies:
       '@microsoft/api-extractor': 7.48.1(@types/node@22.10.5)
-      '@rollup/pluginutils': 5.1.4(rollup@4.29.1)
+      '@rollup/pluginutils': 5.1.4(rollup@4.30.1)
       '@volar/typescript': 2.4.11
       '@vue/language-core': 2.1.10(typescript@5.7.2)
       compare-versions: 6.1.1
@@ -19061,7 +19316,7 @@ snapshots:
       magic-string: 0.30.17
       typescript: 5.7.2
     optionalDependencies:
-      vite: 6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vite: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
@@ -19097,11 +19352,11 @@ snapshots:
       sass: 1.77.5
       terser: 5.37.0
 
-  vite@6.0.6(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0):
+  vite@6.0.7(@types/node@22.10.2)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0):
     dependencies:
       esbuild: 0.24.2
       postcss: 8.4.49
-      rollup: 4.29.1
+      rollup: 4.30.1
     optionalDependencies:
       '@types/node': 22.10.2
       fsevents: 2.3.3
@@ -19112,11 +19367,11 @@ snapshots:
       tsx: 4.19.2
       yaml: 2.7.0
 
-  vite@6.0.6(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0):
+  vite@6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0):
     dependencies:
       esbuild: 0.24.2
       postcss: 8.4.49
-      rollup: 4.29.1
+      rollup: 4.30.1
     optionalDependencies:
       '@types/node': 22.10.5
       fsevents: 2.3.3

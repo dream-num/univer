@@ -87,7 +87,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -111,7 +111,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -129,7 +129,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -158,7 +158,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -176,7 +176,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -216,7 +216,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         if (workbook == null || params == null) {
             return;
         }
@@ -242,7 +242,7 @@ export class FUniverDrawingMixin extends FUniver {
 
         const drawingManagerService = this._injector.get(IDrawingManagerService);
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
 
         if (workbook == null) {
             return;
@@ -272,7 +272,7 @@ export class FUniverDrawingMixin extends FUniver {
             return;
         }
 
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         const drawingManagerService = this._injector.get(IDrawingManagerService);
 
         if (workbook == null) {

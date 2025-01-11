@@ -26,36 +26,38 @@ import { FWorkbook } from './f-workbook';
 
 export interface IFUniverSheetsMixin {
     /**
+     * @deprecated use `univerAPI.createWorkbook` instead.
+     */
+    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
+
+    /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
-     *
      * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
      * @returns {FWorkbook} FWorkbook API instance.
      * @example
      * ```ts
-     * univerAPI.createUniverSheet({ id: 'Sheet1', name: 'Sheet1' });
+     * univerAPI.createWorkbook({ id: 'Sheet1', name: 'Sheet1' });
      * ```
      */
-    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
+    createWorkbook(data: Partial<IWorkbookData>): FWorkbook;
+
     /**
      * Get the currently focused Univer spreadsheet.
      * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
      * @example
      * ```ts
-     * univerAPI.getActiveUniverSheet();
+     * univerAPI.getActiveWorkbook();
      * ```
-     */
-    getActiveUniverSheet(): FWorkbook | null;
-    /**
-     * @deprecated use `getActiveUniverSheet` as instead.
      */
     getActiveWorkbook(): FWorkbook | null;
     /**
      * Get the spreadsheet API handler by the spreadsheet id.
-     *
      * @param {string} id The spreadsheet id.
      * @returns {FWorkbook | null} The spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null;
+
+    getWorkbook(id: string): FWorkbook | null;
     /**
      * Get the PermissionInstance.
      * @deprecated This function is deprecated and will be removed in version 0.6.0. Please use the function with the same name on the `FWorkbook` instance instead.
@@ -70,7 +72,6 @@ export interface IFUniverSheetsMixin {
     /**
      * Create a new defined name builder.
      * @returns {FDefinedNameBuilder} - The defined name builder.
-     *
      * @example
      * ```ts
      * univerAPI.newDefinedName();
@@ -250,17 +251,17 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         return this._injector.createInstance(FWorkbook, workbook);
     };
 
-    override getActiveUniverSheet(): FWorkbook | null {
+    override createWorkbook(data: Partial<IWorkbookData>): FWorkbook {
+        return this.createUniverSheet(data);
+    }
+
+    override getActiveWorkbook(): FWorkbook | null {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override getActiveWorkbook(): FWorkbook | null {
-        return this.getActiveUniverSheet();
     }
 
     override getUniverSheet(id: string): FWorkbook | null {
@@ -270,6 +271,10 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getWorkbook(id: string): FWorkbook | null {
+        return this.getUniverSheet(id);
     }
 
     override getPermission(): FPermission {

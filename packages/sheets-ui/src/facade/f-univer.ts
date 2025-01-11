@@ -244,7 +244,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private _generateClipboardCopyParam(): IBeforeClipboardChangeParam | undefined {
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
         const range = workbook?.getActiveRange();
         if (!workbook || !worksheet || !range) {
@@ -299,7 +299,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             return;
         }
         const { htmlContent, textContent } = params as ISheetPasteByShortKeyParams;
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
         if (!workbook || !worksheet) {
             return;
@@ -314,7 +314,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 
     private async _generateClipboardPasteParamAsync(): Promise<IBeforeClipboardPasteParam | undefined> {
-        const workbook = this.getActiveUniverSheet();
+        const workbook = this.getActiveWorkbook();
         const worksheet = workbook?.getActiveSheet();
         if (!workbook || !worksheet) {
             return;

@@ -18,7 +18,7 @@ import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IEv
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, Direction, FBaseInitialable, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, Registry, toDisposable } from '@univerjs/core';
+import { BooleanNumber, Direction, FBaseInitialable, FEnum, FEventName, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, Registry, toDisposable } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -75,6 +75,8 @@ export class FWorksheet extends FBaseInitialable {
      */
     addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
         this._ensureEventRegistry(event).add(callback);
+        this.addUIEvent(event, callback);
+
         return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
     }
 
@@ -94,6 +96,21 @@ export class FWorksheet extends FBaseInitialable {
         });
 
         return params.cancel;
+    }
+
+    addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
+        //
+    }
+
+    get Enum(): FEnum {
+        return FEnum.get();
+    }
+
+    /**
+     * @returns {FEventName} The event name.
+     */
+    get Event(): FEventName {
+        return FEventName.get();
     }
 
     /**

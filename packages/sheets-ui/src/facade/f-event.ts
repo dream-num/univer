@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
 import type { DeviceInputEventType } from '@univerjs/engine-render';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
-import { FEventName, type IEventBase, type RichTextValue } from '@univerjs/core';
+import { FEventName } from '@univerjs/core';
 
 /**
  * Event interface triggered when cell editing starts
@@ -141,6 +142,8 @@ export const CellFEventName = {
     CellHover: 'CellHover',
     DragOver: 'DragOver',
     Drop: 'Drop',
+    Scroll: 'Scroll',
+    SelectionMoveEnd: 'SelectionMoveEnd',
 } as const;
 
 export interface IFSheetsUIEventNameMixin {
@@ -313,6 +316,24 @@ export interface IFSheetsUIEventNameMixin {
      * ```
      */
     readonly Drop: 'Drop';
+
+    /**
+     * Event fired when scroll spreadsheet.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('Scroll', (p)=> console.log(p));
+     * ```
+     */
+    readonly Scroll: 'Scroll';
+
+    /**
+     * Event fired when selection move end
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionMoveEnd', (p)=> console.log(p));
+     * ```
+     */
+    readonly SelectionMoveEnd: 'SelectionMoveEnd';
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -379,9 +400,17 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get Drop(): 'Drop' {
         return 'Drop' as const;
     }
+
+    override get Scroll(): 'Scroll' {
+        return 'Scroll' as const;
+    }
+
+    override get SelectionMoveEnd(): 'SelectionMoveEnd' {
+        return 'SelectionMoveEnd' as const;
+    }
 }
 
-export interface IUIEventBase extends IEventBase {
+export interface ISheetUIEventBase extends IEventBase {
     /**
      * The workbook instance currently being operated on. {@link FWorkbook}
      */
@@ -441,10 +470,20 @@ export interface IBeforeClipboardPasteParam extends IEventBase {
 
 export type IClipboardPastedParam = IBeforeClipboardPasteParam;
 
-export interface ICellEventParam extends IUIEventBase {
+export interface ICellEventParam extends ISheetUIEventBase {
     row: number;
     column: number;
 }
+
+export interface IScrollEventParam extends ISheetUIEventBase {
+    scrollX: number;
+    scrollY: number;
+}
+
+export interface ISelectionEventParam extends ISheetUIEventBase {
+    selections: IRange[];
+}
+
 export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;
@@ -464,6 +503,9 @@ export interface IFSheetsUIEventParamConfig {
     CellPointerMove: ICellEventParam;
     Drop: ICellEventParam;
     DragOver: ICellEventParam;
+
+    Scroll: IScrollEventParam;
+    SelectionMoveEnd: ISelectionEventParam;
 }
 
 FEventName.extend(FSheetsUIEventName);

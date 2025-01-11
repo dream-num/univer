@@ -40,7 +40,7 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
                 refSelectionsService.clear();
             };
         }
-    }, [isNeed]);
+    }, [contextService, isNeed, refSelectionsService]);
 
     useLayoutEffect(() => {
         if (isNeed && selecting) {
@@ -52,9 +52,9 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
                 d1?.dispose();
             };
         }
-    }, [isNeed, selecting]);
+    }, [contextService, isNeed, refSelectionsRenderService, selecting]);
 
-    //right context controller
+    // right context controller
     useEffect(() => {
         if (isNeed) {
             contextService.setContextValue(EDITOR_ACTIVATED, true);
@@ -64,12 +64,12 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
                 contextMenuService.enable();
             };
         }
-    }, [isNeed]);
+    }, [contextMenuService, contextService, isNeed]);
 
     // reset setSkipLastEnabled
     useEffect(() => {
         if (isNeed) {
             refSelectionsRenderService?.setSkipLastEnabled(false);
         }
-    }, [isNeed]);
+    }, [isNeed, refSelectionsRenderService]);
 };

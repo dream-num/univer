@@ -21,7 +21,7 @@ import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerj
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
@@ -59,6 +59,7 @@ export function FormulaBar() {
     const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
     const contextService = useDependency(IContextService);
+    useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
     const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
     const ref = useRef<HTMLDivElement>(null);
 

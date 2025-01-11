@@ -41,7 +41,7 @@ export interface IRefSelection {
 
 export function calcHighlightRanges(opts: {
     unitId: string;
-    subUnitId?: string;
+    subUnitId: string;
     refSelections: IRefSelection[];
     editor: Editor | undefined;
     refSelectionsService: SheetsSelectionsService;
@@ -119,7 +119,7 @@ export function calcHighlightRanges(opts: {
  * @param {IRefSelection[]} refSelections
  */
 
-export function useSheetHighlight(unitId: string, subUnitId?: string) {
+export function useSheetHighlight(unitId: string, subUnitId: string) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const themeService = useDependency(ThemeService);
     const refSelectionsService = useDependency(IRefSelectionsService);

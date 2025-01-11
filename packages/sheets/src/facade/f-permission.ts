@@ -15,11 +15,14 @@
  */
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
 export class FPermission extends FBase {
     public permissionPointsDefinition = PermissionPointsDefinitions;
+    public rangeRuleChangedAfterAuth$: Observable<unknown>;
+    public sheetRuleChangedAfterAuth$: Observable<unknown>;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -31,6 +34,8 @@ export class FPermission extends FBase {
         @Inject(IAuthzIoService) protected readonly _authzIoService: IAuthzIoService
     ) {
         super();
+        this.rangeRuleChangedAfterAuth$ = this._rangeProtectionRuleModel.ruleRefresh$;
+        this.sheetRuleChangedAfterAuth$ = this._worksheetProtectionRuleModel.ruleRefresh$;
     }
 
     /**

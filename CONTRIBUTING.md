@@ -197,6 +197,15 @@ and then run the following command to run E2E tests:
 pnpm test:e2e
 ```
 
+### Build Preview
+
+After building, the output may differ from the source code. To test for any differences, you can link to the built artifacts using:
+
+```shell
+pnpm build
+pnpm dev:libs
+```
+
 ### Update Snapshots
 
 Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by running this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) on your branch.

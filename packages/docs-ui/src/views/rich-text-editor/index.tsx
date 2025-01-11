@@ -17,6 +17,7 @@
 import type { Editor } from '../../services/editor/editor';
 import type { IKeyboardEventConfig } from './hooks';
 import { BuildTextUtils, createInternalEditorID, generateRandomId, type IDocumentData, useDependency, useObservable } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
@@ -26,6 +27,7 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 import { useKeyboardEvent, useResize } from './hooks';
 import { useEditor } from './hooks/useEditor';
 import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
+import { useOnChange } from './hooks/useOnChange';
 import styles from './index.module.less';
 
 export interface IRichTextEditorProps {
@@ -40,6 +42,10 @@ export interface IRichTextEditorProps {
     isSingle?: boolean;
     placeholder?: string;
     editorId?: string;
+    onHeightChange?: (height: number) => void;
+    onChange?: (data: IDocumentData) => void;
+    maxHeight?: number;
+    defaultHeight?: number;
 }
 
 export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, ref) => {
@@ -54,10 +60,15 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         style,
         isSingle,
         editorId: propsEditorId,
+        onHeightChange,
+        onChange: _onChange,
+        defaultHeight = 32,
+        maxHeight = 32,
     } = props;
     const editorService = useDependency(IEditorService);
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
+    const [height, setHeight] = useState(defaultHeight);
     const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorId = useMemo(() => propsEditorId ?? createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), [propsEditorId]);
     const editor = useEditor({
@@ -73,6 +84,17 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
     const isFocusing = docSelectionRenderService?.isFocusing ?? false;
     const sheetEmbeddingRef = React.useRef<HTMLDivElement>(null);
     const [showPlaceholder, setShowPlaceholder] = useState(() => !BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
+    const { checkScrollBar } = useResize(editor, isSingle, true, true);
+    const onChange = useEvent((data: IDocumentData) => {
+        const docSkeleton = renderer?.with(DocSkeletonManagerService);
+        const size = docSkeleton?.getSkeleton().getActualSize();
+        if (size) {
+            onHeightChange?.(size.actualHeight);
+            setHeight(Math.max(defaultHeight, Math.min(size.actualHeight, maxHeight)));
+        }
+        _onChange?.(data);
+        checkScrollBar();
+    });
 
     useEffect(() => {
         setShowPlaceholder(!BuildTextUtils.transform.getPlainText(editor?.getDocumentData().body?.dataStream ?? ''));
@@ -83,9 +105,10 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
 
         return () => sub?.unsubscribe();
     }, [editor]);
+
     useObservable(editor?.blur$);
     useObservable(editor?.focus$);
-    useResize(editor, isSingle, true);
+
     useEffect(() => {
         onFocusChange?.(isFocusing);
     }, [isFocusing, onFocusChange]);
@@ -113,6 +136,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
     useLeftAndRightArrow(isFocusing && moveCursor, false, editor);
     useKeyboardEvent(isFocusing, keyboardEventConfig, editor);
     useImperativeHandle(ref, () => editor!, [editor]);
+    useOnChange(editor, onChange);
 
     return (
         <div className={clsx(styles.richTextEditor, className)} style={style}>
@@ -120,6 +144,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
                 className={clsx(styles.richTextEditorWrap, {
                     [styles.richTextEditorActive]: isFocusing,
                 })}
+                style={{ height }}
                 ref={sheetEmbeddingRef}
             >
                 <div

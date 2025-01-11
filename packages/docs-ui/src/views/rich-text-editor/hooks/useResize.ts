@@ -23,7 +23,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { VIEWPORT_KEY } from '../../../basics/docs-view-key';
 
 // eslint-disable-next-line max-lines-per-function
-export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean) => {
+export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: boolean, autoScroll?: boolean) => {
     const resize = useCallback(() => {
         if (editor) {
             const { scene, mainComponent } = editor.render;
@@ -41,7 +41,9 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
     }, [editor, isSingle]);
 
     const checkScrollBar = useMemo(() => {
+        // eslint-disable-next-line complexity
         return debounce(() => {
+            if (!autoScrollbar) return;
             if (!editor || !autoScrollbar) {
                 return;
             }
@@ -76,6 +78,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
                     } else {
                         viewportMain?.resetCanvasSizeAndUpdateScroll();
                     }
+                    autoScroll && viewportMain?.scrollToBarPos({ x: 0, y: Infinity });
                 } else {
                     scrollBar = null;
                     viewportMain?.scrollToBarPos({ x: 0, y: 0 });
@@ -93,6 +96,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
                     } else {
                         viewportMain?.resetCanvasSizeAndUpdateScroll();
                     }
+                    autoScroll && viewportMain?.scrollToBarPos({ x: Infinity, y: 0 });
                 } else {
                     scrollBar = null;
                     viewportMain?.scrollToBarPos({ x: 0, y: 0 });
@@ -100,7 +104,7 @@ export const useResize = (editor?: Editor, isSingle = true, autoScrollbar?: bool
                 }
             }
         }, 30);
-    }, [editor, autoScrollbar, isSingle]);
+    }, [editor, autoScrollbar, isSingle, autoScroll]);
 
     useEffect(() => {
         if (!autoScrollbar) return;

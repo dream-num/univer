@@ -114,6 +114,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 initialValue={comment?.text && getSnapshot(comment.text)}
                 onFocusChange={(isFocus) => isFocus && setEditing(isFocus)}
                 isSingle={false}
+                maxHeight={64}
                 onClickOutside={() => {
                     setTimeout(() => {
                         editorService.focus(rootEditorId);

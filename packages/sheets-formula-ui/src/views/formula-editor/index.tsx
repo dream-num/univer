@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, ITextRange } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
 import type { ReactNode } from 'react';
@@ -141,7 +141,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const highlightDoc = useDocHight('=');
     const highlightSheet = useSheetHighlight(unitId, subUnitId);
-    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean) => {
+    const highlight = useEvent((text: string, isNeedResetSelection: boolean = true, isEnd?: boolean, newSelections?: ITextRange[]) => {
         if (!editorRef.current) {
             return;
         }
@@ -153,7 +153,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             sequenceNodes,
             isNeedResetSelection,
             // remove equals need to remove highlight style
-            preText.slice(1) === text && preText[0] === '='
+            preText.slice(1) === text && preText[0] === '=',
+            newSelections
         );
         refSelections.current = ranges;
 
@@ -237,14 +238,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (!isFocusing) {
             return;
         }
-        highlight(`=${refString}`, true, isEnd);
+        highlight(`=${refString}`, true, isEnd, [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }]);
         if (isEnd) {
             focus();
             if (offset !== -1) {
-                // 在渲染结束之后再设置选区
                 setTimeout(() => {
                     const range = { startOffset: offset + 1, endOffset: offset + 1 };
-                    editor?.setSelectionRanges([range]);
                     const docBackScrollRenderController = editor?.render.with(DocBackScrollRenderController);
                     docBackScrollRenderController?.scrollToRange({ ...range, collapsed: true });
                 }, 50);

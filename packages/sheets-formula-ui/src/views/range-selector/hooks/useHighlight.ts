@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Workbook } from '@univerjs/core';
+import type { ITextRange, ITextRun, Workbook } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
@@ -165,7 +165,13 @@ export function useDocHight(_leadingCharacter: string = '') {
     const commandService = useDependency(ICommandService);
     const leadingCharacterLength = useMemo(() => _leadingCharacter.length, [_leadingCharacter]);
 
-    const highlightDoc = useCallback((editor: Editor, sequenceNodes: INode[], isNeedResetSelection = true, clearTextRun = true) => {
+    const highlightDoc = useCallback((
+        editor: Editor,
+        sequenceNodes: INode[],
+        isNeedResetSelection = true,
+        clearTextRun = true,
+        newSelections?: ITextRange[]
+    ) => {
         const data = editor.getDocumentData();
         const editorId = editor.getEditorId();
         if (!data) {
@@ -216,7 +222,7 @@ export function useDocHight(_leadingCharacter: string = '') {
             commandService.syncExecuteCommand(ReplaceTextRunsCommand.id, {
                 unitId: editorId,
                 body: getBodySlice(cloneBody, 0, cloneBody.dataStream.length - 2),
-                textRanges: selections,
+                textRanges: newSelections ?? selections,
             });
             return refSelections;
         }

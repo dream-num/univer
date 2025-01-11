@@ -58,7 +58,7 @@ export const useSheetSelectionChange = (
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const themeService = useDependency(ThemeService);
-    const { getIsNeedAddSelection } = useSelectionAdd(unitId, sequenceNodes, editor);
+    const { getIsNeedAddSelection } = useSelectionAdd(unitId, editor);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
@@ -79,7 +79,7 @@ export const useSheetSelectionChange = (
         if (refSelectionsRenderService && isNeed) {
             let isFirst = true;
             // eslint-disable-next-line complexity
-            const handleSelectionsChange = (selections: ISelectionWithCoord[]) => {
+            const handleSelectionsChange = (selections: ISelectionWithCoord[], isEnd: boolean) => {
                 if (isFirst) {
                     isFirst = false;
                     return;
@@ -111,7 +111,7 @@ export const useSheetSelectionChange = (
                         sequenceNodes.push({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const newSequenceNodes = [...sequenceNodes, ...lastNodes];
                         const result = sequenceNodeToText(newSequenceNodes);
-                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), true);
+                        handleRangeChange(result, getOffsetFromSequenceNodes(sequenceNodes), isEnd);
                     } else {
                         const range = selections[selections.length - 1];
                         const rangeSheetId = range.rangeWithCoord.sheetId ?? subUnitId;
@@ -124,7 +124,7 @@ export const useSheetSelectionChange = (
                         const refRanges = unitRangesToText([unitRangeName], isSupportAcrossSheet && isAcrossSheet);
                         sequenceNodes.unshift({ token: refRanges[0], nodeType: sequenceNodeType.REFERENCE } as any);
                         const result = sequenceNodeToText(sequenceNodes);
-                        handleRangeChange(result, refRanges[0].length, true);
+                        handleRangeChange(result, refRanges[0].length, isEnd);
                     }
                 } else {
                     // 更新全部的 ref Selection
@@ -185,13 +185,17 @@ export const useSheetSelectionChange = (
                     const preNode = sequenceNodes[sequenceNodes.length - 1];
                     const isPreNodeRef = preNode && (typeof preNode === 'string' ? false : preNode.nodeType === sequenceNodeType.REFERENCE);
                     const result = `${currentText}${theLastList.length && isPreNodeRef ? ',' : ''}${theLastList.join(',')}`;
-                    handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, true);
+                    handleRangeChange(result, !theLastList.length && newOffset ? newOffset : result.length, isEnd);
                 }
             };
             const disposableCollection = new DisposableCollection();
+            disposableCollection.add(refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
+                if (isScalingRef.current) return;
+                handleSelectionsChange(selections, false);
+            }));
             disposableCollection.add(refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 if (isScalingRef.current) return;
-                handleSelectionsChange(selections);
+                handleSelectionsChange(selections, true);
             }));
 
             return () => {

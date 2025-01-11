@@ -105,6 +105,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._eventDisposables = null;
     }
 
+    disableSelectionChanging(): void {
+        this._disableSelectionChanging();
+    }
+
     private _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;

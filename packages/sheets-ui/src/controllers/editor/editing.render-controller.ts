@@ -55,7 +55,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, REF_SELECTIONS_ENABLED, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -284,7 +284,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
             const cellSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
             const formulaSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-            if (cellSelectionRenderManager?.isFocusing || formulaSelectionRenderManager?.isFocusing) {
+            if (cellSelectionRenderManager?.canFocusing || formulaSelectionRenderManager?.canFocusing) {
                 this._univerInstanceService.setCurrentUnitForType(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
                 cellSelectionRenderManager?.activate(
                     HIDDEN_EDITOR_POSITION,
@@ -505,6 +505,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             }
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
+                this._contextService.setContextValue(REF_SELECTIONS_ENABLED, false);
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                     unitId: this._context.unit.getUnitId(),
                     subUnitId: sheetId,

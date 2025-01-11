@@ -15,11 +15,14 @@
  */
 
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
 export class FPermission extends FBase {
     public permissionPointsDefinition = PermissionPointsDefinitions;
+    public rangeRuleChangedAfterAuth$: Observable<unknown>;
+    public sheetRuleChangedAfterAuth$: Observable<unknown>;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -31,6 +34,8 @@ export class FPermission extends FBase {
         @Inject(IAuthzIoService) protected readonly _authzIoService: IAuthzIoService
     ) {
         super();
+        this.rangeRuleChangedAfterAuth$ = this._rangeProtectionRuleModel.ruleRefresh$;
+        this.sheetRuleChangedAfterAuth$ = this._worksheetProtectionRuleModel.ruleRefresh$;
     }
 
     /**
@@ -38,11 +43,9 @@ export class FPermission extends FBase {
      *
      * This function sets or updates a permission point for a workbook identified by `unitId`.
      * It creates a new permission point if it does not already exist, and updates the point with the provided value.
-     *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {WorkbookPermissionPointConstructor} FPointClass - The constructor function for creating a permission point instance. Other point constructors can See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The boolean value to determine whether the permission point is enabled or disabled.
-     *
      */
     setWorkbookPermissionPoint(unitId: string, FPointClass: WorkbookPermissionPointConstructor, value: boolean): void {
         const instance = new FPointClass(unitId);
@@ -55,10 +58,8 @@ export class FPermission extends FBase {
 
     /**
      * This function is used to set whether the workbook can be edited
-     *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {boolean} value - A value that controls whether the workbook can be edited
-     *
      */
     setWorkbookEditPermission(unitId: string, value: boolean): void {
         this.setWorkbookPermissionPoint(unitId, WorkbookEditablePermission, value);
@@ -66,10 +67,8 @@ export class FPermission extends FBase {
 
     /**
      * This function is used to add a base permission for a worksheet.
-     *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
-     *
      * @returns {Promise<string | undefined>} - Returns the `permissionId` if the permission is successfully added. If the operation fails or no result is returned, it resolves to `undefined`.
      */
     async addWorksheetBasePermission(unitId: string, subUnitId: string): Promise<string | undefined> {
@@ -103,7 +102,6 @@ export class FPermission extends FBase {
 
     /**
      * Delete the entire table protection set for the worksheet and reset the point permissions of the worksheet to true
-     *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
      */
@@ -123,13 +121,11 @@ export class FPermission extends FBase {
     /**
      * Sets the worksheet permission point by updating or adding the permission point for the worksheet.
      * If the worksheet doesn't have a base permission, it creates one to used render
-     *
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {WorkSheetPermissionPointConstructor} FPointClass - The constructor for the permission point class.
      *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The new permission value to be set for the worksheet.
-     *
      * @returns {Promise<string | undefined>} - Returns the `permissionId` if the permission point is successfully set or created. If no permission is set, it resolves to `undefined`.
      */
     async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): Promise<string | undefined> {
@@ -176,11 +172,9 @@ export class FPermission extends FBase {
 
     /**
      * Adds a range protection to the worksheet.
-     *
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {IRange[]} ranges - The ranges to be protected.
-     *
      * @returns {Promise<{ permissionId: string, ruleId: string } | undefined>} - Returns an object containing the `permissionId` and `ruleId` if the range protection is successfully added. If the operation fails or no result is returned, it resolves to `undefined`. permissionId is used to stitch permission point ID，ruleId is used to store permission rules
      */
     async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]): Promise<{
@@ -234,7 +228,6 @@ export class FPermission extends FBase {
 
     /**
      * Removes the range protection from the worksheet.
-     *
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {string[]} ruleIds - The rule IDs of the range protection to be removed.
@@ -260,7 +253,6 @@ export class FPermission extends FBase {
 
     /**
      * Modify the permission points of a custom area
-     *
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
      * @param {string} permissionId - The unique identifier of the permission that controls access to the range.
@@ -283,7 +275,6 @@ export class FPermission extends FBase {
      * This method finds the rule by unitId, subUnitId, and ruleId, and updates the rule with the provided ranges.
      * It checks for overlaps with existing ranges in the same subunit and shows an error message if any overlap is detected.
      * If no overlap is found, it executes the command to update the range protection with the new ranges.
-     *
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet within the workbook.
      * @param {string} ruleId - The ruleId of the range protection rule that is being updated.

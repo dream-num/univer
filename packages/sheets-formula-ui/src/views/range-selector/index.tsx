@@ -489,7 +489,7 @@ function RangeSelectorDialog(props: {
         }
     });
 
-    const highlightSheet = useSheetHighlight(unitId);
+    const highlightSheet = useSheetHighlight(unitId, subUnitId);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
     useRefactorEffect(focusIndex >= 0, focusIndex >= 0, unitId);
     useOnlyOneRange(unitId, isOnlyOneRange);

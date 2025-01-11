@@ -25,7 +25,7 @@ export interface IFWorksheetDataValidationMixin {
      * Get all data validation rules in current sheet.
      * @returns all data validation rules
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getWorksheet('sheet1');
      * const dataValidations = worksheet.getDataValidations();
      * ```
@@ -35,7 +35,7 @@ export interface IFWorksheetDataValidationMixin {
      * Get data validation validator status for current sheet.
      * @returns matrix of validator status
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getWorksheet('sheet1');
      * const validatorStatus = worksheet.getValidatorStatus();
      * ```
@@ -47,7 +47,7 @@ export interface IFWorksheetDataValidationMixin {
      * @param ruleId - the rule id
      * @returns data validation rule
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getWorksheet('sheet1');
      * const dataValidation = worksheet.getDataValidation('ruleId');
      * ```

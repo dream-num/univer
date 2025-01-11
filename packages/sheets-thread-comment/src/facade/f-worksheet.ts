@@ -27,7 +27,7 @@ export interface IFWorksheetCommentMixin {
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getSheetById(sheetId);
      * const comments = worksheet.getComments();
      * ```
@@ -37,7 +37,7 @@ export interface IFWorksheetCommentMixin {
     /**
      * Clear all comments in the current sheet
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getSheetById(sheetId);
      * await worksheet.clearComments();
      * ```
@@ -48,7 +48,7 @@ export interface IFWorksheetCommentMixin {
      * get comment by comment id
      * @param {string} commentId comment id
      * ```ts
-     * const workbook = univerAPI.getActiveUniverSheet();
+     * const workbook = univerAPI.getActiveWorkbook();
      * const worksheet = workbook.getSheetById(sheetId);
      * const comment = worksheet.getCommentById(commentId);
      * ```

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { IDisposable, IEventParamConfig, IRange, Nullable } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
+
+import type { IFSheetsUIEventParamConfig, IScrollEventParam, ISheetUIEventBase } from './f-event';
 import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
+import { CellFEventName } from './f-event';
 
 export interface IFWorksheetSkeletonMixin {
     /**
@@ -103,6 +107,50 @@ export interface IFWorksheetSkeletonMixin {
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
+    /**
+     * Fire an event, used in internal only.
+     * @param event {string} key of event
+     * @param params {any} params of event
+     * @returns {boolean} should cancel
+     * @example
+     * ```ts
+     * this.fireEvent(univerAPI.event.UnitCreated, params);
+     * ```
+     */
+    protected fireUIEvent<T extends keyof IFSheetsUIEventParamConfig>(event: T, params: IFSheetsUIEventParamConfig[T]): boolean | undefined {
+        return super.fireEvent(event, params as unknown as IEventParamConfig[T]);
+    }
+
+    override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): IDisposable {
+        const baseParams: ISheetUIEventBase = {
+            workbook: this._fWorkbook,
+            worksheet: this,
+        };
+
+        switch (event) {
+            case CellFEventName.Scroll:
+                this.onScroll((params: Nullable<IViewportScrollState>) => {
+                    this.fireUIEvent(this.Event.Scroll, {
+                        scrollX: params?.viewportScrollX,
+                        scrollY: params?.viewportScrollY,
+                        ...baseParams,
+                    } as IScrollEventParam);
+                });
+                break;
+            case CellFEventName.SelectionMoveEnd:
+                this.onSelectionMoveEnd((selections: IRange[]) => {
+                    this.fireUIEvent(this.Event.SelectionMoveEnd, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+        }
+
+        return toDisposable(() => {
+            //
+        });
+    }
+
     override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
@@ -205,6 +253,24 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                 callback(params);
             });
             return toDisposable(sub);
+        }
+        return toDisposable(() => { });
+    }
+
+    onSelectionMoveEnd(callback: (selections: IRange[]) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
         }
         return toDisposable(() => { });
     }

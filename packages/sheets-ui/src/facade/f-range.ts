@@ -73,7 +73,7 @@ interface IFRangeSheetsUIMixin {
     generateHTML(this: FRange): string;
 
     /**
-     * Attach a popup to the start cell of current range.
+     * Attach a popup to the right side of the start cell of current range.
      * If current worksheet is not active, the popup will not be shown.
      * Be careful to manager the detach disposable object, if not dispose correctly, it might memory leaks.
      * @param popup The popup to attach
@@ -96,9 +96,9 @@ interface IFRangeSheetsUIMixin {
      * @returns The disposable object to detach the alert.
      * @example
      * ```ts
-     * let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     * let range = sheet.getRange(2, 2, 3, 3);
-     * range.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
+     let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     let range = sheet.getRange(2, 2, 3, 3);
+     range.attachAlertPopup({ message: 'This is an alert', type: 'warning' });
      * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
@@ -150,6 +150,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     }
 
     override attachPopup(popup: IFCanvasPopup): Nullable<IDisposable> {
+        popup.onClick;
         popup.direction = popup.direction ?? 'horizontal';
         popup.extraProps = popup.extraProps ?? {};
         popup.offset = popup.offset ?? [0, 0];

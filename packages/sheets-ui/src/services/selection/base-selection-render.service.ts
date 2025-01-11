@@ -454,7 +454,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     /**
-     * Clear existed selections by workbookSelections.selectionMoveEnd$
+     * Clear existed selection controls.
+     * Only rendered selections cleared, selections in data-model still exist.
      */
     protected _reset(): void {
         this._clearAllSelectionControls();

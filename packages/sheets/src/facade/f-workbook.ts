@@ -469,6 +469,13 @@ export class FWorkbook extends FBaseInitialable {
      * Register a callback that will be triggered when the selection changes.
      * @param {onSelectionChangeCallback} callback The callback.
      * @returns A function to dispose the listening
+     * @example
+     * ``` ts
+     let s = univerAPI.getActiveWorkbook();
+     s.onSelectionChange((selections) => {
+        console.log('Selection changed:', selections);
+     })
+     * ```
      */
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(

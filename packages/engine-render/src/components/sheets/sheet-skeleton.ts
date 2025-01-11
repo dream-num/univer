@@ -777,6 +777,18 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(MIN_COL_WIDTH, colWidth); // min col width is 2
     }
 
+    getColWidth(colIndex: number) {
+        const preColIndex = Math.max(0, colIndex - 1);
+        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        return currColWidth;
+    }
+
+    getRowHeight(rowIndex: number) {
+        const preRowIndex = Math.max(0, rowIndex - 1);
+        const currRowHeight = this._rowHeightAccumulation[rowIndex] - this._rowHeightAccumulation[preRowIndex];
+        return currRowHeight;
+    }
+
     /**
      * For _calculateColMaxWidth
      * @param cell

@@ -134,6 +134,7 @@ export class SheetPermissionInitController extends Disposable {
                                 this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                             }
                         });
+                        this._rangeProtectionRuleModel.ruleRefresh(info.rule.permissionId);
                     });
                 } else {
                     const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(info.unitId, info.subUnitId);
@@ -194,6 +195,7 @@ export class SheetPermissionInitController extends Disposable {
                                 this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                             }
                         });
+                        this._worksheetProtectionRuleModel.ruleRefresh(info.rule.permissionId);
                     });
                 } else {
                     [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {

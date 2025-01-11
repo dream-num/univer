@@ -35,6 +35,7 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -59,6 +60,7 @@ import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
+import '@univerjs/@univerjs/sheets-source-binding/facade';
 import '../global.css';
 import './styles';
 
@@ -118,6 +120,7 @@ univer.registerPlugin(UniverSheetsHyperLinkPlugin);
 univer.registerPlugin(UniverThreadCommentUIPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
+univer.registerPlugin(UniverSheetsBindingSourcePlugin);
 
 // If we are running in e2e platform, we should immediately register the debugger plugin.
 if (IS_E2E) {

@@ -65,7 +65,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const documentSkeleton = this._getEditorSkeleton();
         if (!documentSkeleton) return;
 
-        let { actualWidth, actualHeight } = this._predictingSize(
+        const info = this._predictingSize(
             position,
             canvasOffset,
             documentSkeleton,
@@ -73,7 +73,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
             scaleX,
             scaleY
         );
-
+        if (!info) return;
+        let { actualWidth, actualHeight } = info;
         const { verticalAlign, horizontalAlign, paddingData, fill } = documentLayoutObject;
         actualWidth = actualWidth + (paddingData.l ?? 0) + (paddingData.r ?? 0);
         actualHeight = actualHeight + (paddingData.t ?? 0) + (paddingData.b ?? 0);

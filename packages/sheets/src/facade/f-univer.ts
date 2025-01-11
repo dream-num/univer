@@ -50,6 +50,12 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     getActiveWorkbook(): FWorkbook | null;
+
+    /**
+     * @deprecated use `univerAPI.getActiveWorkbook` instead
+     */
+    getActiveUniverSheet(): FWorkbook | null;
+
     /**
      * Get the spreadsheet API handler by the spreadsheet id.
      * @param {string} id The spreadsheet id.
@@ -262,6 +268,10 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getActiveUniverSheet(): FWorkbook | null {
+        return this.getActiveWorkbook();
     }
 
     override getUniverSheet(id: string): FWorkbook | null {

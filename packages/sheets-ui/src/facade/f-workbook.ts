@@ -23,7 +23,7 @@ import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, 
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
-import { CellFEventName, type ICellEventParam, type IFSheetsUIEventParamConfig, type IUIEventBase } from './f-event';
+import { CellFEventName, type ICellEventParam, type IFSheetsUIEventParamConfig, type ISheetUIEventBase } from './f-event';
 
 export interface IFWorkbookSheetsUIMixin {
     /**
@@ -184,7 +184,7 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
 
     override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): IDisposable {
         const worksheet = this.getActiveSheet();
-        const baseParams: IUIEventBase = {
+        const baseParams: ISheetUIEventBase = {
             workbook: this,
             worksheet,
         };

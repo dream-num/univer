@@ -171,6 +171,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                             editorBridgeService.disableForceKeepVisible();
                         }
                     }}
+                    disableSelectionOnClick
                 />
             )}
         </div>

@@ -227,6 +227,7 @@ export function FormulaBar() {
                     <div className={styles.formulaInput} ref={ref}>
                         {FormulaEditor && (
                             <FormulaEditor
+                                disableSelectionOnClick
                                 editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
                                 initValue=""
                                 onChange={() => {}}

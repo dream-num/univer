@@ -21,7 +21,7 @@ import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { isFormulaLexerToken, LexerTreeBuilder, matchRefDrawToken, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useRef, useState } from 'react';
-import { distinctUntilChanged, filter, map } from 'rxjs';
+import { filter, map } from 'rxjs';
 
 function getCurrentBodyDataStreamAndOffset(accssor: IAccessor) {
     const univerInstanceService = accssor.get(IUniverInstanceService);
@@ -41,7 +41,7 @@ export enum FormulaSelectingType {
     CAN_EDIT = 2,
 }
 
-export function useFormulaSelecting(editorId: string, isFocus: boolean) {
+export function useFormulaSelecting(editorId: string, isFocus: boolean, disableOnClick?: boolean) {
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);
     const docSelectionRenderService = renderer?.with(DocSelectionRenderService);
@@ -61,8 +61,7 @@ export function useFormulaSelecting(editorId: string, isFocus: boolean) {
                     const activeRange = docSelectionRenderService?.getActiveTextRange();
                     const index = activeRange?.collapsed ? activeRange.startOffset! : -1;
                     return index;
-                }),
-                distinctUntilChanged()
+                })
             )
             .subscribe((index) => {
                 const config = getCurrentBodyDataStreamAndOffset(injector);
@@ -101,13 +100,14 @@ export function useFormulaSelecting(editorId: string, isFocus: boolean) {
     }, [isFocus]);
 
     useEffect(() => {
+        if (!disableOnClick) return;
         const sub = renderer?.mainComponent?.onPointerDown$.subscribeEvent(() => {
             setIsSelecting(FormulaSelectingType.NOT_SELECT);
             isDisabledByPointer.current = true;
         });
 
         return () => sub?.unsubscribe();
-    }, [renderer?.mainComponent?.onPointerDown$]);
+    }, [disableOnClick, renderer?.mainComponent?.onPointerDown$]);
 
     return { isSelecting };
 }

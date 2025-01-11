@@ -68,6 +68,10 @@ export interface IFormulaEditorProps {
     resetSelectionOnBlur?: boolean;
     isSingle?: boolean;
     autoScrollbar?: boolean;
+    /**
+     * Disable selection when click formula editor
+     */
+    disableSelectionOnClick?: boolean;
 }
 
 const noop = () => { };
@@ -93,6 +97,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         resetSelectionOnBlur = true,
         autoScrollbar = true,
         isSingle = true,
+        disableSelectionOnClick = false,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -123,7 +128,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
     const formulaWithoutEqualSymbol = useMemo(() => getFormulaText(formulaText), [formulaText]);
     const sequenceNodes = useMemo(() => getFormulaToken(formulaWithoutEqualSymbol), [formulaWithoutEqualSymbol, getFormulaToken]);
-    const { isSelecting } = useFormulaSelecting(editorId, isFocus);
+    const { isSelecting } = useFormulaSelecting(editorId, isFocus, disableSelectionOnClick);
     const highTextRef = useRef('');
     const renderManagerService = useDependency(IRenderManagerService);
     const renderer = renderManagerService.getRenderById(editorId);

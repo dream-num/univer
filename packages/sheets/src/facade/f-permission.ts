@@ -21,8 +21,8 @@ import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRange
 
 export class FPermission extends FBase {
     public permissionPointsDefinition = PermissionPointsDefinitions;
-    public rangeRuleChangedAfterServer$: Observable<unknown>;
-    public sheetRuleChangedAfterServer$: Observable<unknown>;
+    public rangeRuleChangedAfterAuth$: Observable<unknown>;
+    public sheetRuleChangedAfterAuth$: Observable<unknown>;
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -34,8 +34,8 @@ export class FPermission extends FBase {
         @Inject(IAuthzIoService) protected readonly _authzIoService: IAuthzIoService
     ) {
         super();
-        this.rangeRuleChangedAfterServer$ = this._rangeProtectionRuleModel.ruleRefresh$;
-        this.sheetRuleChangedAfterServer$ = this._worksheetProtectionRuleModel.ruleRefresh$;
+        this.rangeRuleChangedAfterAuth$ = this._rangeProtectionRuleModel.ruleRefresh$;
+        this.sheetRuleChangedAfterAuth$ = this._worksheetProtectionRuleModel.ruleRefresh$;
     }
 
     /**

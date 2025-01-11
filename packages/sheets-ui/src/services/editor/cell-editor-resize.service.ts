@@ -146,13 +146,16 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         // startX and startY are the width and height after scaling.
         const { startX, endX } = actualRangeWithCoord;
 
-        const { textRotation, wrapStrategy } = documentLayoutObject;
+        const { textRotation, wrapStrategy, paddingData } = documentLayoutObject;
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
 
         const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+            documentDataModel?.updateDocumentDataPageSize(endX - startX);
+            documentDataModel?.updateDocumentDataMargin({ l: paddingData.l, t: paddingData.t });
+            documentSkeleton.calculate();
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
             // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
             return {

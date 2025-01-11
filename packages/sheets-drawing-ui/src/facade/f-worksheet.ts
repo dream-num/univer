@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
@@ -23,6 +24,7 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
 import { FOverGridImage, FOverGridImageBuilder } from './f-over-grid-image';
 
+// why omit this key? if componentKey is missing, then which component should be used?
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
 
 export interface IFWorksheetLegacy {
@@ -31,8 +33,57 @@ export interface IFWorksheetLegacy {
      * @param layer float dom config
      * @param id float dom id, if not given will be auto generated
      * @returns float dom id and dispose function
+     * @example
+     * ```ts
+     let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     sheet.addFloatDomToPosition({
+            allowTransform: false,
+            initPosition: {
+                startX: 200,
+                endX: 400,
+                startY: 200,
+                endY: 400,
+            },
+            componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        });
+     * ```
      */
     addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }>;
+
+    /**
+     * add float dom to range
+     * @param layer
+     * @param id
+     * @example
+     * ```ts
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const range = sheet.getRange(0, 0, 3, 3);
+     univerAPI.getActiveWorkbook().setActiveRange(range);
+     const {id, dispose } = sheet.addFloatDomToRange(range, {
+            allowTransform: false,
+            componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        }, 'loadingcover')
+    setTimeout(()=> {
+        dispose();
+    }, 2000)
+     * ```
+     */
+    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -175,6 +226,31 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
         const res = floatDomService.addFloatDomToPosition({ ...layer, componentKey: key, unitId, subUnitId }, id);
+
+        if (res) {
+            disposableCollection.add(res.dispose);
+            return {
+                id: res.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
+
+    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, id);
 
         if (res) {
             disposableCollection.add(res.dispose);

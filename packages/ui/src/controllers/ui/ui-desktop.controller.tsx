@@ -28,7 +28,7 @@ import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { FloatDom } from '../../views/components/dom/FloatDom';
-import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
+import { CanvasPopup, ContentDOMPopup } from '../../views/components/popup/CanvasPopup';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { menuSchema } from '../menus/menu.schema';
 
@@ -102,6 +102,7 @@ export class DesktopUIController extends Disposable {
 
     private _initBuiltinComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
+        // this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ContentDOMPopup, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }
 }

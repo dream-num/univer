@@ -75,6 +75,18 @@ interface ICanvasFloatDomInfo {
     subUnitId: string;
 }
 
+export enum DOMPositionMode {
+    COVER = 'cover', // 完全覆盖
+    FROM_BOTTOM_RIGHT = 'fromBottomRight', // 从右下角开始
+    FROM_TOP_LEFT = 'fromTopLeft', // 从左上角开始
+}
+export interface IDOMRangePosition {
+    width: number;
+    height: number;
+    x?: number; // x 方向偏移量
+    y?: number; // y 方向偏移量
+}
+
 export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
@@ -664,7 +676,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
-    addFloatDomToRange(range: IRange, layer: ICanvasFloatDom, propId?: string) {
+    addFloatDomToRange(range: IRange, layer: ICanvasFloatDom, domPos: IDOMRangePosition, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: layer.unitId,
             subUnitId: layer.subUnitId,
@@ -685,14 +697,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const id = propId ?? generateRandomId();
         const drawingId = id;
 
-        const { position: initPosition } = this._createRangePositionObserver(range, currentRender, skeletonParam.skeleton, viewMain);
-        const sheetTransform = this._getPosition(initPosition, unitId);
+        const { position: rangePosition } = this._createRangePositionObserver(range, currentRender, skeletonParam.skeleton, viewMain);
+        const sheetTransform = this._getPosition(rangePosition, unitId);
         if (sheetTransform == null) {
             return;
         }
         // this._ensureMap for what?
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, layer);
+        const rangeWidth = rangePosition.endX - rangePosition.startX;
+        const rangeHeight = rangePosition.endY - rangePosition.startY;
+        const domWidth = domPos.width ?? rangeWidth;
+        const domHeight = domPos.height ?? rangeHeight;
+
+        const domLeft = rangePosition.startX + calculateOffset(domPos.x, rangeWidth);
+        const domTop = rangePosition.startY + calculateOffset(domPos.y, rangeHeight);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -702,10 +721,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             componentKey,
             sheetTransform,
             transform: {
-                left: initPosition.startX,
-                top: initPosition.startY,
-                width: initPosition.endX - initPosition.startX,
-                height: initPosition.endY - initPosition.startY,
+                left: domLeft,
+                top: domTop,
+                width: domWidth,
+                height: domHeight,
             } as ITransformState,
             data,
             allowTransform,
@@ -723,21 +742,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const { unitId, subUnitId, drawingId } = sheetDrawingParam;
             const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
             // const floatDomParam = this._drawingManagerService.getDrawingByParam(sheetDrawingParam) as IFloatDomData;
-            const floatDomParam: IFloatDomData = {
-                unitId,
-                subUnitId,
-                drawingId,
-                drawingType: DrawingTypeEnum.DRAWING_DOM,
-                componentKey: layer.componentKey,
-                data: '',
-                allowTransform: false,
-                transform: {
-                    left: initPosition.startX,
-                    top: initPosition.startY,
-                    width: initPosition.width,
-                    height: initPosition.height,
-                } as ITransformState,
-            };
+            const floatDomParam = sheetDrawingParam;
 
             const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
@@ -1038,4 +1043,15 @@ function calcCellPositionByCell(
         top: cellInfo.startY,
         bottom: cellInfo.endY,
     };
+}
+
+function calculateOffset(value: number | string | undefined, rangeWidth: number): number {
+    if (value === undefined) return 0;
+
+    // 如果是数字直接返回
+    if (typeof value === 'number') return value;
+
+    // 处理百分比字符串
+    const percentage = Number.parseFloat(value);
+    return (rangeWidth * percentage) / 100;
 }

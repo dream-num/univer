@@ -502,7 +502,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param showOnSelectionMoving
      * @returns
      */
-    attachDOMToRange(range: IRange, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
+    attachRangePopup(range: IRange, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {

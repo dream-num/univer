@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
+import type { IDisposable, IFBlobSource, IPosition, Nullable } from '@univerjs/core';
 import type { FRange } from '@univerjs/sheets/facade';
+import type { IDOMRangePosition } from '../services/canvas-float-dom-manager.service';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
 import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
@@ -77,13 +78,31 @@ export interface IFWorksheetLegacy {
             data: {
                 aa: '128',
             },
-        }, 'loadingcover')
+        }, {}, 'loadingcover')
     setTimeout(()=> {
         dispose();
     }, 2000)
+
+    // -------------------
+    {
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const range = sheet.getRange(0, 0, 3, 3);
+     univerAPI.getActiveWorkbook().setActiveRange(range);
+     const {id, dispose } = sheet.addFloatDomToRange(range, {
+            allowTransform: false,
+            componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        }, {
+        width: 100, height: 30, x: '100%', y: '100%'}, 'loadingcover')
+    }
      * ```
      */
-    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, id?: string): Nullable<{
+    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domPos: IDOMRangePosition, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -242,7 +261,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return null;
     }
 
-    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, id?: string): Nullable<{
+    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domPos: IDOMRangePosition, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }> {
@@ -250,7 +269,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const subUnitId = this._worksheet.getSheetId();
         const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
-        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, id);
+        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, domPos, id);
 
         if (res) {
             disposableCollection.add(res.dispose);

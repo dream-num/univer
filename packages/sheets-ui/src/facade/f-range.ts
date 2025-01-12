@@ -230,7 +230,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
 
         const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
         const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
-        const disposePopup = sheetsPopupService.attachDOMToRange(
+        const disposePopup = sheetsPopupService.attachRangePopup(
             this._range,
             { ...popup, componentKey: key },
             this.getUnitId(),

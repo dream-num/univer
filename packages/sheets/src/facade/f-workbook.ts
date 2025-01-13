@@ -17,6 +17,7 @@
 import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
+import type { FontLine as _FontLine } from './f-range';
 import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
@@ -851,4 +852,11 @@ export class FWorkbook extends FBaseInitialable {
     getCustomMetadata(): CustomData | undefined {
         return this._workbook.getCustomMetadata();
     }
+}
+
+// eslint-disable-next-line ts/no-namespace
+export namespace FWorkbook {
+    export type FontLine = _FontLine;
+    export type FontStyle = _FontLine;
+    export type FontWeight = _FontLine;
 }

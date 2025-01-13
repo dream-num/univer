@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { LocaleType, numfmt } from '@univerjs/core';
+import type { INumfmtLocalTag } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
+import { numfmt } from '@univerjs/core';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
 interface IPatternPreview {
@@ -23,9 +24,8 @@ interface IPatternPreview {
     color?: string;
 }
 
-export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType): IPatternPreview => {
+export const getPatternPreview = (pattern: string, value: number, locale: INumfmtLocalTag = 'en'): IPatternPreview => {
     const info = numfmt.getInfo(pattern);
-    const locale = _locale === LocaleType.ZH_CN ? 'zh-CN' : 'en';
     const negInfo = info._partitions[1];
     const result = numfmt.format(pattern, value, { locale, throws: false });
     if (value < 0) {
@@ -39,11 +39,11 @@ export const getPatternPreview = (pattern: string, value: number, _locale?: Loca
     };
 };
 
-export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, _locale?: LocaleType): IPatternPreview => {
+export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, locale?: INumfmtLocalTag): IPatternPreview => {
     if (pattern === 'General') {
         return {
             result: String(value),
         };
     }
-    return getPatternPreview(pattern, value, _locale);
+    return getPatternPreview(pattern, value, locale);
 };

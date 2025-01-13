@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { INumfmt, LocaleTag } from './types/numfmt.type';
 // @ts-ignore
 import _numfmt from 'numfmt';
-import type { INumfmt } from './types/numfmt.type';
 
 const numfmt = _numfmt as INumfmt;
-export { numfmt };
+export { LocaleTag as INumfmtLocalTag, numfmt };

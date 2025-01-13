@@ -22,7 +22,7 @@ import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInsta
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
-import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
@@ -735,7 +735,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         const position$ = topLeftPos$.pipe(
             map((topLeft) => {
                 const rightBottomCoord = this._calcCellPositionByCell(range.endRow, range.endColumn, currentRender, skeleton, activeViewport);
-                console.log('service', topLeft.left, topLeft.top);
                 return {
                     top: topLeft.top,
                     left: topLeft.left,

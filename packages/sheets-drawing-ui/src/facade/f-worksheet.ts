@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IFBlobSource, IPosition, Nullable } from '@univerjs/core';
+import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
 import type { FRange } from '@univerjs/sheets/facade';
-import type { IDOMRangePosition } from '../services/canvas-float-dom-manager.service';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
-import { type ICanvasFloatDom, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { type ICanvasFloatDom, type IDOMRangeLayout, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
@@ -102,7 +101,38 @@ export interface IFWorksheetLegacy {
     }
      * ```
      */
-    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domPos: IDOMRangePosition, id?: string): Nullable<{
+    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }>;
+
+    /**
+     *
+     * @param column
+     * @param layer
+     * @param domPos
+     * @param id
+     * @example
+     * ```ts
+    {
+     const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+     const range = sheet.getRange(0, 3, 1, 1);
+     univerAPI.getActiveWorkbook().setActiveRange(range);
+     const rs = sheet.addFloatDomToColumnHeader(3, {
+            allowTransform: false,
+            componentKey: 'ImageDemo',
+            props: {
+                a: 1,
+            },
+            data: {
+                aa: '128',
+            },
+        }, {
+        width: 100, height: 40, x: 0, y: 0}, 'ai-selector')
+    }
+     *```
+     */
+    addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domPos: IDOMRangeLayout, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -261,7 +291,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return null;
     }
 
-    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domPos: IDOMRangePosition, id?: string): Nullable<{
+    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }> {
@@ -269,7 +299,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         const subUnitId = this._worksheet.getSheetId();
         const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
         const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
-        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, domPos, id);
+        const res = floatDomService.addFloatDomToRange(fRange.getRange(), { ...layer, componentKey: key, unitId, subUnitId }, domLayout, id);
 
         if (res) {
             disposableCollection.add(res.dispose);
@@ -278,6 +308,31 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
                 dispose: (): void => {
                     disposableCollection.dispose();
                     res.dispose();
+                },
+            };
+        }
+
+        disposableCollection.dispose();
+        return null;
+    }
+
+    override addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
+        id: string;
+        dispose: () => void;
+    }> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const { key, disposableCollection } = transformComponentKey(layer, this._injector.get(ComponentManager));
+        const floatDomService = this._injector.get(SheetCanvasFloatDomManagerService);
+        const domRangeDispose = floatDomService.addFloatDomToColumnHeader(column, { ...layer, componentKey: key, unitId, subUnitId }, domLayout, id);
+
+        if (domRangeDispose) {
+            disposableCollection.add(domRangeDispose.dispose);
+            return {
+                id: domRangeDispose.id,
+                dispose: (): void => {
+                    disposableCollection.dispose();
+                    domRangeDispose.dispose();
                 },
             };
         }

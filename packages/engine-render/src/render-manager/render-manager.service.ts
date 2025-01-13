@@ -44,10 +44,15 @@ export interface IRenderManagerService extends IDisposable {
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
     /**
-     * get RenderUnit By Id, RenderUnit implements IRender
+     * Get RenderUnit By Id, RenderUnit implements IRender
      * @param unitId
      */
     getRenderById(unitId: string): Nullable<IRender>;
+    /**
+     * Get RenderUnit By Id, RenderUnit implements IRender
+     * @param unitId
+     */
+    getRenderByUnitId(unitId: string): Nullable<IRender>;
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[];
     getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit>;
     getRenderAll(): Map<string, IRender>;
@@ -340,11 +345,16 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     /**
-     * get RenderUnit from this._renderMap
+     * @deprecated use getRenderUnitById instead
+     * Get RenderUnit from this._renderMap.
      * @param unitId
      * @returns RenderUnit, aka IRender
      */
     getRenderById(unitId: string): Nullable<IRender> {
+        return this._renderMap.get(unitId);
+    }
+
+    getRenderUnitById(unitId: string): Nullable<IRender> {
         return this._renderMap.get(unitId);
     }
 

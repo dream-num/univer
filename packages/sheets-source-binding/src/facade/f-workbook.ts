@@ -19,9 +19,23 @@ import { SheetsSourceBindService } from '@univerjs/sheets-source-binding';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookSourceBindingMixin {
+    /**
+     * Create a source model with the specified type.
+     */
     createSource(type: DataBindingNodeTypeEnum): SourceModelBase;
+    /**
+     * Switch to path mode.In this mode, the path will show in cell.
+     */
     usePathMode(): void;
+    /**
+     * Switch to value mode.This is the default mode. In this mode, the cell value will fulfill by source values.
+     */
     useValueMode(): void;
+    /**
+     * Get the source model by the specified source id.
+     * @param {string} sourceId The source id.
+     */
+    getSource(sourceId: string): SourceModelBase | undefined;
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
@@ -29,6 +43,12 @@ export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourc
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
         return sheetsSourceBindService.createSource(this.getId(), type);
+    }
+
+    override getSource(sourceId: string): SourceModelBase | undefined {
+        const injector = this._injector;
+        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
+        return sheetsSourceBindService.getSource(this.getId(), sourceId);
     }
 
     override usePathMode(): void {

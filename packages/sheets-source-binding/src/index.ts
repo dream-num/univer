@@ -19,4 +19,4 @@ export { SourceModelBase } from './model/source-model';
 export { UniverSheetsBindingSourcePlugin } from './plugin';
 export { BindModeEnum, DataBindingNodeTypeEnum } from './types';
 export { SheetsSourceBindService } from './services/source-binding-service';
-export type { ICellBindingNode } from './types';
+export type { ICellBindingNode, ICellBindingNodeParam } from './types';

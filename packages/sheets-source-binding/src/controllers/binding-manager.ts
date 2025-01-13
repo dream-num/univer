@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellBindingNode } from '../types';
+import type { ICellBindingNode, ICellBindingNodeParam } from '../types';
 import { Disposable, generateRandomId } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { SheetBindingModel } from '../model/binding-model';
@@ -51,7 +51,7 @@ export class SheetsBindingManager extends Disposable {
                             unitId,
                             subunitId,
                             sourceId,
-                            nodeId: node.nodeId,
+                            nodeId: node.nodeId!,
                             row: node.row,
                             column: node.column,
                         });
@@ -73,7 +73,7 @@ export class SheetsBindingManager extends Disposable {
         return this.modelMap.get(unitId)?.get(subunitId);
     }
 
-    setBindingNode(unitId: string, subunitId: string, node: ICellBindingNode): void {
+    setBindingNode(unitId: string, subunitId: string, node: ICellBindingNodeParam): void {
         let model = this.getModel(unitId, subunitId);
         if (!model) {
             model = new SheetBindingModel();
@@ -87,7 +87,7 @@ export class SheetsBindingManager extends Disposable {
             throw new Error('row and column is required');
         }
         const oldNode = model.getBindingNode(row, column);
-        model.setBindingNode(row, column, { ...node, row, column });
+        model.setBindingNode(row, column, { ...node, row, column } as ICellBindingNode);
         this._cellBindInfoUpdate$.next({
             unitId,
             subunitId,
@@ -110,13 +110,21 @@ export class SheetsBindingManager extends Disposable {
                     unitId,
                     subunitId,
                     sourceId: node.sourceId,
-                    nodeId: node.nodeId,
+                    nodeId: node.nodeId!,
                     row,
                     column,
                     changeType: BindingSourceChangeTypeEnum.Remove,
                 });
             }
         }
+    }
+
+    getBindingNode(unitId: string, subunitId: string, row: number, column: number): ICellBindingNode | undefined {
+        const model = this.getModel(unitId, subunitId);
+        if (model) {
+            return model.getBindingNode(row, column);
+        }
+        return undefined;
     }
 
     createModel(unitId: string, subunitId: string, json?: any): SheetBindingModel {

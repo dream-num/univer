@@ -72,15 +72,42 @@ export interface IDataBindingModel {
 
 }
 
-export interface ICellBindingNode {
+/**
+ * The binding node of cell, which config the source id, path, row, column.
+ */
+export interface ICellBindingNodeParam {
+    /**
+     * The binding node type, the node type should be same as provide source type.
+     */
     type: DataBindingNodeTypeEnum;
+    /**
+     * The path of the binding node, the path should be same as provide source path.
+     * @example
+     * for object type : the source is :{user: {name :'Tom'}}, we can set path 'user.name' to represent the Tom.
+     * for list type : the source is :{fields:['name', 'age'], records:[['Tom', 18],['Jerry', 20]]}, we can set path 'name' to represent the all names in data.
+     */
     path: string;
+    /**
+     * The source id of the binding node, the source id should be same as provide source id.
+     */
     sourceId: string;
-    nodeId: string;
+    /**
+     * The target row of the binding node.
+     */
     row: number;
+    /**
+     * The target column of the binding node.
+     */
     column: number;
+    nodeId?: string; // optional in ICellBindingNodeParam
 }
 
+export interface ICellBindingNode extends ICellBindingNodeParam {
+    /**
+     * The node id of ICellBindingNode, if not provide, will generate a random id.
+     */
+    nodeId: string;
+}
 export interface IListDataBindingNode extends ICellBindingNode {
     type: DataBindingNodeTypeEnum.List;
     limit?: number;

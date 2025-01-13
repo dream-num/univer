@@ -19,15 +19,15 @@ import { SheetsSourceBindService } from '@univerjs/sheets-source-binding';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 export interface IFworksheetSourceBindingMixin {
-    setBindingNode(row: number, col: number, value: ICellBindingNode): void;
+    setBindingNode(value: ICellBindingNode): void;
 }
 
 export class FWorksheetSourceBinding extends FWorksheet implements IFworksheetSourceBindingMixin {
-    override setBindingNode(row: number, col: number, value: ICellBindingNode): void {
+    override setBindingNode(bindingNode: ICellBindingNode): void {
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
         const unitId = this._workbook.getUnitId();
-        sheetsSourceBindService.setBindingNode(unitId, this.getSheetId(), row, col, value);
+        sheetsSourceBindService.setBindingNode(unitId, this.getSheetId(), bindingNode);
     }
 }
 

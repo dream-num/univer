@@ -61,8 +61,8 @@ export class SheetsSourceBindService extends Disposable {
         return this._sheetsBindingManager.createModel(unitId, subUnitId);
     }
 
-    setBindingNode(unitId: string, subUnitId: string, row: number, column: number, node: ICellBindingNode) {
-        this._sheetsBindingManager.setBindingNode(unitId, subUnitId, row, column, node);
+    setBindingNode(unitId: string, subUnitId: string, node: ICellBindingNode) {
+        this._sheetsBindingManager.setBindingNode(unitId, subUnitId, node);
     }
 
     createSource(unitId: string, type: DataBindingNodeTypeEnum, id?: string) {

@@ -376,6 +376,9 @@ importers:
       '@univerjs/sheets-sort-ui':
         specifier: workspace:*
         version: link:../packages/sheets-sort-ui
+      '@univerjs/sheets-source-binding':
+        specifier: workspace:*
+        version: link:../packages/sheets-source-binding
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../packages/sheets-thread-comment
@@ -2912,6 +2915,31 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+      vite:
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
+
+  packages/sheets-source-binding:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
@@ -10422,9 +10450,6 @@ packages:
 
   tslib@2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
-
-  tslib@2.6.3:
-    resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -18188,7 +18213,7 @@ snapshots:
 
   regexp-util@2.0.0:
     dependencies:
-      tslib: 2.6.3
+      tslib: 2.8.1
 
   regexp.prototype.flags@1.5.3:
     dependencies:
@@ -18381,7 +18406,7 @@ snapshots:
 
   rxjs@7.8.1:
     dependencies:
-      tslib: 2.6.3
+      tslib: 2.8.1
 
   safe-array-concat@1.1.2:
     dependencies:
@@ -19003,8 +19028,6 @@ snapshots:
       strip-bom: 3.0.0
 
   tslib@2.5.0: {}
-
-  tslib@2.6.3: {}
 
   tslib@2.8.1: {}
 

@@ -73,7 +73,7 @@ export class SheetsBindingManager extends Disposable {
         return this.modelMap.get(unitId)?.get(subunitId);
     }
 
-    setBindingNode(unitId: string, subunitId: string, row: number, column: number, node: ICellBindingNode): void {
+    setBindingNode(unitId: string, subunitId: string, node: ICellBindingNode): void {
         let model = this.getModel(unitId, subunitId);
         if (!model) {
             model = new SheetBindingModel();
@@ -82,6 +82,7 @@ export class SheetsBindingManager extends Disposable {
         if (!node.nodeId) {
             node.nodeId = generateRandomId();
         }
+        const { row, column } = node;
         const oldNode = model.getBindingNode(row, column);
         model.setBindingNode(row, column, { ...node, row, column });
         this._cellBindInfoUpdate$.next({

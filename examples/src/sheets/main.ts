@@ -60,7 +60,7 @@ import '@univerjs/sheets-conditional-formatting/facade';
 import '@univerjs/sheets-find-replace/facade';
 import '@univerjs/sheets-drawing-ui/facade';
 import '@univerjs/sheets-zen-editor/facade';
-import '@univerjs/@univerjs/sheets-source-binding/facade';
+import '@univerjs/sheets-source-binding/facade';
 import '../global.css';
 import './styles';
 

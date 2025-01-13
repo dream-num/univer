@@ -227,6 +227,9 @@ export class Editor extends Disposable implements IEditor {
         return docSelectionRenderService.isFocusing && Boolean(docSelectionRenderService.getActiveTextRange());
     }
 
+    /**
+     * @deprecated use `IEditorService.focus` as instead. this is for internal usage.
+     */
     focus() {
         const curDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const editorUnitId = this.getEditorId();
@@ -253,6 +256,9 @@ export class Editor extends Disposable implements IEditor {
         // }
     }
 
+    /**
+     * @deprecated use `IEditorService.blur` as instead. this is for internal usage.
+     */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 

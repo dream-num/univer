@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, useDependency } from '@univerjs/core';
+import { useDependency } from '@univerjs/core';
 import React from 'react';
 import { ComponentManager } from '../../../common';
 import { useObservable } from '../../../components/hooks/observable';
-import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
 import { SingleDOMPopup } from './dom-popup';
 import { SingleCanvasPopup } from './single-canvas-popup';

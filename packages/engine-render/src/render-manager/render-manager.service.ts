@@ -52,7 +52,7 @@ export interface IRenderManagerService extends IDisposable {
      * Get RenderUnit By Id, RenderUnit implements IRender
      * @param unitId
      */
-    getRenderByUnitId(unitId: string): Nullable<IRender>;
+    getRenderUnitById(unitId: string): Nullable<IRender>;
     getAllRenderersOfType(type: UniverInstanceType): RenderUnit[];
     getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit>;
     getRenderAll(): Map<string, IRender>;

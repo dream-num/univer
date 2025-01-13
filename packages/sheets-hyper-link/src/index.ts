@@ -17,7 +17,7 @@
 export { HyperLinkModel } from './models/hyper-link.model';
 export { SheetHyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
-export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
+export type { ICellLinkContent, ISheetHyperLink } from './types/interfaces/i-hyper-link';
 export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
 export { ERROR_RANGE } from './types/const';
 

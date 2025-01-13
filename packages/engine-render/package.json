@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-render",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "private": false,
     "description": "UniverSheet normal base-render",
     "author": "DreamNum <developer@univer.ai>",

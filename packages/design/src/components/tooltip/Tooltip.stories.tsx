@@ -72,6 +72,18 @@ export const Playground = {
                 <div>
 
                     <Tooltip
+                        title="https://docs.google.com/spreadsheets/d/1nt6WeRPP7E8LSUdJQZBetYJandjhNa4G6i-plp__hRA/edit?gid=0#gid=0"
+                        showIfEllipsis
+                        placement="bottom"
+                    >
+                        <div className="univer-w-72 univer-truncate">
+                            https://docs.google.com/spreadsheets/d/1nt6WeRPP7E8LSUdJQZBetYJandjhNa4G6i-plp__hRA/edit?gid=0#gid=0
+                        </div>
+                    </Tooltip>
+                </div>
+
+                <div>
+                    <Tooltip
                         title="完整的文本内容"
                         showIfEllipsis
                         placement="bottom"

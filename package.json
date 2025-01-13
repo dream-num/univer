@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "private": true,
     "packageManager": "pnpm@9.15.2",
     "author": "DreamNum Inc. <developer@univer.ai>",

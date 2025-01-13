@@ -292,6 +292,12 @@ export class Editor extends Disposable implements IEditor {
         return this._docSelectionManagerService.getDocRanges(params);
     }
 
+    getCursorPosition(): number {
+        const selectionRanges = this.getSelectionRanges();
+
+        return selectionRanges.find((range) => range.collapsed)?.startOffset ?? -1;
+    }
+
     // get editor id.
     getEditorId(): string {
         return this._getEditorId();
@@ -302,6 +308,10 @@ export class Editor extends Disposable implements IEditor {
         const docDataModel = this._getDocDataModel();
 
         return docDataModel.getSnapshot();
+    }
+
+    getDocumentDataModel() {
+        return this._getDocDataModel();
     }
 
     // Set the new document data.

@@ -17,7 +17,7 @@
 import type { ICellWithCoord, IDisposable, ISelectionCell, Nullable } from '@univerjs/core';
 import type { ISelectionStyle, ISheetLocation } from '@univerjs/sheets';
 import type { ComponentType } from '@univerjs/ui';
-import { DisposableCollection, generateRandomId, toDisposable } from '@univerjs/core';
+import { DisposableCollection, generateRandomId, ILogService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CellAlertManagerService, type ICanvasPopup, type ICellAlert, IMarkSelectionService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -120,11 +120,16 @@ interface IFRangeSheetsUIMixin {
 class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     override getCell(): ICellWithCoord {
         const renderManagerService = this._injector.get(IRenderManagerService);
+        const logService = this._injector.get(ILogService);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const skeleton = renderManagerService.getRenderById(unitId)!
-            .with(SheetSkeletonManagerService)
-            .getWorksheetSkeleton(subUnitId)!.skeleton;
+        const render = renderManagerService.getRenderById(unitId);
+        const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
+        if (!skeleton) {
+            logService.error('[Facade]: `FRange.getCell` can only be called in current worksheet');
+            throw new Error('`FRange.getCell` can only be called in current worksheet');
+        }
+
         return skeleton.getCellWithCoordByIndex(this._range.startRow, this._range.startColumn);
     }
 

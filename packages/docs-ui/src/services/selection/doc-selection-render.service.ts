@@ -93,6 +93,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
+    private _onPointerEvent = false;
 
     private _viewPortObserverMap = new Map<
         string,
@@ -107,6 +108,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerUpSubs: Array<Subscription> = [];
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
+
+    get isOnPointerEvent() {
+        return this._onPointerEvent;
+    }
 
     get isFocusing() {
         return this._input === document.activeElement;
@@ -181,7 +186,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             _currentSegmentPage: segmentPage,
             _selectionStyle: style,
         } = this;
-
         const { scene, mainComponent } = this._context;
         const document = mainComponent as Documents;
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
@@ -509,7 +513,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         let preMoveOffsetX = evtOffsetX;
 
         let preMoveOffsetY = evtOffsetY;
-
+        this._onPointerEvent = true;
         this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
@@ -532,6 +536,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
+            this._onPointerEvent = false;
             scene.enableObjectsEvent();
 
             // Add cursor.
@@ -620,6 +625,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private _getAllRectRanges() {
         return this._rectRangeList.map(serializeRectRange);
+    }
+
+    getAllTextRanges() {
+        return this._getAllTextRanges();
+    }
+
+    getAllRectRanges() {
+        return this._getAllRectRanges();
     }
 
     private _getActiveRange(): Nullable<ITextRangeWithStyle> {
@@ -762,20 +775,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         this._rectRangeList = newRanges;
-    }
-
-    private _removeCollapsedTextRange() {
-        const oldTextRanges = this._rangeList;
-
-        this._rangeList = [];
-
-        for (const textRange of oldTextRanges) {
-            if (textRange.collapsed) {
-                textRange.dispose();
-            } else {
-                this._rangeList.push(textRange);
-            }
-        }
     }
 
     private _removeAllRanges() {

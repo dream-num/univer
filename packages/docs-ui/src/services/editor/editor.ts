@@ -143,6 +143,10 @@ export class Editor extends Disposable implements IEditor {
         this._listenSelection();
     }
 
+    get docSelectionRenderService() {
+        return this._param.render.with(DocSelectionRenderService);
+    }
+
     private _listenSelection() {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 

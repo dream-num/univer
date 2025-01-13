@@ -211,7 +211,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 const editCell = this._editorBridgeService.getEditLocation();
                 if (editCell) {
                     const { unitId: editingUnitId, sheetId: editingSheetId, row, column } = editCell;
-                    if (unitId === editingUnitId && subUnitId === editingSheetId && cellValue && cellValue[row] && Object.hasOwn(cellValue[row], column)) {
+                    if (unitId === editingUnitId && subUnitId === editingSheetId && cellValue && cellValue[row] && Object.prototype.hasOwnProperty.call(cellValue[row], column)) {
                         this._editorBridgeService.refreshEditCellState();
                     }
                 }

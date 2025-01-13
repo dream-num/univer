@@ -378,7 +378,7 @@ importers:
         version: link:../packages/sheets-sort-ui
       '@univerjs/sheets-source-binding':
         specifier: workspace:*
-        version: link:../packages/sheets-source-binding
+        version: link:../packages-experimental/sheets-source-binding
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../packages/sheets-thread-comment
@@ -742,6 +742,31 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+      vite:
+        specifier: ^6.0.7
+        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
+
+  packages-experimental/sheets-source-binding:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
@@ -2915,31 +2940,6 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.2
-      vite:
-        specifier: ^6.0.7
-        version: 6.0.7(@types/node@22.10.5)(jiti@2.4.2)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0)
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.8(@types/node@22.10.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.1)(sass@1.77.5)(terser@5.37.0)
-
-  packages/sheets-source-binding:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
       typescript:
         specifier: ^5.7.2
         version: 5.7.2

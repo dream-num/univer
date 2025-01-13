@@ -83,6 +83,9 @@ export class SheetsBindingManager extends Disposable {
             node.nodeId = generateRandomId();
         }
         const { row, column } = node;
+        if (row === undefined || column === undefined) {
+            throw new Error('row and column is required');
+        }
         const oldNode = model.getBindingNode(row, column);
         model.setBindingNode(row, column, { ...node, row, column });
         this._cellBindInfoUpdate$.next({

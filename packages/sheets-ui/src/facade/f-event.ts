@@ -133,7 +133,17 @@ export interface IBeforeSheetEditEndEventParams extends IEventBase {
     isConfirm: boolean;
 }
 
-interface IFSheetsUIEventNameMixin {
+export const CellFEventName = {
+    CellClicked: 'CellClicked',
+    CellPointerDown: 'CellPointerDown',
+    CellPointerUp: 'CellPointerUp',
+    CellPointerMove: 'CellPointerMove',
+    CellHover: 'CellHover',
+    DragOver: 'DragOver',
+    Drop: 'Drop',
+} as const;
+
+export interface IFSheetsUIEventNameMixin {
     /**
      * Trigger this event before the clipboard content changes.
      * Type of the event parameter is {@link IBeforeClipboardChangeParam}
@@ -243,6 +253,66 @@ interface IFSheetsUIEventNameMixin {
      * ```
      */
     readonly SheetEditEnded: 'SheetEditEnded';
+
+    /**
+     * Event fired when a cell is clicked
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('CellClicked', (p)=> console.log(p));
+     * ```
+     */
+    readonly CellClicked: 'CellClicked';
+    /**
+     * Event fired when a cell is pointer down
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('CellPointerDown', (p)=> console.log(p));
+     * ```
+     */
+    readonly CellPointerDown: 'CellPointerDown';
+
+    /**
+     * Event fired when a cell is pointer up
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('CellPointerUp', (p)=> console.log(p));
+     * ```
+     */
+    readonly CellPointerUp: 'CellPointerUp';
+
+    /**
+     * Event fired when a cell is hovered
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('CellHover', (p)=> console.log(p));
+     * ```
+     */
+    readonly CellHover: 'CellHover';
+    /**
+     * Event fired when move on spreadsheet cells
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('CellPointerMove', (p)=> console.log(p));
+     * ```
+     */
+    readonly CellPointerMove: 'CellPointerMove';
+    /**
+     * Event fired when drag over spreadsheet cells
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('DragOver', (p)=> console.log(p));
+     * ```
+     */
+    readonly DragOver: 'DragOver';
+
+    /**
+     * Event fired when drop on spreadsheet cells
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().addEvent('Drop', (p)=> console.log(p));
+     * ```
+     */
+    readonly Drop: 'Drop';
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -281,8 +351,46 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get SheetEditEnded(): 'SheetEditEnded' {
         return 'SheetEditEnded';
     }
+
+    override get CellClicked(): 'CellClicked' {
+        return CellFEventName.CellClicked;
+    }
+
+    override get CellHover(): 'CellHover' {
+        return CellFEventName.CellHover;
+    }
+
+    override get CellPointerDown(): 'CellPointerDown' {
+        return CellFEventName.CellPointerDown;
+    }
+
+    override get CellPointerUp(): 'CellPointerUp' {
+        return CellFEventName.CellPointerUp;
+    }
+
+    override get CellPointerMove(): 'CellPointerMove' {
+        return CellFEventName.CellPointerMove;
+    }
+
+    override get DragOver(): 'DragOver' {
+        return 'DragOver' as const;
+    }
+
+    override get Drop(): 'Drop' {
+        return 'Drop' as const;
+    }
 }
 
+export interface IUIEventBase extends IEventBase {
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+    /**
+     * The worksheet instance currently being operated on. {@link FWorksheet}
+     */
+    worksheet: FWorksheet;
+}
 export interface IBeforeClipboardChangeParam extends IEventBase {
     /**
      * The workbook instance currently being operated on. {@link FWorkbook}
@@ -333,7 +441,11 @@ export interface IBeforeClipboardPasteParam extends IEventBase {
 
 export type IClipboardPastedParam = IBeforeClipboardPasteParam;
 
-interface IFSheetsUIEventParamConfig {
+export interface ICellEventParam extends IUIEventBase {
+    row: number;
+    column: number;
+}
+export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;
     BeforeClipboardPaste: IBeforeClipboardPasteParam;
@@ -344,6 +456,14 @@ interface IFSheetsUIEventParamConfig {
     SheetEditChanging: ISheetEditChangingEventParams;
     BeforeSheetEditEnd: IBeforeSheetEditEndEventParams;
     SheetEditEnded: ISheetEditEndedEventParams;
+
+    CellClicked: ICellEventParam;
+    CellHover: ICellEventParam;
+    CellPointerDown: ICellEventParam;
+    CellPointerUp: ICellEventParam;
+    CellPointerMove: ICellEventParam;
+    Drop: ICellEventParam;
+    DragOver: ICellEventParam;
 }
 
 FEventName.extend(FSheetsUIEventName);

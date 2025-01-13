@@ -311,6 +311,12 @@ export class HoverManagerService extends Disposable {
         });
     }
 
+    /**
+     * Trigger by pointerup.
+     * @param unitId
+     * @param offsetX
+     * @param offsetY
+     */
     triggerClick(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
         if (activeCell) {

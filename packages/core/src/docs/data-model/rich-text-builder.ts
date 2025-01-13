@@ -1656,6 +1656,8 @@ export class RichTextBuilder extends RichTextValue {
         } else {
             insertStyle = style instanceof TextStyleBuilder ? style.build() : style;
         }
+
+        if (!insertText) return this;
         const newBody: IDocumentBody = {
             dataStream: insertText,
             textRuns: insertStyle

@@ -70,7 +70,6 @@
     "dependencies": {
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.5",
-        "@types/react-mentions": "^4.4.0",
         "@univerjs/icons": "^0.2.12",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
@@ -87,7 +86,6 @@
         "rc-virtual-list": "^3.15.0",
         "react-draggable": "^4.4.6",
         "react-grid-layout": "^1.5.0",
-        "react-mentions": "^4.4.10",
         "react-transition-group": "^4.4.5",
         "tailwind-merge": "^2.6.0"
     },

@@ -44,7 +44,7 @@ export interface IFUniverCommentMixin {
 
     /**
      * create a new thread comment
-     * @return {FTheadCommentBuilder} thead comment builder
+     * @returns {FTheadCommentBuilder} thead comment builder
      * @example
      * ```ts
      * const comment = univerAPI.newTheadComment().setContent(univerAPI.newRichText().insertText('hello zhangsan'));

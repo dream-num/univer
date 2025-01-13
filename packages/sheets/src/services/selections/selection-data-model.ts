@@ -93,7 +93,7 @@ export class WorkbookSelectionModel extends Disposable {
                 this._selectionMoveEnd$.next(selectionDatas);
                 break;
             case SelectionMoveType.ONLY_SET: {
-                this._selectionSet$.next(selectionDatas);
+                this._eventAfterSetSelections(selectionDatas);
                 break;
             }
             default:

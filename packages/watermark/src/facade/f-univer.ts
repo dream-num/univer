@@ -21,7 +21,6 @@ import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, Waterma
 export interface IFUniverWatermarkMixin {
     /**
      * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
-     *
      * @param {IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image} type - The type of watermark to add. Can be either 'Text' or 'Image'.
      * @param {ITextWatermarkConfig | IImageWatermarkConfig} config - The configuration object for the watermark.
      * - If the type is 'Text', the config should follow the ITextWatermarkConfig interface.

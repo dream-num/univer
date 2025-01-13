@@ -35,8 +35,7 @@ export class FDataValidation {
 
     /**
      * Gets whether invalid data is allowed based on the error style value.
-     *
-     * @return true if invalid data is allowed, false otherwise.
+     * @returns true if invalid data is allowed, false otherwise.
      */
     getAllowInvalid(): boolean {
         return this.rule.errorStyle !== DataValidationErrorStyle.STOP;
@@ -44,7 +43,6 @@ export class FDataValidation {
 
     /**
      * Gets the data validation type of the rule
-     *
      * @returns The data validation type
      */
     getCriteriaType(): DataValidationType | string {
@@ -53,7 +51,6 @@ export class FDataValidation {
 
     /**
      * Gets the values used for criteria evaluation
-     *
      * @returns An array containing the operator, formula1, and formula2 values
      */
     getCriteriaValues(): [string | undefined, string | undefined, string | undefined] {
@@ -62,7 +59,6 @@ export class FDataValidation {
 
     /**
      * Gets the help text information, which is used to provide users with guidance and support
-     *
      * @returns Returns the help text information. If there is no error message, it returns an undefined value.
      */
     getHelpText(): string | undefined {
@@ -72,8 +68,7 @@ export class FDataValidation {
     /**
      * Creates a new instance of FDataValidationBuilder using the current rule object.
      * This method is useful for copying an existing data validation rule configuration.
-     *
-     * @return A new FDataValidationBuilder instance with the same rule configuration.
+     * @returns A new FDataValidationBuilder instance with the same rule configuration.
      */
     copy(): FDataValidationBuilder {
         return new FDataValidationBuilder(this.rule);
@@ -81,7 +76,6 @@ export class FDataValidation {
 
     /**
      * Gets whether the data validation rule is applied to the worksheet.
-     *
      * @returns true if the rule is applied, false otherwise.
      */
     getApplied(): boolean {
@@ -100,7 +94,6 @@ export class FDataValidation {
 
     /**
      * Gets the ranges to which the data validation rule is applied.
-     *
      * @returns An array of IRange objects representing the ranges to which the data validation rule is applied.
      */
     getRanges(): FRange[] {
@@ -114,7 +107,6 @@ export class FDataValidation {
 
     /**
      * Gets the title of the error message dialog box.
-     *
      * @returns The title of the error message dialog box.
      */
     getUnitId(): string | undefined {
@@ -123,7 +115,6 @@ export class FDataValidation {
 
     /**
      * Gets the sheetId of the worksheet.
-     *
      * @returns The sheetId of the worksheet.
      */
     getSheetId(): string | undefined {
@@ -134,6 +125,7 @@ export class FDataValidation {
      * Set Criteria for the data validation rule.
      * @param type The type of data validation criteria.
      * @param values An array containing the operator, formula1, and formula2 values.
+     * @param allowBlank
      * @returns true if the criteria is set successfully, false otherwise.
      */
     setCriteria(type: DataValidationType, values: [DataValidationOperator, string, string], allowBlank = true): FDataValidation {

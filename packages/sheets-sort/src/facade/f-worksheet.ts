@@ -23,11 +23,9 @@ import { FWorksheet } from '@univerjs/sheets/facade';
 export interface IFWorksheetSort {
     /**
      * Sort the worksheet by the specified column.
-     *
      * @param {number} colIndex The column index to sort by. which starts from 1.
      * @param {boolean} [asc=true] The sort order. `true` for ascending, `false` for descending.
      * @returns The worksheet itself for chaining.
-     *
      * @example
      * ```typescript
      * const activeSpreadsheet = univerAPI.getActiveWorkbook();

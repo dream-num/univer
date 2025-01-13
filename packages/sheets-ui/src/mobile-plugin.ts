@@ -19,7 +19,7 @@ import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
@@ -111,6 +111,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetsRenderService],
                 [SheetUIMobileController],
                 [StatusBarController],
+                [IRefSelectionsService, { useClass: RefSelectionsService }],
 
                 // permission
                 [SheetPermissionPanelModel],

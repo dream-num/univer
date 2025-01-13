@@ -127,7 +127,6 @@ export function DataValidationDetail() {
                 ...unitRange, sheetId: '',
             };
         });
-
         if (isUnitRangesEqual(unitRanges, localRanges)) {
             return;
         }

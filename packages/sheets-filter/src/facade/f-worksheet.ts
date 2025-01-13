@@ -23,10 +23,8 @@ import { FFilter } from './f-filter';
 export interface IFWorksheetFilter {
     /**
      * Get the filter for the current worksheet.
-     *
-     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
+     * @returns {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
      * this method would return `null`.
-     *
      * @example
      * ```typescript
      * const workbook = univerAPI.getActiveWorkbook();

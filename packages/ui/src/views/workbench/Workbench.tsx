@@ -193,6 +193,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <DesktopContextMenu />}
             <FloatingContainer />
+            <div id="univer-popup-portal"></div>
         </ConfigProvider>
     );
 }

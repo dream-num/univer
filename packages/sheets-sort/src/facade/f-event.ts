@@ -24,7 +24,6 @@ export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted when a range on a worksheet is sorted.
      * Type of the event is {@link ISheetRangeSortedParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetRangeSorted, (params) => {
@@ -39,7 +38,6 @@ export interface IFSheetSortEventMixin {
     /**
      * This event will be emitted before sorting a range on a worksheet.
      * Type of the event is {@link ISheetRangeSortParams}.
-     *
      * @example
      * ```typescript
      * const callbackDisposable = univerAPI.addEvent(univerAPI.Event.SheetBeforeRangeSort, (params) => {

@@ -90,6 +90,7 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
     }
 
     /**
+     * @param callback
      * @deprecated
      */
     override onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
@@ -99,6 +100,7 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
     }
 
     /**
+     * @param callback
      * @deprecated
      */
     override onBeforeAddThreadComment(callback: (params: IAddCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
@@ -116,6 +118,7 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
     }
 
     /**
+     * @param callback
      * @deprecated
      */
     override onBeforeUpdateThreadComment(callback: (params: IUpdateCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {
@@ -133,6 +136,7 @@ export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbook
     }
 
     /**
+     * @param callback
      * @deprecated
      */
     override onBeforeDeleteThreadComment(callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false): IDisposable {

@@ -156,9 +156,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId } = params;
                 const unit = instanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-                if (!unit) {
-                    return;
-                }
+                if (!unit || !editorBridgeService.isVisible().visible) return;
                 const text = BuildTextUtils.transform.getPlainText(unit.getSnapshot().body?.dataStream ?? '');
                 setEditingText(text);
             }
@@ -167,7 +165,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
         return () => {
             dispose.dispose();
         };
-    }, [commandService, instanceService]);
+    }, [commandService, editorBridgeService, instanceService]);
 
     if (!worksheet) {
         return null;

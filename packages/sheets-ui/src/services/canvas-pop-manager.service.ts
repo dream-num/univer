@@ -20,7 +20,7 @@ import type { ISetWorksheetRowAutoHeightMutationParams, ISheetLocationBase } fro
 import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, IRefSelectionsService, RefRangeService, SetFrozenMutation, SetWorksheetRowAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
@@ -32,6 +32,7 @@ import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
     extraProps?: Record<string, unknown>;
+    showOnSelectionMoving?: boolean;
 }
 
 interface IPopupMenuItem {
@@ -51,9 +52,39 @@ export class SheetCanvasPopManagerService extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRefSelectionsService private readonly _refSelectionsService: ISheetSelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
+
+        this._initMoving();
+    }
+
+    private _isSelectionMoving = false;
+
+    private _initMoving() {
+        this.disposeWithMe(
+            this._refSelectionsService.selectionMoving$.subscribe(() => {
+                this._isSelectionMoving = true;
+            })
+        );
+        this.disposeWithMe(
+            this._refSelectionsService.selectionMoveEnd$.subscribe(() => {
+                this._isSelectionMoving = false;
+            })
+        );
+
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoving$.subscribe(() => {
+                this._isSelectionMoving = true;
+            })
+        );
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
+                this._isSelectionMoving = false;
+            })
+        );
     }
 
     /**
@@ -214,7 +245,7 @@ export class SheetCanvasPopManagerService extends Disposable {
     attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): INeedCheckDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
+        if (!worksheet || (this._isSelectionMoving && !popup.showOnSelectionMoving)) {
             return {
                 dispose: () => {
                     // empty
@@ -283,6 +314,10 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
+        if (this._isSelectionMoving && !popup.showOnSelectionMoving) {
+            return;
+        }
+
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
             sheetId: subUnitId,
         });
@@ -345,6 +380,10 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
+        if (this._isSelectionMoving && !popup.showOnSelectionMoving) {
+            return;
+        }
+
         const position$ = new BehaviorSubject(bound);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -375,10 +414,9 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param _unitId
      * @param _subUnitId
      * @param viewport
-     * @param showOnSelectionMoving
      * @returns
      */
-    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport): Nullable<INeedCheckDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
@@ -400,7 +438,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
-        if (sheetSelectionRenderService.selectionMoving && !showOnSelectionMoving) {
+        if (this._isSelectionMoving && (!popup.showOnSelectionMoving)) {
             return;
         }
 

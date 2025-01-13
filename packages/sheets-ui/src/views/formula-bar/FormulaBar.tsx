@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
+import type { Workbook } from '@univerjs/core';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { ComponentContainer, KeyCode, useComponentsOfPart } from '@univerjs/ui';
+import { ComponentContainer, ComponentManager, KeyCode, useComponentsOfPart } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
 import { SheetsUIPart } from '../../consts/ui-name';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { DefinedName } from '../defined-name/DefinedName';
+import { useKeyEventConfig } from '../editor-container/hooks';
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -47,13 +48,20 @@ export function FormulaBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
-
     const [disable, setDisable] = useState<boolean>(false);
     const [imageDisable, setImageDisable] = useState<boolean>(false);
     const currentWorkbook = useActiveWorkbook();
+    const componentManager = useDependency(ComponentManager);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
-
+    const isRefSelecting = useRef<0 | 1 | 2>(0);
+    const editState = editorBridgeService.getEditLocation();
+    const keyCodeConfig = useKeyEventConfig(isRefSelecting, editState?.unitId ?? '');
+    const FormulaEditor = componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY);
     const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
+    const contextService = useDependency(IContextService);
+    useObservable(useMemo(() => contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), [contextService]));
+    const isFocusFxBar = contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    const ref = useRef<HTMLDivElement>(null);
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -107,44 +115,6 @@ export function FormulaBar() {
         };
     }, [workbook]);
 
-    const INITIAL_SNAPSHOT: IDocumentData = {
-        id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-        body: {
-            dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-            textRuns: [],
-            tables: [],
-            paragraphs: [
-                {
-                    startIndex: 0,
-                },
-            ],
-            sectionBreaks: [{
-                startIndex: 1,
-            }],
-        },
-        tableSource: {},
-        documentStyle: {
-            pageSize: {
-                width: Number.POSITIVE_INFINITY,
-                height: Number.POSITIVE_INFINITY,
-            },
-            documentFlavor: DocumentFlavor.UNSPECIFIED,
-            marginTop: 5,
-            marginBottom: 5,
-            marginRight: 0,
-            marginLeft: 0,
-            paragraphLineGapDefault: 0,
-            renderConfig: {
-                horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.TOP,
-                centerAngle: 0,
-                vertexAngle: 0,
-                wrapStrategy: WrapStrategy.WRAP,
-                isRenderStyle: BooleanNumber.FALSE,
-            },
-        },
-    };
-
     useEffect(() => {
         const subscription = editorBridgeService.visible$.subscribe((visibleInfo) => {
             setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
@@ -165,15 +135,20 @@ export function FormulaBar() {
         return () => subscription.unsubscribe();
     }, [editorBridgeService.currentEditCellState$]);
 
-    function resizeCallBack(editor: Nullable<HTMLDivElement>) {
-        if (editor == null) {
-            return;
+    useEffect(() => {
+        if (ref.current) {
+            const handleResize = () => {
+                const editorRect = ref.current!.getBoundingClientRect();
+                formulaEditorManagerService.setPosition(editorRect);
+            };
+
+            handleResize();
+            const a = new ResizeObserver(handleResize);
+
+            a.observe(ref.current);
+            return () => a.disconnect();
         }
-
-        const editorRect = editor.getBoundingClientRect();
-
-        formulaEditorManagerService.setPosition(editorRect);
-    }
+    }, [formulaEditorManagerService]);
 
     function handleArrowClick() {
         setArrowDirection(arrowDirection === ArrowDirection.Down ? ArrowDirection.Up : ArrowDirection.Down);
@@ -249,19 +224,35 @@ export function FormulaBar() {
                     </div>
                 </div>
 
-                <div className={styles.formulaInput}>
-                    <TextEditor
-                        id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
-                        isSheetEditor
-                        resizeCallBack={resizeCallBack}
-                        cancelDefaultResizeListener
-                        onContextMenu={(e) => e.preventDefault()}
-                        className={styles.formulaContent}
-                        snapshot={INITIAL_SNAPSHOT}
-                        isSingle={false}
-                        disabled={disabled}
-                    />
-                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disabled })} onClick={handleArrowClick}>
+                <div className={styles.formulaContainer}>
+                    <div className={styles.formulaInput} ref={ref}>
+                        {FormulaEditor && (
+                            <FormulaEditor
+                                disableSelectionOnClick
+                                editorId={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                                initValue=""
+                                onChange={() => {}}
+                                isFocus={isFocusFxBar}
+                                className={styles.formulaContent}
+                                unitId={editState?.unitId}
+                                subUnitId={editState?.sheetId}
+                                isSupportAcrossSheet
+                                resetSelectionOnBlur={false}
+                                isSingle={false}
+                                keyboradEventConfig={keyCodeConfig}
+                                onFormulaSelectingChange={(isSelecting: 0 | 1 | 2) => {
+                                    isRefSelecting.current = isSelecting;
+                                    if (isSelecting) {
+                                        editorBridgeService.enableForceKeepVisible();
+                                    } else {
+                                        editorBridgeService.disableForceKeepVisible();
+                                    }
+                                }}
+                                autoScrollbar={false}
+                            />
+                        )}
+                    </div>
+                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (
                                 <DropdownSingle />

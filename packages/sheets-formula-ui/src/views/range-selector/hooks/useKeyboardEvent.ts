@@ -14,20 +14,4 @@
  * limitations under the License.
  */
 
-import React, { forwardRef } from 'react';
-import type { MentionsInputProps } from 'react-mentions';
-import { MentionsInput } from 'react-mentions';
-import styles from './index.module.less';
-
-export interface IMentionsProps extends MentionsInputProps {}
-
-export const Mentions = forwardRef<React.Component<MentionsInputProps, any, any>, IMentionsProps>((props, ref) => {
-    return (
-        <MentionsInput
-            ref={ref}
-            {...props}
-            className={styles.mentions}
-        />
-    );
-});
-
+export { type IKeyboardEventConfig, useKeyboardEvent } from '@univerjs/docs-ui';

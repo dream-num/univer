@@ -33,7 +33,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
     id: 'doc.command-replace-snapshot',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
-    handler: async (accessor, params: IReplaceSnapshotCommandParams) => {
+    handler: (accessor, params: IReplaceSnapshotCommandParams) => {
         const { unitId, snapshot, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -46,7 +46,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             return false;
         }
 
-        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder } = snapshot;
+        const { body, tableSource, footers, headers, lists, drawings, drawingsOrder, documentStyle } = Tools.deepClone(snapshot);
         const {
             body: prevBody,
             tableSource: prevTableSource,
@@ -55,6 +55,7 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             lists: prevLists,
             drawings: prevDrawings,
             drawingsOrder: prevDrawingsOrder,
+            documentStyle: prevDocumentStyle,
         } = prevSnapshot;
 
         if (body == null || prevBody == null) {
@@ -87,6 +88,13 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
         const rawActions: JSONXActions = [];
 
         const jsonX = JSONX.getInstance();
+
+        if (!Tools.diffValue(prevDocumentStyle, documentStyle)) {
+            const actions = jsonX.replaceOp(['documentStyle'], prevDocumentStyle, documentStyle);
+            if (actions != null) {
+                rawActions.push(actions);
+            }
+        }
 
         if (!Tools.diffValue(body, prevBody)) {
             const actions = jsonX.replaceOp(['body'], prevBody, body);
@@ -338,5 +346,58 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         return true;
+    },
+};
+
+export const ReplaceTextRunsCommand: ICommand<IReplaceContentCommandParams> = {
+    id: 'doc.command.replace-text-runs',
+    type: CommandType.COMMAND,
+
+    handler: (accessor, params: IReplaceContentCommandParams) => {
+        const { unitId, body, textRanges, segmentId = '', options } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        // const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
+
+        if (docDataModel == null || prevBody == null) {
+            return false;
+        }
+
+        const textX = BuildTextUtils.selection.replaceTextRuns({
+            doc: docDataModel,
+            body,
+            selection: {
+                startOffset: 0,
+                endOffset: prevBody.dataStream.length - 2,
+                collapsed: false,
+            },
+        });
+
+        if (!textX) {
+            return false;
+        }
+
+        const doMutation = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+                noHistory: true,
+            } as IRichTextEditingMutationParams,
+        };
+        const jsonX = JSONX.getInstance();
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+        doMutation.params.textRanges = textRanges;
+        if (options) {
+            doMutation.params.options = options;
+        }
+
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
+        return Boolean(result);
     },
 };

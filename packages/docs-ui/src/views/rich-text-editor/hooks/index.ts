@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 
-export { Mentions } from './Mentions';
-export type { IMentionsProps } from './Mentions';
-export { Mention, type MentionProps } from 'react-mentions';
+export { type IKeyboardEventConfig, useKeyboardEvent } from './useKeyboardEvent';
+export { useResize } from './useResize';

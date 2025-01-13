@@ -17,7 +17,7 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
 import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
+// import { TextEditor } from '@univerjs/docs-ui';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import { useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
@@ -123,7 +123,7 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
 
     return (
         <div className={styles.docUiFormulaPopup} onMouseEnter={() => onHovered(true)} onMouseLeave={() => onHovered(false)}>
-            <TextEditor
+            {/* <TextEditor
                 id={UNI_FORMULA_EDITOR_ID}
                 className={clsx(styles.docUiFormulaPopupEditor, focused && styles.docUiFormulaPopupEditorActivated)}
                 placeholder={localeService.t('uni-formula.popup.placeholder')}
@@ -138,7 +138,7 @@ function DocFormula(props: { popupInfo: IUniFormulaPopupInfo }) {
                     setFocused(true);
                 }}
                 onBlur={() => setFocused(false)}
-            />
+            /> */}
             <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: !formulaString })}>
                 <span
                     className={clsx(styles.iconContainer, styles.iconContainerError)}

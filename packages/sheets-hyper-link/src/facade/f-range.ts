@@ -55,6 +55,8 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     // #region hyperlink
 
     /**
+     * @param url
+     * @param label
      * @deprecated
      */
     override setHyperLink(url: string, label?: string): Promise<boolean> {
@@ -94,6 +96,9 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     }
 
     /**
+     * @param id
+     * @param url
+     * @param label
      * @deprecated
      */
     override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
@@ -113,6 +118,7 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
     }
 
     /**
+     * @param id
      * @deprecated
      */
     override cancelHyperLink(id: string): boolean {

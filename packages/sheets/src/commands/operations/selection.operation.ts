@@ -28,6 +28,7 @@ export interface ISetSelectionsOperationParams {
 
     /** If should scroll to the selected range. */
     reveal?: boolean;
+    extra?: string;
 }
 
 /**
@@ -38,7 +39,6 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         if (!params) return false;
-
         const { selections, type, unitId, subUnitId } = params;
         const selectionManagerService = getSelectionsService(accessor);
 

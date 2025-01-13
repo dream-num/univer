@@ -284,33 +284,29 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         });
     }, [strList, onChange, isFormulaStr, formulaStrCopy, refColors]);
 
-    const updateFormula = useMemo(
-        () =>
-            async (str: string) => {
-                if (!isFormulaString(str)) {
-                    onChange?.({
-                        formula1: '',
-                        formula2,
-                    });
-                    return;
-                }
-                if (dataValidationFormulaController.getFormulaRefCheck(str)) {
-                    onChange?.({
-                        formula1: isFormulaString(str) ? str : '',
-                        formula2,
-                    });
-                    setLocalError('');
-                } else {
-                    onChange?.({
-                        formula1: '',
-                        formula2,
-                    });
-                    setFormulaStr('=');
-                    setLocalError(localeService.t('dataValidation.validFail.formulaError'));
-                }
-            },
-        [formula2, onChange]
-    );
+    const updateFormula = useEvent(async (str: string) => {
+        if (!isFormulaString(str)) {
+            onChange?.({
+                formula1: '',
+                formula2,
+            });
+            return;
+        }
+        if (dataValidationFormulaController.getFormulaRefCheck(str)) {
+            onChange?.({
+                formula1: isFormulaString(str) ? str : '',
+                formula2,
+            });
+            setLocalError('');
+        } else {
+            onChange?.({
+                formula1: '',
+                formula2,
+            });
+            setFormulaStr('=');
+            setLocalError(localeService.t('dataValidation.validFail.formulaError'));
+        }
+    });
 
     const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);

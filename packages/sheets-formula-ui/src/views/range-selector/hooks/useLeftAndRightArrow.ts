@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-import type { Editor } from '@univerjs/docs-ui';
-import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { CommandType, Direction, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
+import { type Editor, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { IShortcutService, KeyCode } from '@univerjs/ui';
-import { useEffect } from 'react';
+import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from '@univerjs/sheets-ui';
+import { IShortcutService, KeyCode, MetaKeys } from '@univerjs/ui';
+import { useEffect, useRef } from 'react';
+import { FormulaSelectingType } from '../../formula-editor/hooks/useFormulaSelection';
 
-export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
+// eslint-disable-next-line max-lines-per-function
+export const useLeftAndRightArrow = (isNeed: boolean, shouldMoveSelection: FormulaSelectingType, editor?: Editor, onMoveInEditor?: (keyCode: KeyCode, metaKey?: MetaKeys) => void) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
+    const shouldMoveSelectionRef = useRef(shouldMoveSelection);
+    shouldMoveSelectionRef.current = shouldMoveSelection;
+    const onMoveInEditorRef = useRef(onMoveInEditor);
+    onMoveInEditorRef.current = onMoveInEditor;
 
+    // eslint-disable-next-line max-lines-per-function
     useEffect(() => {
         if (!editor || !isNeed) {
             return;
@@ -31,23 +39,71 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
         const editorId = editor.getEditorId();
         const operationId = `sheet.formula-embedding-editor.${editorId}`;
         const d = new DisposableCollection();
-        const handleKeycode = (keycode: KeyCode) => {
-            const selections = editor.getSelectionRanges();
-            if (selections.length === 1) {
-                const range = selections[0];
-                switch (keycode) {
-                    case KeyCode.ARROW_LEFT: {
-                        const offset = Math.max(range.startOffset - 1, 0);
-                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                        break;
-                    }
-                    case KeyCode.ARROW_RIGHT: {
-                        const content = (editor.getDocumentData().body?.dataStream || ',,').length - 2;
-                        const offset = Math.min(range.endOffset + 1, content);
-                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                        break;
-                    }
+        const handleMoveInEditor = (keycode: KeyCode, metaKey?: MetaKeys) => {
+            if (onMoveInEditorRef.current) {
+                onMoveInEditorRef.current(keycode, metaKey);
+                return;
+            }
+
+            let direction = Direction.LEFT;
+            if (keycode === KeyCode.ARROW_DOWN) {
+                direction = Direction.DOWN;
+            } else if (keycode === KeyCode.ARROW_UP) {
+                direction = Direction.UP;
+            } else if (keycode === KeyCode.ARROW_RIGHT) {
+                direction = Direction.RIGHT;
+            }
+
+            if (metaKey === MetaKeys.SHIFT) {
+                commandService.executeCommand(MoveSelectionOperation.id, {
+                    direction,
+                });
+            } else {
+                commandService.executeCommand(MoveCursorOperation.id, {
+                    direction,
+                });
+            }
+        };
+
+        const handleKeycode = (keycode: KeyCode, metaKey?: MetaKeys) => {
+            let direction = Direction.DOWN;
+            if (keycode === KeyCode.ARROW_DOWN) {
+                direction = Direction.DOWN;
+            } else if (keycode === KeyCode.ARROW_UP) {
+                direction = Direction.UP;
+            } else if (keycode === KeyCode.ARROW_LEFT) {
+                direction = Direction.LEFT;
+            } else if (keycode === KeyCode.ARROW_RIGHT) {
+                direction = Direction.RIGHT;
+            }
+            if (shouldMoveSelectionRef.current) {
+                if (metaKey === MetaKeys.CTRL_COMMAND) {
+                    commandService.executeCommand(MoveSelectionCommand.id, {
+                        direction,
+                        jumpOver: JumpOver.moveGap,
+                        extra: 'formula-editor',
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
+                    });
+                } else if (metaKey === MetaKeys.SHIFT) {
+                    commandService.executeCommand(ExpandSelectionCommand.id, {
+                        direction,
+                        extra: 'formula-editor',
+                    });
+                } else if (metaKey === (MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT)) {
+                    commandService.executeCommand(ExpandSelectionCommand.id, {
+                        direction,
+                        jumpOver: JumpOver.moveGap,
+                        extra: 'formula-editor',
+                    });
+                } else {
+                    commandService.executeCommand(MoveSelectionCommand.id, {
+                        direction,
+                        extra: 'formula-editor',
+                        fromCurrentSelection: shouldMoveSelectionRef.current === FormulaSelectingType.NEED_ADD,
+                    });
                 }
+            } else {
+                handleMoveInEditor(keycode, metaKey);
             }
         };
 
@@ -55,20 +111,40 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
             id: operationId,
             type: CommandType.OPERATION,
             handler(_event, params) {
-                const { keyCode } = params as { eventType: DeviceInputEventType; keyCode: KeyCode };
-                handleKeycode(keyCode);
+                const { keyCode, metaKey } = params as { eventType: DeviceInputEventType; keyCode: KeyCode; metaKey?: MetaKeys };
+                handleKeycode(keyCode, metaKey);
             },
         }));
 
-        [KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP].map((keyCode) => {
+        const keyCodes = [
+            { keyCode: KeyCode.ARROW_DOWN },
+            { keyCode: KeyCode.ARROW_LEFT },
+            { keyCode: KeyCode.ARROW_RIGHT },
+            { keyCode: KeyCode.ARROW_UP },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND },
+            { keyCode: KeyCode.ARROW_DOWN, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_LEFT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_RIGHT, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+            { keyCode: KeyCode.ARROW_UP, metaKey: MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT },
+        ];
+
+        keyCodes.map(({ keyCode, metaKey }) => {
             return {
                 id: operationId,
-                binding: keyCode,
+                binding: metaKey ? keyCode | metaKey : keyCode,
                 preconditions: () => true,
                 priority: 900,
                 staticParameters: {
                     eventType: DeviceInputEventType.Keyboard,
                     keyCode,
+                    metaKey,
                 },
             };
         }).forEach((item) => {
@@ -78,5 +154,5 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
         return () => {
             d.dispose();
         };
-    }, [editor, isNeed]);
+    }, [commandService, editor, isNeed, shortcutService]);
 };

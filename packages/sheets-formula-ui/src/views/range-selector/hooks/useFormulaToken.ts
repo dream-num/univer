@@ -17,10 +17,11 @@
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { useCallback } from 'react';
 
 export type INode = (string | ISequenceNode);
 export const useFormulaToken = () => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-    const getFormulaToken = (text: string) => lexerTreeBuilder.sequenceNodesBuilder(text) || [];
+    const getFormulaToken = useCallback((text: string) => lexerTreeBuilder.sequenceNodesBuilder(text) || [], [lexerTreeBuilder]);
     return getFormulaToken;
 };

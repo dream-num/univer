@@ -17,13 +17,12 @@
 import type { Editor } from '@univerjs/docs-ui';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
 import { useDependency } from '@univerjs/core';
-import { compareToken, matchToken, operatorToken } from '@univerjs/engine-formula';
+import { compareToken, LexerTreeBuilder, matchToken, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { useEvent } from '@univerjs/ui';
 import { useEffect, useMemo, useRef } from 'react';
-import { debounceTime } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
-import { useStateRef } from './useStateRef';
 
 const createLock = (initValue: boolean, step = 300) => {
     let isEnableCancel = initValue;
@@ -82,23 +81,24 @@ const getContent = (node: INode) => typeof node === 'string' ? node : node.token
  * @return {*}
  */
 // eslint-disable-next-line max-lines-per-function
-export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?: Editor) => {
+export const useSelectionAdd = (unitId: string, editor?: Editor) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
     const isNeedAddSelection = useRef(false);
-    const sequenceNodesRef = useStateRef(sequenceNodes);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     // 非用户行为导致的选区改变,应该屏蔽选区变更事件
     const isLockSelectionEvent = useMemo(() => createLock(false, 300), []);
 
-    const setIsAddSelection = (v: boolean) => {
+    const setIsAddSelection = useEvent((v: boolean) => {
         if (refSelectionsRenderService) {
             refSelectionsRenderService.setSkipLastEnabled(v);
         }
         isNeedAddSelection.current = v;
-    };
-    const getIsNeedAddSelection = () => isNeedAddSelection.current;
+    });
+
+    const getIsNeedAddSelection = useEvent(() => isNeedAddSelection.current);
 
     useEffect(() => {
         if (editor && refSelectionsRenderService) {
@@ -114,10 +114,12 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                 }
             });
             // sequenceNodes 的创建会在 input 事件之后,为了拿到最新的 sequenceNodes , 这里延后 100ms
-            const d2 = editor.selectionChange$.pipe(debounceTime(100)).subscribe((e) => {
+            const d2 = editor.selectionChange$.subscribe((e) => {
                 if (isLockSelectionEvent.getValue()) {
                     return;
                 }
+                const dataStream = editor.getDocumentData().body?.dataStream.slice(0, -2) ?? '';
+                const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(dataStream);
                 const selections = e.textRanges;
                 if (!selections.length) {
                     return;
@@ -131,8 +133,7 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                     setIsAddSelection(false);
                     return;
                 }
-                const sequenceNodes = sequenceNodesRef.current;
-                if (!sequenceNodes.length) {
+                if (!sequenceNodes?.length) {
                     setIsAddSelection(true);
                     return;
                 }
@@ -175,7 +176,7 @@ export const useSelectionAdd = (unitId: string, sequenceNodes: INode[], editor?:
                 d2.unsubscribe();
             };
         }
-    }, [editor, refSelectionsRenderService]);
+    }, [editor, isLockSelectionEvent, lexerTreeBuilder, refSelectionsRenderService, setIsAddSelection]);
 
     return {
         setIsAddSelection,

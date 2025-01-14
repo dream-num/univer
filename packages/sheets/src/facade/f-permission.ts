@@ -220,7 +220,7 @@ export class FPermission extends FBase {
                         scope: undefined,
                     },
                 });
-                this._commandService.syncExecuteCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
+                this._commandService.syncExecuteCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, rule: { unitId, subUnitId, permissionId } });
             } else {
                 permissionId = rule.permissionId;
             }

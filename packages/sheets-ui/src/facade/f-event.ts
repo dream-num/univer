@@ -146,6 +146,7 @@ export const CellFEventName = {
     SelectionMoveStart: 'SelectionMoveStart',
     SelectionMoving: 'SelectionMoving',
     SelectionMoveEnd: 'SelectionMoveEnd',
+    SelectionChanged: 'SelectionChanged',
 } as const;
 
 export interface IFSheetsUIEventNameMixin {
@@ -328,11 +329,14 @@ export interface IFSheetsUIEventNameMixin {
      */
     readonly Scroll: 'Scroll';
 
-    // Wait to be done.
-    // /**
-    //  * @example
-    //  */
-    // readonly SelectionChanging: 'SelectionChanging';
+    /**
+     * Event fired when selection changed.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionChanged', (p)=> console.log(p));
+     * ```
+     */
+    readonly SelectionChanged: 'SelectionChanged';
 
     /**
      * Event fired when selection move end
@@ -360,6 +364,7 @@ export interface IFSheetsUIEventNameMixin {
      * ```
      */
     readonly SelectionMoveEnd: 'SelectionMoveEnd';
+
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -435,9 +440,9 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
         return 'SelectionMoveStart' as const;
     }
 
-    // override get SelectionChanging(): 'SelectionChanging' {
-    //     return 'SelectionChanging' as const;
-    // }
+    override get SelectionChanged(): 'SelectionChanged' {
+        return 'SelectionChanged' as const;
+    }
 
     override get SelectionMoving(): 'SelectionMoving' {
         return 'SelectionMoving' as const;
@@ -547,6 +552,7 @@ export interface IFSheetsUIEventParamConfig {
     SelectionMoveStart: ISelectionEventParam;
     SelectionMoving: ISelectionEventParam;
     SelectionMoveEnd: ISelectionEventParam;
+    SelectionChanged: ISelectionEventParam;
 }
 
 FEventName.extend(FSheetsUIEventName);

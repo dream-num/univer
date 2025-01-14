@@ -214,7 +214,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
     /**
      * attachDOMPopup
      * @param popup
-     * @returns ddd
+     * @returns {IDisposable} disposable
         let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
         let range = sheet.getRange(2, 2, 3, 3);
         univerAPI.getActiveWorkbook().setActiveRange(range);

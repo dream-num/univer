@@ -70,7 +70,7 @@ export interface IFWorksheetLegacy {
      univerAPI.getActiveWorkbook().setActiveRange(range);
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
-            componentKey: 'ImageDemo',
+            componentKey: 'RangeLoading',
             props: {
                 a: 1,
             },
@@ -89,7 +89,7 @@ export interface IFWorksheetLegacy {
      univerAPI.getActiveWorkbook().setActiveRange(range);
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
-            componentKey: 'ImageDemo',
+            componentKey: 'FloatButton', // React comp key registered in ComponentManager
             props: {
                 a: 1,
             },
@@ -97,7 +97,11 @@ export interface IFWorksheetLegacy {
                 aa: '128',
             },
         }, {
-        width: 100, height: 30, x: '100%', y: '100%'}, 'loadingcover')
+        width: 100,
+        height: 30,
+        x: '100%',
+        y: '100%'},
+    'AIButton') // create a div#AIButton wraps FloatButton Comp
     }
      * ```
      */

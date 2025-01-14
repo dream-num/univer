@@ -38,7 +38,7 @@ export interface IFRangeDataValidationMixin {
      * @returns all data validation rules
      */
     getDataValidations(this: FRange): FDataValidation[];
-    getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]>;
+    getValidatorStatus(): Promise<DataValidationStatus[][]>;
 }
 
 export class FRangeDataValidationMixin extends FRange implements IFRangeDataValidationMixin {
@@ -90,7 +90,7 @@ export class FRangeDataValidationMixin extends FRange implements IFRangeDataVali
         ).map((rule) => new FDataValidation(rule, this._worksheet, this._injector));
     }
 
-    override async getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]> {
+    override async getValidatorStatus(): Promise<DataValidationStatus[][]> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorRanges(
             this._workbook.getUnitId(),

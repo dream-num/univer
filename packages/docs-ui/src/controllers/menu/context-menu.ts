@@ -18,7 +18,7 @@ import type { IAccessor } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscriber } from 'rxjs';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
@@ -32,8 +32,9 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     return new Observable<boolean>((subscriber) => {
         const observable = docSelectionManagerService.textSelection$.subscribe(() => {
-            const range = docSelectionManagerService.getActiveTextRange();
-            if (range && !range.collapsed) {
+            const ranges = docSelectionManagerService.getDocRanges();
+            const legal = ranges.some((range) => range.collapsed === false || range.rangeType === DOC_RANGE_TYPE.RECT);
+            if (legal) {
                 subscriber.next(false);
             } else {
                 subscriber.next(true);

@@ -249,6 +249,7 @@ export function FormulaBar() {
                                     }
                                 }}
                                 autoScrollbar={false}
+                                disableContextMenu={false}
                             />
                         )}
                     </div>

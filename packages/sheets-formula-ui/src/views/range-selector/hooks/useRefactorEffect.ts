@@ -22,7 +22,7 @@ import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string) => {
+export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: string, disableContextMenu = true) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const contextService = useDependency(IContextService);
     const contextMenuService = useDependency(IContextMenuService);
@@ -58,13 +58,13 @@ export const useRefactorEffect = (isNeed: boolean, selecting: boolean, unitId: s
     useEffect(() => {
         if (isNeed) {
             contextService.setContextValue(EDITOR_ACTIVATED, true);
-            contextMenuService.disable();
+            disableContextMenu && contextMenuService.disable();
             return () => {
                 contextService.setContextValue(EDITOR_ACTIVATED, false);
-                contextMenuService.enable();
+                disableContextMenu && contextMenuService.enable();
             };
         }
-    }, [contextMenuService, contextService, isNeed]);
+    }, [contextMenuService, contextService, isNeed, disableContextMenu]);
 
     // reset setSkipLastEnabled
     useEffect(() => {

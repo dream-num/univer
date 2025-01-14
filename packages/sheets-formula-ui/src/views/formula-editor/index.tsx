@@ -72,6 +72,7 @@ export interface IFormulaEditorProps {
      * Disable selection when click formula editor
      */
     disableSelectionOnClick?: boolean;
+    disableContextMenu?: boolean;
 }
 
 const noop = () => { };
@@ -98,6 +99,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         autoScrollbar = true,
         isSingle = true,
         disableSelectionOnClick = false,
+        disableContextMenu,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -236,7 +238,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [_isFocus, editor, focus, resetSelection, resetSelectionOnBlur]);
 
     const { checkScrollBar } = useResize(editor, isSingle, autoScrollbar);
-    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId);
+    useRefactorEffect(isFocus, Boolean(isSelecting && docFocusing), unitId, disableContextMenu);
     useLeftAndRightArrow(isFocus && moveCursor, selectingMode, editor, onMoveInEditor);
 
     const handleSelectionChange = useEvent((refString: string, offset: number, isEnd: boolean) => {

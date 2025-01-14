@@ -127,7 +127,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
             Range.foreach(range, (row, col) => {
                 promises.push(this._validatorByCell(workbook, worksheet, row, col));
             });
-            return promises;
+            return Promise.all(promises);
         }));
     }
 

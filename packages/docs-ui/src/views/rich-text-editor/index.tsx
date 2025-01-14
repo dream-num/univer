@@ -90,7 +90,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
         const size = docSkeleton?.getSkeleton().getActualSize();
         if (size) {
             onHeightChange?.(size.actualHeight);
-            setHeight(Math.max(defaultHeight, Math.min(size.actualHeight, maxHeight)));
+            setHeight(Math.max(defaultHeight, Math.min(size.actualHeight + 10, maxHeight)));
         }
         _onChange?.(data);
         checkScrollBar();

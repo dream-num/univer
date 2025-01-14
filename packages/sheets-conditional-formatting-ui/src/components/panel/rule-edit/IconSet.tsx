@@ -37,7 +37,7 @@ import {
 import { FormulaEditor } from '@univerjs/sheets-formula-ui';
 import { ILayoutService, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
@@ -108,7 +108,7 @@ interface IconGroupListProps {
     onClick: (iconType: IIconType) => void;
     iconType?: IIconType;
 };
-const IconGroupList = ({ ref, ...props }: IconGroupListProps & { ref: React.RefObject<HTMLDivElement | null> }) => {
+const IconGroupList = forwardRef<HTMLDivElement, IconGroupListProps>((props, ref) => {
     const localeService = useDependency(LocaleService);
 
     const handleClick = (iconType: IIconType) => {
@@ -137,7 +137,7 @@ const IconGroupList = ({ ref, ...props }: IconGroupListProps & { ref: React.RefO
             })}
         </div>
     );
-};
+});
 
 const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void; iconType?: IIconType; iconId: string }) => {
     const list = useMemo(() => {

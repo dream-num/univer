@@ -69,7 +69,7 @@ export const RichTextEditor = forwardRef<Editor, IRichTextEditorProps>((props, r
     const onFocusChange = useEvent(_onFocusChange);
     const onClickOutside = useEvent(_onClickOutside);
     const [height, setHeight] = useState(defaultHeight);
-    const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null);
+    const formulaEditorContainerRef = React.useRef<HTMLDivElement>(null!);
     const editorId = useMemo(() => propsEditorId ?? createInternalEditorID(`RICH_TEXT_EDITOR-${generateRandomId(4)}`), [propsEditorId]);
     const editor = useEditor({
         editorId,

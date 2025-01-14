@@ -60,7 +60,7 @@ export interface IFWorksheetLegacy {
     }>;
 
     /**
-     * add float dom to range
+     * Add dom over range to FloatDOM, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
      * @param layer
      * @param id
      * @example
@@ -70,14 +70,16 @@ export interface IFWorksheetLegacy {
      univerAPI.getActiveWorkbook().setActiveRange(range);
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
-            componentKey: 'ImageDemo',
+            componentKey: 'RangeLoading',
             props: {
                 a: 1,
             },
             data: {
                 aa: '128',
             },
-        }, {}, 'loadingcover')
+        }, {},
+        'loadingcover'
+    )
     setTimeout(()=> {
         dispose();
     }, 2000)
@@ -85,11 +87,12 @@ export interface IFWorksheetLegacy {
     // -------------------
     {
      const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     const range = sheet.getRange(0, 0, 3, 3);
-     univerAPI.getActiveWorkbook().setActiveRange(range);
+     //  const range = sheet.getRange(0, 0, 3, 3);
+     //  univerAPI.getActiveWorkbook().setActiveRange(range);
+     univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
-            componentKey: 'ImageDemo',
+            componentKey: 'FloatButton', // React comp key registered in ComponentManager
             props: {
                 a: 1,
             },
@@ -97,7 +100,11 @@ export interface IFWorksheetLegacy {
                 aa: '128',
             },
         }, {
-        width: 100, height: 30, x: '100%', y: '100%'}, 'loadingcover')
+        width: 100,
+        height: 30,
+        x: '100%',
+        y: '100%'},
+    'AIButton') // dom id
     }
      * ```
      */
@@ -107,7 +114,7 @@ export interface IFWorksheetLegacy {
     }>;
 
     /**
-     *
+     * Add dom at column header, And FloatDOM is registerComponent(BuiltInUIPart.CONTENT)
      * @param column
      * @param layer
      * @param domPos

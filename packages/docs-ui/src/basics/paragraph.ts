@@ -69,10 +69,12 @@ export function getTextRunAtPosition(
 
 export function getCustomRangeAtPosition(customRanges: ICustomRange[], position: number, extendRange?: boolean) {
     if (extendRange) {
-        return customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+        const range = customRanges.find((customRange) => position >= customRange.startIndex && position <= customRange.endIndex + 1);
+        return range?.wholeEntity ? null : range;
     }
 
-    return customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
+    const range = customRanges.find((customRange) => position > customRange.startIndex && position <= customRange.endIndex);
+    return range?.wholeEntity ? null : range;
 }
 
 export function getCustomDecorationAtPosition(customDecorations: ICustomDecoration[], position: number) {

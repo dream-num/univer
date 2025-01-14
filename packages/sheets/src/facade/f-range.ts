@@ -41,7 +41,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Get the unit ID of the current workbook
-     * @returns The unit ID of the workbook
+     * @returns {string} The unit ID of the workbook
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getUnitId()
+     * ```
      */
     getUnitId(): string {
         return this._workbook.getUnitId();
@@ -49,7 +56,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the name of the worksheet
-     * @returns The name of the worksheet
+     * @returns {string} The name of the worksheet
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getSheetName()
+     * ```
      */
     getSheetName(): string {
         return this._worksheet.getName();
@@ -57,7 +71,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the ID of the worksheet
-     * @returns The ID of the worksheet
+     * @returns {string} The ID of the worksheet
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getSheetId()
+     * ```
      */
     getSheetId(): string {
         return this._worksheet.getSheetId();
@@ -65,7 +86,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the area where the statement is applied
-     * @returns The area where the statement is applied
+     * @returns {IRange} The area where the statement is applied
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getRange()
+     * ```
      */
     getRange(): IRange {
         return this._range;
@@ -73,7 +101,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the starting row number of the applied area
-     * @returns The starting row number of the area
+     * @returns {number} The starting row number of the area
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getRow()
+     * ```
      */
     getRow(): number {
         return this._range.startRow;
@@ -81,7 +116,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the starting column number of the applied area
-     * @returns The starting column number of the area
+     * @returns {number} The starting column number of the area
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getColumn()
+     * ```
      */
     getColumn(): number {
         return this._range.startColumn;
@@ -89,7 +131,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the width of the applied area
-     * @returns The width of the area
+     * @returns {number} The width of the area
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getWidth()
+     * ```
      */
     getWidth(): number {
         return this._range.endColumn - this._range.startColumn + 1;
@@ -97,7 +146,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Gets the height of the applied area
-     * @returns The height of the area
+     * @returns {number} The height of the area
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getHeight()
+     * ```
      */
     getHeight(): number {
         return this._range.endRow - this._range.startRow + 1;
@@ -105,7 +161,14 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Return range whether this range is merged
-     * @returns if true is merged
+     * @returns {boolean} if true is merged
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .isMerged()
+     * ```
      */
     isMerged(): boolean {
         const { startColumn, startRow, endColumn, endRow } = this._range;
@@ -116,6 +179,13 @@ export class FRange extends FBaseInitialable {
     /**
      * Return first cell style data in this range
      * @returns {IStyleData | null} The cell style data
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellStyleData()
+     * ```
      */
     getCellStyleData(): IStyleData | null {
         const cell = this.getCellData();
@@ -128,17 +198,14 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the value of the cell at the start of this range.
-     * @returns {CellValue | null} The value of the cell.
+     * @deprecated use `getValueAndRichTextValue` instead. This api can't return rich text value.
      */
     getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
     /**
-     * Returns the rectangular grid of values for this range.
-     * Returns a two-dimensional array of values, indexed by row, then by column.
-     * @returns {Nullable<CellValue>[][]} A two-dimensional array of values.
+     * @deprecated use `getValueAndRichTextValues` instead. This api can't return rich text value.
      */
     getValues(): Nullable<CellValue>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
@@ -160,7 +227,7 @@ export class FRange extends FBaseInitialable {
      * Return first cell model data in this range
      * @returns {ICellData | null} The cell model data
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -175,7 +242,7 @@ export class FRange extends FBaseInitialable {
      * Returns the cell data for the cells in the range.
      * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -207,7 +274,7 @@ export class FRange extends FBaseInitialable {
      * Returns the rich text value for the cell at the start of this range.
      * @returns {Nullable<RichTextValue>} The rich text value
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -226,7 +293,7 @@ export class FRange extends FBaseInitialable {
      * Returns the rich text value for the cells in the range.
      * @returns {Nullable<RichTextValue>[][]} A two-dimensional array of RichTextValue objects.
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -242,7 +309,7 @@ export class FRange extends FBaseInitialable {
      * Returns the value and rich text value for the cell at the start of this range.
      * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -258,7 +325,7 @@ export class FRange extends FBaseInitialable {
      * Returns the value and rich text value for the cells in the range.
      * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -302,18 +369,62 @@ export class FRange extends FBaseInitialable {
         return formulas;
     }
 
+    /**
+     * Returns true if the cell wrap is enabled
+     * @returns {boolean} True if the cell wrap is enabled
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getWrap()
+     * ```
+     */
     getWrap(): boolean {
         return this._worksheet.getRange(this._range).getWrap() === BooleanNumber.TRUE;
     }
 
+    /**
+     * Returns the text wrapping strategy for the top left cell of the range.
+     * @returns {WrapStrategy} The text wrapping strategy
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getWrapStrategy()
+     * ```
+     */
     getWrapStrategy(): WrapStrategy {
         return this._worksheet.getRange(this._range).getWrapStrategy();
     }
 
+    /**
+     * Returns the horizontal alignment for the top left cell of the range.
+     * @returns {string} The horizontal alignment
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getHorizontalAlignment()
+     * ```
+     */
     getHorizontalAlignment(): string {
         return transformCoreHorizontalAlignment(this._worksheet.getRange(this._range).getHorizontalAlignment());
     }
 
+    /**
+     * Returns the vertical alignment for the top left cell of the range.
+     * @returns {string} The vertical alignment
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getVerticalAlignment()
+     * ```
+     */
     getVerticalAlignment(): string {
         return transformCoreVerticalAlignment(this._worksheet.getRange(this._range).getVerticalAlignment());
     }
@@ -386,9 +497,10 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set background color for current range.
-     * @param color {string}
+     * @param {string} color The background color
+     * @returns {FRange} This range, for chaining
      * @example
-     * ```
+     * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
@@ -412,11 +524,12 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set background color for current range.
+     * @param {string} color The background color
+     * @returns {FRange} This range, for chaining
      * @example
      * ```typescript
      * univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange().setBackground('red')
      * ```
-     * @param color {string}
      */
     setBackground(color: string): FRange {
         this.setBackgroundColor(color);
@@ -426,6 +539,13 @@ export class FRange extends FBaseInitialable {
     /**
      * Set new value for current cell, first cell in this range.
      * @param {CellValue | ICellData} value The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * @returns {FRange} This range, for chaining
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setValue(1);
+     * ```
      */
     setValue(value: CellValue | ICellData): FRange {
         const realValue = covertCellValue(value);
@@ -447,6 +567,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Set new value for current cell, first cell in this range.
      * @param {CellValue | ICellData} value  The value can be a number, string, boolean, or standard cell format. If it begins with `=`, it is interpreted as a formula. The value is tiled to all cells in the range.
+     * @returns {FRange} This range, for chaining
      * ```ts
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
@@ -535,7 +656,15 @@ export class FRange extends FBaseInitialable {
     /**
      * Set the cell wrap of the given range.
      * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
-     * @param isWrapEnabled
+     * @param {boolean} isWrapEnabled Whether to enable wrap
+     * @returns {FRange} this range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setWrap(true);
+     * ```
      */
     setWrap(isWrapEnabled: boolean): FRange {
         this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
@@ -550,7 +679,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the text wrapping strategy for the cells in the range.
-     * @param strategy
+     * @param {WrapStrategy} strategy The text wrapping strategy
+     * @returns {FRange} this range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setWrapStrategy(WrapStrategy.WRAP);
+     * ```
      */
     setWrapStrategy(strategy: WrapStrategy): FRange {
         this._commandService.syncExecuteCommand(SetTextWrapCommand.id, {
@@ -565,7 +702,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
-     * @param alignment
+     * @param {"top" | "middle" | "bottom"} alignment The vertical alignment
+     * @returns {FRange} this range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setVerticalAlignment('top');
+     * ```
      */
     setVerticalAlignment(alignment: FVerticalAlignment): FRange {
         this._commandService.syncExecuteCommand(SetVerticalTextAlignCommand.id, {
@@ -580,7 +725,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Set the horizontal (left to right) alignment for the given range (left/center/right).
-     * @param alignment
+     * @param {"left" | "center" | "normal"} alignment The horizontal alignment
+     * @returns {FRange} this range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setHorizontalAlignment('left');
+     * ```
      */
     setHorizontalAlignment(alignment: FHorizontalAlignment): FRange {
         this._commandService.syncExecuteCommand(SetHorizontalTextAlignCommand.id, {
@@ -595,7 +748,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets a different value for each cell in the range. The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats. If a value begins with `=`, it is interpreted as a formula.
-     * @param value
+     * @param {CellValue[][] | IObjectMatrixPrimitiveType<CellValue> | ICellData[][] | IObjectMatrixPrimitiveType<ICellData>} value The value can be a two-dimensional array or a standard range matrix (must match the dimensions of this range), consisting of numbers, strings, Boolean values or Composed of standard cell formats.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setValues([[1, 2], [3, 4]]);
+     * ```
      */
     setValues(
         value:
@@ -618,7 +779,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font weight for the given range (normal/bold),
-     * @param fontWeight The font weight, either 'normal' or 'bold'; a null value resets the font weight.
+     * @param {FontWeight|null} fontWeight The font weight, either 'normal' or 'bold'; a null value resets the font weight.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontWeight('bold');
+     * ```
      */
     setFontWeight(fontWeight: FontWeight | null): this {
         let value: BooleanNumber | null;
@@ -651,7 +820,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font style for the given range ('italic' or 'normal').
-     * @param fontStyle The font style, either 'italic' or 'normal'; a null value resets the font style.
+     * @param {FontStyle|null} fontStyle The font style, either 'italic' or 'normal'; a null value resets the font style.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontStyle('italic');
+     * ```
      */
     setFontStyle(fontStyle: FontStyle | null): this {
         let value: BooleanNumber | null;
@@ -684,7 +861,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font line style of the given range ('underline', 'line-through', or 'none').
-     * @param fontLine The font line style, either 'underline', 'line-through', or 'none'; a null value resets the font line style.
+     * @param {FontLine|null} fontLine The font line style, either 'underline', 'line-through', or 'none'; a null value resets the font line style.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontLine('underline');
+     * ```
      */
     setFontLine(fontLine: FontLine | null): this {
         if (fontLine === 'underline') {
@@ -713,7 +898,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font underline style of the given ITextDecoration
-     * @param value
+     * @param {ITextDecoration|null} value The font underline style of the given ITextDecoration; a null value resets the font underline style
+     * @returns {void}
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontLine('underline');
+     * ```
      */
     private _setFontUnderline(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
@@ -732,7 +925,8 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font strikethrough style of the given ITextDecoration
-     * @param value
+     * @param {ITextDecoration|null} value The font strikethrough style of the given ITextDecoration; a null value resets the font strikethrough style
+     * @returns {void}
      */
     private _setFontStrikethrough(value: ITextDecoration | null): void {
         const style: IStyleTypeValue<ITextDecoration | null> = {
@@ -751,7 +945,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font family, such as "Arial" or "Helvetica".
-     * @param fontFamily The font family to set; a null value resets the font family.
+     * @param {string|null} fontFamily The font family to set; a null value resets the font family.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontFamily('Arial');
+     * ```
      */
     setFontFamily(fontFamily: string | null): this {
         const style: IStyleTypeValue<string | null> = {
@@ -772,7 +974,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font size, with the size being the point size to use.
-     * @param size A font size in point size. A null value resets the font size.
+     * @param {number|null} size A font size in point size. A null value resets the font size.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontSize(12);
+     * ```
      */
     setFontSize(size: number | null): this {
         const style: IStyleTypeValue<number | null> = {
@@ -793,7 +1003,15 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Sets the font color in CSS notation (such as '#ffffff' or 'white').
-     * @param color The font color in CSS notation (such as '#ffffff' or 'white'); a null value resets the color.
+     * @param {string|null} color The font color in CSS notation (such as '#ffffff' or 'white'); a null value resets the color.
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setFontColor('#ff0000');
+     * ```
      */
     setFontColor(color: string | null): this {
         const value: IColorStyle | null = color === null ? null : { rgb: color };
@@ -820,8 +1038,8 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merge cells in a range into one merged cell
-     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     * @returns This range, for chaining
+     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @returns {FRange} This range, for chaining
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
@@ -843,8 +1061,8 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range horizontally.
-     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     * @returns This range, for chaining
+     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @returns {FRange} This range, for chaining
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
@@ -867,8 +1085,8 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Merges cells in a range vertically.
-     * @param [defaultMerge] - If true, only the value in the upper left cell is retained.
-     * @returns This range, for chaining
+     * @param {boolean} [defaultMerge] - If true, only the value in the upper left cell is retained.
+     * @returns {FRange} This range, for chaining
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
@@ -910,7 +1128,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Break all horizontally- or vertically-merged cells contained within the range list into individual cells again.
-     * @returns This range, for chaining
+     * @returns {FRange} This range, for chaining
      * @example
      * ```ts
      * const workbook = univerAPI.getActiveWorkbook();
@@ -934,7 +1152,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Iterate cells in this range. Merged cells will be respected.
-     * @param callback the callback function to be called for each cell in the range
+     * @param {Function} callback the callback function to be called for each cell in the range
      * @param {number} callback.row the row number of the cell
      * @param {number} callback.col the column number of the cell
      * @param {ICellData} callback.cell the cell data
@@ -959,7 +1177,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns a string description of the range, in A1 notation.
-     * @param withSheet
+     * @param {boolean} [withSheet] - If true, the sheet name is included in the A1 notation.
      * @returns {string} The A1 notation of the range.
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

@@ -80,6 +80,10 @@ export class FWorksheet extends FBaseInitialable {
         return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
     }
 
+    addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
+        // implementation in sub class.
+    }
+
     /**
      * Fire an event, used in internal only.
      * @param event {string} key of event
@@ -96,10 +100,6 @@ export class FWorksheet extends FBaseInitialable {
         });
 
         return params.cancel;
-    }
-
-    addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
-        //
     }
 
     get Enum(): FEnum {

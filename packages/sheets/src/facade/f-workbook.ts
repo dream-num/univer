@@ -98,7 +98,7 @@ export class FWorkbook extends FBaseInitialable {
     }
 
     addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
-        //
+        // implementation in sub class.
     }
 
     get Enum(): FEnum {

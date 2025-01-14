@@ -57,4 +57,3 @@ test('memory', async ({ page }) => {
     const noUniverLeaking = memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW;
     expect(noUniverLeaking).toBeTruthy();
 });
-

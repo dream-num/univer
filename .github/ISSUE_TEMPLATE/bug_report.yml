@@ -29,7 +29,7 @@ body:
           description: |
               **Please note that it is essential to provide a reproduction and describe the reproduction steps in detail. If you cannot provide a reproduction link, your issue may be closed directly.**
 
-              We provide an [online template](https://stackblitz.com/edit/univer-sheets-vite), if your issue can be reproduced in this template, please provide the reproduction link here.
+              We provide a [Vite online template](https://stackblitz.com/edit/univer-sheets-vite) and a [UMD online template](https://stackblitz.com/edit/univer-sheets-umd). If your issue can be reproduced in one of these templates, please provide the reproduction link here.
               We also provide some other [template repositories](https://github.com/awesome-univer), you can choose one of them to reproduce your issue.
               If your issue cannot be reproduced in the template, please provide as detailed reproduction steps as possible.
       validations:

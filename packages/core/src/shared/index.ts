@@ -31,7 +31,7 @@ export * from './hash-algorithm';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
-export { numfmt } from './numfmt';
+export { type INumfmtLocalTag, numfmt } from './numfmt';
 export * from './object-matrix';
 export { queryObjectMatrix } from './object-matrix-query';
 export { moveRangeByOffset, splitIntoGrid } from './range';

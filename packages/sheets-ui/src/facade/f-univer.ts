@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-console */
+
 import type { DocumentDataModel, IDisposable, Injector, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
     IRowsHeaderCfgParam,
     RenderComponentType,
+    RenderManagerService,
     SheetComponent,
     SheetExtension,
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
-import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
-import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, RichTextValue, toDisposable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, IScrollEventParam, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
+import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 
@@ -203,6 +206,40 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 }
             }
         }));
+
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        console.log('univer ins', univerInstanceService);
+        const unitM = univerInstanceService.getFocusedUnit();
+        console.log('univer ins model', unitM?.getUnitId());
+        const unitId = unitM?.getUnitId();
+        if (unitId) {
+            const liftCycleService = this._injector.get(LifecycleService);
+            // univerAPI.addEvent('Scroll', (p)=> console.log(p));
+            const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+
+            liftCycleService.lifecycle$.subscribe((stage) => {
+                if (stage === LifecycleStages.Rendered) {
+                    console.log('on rendered');
+
+                    const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
+                    if (scrollManagerService) {
+                        const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                            this.fireEvent(this.Event.Scroll, {
+                                scrollX: params?.viewportScrollX,
+                                scrollY: params?.viewportScrollY,
+                                // ...baseParams,
+                            } as IScrollEventParam);
+                        });
+                        // return toDisposable(sub);
+                    }
+                }
+            });
+        }
+
+        // too late!
+        univerInstanceService.unitAdded$.subscribe((p) => {
+            console.log('univer ins add', p.getUnitId());
+        });
     }
 
     override _initialize(injector: Injector): void {

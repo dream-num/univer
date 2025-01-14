@@ -102,6 +102,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
+        console.log('UniverInstanceService');
     }
 
     override dispose(): void {
@@ -183,6 +184,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
 
         units.push(unit);
+        console.log('_unitAdded in instance', unit.getUnitId());
         this._unitAdded$.next(unit);
 
         if (options?.makeCurrent ?? true) {
@@ -280,6 +282,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     disposeUnit(unitId: string): boolean {
+        console.log('disposeUnit');
         const result = this._getUnitById(unitId);
         if (!result) return false;
 

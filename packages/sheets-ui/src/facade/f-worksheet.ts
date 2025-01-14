@@ -104,6 +104,36 @@ export interface IFWorksheetSkeletonMixin {
      */
     onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
 
+    /**
+     * Invoked when the start a selection by mouse/pointer down event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveStart((params) => {...})
+     * ```
+     */
+    onSelectionMoveStart(callback: (params: IRange[]) => void): IDisposable;
+
+    /**
+     * Invoked when moving cursor to adjust selection by mouse/pointer event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveMoving((params) => {...})
+     * ```
+     */
+    onSelectionMoving(callback: (params: IRange[]) => void): IDisposable;
+
+    /**
+     * Invoked when end a selection by mouse/pointer up event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveEnd((params) => {...})
+     * ```
+     */
+    onSelectionMoveEnd(callback: (params: IRange[]) => void): IDisposable;
+
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -126,28 +156,40 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             workbook: this._fWorkbook,
             worksheet: this,
         };
-
         switch (event) {
             case CellFEventName.Scroll:
-                this.onScroll((params: Nullable<IViewportScrollState>) => {
+                return this.onScroll((params: Nullable<IViewportScrollState>) => {
                     this.fireUIEvent(this.Event.Scroll, {
                         scrollX: params?.viewportScrollX,
                         scrollY: params?.viewportScrollY,
                         ...baseParams,
                     } as IScrollEventParam);
                 });
-                break;
+
+            case CellFEventName.SelectionMoveStart:
+                return this.onSelectionMoveStart((selections: IRange[]) => {
+                    this.fireUIEvent(this.Event.SelectionMoveStart, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+            case CellFEventName.SelectionMoving:
+                return this.onSelectionMoving((selections: IRange[]) => {
+                    this.fireUIEvent(this.Event.SelectionMoving, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
             case CellFEventName.SelectionMoveEnd:
-                this.onSelectionMoveEnd((selections: IRange[]) => {
+                return this.onSelectionMoveEnd((selections: IRange[]) => {
                     this.fireUIEvent(this.Event.SelectionMoveEnd, {
                         selections,
                         ...baseParams,
                     });
                 });
         }
-
         return toDisposable(() => {
-            //
+            //..
         });
     }
 
@@ -257,7 +299,43 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return toDisposable(() => { });
     }
 
-    onSelectionMoveEnd(callback: (selections: IRange[]) => void): IDisposable {
+    override onSelectionMoveStart(callback: (selections: IRange[]) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoveStart$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+        return toDisposable(() => { });
+    }
+
+    override onSelectionMoving(callback: (selections: IRange[]) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoving$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+        return toDisposable(() => { });
+    }
+
+    override onSelectionMoveEnd(callback: (selections: IRange[]) => void): IDisposable {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);

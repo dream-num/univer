@@ -25,10 +25,10 @@ export interface IFSheetEventMixin {
      * @see {@link ISheetCreatedEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.SheetCreated, (params) => {
-     *      const { workbook, worksheet } = params;
-     *     console.log('unit created', params);
-     * });
+     univerAPI.addEvent(univerAPI.Event.SheetCreated, (params) => {
+         const { workbook, worksheet } = params;
+         console.log('unit created', params);
+     });
      * ```
      */
     get SheetCreated(): 'SheetCreated' ;
@@ -37,7 +37,7 @@ export interface IFSheetEventMixin {
      * @see {@link IBeforeSheetCreateEventParams}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.BeforeSheetCreate, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetCreate, (params) => {
      *      const { workbook, index, sheet } = params;
      *     console.log('unit created', params);
      * });
@@ -49,7 +49,7 @@ export interface IFSheetEventMixin {
      * @see {@link IWorkbookCreateParam}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.WorkbookCreated, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.WorkbookCreated, (params) => {
      *      const { unitId, type, workbook, unit } = params;
      *     console.log('unit created', params);
      * });
@@ -61,7 +61,7 @@ export interface IFSheetEventMixin {
      * @see {@link IWorkbookDisposedEvent}
      * @example
      * ```ts
-     * univerAPI.addEvent(univerAPI.event.WorkbookDisposed, (params) => {
+     * univerAPI.addEvent(univerAPI.Event.WorkbookDisposed, (params) => {
      *      const { unitId, unitType, snapshot } = params;
      *     console.log('unit disposed', params);
      * });

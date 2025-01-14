@@ -20,7 +20,7 @@ import type { ISelectionWithStyle } from '../../basics/selection';
 import type { ISelectionManagerSearchParam } from './type';
 
 import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { of, shareReplay, switchMap, takeUntil } from 'rxjs';
+import { distinctUntilChanged, of, shareReplay, skip, switchMap, takeUntil } from 'rxjs';
 import { WorkbookSelectionModel } from './selection-data-model';
 import { SelectionMoveType } from './type';
 
@@ -57,6 +57,11 @@ export class SheetsSelectionsService extends RxDisposable {
      */
     selectionSet$: Observable<Nullable<ISelectionWithStyle[]>>;
 
+    /**
+     * Selection Events, merge moveEnd$ and selectionSet$
+     */
+    selectionChanged$: Observable<Nullable<ISelectionWithStyle[]>>;
+
     constructor(
         @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
@@ -66,11 +71,21 @@ export class SheetsSelectionsService extends RxDisposable {
 
     protected _init(): void {
         const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
-
+        // When workbook changed, unsubscribe the previous workbook selection$ and subscribe the new workbook selection$.
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
         this.selectionSet$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionSet$));
+        this.selectionChanged$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionChanged$)).pipe(
+            distinctUntilChanged((prev, curr) => {
+                if (prev.length !== curr.length) return false;
+                if (prev.length === 0 && curr.length === 0) return true;
+                return prev.every((item, index) => {
+                    return JSON.stringify(item) === JSON.stringify(curr[index]);
+                });
+            }),
+            skip(1)
+        );
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._removeWorkbookSelection(workbook.getUnitId());

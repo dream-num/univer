@@ -16,7 +16,7 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, isRealNum } from '@univerjs/core';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -81,10 +81,14 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
                     }
 
                     // Dealing with precision issues
-                    if (cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
+                    // Need to be compatible with the case where v is a string but the cell type is a number
+                    // e.g.
+                    // "v": "123413.23000000001",
+                    // "t": 2,
+                    if (cell?.t === CellValueType.NUMBER && cell.v !== undefined && cell.v !== null && isRealNum(cell.v)) {
                         return next({
                             ...cell,
-                            v: stripErrorMargin(cell.v),
+                            v: stripErrorMargin(Number(cell.v)),
                         });
                     }
 

@@ -202,6 +202,7 @@ export function FormulaBar() {
         formulaEditorManagerService.handleFxBtnClick(true);
     }
 
+    // TODO Is there a need to disable an editor here?
     const { viewDisable, editDisable } = disableInfo;
     const disabled = editDisable || imageDisable;
     return (

@@ -15,5 +15,8 @@
  */
 
 import './f-range';
+import './f-workbook';
 
 export type * from './f-range';
+export type * from './f-workbook';
+

@@ -134,6 +134,16 @@ export interface IFWorksheetSkeletonMixin {
      */
     onSelectionMoveEnd(callback: (params: IRange[]) => void): IDisposable;
 
+    /**
+     * Invoked when the selection is changed.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionChanged((params) => {...})
+     * ```
+     */
+    onSelectionChanged(callback: (params: IRange[]) => void): IDisposable;
+
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -183,6 +193,14 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             case CellFEventName.SelectionMoveEnd:
                 return this.onSelectionMoveEnd((selections: IRange[]) => {
                     this.fireUIEvent(this.Event.SelectionMoveEnd, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+                break;
+            case CellFEventName.SelectionChanged:
+                this.onSelectionChanged((selections: IRange[]) => {
+                    this.fireUIEvent(this.Event.SelectionChanged, {
                         selections,
                         ...baseParams,
                     });
@@ -342,6 +360,24 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         if (selectionService) {
             return toDisposable(
                 this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+        return toDisposable(() => { });
+    }
+
+    override onSelectionChanged(callback: (selections: IRange[]) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionChanged$.subscribe((selections) => {
                     if (!selections?.length) {
                         callback([]);
                     } else {

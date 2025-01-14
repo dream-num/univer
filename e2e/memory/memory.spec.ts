@@ -30,23 +30,23 @@ test('memory', async ({ page }) => {
     test.setTimeout(60_000);
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
 
     const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory before load (B):', memoryBeforeLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after first load (B):', memoryAfterFirstLoad);
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load (B):', memoryAfterSecondLoad);
 
     await page.evaluate(() => window.univer.dispose());
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after disposing univer (B):', memoryAfterDisposingUniver);
 
@@ -56,4 +56,3 @@ test('memory', async ({ page }) => {
     const noUniverLeaking = memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW;
     expect(noUniverLeaking).toBeTruthy();
 });
-

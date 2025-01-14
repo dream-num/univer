@@ -31,7 +31,7 @@ test('sheets no gridlines', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.evaluate(() => window.univerAPI.getActiveWorkbook().getActiveSheet().setHiddenGridlines(true));
     await page.waitForTimeout(1000);
 

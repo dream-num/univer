@@ -813,7 +813,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
 
         return this;
     }
@@ -854,7 +854,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
 
         return this;
     }
@@ -920,7 +920,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     }
 
     /**
@@ -940,7 +940,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     }
 
     /**
@@ -967,7 +967,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
 
         return this;
     }
@@ -996,7 +996,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
 
         return this;
     }
@@ -1027,7 +1027,7 @@ export class FRange extends FBaseInitialable {
             style,
         };
 
-        this._commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        this._commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
 
         return this;
     }
@@ -1144,7 +1144,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     breakApart(): FRange {
-        this._commandService.executeCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
+        this._commandService.syncExecuteCommand(RemoveWorksheetMergeCommand.id, { ranges: [this._range] });
         return this;
     }
 
@@ -1285,7 +1285,7 @@ export class FRange extends FBaseInitialable {
      * //  4 | 5 | 6
      */
     splitTextToColumns(treatMultipleDelimitersAsOne?: boolean, delimiter?: SplitDelimiterEnum, customDelimiter?: string): void {
-        this._commandService.executeCommand(SplitTextToColumnsCommand.id, {
+        this._commandService.syncExecuteCommand(SplitTextToColumnsCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,
@@ -1313,7 +1313,7 @@ export class FRange extends FBaseInitialable {
                 this.removeThemeStyle(usedThemeName);
             }
         } else {
-            this._commandService.executeCommand(SetWorksheetRangeThemeStyleCommand.id, {
+            this._commandService.syncExecuteCommand(SetWorksheetRangeThemeStyleCommand.id, {
                 unitId: this._workbook.getUnitId(),
                 subUnitId: this._worksheet.getSheetId(),
                 range: this._range,
@@ -1334,7 +1334,7 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     removeThemeStyle(themeName: string): void {
-        this._commandService.executeCommand(DeleteWorksheetRangeThemeStyleCommand.id, {
+        this._commandService.syncExecuteCommand(DeleteWorksheetRangeThemeStyleCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             range: this._range,

@@ -102,7 +102,7 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
      * ```
      */
-    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
+    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable>;
 
     /**
      * Invoked when the start a selection by mouse/pointer down event.
@@ -112,7 +112,7 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveStart((params) => {...})
      * ```
      */
-    onSelectionMoveStart(callback: (params: IRange[]) => void): IDisposable;
+    onSelectionMoveStart(callback: (params: IRange[]) => void): Nullable<IDisposable>;
 
     /**
      * Invoked when moving cursor to adjust selection by mouse/pointer event.
@@ -122,7 +122,7 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveMoving((params) => {...})
      * ```
      */
-    onSelectionMoving(callback: (params: IRange[]) => void): IDisposable;
+    onSelectionMoving(callback: (params: IRange[]) => void): Nullable<IDisposable>;
 
     /**
      * Invoked when end a selection by mouse/pointer up event.
@@ -132,7 +132,7 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveEnd((params) => {...})
      * ```
      */
-    onSelectionMoveEnd(callback: (params: IRange[]) => void): IDisposable;
+    onSelectionMoveEnd(callback: (params: IRange[]) => void): Nullable<IDisposable>;
 
     /**
      * Invoked when the selection is changed.
@@ -142,7 +142,7 @@ export interface IFWorksheetSkeletonMixin {
      * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionChanged((params) => {...})
      * ```
      */
-    onSelectionChanged(callback: (params: IRange[]) => void): IDisposable;
+    onSelectionChanged(callback: (params: IRange[]) => void): Nullable<IDisposable>;
 
 }
 
@@ -161,37 +161,42 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return super.fireEvent(event, params as unknown as IEventParamConfig[T]);
     }
 
-    override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): IDisposable {
+    override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): void {
         const baseParams: ISheetUIEventBase = {
             workbook: this._fWorkbook,
             worksheet: this,
         };
         switch (event) {
             case CellFEventName.Scroll:
-                return this.onScroll((params: Nullable<IViewportScrollState>) => {
+                this.onScroll((params: Nullable<IViewportScrollState>) => {
                     this.fireUIEvent(this.Event.Scroll, {
                         scrollX: params?.viewportScrollX,
                         scrollY: params?.viewportScrollY,
                         ...baseParams,
                     } as IScrollEventParam);
                 });
+                break;
 
             case CellFEventName.SelectionMoveStart:
-                return this.onSelectionMoveStart((selections: IRange[]) => {
+                this.onSelectionMoveStart((selections: IRange[]) => {
                     this.fireUIEvent(this.Event.SelectionMoveStart, {
                         selections,
                         ...baseParams,
                     });
                 });
+                break;
+
             case CellFEventName.SelectionMoving:
-                return this.onSelectionMoving((selections: IRange[]) => {
+                this.onSelectionMoving((selections: IRange[]) => {
                     this.fireUIEvent(this.Event.SelectionMoving, {
                         selections,
                         ...baseParams,
                     });
                 });
+                break;
+
             case CellFEventName.SelectionMoveEnd:
-                return this.onSelectionMoveEnd((selections: IRange[]) => {
+                this.onSelectionMoveEnd((selections: IRange[]) => {
                     this.fireUIEvent(this.Event.SelectionMoveEnd, {
                         selections,
                         ...baseParams,
@@ -206,9 +211,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                     });
                 });
         }
-        return toDisposable(() => {
-            //..
-        });
     }
 
     override refreshCanvas(): FWorksheet {
@@ -304,7 +306,7 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         return scrollState || emptyScrollState;
     }
 
-    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
+    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
@@ -314,10 +316,9 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
             });
             return toDisposable(sub);
         }
-        return toDisposable(() => { });
     }
 
-    override onSelectionMoveStart(callback: (selections: IRange[]) => void): IDisposable {
+    override onSelectionMoveStart(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
@@ -332,10 +333,9 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                 })
             );
         }
-        return toDisposable(() => { });
     }
 
-    override onSelectionMoving(callback: (selections: IRange[]) => void): IDisposable {
+    override onSelectionMoving(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
@@ -350,10 +350,9 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                 })
             );
         }
-        return toDisposable(() => { });
     }
 
-    override onSelectionMoveEnd(callback: (selections: IRange[]) => void): IDisposable {
+    override onSelectionMoveEnd(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
@@ -368,10 +367,9 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                 })
             );
         }
-        return toDisposable(() => { });
     }
 
-    override onSelectionChanged(callback: (selections: IRange[]) => void): IDisposable {
+    override onSelectionChanged(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
         const unitId = this._workbook.getUnitId();
         const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
         const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
@@ -386,7 +384,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
                 })
             );
         }
-        return toDisposable(() => { });
     }
 }
 

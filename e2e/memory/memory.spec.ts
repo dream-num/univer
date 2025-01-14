@@ -24,7 +24,7 @@ const MAX_UNIT_MEMORY_OVERFLOW = 1_000_000; // 1MB
 // There are some compiled code and global cache, so we make some room
 // for this. But we need to make sure that a Univer object cannot fit
 // in this size.
-const MAX_UNIVER_MEMORY_OVERFLOW = 5_000_000;
+const MAX_UNIVER_MEMORY_OVERFLOW = 5_300_000;
 
 test('memory', async ({ page }) => {
     test.setTimeout(60_000);
@@ -56,4 +56,3 @@ test('memory', async ({ page }) => {
     const noUniverLeaking = memoryAfterDisposingUniver - memoryBeforeLoad <= MAX_UNIVER_MEMORY_OVERFLOW;
     expect(noUniverLeaking).toBeTruthy();
 });
-

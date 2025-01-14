@@ -24,6 +24,60 @@ import { BuildTextUtils } from './text-x/build-utils';
 import { TextX } from './text-x/text-x';
 import { getBodySlice } from './text-x/utils';
 
+function normalizeBody(body: IDocumentBody) {
+    if (!body.customRanges) {
+        body.customRanges = [];
+    }
+
+    if (!body.paragraphs) {
+        body.paragraphs = [];
+        for (let i = 0; i < body.dataStream.length; i++) {
+            if (body.dataStream[i] === '\r') {
+                body.paragraphs.push({ startIndex: i });
+            }
+        }
+    }
+
+    if (!body.customBlocks) {
+        body.customBlocks = [];
+    }
+
+    if (!body.textRuns) {
+        body.textRuns = [];
+    }
+
+    if (!body.customDecorations) {
+        body.customDecorations = [];
+    }
+
+    if (!body.sectionBreaks) {
+        body.sectionBreaks = [];
+    }
+
+    if (!body.tables) {
+        body.tables = [];
+    }
+
+    return body;
+}
+
+function normalizeData(data: IDocumentData) {
+    data.body = normalizeBody(data.body ?? { dataStream: '' });
+
+    if (!data.drawingsOrder) {
+        data.drawingsOrder = [];
+    }
+
+    if (!data.drawings) {
+        data.drawings = {};
+    }
+    if (!data.documentStyle) {
+        data.documentStyle = {};
+    }
+
+    return data;
+}
+
 /**
  * Represents a read-only font style value object.
  * This class provides access to font style properties without modification capabilities.
@@ -1492,7 +1546,7 @@ export class RichTextValue {
         if (!data.body) {
             throw new Error('Invalid document data, body is required');
         }
-        this._data = data;
+        this._data = normalizeData(data);
     }
 
     /**

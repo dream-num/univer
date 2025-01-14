@@ -77,8 +77,8 @@ export class SheetsSourceBindService extends Disposable {
         return this._sheetsSourceManager.getSource(unitId, id);
     }
 
-    createSource(unitId: string, type: DataBindingNodeTypeEnum, id?: string) {
-        return this._sheetsSourceManager.createSource(unitId, type, id);
+    createSource(unitId: string, type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string) {
+        return this._sheetsSourceManager.createSource(unitId, type, isListObject, id);
     }
 
     private _ensureRTreeCollection(unitId: string) {

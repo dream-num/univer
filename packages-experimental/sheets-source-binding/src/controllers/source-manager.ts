@@ -46,12 +46,12 @@ export class SheetsSourceManager extends Disposable {
         return unitMap?.get(id);
     }
 
-    createSource(unitId: string, type: DataBindingNodeTypeEnum, id?: string): SourceModelBase {
+    createSource(unitId: string, type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string): SourceModelBase {
         const sourceId = id === undefined ? generateRandomId() : id;
         let source;
         switch (type) {
             case DataBindingNodeTypeEnum.List:
-                source = new ListSourceModel(sourceId);
+                source = new ListSourceModel(sourceId, isListObject);
                 break;
             case DataBindingNodeTypeEnum.Object:
                 source = new ObjectSourceModel(sourceId);

@@ -22,6 +22,7 @@ export enum DataBindingNodeTypeEnum {
      * The array like data source.
      */
     List = 'list',
+
     // Cell = 'cell',
     /**
      * The object like data source.
@@ -152,7 +153,7 @@ export type ISourceEvent = (IListSourceInfo | IObjectSourceInfo) & {
 
 export interface IListSourceData {
     fields: string[];
-    records: any[][];
+    records: any[][] | Record<string | number, any>[];
 }
 
 export enum BindingSourceChangeTypeEnum {

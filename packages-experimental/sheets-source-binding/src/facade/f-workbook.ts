@@ -21,8 +21,11 @@ import { FWorkbook } from '@univerjs/sheets/facade';
 export interface IFWorkbookSourceBindingMixin {
     /**
      * Create a source model with the specified type.
+     * @param {DataBindingNodeTypeEnum} type The source type.
+     * @param {boolean} [isListObject] Whether the source is a list object.
+     * @returns {SourceModelBase} The source data of sheet.
      */
-    createSource(type: DataBindingNodeTypeEnum): SourceModelBase;
+    createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean): SourceModelBase;
     /**
      * Switch to path mode.In this mode, the path will show in cell.
      */
@@ -39,10 +42,10 @@ export interface IFWorkbookSourceBindingMixin {
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
-    override createSource(type: DataBindingNodeTypeEnum): SourceModelBase {
+    override createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean): SourceModelBase {
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
-        return sheetsSourceBindService.createSource(this.getId(), type);
+        return sheetsSourceBindService.createSource(this.getId(), type, isListObject);
     }
 
     override getSource(sourceId: string): SourceModelBase | undefined {

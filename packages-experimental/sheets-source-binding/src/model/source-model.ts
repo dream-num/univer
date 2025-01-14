@@ -50,10 +50,21 @@ export abstract class SourceModelBase {
 
 export class ListSourceModel extends SourceModelBase {
     override readonly type = DataBindingNodeTypeEnum.List;
+    private _isListObject: boolean;
     private _fieldIndexMap: Map<string, number> = new Map();
     protected override _data: IListSourceData = { fields: [], records: [] };
-    constructor(id: string) {
+    constructor(id: string, isListObject?: boolean) {
         super(id);
+        this._isListObject = isListObject ?? true;
+    }
+
+    /**
+     * Toggle the list object mode. The default value is true.
+     * In the list object mode, the records is an array of objects. Such as [{name: 'Tom', age: 20}, {name: 'Jerry', age: 18}].
+     * In the list array mode, the records is an array of arrays. Such as [['Tom', 20], ['Jerry', 18]].
+     */
+    toggleListObject(isListObject: boolean) {
+        this._isListObject = isListObject;
     }
 
     getData(node: IListDataBindingNode, row: number): string | number | boolean | null {
@@ -62,6 +73,9 @@ export class ListSourceModel extends SourceModelBase {
         const rowIndex = row - baseRow;
         if (rowIndex === 0) {
             return this._data.fields[colIndex];
+        }
+        if (this._isListObject) {
+            return (this._data.records as Record<string | number, any>)[rowIndex - 1][path];
         }
         return this._data.records[rowIndex - 1][colIndex];
     }

@@ -33,7 +33,7 @@ import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSh
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, getSkeletonChangedEffectedRange, getValueChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
 import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
@@ -593,6 +593,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     worksheet: sheet.worksheet,
                     payload: commandInfo as CommandListenerSkeletonChange,
                     skeleton: sheet.worksheet.getSkeleton()!,
+                    effectedRanges: getSkeletonChangedEffectedRange(commandInfo)
+                        .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
+                        .filter(Boolean) as FRange[],
                 });
                 return;
             }
@@ -603,9 +606,13 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!sheet) return;
                 this.fireEvent(this.Event.SheetValueChanged, {
                     payload: commandInfo as CommandListenerValueChange,
-                    effectedRanges: getValueChangedEffectedRange(commandInfo).map(
-                        (range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range)
-                    ).filter(Boolean) as FRange[],
+                    effectedRanges: getValueChangedEffectedRange(commandInfo)
+                        .map(
+                            (range) => this.getWorkbook(range.unitId)
+                                ?.getSheetBySheetId(range.subUnitId)
+                                ?.getRange(range.range)
+                        )
+                        .filter(Boolean) as FRange[],
                 });
                 return;
             }

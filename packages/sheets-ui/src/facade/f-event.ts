@@ -759,6 +759,7 @@ export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
 export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
     skeleton: SpreadsheetSkeleton;
     payload: CommandListenerSkeletonChange;
+    effectedRanges: FRange[];
 }
 
 export interface ISheetValueChangedEvent extends IEventBase {

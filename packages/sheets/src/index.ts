@@ -22,6 +22,7 @@ export {
     COMMAND_LISTENER_VALUE_CHANGE,
     type CommandListenerSkeletonChange,
     type CommandListenerValueChange,
+    getSkeletonChangedEffectedRange,
     getValueChangedEffectedRange,
 } from './basics/const/command-listener-const';
 export {

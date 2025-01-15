@@ -32,7 +32,7 @@ import type {
 import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
 import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
-import { type ICommandInfo, type IRange, ObjectMatrix } from '@univerjs/core';
+import { type ICommandInfo, type IRange, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -108,7 +108,7 @@ export type CommandListenerSkeletonChange =
         params: IMoveRowsMutationParams;
     }
     | {
-        id: 'sheet.mutation.move-cols';
+        id: 'sheet.mutation.move-columns';
         params: IMoveColumnsMutationParams;
     }
     | {
@@ -318,6 +318,138 @@ export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitI
                 subUnitId: params.subUnitId,
                 range: params.range,
             }];
+        }
+
+        default:
+            return [];
+    }
+}
+
+/**
+ * Get the affected range for skeleton change commands
+ * @param {ICommandInfo} commandInfo The command information
+ * @returns {{ unitId: string; subUnitId: string; range: IRange }[]} Array of affected ranges
+ */
+// eslint-disable-next-line max-lines-per-function
+export function getSkeletonChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string; subUnitId: string; range: IRange }[] {
+    switch (commandInfo.id) {
+        case SetWorksheetRowHeightMutation.id:
+        case SetWorksheetRowIsAutoHeightMutation.id:
+        case SetWorksheetRowAutoHeightMutation.id: {
+            const params = commandInfo.params as ISetWorksheetRowHeightMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...range,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+            }));
+        }
+
+        case SetWorksheetColWidthMutation.id: {
+            const params = commandInfo.params as ISetWorksheetColWidthMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...range,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
+            }));
+        }
+
+        case MoveColsMutation.id:
+        case MoveRowsMutation.id: {
+            const params = commandInfo.params as IMoveRowsMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: params.targetRange,
+            }, {
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: params.sourceRange,
+            }];
+        }
+
+        case SetColHiddenMutation.id:
+        case SetColVisibleMutation.id: {
+            const params = commandInfo.params as ISetColVisibleMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...range,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
+            }));
+        }
+
+        case SetRowHiddenMutation.id:
+        case SetRowVisibleMutation.id: {
+            const params = commandInfo.params as ISetRowVisibleMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...range,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+            }));
+        }
+
+        case InsertColMutation.id: {
+            const params = commandInfo.params as IInsertColMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...params.range,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
+            }];
+        }
+
+        case InsertRowMutation.id: {
+            const params = commandInfo.params as IInsertRowMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...params.range,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+            }];
+        }
+
+        case RemoveColMutation.id: {
+            const params = commandInfo.params as IRemoveColMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...params.range,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
+            }];
+        }
+
+        case RemoveRowMutation.id: {
+            const params = commandInfo.params as IRemoveRowsMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    ...params.range,
+                    rangeType: RANGE_TYPE.ROW,
+                },
+            }];
+        }
+
+        case ToggleGridlinesMutation.id:
+        case SetGridlinesColorMutation.id: {
+            return [];
         }
 
         default:

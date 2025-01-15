@@ -47,6 +47,14 @@ export class FSelection {
     /**
      * Represents the active selection in the sheet. Which means the selection contains the active cell.
      * @returns {FRange | null} The active selection.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fSelection = fWorksheet.getSelection();
+     * const activeRange = fSelection.getActiveRange();
+     * console.log(activeRange);
+     * ```
      */
     getActiveRange(): FRange | null {
         const active = this._selections.find((selection) => !!selection.primary);
@@ -60,6 +68,14 @@ export class FSelection {
     /**
      * Represents the active selection list in the sheet.
      * @returns {FRange[]} The active selection list.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fSelection = fWorksheet.getSelection();
+     * const activeRangeList = fSelection.getActiveRangeList();
+     * console.log(activeRangeList);
+     * ```
      */
     getActiveRangeList(): FRange[] {
         return this._selections.map((selection) => {
@@ -70,6 +86,14 @@ export class FSelection {
     /**
      * Represents the current select cell in the sheet.
      * @returns {ISelectionCell} The current select cell info.Pay attention to the type of the return value.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const fSelection = fWorksheet.getSelection();
+     * const currentCell = fSelection.getCurrentCell();
+     * console.log(currentCell);
+     * ```
      */
     getCurrentCell(): Nullable<ISelectionCell> {
         const current = this._selections.find((selection) => !!selection.primary);

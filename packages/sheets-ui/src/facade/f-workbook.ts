@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable } from '@univerjs/core';
+import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, RenderManagerService } from '@univerjs/engine-render';
-import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, IViewportScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+
+import type { ICellEventParam, IFSheetsUIEventParamConfig, IScrollEventParam, ISheetUIEventBase } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
-import { CellFEventName, type ICellEventParam, type IFSheetsUIEventParamConfig, type IUIEventBase } from './f-event';
+import { CellFEventName } from './f-event';
 
 export interface IFWorkbookSheetsUIMixin {
     /**
@@ -152,6 +155,57 @@ export interface IFWorkbookSheetsUIMixin {
      * ```
      */
     showSelection(): FWorkbook;
+
+    /**
+     * Invoked when scrolling the sheet.
+     * @param {function(Nullable<IViewportScrollState>): void} callback The scrolling callback function.
+     * @returns {IDisposable} The disposable object to remove the event listener.
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().onScroll((params) => {...})
+     * ```
+     */
+    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable>;
+
+    /**
+     * Invoked when the start a selection by mouse/pointer down event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().onSelectionMoveStart((params) => {...})
+     * ```
+     */
+    onSelectionMoveStart(callback: (params: IRange[]) => void): Nullable<IDisposable>;
+
+    /**
+     * Invoked when moving cursor to adjust selection by mouse/pointer event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().onSelectionMoveMoving((params) => {...})
+     * ```
+     */
+    onSelectionMoving(callback: (params: IRange[]) => void): Nullable<IDisposable>;
+
+    /**
+     * Invoked when end a selection by mouse/pointer up event.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().onSelectionMoveEnd((params) => {...})
+     * ```
+     */
+    onSelectionMoveEnd(callback: (params: IRange[]) => void): Nullable<IDisposable>;
+
+    /**
+     * Invoked when the selection is changed.
+     * @param callback
+     * @example
+     * ``` ts
+     * univerAPI.getActiveWorkbook().onSelectionChanged((params) => {...})
+     * ```
+     */
+    onSelectionChanged(callback: (params: IRange[]) => void): Nullable<IDisposable>;
 }
 
 export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheetsUIMixin {
@@ -182,9 +236,10 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
         logService.warn('[FWorkbook]', `${name} is deprecated. Please use the function of the same name on "FUniver".`);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): IDisposable {
         const worksheet = this.getActiveSheet();
-        const baseParams: IUIEventBase = {
+        const baseParams: ISheetUIEventBase = {
             workbook: this,
             worksheet,
         };
@@ -236,6 +291,51 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
                         ...baseParams,
                     });
                 });
+                break;
+            case CellFEventName.Scroll:
+                this.onScroll((params: Nullable<IViewportScrollState>) => {
+                    this.fireEvent(this.Event.Scroll, {
+                        scrollX: params?.viewportScrollX,
+                        scrollY: params?.viewportScrollY,
+                        ...baseParams,
+                    } as IScrollEventParam);
+                });
+                break;
+
+            case CellFEventName.SelectionMoveStart:
+                this.onSelectionMoveStart((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoveStart, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+                break;
+
+            case CellFEventName.SelectionMoving:
+                this.onSelectionMoving((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoving, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+                break;
+
+            case CellFEventName.SelectionMoveEnd:
+                this.onSelectionMoveEnd((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoveEnd, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+                break;
+            case CellFEventName.SelectionChanged:
+                this.onSelectionChanged((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionChanged, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+                break;
         }
 
         return toDisposable(() => {
@@ -403,6 +503,86 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
             (render.with(ISheetSelectionRenderService) as SheetSelectionRenderService).showSelection();
         }
         return this;
+    }
+
+    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
+        if (scrollManagerService) {
+            const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                callback(params);
+            });
+            return toDisposable(sub);
+        }
+    }
+
+    override onSelectionMoveStart(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoveStart$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+    }
+
+    override onSelectionMoving(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoving$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+    }
+
+    override onSelectionMoveEnd(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
+    }
+
+    override onSelectionChanged(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
+        if (selectionService) {
+            return toDisposable(
+                this._selectionManagerService.selectionChanged$.subscribe((selections) => {
+                    if (!selections?.length) {
+                        callback([]);
+                    } else {
+                        callback(selections!.map((s) => s.range));
+                    }
+                })
+            );
+        }
     }
 }
 

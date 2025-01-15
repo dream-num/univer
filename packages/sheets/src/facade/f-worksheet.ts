@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IEventParamConfig, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, ICellData, IColumnData, IColumnRange, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IRowRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetColDataCommandParams, ISetGridlinesColorCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
-import { BooleanNumber, Direction, FBaseInitialable, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE, Registry, toDisposable } from '@univerjs/core';
+import { BooleanNumber, Direction, FBaseInitialable, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
@@ -51,50 +51,67 @@ export class FWorksheet extends FBaseInitialable {
         return this._worksheet;
     }
 
-    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
+    // private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
 
-    private _ensureEventRegistry(event: string): Registry<(param: any) => void> {
-        if (!this._eventRegistry.has(event)) {
-            this._eventRegistry.set(event, new Registry());
-        }
+    // private _ensureEventRegistry(event: string): Registry<(param: any) => void> {
+    //     if (!this._eventRegistry.has(event)) {
+    //         this._eventRegistry.set(event, new Registry());
+    //     }
 
-        return this._eventRegistry.get(event)!;
-    }
+    //     return this._eventRegistry.get(event)!;
+    // }
 
-    /**
-     * Add an event listener
-     * @param event key of event
-     * @param callback callback when event triggered
-     * @returns {Disposable} The Disposable instance, for remove the listener
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *     console.log('unit created', params);
-     * });
-     * ```
-     */
-    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
-        this._ensureEventRegistry(event).add(callback);
-        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
-    }
+    // /**
+    //  * Add an event listener
+    //  * @param event key of event
+    //  * @param callback callback when event triggered
+    //  * @returns {Disposable} The Disposable instance, for remove the listener
+    //  * @example
+    //  * ```ts
+    //  * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
+    //  *     console.log('unit created', params);
+    //  * });
+    //  * ```
+    //  */
+    // addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
+    //     this._ensureEventRegistry(event).add(callback);
+    //     this.addUIEvent(event, callback);
 
-    /**
-     * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
-     * @returns {boolean} should cancel
-     * @example
-     * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
-     * ```
-     */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
-        this._eventRegistry.get(event)?.getData().forEach((callback) => {
-            callback(params);
-        });
+    //     return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
+    // }
 
-        return params.cancel;
-    }
+    // addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
+    //     // implementation in sub class.
+    // }
+
+    // /**
+    //  * Fire an event, used in internal only.
+    //  * @param event {string} key of event
+    //  * @param params {any} params of event
+    //  * @returns {boolean} should cancel
+    //  * @example
+    //  * ```ts
+    //  * this.fireEvent(univerAPI.event.UnitCreated, params);
+    //  * ```
+    //  */
+    // protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
+    //     this._eventRegistry.get(event)?.getData().forEach((callback) => {
+    //         callback(params);
+    //     });
+
+    //     return params.cancel;
+    // }
+
+    // get Enum(): FEnum {
+    //     return FEnum.get();
+    // }
+
+    // /**
+    //  * @returns {FEventName} The event name.
+    //  */
+    // get Event(): FEventName {
+    //     return FEventName.get();
+    // }
 
     /**
      * Returns the injector

@@ -16,8 +16,9 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Nullable, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
+import type { IDragCellPosition } from '@univerjs/sheets-ui';
 import {
     ILogService,
     Inject,
@@ -58,9 +59,10 @@ import {
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SheetRenderController, SheetScrollManagerService, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
 import { FUniver } from '../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -176,10 +178,20 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            // Create a mock HoverManagerService with currentCell$
+            const mockHoverManagerService = {
+                currentCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
+                currentPosition$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
+                currentClickedCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
+                endCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
+            };
+            injector.add([HoverManagerService, { useValue: mockHoverManagerService as unknown as HoverManagerService }]);
+            injector.add([DragManagerService, { useValue: mockHoverManagerService as unknown as DragManagerService }]);
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetScrollManagerService] as Dependency);
 
             // register feature modules
             ([

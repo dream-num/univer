@@ -23,7 +23,7 @@ import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, REF_SELECTIONS_ENABLED, SelectionMoveType, SELECTIONS_ENABLED, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, merge, skip, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
@@ -202,18 +202,19 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             .pipe(startWith(false), distinctUntilChanged())
             .subscribe((enabled) => {
                 if (enabled) {
-                    this._renderDisposable?.dispose();
-                    this._renderDisposable = null;
+                    // this._renderDisposable?.dispose();
+                    // this._renderDisposable = null;
+
+                    // clear curr normal selections when ref turn enabled, only view selections are cleared, selection data still exist.
                     this._reset();
                 } else {
-                    //TODO @lumixraku ! these would only show the last selection, not all
-
+                    // DO not bind again !!! or there would be two selectionMoveEnd$ after pointer up.
                     // #univer-pro/issues/3763
-                    this._renderDisposable = toDisposable(
-                        this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
-                            this._updateSelections(params, SelectionMoveType.MOVE_END);
-                        })
-                    );
+                    // this._renderDisposable = toDisposable(
+                    //     this.selectionMoveEnd$.pipe(skip(1)).subscribe((params) => {
+                    //         // this._updateSelections(params, SelectionMoveType.MOVE_END);
+                    //     })
+                    // );
                 }
             }));
 

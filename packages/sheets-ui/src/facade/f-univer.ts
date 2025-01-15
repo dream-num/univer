@@ -360,8 +360,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    dragManagerService.endCell$
-                        .pipe(filter((cell) => !!cell))
+                    dragManagerService.endCell$?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.Drop)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);

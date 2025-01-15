@@ -234,6 +234,7 @@ export class FRange extends FBaseInitialable {
         }));
     }
 
+    // eslint-disable-next-line jsdoc/require-returns
     /**
      * @deprecated use `getValueAndRichTextValue` instead. This api can't return rich text value.
      */
@@ -241,6 +242,7 @@ export class FRange extends FBaseInitialable {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
+    // eslint-disable-next-line jsdoc/require-returns
     /**
      * @deprecated use `getValueAndRichTextValues` instead. This api can't return rich text value.
      */
@@ -300,6 +302,7 @@ export class FRange extends FBaseInitialable {
         return range;
     }
 
+    // eslint-disable-next-line jsdoc/require-returns
     /**
      * @deprecated use `getCellDatas` instead.
      */

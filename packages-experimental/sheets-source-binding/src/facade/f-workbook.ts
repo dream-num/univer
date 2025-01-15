@@ -15,7 +15,7 @@
  */
 
 import type { DataBindingNodeTypeEnum, SourceModelBase } from '@univerjs/sheets-source-binding';
-import { SheetsSourceBindService } from '@univerjs/sheets-source-binding';
+import { SheetsSourceBindService, SheetsSourceManager } from '@univerjs/sheets-source-binding';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
 export interface IFWorkbookSourceBindingMixin {
@@ -76,11 +76,8 @@ export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourc
 
     override setSourceData(sourceId: string, data: any): void {
         const injector = this._injector;
-        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
-        const source = sheetsSourceBindService.getSource(this.getId(), sourceId);
-        if (source) {
-            source.setSourceData(data);
-        }
+        const sheetsSourceManager = injector.get(SheetsSourceManager);
+        sheetsSourceManager.updateSourceData(this.getId(), sourceId, data);
     }
 
     override usePathMode(): void {

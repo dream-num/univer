@@ -46,6 +46,16 @@ export class FWorkbook extends FBaseInitialable {
         this.id = this._workbook.getUnitId();
     }
 
+    /**
+     * Get the Workbook instance.
+     * @returns {Workbook} The Workbook instance.
+     * @example
+     * ```ts
+     * // The code below gets the Workbook instance
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const workbook = activeSpreadsheet.getWorkbook();
+     * ```
+     */
     getWorkbook(): Workbook {
         return this._workbook;
     }
@@ -131,6 +141,12 @@ export class FWorkbook extends FBaseInitialable {
      * @deprecated use 'save' instead.
      * @returns {*}  {IWorkbookData} Workbook snapshot data
      * @memberof FWorkbook
+     * @example
+     * ```ts
+     * // The code below saves the workbook snapshot data
+     * const activeSpreadsheet = univerAPI.getActiveWorkbook();
+     * const snapshot = activeSpreadsheet.getSnapshot();
+     * ```
      */
     getSnapshot(): IWorkbookData {
         this._logService.warn('use \'save\' instead of \'getSnapshot\'');

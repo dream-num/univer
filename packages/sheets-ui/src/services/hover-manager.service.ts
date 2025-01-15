@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle, IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IBoundRectNoAngle, IMouseEvent, IPointerEvent, IRender } from '@univerjs/engine-render';
 import type { ISheetLocation, ISheetLocationBase } from '@univerjs/sheets';
+import type { ISheetSkeletonManagerParam } from './sheet-skeleton-manager.service';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetScrollManagerService } from './scroll-manager.service';
@@ -77,6 +78,12 @@ export interface IHoverRichTextPosition extends ISheetLocationBase {
     event?: IMouseEvent | IPointerEvent;
 }
 
+export interface IHoverHeaderPosition {
+    unitId: string;
+    subUnitId: string;
+    index: number;
+}
+
 export function getLocationBase(location: ISheetLocation) {
     const { workbook, worksheet, ...locBase } = location;
     return locBase;
@@ -86,10 +93,22 @@ export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextInfo>>(null);
     private _currentClickedCell$ = new Subject<IHoverRichTextInfo>();
+    private _currentDbClickedCell$ = new Subject<IHoverRichTextInfo>();
 
     private _currentCellWithEvent$ = new Subject<Nullable<ICellWithEvent>>();
     private _currentPointerDownCell$ = new Subject<ICellPosWithEvent>();
     private _currentPointerUpCell$ = new Subject<ICellPosWithEvent>();
+
+    private _currentHoveredRowHeader$ = new BehaviorSubject<Nullable<IHoverHeaderPosition>>(null);
+    private _currentHoveredColHeader$ = new BehaviorSubject<Nullable<IHoverHeaderPosition>>(null);
+    private _currentRowHeaderClick$ = new Subject<IHoverHeaderPosition>();
+    private _currentColHeaderClick$ = new Subject<IHoverHeaderPosition>();
+    private _currentRowHeaderDbClick$ = new Subject<IHoverHeaderPosition>();
+    private _currentColHeaderDbClick$ = new Subject<IHoverHeaderPosition>();
+    private _currentRowHeaderPointerDown$ = new Subject<IHoverHeaderPosition>();
+    private _currentColHeaderPointerDown$ = new Subject<IHoverHeaderPosition>();
+    private _currentRowHeaderPointerUp$ = new Subject<IHoverHeaderPosition>();
+    private _currentColHeaderPointerUp$ = new Subject<IHoverHeaderPosition>();
 
     // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(
@@ -156,8 +175,20 @@ export class HoverManagerService extends Disposable {
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();
     currentClickedCell$ = this._currentClickedCell$.asObservable();
+    currentDbClickedCell$ = this._currentDbClickedCell$.asObservable();
     currentPointerDownCell$ = this._currentPointerDownCell$.asObservable();
     currentPointerUpCell$ = this._currentPointerUpCell$.asObservable();
+
+    currentHoveredRowHeader$ = this._currentHoveredRowHeader$.asObservable();
+    currentHoveredColHeader$ = this._currentHoveredColHeader$.asObservable();
+    currentRowHeaderClick$ = this._currentRowHeaderClick$.asObservable();
+    currentColHeaderClick$ = this._currentColHeaderClick$.asObservable();
+    currentRowHeaderDbClick$ = this._currentRowHeaderDbClick$.asObservable();
+    currentColHeaderDbClick$ = this._currentColHeaderDbClick$.asObservable();
+    currentRowHeaderPointerDown$ = this._currentRowHeaderPointerDown$.asObservable();
+    currentColHeaderPointerDown$ = this._currentColHeaderPointerDown$.asObservable();
+    currentRowHeaderPointerUp$ = this._currentRowHeaderPointerUp$.asObservable();
+    currentColHeaderPointerUp$ = this._currentColHeaderPointerUp$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -165,7 +196,6 @@ export class HoverManagerService extends Disposable {
     ) {
         super();
 
-        // TODO@weird94: any better solution here?
         this._initCellDisposableListener();
     }
 
@@ -194,8 +224,7 @@ export class HoverManagerService extends Disposable {
         }));
     }
 
-    // eslint-disable-next-line complexity
-    private _calcActiveCell(unitId: string, offsetX: number, offsetY: number) {
+    private _getCalcDeps(unitId: string) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return null;
@@ -213,12 +242,15 @@ export class HoverManagerService extends Disposable {
 
         const scrollManagerService = currentRender.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService?.getCurrentScrollState();
-        const skeleton = skeletonParam?.skeleton as SpreadsheetSkeleton;
 
-        if (!skeleton || !scrollInfo || !currentRender) return;
+        if (!scrollInfo || !currentRender) return;
 
+        return { currentRender, workbook, worksheet, skeletonParam };
+    }
+
+    private _calcActiveCell(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
-
+        const skeleton = skeletonParam.skeleton;
         if (!hoverPosition) {
             return null;
         }
@@ -270,8 +302,53 @@ export class HoverManagerService extends Disposable {
         };
     }
 
+    private _calcActiveRowHeader(unitId: string, offsetX: number, offsetY: number) {
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, worksheet, skeletonParam } = deps;
+        const { scaleY } = currentRender.scene.getAncestorScale();
+        const activeViewport = currentRender.scene.getViewports().find((v) => v.isHit(new Vector2(offsetX, offsetY)));
+        if (!activeViewport || (activeViewport.viewportKey !== SHEET_VIEWPORT_KEY.VIEW_ROW_TOP && activeViewport.viewportKey !== SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)) {
+            return;
+        }
+        const scrollXY = {
+            x: activeViewport.viewportScrollX,
+            y: activeViewport.viewportScrollY,
+        };
+
+        const index = skeletonParam.skeleton.getRowIndexByOffsetY(offsetY, scaleY, scrollXY);
+        return { unitId, index, subUnitId: worksheet.getSheetId() };
+    }
+
+    private _calcActiveColHeader(unitId: string, offsetX: number, offsetY: number) {
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, worksheet, skeletonParam } = deps;
+        const { scaleX } = currentRender.scene.getAncestorScale();
+        const activeViewport = currentRender.scene.getViewports().find((v) => v.isHit(new Vector2(offsetX, offsetY)));
+        if (!activeViewport || (activeViewport.viewportKey !== SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT && activeViewport.viewportKey !== SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)) {
+            return;
+        }
+        const scrollXY = {
+            x: activeViewport.viewportScrollX,
+            y: activeViewport.viewportScrollY,
+        };
+
+        const index = skeletonParam.skeleton.getColumnIndexByOffsetX(offsetX, scaleX, scrollXY);
+        return { unitId, index, subUnitId: worksheet.getSheetId() };
+    }
+
     triggerPointerDown(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, workbook, worksheet, skeletonParam } = deps;
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, event.offsetX, event.offsetY);
         if (activeCell && activeCell.location) {
             const { unitId, subUnitId, row, col } = getLocationBase(activeCell.location);
             this._currentPointerDownCell$.next({
@@ -282,7 +359,13 @@ export class HoverManagerService extends Disposable {
     }
 
     triggerPointerUp(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, workbook, worksheet, skeletonParam } = deps;
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, event.offsetX, event.offsetY);
+
         if (activeCell) {
             const location = getLocationBase(activeCell.location);
             this._currentPointerUpCell$.next({
@@ -293,7 +376,13 @@ export class HoverManagerService extends Disposable {
     }
 
     triggerMouseMove(unitId: string, event: IPointerEvent | IMouseEvent) {
-        const activeCell = this._calcActiveCell(unitId, event.offsetX, event.offsetY);
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, workbook, worksheet, skeletonParam } = deps;
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, event.offsetX, event.offsetY);
+
         this._currentCell$.next(activeCell && {
             location: getLocationBase(activeCell.location),
             position: activeCell.position,
@@ -318,7 +407,12 @@ export class HoverManagerService extends Disposable {
      * @param offsetY
      */
     triggerClick(unitId: string, offsetX: number, offsetY: number) {
-        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, workbook, worksheet, skeletonParam } = deps;
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
         if (activeCell) {
             this._currentClickedCell$.next({
                 ...activeCell,
@@ -327,7 +421,70 @@ export class HoverManagerService extends Disposable {
         }
     }
 
+    triggerDbClick(unitId: string, offsetX: number, offsetY: number) {
+        const deps = this._getCalcDeps(unitId);
+        if (!deps) {
+            return;
+        }
+        const { currentRender, workbook, worksheet, skeletonParam } = deps;
+        const activeCell = this._calcActiveCell(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
+        if (activeCell) {
+            this._currentDbClickedCell$.next({
+                ...activeCell,
+                location: getLocationBase(activeCell.location),
+            });
+        }
+    }
+
     triggerScroll() {
         this._currentCell$.next(null);
+    }
+
+    triggerRowHeaderClick(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+        pos && this._currentRowHeaderClick$.next(pos);
+    }
+
+    triggerColHeaderClick(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+        pos && this._currentColHeaderClick$.next(pos);
+    }
+
+    triggerRowHeaderDbClick(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+        pos && this._currentRowHeaderDbClick$.next(pos);
+    }
+
+    triggerColHeaderDbClick(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+        pos && this._currentColHeaderDbClick$.next(pos);
+    }
+
+    triggerRowHeaderMouseMove(unitId: string, offsetX: number, offsetY: number) {
+        this._currentHoveredRowHeader$.next(this._calcActiveRowHeader(unitId, offsetX, offsetY));
+    }
+
+    triggerColHeaderMouseMove(unitId: string, offsetX: number, offsetY: number) {
+        this._currentHoveredColHeader$.next(this._calcActiveColHeader(unitId, offsetX, offsetY));
+    }
+
+    triggerRowHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+        pos && this._currentRowHeaderPointerDown$.next(pos);
+    }
+
+    triggerColHeaderPoniterDown(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+        pos && this._currentColHeaderPointerDown$.next(pos);
+    }
+
+    triggerRowHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveRowHeader(unitId, offsetX, offsetY);
+        pos && this._currentRowHeaderPointerUp$.next(pos);
+    }
+
+    triggerColHeaderPoniterUp(unitId: string, offsetX: number, offsetY: number) {
+        const pos = this._calcActiveColHeader(unitId, offsetX, offsetY);
+        pos && this._currentColHeaderPointerUp$.next(pos);
     }
 }

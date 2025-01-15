@@ -17,7 +17,13 @@
 export { UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services
-export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';
+export {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    COMMAND_LISTENER_VALUE_CHANGE,
+    type CommandListenerSkeletonChange,
+    type CommandListenerValueChange,
+    getValueChangedEffectedRange,
+} from './basics/const/command-listener-const';
 export {
     type IAddWorksheetMergeMutationParams,
     type IDeleteRangeMutationParams,

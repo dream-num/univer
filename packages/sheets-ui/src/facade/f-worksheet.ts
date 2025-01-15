@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import type { IScrollState } from '@univerjs/sheets-ui';
+import type { IRange, Nullable } from '@univerjs/core';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 
+import type { IScrollState } from '@univerjs/sheets-ui';
 import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
 import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
@@ -88,6 +89,19 @@ export interface IFWorksheetSkeletonMixin {
      * ```
      */
     getScrollState(): IScrollState;
+
+    /**
+     * Get the skeleton service of the worksheet.
+     * @returns {Nullable<SpreadsheetSkeleton>} The skeleton of the worksheet.
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * const skeleton = fWorksheet.getSkeleton();
+     * console.log(skeleton);
+     * ```
+     */
+    getSkeleton(): Nullable<SpreadsheetSkeleton>;
 
 }
 
@@ -183,6 +197,11 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const sheetScrollManagerService = render.with(SheetScrollManagerService);
         const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
         return scrollState || emptyScrollState;
+    }
+
+    override getSkeleton(): Nullable<SpreadsheetSkeleton> {
+        const service = this._injector.get(IRenderManagerService).getRenderById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
+        return service?.getWorksheetSkeleton(this._worksheet.getSheetId())?.skeleton;
     }
 }
 

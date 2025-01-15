@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
+import type { IReorderRangeMutationParams } from '../../commands/mutations/reorder-range.mutation';
+import type { ISetColDataMutationParams } from '../../commands/mutations/set-col-data.mutation';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../../commands/mutations/set-col-visible.mutation';
+import type { ISetGridlinesColorMutationParams } from '../../commands/mutations/set-gridlines-color.mutation';
+import type { ISetRangeValuesMutationParams } from '../../commands/mutations/set-range-values.mutation';
+import type { ISetRowDataMutationParams } from '../../commands/mutations/set-row-data.mutation';
+import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../../commands/mutations/set-row-visible.mutation';
+import type { ISetWorksheetColWidthMutationParams } from '../../commands/mutations/set-worksheet-col-width.mutation';
+import type { ISetWorksheetDefaultStyleMutationParams } from '../../commands/mutations/set-worksheet-default-style.mutation';
+import type {
+    ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
+import type { IAddWorksheetMergeMutationParams, IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveWorksheetMergeMutationParams, IWorksheetRangeThemeStyleMutationParams } from '../interfaces';
+import { type ICommandInfo, type IRange, ObjectMatrix } from '@univerjs/core';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -24,6 +43,7 @@ import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/r
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mutation';
 import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
+
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetGridlinesColorMutation } from '../../commands/mutations/set-gridlines-color.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
@@ -62,6 +82,76 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetGridlinesColorMutation.id,
 ];
 
+export type CommandListenerSkeletonChange =
+    | {
+        id: 'sheet.mutation.set-worksheet-row-height';
+        params: ISetWorksheetRowHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-row-is-auto-height';
+        params: ISetWorksheetRowIsAutoHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-row-auto-height';
+        params: ISetWorksheetRowAutoHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-col-width';
+        params: ISetWorksheetColWidthMutationParams;
+    }
+    | {
+        id: 'sheet.operation.set-worksheet-active';
+        params: ISetWorksheetActiveOperationParams;
+    }
+    | {
+        id: 'sheet.mutation.move-rows';
+        params: IMoveRowsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.move-cols';
+        params: IMoveColumnsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-col-hidden';
+        params: ISetColHiddenMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-col-visible';
+        params: ISetColVisibleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-row-hidden';
+        params: ISetRowHiddenMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-row-visible';
+        params: ISetRowVisibleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.insert-col';
+        params: IInsertColMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.insert-row';
+        params: IInsertRowMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.remove-col';
+        params: IRemoveColMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.remove-row';
+        params: IRemoveRowsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.toggle-gridlines';
+        params: IToggleGridlinesMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-gridlines-color';
+        params: ISetGridlinesColorMutationParams;
+    };
+
 export const COMMAND_LISTENER_VALUE_CHANGE = [
     SetRangeValuesMutation.id,
     MoveRangeMutation.id,
@@ -74,3 +164,163 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     SetWorksheetRangeThemeStyleMutation.id,
     DeleteWorksheetRangeThemeStyleMutation.id,
 ];
+
+export type CommandListenerValueChange =
+    | {
+        id: 'sheet.mutation.set-range-values';
+        params: ISetRangeValuesMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.move-range';
+        params: IMoveRangeMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.remove-worksheet-merge';
+        params: IRemoveWorksheetMergeMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.add-worksheet-merge';
+        params: IAddWorksheetMergeMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.reorder-range';
+        params: IReorderRangeMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-default-style';
+        params: ISetWorksheetDefaultStyleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-row-data';
+        params: ISetRowDataMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-col-data';
+        params: ISetColDataMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-range-theme-style';
+        params: IWorksheetRangeThemeStyleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.delete-worksheet-range-theme-style';
+        params: IWorksheetRangeThemeStyleMutationParams;
+    };
+
+// eslint-disable-next-line max-lines-per-function
+export function getValueChangedEffectedRange(commandInfo: ICommandInfo): { unitId: string;subUnitId: string; range: IRange }[] {
+    switch (commandInfo.id) {
+        case SetRangeValuesMutation.id: {
+            const params = commandInfo.params as ISetRangeValuesMutationParams;
+            return params.cellValue
+                ? [{
+                    unitId: params.unitId,
+                    subUnitId: params.subUnitId,
+                    range: new ObjectMatrix(params.cellValue).getDataRange(),
+                }]
+                : [];
+        }
+
+        case MoveRangeMutation.id: {
+            const params = commandInfo.params as IMoveRangeMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.from.subUnitId,
+                range: new ObjectMatrix(params.from.value).getRange(),
+            }, {
+                unitId: params.unitId,
+                subUnitId: params.to.subUnitId,
+                range: new ObjectMatrix(params.to.value).getRange(),
+            }];
+        }
+
+        case RemoveWorksheetMergeMutation.id: {
+            const params = commandInfo.params as IRemoveWorksheetMergeMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range,
+            }));
+        }
+
+        case AddWorksheetMergeMutation.id: {
+            const params = commandInfo.params as IAddWorksheetMergeMutationParams;
+            return params.ranges.map((range) => ({
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range,
+            }));
+        }
+
+        case ReorderRangeMutation.id: {
+            const params = commandInfo.params as IReorderRangeMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: params.range,
+            }];
+        }
+
+        case SetWorksheetDefaultStyleMutation.id: {
+            const params = commandInfo.params as ISetWorksheetDefaultStyleMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: { startRow: 0, endRow: Number.MAX_SAFE_INTEGER, startColumn: 0, endColumn: Number.MAX_SAFE_INTEGER },
+            }];
+        }
+
+        case SetRowDataMutation.id: {
+            const params = commandInfo.params as ISetRowDataMutationParams;
+            const rowIndices = Object.keys(params.rowData).map(Number);
+            if (rowIndices.length === 0) return [];
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    startRow: Math.min(...rowIndices),
+                    endRow: Math.max(...rowIndices),
+                    startColumn: 0,
+                    endColumn: Number.MAX_SAFE_INTEGER,
+                },
+            }];
+        }
+
+        case SetColDataMutation.id: {
+            const params = commandInfo.params as ISetColDataMutationParams;
+            const colIndices = Object.keys(params.columnData).map(Number);
+            if (colIndices.length === 0) return [];
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: {
+                    startRow: 0,
+                    endRow: Number.MAX_SAFE_INTEGER,
+                    startColumn: Math.min(...colIndices),
+                    endColumn: Math.max(...colIndices),
+                },
+            }];
+        }
+
+        case SetWorksheetRangeThemeStyleMutation.id: {
+            const params = commandInfo.params as IWorksheetRangeThemeStyleMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: params.range,
+            }];
+        }
+
+        case DeleteWorksheetRangeThemeStyleMutation.id: {
+            const params = commandInfo.params as IWorksheetRangeThemeStyleMutationParams;
+            return [{
+                unitId: params.unitId,
+                subUnitId: params.subUnitId,
+                range: params.range,
+            }];
+        }
+
+        default:
+            return [];
+    }
+}

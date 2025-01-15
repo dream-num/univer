@@ -25,13 +25,15 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { CommandListenerSkeletonChange, CommandListenerValueChange } from '@univerjs/sheets';
+import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { FRange } from '@univerjs/sheets/facade';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
@@ -134,8 +136,25 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     }
                 }
             }
+
+            if (commandInfo.id === SetZoomRatioCommand.id) {
+                if (!this._eventListend(this.Event.BeforeSheetZoomChange)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
+                this.fireEvent(this.Event.BeforeSheetZoomChange, {
+                    zoom: (commandInfo.params as ISetZoomRatioCommandParams).zoomRatio,
+                    workbook,
+                    worksheet,
+                });
+            }
         }));
 
+        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetCellEditVisibleOperation.id) {
                 if (!this._eventListend(this.Event.SheetEditStarted) && !this._eventListend(this.Event.SheetEditEnded)) {
@@ -204,6 +223,22 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     this.fireEvent(this.Event.SheetEditChanging, eventParams);
                 }
             }
+
+            if (commandInfo.id === SetZoomRatioCommand.id) {
+                if (!this._eventListend(this.Event.SheetZoomChanged)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
+                this.fireEvent(this.Event.SheetZoomChanged, {
+                    zoom: worksheet.getZoom(),
+                    workbook,
+                    worksheet,
+                });
+            }
         }));
 
         this._initObserverListener(injector);
@@ -233,7 +268,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!hoverManagerService) return;
                 disposable.add(
                     hoverManagerService.currentClickedCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellClicked)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -309,7 +344,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     dragManagerService.currentCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.DragOver)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -325,7 +360,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     dragManagerService.endCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.Drop)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -335,6 +370,120 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                                 ...cell,
                                 row: cell.location.row,
                                 column: cell.location.col,
+                            });
+                        })
+                );
+
+                // Row Header Events
+                disposable.add(
+                    hoverManagerService.currentRowHeaderClick$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderClick)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderClick, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentRowHeaderPointerDown$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderPointerDown)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerDown, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentRowHeaderPointerUp$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderPointerUp)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerUp, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentHoveredRowHeader$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderHover)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderHover, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                // Column Header Events
+                disposable.add(
+                    hoverManagerService.currentColHeaderClick$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderClick)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderClick, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentColHeaderPointerDown$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderPointerDown)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerDown, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentColHeaderPointerUp$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderPointerUp)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerUp, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentHoveredColHeader$
+                        ?.pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderHover)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderHover, {
+                                ...baseParams,
+                                column: header.index,
                             });
                         })
                 );
@@ -429,6 +578,31 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             }
         }));
         this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+                if (!this._eventListend(this.Event.SheetSkeletonChanged)) return;
+                const sheet = this.getActiveSheet();
+                if (!sheet) return;
+                this.fireEvent(this.Event.SheetSkeletonChanged, {
+                    workbook: sheet.workbook,
+                    worksheet: sheet.worksheet,
+                    payload: commandInfo as CommandListenerSkeletonChange,
+                    skeleton: sheet.worksheet.getSkeleton()!,
+                });
+                return;
+            }
+
+            if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
+                if (!this._eventListend(this.Event.SheetValueChanged)) return;
+                const sheet = this.getActiveSheet();
+                if (!sheet) return;
+                this.fireEvent(this.Event.SheetValueChanged, {
+                    payload: commandInfo as CommandListenerValueChange,
+                    effectedRanges: getValueChangedEffectedRange(commandInfo).map(
+                        (range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range)
+                    ).filter(Boolean) as FRange[],
+                });
+                return;
+            }
             switch (commandInfo.id) {
                 case CopyCommand.id:
                 case CutCommand.id:

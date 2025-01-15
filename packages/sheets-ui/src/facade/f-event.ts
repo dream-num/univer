@@ -15,7 +15,8 @@
  */
 
 import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
-import type { DeviceInputEventType } from '@univerjs/engine-render';
+import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { CommandListenerSkeletonChange, CommandListenerValueChange } from '@univerjs/sheets';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core';
@@ -264,7 +265,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is clicked
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('CellClicked', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellClicked, (params)=> {
+     *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
+     * });
      * ```
      */
     readonly CellClicked: 'CellClicked';
@@ -272,7 +275,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is pointer down
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('CellPointerDown', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerDown, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly CellPointerDown: 'CellPointerDown';
@@ -281,7 +286,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is pointer up
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('CellPointerUp', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerUp, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly CellPointerUp: 'CellPointerUp';
@@ -290,7 +297,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is hovered
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('CellHover', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellHover, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly CellHover: 'CellHover';
@@ -298,15 +307,116 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when move on spreadsheet cells
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('CellPointerMove', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerMove, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly CellPointerMove: 'CellPointerMove';
+
+    /**
+     * Triggered when a row header is clicked
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderClick, (params) => {
+     *   console.log(`Row ${params.row} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderClick: 'RowHeaderClick';
+
+    /**
+     * Triggered when pointer is pressed down on a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderPointerDown, (params) => {
+     *   console.log(`Pointer down on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderPointerDown: 'RowHeaderPointerDown';
+
+    /**
+     * Triggered when pointer is released on a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderPointerUp, (params) => {
+     *   console.log(`Pointer up on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderPointerUp: 'RowHeaderPointerUp';
+
+    /**
+     * Triggered when pointer hovers over a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderHover, (params) => {
+     *   console.log(`Hovering over row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderHover: 'RowHeaderHover';
+
+    /**
+     * Triggered when a column header is clicked
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderClick, (params) => {
+     *   console.log(`Column ${params.column} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderClick: 'ColumnHeaderClick';
+
+    /**
+     * Triggered when pointer is pressed down on a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerDown, (params) => {
+     *   console.log(`Pointer down on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderPointerDown: 'ColumnHeaderPointerDown';
+
+    /**
+     * Triggered when pointer is released on a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerUp, (params) => {
+     *   console.log(`Pointer up on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderPointerUp: 'ColumnHeaderPointerUp';
+
+    /**
+     * Triggered when pointer hovers over a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderHover, (params) => {
+     *   console.log(`Hovering over column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderHover: 'ColumnHeaderHover';
+
     /**
      * Event fired when drag over spreadsheet cells
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('DragOver', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.DragOver, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly DragOver: 'DragOver';
@@ -315,7 +425,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when drop on spreadsheet cells
      * @example
      * ```ts
-     * univerAPI.addEvent('Drop', (p)=> console.log(p));
+     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.Drop, (params)=> {
+     *      const { worksheet, workbook, row, column } = params;
+     * });
      * ```
      */
     readonly Drop: 'Drop';
@@ -324,7 +436,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when scroll spreadsheet.
      * @example
      * ```ts
-     * univerAPI.addEvent('Scroll', (p)=> console.log(p));
+     * univerAPI.addEvent(univerAPI.Event.Scroll, (params)=> {
+     *      const { worksheet, workbook, scrollX, scrollY } = params;
+     * });
      * ```
      */
     readonly Scroll: 'Scroll';
@@ -333,16 +447,20 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection changed.
      * @example
      * ```ts
-     * univerAPI.addEvent('SelectionChanged', (p)=> console.log(p));
+     * univerAPI.addEvent(univerAPI.Event.SelectionChanged, (p)=> {
+     *      const { worksheet, workbook, selections } = p;
+     * });
      * ```
      */
     readonly SelectionChanged: 'SelectionChanged';
 
     /**
-     * Event fired when selection move end
+     * Event fired when selection move start
      * @example
      * ```ts
-     * univerAPI.addEvent('SelectionMoveStart', (p)=> console.log(p));
+     * univerAPI.addEvent(univerAPI.Event.SelectionMoveStart, (p)=> {
+     *      const { worksheet, workbook, selections } = p;
+     * });
      * ```
      */
     readonly SelectionMoveStart: 'SelectionMoveStart';
@@ -351,7 +469,9 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection move end
      * @example
      * ```ts
-     * univerAPI.addEvent('SelectionMoving', (p)=> console.log(p));
+     * univerAPI.addEvent(univerAPI.Event.SelectionMoving, (p)=> {
+     *      const { worksheet, workbook, selections } = p;
+     * });
      * ```
      */
     readonly SelectionMoving: 'SelectionMoving';
@@ -360,10 +480,56 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection move end
      * @example
      * ```ts
-     * univerAPI.addEvent('SelectionMoveEnd', (p)=> console.log(p));
+     * univerAPI.addEvent(univerAPI.Event.SelectionMoveEnd, (p)=> {
+     *      const { worksheet, workbook, selections } = p;
+     * });
      * ```
      */
     readonly SelectionMoveEnd: 'SelectionMoveEnd';
+
+    /**
+     * Event fired when zoom changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetZoomChanged, (p)=> {
+     *      const { worksheet, workbook, zoom } = p;
+     * });
+     * ```
+     */
+    readonly SheetZoomChanged: 'SheetZoomChanged';
+
+    /**
+     * Event fired before zoom changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeSheetZoomChange, (p)=> {
+     *      const { worksheet, workbook, zoom } = p;
+     * });
+     * ```
+     */
+    readonly BeforeSheetZoomChange: 'BeforeSheetZoomChange';
+
+    /**
+     * Event fired when sheet skeleton changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (p)=> {
+     *      const { worksheet, workbook } = p;
+     * });
+     * ```
+     */
+    readonly SheetSkeletonChanged: 'SheetSkeletonChanged';
+
+    /**
+     * Event fired when sheet value changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (p)=> {
+     *      const { workbook, effectedRanges, payload } = p;
+     * });
+     * ```
+     */
+    readonly SheetValueChanged: 'SheetValueChanged';
 
 }
 
@@ -451,6 +617,46 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get SelectionMoveEnd(): 'SelectionMoveEnd' {
         return 'SelectionMoveEnd' as const;
     }
+
+    override get RowHeaderClick(): 'RowHeaderClick' {
+        return 'RowHeaderClick' as const;
+    }
+
+    override get RowHeaderPointerDown(): 'RowHeaderPointerDown' {
+        return 'RowHeaderPointerDown' as const;
+    }
+
+    override get RowHeaderPointerUp(): 'RowHeaderPointerUp' {
+        return 'RowHeaderPointerUp' as const;
+    }
+
+    override get RowHeaderHover(): 'RowHeaderHover' {
+        return 'RowHeaderHover' as const;
+    }
+
+    override get ColumnHeaderClick(): 'ColumnHeaderClick' {
+        return 'ColumnHeaderClick' as const;
+    }
+
+    override get ColumnHeaderPointerDown(): 'ColumnHeaderPointerDown' {
+        return 'ColumnHeaderPointerDown' as const;
+    }
+
+    override get ColumnHeaderPointerUp(): 'ColumnHeaderPointerUp' {
+        return 'ColumnHeaderPointerUp' as const;
+    }
+
+    override get ColumnHeaderHover(): 'ColumnHeaderHover' {
+        return 'ColumnHeaderHover' as const;
+    }
+
+    override get SheetSkeletonChanged(): 'SheetSkeletonChanged' {
+        return 'SheetSkeletonChanged' as const;
+    }
+
+    override get SheetValueChanged(): 'SheetValueChanged' {
+        return 'SheetValueChanged' as const;
+    }
 }
 
 export interface ISheetUIEventBase extends IEventBase {
@@ -513,6 +719,21 @@ export interface IBeforeClipboardPasteParam extends IEventBase {
 
 export type IClipboardPastedParam = IBeforeClipboardPasteParam;
 
+export interface ISheetZoomEvent extends IEventBase {
+    /**
+     * Zoom ratio
+     */
+    zoom: number;
+    /**
+     * The workbook instance currently being operated on. {@link FWorkbook}
+     */
+    workbook: FWorkbook;
+    /**
+     * The worksheet instance currently being operated on. {@link FWorkbook}
+     */
+    worksheet: FWorksheet;
+}
+
 export interface ICellEventParam extends ISheetUIEventBase {
     row: number;
     column: number;
@@ -525,6 +746,24 @@ export interface IScrollEventParam extends ISheetUIEventBase {
 
 export interface ISelectionEventParam extends ISheetUIEventBase {
     selections: IRange[];
+}
+
+export interface ISheetRowHeaderEvent extends ISheetUIEventBase {
+    row: number;
+}
+
+export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
+    column: number;
+}
+
+export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
+    skeleton: SpreadsheetSkeleton;
+    payload: CommandListenerSkeletonChange;
+}
+
+export interface ISheetValueChangedEvent extends IEventBase {
+    effectedRanges: FRange[];
+    payload: CommandListenerValueChange;
 }
 
 export interface IFSheetsUIEventParamConfig {
@@ -547,12 +786,30 @@ export interface IFSheetsUIEventParamConfig {
     Drop: ICellEventParam;
     DragOver: ICellEventParam;
 
+    RowHeaderClick: ISheetRowHeaderEvent;
+    RowHeaderDbClick: ISheetRowHeaderEvent;
+    RowHeaderHover: ISheetRowHeaderEvent;
+    RowHeaderPointerDown: ISheetRowHeaderEvent;
+    RowHeaderPointerUp: ISheetRowHeaderEvent;
+
+    ColumnHeaderClick: ISheetColumnHeaderEvent;
+    ColumnHeaderDbClick: ISheetColumnHeaderEvent;
+    ColumnHeaderHover: ISheetColumnHeaderEvent;
+    ColumnHeaderPointerDown: ISheetColumnHeaderEvent;
+    ColumnHeaderPointerUp: ISheetColumnHeaderEvent;
+
     Scroll: IScrollEventParam;
     SelectionChanging: ISelectionEventParam;
     SelectionMoveStart: ISelectionEventParam;
     SelectionMoving: ISelectionEventParam;
     SelectionMoveEnd: ISelectionEventParam;
     SelectionChanged: ISelectionEventParam;
+
+    SheetZoomChanged: ISheetZoomEvent;
+    BeforeSheetZoomChange: ISheetZoomEvent;
+
+    SheetSkeletonChanged: ISheetSkeletonChangedEvent;
+    SheetValueChanged: ISheetValueChangedEvent;
 }
 
 FEventName.extend(FSheetsUIEventName);

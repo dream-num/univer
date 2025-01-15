@@ -18,6 +18,7 @@ import type { DocumentDataModel, IDisposable, Injector, Nullable } from '@univer
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
+    IRender,
     IRowsHeaderCfgParam,
     RenderComponentType,
     SheetComponent,
@@ -342,17 +343,23 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
             this.disposeWithMe(disposable);
 
+            let sheetRenderUnit: IRender;
             this.disposeWithMe(combined$.subscribe(([created, lifecycle]) => {
-                if (lifecycle < LifecycleStages.Rendered) return;
-                if (created.type !== UniverInstanceType.UNIVER_SHEET) return;
+                if (created.type === UniverInstanceType.UNIVER_SHEET) {
+                    sheetRenderUnit = created;
+                }
+
+                if (lifecycle !== LifecycleStages.Rendered) return;
                 const disposable = new DisposableCollection();
-                const workbook = this.getWorkbook(created.unitId);
                 if (unitMap.get(created.unitId)) {
                     unitMap.get(created.unitId)?.dispose();
                 }
                 unitMap.set(created.unitId, disposable);
+                const workbook = this.getWorkbook(sheetRenderUnit.unitId);
                 if (!workbook) return;
-                const scrollManagerService = created.with(SheetScrollManagerService);
+                if (!sheetRenderUnit) return;
+
+                const scrollManagerService = sheetRenderUnit.with(SheetScrollManagerService);
                 disposable.add(scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
                     if (!params) return;
                     if (!this._eventListend(this.Event.Scroll)) return;

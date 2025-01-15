@@ -114,7 +114,7 @@ export class NumfmtEditorController extends Disposable {
                                     case 'grouped':
                                     case 'number': {
                                         const cell = context.worksheet.getCellRaw(row, col);
-                                        return cell;
+                                        return next && next(cell);
                                     }
                                     case 'percent':
                                     case 'date':

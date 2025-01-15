@@ -536,7 +536,7 @@ export const SetBorderCommand: ICommand = {
     id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor, params?: ISetBorderCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -591,41 +591,41 @@ export const SetBorderCommand: ICommand = {
 export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams> = {
     id: 'sheet.command.set-border-position',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
         if (!params.value) return false;
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setType(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderStyleCommand: ICommand = {
     id: 'sheet.command.set-border-style',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setStyle(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     id: 'sheet.command.set-border-color',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setColor(params.value);
-        return commandService.executeCommand(SetBorderCommand.id);
+        return commandService.syncExecuteCommand(SetBorderCommand.id);
     },
 };
 
 export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
     id: 'sheet.command.set-border-basic',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
         const { unitId, subUnitId, value } = params;
         const { type, color, style } = value;
 
@@ -636,7 +636,7 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
         if (color) borderManager.setColor(color);
         borderManager.setStyle(style);
 
-        return commandService.executeCommand(SetBorderCommand.id, {
+        return commandService.syncExecuteCommand(SetBorderCommand.id, {
             unitId,
             subUnitId,
         });

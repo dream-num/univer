@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '../common/unit';
 import { CommandType } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../types/enum';
+import { BaselineOffset, BooleanNumber, BorderStyleTypes, BorderType, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign } from '../types/enum';
 import { DataValidationErrorStyle } from '../types/enum/data-validation-error-style';
 import { DataValidationOperator } from '../types/enum/data-validation-operator';
 import { DataValidationRenderMode } from '../types/enum/data-validation-render-mode';
@@ -156,5 +156,19 @@ export class FEnum {
      */
     get VerticalAlign() {
         return VerticalAlign;
+    }
+
+    /**
+     * Different border types
+     */
+    get BorderType() {
+        return BorderType;
+    }
+
+    /**
+     * Different border style types
+     */
+    get BorderStyleTypes() {
+        return BorderStyleTypes;
     }
 }

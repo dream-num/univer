@@ -230,6 +230,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 disposable.dispose();
                 const hoverManagerService = injector.get(HoverManagerService);
                 const dragManagerService = injector.get(DragManagerService);
+                if (!hoverManagerService) return;
                 disposable.add(
                     hoverManagerService.currentClickedCell$
                         .pipe(filter((cell) => !!cell))
@@ -247,8 +248,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    hoverManagerService.currentRichText$
-                        .pipe(filter((cell) => !!cell))
+                    hoverManagerService.currentRichText$?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellHover)) return;
                             const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
@@ -263,8 +263,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    hoverManagerService.currentPointerDownCell$
-                        .pipe(filter((cell) => !!cell))
+                    hoverManagerService.currentPointerDownCell$?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellPointerDown)) return;
                             const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
@@ -279,8 +278,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    hoverManagerService.currentPointerUpCell$
-                        .pipe(filter((cell) => !!cell))
+                    hoverManagerService.currentPointerUpCell$?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellPointerUp)) return;
                             const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
@@ -295,8 +293,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    hoverManagerService.currentCellPosWithEvent$
-                        .pipe(filter((cell) => !!cell))
+                    hoverManagerService.currentCellPosWithEvent$?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellPointerMove)) return;
                             const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);

@@ -18,7 +18,8 @@
 
 import type { Dependency, IWorkbookData, Nullable, UnitModel } from '@univerjs/core';
 import type { IRender } from '@univerjs/engine-render';
-import type { IDragCellPosition } from '@univerjs/sheets-ui';
+import type { ICellPosWithEvent, IHoverCellPosition, IHoverRichTextInfo, IHoverRichTextPosition } from '@univerjs/sheets-ui';
+import type { IHoverHeaderPosition } from '@univerjs/sheets-ui/services/hover-manager.service.js';
 import {
     ILogService,
     Inject,
@@ -180,10 +181,24 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             // Create a mock HoverManagerService with currentCell$
             const mockHoverManagerService = {
-                currentCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
-                currentPosition$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
-                currentClickedCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
-                endCell$: new Subject<Nullable<IDragCellPosition>>().asObservable(),
+                currentCell$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentRichText$: new Subject<Nullable<IHoverRichTextPosition>>().asObservable(),
+                currentClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentDbClickedCell$: new Subject<IHoverRichTextInfo>().asObservable(),
+                currentCellPosWithEvent$: new Subject<Nullable<ICellPosWithEvent>>().asObservable(),
+                currentPointerDownCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPointerUpCell$: new Subject<ICellPosWithEvent>().asObservable(),
+                currentPosition$: new Subject<Nullable<IHoverCellPosition>>().asObservable(),
+                currentHoveredRowHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentHoveredColHeader$: new Subject<Nullable<IHoverHeaderPosition>>().asObservable(),
+                currentRowHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderDbClick$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerDown$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentRowHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
+                currentColHeaderPointerUp$: new Subject<IHoverHeaderPosition>().asObservable(),
             };
             injector.add([HoverManagerService, { useValue: mockHoverManagerService as unknown as HoverManagerService }]);
             injector.add([DragManagerService, { useValue: mockHoverManagerService as unknown as DragManagerService }]);

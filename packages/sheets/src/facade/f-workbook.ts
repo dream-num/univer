@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IEventParamConfig, IRange, IWorkbookData, LocaleType, Registry, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
@@ -58,26 +58,6 @@ export class FWorkbook extends FBaseInitialable {
      */
     getWorkbook(): Workbook {
         return this._workbook;
-    }
-
-    private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
-
-    /**
-     * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
-     * @returns {boolean | undefined} should cancel
-     * @example
-     * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
-     * ```
-     */
-    protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
-        this._eventRegistry.get(event)?.getData().forEach((callback) => {
-            callback(params);
-        });
-
-        return params.cancel;
     }
 
     /**
@@ -187,9 +167,9 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Create a new worksheet and returns a handle to it.
-     * @param name Name of the new sheet
-     * @param rows How may rows would the new sheet have
-     * @param column How many columns would the new sheet have
+     * @param {string} name Name of the new sheet
+     * @param {number} rows How many rows would the new sheet have
+     * @param {number} column How many columns would the new sheet have
      * @returns {FWorksheet} The new created sheet
      * @example
      * ```ts
@@ -226,7 +206,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get a worksheet by sheet id.
-     * @param sheetId The id of the sheet to get.
+     * @param {string} sheetId The id of the sheet to get.
      * @returns {FWorksheet | null} The worksheet with given sheet id
      * @example
      * ```ts
@@ -246,7 +226,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get a worksheet by sheet name.
-     * @param name The name of the sheet to get.
+     * @param {string} name The name of the sheet to get.
      * @returns {FWorksheet | null} The worksheet with given sheet name
      * @example
      * ```ts
@@ -266,7 +246,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Sets the given worksheet to be the active worksheet in the workbook.
-     * @param sheet The worksheet to set as the active worksheet.
+     * @param {FWorksheet | string} sheet The worksheet to set as the active worksheet.
      * @returns {FWorksheet} The active worksheet
      * @example
      * ```ts
@@ -288,7 +268,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Inserts a new worksheet into the workbook.
      * Using a default sheet name. The new sheet becomes the active sheet
-     * @param sheetName - (optional) The name of the new sheet
+     * @param {string} [sheetName] The name of the new sheet
      * @returns {FWorksheet} The new sheet
      * @example
      * ```ts
@@ -325,7 +305,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Deletes the specified worksheet.
-     * @param sheet The worksheet to delete.
+     * @param {FWorksheet | string} sheet The worksheet to delete.
      * @returns {boolean} True if the worksheet was deleted, false otherwise.
      * @example
      * ```ts
@@ -480,7 +460,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Sets the selection region for active sheet.
-     * @param range The range to set as the active selection.
+     * @param {FRange} range The range to set as the active selection.
      * @returns {FWorkbook} FWorkbook instance
      */
     setActiveRange(range: FRange): FWorkbook {
@@ -567,7 +547,6 @@ export class FWorkbook extends FBaseInitialable {
      * @returns {FWorksheet} The duplicated worksheet
      * @example
      * ```ts
-     * // The code below duplicates the active sheet
      *  const activeSpreadsheet = univerAPI.getActiveWorkbook();
      *  activeSpreadsheet.duplicateActiveSheet();
      * ```
@@ -828,7 +807,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Register a custom range theme style.
-     * @param rangeThemeStyle
+     * @param {RangeThemeStyle} rangeThemeStyle The range theme style to register
      * @returns {void}
      * @example
      * ```ts
@@ -852,7 +831,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Unregister a custom range theme style.
-     * @param themeName
+     * @param {string} themeName The name of the theme to unregister
      * @returns {void}
      * @example
      * ```ts

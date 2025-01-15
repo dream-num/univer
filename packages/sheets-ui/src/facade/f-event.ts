@@ -15,7 +15,7 @@
  */
 
 import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
-import type { DeviceInputEventType } from '@univerjs/engine-render';
+import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core';
@@ -508,6 +508,17 @@ export interface IFSheetsUIEventNameMixin {
      */
     readonly BeforeSheetZoomChange: 'BeforeSheetZoomChange';
 
+    /**
+     * Event fired when sheet skeleton changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (p)=> {
+     *      const { worksheet, workbook } = p;
+     * });
+     * ```
+     */
+    readonly SheetSkeletonChanged: 'SheetSkeletonChanged';
+
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -626,6 +637,10 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get ColumnHeaderHover(): 'ColumnHeaderHover' {
         return 'ColumnHeaderHover' as const;
     }
+
+    override get SheetSkeletonChanged(): 'SheetSkeletonChanged' {
+        return 'SheetSkeletonChanged' as const;
+    }
 }
 
 export interface ISheetUIEventBase extends IEventBase {
@@ -725,6 +740,12 @@ export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
     column: number;
 }
 
+export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
+    skeleton: SpreadsheetSkeleton;
+    trigger: string;
+    payload: any;
+}
+
 export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;
@@ -766,6 +787,8 @@ export interface IFSheetsUIEventParamConfig {
 
     SheetZoomChanged: ISheetZoomEvent;
     BeforeSheetZoomChange: ISheetZoomEvent;
+
+    SheetSkeletonChanged: ISheetSkeletonChangedEvent;
 }
 
 FEventName.extend(FSheetsUIEventName);

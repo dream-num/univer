@@ -30,7 +30,7 @@ import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSh
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, SheetsSelectionsService } from '@univerjs/sheets';
 import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
@@ -576,6 +576,19 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             }
         }));
         this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+                if (!this._eventListend(this.Event.SheetSkeletonChanged)) return;
+                const sheet = this.getActiveSheet();
+                if (!sheet) return;
+                this.fireEvent(this.Event.SheetSkeletonChanged, {
+                    workbook: sheet.workbook,
+                    worksheet: sheet.worksheet,
+                    trigger: commandInfo.id,
+                    payload: commandInfo.params,
+                    skeleton: sheet.worksheet.getSkeleton()!,
+                });
+                return;
+            }
             switch (commandInfo.id) {
                 case CopyCommand.id:
                 case CutCommand.id:

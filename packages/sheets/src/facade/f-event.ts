@@ -19,6 +19,10 @@ import type { FWorkbook } from './f-workbook';
 import type { FWorksheet } from './f-worksheet';
 import { FEventName } from '@univerjs/core';
 
+/**
+ * Interface for sheet-related events
+ * Provides event names for sheet creation, workbook creation, and gridline changes
+ */
 export interface IFSheetEventMixin {
     /**
      * Event fired after a sheet is created
@@ -68,19 +72,159 @@ export interface IFSheetEventMixin {
      * ```
      */
     get WorkbookDisposed(): 'WorkbookDisposed';
+
+    /**
+     * Event fired when gridline changed
+     * @see {@link IGridlineChangedEvent}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.GridlineChanged, (params) => {
+     *      const { workbook, worksheet, enabled, color } = params;
+     *     console.log('gridline changed', params);
+     * });
+     * ```
+     */
+    get GridlineChanged(): 'GridlineChanged';
+
+    /**
+     * Event fired before gridline enable changed
+     * @see {@link IBeforeGridlineEnableChange}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeGridlineEnableChange, (params) => {
+     *      const { workbook, worksheet, enabled } = params;
+     *     console.log('gridline changed', params);
+     * });
+     * ```
+     */
+    get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange';
+
+    /**
+     * Event fired before gridline color changed
+     * @see {@link IBeforeGridlineColorChanged}
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.BeforeGridlineColorChange, (params) => {
+     *      const { workbook, worksheet, color } = params;
+     *     console.log('gridline changed', params);
+     * });
+     * ```
+     */
+    get BeforeGridlineColorChange(): 'BeforeGridlineColorChange';
 }
 
+/**
+ * Interface for workbook creation parameters
+ * Extends the base event interface and includes workbook initialization details
+ */
 export interface IWorkbookCreateParam extends IEventBase {
+    /** Unique identifier for the workbook unit */
     unitId: string;
+    /** Type identifier specifying this is a sheet instance */
     type: UniverInstanceType.UNIVER_SHEET;
+    /** The workbook instance being created */
     workbook: FWorkbook;
+    /** The workbook unit reference */
     unit: FWorkbook;
 }
 
+/**
+ * Interface for workbook disposal event
+ * Contains information about the disposed workbook including its snapshot data
+ */
 export interface IWorkbookDisposedEvent extends IEventBase {
+    /** Unique identifier of the disposed workbook unit */
     unitId: string;
+    /** Type identifier specifying this was a sheet instance */
     unitType: UniverInstanceType.UNIVER_SHEET;
+    /** Snapshot data of the workbook at the time of disposal */
     snapshot: IWorkbookData;
+}
+
+/**
+ * Interface for gridline change event
+ * Triggered when gridline visibility or color changes in a worksheet
+ */
+export interface IGridlineChangedEvent extends IEventBase {
+    /** The workbook instance containing the worksheet */
+    workbook: FWorkbook;
+    /** The worksheet where gridline changes occurred */
+    worksheet: FWorksheet;
+    /** Flag indicating whether gridlines are enabled or disabled */
+    enabled: boolean;
+    /** The color of the gridlines, undefined if using default color */
+    color: string | undefined;
+}
+
+/**
+ * Interface for event before gridline enable/disable
+ * Triggered before changing the gridline visibility state
+ */
+export interface IBeforeGridlineEnableChange extends IEventBase {
+    /** The workbook instance containing the worksheet */
+    workbook: FWorkbook;
+    /** The worksheet where gridline state will change */
+    worksheet: FWorksheet;
+    /** The new enabled state to be applied */
+    enabled: boolean;
+}
+
+/**
+ * Interface for event before gridline color change
+ * Triggered before changing the gridline color
+ */
+export interface IBeforeGridlineColorChanged extends IEventBase {
+    /** The workbook instance containing the worksheet */
+    workbook: FWorkbook;
+    /** The worksheet where gridline color will change */
+    worksheet: FWorksheet;
+    /** The new color to be applied, undefined to use default color */
+    color: string | undefined;
+}
+
+/**
+ * Interface for event parameters triggered before creating a new worksheet
+ * Extends the base event interface and includes workbook and worksheet details
+ */
+export interface IBeforeSheetCreateEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** Optional index where the new sheet will be inserted */
+    index?: number;
+    /** Optional initial worksheet data */
+    sheet?: IWorksheetData;
+}
+
+/**
+ * Interface for event parameters triggered after a worksheet is created
+ * Extends the base event interface and includes workbook and worksheet details
+ */
+export interface ISheetCreatedEventParams extends IEventBase {
+    /** The workbook instance */
+    workbook: FWorkbook;
+    /** The newly created worksheet */
+    worksheet: FWorksheet;
+}
+
+/**
+ * Configuration interface for sheet-related events
+ * Provides event names and their corresponding event parameter interfaces
+ */
+export interface ISheetEventParamConfig {
+    /** Event fired after a worksheet is created */
+    SheetCreated: ISheetCreatedEventParams;
+    /** Event fired before creating a worksheet */
+    BeforeSheetCreate: IBeforeSheetCreateEventParams;
+    /** Event fired after a workbook is created */
+    WorkbookCreated: IWorkbookCreateParam;
+    /** Event fired when a workbook is disposed */
+    WorkbookDisposed: IWorkbookDisposedEvent;
+    /** Event fired when gridline changed */
+    GridlineChanged: IGridlineChangedEvent;
+    /** Event fired before gridline enable changed */
+    BeforeGridlineEnableChange: IBeforeGridlineEnableChange;
+    /** Event fired before gridline color changed */
+    BeforeGridlineColorChange: IBeforeGridlineColorChanged;
 }
 
 export class FSheetEventName extends FEventName implements IFSheetEventMixin {
@@ -99,47 +243,18 @@ export class FSheetEventName extends FEventName implements IFSheetEventMixin {
     override get WorkbookDisposed(): 'WorkbookDisposed' {
         return 'WorkbookDisposed' as const;
     }
-}
 
-/**
- * Event interface triggered before creating a new worksheet
- * @interface IBeforeSheetCreateEventParams
- * @augments {IEventBase}
- */
-export interface IBeforeSheetCreateEventParams extends IEventBase {
-    /** The workbook instance */
-    workbook: FWorkbook;
-    /** Optional index where the new sheet will be inserted */
-    index?: number;
-    /** Optional initial worksheet data */
-    sheet?: IWorksheetData;
-}
+    override get GridlineChanged(): 'GridlineChanged' {
+        return 'GridlineChanged' as const;
+    }
 
-/**
- * Event interface triggered after a worksheet is created
- * @interface ISheetCreatedEventParams
- * @augments {IEventBase}
- */
-export interface ISheetCreatedEventParams extends IEventBase {
-    /** The workbook instance */
-    workbook: FWorkbook;
-    /** The newly created worksheet */
-    worksheet: FWorksheet;
-}
+    override get BeforeGridlineEnableChange(): 'BeforeGridlineEnableChange' {
+        return 'BeforeGridlineEnableChange' as const;
+    }
 
-/**
- * Configuration interface for sheet-related events
- * @interface ISheetEventParamConfig
- */
-export interface ISheetEventParamConfig {
-    /** Event fired after a worksheet is created */
-    SheetCreated: ISheetCreatedEventParams;
-    /** Event fired before creating a worksheet */
-    BeforeSheetCreate: IBeforeSheetCreateEventParams;
-    /** Event fired after a workbook is created */
-    WorkbookCreated: IWorkbookCreateParam;
-    /** Event fired when a workbook is disposed */
-    WorkbookDisposed: IWorkbookDisposedEvent;
+    override get BeforeGridlineColorChange(): 'BeforeGridlineColorChange' {
+        return 'BeforeGridlineColorChange' as const;
+    }
 }
 
 FEventName.extend(FSheetEventName);

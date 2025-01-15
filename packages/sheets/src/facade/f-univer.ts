@@ -15,11 +15,11 @@
  */
 
 import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
-import type { IInsertSheetCommandParams } from '@univerjs/sheets';
+import type { IInsertSheetCommandParams, ISetGridlinesColorCommandParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { InsertSheetCommand } from '@univerjs/sheets';
+import { InsertSheetCommand, SetGridlinesColorCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -195,6 +195,7 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(
@@ -222,7 +223,26 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         }
                         break;
                     }
-
+                    case SetGridlinesColorCommand.id: {
+                        if (!this._eventListend(this.Event.BeforeGridlineColorChange)) return;
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) return;
+                        this.fireEvent(this.Event.BeforeGridlineColorChange, {
+                            ...target,
+                            color: (commandInfo.params as ISetGridlinesColorCommandParams)?.color,
+                        });
+                        break;
+                    }
+                    case ToggleGridlinesCommand.id: {
+                        if (!this._eventListend(this.Event.BeforeGridlineEnableChange)) return;
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) return;
+                        this.fireEvent(this.Event.BeforeGridlineEnableChange, {
+                            ...target,
+                            enabled: Boolean((commandInfo.params as IToggleGridlinesCommandParams)?.showGridlines) ?? !target.worksheet.hasHiddenGridLines(),
+                        });
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -253,7 +273,18 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                         );
                         break;
                     }
-
+                    case SetGridlinesColorCommand.id:
+                    case ToggleGridlinesCommand.id: {
+                        if (!this._eventListend(this.Event.GridlineChanged)) return;
+                        const target = this.getCommandSheetTarget(commandInfo);
+                        if (!target) return;
+                        this.fireEvent(this.Event.GridlineChanged, {
+                            ...target,
+                            enabled: !target.worksheet.hasHiddenGridLines(),
+                            color: target.worksheet.getGridLinesColor(),
+                        });
+                        break;
+                    }
                     default:
                         break;
                 }

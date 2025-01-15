@@ -382,7 +382,7 @@ export class FRange extends FBaseInitialable {
      * univerAPI.getActiveWorkbook()
      *  .getActiveSheet()
      *  .getActiveRange()
-     *  .rmulas()
+     *  .getFormulas()
      * ```
      */
     getFormulas(): string[][] {
@@ -1334,7 +1334,6 @@ export class FRange extends FBaseInitialable {
      * //  A | B | C
      * //  1 | 2 | 3
      * //  1 | 2 | 3
-     *
      * @example Show how to split text to columns with custom delimiter
      * // A1:A3 has following values:
      * //     A   | B | C

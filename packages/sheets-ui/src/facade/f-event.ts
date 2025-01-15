@@ -16,6 +16,7 @@
 
 import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
 import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core';
@@ -742,8 +743,7 @@ export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
 
 export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
     skeleton: SpreadsheetSkeleton;
-    trigger: string;
-    payload: any;
+    payload: CommandListenerSkeletonChange;
 }
 
 export interface IFSheetsUIEventParamConfig {

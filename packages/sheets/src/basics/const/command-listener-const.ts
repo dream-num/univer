@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../../commands/mutations/move-rows-cols.mutation';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../../commands/mutations/set-col-visible.mutation';
+import type { ISetGridlinesColorMutationParams } from '../../commands/mutations/set-gridlines-color.mutation';
+import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../../commands/mutations/set-row-visible.mutation';
+import type { ISetWorksheetColWidthMutationParams } from '../../commands/mutations/set-worksheet-col-width.mutation';
+import type {
+    ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import type { IToggleGridlinesMutationParams } from '../../commands/mutations/toggle-gridlines.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../../commands/operations/set-worksheet-active.operation';
+import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams } from '../interfaces';
 import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { SetWorksheetRangeThemeStyleMutation } from '../../commands/mutations/add-worksheet-range-theme.mutation';
 import { DeleteWorksheetRangeThemeStyleMutation } from '../../commands/mutations/delete-worksheet-range-theme.mutation';
@@ -61,6 +73,76 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     ToggleGridlinesMutation.id,
     SetGridlinesColorMutation.id,
 ];
+
+export type CommandListenerSkeletonChange =
+    | {
+        id: 'sheet.mutation.set-worksheet-row-height';
+        params: ISetWorksheetRowHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-row-is-auto-height';
+        params: ISetWorksheetRowIsAutoHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-row-auto-height';
+        params: ISetWorksheetRowAutoHeightMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-worksheet-col-width';
+        params: ISetWorksheetColWidthMutationParams;
+    }
+    | {
+        id: 'sheet.operation.set-worksheet-active';
+        params: ISetWorksheetActiveOperationParams;
+    }
+    | {
+        id: 'sheet.mutation.move-rows';
+        params: IMoveRowsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.move-cols';
+        params: IMoveColumnsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-col-hidden';
+        params: ISetColHiddenMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-col-visible';
+        params: ISetColVisibleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-row-hidden';
+        params: ISetRowHiddenMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-row-visible';
+        params: ISetRowVisibleMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.insert-col';
+        params: IInsertColMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.insert-row';
+        params: IInsertRowMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.remove-col';
+        params: IRemoveColMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.remove-row';
+        params: IRemoveRowsMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.toggle-gridlines';
+        params: IToggleGridlinesMutationParams;
+    }
+    | {
+        id: 'sheet.mutation.set-gridlines-color';
+        params: ISetGridlinesColorMutationParams;
+    };
 
 export const COMMAND_LISTENER_VALUE_CHANGE = [
     SetRangeValuesMutation.id,

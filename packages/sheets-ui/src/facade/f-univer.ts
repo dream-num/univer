@@ -25,6 +25,7 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
+import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
@@ -583,8 +584,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 this.fireEvent(this.Event.SheetSkeletonChanged, {
                     workbook: sheet.workbook,
                     worksheet: sheet.worksheet,
-                    trigger: commandInfo.id,
-                    payload: commandInfo.params,
+                    payload: commandInfo as CommandListenerSkeletonChange,
                     skeleton: sheet.worksheet.getSkeleton()!,
                 });
                 return;

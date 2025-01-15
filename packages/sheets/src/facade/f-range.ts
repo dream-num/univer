@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
+import type { BorderStyleTypes, BorderType, CellValue, CustomData, ICellData, IColorStyle, IDocumentData, IObjectMatrixPrimitiveType, IRange, IStyleData, ITextDecoration, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetBorderBasicCommandParams, ISetHorizontalTextAlignCommandParams, ISetRangeValuesCommandParams, ISetStyleCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams, IStyleTypeValue, SplitDelimiterEnum } from '@univerjs/sheets';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, RichTextValue, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, Dimension, FBaseInitialable, ICommandService, Inject, Injector, Rectangle, RichTextValue, TextStyleValue, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
+import { addMergeCellsUtil, DeleteWorksheetRangeThemeStyleCommand, getAddMergeMutationRangeByType, RemoveWorksheetMergeCommand, SetBorderBasicCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetRangeThemeStyleCommand, SheetRangeThemeService, SplitTextToColumnsCommand } from '@univerjs/sheets';
 import { FWorkbook } from './f-workbook';
 import { covertCellValue, covertCellValues, transformCoreHorizontalAlignment, transformCoreVerticalAlignment, transformFacadeHorizontalAlignment, transformFacadeVerticalAlignment } from './utils';
 
@@ -198,12 +198,51 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
+     * Return first cell style in this range
+     * @returns {TextStyleValue | null} The cell style
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellStyle()
+     * ```
+     */
+    getCellStyle(): TextStyleValue | null {
+        const data = this.getCellStyleData();
+        return data ? TextStyleValue.create(data) : null;
+    }
+
+    /**
+     * Returns the cell styles for the cells in the range.
+     * @returns {Array<Array<TextStyleValue | null>>} A two-dimensional array of cell styles.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellStyles()
+     * ```
+     */
+    getCellStyles(): Array<Array<TextStyleValue | null>> {
+        const cells = this.getCellDatas();
+        const styles = this._workbook.getStyles();
+        return cells.map((row) => row.map((cell) => {
+            if (!cell) return null;
+            const style = styles.getStyleByCell(cell);
+            return style ? TextStyleValue.create(style) : null;
+        }));
+    }
+
+    // eslint-disable-next-line jsdoc/require-returns
+    /**
      * @deprecated use `getValueAndRichTextValue` instead. This api can't return rich text value.
      */
     getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
+    // eslint-disable-next-line jsdoc/require-returns
     /**
      * @deprecated use `getValueAndRichTextValues` instead. This api can't return rich text value.
      */
@@ -263,6 +302,7 @@ export class FRange extends FBaseInitialable {
         return range;
     }
 
+    // eslint-disable-next-line jsdoc/require-returns
     /**
      * @deprecated use `getCellDatas` instead.
      */
@@ -491,6 +531,33 @@ export class FRange extends FBaseInitialable {
     getCustomMetaDatas(): Nullable<CustomData>[][] {
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.custom ?? null));
+    }
+
+    /**
+     * Sets basic border properties for the current range.
+     * @param {BorderType} type The type of border to apply
+     * @param {BorderStyleTypes} style The border style
+     * @param {string} [color] Optional border color in CSS notation
+     * @returns {FRange} This range, for chaining
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .setBorder(BorderType.ALL, BorderStyleType.THIN, '#ff0000');
+     * ```
+     */
+    setBorder(type: BorderType, style: BorderStyleTypes, color?: string): FRange {
+        this._commandService.syncExecuteCommand(SetBorderBasicCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            value: {
+                type,
+                style,
+                color,
+            },
+        } as ISetBorderBasicCommandParams);
+        return this;
     }
 
     // #region editing
@@ -1270,7 +1337,6 @@ export class FRange extends FBaseInitialable {
      * //  A | B | C
      * //  1 | 2 | 3
      * //  1 | 2 | 3
-     *
      * @example Show how to split text to columns with custom delimiter
      * // A1:A3 has following values:
      * //     A   | B | C

@@ -23,7 +23,7 @@ import { RangeProtectionRuleModel, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALU
  * Get defined name field name
  * @param {string} unitId - unit id
  * @param {LocaleService} localeService - locale service
- * @param {DefinedNamesService} definedNamesService - defined names service
+ * @param {IDefinedNamesService} definedNamesService - defined names service
  * @returns {string} field name
  */
 function getDefinedNameFieldName(unitId: string, localeService: LocaleService, definedNamesService: IDefinedNamesService): string {

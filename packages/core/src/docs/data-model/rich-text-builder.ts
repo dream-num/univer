@@ -24,7 +24,7 @@ import { BuildTextUtils } from './text-x/build-utils';
 import { TextX } from './text-x/text-x';
 import { getBodySlice } from './text-x/utils';
 
-function normalizeBody(body: IDocumentBody) {
+export function normalizeBody(body: IDocumentBody) {
     if (!body.customRanges) {
         body.customRanges = [];
     }
@@ -61,7 +61,7 @@ function normalizeBody(body: IDocumentBody) {
     return body;
 }
 
-function normalizeData(data: IDocumentData) {
+export function normalizeData(data: IDocumentData) {
     data.body = normalizeBody(data.body ?? { dataStream: '' });
 
     if (!data.drawingsOrder) {
@@ -1688,7 +1688,7 @@ export class RichTextValue {
  */
 export class RichTextBuilder extends RichTextValue {
     public static newEmptyData(): IDocumentData {
-        return {
+        return normalizeData({
             id: 'd',
             documentStyle: {},
             drawings: {},
@@ -1702,7 +1702,7 @@ export class RichTextBuilder extends RichTextValue {
                 tables: [],
                 sectionBreaks: [],
             },
-        };
+        });
     }
 
     /**

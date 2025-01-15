@@ -100,6 +100,10 @@ export interface ICellBindingNodeParam {
      * The target column of the binding node.
      */
     column: number;
+     /**
+      * Whether treat the data as date.
+      */
+    isDate?: boolean;
     nodeId?: string; // optional in ICellBindingNodeParam
 }
 

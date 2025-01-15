@@ -15,7 +15,32 @@
  */
 
 import type { ICellBindingNode, IListDataBindingNode, IListSourceData, IListSourceInfo, IObjectSourceInfo } from '../types';
+import { CellValueType, type ICellData } from '@univerjs/core';
 import { DataBindingNodeTypeEnum } from '../types';
+
+function isValidDate(date: Date): date is Date {
+    return date instanceof Date && !isNaN(date.getTime());
+}
+
+function transformDate(dateString: string | number): number | string {
+    const date = new Date(dateString);
+    if (!isValidDate(date)) {
+        return dateString;
+    }
+    const baseDate = new Date(Date.UTC(1900, 0, 1, 0, 0, 0)); // January 1, 1900, UTC at midnight
+    const leapDayDate = new Date(Date.UTC(1900, 1, 28, 0, 0, 0)); // February 28, 1900, UTC at midnight
+
+    // Calculate the difference in milliseconds between the input date and the base date
+    const diffMilliseconds = date.getTime() - baseDate.getTime();
+    let dayDifference = diffMilliseconds / (1000 * 3600 * 24);
+
+    // Adjusting for the Excel leap year bug
+    if (date > leapDayDate) {
+        dayDifference += 1;
+    }
+
+    return dayDifference + 1; // Excel serial number starts from 1
+}
 
 export abstract class SourceModelBase {
     protected _data: any;
@@ -45,7 +70,7 @@ export abstract class SourceModelBase {
 
     abstract getSourceInfo(): any;
 
-    abstract getData(node: ICellBindingNode, row: number, col: number): string | number | boolean | null;
+    abstract getData(node: ICellBindingNode, row: number, col: number): ICellData | null;
 }
 
 export class ListSourceModel extends SourceModelBase {
@@ -67,17 +92,35 @@ export class ListSourceModel extends SourceModelBase {
         this._isListObject = isListObject;
     }
 
-    getData(node: IListDataBindingNode, row: number): string | number | boolean | null {
+    getData(node: IListDataBindingNode, row: number): ICellData | null {
         const { path, row: baseRow } = node;
         const colIndex = this._fieldIndexMap.get(path)!;
         const rowIndex = row - baseRow;
         if (rowIndex === 0) {
-            return this._data.fields[colIndex];
+            return {
+                v: this._data.fields[colIndex],
+            };
         }
+        let data;
         if (this._isListObject) {
-            return (this._data.records as Record<string | number, any>)[rowIndex - 1][path];
+            data = (this._data.records as Record<string | number, any>)[rowIndex - 1][path];
         }
-        return this._data.records[rowIndex - 1][colIndex];
+        data = this._data.records[rowIndex - 1][colIndex];
+        if (node.isDate === true) {
+            return {
+                v: transformDate(data),
+                s: {
+                    n: {
+                        pattern: 'yyyy-m-d am/pm h:mm',
+                    },
+                },
+                t: CellValueType.NUMBER,
+            };
+        } else {
+            return {
+                v: data,
+            };
+        }
     }
 
     override setSourceData(data: IListSourceData): void {
@@ -105,7 +148,7 @@ export class ObjectSourceModel extends SourceModelBase {
         super(id);
     }
 
-    getData(node: ICellBindingNode): string | number | boolean | null {
+    getData(node: ICellBindingNode): ICellData | null {
         const path = node.path;
         const paths = path.split('.');
         let data = this._data;
@@ -115,7 +158,21 @@ export class ObjectSourceModel extends SourceModelBase {
                 return null;
             }
         }
-        return data;
+        if (node.isDate === true) {
+            return {
+                v: transformDate(data),
+                s: {
+                    n: {
+                        pattern: 'yyyy-m-d am/pm h:mm',
+                    },
+                },
+                t: CellValueType.NUMBER,
+            };
+        } else {
+            return {
+                v: data,
+            };
+        }
     }
 
     override getSourceInfo(): IObjectSourceInfo {

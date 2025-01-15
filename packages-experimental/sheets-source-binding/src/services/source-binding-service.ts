@@ -203,9 +203,7 @@ export class SheetsSourceBindService extends Disposable {
                 const { sourceId } = node;
                 const source = this._sheetsSourceManager.getSource(unitId, sourceId);
                 if (source && source.hasData()) {
-                    return {
-                        v: source?.getData(node, row, col) || '',
-                    };
+                    return source?.getData(node, row, col) || { v: '' };
                 }
             }
         }
@@ -219,9 +217,7 @@ export class SheetsSourceBindService extends Disposable {
                     const { sourceId } = node;
                     const source = this._sheetsSourceManager.getSource(unitId, sourceId);
                     if (source && source.hasData()) {
-                        return {
-                            v: source?.getData(node, row, col) || '',
-                        };
+                        return source?.getData(node, row, col) || { v: '' };
                     }
                 }
             }
@@ -230,7 +226,8 @@ export class SheetsSourceBindService extends Disposable {
 
     private _registerInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            effect: InterceptorEffectEnum.Value,
+            effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
+            priority: 102,
             handler: (cell, context, next) => {
                 const { row, col, unitId, subUnitId } = context;
                 let value = null;

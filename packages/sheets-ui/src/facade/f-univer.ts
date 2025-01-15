@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Injector, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Injector, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
@@ -25,15 +25,14 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
-import type { FWorksheet } from '@univerjs/sheets/facade';
+import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
-import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
+import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverType } from '@univerjs/protocol';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
-import { FSheetHooks, FWorkbook } from '@univerjs/sheets/facade';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
 
@@ -219,31 +218,15 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (unitId) {
             const lifeCycleService = injector.get(LifecycleService);
 
-            let workbook: Nullable<FWorkbook>;
-            let worksheet: Nullable<FWorksheet>;
-
-            const combined$ = combineLatest([lifeCycleService.lifecycle$, renderManagerService.created$]);
             const disposable = new DisposableCollection();
+            const combined$ = combineLatest([
+                renderManagerService.created$,
+                lifeCycleService.lifecycle$,
+            ]);
+            const unitMap = new Map<string, IDisposable>();
             // eslint-disable-next-line max-lines-per-function
-            this.disposeWithMe(combined$.subscribe(([lifecycle, r]) => {
-                if (r.type === UniverType.UNIVER_SHEET) {
-                    if (r.getRenderContext) {
-                        const wb = r.getRenderContext()?.unit as Workbook;
-                        if (wb) {
-                            workbook = this._injector.createInstance(FWorkbook, wb);
-                        }
-                    }
-
-                    worksheet = workbook?.getActiveSheet();
-                }
+            this.disposeWithMe(lifeCycleService.lifecycle$.subscribe((lifecycle) => {
                 if (lifecycle < LifecycleStages.Rendered) return;
-
-                if (!workbook || !worksheet) return;
-                const baseParams = {
-                    workbook,
-                    worksheet,
-                };
-
                 disposable.dispose();
                 const hoverManagerService = injector.get(HoverManagerService);
                 const dragManagerService = injector.get(DragManagerService);
@@ -251,6 +234,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentClickedCell$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellClicked)) return;
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellClicked, {
                                 ...baseParams,
                                 ...cell,
@@ -264,6 +250,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentCellPosWithEvent$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellPointerMove)) return;
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellPointerMove, {
                                 ...baseParams,
                                 ...cell,
@@ -277,6 +266,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentRichText$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellHover)) return;
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellHover, {
                                 ...baseParams,
                                 ...cell,
@@ -290,6 +282,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentPointerDownCell$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellPointerDown)) return;
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellPointerDown, {
                                 ...baseParams,
                                 ...cell,
@@ -303,6 +298,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentPointerUpCell$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellPointerUp)) return;
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellPointerUp, {
                                 ...baseParams,
                                 ...cell,
@@ -316,6 +314,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     hoverManagerService.currentCellPosWithEvent$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.CellPointerMove)) return;
+                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.CellPointerMove, {
                                 ...baseParams,
                                 ...cell,
@@ -329,6 +330,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     dragManagerService.currentCell$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.DragOver)) return;
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.DragOver, {
                                 ...baseParams,
                                 ...cell,
@@ -342,6 +346,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     dragManagerService.endCell$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
+                            if (!this._eventListend(this.Event.Drop)) return;
+                            const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
+                            if (!baseParams) return;
                             this.fireEvent(this.Event.Drop, {
                                 ...baseParams,
                                 ...cell,
@@ -353,6 +360,76 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             }));
 
             this.disposeWithMe(disposable);
+
+            this.disposeWithMe(combined$.subscribe(([created, lifecycle]) => {
+                if (lifecycle < LifecycleStages.Rendered) return;
+                if (created.type !== UniverInstanceType.UNIVER_SHEET) return;
+                const disposable = new DisposableCollection();
+                const workbook = this.getWorkbook(created.unitId);
+                if (unitMap.get(created.unitId)) {
+                    unitMap.get(created.unitId)?.dispose();
+                }
+                unitMap.set(created.unitId, disposable);
+                if (!workbook) return;
+                const scrollManagerService = created.with(SheetScrollManagerService);
+                disposable.add(scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                    if (!params) return;
+                    if (!this._eventListend(this.Event.Scroll)) return;
+                    this.fireEvent(this.Event.Scroll, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        ...params,
+                    });
+                }));
+
+                const selectionService = created.with(SheetsSelectionsService);
+                disposable.add(selectionService.selectionMoveStart$.subscribe((selections) => {
+                    if (!this._eventListend(this.Event.SelectionMoveStart)) return;
+                    this.fireEvent(this.Event.SelectionMoveStart, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                }));
+
+                disposable.add(selectionService.selectionMoving$.subscribe((selections) => {
+                    if (!this._eventListend(this.Event.SelectionMoving)) return;
+                    this.fireEvent(this.Event.SelectionMoving, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                }));
+
+                disposable.add(selectionService.selectionMoveEnd$.subscribe((selections) => {
+                    if (!this._eventListend(this.Event.SelectionMoveEnd)) return;
+                    this.fireEvent(this.Event.SelectionMoveEnd, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                }));
+
+                disposable.add(selectionService.selectionChanged$.subscribe((selections) => {
+                    if (!this._eventListend(this.Event.SelectionChanged)) return;
+                    this.fireEvent(this.Event.SelectionChanged, {
+                        workbook,
+                        worksheet: workbook.getActiveSheet(),
+                        selections: selections?.map((s) => s.range) ?? [],
+                    });
+                }));
+            }));
+
+            this.disposeWithMe(renderManagerService.disposed$.subscribe((unitId) => {
+                unitMap.get(unitId)?.dispose();
+                unitMap.delete(unitId);
+            }));
+
+            this.disposeWithMe(() => {
+                unitMap.forEach((disposable) => {
+                    disposable.dispose();
+                });
+            });
         }
     }
 

@@ -268,7 +268,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!hoverManagerService) return;
                 disposable.add(
                     hoverManagerService.currentClickedCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.CellClicked)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -344,7 +344,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     dragManagerService.currentCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.DragOver)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -360,7 +360,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     dragManagerService.endCell$
-                        .pipe(filter((cell) => !!cell))
+                        ?.pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {
                             if (!this._eventListend(this.Event.Drop)) return;
                             const baseParams = this.getSheetTarget(cell.location.unitId, cell.location.subUnitId);
@@ -405,7 +405,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     hoverManagerService.currentRowHeaderPointerUp$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.RowHeaderPointerUp)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
@@ -419,7 +419,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     hoverManagerService.currentHoveredRowHeader$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.RowHeaderHover)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
@@ -434,7 +434,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 // Column Header Events
                 disposable.add(
                     hoverManagerService.currentColHeaderClick$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.ColumnHeaderClick)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
@@ -448,7 +448,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     hoverManagerService.currentColHeaderPointerDown$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.ColumnHeaderPointerDown)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
@@ -462,7 +462,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     hoverManagerService.currentColHeaderPointerUp$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.ColumnHeaderPointerUp)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
@@ -476,7 +476,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
 
                 disposable.add(
                     hoverManagerService.currentHoveredColHeader$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.ColumnHeaderHover)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);

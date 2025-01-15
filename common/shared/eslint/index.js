@@ -49,6 +49,7 @@ exports.baseRules = {
     'react/no-unstable-context-value': 'warn',
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
+    'jsdoc/tag-lines': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',
@@ -177,6 +178,7 @@ exports.facadePreset = () => {
             'ts/explicit-function-return-type': 'error',
             'univer/no-external-imports-in-facade': 'error',
             ...jsdoc.configs.recommended.rules,
+            'jsdoc/tag-lines': 'off',
         },
     };
 };

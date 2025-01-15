@@ -22,6 +22,7 @@ import { Disposable } from '../shared';
  * It provides a way to extend classes with static and instance methods.
  * The `_initialize` as a special method that will be called after the constructor. You should never call it directly.
  */
+/** @ignore */
 export abstract class FBase extends Disposable {
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
@@ -40,10 +41,12 @@ export abstract class FBase extends Disposable {
     }
 }
 
+/** @ignore */
 const InitializerSymbol = Symbol('initializers');
 
 type Initializers = Array<(injector: Injector) => void>;
 
+/** @ignore */
 export class FBaseInitialable extends Disposable {
     declare private [InitializerSymbol]: Initializers | undefined;
 

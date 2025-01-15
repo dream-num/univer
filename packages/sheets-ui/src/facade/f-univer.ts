@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Injector, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Injector, IRange, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
@@ -25,9 +25,9 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
-import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
-import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, RichTextValue, toDisposable } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ICellEventParam, IScrollEventParam, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
+import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
@@ -203,6 +203,93 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 }
             }
         }));
+
+        this._initObserverListener(injector);
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    _initObserverListener(injector: Injector): void {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const unitM = univerInstanceService.getFocusedUnit();
+        const unitId = unitM?.getUnitId();
+        if (unitId) {
+            const liftCycleService = this._injector.get(LifecycleService);
+
+            liftCycleService.lifecycle$.subscribe((stage) => {
+                if (stage === LifecycleStages.Rendered) {
+                    const workbook = this.getActiveWorkbook();
+                    const worksheet = workbook?.getActiveSheet();
+                    if (!workbook || !worksheet) return;
+                    const baseParams = {
+                        workbook,
+                        worksheet,
+                    };
+
+                    workbook.onScroll((params: Nullable<IViewportScrollState>) => {
+                        this.fireEvent(this.Event.Scroll, {
+                            scrollX: params?.viewportScrollX,
+                            scrollY: params?.viewportScrollY,
+                            ...baseParams,
+                        } as IScrollEventParam);
+                    });
+                    workbook.onCellClick((cell) => {
+                        this.fireEvent(this.Event.CellClicked, {
+                            row: cell.location.row,
+                            column: cell.location.col,
+                            ...baseParams,
+                        } as ICellEventParam);
+                    });
+
+                    workbook.onDrop((cell) => {
+                        this.fireEvent(this.Event.Drop, {
+                            row: cell.location.row,
+                            column: cell.location.col,
+                            ...baseParams,
+                        });
+                    });
+
+                    workbook.onSelectionMoveStart((selections: IRange[]) => {
+                        this.fireEvent(this.Event.SelectionMoveStart, {
+                            selections,
+                            ...baseParams,
+                        });
+                    });
+
+                    workbook.onSelectionMoving((selections: IRange[]) => {
+                        this.fireEvent(this.Event.SelectionMoving, {
+                            selections,
+                            ...baseParams,
+                        });
+                    });
+
+                    workbook.onSelectionMoving((selections: IRange[]) => {
+                        this.fireEvent(this.Event.SelectionMoving, {
+                            selections,
+                            ...baseParams,
+                        });
+                    });
+
+                    workbook.onSelectionMoveEnd((selections: IRange[]) => {
+                        this.fireEvent(this.Event.SelectionMoveEnd, {
+                            selections,
+                            ...baseParams,
+                        });
+                    });
+
+                    workbook.onSelectionChanged((selections: IRange[]) => {
+                        this.fireEvent(this.Event.SelectionChanged, {
+                            selections,
+                            ...baseParams,
+                        });
+                    });
+                }
+            });
+        }
+
+        // too late!
+        // univerInstanceService.unitAdded$.subscribe((p) => {
+        //     console.log('univer ins add', p.getUnitId());
+        // });
     }
 
     override _initialize(injector: Injector): void {

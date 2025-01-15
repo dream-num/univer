@@ -315,7 +315,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when drop on spreadsheet cells
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent('Drop', (p)=> console.log(p));
+     * univerAPI.addEvent('Drop', (p)=> console.log(p));
      * ```
      */
     readonly Drop: 'Drop';
@@ -324,7 +324,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when scroll spreadsheet.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('Scroll', (p)=> console.log(p));
+     * univerAPI.addEvent('Scroll', (p)=> console.log(p));
      * ```
      */
     readonly Scroll: 'Scroll';
@@ -333,7 +333,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection changed.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionChanged', (p)=> console.log(p));
+     * univerAPI.addEvent('SelectionChanged', (p)=> console.log(p));
      * ```
      */
     readonly SelectionChanged: 'SelectionChanged';
@@ -342,7 +342,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection move end
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionMoveStart', (p)=> console.log(p));
+     * univerAPI.addEvent('SelectionMoveStart', (p)=> console.log(p));
      * ```
      */
     readonly SelectionMoveStart: 'SelectionMoveStart';
@@ -351,7 +351,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection move end
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionMoving', (p)=> console.log(p));
+     * univerAPI.addEvent('SelectionMoving', (p)=> console.log(p));
      * ```
      */
     readonly SelectionMoving: 'SelectionMoving';
@@ -360,7 +360,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when selection move end
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().addEvent('SelectionMoveEnd', (p)=> console.log(p));
+     * univerAPI.addEvent('SelectionMoveEnd', (p)=> console.log(p));
      * ```
      */
     readonly SelectionMoveEnd: 'SelectionMoveEnd';

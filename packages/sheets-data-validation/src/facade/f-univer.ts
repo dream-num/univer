@@ -121,6 +121,7 @@ export class FUnvierDataValidationMixin extends FUniver {
                         ruleId: params.ruleId,
                         newCriteria: params.setting,
                     };
+
                     this.fireEvent(this.Event.BeforeSheetDataValidationCriteriaUpdate, eventParams);
                     if (eventParams.cancel) {
                         throw new CanceledError();

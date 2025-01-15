@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IEventParamConfig, IRange, Nullable } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IRange } from '@univerjs/core';
+import type { IScrollState } from '@univerjs/sheets-ui';
 
-import type { IFSheetsUIEventParamConfig, IScrollEventParam, ISheetUIEventBase } from './f-event';
-import { ICommandService, toDisposable } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { CellFEventName } from './f-event';
 
 export interface IFWorksheetSkeletonMixin {
     /**
@@ -93,126 +89,9 @@ export interface IFWorksheetSkeletonMixin {
      */
     getScrollState(): IScrollState;
 
-    /**
-     * Invoked when scrolling the sheet.
-     * @param {function(Nullable<IViewportScrollState>): void} callback The scrolling callback function.
-     * @returns {IDisposable} The disposable object to remove the event listener.
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onScroll((params) => {...})
-     * ```
-     */
-    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable>;
-
-    /**
-     * Invoked when the start a selection by mouse/pointer down event.
-     * @param callback
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveStart((params) => {...})
-     * ```
-     */
-    onSelectionMoveStart(callback: (params: IRange[]) => void): Nullable<IDisposable>;
-
-    /**
-     * Invoked when moving cursor to adjust selection by mouse/pointer event.
-     * @param callback
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveMoving((params) => {...})
-     * ```
-     */
-    onSelectionMoving(callback: (params: IRange[]) => void): Nullable<IDisposable>;
-
-    /**
-     * Invoked when end a selection by mouse/pointer up event.
-     * @param callback
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionMoveEnd((params) => {...})
-     * ```
-     */
-    onSelectionMoveEnd(callback: (params: IRange[]) => void): Nullable<IDisposable>;
-
-    /**
-     * Invoked when the selection is changed.
-     * @param callback
-     * @example
-     * ``` ts
-     * univerAPI.getActiveWorkbook().getActiveSheet().onSelectionChanged((params) => {...})
-     * ```
-     */
-    onSelectionChanged(callback: (params: IRange[]) => void): Nullable<IDisposable>;
-
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
-    /**
-     * Fire an event, used in internal only.
-     * @param event {string} key of event
-     * @param params {any} params of event
-     * @returns {boolean} should cancel
-     * @example
-     * ```ts
-     * this.fireEvent(univerAPI.event.UnitCreated, params);
-     * ```
-     */
-    protected fireUIEvent<T extends keyof IFSheetsUIEventParamConfig>(event: T, params: IFSheetsUIEventParamConfig[T]): boolean | undefined {
-        return super.fireEvent(event, params as unknown as IEventParamConfig[T]);
-    }
-
-    override addUIEvent(event: keyof IFSheetsUIEventParamConfig, _callback: (params: IFSheetsUIEventParamConfig[typeof event]) => void): void {
-        const baseParams: ISheetUIEventBase = {
-            workbook: this._fWorkbook,
-            worksheet: this,
-        };
-        switch (event) {
-            case CellFEventName.Scroll:
-                this.onScroll((params: Nullable<IViewportScrollState>) => {
-                    this.fireUIEvent(this.Event.Scroll, {
-                        scrollX: params?.viewportScrollX,
-                        scrollY: params?.viewportScrollY,
-                        ...baseParams,
-                    } as IScrollEventParam);
-                });
-                break;
-
-            case CellFEventName.SelectionMoveStart:
-                this.onSelectionMoveStart((selections: IRange[]) => {
-                    this.fireUIEvent(this.Event.SelectionMoveStart, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
-                break;
-
-            case CellFEventName.SelectionMoving:
-                this.onSelectionMoving((selections: IRange[]) => {
-                    this.fireUIEvent(this.Event.SelectionMoving, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
-                break;
-
-            case CellFEventName.SelectionMoveEnd:
-                this.onSelectionMoveEnd((selections: IRange[]) => {
-                    this.fireUIEvent(this.Event.SelectionMoveEnd, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
-                break;
-            case CellFEventName.SelectionChanged:
-                this.onSelectionChanged((selections: IRange[]) => {
-                    this.fireUIEvent(this.Event.SelectionChanged, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
-        }
-    }
-
     override refreshCanvas(): FWorksheet {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const unitId = this._fWorkbook.id;
@@ -304,86 +183,6 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const sheetScrollManagerService = render.with(SheetScrollManagerService);
         const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
         return scrollState || emptyScrollState;
-    }
-
-    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): Nullable<IDisposable> {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
-        if (scrollManagerService) {
-            const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
-                callback(params);
-            });
-            return toDisposable(sub);
-        }
-    }
-
-    override onSelectionMoveStart(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
-        if (selectionService) {
-            return toDisposable(
-                this._selectionManagerService.selectionMoveStart$.subscribe((selections) => {
-                    if (!selections?.length) {
-                        callback([]);
-                    } else {
-                        callback(selections!.map((s) => s.range));
-                    }
-                })
-            );
-        }
-    }
-
-    override onSelectionMoving(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
-        if (selectionService) {
-            return toDisposable(
-                this._selectionManagerService.selectionMoving$.subscribe((selections) => {
-                    if (!selections?.length) {
-                        callback([]);
-                    } else {
-                        callback(selections!.map((s) => s.range));
-                    }
-                })
-            );
-        }
-    }
-
-    override onSelectionMoveEnd(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
-        if (selectionService) {
-            return toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                    if (!selections?.length) {
-                        callback([]);
-                    } else {
-                        callback(selections!.map((s) => s.range));
-                    }
-                })
-            );
-        }
-    }
-
-    override onSelectionChanged(callback: (selections: IRange[]) => void): Nullable<IDisposable> {
-        const unitId = this._workbook.getUnitId();
-        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
-        const selectionService = renderManagerService.getRenderById(unitId)?.with(SheetsSelectionsService);
-        if (selectionService) {
-            return toDisposable(
-                this._selectionManagerService.selectionChanged$.subscribe((selections) => {
-                    if (!selections?.length) {
-                        callback([]);
-                    } else {
-                        callback(selections!.map((s) => s.range));
-                    }
-                })
-            );
-        }
     }
 }
 

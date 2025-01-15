@@ -111,6 +111,18 @@ export interface IFUniverSheetsMixin {
      * ```
      */
     getCommandSheetTarget(commandInfo: ICommandInfo<object>): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
+
+    /**
+     * Get the active sheet.
+     * @returns {Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>} The active sheet.
+     * @example
+     * ```ts
+     * const target = univerAPI.getActiveSheet();
+     * if (!target) return;
+     * const { workbook, worksheet } = target;
+     * ```
+     */
+    getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }>;
 }
 
 export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
@@ -302,6 +314,18 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
 
     override newDefinedName(): FDefinedNameBuilder {
         return this._injector.createInstance(FDefinedNameBuilder);
+    }
+
+    override getActiveSheet(): Nullable<{ workbook: FWorkbook; worksheet: FWorksheet }> {
+        const workbook = this.getActiveWorkbook();
+        if (!workbook) {
+            return null;
+        }
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return null;
+        }
+        return { workbook, worksheet };
     }
 }
 

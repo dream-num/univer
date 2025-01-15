@@ -134,7 +134,7 @@ export interface IFSheetEventMixin {
     get SheetNameChanged(): 'SheetNameChanged';
     /**
      * Event fired before a sheet name is changed
-     * @see {@link IBeforeSheetNameChange}
+     * @see {@link IBeforeSheetNameChangeEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetNameChange, (params) => {
@@ -158,7 +158,7 @@ export interface IFSheetEventMixin {
     get SheetTabColorChanged(): 'SheetTabColorChanged';
     /**
      * Event fired before a sheet tab color is changed
-     * @see {@link IBeforeSheetTabColorChange}
+     * @see {@link IBeforeSheetTabColorChangeEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetTabColorChange, (params) => {
@@ -182,7 +182,7 @@ export interface IFSheetEventMixin {
     get SheetHideChanged(): 'SheetHideChanged';
     /**
      * Event fired before a sheet is hidden
-     * @see {@link IBeforeSheetHideChange}
+     * @see {@link IBeforeSheetHideChangeEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetHideChange, (params) => {

@@ -59,6 +59,19 @@ export interface IFSheetEventMixin {
      * });
      * ```
      */
+
+    get BeforeActiveSheetChange(): 'BeforeActiveSheetChange';
+    get ActiveSheetChanged(): 'ActiveSheetChanged';
+    get SheetDeleted(): 'SheetDeleted';
+    get BeforeSheetDelete(): 'BeforeSheetDelete';
+    get SheetMoved(): 'SheetMoved';
+    get BeforeSheetMove(): 'BeforeSheetMove';
+    get SheetNameChanged(): 'SheetNameChanged';
+    get BeforeSheetNameChange(): 'BeforeSheetNameChange';
+    get SheetTabColorChanged(): 'SheetTabColorChanged';
+    get BeforeSheetTabColorChange(): 'BeforeSheetTabColorChange';
+    get SheetHideChanged(): 'SheetHideChanged';
+    get BeforeSheetHideChange(): 'BeforeSheetHideChange';
     get WorkbookCreated(): 'WorkbookCreated';
     /**
      * Event fired after a workbook is disposed

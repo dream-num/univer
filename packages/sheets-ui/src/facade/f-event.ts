@@ -16,7 +16,7 @@
 
 import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
 import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
+import type { CommandListenerSkeletonChange, CommandListenerValueChange } from '@univerjs/sheets';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core';
@@ -520,6 +520,17 @@ export interface IFSheetsUIEventNameMixin {
      */
     readonly SheetSkeletonChanged: 'SheetSkeletonChanged';
 
+    /**
+     * Event fired when sheet value changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (p)=> {
+     *      const { workbook, effectedRanges, payload } = p;
+     * });
+     * ```
+     */
+    readonly SheetValueChanged: 'SheetValueChanged';
+
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -642,6 +653,10 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get SheetSkeletonChanged(): 'SheetSkeletonChanged' {
         return 'SheetSkeletonChanged' as const;
     }
+
+    override get SheetValueChanged(): 'SheetValueChanged' {
+        return 'SheetValueChanged' as const;
+    }
 }
 
 export interface ISheetUIEventBase extends IEventBase {
@@ -746,6 +761,11 @@ export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
     payload: CommandListenerSkeletonChange;
 }
 
+export interface ISheetValueChangedEvent extends IEventBase {
+    effectedRanges: FRange[];
+    payload: CommandListenerValueChange;
+}
+
 export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;
@@ -789,6 +809,7 @@ export interface IFSheetsUIEventParamConfig {
     BeforeSheetZoomChange: ISheetZoomEvent;
 
     SheetSkeletonChanged: ISheetSkeletonChangedEvent;
+    SheetValueChanged: ISheetValueChangedEvent;
 }
 
 FEventName.extend(FSheetsUIEventName);

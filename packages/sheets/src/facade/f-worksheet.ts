@@ -311,11 +311,15 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     getRange(a1Notation: string): FRange;
-    getRange(rowOrA1Notation: number | string, column?: number, numRows?: number, numColumns?: number): FRange {
+    getRange(range: IRange): FRange;
+    getRange(rowOrA1Notation: IRange | number | string, column?: number, numRows?: number, numColumns?: number): FRange {
         let range: IRange;
         let sheet: Worksheet;
 
-        if (typeof rowOrA1Notation === 'string') {
+        if (typeof rowOrA1Notation === 'object') {
+            range = rowOrA1Notation;
+            sheet = this._worksheet;
+        } else if (typeof rowOrA1Notation === 'string') {
             // A1 notation
             const { range: parsedRange, sheetName } = deserializeRangeWithSheet(rowOrA1Notation);
 

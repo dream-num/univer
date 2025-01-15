@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Injector, IRange, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Injector, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
@@ -26,13 +26,16 @@ import type {
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
 import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { FWorksheet } from '@univerjs/sheets/facade';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ICellEventParam, IScrollEventParam, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
 import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverType } from '@univerjs/protocol';
 import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
-import { FSheetHooks } from '@univerjs/sheets/facade';
+import { FSheetHooks, FWorkbook } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
+import { combineLatest } from 'rxjs';
 
 export interface IFUniverSheetsUIMixin {
     /**
@@ -212,77 +215,90 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const univerInstanceService = injector.get(IUniverInstanceService);
         const unitM = univerInstanceService.getFocusedUnit();
         const unitId = unitM?.getUnitId();
+        const renderManagerService = injector.get(IRenderManagerService);
         if (unitId) {
-            const liftCycleService = this._injector.get(LifecycleService);
+            const lifeCycleService = this._injector.get(LifecycleService);
 
-            liftCycleService.lifecycle$.subscribe((stage) => {
-                if (stage === LifecycleStages.Rendered) {
-                    const workbook = this.getActiveWorkbook();
-                    const worksheet = workbook?.getActiveSheet();
-                    if (!workbook || !worksheet) return;
-                    const baseParams = {
-                        workbook,
-                        worksheet,
-                    };
+            let workbook: Nullable<FWorkbook>;
+            let worksheet: Nullable<FWorksheet>;
 
-                    workbook.onScroll((params: Nullable<IViewportScrollState>) => {
-                        this.fireEvent(this.Event.Scroll, {
-                            scrollX: params?.viewportScrollX,
-                            scrollY: params?.viewportScrollY,
-                            ...baseParams,
-                        } as IScrollEventParam);
-                    });
-                    workbook.onCellClick((cell) => {
-                        this.fireEvent(this.Event.CellClicked, {
-                            row: cell.location.row,
-                            column: cell.location.col,
-                            ...baseParams,
-                        } as ICellEventParam);
-                    });
+            const combined$ = combineLatest([lifeCycleService.lifecycle$, renderManagerService.created$]);
+            combined$.subscribe(([lifecycle, r]) => {
+                if (r.type === UniverType.UNIVER_SHEET) {
+                    if (r.getRenderContext) {
+                        const wb = r.getRenderContext()?.unit as Workbook;
+                        if (wb) {
+                            workbook = this._injector.createInstance(FWorkbook, wb);
+                        }
+                    }
 
-                    workbook.onDrop((cell) => {
-                        this.fireEvent(this.Event.Drop, {
-                            row: cell.location.row,
-                            column: cell.location.col,
-                            ...baseParams,
-                        });
-                    });
-
-                    workbook.onSelectionMoveStart((selections: IRange[]) => {
-                        this.fireEvent(this.Event.SelectionMoveStart, {
-                            selections,
-                            ...baseParams,
-                        });
-                    });
-
-                    workbook.onSelectionMoving((selections: IRange[]) => {
-                        this.fireEvent(this.Event.SelectionMoving, {
-                            selections,
-                            ...baseParams,
-                        });
-                    });
-
-                    workbook.onSelectionMoving((selections: IRange[]) => {
-                        this.fireEvent(this.Event.SelectionMoving, {
-                            selections,
-                            ...baseParams,
-                        });
-                    });
-
-                    workbook.onSelectionMoveEnd((selections: IRange[]) => {
-                        this.fireEvent(this.Event.SelectionMoveEnd, {
-                            selections,
-                            ...baseParams,
-                        });
-                    });
-
-                    workbook.onSelectionChanged((selections: IRange[]) => {
-                        this.fireEvent(this.Event.SelectionChanged, {
-                            selections,
-                            ...baseParams,
-                        });
-                    });
+                    worksheet = workbook?.getActiveSheet();
                 }
+                if (lifecycle < LifecycleStages.Rendered) return;
+
+                if (!workbook || !worksheet) return;
+                const baseParams = {
+                    workbook,
+                    worksheet,
+                };
+
+                workbook.onScroll((params: Nullable<IViewportScrollState>) => {
+                    this.fireEvent(this.Event.Scroll, {
+                        scrollX: params?.viewportScrollX,
+                        scrollY: params?.viewportScrollY,
+                        ...baseParams,
+                    } as IScrollEventParam);
+                });
+                workbook.onCellClick((cell) => {
+                    this.fireEvent(this.Event.CellClicked, {
+                        row: cell.location.row,
+                        column: cell.location.col,
+                        ...baseParams,
+                    } as ICellEventParam);
+                });
+
+                workbook.onDrop((cell) => {
+                    this.fireEvent(this.Event.Drop, {
+                        row: cell.location.row,
+                        column: cell.location.col,
+                        ...baseParams,
+                    });
+                });
+
+                workbook.onSelectionMoveStart((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoveStart, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+
+                workbook.onSelectionMoving((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoving, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+
+                workbook.onSelectionMoving((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoving, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+
+                workbook.onSelectionMoveEnd((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionMoveEnd, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
+
+                workbook.onSelectionChanged((selections: IRange[]) => {
+                    this.fireEvent(this.Event.SelectionChanged, {
+                        selections,
+                        ...baseParams,
+                    });
+                });
             });
         }
 

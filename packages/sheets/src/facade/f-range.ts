@@ -533,7 +533,7 @@ export class FRange extends FBaseInitialable {
     /**
      * Sets basic border properties for the current range.
      * @param {BorderType} type The type of border to apply
-     * @param {BorderStyleType} style The border style
+     * @param {BorderStyleTypes} style The border style
      * @param {string} [color] Optional border color in CSS notation
      * @returns {FRange} This range, for chaining
      * @example

@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IMessageProps } from '@univerjs/design';
-import type { BuiltInUIPart, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { BuiltInUIPart, ComponentType, IComponentOptions, IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import type { IFacadeMenuItem, IFacadeSubmenuItem } from './f-menu-builder';
 import { connectInjector, FUniver } from '@univerjs/core';
 import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISidebarService, IUIPartsService, PasteCommand } from '@univerjs/ui';
@@ -140,6 +140,16 @@ export interface IFUniverUIMixin {
      * ```
      */
     registerUIPart(key: BuiltInUIPart, component: any): IDisposable;
+
+    /**
+     * register an component.
+     * @param component
+     * @example
+     * ```ts
+     * univerAPI.registerComponent(() => React.createElement('h1', null, 'Custom Header'));
+     * ```
+     */
+    registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
 }
 
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
@@ -211,6 +221,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override registerUIPart(key: BuiltInUIPart, component: any): IDisposable {
         const uiPartService = this._injector.get(IUIPartsService);
         return uiPartService.registerComponent(key, () => connectInjector(component, this._injector));
+    }
+
+    override registerComponent(name: string, component: any, options?: IComponentOptions): IDisposable {
+        const componentManager = this._injector.get(ComponentManager);
+        return this.disposeWithMe(componentManager.register(name, component, options));
     }
 }
 

@@ -84,7 +84,7 @@ export interface IFWorksheetLegacy {
         dispose();
     }, 2000)
 
-    // -------------------
+    // another example-------------------
     {
      const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      //  const range = sheet.getRange(0, 0, 3, 3);
@@ -123,19 +123,20 @@ export interface IFWorksheetLegacy {
      * ```ts
     {
      const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     const range = sheet.getRange(0, 3, 1, 1);
-     univerAPI.getActiveWorkbook().setActiveRange(range);
-     const rs = sheet.addFloatDomToColumnHeader(3, {
-            allowTransform: false,
-            componentKey: 'ImageDemo',
-            props: {
-                a: 1,
+     const rs = sheet.addFloatDomToColumnHeader(3,
+            {
+                allowTransform: false,
+                componentKey: 'FloatButton', // React comp key registered in ComponentManager
+                props: {
+                    a: 1,
+                },
+                data: {
+                    aa: '128',
+                },
             },
-            data: {
-                aa: '128',
-            },
-        }, {
-        width: 100, height: 40, x: 0, y: 0}, 'ai-selector')
+            {width: 100, height: 40, x: 0, y: 0},
+            'ai-selector' // dom id
+        )
     }
      *```
      */

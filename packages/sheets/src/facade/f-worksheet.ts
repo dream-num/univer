@@ -20,7 +20,8 @@ import type { FDefinedName } from './f-defined-name';
 import type { FWorkbook } from './f-workbook';
 import { BooleanNumber, Direction, FBaseInitialable, ICommandService, ILogService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { CancelFrozenCommand, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, copyRangeStyles, InsertColByRangeCommand, InsertRowByRangeCommand, MoveColsCommand, MoveRowsCommand, RemoveColByRangeCommand, RemoveRowByRangeCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetGridlinesColorCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetTabColorCommand, SetWorksheetDefaultStyleMutation, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SetWorksheetShowCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { endWith } from 'rxjs';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -762,6 +763,37 @@ export class FWorksheet extends FBaseInitialable {
      */
     setRowHeight(rowPosition: number, height: number): FWorksheet {
         return this.setRowHeights(rowPosition, 1, height);
+    }
+
+    /**
+     *
+     * @param rowPosition
+     * @param auto
+     * @returns {FWorksheet} this
+     * @example
+     * ```ts
+     const fWorkbook = univerAPI.getActiveWorkbook();
+     const fWorkSheet = fWorkbook.getActiveSheet();
+     fWorkSheet.autoFitRow(24);
+     * ```
+     */
+    autoFitRow(rowPosition: number, auto: BooleanNumber = BooleanNumber.TRUE): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [{
+            startRow: rowPosition,
+            endRow: rowPosition,
+            startColumn: 0,
+            endColumn: this._worksheet.getColumnCount() - 1,
+        }];
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightMutation.id,
+            {
+                unitId,
+                subUnitId,
+                ranges,
+                autoHeightInfo: auto,
+            });
+        return this;
     }
 
     /**

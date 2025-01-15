@@ -32,7 +32,7 @@ export const FloatButton = () => {
     };
     return (
         <div style={divStyle} onClick={clickHandler}>
-            AI Generate
+            FloatButton
         </div>
     );
 };

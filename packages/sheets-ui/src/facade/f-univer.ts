@@ -247,22 +247,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 );
 
                 disposable.add(
-                    hoverManagerService.currentCellPosWithEvent$
-                        .pipe(filter((cell) => !!cell))
-                        .subscribe((cell) => {
-                            if (!this._eventListend(this.Event.CellPointerMove)) return;
-                            const baseParams = this.getSheetTarget(cell.unitId, cell.subUnitId);
-                            if (!baseParams) return;
-                            this.fireEvent(this.Event.CellPointerMove, {
-                                ...baseParams,
-                                ...cell,
-                                row: cell.row,
-                                column: cell.col,
-                            });
-                        })
-                );
-
-                disposable.add(
                     hoverManagerService.currentRichText$
                         .pipe(filter((cell) => !!cell))
                         .subscribe((cell) => {

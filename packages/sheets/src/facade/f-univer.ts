@@ -309,15 +309,17 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
                     if (!this._eventListend(this.Event.SheetValueChanged)) return;
                     const sheet = this.getActiveSheet();
                     if (!sheet) return;
+                    const ranges = getValueChangedEffectedRange(commandInfo)
+                        .map(
+                            (range) => this.getWorkbook(range.unitId)
+                                ?.getSheetBySheetId(range.subUnitId)
+                                ?.getRange(range.range)
+                        )
+                        .filter(Boolean) as FRange[];
+                    if (!ranges.length) return;
                     this.fireEvent(this.Event.SheetValueChanged, {
                         payload: commandInfo as CommandListenerValueChange,
-                        effectedRanges: getValueChangedEffectedRange(commandInfo)
-                            .map(
-                                (range) => this.getWorkbook(range.unitId)
-                                    ?.getSheetBySheetId(range.subUnitId)
-                                    ?.getRange(range.range)
-                            )
-                            .filter(Boolean) as FRange[],
+                        effectedRanges: ranges,
                     });
                     return;
                 }

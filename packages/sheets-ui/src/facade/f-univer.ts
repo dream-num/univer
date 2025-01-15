@@ -588,14 +588,17 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!this._eventListend(this.Event.SheetSkeletonChanged)) return;
                 const sheet = this.getActiveSheet();
                 if (!sheet) return;
+                const ranges = getSkeletonChangedEffectedRange(commandInfo)
+                    .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
+                    .filter(Boolean) as FRange[];
+                if (!ranges.length) return;
+
                 this.fireEvent(this.Event.SheetSkeletonChanged, {
                     workbook: sheet.workbook,
                     worksheet: sheet.worksheet,
                     payload: commandInfo as CommandListenerSkeletonChange,
                     skeleton: sheet.worksheet.getSkeleton()!,
-                    effectedRanges: getSkeletonChangedEffectedRange(commandInfo)
-                        .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
-                        .filter(Boolean) as FRange[],
+                    effectedRanges: ranges,
                 });
                 return;
             }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, Injector, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDisposable, Injector, Nullable, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type {
     IColumnsHeaderCfgParam,
@@ -25,17 +25,17 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams } from '@univerjs/sheets-ui';
 import type { FWorksheet } from '@univerjs/sheets/facade';
-import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ICellEventParam, IScrollEventParam, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
-import { CanceledError, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
+import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
+import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverType } from '@univerjs/protocol';
-import { IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
 import { FSheetHooks, FWorkbook } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
-import { combineLatest } from 'rxjs';
+import { combineLatest, filter } from 'rxjs';
 
 export interface IFUniverSheetsUIMixin {
     /**
@@ -217,13 +217,15 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const unitId = unitM?.getUnitId();
         const renderManagerService = injector.get(IRenderManagerService);
         if (unitId) {
-            const lifeCycleService = this._injector.get(LifecycleService);
+            const lifeCycleService = injector.get(LifecycleService);
 
             let workbook: Nullable<FWorkbook>;
             let worksheet: Nullable<FWorksheet>;
 
             const combined$ = combineLatest([lifeCycleService.lifecycle$, renderManagerService.created$]);
-            combined$.subscribe(([lifecycle, r]) => {
+            const disposable = new DisposableCollection();
+            // eslint-disable-next-line max-lines-per-function
+            this.disposeWithMe(combined$.subscribe(([lifecycle, r]) => {
                 if (r.type === UniverType.UNIVER_SHEET) {
                     if (r.getRenderContext) {
                         const wb = r.getRenderContext()?.unit as Workbook;
@@ -242,70 +244,114 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     worksheet,
                 };
 
-                workbook.onScroll((params: Nullable<IViewportScrollState>) => {
-                    this.fireEvent(this.Event.Scroll, {
-                        scrollX: params?.viewportScrollX,
-                        scrollY: params?.viewportScrollY,
-                        ...baseParams,
-                    } as IScrollEventParam);
-                });
-                workbook.onCellClick((cell) => {
-                    this.fireEvent(this.Event.CellClicked, {
-                        row: cell.location.row,
-                        column: cell.location.col,
-                        ...baseParams,
-                    } as ICellEventParam);
-                });
+                disposable.dispose();
+                const hoverManagerService = injector.get(HoverManagerService);
+                const dragManagerService = injector.get(DragManagerService);
+                disposable.add(
+                    hoverManagerService.currentClickedCell$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellClicked, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                );
 
-                workbook.onDrop((cell) => {
-                    this.fireEvent(this.Event.Drop, {
-                        row: cell.location.row,
-                        column: cell.location.col,
-                        ...baseParams,
-                    });
-                });
+                disposable.add(
+                    hoverManagerService.currentCellPosWithEvent$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellPointerMove, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                );
 
-                workbook.onSelectionMoveStart((selections: IRange[]) => {
-                    this.fireEvent(this.Event.SelectionMoveStart, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
+                disposable.add(
+                    hoverManagerService.currentRichText$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellHover, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                );
 
-                workbook.onSelectionMoving((selections: IRange[]) => {
-                    this.fireEvent(this.Event.SelectionMoving, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
+                disposable.add(
+                    hoverManagerService.currentPointerDownCell$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellPointerDown, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                );
 
-                workbook.onSelectionMoving((selections: IRange[]) => {
-                    this.fireEvent(this.Event.SelectionMoving, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
+                disposable.add(
+                    hoverManagerService.currentPointerUpCell$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellPointerUp, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                );
 
-                workbook.onSelectionMoveEnd((selections: IRange[]) => {
-                    this.fireEvent(this.Event.SelectionMoveEnd, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
+                disposable.add(
+                    hoverManagerService.currentCellPosWithEvent$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.CellPointerMove, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.row,
+                                column: cell.col,
+                            });
+                        })
+                );
 
-                workbook.onSelectionChanged((selections: IRange[]) => {
-                    this.fireEvent(this.Event.SelectionChanged, {
-                        selections,
-                        ...baseParams,
-                    });
-                });
-            });
+                disposable.add(
+                    dragManagerService.currentCell$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.DragOver, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    dragManagerService.endCell$
+                        .pipe(filter((cell) => !!cell))
+                        .subscribe((cell) => {
+                            this.fireEvent(this.Event.Drop, {
+                                ...baseParams,
+                                ...cell,
+                                row: cell.location.row,
+                                column: cell.location.col,
+                            });
+                        })
+                );
+            }));
         }
-
-        // too late!
-        // univerInstanceService.unitAdded$.subscribe((p) => {
-        //     console.log('univer ins add', p.getUnitId());
-        // });
     }
 
     override _initialize(injector: Injector): void {

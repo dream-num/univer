@@ -382,7 +382,7 @@ export interface ISheetDeletedEvent extends IEventBase {
     /** The workbook instance containing the worksheet */
     workbook: FWorkbook;
     /** The worksheet that was deleted */
-    worksheetId: string;
+    sheetId: string;
 }
 
 /**
@@ -435,8 +435,6 @@ export interface ISheetNameChangedEvent extends IEventBase {
     worksheet: FWorksheet;
     /** The new name of the sheet */
     newName: string;
-    /** The previous name of the sheet */
-    oldName: string;
 }
 
 /**
@@ -450,6 +448,8 @@ export interface IBeforeSheetNameChangeEvent extends IEventBase {
     worksheet: FWorksheet;
     /** The new name to be applied */
     newName: string;
+    /** The current name of the sheet */
+    oldName: string;
 }
 
 /**
@@ -462,7 +462,7 @@ export interface ISheetTabColorChangedEvent extends IEventBase {
     /** The worksheet whose tab color was changed */
     worksheet: FWorksheet;
     /** The new color of the sheet tab */
-    newColor: string | null;
+    newColor: string | undefined;
 }
 
 /**
@@ -475,9 +475,9 @@ export interface IBeforeSheetTabColorChangeEvent extends IEventBase {
     /** The worksheet whose tab color will be changed */
     worksheet: FWorksheet;
     /** The new color to be applied */
-    newColor: string | null;
+    newColor: string | undefined;
     /** The current color of the sheet tab */
-    oldColor: string | null;
+    oldColor: string | undefined;
 }
 
 /**

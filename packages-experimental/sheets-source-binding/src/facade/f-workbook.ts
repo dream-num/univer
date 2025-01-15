@@ -39,6 +39,26 @@ export interface IFWorkbookSourceBindingMixin {
      * @param {string} sourceId The source id.
      */
     getSource(sourceId: string): SourceModelBase | undefined;
+    /**
+     * Set the source data by the specified source id.
+     * @param {string} sourceId - The source id which you want to set data.
+     * @param data - The source data. If the source is a list object, the data should be an array of objects.
+     * If the isListObject is false, the data should look like below:
+     * ```typescript
+     * {
+     *   fields: ['name', 'age'],
+     *   records: [['Tom', 18], ['Jerry', 20]]
+     * }
+     * ```
+     * If the isListObject is true, the data should look like below:
+     * ```typescript
+     * {
+     *   fields: ['name', 'age'],
+     *   records: [{name: 'Tom', age: 18}, {name: 'Jerry', age: 20}]
+     * }
+     * ```
+     */
+    setSourceData(sourceId: string, data: any): void;
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
@@ -52,6 +72,15 @@ export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourc
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
         return sheetsSourceBindService.getSource(this.getId(), sourceId);
+    }
+
+    override setSourceData(sourceId: string, data: any): void {
+        const injector = this._injector;
+        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
+        const source = sheetsSourceBindService.getSource(this.getId(), sourceId);
+        if (source) {
+            source.setSourceData(data);
+        }
     }
 
     override usePathMode(): void {

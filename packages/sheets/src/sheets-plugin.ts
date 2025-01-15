@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { AUTO_HEIGHT_FOR_MERGED_CELLS, DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
@@ -28,12 +28,12 @@ import { NumberCellDisplayController } from './controllers/number-cell.controlle
 import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
-import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 
+import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { RangeProtectionCache } from './model/range-protection.cache';
-import { SheetRangeThemeModel } from './model/range-theme-model';
 
+import { SheetRangeThemeModel } from './model/range-theme-model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
@@ -79,6 +79,9 @@ export class UniverSheetsPlugin extends Plugin {
         }
         if (this._config?.isRowStylePrecedeColumnStyle) {
             this._configService.setConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, true);
+        }
+        if (this._config?.autoHeightForMergedCells) {
+            this._configService.setConfig(AUTO_HEIGHT_FOR_MERGED_CELLS, true);
         }
     }
 

@@ -46,6 +46,7 @@ import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-c
 import type { IBoundRectNoAngle, IPoint, IViewportInfo } from '../../basics/vector2';
 import {
     addLinkToDocumentModel,
+    AUTO_HEIGHT_FOR_MERGED_CELLS,
     BooleanNumber,
     CellValueType,
     composeStyles,
@@ -250,6 +251,10 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Whether the row style precedes the column style.
      */
     private _isRowStylePrecedeColumnStyle = false;
+    /**
+     * Whether auto height for merged cells
+     */
+    private _skipAutoHeightForMergedCells = true;
 
     private _renderRawFormula = false;
 
@@ -273,8 +278,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._cellData = this.worksheet.getCellMatrix();
 
         this._imageCacheMap = new ImageCacheMap(this._injector);
+        this.initConfig();
         this._updateLayout();
         this._initContextListener();
+    }
+
+    initConfig() {
+        this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
@@ -598,10 +608,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
-            const { isMerged, isMergedMainCell } = this.worksheet.getCellInfoInMergeData(rowNum, i);
-
-            if (isMerged || isMergedMainCell) {
-                continue;
+            const cellMergeInfo = this.worksheet.getCellInfoInMergeData(rowNum, i);
+            if (this._skipAutoHeightForMergedCells) {
+                if (cellMergeInfo.isMerged || cellMergeInfo.isMergedMainCell) {
+                    continue;
+                }
             }
             const cell = worksheet.getCell(rowNum, i);
             if (cell?.interceptorAutoHeight) {
@@ -623,10 +634,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             const documentViewModel = new DocumentViewModel(documentModel);
-
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-            const colWidth = columnData[i]?.w ?? defaultColumnWidth;
+            let colWidth = columnData[i]?.w ?? defaultColumnWidth;
+            if (cellMergeInfo.isMergedMainCell) {
+                const mergeCellStartCol = cellMergeInfo.startColumn;
+                const mergeCellEndCol = cellMergeInfo.endColumn;
+                const mergeCellWidth = mergeCellEndCol - mergeCellStartCol + 1;
+                colWidth = Array.from(
+                    { length: mergeCellEndCol - mergeCellStartCol + 1 },
+                    (_, index) => mergeCellStartCol + index
+                ).reduce((sum, colIndex) => {
+                    return sum + (columnData[colIndex]?.w ?? defaultColumnWidth);
+                }, 0);
+            }
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }

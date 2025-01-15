@@ -43,7 +43,7 @@ interface IConfigOptions {
 }
 
 export interface IConfigService {
-    getConfig<T>(id: string): Nullable<T>;
+    getConfig<T>(id: string | symbol): Nullable<T>;
     setConfig(id: string | symbol, value: unknown, options?: IConfigOptions): void;
     deleteConfig(id: string): boolean;
     subscribeConfigValue$<T = unknown>(key: string): Observable<T>;

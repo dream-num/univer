@@ -1290,7 +1290,7 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setHiddenGridlines(hidden: boolean): FWorksheet {
-        this._commandService.executeCommand(ToggleGridlinesCommand.id, {
+        this._commandService.syncExecuteCommand(ToggleGridlinesCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
@@ -1340,7 +1340,7 @@ export class FWorksheet extends FBaseInitialable {
      * ```
      */
     setTabColor(color: string): FWorksheet {
-        this._commandService.executeCommand(SetTabColorCommand.id, {
+        this._commandService.syncExecuteCommand(SetTabColorCommand.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._worksheet.getSheetId(),
             color,

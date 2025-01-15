@@ -152,11 +152,11 @@ export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     }
 
     override copy(): Promise<boolean> {
-        return this._commandService.executeCommand(CopyCommand.id);
+        return this._commandService.syncExecuteCommand(CopyCommand.id);
     }
 
     override paste(): Promise<boolean> {
-        return this._commandService.executeCommand(PasteCommand.id);
+        return this._commandService.syncExecuteCommand(PasteCommand.id);
     }
 
     override createMenu(menuItem: IFacadeMenuItem): FMenu {

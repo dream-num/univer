@@ -154,7 +154,7 @@ export class FPermission extends FBase {
                         scope: undefined,
                     },
                 });
-                this._commandService.executeCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
+                this._commandService.syncExecuteCommand(SetWorksheetPermissionPointsMutation.id, { unitId, subUnitId, permissionId });
             } else {
                 permissionId = rule.permissionId;
             }

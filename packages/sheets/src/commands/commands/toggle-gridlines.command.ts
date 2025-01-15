@@ -29,7 +29,7 @@ export interface IToggleGridlinesCommandParams {
 export const ToggleGridlinesCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.toggle-gridlines',
-    handler: async (accessor: IAccessor, params?: IToggleGridlinesCommandParams) => {
+    handler: (accessor: IAccessor, params?: IToggleGridlinesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

@@ -377,7 +377,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 // Row Header Events
                 disposable.add(
                     hoverManagerService.currentRowHeaderClick$
-                        .pipe(filter((header) => !!header))
+                        ?.pipe(filter((header) => !!header))
                         .subscribe((header) => {
                             if (!this._eventListend(this.Event.RowHeaderClick)) return;
                             const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);

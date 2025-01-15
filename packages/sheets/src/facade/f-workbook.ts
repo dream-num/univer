@@ -275,13 +275,13 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.setActiveSheet(sheet);
      * ```
      */
-    setActiveSheet(sheet: FWorksheet): FWorksheet {
+    setActiveSheet(sheet: FWorksheet | string): FWorksheet {
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId: this.id,
-            subUnitId: sheet.getSheetId(),
+            subUnitId: typeof sheet === 'string' ? sheet : sheet.getSheetId(),
         });
 
-        return sheet;
+        return typeof sheet === 'string' ? this.getSheetBySheetId(sheet)! : sheet;
     }
 
     /**
@@ -334,9 +334,9 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.deleteSheet(sheet);
      * ```
      */
-    deleteSheet(sheet: FWorksheet): boolean {
+    deleteSheet(sheet: FWorksheet | string): boolean {
         const unitId = this.id;
-        const subUnitId = sheet.getSheetId();
+        const subUnitId = typeof sheet === 'string' ? sheet : sheet.getSheetId();
         return this._commandService.syncExecuteCommand(RemoveSheetCommand.id, {
             unitId,
             subUnitId,

@@ -66,7 +66,7 @@ export class FWorkbook extends FBaseInitialable {
      * Fire an event, used in internal only.
      * @param event {string} key of event
      * @param params {any} params of event
-     * @returns {boolean} should cancel
+     * @returns {boolean | undefined} should cancel
      * @example
      * ```ts
      * this.fireEvent(univerAPI.event.UnitCreated, params);
@@ -111,6 +111,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Set the name of the workbook.
      * @param {string} name The new name of the workbook.
+     * @returns {void}
      * @example
      * ```ts
      * // The code below sets the name of the workbook
@@ -139,7 +140,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * @deprecated use 'save' instead.
-     * @returns {*}  {IWorkbookData} Workbook snapshot data
+     * @returns {IWorkbookData} Workbook snapshot data
      * @memberof FWorkbook
      * @example
      * ```ts
@@ -189,7 +190,7 @@ export class FWorkbook extends FBaseInitialable {
      * @param name Name of the new sheet
      * @param rows How may rows would the new sheet have
      * @param column How many columns would the new sheet have
-     * @returns The new created sheet
+     * @returns {FWorksheet} The new created sheet
      * @example
      * ```ts
      * // The code below creates a new sheet
@@ -226,7 +227,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Get a worksheet by sheet id.
      * @param sheetId The id of the sheet to get.
-     * @returns The worksheet with given sheet id
+     * @returns {FWorksheet | null} The worksheet with given sheet id
      * @example
      * ```ts
      * // The code below gets a worksheet by sheet id
@@ -246,7 +247,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Get a worksheet by sheet name.
      * @param name The name of the sheet to get.
-     * @returns The worksheet with given sheet name
+     * @returns {FWorksheet | null} The worksheet with given sheet name
      * @example
      * ```ts
      * // The code below gets a worksheet by sheet name
@@ -266,7 +267,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Sets the given worksheet to be the active worksheet in the workbook.
      * @param sheet The worksheet to set as the active worksheet.
-     * @returns The active worksheet
+     * @returns {FWorksheet} The active worksheet
      * @example
      * ```ts
      * // The code below sets the given worksheet to be the active worksheet
@@ -288,7 +289,7 @@ export class FWorkbook extends FBaseInitialable {
      * Inserts a new worksheet into the workbook.
      * Using a default sheet name. The new sheet becomes the active sheet
      * @param sheetName - (optional) The name of the new sheet
-     * @returns The new sheet
+     * @returns {FWorksheet} The new sheet
      * @example
      * ```ts
      * // The code below inserts a new sheet into the workbook
@@ -362,7 +363,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Redo the last undone action.
-     * @returns A promise that resolves to true if the redo was successful, false otherwise.
+     * @returns {FWorkbook} A promise that resolves to true if the redo was successful, false otherwise.
      * @example
      * ```ts
      * // The code below redoes the last undone action
@@ -385,7 +386,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered before invoking a command targeting the Univer sheet.
      * @param {onBeforeCommandExecuteCallback} callback the callback.
-     * @returns A function to dispose the listening.
+     * @returns {IDisposable} A function to dispose the listening.
      * @example
      * ```ts
      * // The code below registers a callback that will be triggered before invoking a command targeting the Univer sheet
@@ -414,7 +415,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered when a command is invoked targeting the Univer sheet.
      * @param {onCommandExecutedCallback} callback the callback.
-     * @returns A function to dispose the listening.
+     * @returns {IDisposable} A function to dispose the listening.
      * @example
      * ```ts
      * // The code below registers a callback that will be triggered when a command is invoked targeting the Univer sheet
@@ -442,7 +443,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a callback that will be triggered when the selection changes.
      * @param {onSelectionChangeCallback} callback The callback.
-     * @returns A function to dispose the listening
+     * @returns {IDisposable} A function to dispose the listening
      */
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
@@ -511,7 +512,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range.
-     * @returns the active range
+     * @returns {FRange | null} The active range
      */
     // could sheet have no active range ?
     getActiveRange(): FRange | null {
@@ -578,7 +579,7 @@ export class FWorkbook extends FBaseInitialable {
 
     /**
      * Get the number of sheets in the workbook.
-     * @returns The number of sheets in the workbook
+     * @returns {number} The number of sheets in the workbook
      * @example
      * ```ts
      * // The code below gets the number of sheets in the workbook
@@ -778,6 +779,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Insert a defined name by builder param.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @returns {void}
      * @example
      * ```ts
      * // The code below inserts a defined name by builder param
@@ -795,6 +797,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Update the defined name with the given name.
      * @param {ISetDefinedNameMutationParam} param The param to insert the defined name
+     * @returns {void}
      * @example
      * ```ts
      * // The code below updates the defined name with the given name
@@ -826,6 +829,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Register a custom range theme style.
      * @param rangeThemeStyle
+     * @returns {void}
      * @example
      * ```ts
      * // import {RangeThemeStyle} from '@univerjs/sheets';
@@ -849,6 +853,7 @@ export class FWorkbook extends FBaseInitialable {
     /**
      * Unregister a custom range theme style.
      * @param themeName
+     * @returns {void}
      * @example
      * ```ts
      * const fWorkbook = univerAPI.getActiveWorkbook();

@@ -351,6 +351,8 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                         })
                 );
             }));
+
+            this.disposeWithMe(disposable);
         }
     }
 

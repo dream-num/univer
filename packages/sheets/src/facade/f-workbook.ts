@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CommandListener, CustomData, ICommandInfo, IDisposable, IEventParamConfig, IRange, IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import type { CommandListener, CustomData, ICommandInfo, IDisposable, IEventParamConfig, IRange, IWorkbookData, LocaleType, Registry, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams, ISheetCommandSharedParams, RangeThemeStyle } from '@univerjs/sheets';
 import type { FontLine as _FontLine } from './f-range';
-import { FBaseInitialable, FEnum, FEventName, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, Registry, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { FBaseInitialable, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, LocaleService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { CopySheetCommand, getPrimaryForRange, InsertSheetCommand, RegisterWorksheetRangeThemeStyleCommand, RemoveSheetCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SetWorksheetOrderCommand, SheetRangeThemeService, SheetsSelectionsService, UnregisterWorksheetRangeThemeStyleCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { FDefinedName, FDefinedNameBuilder } from './f-defined-name';
@@ -52,33 +52,6 @@ export class FWorkbook extends FBaseInitialable {
 
     private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
 
-    private _ensureEventRegistry(event: string): Registry<(param: any) => void> {
-        if (!this._eventRegistry.has(event)) {
-            this._eventRegistry.set(event, new Registry());
-        }
-
-        return this._eventRegistry.get(event)!;
-    }
-
-    /**
-     * Add an event listener
-     * @param event key of event
-     * @param callback callback when event triggered
-     * @returns {Disposable} The Disposable instance, for remove the listener
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-     *     console.log('unit created', params);
-     * });
-     * ```
-     */
-    addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
-        this._ensureEventRegistry(event).add(callback);
-        this.addUIEvent(event, callback);
-
-        return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
-    }
-
     /**
      * Fire an event, used in internal only.
      * @param event {string} key of event
@@ -95,21 +68,6 @@ export class FWorkbook extends FBaseInitialable {
         });
 
         return params.cancel;
-    }
-
-    addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
-        // implementation in sub class.
-    }
-
-    get Enum(): FEnum {
-        return FEnum.get();
-    }
-
-    /**
-     * @returns {FEventName} The event name.
-     */
-    get Event(): FEventName {
-        return FEventName.get();
     }
 
     /**

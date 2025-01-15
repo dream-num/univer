@@ -51,68 +51,6 @@ export class FWorksheet extends FBaseInitialable {
         return this._worksheet;
     }
 
-    // private _eventRegistry: Map<string, Registry<(param: any) => void>> = new Map();
-
-    // private _ensureEventRegistry(event: string): Registry<(param: any) => void> {
-    //     if (!this._eventRegistry.has(event)) {
-    //         this._eventRegistry.set(event, new Registry());
-    //     }
-
-    //     return this._eventRegistry.get(event)!;
-    // }
-
-    // /**
-    //  * Add an event listener
-    //  * @param event key of event
-    //  * @param callback callback when event triggered
-    //  * @returns {Disposable} The Disposable instance, for remove the listener
-    //  * @example
-    //  * ```ts
-    //  * univerAPI.addEvent(univerAPI.event.UnitCreated, (params) => {
-    //  *     console.log('unit created', params);
-    //  * });
-    //  * ```
-    //  */
-    // addEvent(event: keyof IEventParamConfig, callback: (params: IEventParamConfig[typeof event]) => void): IDisposable {
-    //     this._ensureEventRegistry(event).add(callback);
-    //     this.addUIEvent(event, callback);
-
-    //     return toDisposable(() => this._ensureEventRegistry(event).delete(callback));
-    // }
-
-    // addUIEvent(event: keyof IEventParamConfig, _callback: (params: IEventParamConfig[typeof event]) => void): void {
-    //     // implementation in sub class.
-    // }
-
-    // /**
-    //  * Fire an event, used in internal only.
-    //  * @param event {string} key of event
-    //  * @param params {any} params of event
-    //  * @returns {boolean} should cancel
-    //  * @example
-    //  * ```ts
-    //  * this.fireEvent(univerAPI.event.UnitCreated, params);
-    //  * ```
-    //  */
-    // protected fireEvent<T extends keyof IEventParamConfig>(event: T, params: IEventParamConfig[T]): boolean | undefined {
-    //     this._eventRegistry.get(event)?.getData().forEach((callback) => {
-    //         callback(params);
-    //     });
-
-    //     return params.cancel;
-    // }
-
-    // get Enum(): FEnum {
-    //     return FEnum.get();
-    // }
-
-    // /**
-    //  * @returns {FEventName} The event name.
-    //  */
-    // get Event(): FEventName {
-    //     return FEventName.get();
-    // }
-
     /**
      * Returns the injector
      * @returns The injector

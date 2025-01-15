@@ -25,13 +25,13 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceVisibleParam, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
+import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
@@ -134,8 +134,25 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     }
                 }
             }
+
+            if (commandInfo.id === SetZoomRatioCommand.id) {
+                if (!this._eventListend(this.Event.BeforeSheetZoomChange)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
+                this.fireEvent(this.Event.BeforeSheetZoomChange, {
+                    zoom: (commandInfo.params as ISetZoomRatioCommandParams).zoomRatio,
+                    workbook,
+                    worksheet,
+                });
+            }
         }));
 
+        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetCellEditVisibleOperation.id) {
                 if (!this._eventListend(this.Event.SheetEditStarted) && !this._eventListend(this.Event.SheetEditEnded)) {
@@ -203,6 +220,22 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                     };
                     this.fireEvent(this.Event.SheetEditChanging, eventParams);
                 }
+            }
+
+            if (commandInfo.id === SetZoomRatioCommand.id) {
+                if (!this._eventListend(this.Event.SheetZoomChanged)) {
+                    return;
+                }
+                const target = this.getCommandSheetTarget(commandInfo);
+                if (!target) {
+                    return;
+                }
+                const { workbook, worksheet } = target;
+                this.fireEvent(this.Event.SheetZoomChanged, {
+                    zoom: worksheet.getZoom(),
+                    workbook,
+                    worksheet,
+                });
             }
         }));
 

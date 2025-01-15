@@ -102,7 +102,7 @@ univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsPlugin, { notExecuteFormula: true, autoHeightForMergedCells: false });
 univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);

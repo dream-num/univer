@@ -32,6 +32,11 @@ export interface IUniverSheetsConfig {
       * If the row style and column style be set both, and the row style should precede the column style or not.
       */
     isRowStylePrecedeColumnStyle?: boolean;
+
+    /**
+     * default false, auto height works for merged cells
+     */
+    autoHeightForMergedCells?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

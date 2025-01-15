@@ -26,6 +26,8 @@ export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
 export const IS_ROW_STYLE_PRECEDE_COLUMN_STYLE = 'isRowStylePrecedeColumnStyle';
 
+export const AUTO_HEIGHT_FOR_MERGED_CELLS = 'AUTO_HEIGHT_FOR_MERGED_CELLS';
+
 export function createInternalEditorID(id: string) {
     return `${PREFIX}${id}`;
 }

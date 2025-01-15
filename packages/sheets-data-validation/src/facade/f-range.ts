@@ -22,22 +22,49 @@ import { FDataValidation } from './f-data-validation';
 
 export interface IFRangeDataValidationMixin {
     /**
-     * Set a data validation rule to current range.
-     * @param rule data validation rule, build by `FUniver.newDataValidation`
+     * Set a data validation rule to current range. if rule is null, clear data validation rule.
+     * @param {Nullable<FDataValidation>} rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
+     * @example
+     * ```ts
+     * const rule = FUniver.newDataValidation().requireValueInRange(range).build();
+     * cell.setDataValidation(rule);
+     * ```
      */
-    setDataValidation(this: FRange, rule: Nullable<FDataValidation>): FRange;
+    setDataValidation(rule: Nullable<FDataValidation>): FRange;
     /**
      * Get first data validation rule in current range.
-     * @returns data validation rule
+     * @returns {Nullable<FDataValidation>} data validation rule
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const dataValidation = worksheet.getActiveRange().getDataValidation();
+     * ```
      */
-    getDataValidation(this: FRange): Nullable<FDataValidation>;
+    getDataValidation(): Nullable<FDataValidation>;
 
     /**
      * Get all data validation rules in current range.
-     * @returns all data validation rules
+     * @returns {FDataValidation[]} all data validation rules
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const dataValidations = worksheet.getActiveRange().getDataValidations();
+     * ```
      */
-    getDataValidations(this: FRange): FDataValidation[];
+    getDataValidations(): FDataValidation[];
+    /**
+     * Get data validation validator status for current range.
+     * @returns {Promise<DataValidationStatus[][]>} matrix of validator status
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const worksheet = workbook.getActiveSheet();
+     * const validatorStatus = worksheet.getActiveRange().getValidatorStatus();
+     * ```
+     */
     getValidatorStatus(): Promise<DataValidationStatus[][]>;
 }
 

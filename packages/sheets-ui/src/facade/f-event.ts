@@ -312,6 +312,103 @@ export interface IFSheetsUIEventNameMixin {
      * ```
      */
     readonly CellPointerMove: 'CellPointerMove';
+
+    /**
+     * Triggered when a row header is clicked
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderClick, (params) => {
+     *   console.log(`Row ${params.row} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderClick: 'RowHeaderClick';
+
+    /**
+     * Triggered when pointer is pressed down on a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderPointerDown, (params) => {
+     *   console.log(`Pointer down on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderPointerDown: 'RowHeaderPointerDown';
+
+    /**
+     * Triggered when pointer is released on a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderPointerUp, (params) => {
+     *   console.log(`Pointer up on row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderPointerUp: 'RowHeaderPointerUp';
+
+    /**
+     * Triggered when pointer hovers over a row header
+     * @param {ISheetRowHeaderEvent} params - Event parameters containing unitId, subUnitId, and row index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.RowHeaderHover, (params) => {
+     *   console.log(`Hovering over row ${params.row} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly RowHeaderHover: 'RowHeaderHover';
+
+    /**
+     * Triggered when a column header is clicked
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderClick, (params) => {
+     *   console.log(`Column ${params.column} header clicked in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderClick: 'ColumnHeaderClick';
+
+    /**
+     * Triggered when pointer is pressed down on a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerDown, (params) => {
+     *   console.log(`Pointer down on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderPointerDown: 'ColumnHeaderPointerDown';
+
+    /**
+     * Triggered when pointer is released on a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderPointerUp, (params) => {
+     *   console.log(`Pointer up on column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderPointerUp: 'ColumnHeaderPointerUp';
+
+    /**
+     * Triggered when pointer hovers over a column header
+     * @param {ISheetColumnHeaderEvent} params - Event parameters containing unitId, subUnitId, and column index
+     * @example
+     * ```typescript
+     * univerAPI.onSheetEvent(Event.ColumnHeaderHover, (params) => {
+     *   console.log(`Hovering over column ${params.column} header in sheet ${params.worksheet.getSheetId()}`);
+     * });
+     * ```
+     */
+    readonly ColumnHeaderHover: 'ColumnHeaderHover';
+
     /**
      * Event fired when drag over spreadsheet cells
      * @example
@@ -497,6 +594,38 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get SelectionMoveEnd(): 'SelectionMoveEnd' {
         return 'SelectionMoveEnd' as const;
     }
+
+    override get RowHeaderClick(): 'RowHeaderClick' {
+        return 'RowHeaderClick' as const;
+    }
+
+    override get RowHeaderPointerDown(): 'RowHeaderPointerDown' {
+        return 'RowHeaderPointerDown' as const;
+    }
+
+    override get RowHeaderPointerUp(): 'RowHeaderPointerUp' {
+        return 'RowHeaderPointerUp' as const;
+    }
+
+    override get RowHeaderHover(): 'RowHeaderHover' {
+        return 'RowHeaderHover' as const;
+    }
+
+    override get ColumnHeaderClick(): 'ColumnHeaderClick' {
+        return 'ColumnHeaderClick' as const;
+    }
+
+    override get ColumnHeaderPointerDown(): 'ColumnHeaderPointerDown' {
+        return 'ColumnHeaderPointerDown' as const;
+    }
+
+    override get ColumnHeaderPointerUp(): 'ColumnHeaderPointerUp' {
+        return 'ColumnHeaderPointerUp' as const;
+    }
+
+    override get ColumnHeaderHover(): 'ColumnHeaderHover' {
+        return 'ColumnHeaderHover' as const;
+    }
 }
 
 export interface ISheetUIEventBase extends IEventBase {
@@ -588,6 +717,14 @@ export interface ISelectionEventParam extends ISheetUIEventBase {
     selections: IRange[];
 }
 
+export interface ISheetRowHeaderEvent extends ISheetUIEventBase {
+    row: number;
+}
+
+export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
+    column: number;
+}
+
 export interface IFSheetsUIEventParamConfig {
     BeforeClipboardChange: IBeforeClipboardChangeParam;
     ClipboardChanged: IClipboardChangedParam;
@@ -607,6 +744,18 @@ export interface IFSheetsUIEventParamConfig {
     CellPointerMove: ICellEventParam;
     Drop: ICellEventParam;
     DragOver: ICellEventParam;
+
+    RowHeaderClick: ISheetRowHeaderEvent;
+    RowHeaderDbClick: ISheetRowHeaderEvent;
+    RowHeaderHover: ISheetRowHeaderEvent;
+    RowHeaderPointerDown: ISheetRowHeaderEvent;
+    RowHeaderPointerUp: ISheetRowHeaderEvent;
+
+    ColumnHeaderClick: ISheetColumnHeaderEvent;
+    ColumnHeaderDbClick: ISheetColumnHeaderEvent;
+    ColumnHeaderHover: ISheetColumnHeaderEvent;
+    ColumnHeaderPointerDown: ISheetColumnHeaderEvent;
+    ColumnHeaderPointerUp: ISheetColumnHeaderEvent;
 
     Scroll: IScrollEventParam;
     SelectionChanging: ISelectionEventParam;

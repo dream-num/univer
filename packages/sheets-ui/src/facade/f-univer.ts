@@ -371,6 +371,120 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                             });
                         })
                 );
+
+                // Row Header Events
+                disposable.add(
+                    hoverManagerService.currentRowHeaderClick$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderClick)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderClick, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentRowHeaderPointerDown$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderPointerDown)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerDown, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentRowHeaderPointerUp$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderPointerUp)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderPointerUp, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentHoveredRowHeader$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.RowHeaderHover)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.RowHeaderHover, {
+                                ...baseParams,
+                                row: header.index,
+                            });
+                        })
+                );
+
+                // Column Header Events
+                disposable.add(
+                    hoverManagerService.currentColHeaderClick$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderClick)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderClick, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentColHeaderPointerDown$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderPointerDown)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerDown, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentColHeaderPointerUp$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderPointerUp)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderPointerUp, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
+
+                disposable.add(
+                    hoverManagerService.currentHoveredColHeader$
+                        .pipe(filter((header) => !!header))
+                        .subscribe((header) => {
+                            if (!this._eventListend(this.Event.ColumnHeaderHover)) return;
+                            const baseParams = this.getSheetTarget(header.unitId, header.subUnitId);
+                            if (!baseParams) return;
+                            this.fireEvent(this.Event.ColumnHeaderHover, {
+                                ...baseParams,
+                                column: header.index,
+                            });
+                        })
+                );
             }));
 
             this.disposeWithMe(disposable);

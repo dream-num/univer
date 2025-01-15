@@ -24,6 +24,8 @@ export {
     type CommandListenerValueChange,
     getSkeletonChangedEffectedRange,
     getValueChangedEffectedRange,
+    SheetSkeletonChangeType,
+    SheetValueChangeType,
 } from './basics/const/command-listener-const';
 export {
     type IAddWorksheetMergeMutationParams,

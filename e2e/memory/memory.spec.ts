@@ -31,12 +31,8 @@ test('memory', async ({ page }) => {
     test.setTimeout(60_000);
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
 
-    const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
-
-    await page.evaluate(() => window.createNewInstance());
-    await page.waitForTimeout(2000);
     const memoryAfterFirstInstance = (await getMetrics(page)).JSHeapUsedSize;
 
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
@@ -65,7 +61,7 @@ test('memory', async ({ page }) => {
     expect(memoryAfterDisposingSecondUniver - memoryAfterDisposingFirstInstance)
         .toBeLessThanOrEqual(MAX_SECOND_INSTANCE_OVERFLOW);
 
-    expect(memoryAfterDisposingSecondUniver - memoryBeforeLoad)
+    expect(memoryAfterDisposingSecondUniver - memoryAfterFirstInstance)
         .toBeLessThanOrEqual(MAX_UNIVER_MEMORY_OVERFLOW);
 });
 

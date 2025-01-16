@@ -163,11 +163,8 @@ function createNewInstance() {
     window.univerAPI = FUniver.newAPI(univer);
 }
 
-if (!IS_E2E) {
-    createNewInstance();
-} else {
-    window.createNewInstance = createNewInstance;
-}
+createNewInstance();
+window.createNewInstance = createNewInstance;
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

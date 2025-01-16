@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellBindingNode, ICellBindingNodeParam } from '../types';
-import { Disposable, generateRandomId } from '@univerjs/core';
+import type { IMutationInfo } from '@univerjs/core';
+import type { ICellBindingJSON, ICellBindingNode, ICellBindingNodeParam } from '../types';
+import { Disposable, generateRandomId, Inject, IUniverInstanceService, Range } from '@univerjs/core';
+
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { SheetBindingModel } from '../model/binding-model';
 import { BindingSourceChangeTypeEnum } from '../types';
@@ -32,12 +35,47 @@ interface IBindingNodeInfo {
 export class SheetsBindingManager extends Disposable {
     modelMap: Map<string, Map<string, SheetBindingModel>> = new Map();
 
-    private _cellBindInfoUpdate$ = new Subject<IBindingNodeInfo & { changeType: BindingSourceChangeTypeEnum;oldSourceId?: string }>();
+    private _cellBindInfoUpdate$ = new Subject<IBindingNodeInfo & { changeType: BindingSourceChangeTypeEnum; oldSourceId?: string }>();
     cellBindInfoUpdate$ = this._cellBindInfoUpdate$.asObservable();
 
     constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
     ) {
         super();
+        this._initRemoveCommand();
+    }
+
+    private _initRemoveCommand() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                getMutations: (command) => {
+                    const redos: IMutationInfo[] = [];
+                    const undos: IMutationInfo[] = [];
+                    const selections = this._sheetsSelectionsService.getCurrentSelections();
+                    const target = getSheetCommandTarget(this._univerInstanceService);
+                    if (!target || !selections || selections.length === 0) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+                    const { unitId, subUnitId } = target;
+                    if (command.id === ClearSelectionContentCommand.id || command.id === ClearSelectionAllCommand.id) {
+                        selections.forEach(({ range }) => {
+                            Range.foreach(range, (row, column) => {
+                                const node = this.getBindingNode(unitId, subUnitId, row, column);
+                                if (node) {
+                                    this.removeBindingNode(unitId, subUnitId, row, column);
+                                }
+                            });
+                        });
+                    }
+                    return { redos, undos };
+                },
+            })
+        );
     }
 
     getBindingModelBySourceId(sourceId: string) {
@@ -127,13 +165,31 @@ export class SheetsBindingManager extends Disposable {
         return undefined;
     }
 
-    createModel(unitId: string, subunitId: string, json?: any): SheetBindingModel {
+    createModel(unitId: string, subunitId: string, json?: ICellBindingNode[]): SheetBindingModel {
         const model = new SheetBindingModel(json);
         this.addModel(unitId, subunitId, model);
         return model;
     }
 
+    toJSON(unitId: string) {
+        const rs: ICellBindingJSON = {};
+        const subMap = this.modelMap.get(unitId);
+        if (subMap) {
+            subMap.forEach((model, subunitId) => {
+                rs[subunitId] = model.toJSON();
+            });
+        }
+        return rs;
+    }
+
+    fromJSON(unitId: string, json: ICellBindingJSON) {
+        Object.entries(json).forEach(([subunitId, nodes]) => {
+            this.createModel(unitId, subunitId, nodes);
+        });
+    }
+
     override dispose(): void {
         this.modelMap.clear();
+        this._cellBindInfoUpdate$.complete();
     }
 }

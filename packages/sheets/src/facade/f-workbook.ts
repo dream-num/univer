@@ -403,6 +403,7 @@ export class FWorkbook extends FBaseInitialable {
      * activeSpreadsheet.onCommandExecuted((command) => {
      *   console.log('Command executed:', command);
      * });
+     * ```
      */
     onCommandExecuted(callback: CommandListener): IDisposable {
         return this._commandService.onCommandExecuted((command) => {

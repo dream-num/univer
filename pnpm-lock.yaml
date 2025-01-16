@@ -2783,6 +2783,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/engine-numfmt':
         specifier: workspace:*
         version: link:../engine-numfmt

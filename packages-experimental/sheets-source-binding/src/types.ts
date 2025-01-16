@@ -100,6 +100,10 @@ export interface ICellBindingNodeParam {
      * The target column of the binding node.
      */
     column: number;
+     /**
+      * Whether treat the data as date.
+      */
+    isDate?: boolean;
     nodeId?: string; // optional in ICellBindingNodeParam
 }
 
@@ -162,3 +166,16 @@ export enum BindingSourceChangeTypeEnum {
     Update = 'update',
 }
 
+export interface ISourceJSON {
+    id: string;
+    type: DataBindingNodeTypeEnum;
+}
+
+export interface ICellBindingJSON {
+    [subUnitId: string]: ICellBindingNode[];
+}
+
+export interface ISourceBindingInfo {
+    source: ISourceJSON[];
+    cellBinding: ICellBindingJSON;
+}

@@ -54,11 +54,6 @@ export interface IFRangeHyperlinkMixin {
 export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixin {
     // #region hyperlink
 
-    /**
-     * @param url
-     * @param label
-     * @deprecated
-     */
     override setHyperLink(url: string, label?: string): Promise<boolean> {
         const params: IAddHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -75,9 +70,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
     }
 
-    /**
-     * @deprecated
-     */
     override getHyperLinks(): ICellHyperLink[] {
         const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
         if (!cellValue?.p) {
@@ -95,12 +87,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
             })) ?? [];
     }
 
-    /**
-     * @param id
-     * @param url
-     * @param label
-     * @deprecated
-     */
     override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
         const params: IUpdateHyperLinkCommandParams = {
             unitId: this.getUnitId(),
@@ -117,10 +103,6 @@ export class FRangeHyperlinkMixin extends FRange implements IFRangeHyperlinkMixi
         return this._commandService.executeCommand(UpdateHyperLinkCommand.id, params);
     }
 
-    /**
-     * @param id
-     * @deprecated
-     */
     override cancelHyperLink(id: string): boolean {
         const params: ICancelHyperLinkCommandParams = {
             unitId: this.getUnitId(),

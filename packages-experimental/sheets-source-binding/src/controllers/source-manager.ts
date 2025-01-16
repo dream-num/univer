@@ -115,4 +115,9 @@ export class SheetsSourceManager extends Disposable {
             unitMap.set(source.id, model);
         }
     }
+
+    override dispose(): void {
+        this._sourceDataUpdate$.complete();
+        this.sourceMap.clear();
+    }
 }

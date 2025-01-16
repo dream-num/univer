@@ -190,5 +190,6 @@ export class SheetsBindingManager extends Disposable {
 
     override dispose(): void {
         this.modelMap.clear();
+        this._cellBindInfoUpdate$.complete();
     }
 }

@@ -256,4 +256,8 @@ export class SheetsSourceBindService extends Disposable {
             },
         }));
     }
+
+    override dispose(): void {
+        this._bindModelRTreeCollection.clear();
+    }
 }

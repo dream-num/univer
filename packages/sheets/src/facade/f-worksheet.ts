@@ -823,6 +823,38 @@ export class FWorksheet extends FBaseInitialable {
     }
 
     /**
+     * Sets the height of the given rows to auto.
+     * @param {number} startRow - The starting row position to change
+     * @param {number} numRows - The number of rows to change
+     * @returns {FWorksheet} This worksheet instance for chaining
+     * @example
+     * ```typescript
+     * const sheet = workbook.getActiveSheet();
+     * sheet.setRowAutoHeight(1, 10);
+     * ```
+     */
+    setRowAutoHeight(startRow: number, numRows: number): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startRow,
+                endRow: startRow + numRows - 1,
+                startColumn: 0,
+                endColumn: this._worksheet.getColumnCount() - 1,
+            },
+        ];
+
+        this._commandService.syncExecuteCommand(SetWorksheetRowIsAutoHeightCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
+
+        return this;
+    }
+
+    /**
      * Sets the height of the given rows in pixels. By default, rows grow to fit cell contents. When you use setRowHeightsForced, rows are forced to the specified height even if the cell contents are taller than the row height.
      * @param {number} startRow - The starting row position to change
      * @param {number} numRows - The number of rows to change

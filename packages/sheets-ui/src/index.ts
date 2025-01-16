@@ -111,6 +111,7 @@ export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
 
 // #region - all commands
+export { SetWorksheetColAutoWidthCommand } from './commands/commands/set-worksheet-auto-col-width.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteByShortKeyParams,

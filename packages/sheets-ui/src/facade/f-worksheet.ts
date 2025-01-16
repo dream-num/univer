@@ -20,7 +20,7 @@ import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IScrollState } from '@univerjs/sheets-ui';
 import { ICommandService } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
-import { ChangeZoomRatioCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
+import { ChangeZoomRatioCommand, SetWorksheetColAutoWidthCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
 
 export interface IFWorksheetSkeletonMixin {
@@ -102,6 +102,19 @@ export interface IFWorksheetSkeletonMixin {
      * ```
      */
     getSkeleton(): Nullable<SpreadsheetSkeleton>;
+
+    /**
+     * Set the given column width to fix-content.
+     * @param {number} columnPosition - Column position
+     * @param {number} numColumn - Number of columns
+     * @example
+     * ```ts
+     * const fWorkbook = univerAPI.getActiveWorkbook();
+     * const fWorksheet = fWorkbook.getActiveSheet();
+     * fWorksheet.setColumnAutoWidth(0, 3);
+     * ```
+     */
+    setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
 
 }
 
@@ -202,6 +215,27 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
     override getSkeleton(): Nullable<SpreadsheetSkeleton> {
         const service = this._injector.get(IRenderManagerService).getRenderById(this._workbook.getUnitId())?.with(SheetSkeletonManagerService);
         return service?.getWorksheetSkeleton(this._worksheet.getSheetId())?.skeleton;
+    }
+
+    override setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const ranges = [
+            {
+                startColumn: columnPosition,
+                endColumn: columnPosition + numColumn - 1,
+                startRow: 0,
+                endRow: this._worksheet.getRowCount() - 1,
+            },
+        ];
+
+        this._commandService.syncExecuteCommand(SetWorksheetColAutoWidthCommand.id, {
+            unitId,
+            subUnitId,
+            ranges,
+        });
+
+        return this;
     }
 }
 

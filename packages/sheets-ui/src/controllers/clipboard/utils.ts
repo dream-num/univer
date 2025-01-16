@@ -89,10 +89,7 @@ export function getDefaultOnPasteCellMutations(
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
 
-        // set custom
-        const { undos: setCustomUndos, redos: setCustomRedos } = getSetCellCustomMutations(pasteTo, pasteFrom, data, accessor);
-        redoMutationsInfo.push(...setCustomRedos);
-        undoMutationsInfo.push(...setCustomUndos);
+        // Do not process the custom attribute here, users can extend the paste event by themselves
 
         // clear and add merge
         const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
@@ -365,60 +362,6 @@ export function getSetCellValueMutations(
     const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
         accessor,
         setValuesMutation
-    );
-
-    undoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: undoSetValuesMutation,
-    });
-    return {
-        undos: undoMutationsInfo,
-        redos: redoMutationsInfo,
-    };
-}
-
-/**
- *
- * @param pasteTo
- * @param pasteFrom
- * @param matrix
- * @param accessor
- */
-export function getSetCellCustomMutations(
-    pasteTo: ISheetDiscreteRangeLocation,
-    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
-) {
-    const { unitId, subUnitId, range } = pasteTo;
-    const redoMutationsInfo: IMutationInfo[] = [];
-    const undoMutationsInfo: IMutationInfo[] = [];
-    const { mapFunc } = virtualizeDiscreteRanges([range]);
-    const valueMatrix = new ObjectMatrix<ICellData>();
-
-    matrix.forValue((row, col, value) => {
-        const { row: realRow, col: realCol } = mapFunc(row, col);
-
-        if (value.custom) {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ custom: value.custom }));
-        }
-    });
-
-    const setCustomMutation: ISetRangeValuesMutationParams = {
-        unitId,
-        subUnitId,
-        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
-    };
-
-    redoMutationsInfo.push({
-        id: SetRangeValuesMutation.id,
-        params: setCustomMutation,
-    });
-
-    // undo
-    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-        accessor,
-        setCustomMutation
     );
 
     undoMutationsInfo.push({

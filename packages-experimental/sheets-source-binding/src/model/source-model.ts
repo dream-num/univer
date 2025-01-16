@@ -118,8 +118,10 @@ export class ListSourceModel extends SourceModelBase {
         let data;
         if (this._isListObject) {
             data = (this._data.records as Record<string | number, any>)[rowIndex - 1][path];
+        } else {
+            data = this._data.records[rowIndex - 1][colIndex];
         }
-        data = this._data.records[rowIndex - 1][colIndex];
+
         if (node.isDate === true) {
             return {
                 v: transformDate(data),

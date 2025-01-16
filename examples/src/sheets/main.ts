@@ -35,7 +35,7 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
+// import { UniverSheetsBindingSourcePlugin } from '@univerjs/sheets-source-binding';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -123,7 +123,7 @@ function createNewInstance() {
     univer.registerPlugin(UniverThreadCommentUIPlugin);
     univer.registerPlugin(UniverSheetsThreadCommentPlugin);
     univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
-    univer.registerPlugin(UniverSheetsBindingSourcePlugin);
+    // univer.registerPlugin(UniverSheetsBindingSourcePlugin);
 
     // If we are running in e2e platform, we should immediately register the debugger plugin.
     if (IS_E2E) {

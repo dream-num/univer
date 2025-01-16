@@ -24,24 +24,51 @@ import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 export interface IFRangeCommentMixin {
     /**
      * Get the comment of the start cell in the current range.
-     * @returns The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
+     * @returns {FThreadComment | null} The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const comment = range.getComment();
+     * ```
      */
     getComment(): Nullable<FThreadComment>;
 
     /**
      * Get the comments in the current range.
      * @returns {FThreadComment[]} The comments in the current range.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const comments = range.getComments();
+     * comments.forEach((comment) => {
+     *   console.log(comment.getContent());
+     * });
+     * ```
      */
     getComments(): FThreadComment[];
     /**
      * @deprecated use `addCommentAsync` as instead.
      */
     addComment(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
-      /**
-       * Add a comment to the start cell in the current range.
-       * @param content The content of the comment.
-       * @returns Whether the comment is added successfully.
-       */
+    /**
+     * Add a comment to the start cell in the current range.
+     * @param content The content of the comment.
+     * @returns Whether the comment is added successfully.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     *
+     * const comment = univerAPI.newTheadComment()
+     *  .setContent(univerAPI.newRichText().insertText('hello zhangsan'));
+     * const success = await range.addCommentAsync(comment);
+     * ```
+     */
     addCommentAsync(content: IDocumentBody | FTheadCommentBuilder): Promise<boolean>;
 
     /**
@@ -60,6 +87,13 @@ export interface IFRangeCommentMixin {
     /**
      * Clear all of the comments in the current range.
      * @returns Whether the comments are cleared successfully.
+     * @example
+     * ```ts
+     * const range = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange();
+     * const success = await range.clearCommentsAsync();
+     * ```
      */
     clearCommentsAsync(): Promise<boolean>;
 }

@@ -29,11 +29,22 @@ export interface IFWorkbookThreadCommentMixin {
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const comments = workbook.getComments();
+     * ```
      */
     getComments(): FThreadComment[];
 
     /**
      * Clear all comments in the current sheet
+     * @returns Whether the comments are cleared successfully.
+     * @example
+     * ```ts
+     * const workbook = univerAPI.getActiveWorkbook();
+     * const success = await workbook.clearComments();
+     * ```
      */
     clearComments(): Promise<boolean>;
 

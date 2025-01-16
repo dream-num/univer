@@ -46,7 +46,11 @@ test('memory', async ({ page }) => {
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load (B):', memoryAfterSecondLoad);
 
-    await page.evaluate(() => window.univer.dispose());
+    await page.evaluate(() => {
+        window.univer.dispose();
+        window.univer = null;
+        window.univerAPI = null;
+    });
     await page.waitForTimeout(5000);
     const memoryAfterDisposingUniver = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after disposing univer (B):', memoryAfterDisposingUniver);

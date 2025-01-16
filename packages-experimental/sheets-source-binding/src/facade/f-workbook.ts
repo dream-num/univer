@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataBindingNodeTypeEnum, SourceModelBase } from '@univerjs/sheets-source-binding';
+import type { DataBindingNodeTypeEnum, ISourceBindingInfo, SourceModelBase } from '@univerjs/sheets-source-binding';
 import { SheetsSourceBindService, SheetsSourceManager } from '@univerjs/sheets-source-binding';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -23,6 +23,7 @@ export interface IFWorkbookSourceBindingMixin {
      * Create a source model with the specified type.
      * @param {DataBindingNodeTypeEnum} type The source type.
      * @param {boolean} [isListObject] Whether the source is a list object.
+     * @param {string} [id] The source id.
      * @returns {SourceModelBase} The source data of sheet.
      */
     createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string | undefined): SourceModelBase;
@@ -59,6 +60,10 @@ export interface IFWorkbookSourceBindingMixin {
      * ```
      */
     setSourceData(sourceId: string, data: any): void;
+
+    loadSourceBindingPathInfo(obj: ISourceBindingInfo): void;
+
+    saveSourceBindingPathInfo(): ISourceBindingInfo;
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
@@ -90,6 +95,18 @@ export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourc
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
         sheetsSourceBindService.useValueMode();
+    }
+
+    override loadSourceBindingPathInfo(obj: ISourceBindingInfo): void {
+        const injector = this._injector;
+        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
+        sheetsSourceBindService.loadSourceBindingPathInfo(this.getId(), obj);
+    }
+
+    override saveSourceBindingPathInfo(): ISourceBindingInfo {
+        const injector = this._injector;
+        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
+        return sheetsSourceBindService.getSourceBindingPathInfo(this.getId());
     }
 }
 

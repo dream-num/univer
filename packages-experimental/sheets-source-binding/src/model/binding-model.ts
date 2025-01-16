@@ -23,14 +23,14 @@ export class SheetBindingModel {
 
     private _sourceIdMap: Map<string, string[]> = new Map();
 
-    constructor(json?: any) {
+    constructor(json?: ICellBindingNode[]) {
         if (json) {
             this._init(json);
         }
     }
 
-    _init(json: any): void {
-        this.fromJSON();
+    _init(json: ICellBindingNode[]): void {
+        this.fromJSON(json);
     }
 
     getBindingNodesBySourceId(sourceId: string): ICellBindingNode[] | undefined {
@@ -86,12 +86,14 @@ export class SheetBindingModel {
         return this._nodeMap.get(nodeId);
     }
 
-    fromJSON(): void {
-
+    fromJSON(nodes: ICellBindingNode[]): void {
+        nodes.forEach((node) => {
+            this.setBindingNode(node.row, node.column, node);
+        });
     }
 
-    toJSON() {
-
+    toJSON(): ICellBindingNode[] {
+        return Array.from(this._nodeMap.values());
     }
 }
 

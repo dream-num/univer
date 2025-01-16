@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISourceEvent } from '../types';
+import type { ISourceEvent, ISourceJSON } from '../types';
 import { Disposable, generateRandomId } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { ListSourceModel, ObjectSourceModel, SourceModelBase } from '../model/source-model';
@@ -83,6 +83,36 @@ export class SheetsSourceManager extends Disposable {
         if (source) {
             unitMap?.delete(id);
             this._sourceDataUpdate$.next({ ...source.getSourceInfo(), unitId, changeType: BindingSourceChangeTypeEnum.Remove });
+        }
+    }
+
+    toJSON(unitId: string): ISourceJSON[] {
+        const sourceList: ISourceJSON[] = [];
+        const unitMap = this._getUnitMap(unitId);
+        if (unitMap) {
+            for (const source of unitMap.values()) {
+                sourceList.push(source.toJSON());
+            }
+        }
+        return sourceList;
+    }
+
+    fromJSON(unitId: string, sources: ISourceJSON[]): void {
+        const unitMap = this._ensureUnitMap(unitId);
+        for (const source of sources) {
+            let model: SourceModelBase;
+            switch (source.type) {
+                case DataBindingNodeTypeEnum.List:
+                    model = new ListSourceModel(source.id);
+                    break;
+                case DataBindingNodeTypeEnum.Object:
+                    model = new ObjectSourceModel(source.id);
+                    break;
+                default:
+                    throw new Error(`Invalid source type: ${source.type}`);
+            }
+            model.fromJSON(source);
+            unitMap.set(source.id, model);
         }
     }
 }

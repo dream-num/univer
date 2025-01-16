@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellBindingNode, IListDataBindingNode, IListSourceData, IListSourceInfo, IObjectSourceInfo } from '../types';
+import type { ICellBindingNode, IListDataBindingNode, IListSourceData, IListSourceInfo, IObjectSourceInfo, ISourceJSON } from '../types';
 import { CellValueType, type ICellData } from '@univerjs/core';
 import { DataBindingNodeTypeEnum } from '../types';
 
@@ -66,6 +66,20 @@ export abstract class SourceModelBase {
     setSourceData(data: any): void {
         this._data = data;
         this._hasData = true;
+    }
+
+    toJSON(): ISourceJSON {
+        return {
+            id: this.id,
+            type: this.type,
+        };
+    }
+
+    fromJSON(info: ISourceJSON): void {
+        // @ts-ignore
+        this.id = info.id;
+        // @ts-ignore
+        this.type = info.type;
     }
 
     abstract getSourceInfo(): any;

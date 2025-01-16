@@ -166,3 +166,16 @@ export enum BindingSourceChangeTypeEnum {
     Update = 'update',
 }
 
+export interface ISourceJSON {
+    id: string;
+    type: DataBindingNodeTypeEnum;
+}
+
+export interface ICellBindingJSON {
+    [subUnitId: string]: ICellBindingNode[];
+}
+
+export interface ISourceBindingInfo {
+    source: ISourceJSON[];
+    cellBinding: ICellBindingJSON;
+}

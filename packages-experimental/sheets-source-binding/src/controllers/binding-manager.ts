@@ -15,7 +15,7 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import type { ICellBindingNode, ICellBindingNodeParam } from '../types';
+import type { ICellBindingJSON, ICellBindingNode, ICellBindingNodeParam } from '../types';
 import { Disposable, generateRandomId, Inject, IUniverInstanceService, Range } from '@univerjs/core';
 
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -165,10 +165,27 @@ export class SheetsBindingManager extends Disposable {
         return undefined;
     }
 
-    createModel(unitId: string, subunitId: string, json?: any): SheetBindingModel {
+    createModel(unitId: string, subunitId: string, json?: ICellBindingNode[]): SheetBindingModel {
         const model = new SheetBindingModel(json);
         this.addModel(unitId, subunitId, model);
         return model;
+    }
+
+    toJSON(unitId: string) {
+        const rs: ICellBindingJSON = {};
+        const subMap = this.modelMap.get(unitId);
+        if (subMap) {
+            subMap.forEach((model, subunitId) => {
+                rs[subunitId] = model.toJSON();
+            });
+        }
+        return rs;
+    }
+
+    fromJSON(unitId: string, json: ICellBindingJSON) {
+        Object.entries(json).forEach(([subunitId, nodes]) => {
+            this.createModel(unitId, subunitId, nodes);
+        });
     }
 
     override dispose(): void {

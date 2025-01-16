@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellBindingNodeParam, IListSourceInfo } from '../types';
+import type { ICellBindingNodeParam, IListSourceInfo, ISourceBindingInfo } from '../types';
 import { Disposable, Inject, InterceptorEffectEnum, RTree } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -79,6 +79,18 @@ export class SheetsSourceBindService extends Disposable {
 
     createSource(unitId: string, type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string) {
         return this._sheetsSourceManager.createSource(unitId, type, isListObject, id);
+    }
+
+    getSourceBindingPathInfo(unitId: string) {
+        return {
+            source: this._sheetsSourceManager.toJSON(unitId),
+            cellBinding: this._sheetsBindingManager.toJSON(unitId),
+        };
+    }
+
+    loadSourceBindingPathInfo(unitId: string, obj: ISourceBindingInfo) {
+        this._sheetsSourceManager.fromJSON(unitId, obj.source);
+        this._sheetsBindingManager.fromJSON(unitId, obj.cellBinding);
     }
 
     private _ensureRTreeCollection(unitId: string) {

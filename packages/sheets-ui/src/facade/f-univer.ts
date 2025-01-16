@@ -26,14 +26,14 @@ import type {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
-import type { CommandListenerSkeletonChange, CommandListenerValueChange } from '@univerjs/sheets';
+import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam, ISetZoomRatioCommandParams, ISheetPasteByShortKeyParams, IViewportScrollState } from '@univerjs/sheets-ui';
 import type { FRange } from '@univerjs/sheets/facade';
 import type { IBeforeClipboardChangeParam, IBeforeClipboardPasteParam, IBeforeSheetEditEndEventParams, IBeforeSheetEditStartEventParams, ISheetEditChangingEventParams, ISheetEditEndedEventParams, ISheetEditStartedEventParams } from './f-event';
 import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FUniver, ICommandService, ILogService, IUniverInstanceService, LifecycleService, LifecycleStages, RichTextValue, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, getSkeletonChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
 import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
@@ -588,27 +588,21 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
                 if (!this._eventListend(this.Event.SheetSkeletonChanged)) return;
                 const sheet = this.getActiveSheet();
                 if (!sheet) return;
+                const ranges = getSkeletonChangedEffectedRange(commandInfo)
+                    .map((range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range))
+                    .filter(Boolean) as FRange[];
+                if (!ranges.length) return;
+
                 this.fireEvent(this.Event.SheetSkeletonChanged, {
                     workbook: sheet.workbook,
                     worksheet: sheet.worksheet,
                     payload: commandInfo as CommandListenerSkeletonChange,
                     skeleton: sheet.worksheet.getSkeleton()!,
+                    effectedRanges: ranges,
                 });
                 return;
             }
 
-            if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
-                if (!this._eventListend(this.Event.SheetValueChanged)) return;
-                const sheet = this.getActiveSheet();
-                if (!sheet) return;
-                this.fireEvent(this.Event.SheetValueChanged, {
-                    payload: commandInfo as CommandListenerValueChange,
-                    effectedRanges: getValueChangedEffectedRange(commandInfo).map(
-                        (range) => this.getWorkbook(range.unitId)?.getSheetBySheetId(range.subUnitId)?.getRange(range.range)
-                    ).filter(Boolean) as FRange[],
-                });
-                return;
-            }
             switch (commandInfo.id) {
                 case CopyCommand.id:
                 case CutCommand.id:

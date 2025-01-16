@@ -217,6 +217,7 @@ declare module '@univerjs/sheets/facade' {
  * Transform component key
  * @param {IFComponentKey} component - The component key to transform.
  * @param {ComponentManager} componentManager - The component manager to use for registration.
+ * @returns {string} The transformed component key.
  */
 export function transformComponentKey(component: IFComponentKey, componentManager: ComponentManager): { key: string; disposableCollection: DisposableCollection } {
     const { componentKey, isVue3 } = component;

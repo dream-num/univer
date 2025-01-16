@@ -15,11 +15,12 @@
  */
 
 import type { ICommandInfo, IDisposable, Injector, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
-import type { IInsertSheetCommandParams, IRemoveSheetCommandParams, ISetGridlinesColorCommandParams, ISetTabColorMutationParams, ISetWorksheetActivateCommandParams, ISetWorksheetHideMutationParams, ISetWorksheetNameCommandParams, ISetWorksheetOrderMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
+import type { CommandListenerValueChange, IInsertSheetCommandParams, IRemoveSheetCommandParams, ISetGridlinesColorCommandParams, ISetTabColorMutationParams, ISetWorksheetActivateCommandParams, ISetWorksheetHideMutationParams, ISetWorksheetNameCommandParams, ISetWorksheetOrderMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IBeforeSheetCreateEventParams, ISheetCreatedEventParams } from './f-event';
+import type { FRange } from './f-range';
 import type { FWorksheet } from './f-worksheet';
 import { CanceledError, FUniver, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActivateCommand, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { COMMAND_LISTENER_VALUE_CHANGE, getValueChangedEffectedRange, InsertSheetCommand, RemoveSheetCommand, SetGridlinesColorCommand, SetTabColorCommand, SetWorksheetActivateCommand, SetWorksheetHideCommand, SetWorksheetNameCommand, SetWorksheetOrderCommand, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { FDefinedNameBuilder } from './f-defined-name';
 import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
@@ -304,6 +305,25 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         this.disposeWithMe(
             // eslint-disable-next-line max-lines-per-function, complexity
             commandService.onCommandExecuted((commandInfo) => {
+                if (COMMAND_LISTENER_VALUE_CHANGE.indexOf(commandInfo.id) > -1) {
+                    if (!this._eventListend(this.Event.SheetValueChanged)) return;
+                    const sheet = this.getActiveSheet();
+                    if (!sheet) return;
+                    const ranges = getValueChangedEffectedRange(commandInfo)
+                        .map(
+                            (range) => this.getWorkbook(range.unitId)
+                                ?.getSheetBySheetId(range.subUnitId)
+                                ?.getRange(range.range)
+                        )
+                        .filter(Boolean) as FRange[];
+                    if (!ranges.length) return;
+                    this.fireEvent(this.Event.SheetValueChanged, {
+                        payload: commandInfo as CommandListenerValueChange,
+                        effectedRanges: ranges,
+                    });
+                    return;
+                }
+
                 switch (commandInfo.id) {
                     case InsertSheetCommand.id: {
                         const params = commandInfo.params as IInsertSheetCommandParams;

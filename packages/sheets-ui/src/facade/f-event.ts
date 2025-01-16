@@ -16,7 +16,7 @@
 
 import type { IEventBase, IRange, RichTextValue } from '@univerjs/core';
 import type { DeviceInputEventType, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { CommandListenerSkeletonChange, CommandListenerValueChange } from '@univerjs/sheets';
+import type { CommandListenerSkeletonChange } from '@univerjs/sheets';
 import type { FRange, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import type { KeyCode } from '@univerjs/ui';
 import { FEventName } from '@univerjs/core';
@@ -520,17 +520,6 @@ export interface IFSheetsUIEventNameMixin {
      */
     readonly SheetSkeletonChanged: 'SheetSkeletonChanged';
 
-    /**
-     * Event fired when sheet value changed
-     * @example
-     * ```ts
-     * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (p)=> {
-     *      const { workbook, effectedRanges, payload } = p;
-     * });
-     * ```
-     */
-    readonly SheetValueChanged: 'SheetValueChanged';
-
 }
 
 export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNameMixin {
@@ -653,10 +642,6 @@ export class FSheetsUIEventName extends FEventName implements IFSheetsUIEventNam
     override get SheetSkeletonChanged(): 'SheetSkeletonChanged' {
         return 'SheetSkeletonChanged' as const;
     }
-
-    override get SheetValueChanged(): 'SheetValueChanged' {
-        return 'SheetValueChanged' as const;
-    }
 }
 
 export interface ISheetUIEventBase extends IEventBase {
@@ -759,11 +744,7 @@ export interface ISheetColumnHeaderEvent extends ISheetUIEventBase {
 export interface ISheetSkeletonChangedEvent extends ISheetUIEventBase {
     skeleton: SpreadsheetSkeleton;
     payload: CommandListenerSkeletonChange;
-}
-
-export interface ISheetValueChangedEvent extends IEventBase {
     effectedRanges: FRange[];
-    payload: CommandListenerValueChange;
 }
 
 export interface IFSheetsUIEventParamConfig {
@@ -771,13 +752,11 @@ export interface IFSheetsUIEventParamConfig {
     ClipboardChanged: IClipboardChangedParam;
     BeforeClipboardPaste: IBeforeClipboardPasteParam;
     ClipboardPasted: IClipboardPastedParam;
-
     BeforeSheetEditStart: IBeforeSheetEditStartEventParams;
     SheetEditStarted: ISheetEditStartedEventParams;
     SheetEditChanging: ISheetEditChangingEventParams;
     BeforeSheetEditEnd: IBeforeSheetEditEndEventParams;
     SheetEditEnded: ISheetEditEndedEventParams;
-
     CellClicked: ICellEventParam;
     CellHover: ICellEventParam;
     CellPointerDown: ICellEventParam;
@@ -785,31 +764,26 @@ export interface IFSheetsUIEventParamConfig {
     CellPointerMove: ICellEventParam;
     Drop: ICellEventParam;
     DragOver: ICellEventParam;
-
     RowHeaderClick: ISheetRowHeaderEvent;
     RowHeaderDbClick: ISheetRowHeaderEvent;
     RowHeaderHover: ISheetRowHeaderEvent;
     RowHeaderPointerDown: ISheetRowHeaderEvent;
     RowHeaderPointerUp: ISheetRowHeaderEvent;
-
     ColumnHeaderClick: ISheetColumnHeaderEvent;
     ColumnHeaderDbClick: ISheetColumnHeaderEvent;
     ColumnHeaderHover: ISheetColumnHeaderEvent;
     ColumnHeaderPointerDown: ISheetColumnHeaderEvent;
     ColumnHeaderPointerUp: ISheetColumnHeaderEvent;
-
     Scroll: IScrollEventParam;
     SelectionChanging: ISelectionEventParam;
     SelectionMoveStart: ISelectionEventParam;
     SelectionMoving: ISelectionEventParam;
     SelectionMoveEnd: ISelectionEventParam;
     SelectionChanged: ISelectionEventParam;
-
     SheetZoomChanged: ISheetZoomEvent;
     BeforeSheetZoomChange: ISheetZoomEvent;
 
     SheetSkeletonChanged: ISheetSkeletonChangedEvent;
-    SheetValueChanged: ISheetValueChangedEvent;
 }
 
 FEventName.extend(FSheetsUIEventName);

@@ -15,14 +15,14 @@
  */
 
 import './f-univer';
+import './f-enum';
 
+export * from './f-enum';
 export * from './f-event';
 export { FPermission } from './f-permission';
 export { FRange } from './f-range';
 export { FSelection } from './f-selection';
-
 export { FSheetHooks } from './f-sheet-hooks';
-
 export { FWorkbook } from './f-workbook';
 
 // eslint-disable-next-line perfectionist/sort-exports

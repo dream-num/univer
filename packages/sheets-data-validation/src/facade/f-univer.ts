@@ -23,14 +23,24 @@ import { FDataValidation } from './f-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
 export class FUnvierDataValidationMixin extends FUniver {
+    // eslint-disable-next-line jsdoc/require-returns
     /**
     /**
-     * @deparecated use `univerAPI.newDataValidation()` as instead.
+     * @deprecated use `univerAPI.newDataValidation()` as instead.
      */
     static override newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
 
+    /**
+     * Creates a new instance of FDataValidationBuilder
+     * @returns {FDataValidationBuilder} A new instance of the FDataValidationBuilder class
+     * @example
+     * ```ts
+     * const rule = FUnvier.newDataValidation();
+     * cell.setDataValidation(rule.requireValueInRange(range));
+     * ```
+     */
     newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }

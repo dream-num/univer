@@ -15,6 +15,8 @@
  */
 
 import type { IEventBase, IWorkbookData, IWorksheetData, UniverInstanceType } from '@univerjs/core';
+import type { CommandListenerValueChange } from '@univerjs/sheets';
+import type { FRange } from './f-range';
 import type { FWorkbook } from './f-workbook';
 import type { FWorksheet } from './f-worksheet';
 import { FEventName } from '@univerjs/core';
@@ -255,6 +257,18 @@ export interface IFSheetEventMixin {
      * ```
      */
     get BeforeGridlineColorChange(): 'BeforeGridlineColorChange';
+
+    /**
+     * Event fired when sheet value changed
+     * @example
+     * ```ts
+     * univerAPI.addEvent(univerAPI.Event.SheetValueChanged, (p)=> {
+     *      const { workbook, effectedRanges, payload } = p;
+     * });
+     * ```
+     */
+    readonly SheetValueChanged: 'SheetValueChanged';
+
 }
 
 /**
@@ -507,6 +521,17 @@ export interface IBeforeSheetHideChangeEvent extends IEventBase {
 }
 
 /**
+ * Interface for sheet value changed event
+ * Contains information about the sheet value change
+ */
+export interface ISheetValueChangedEvent extends IEventBase {
+    /** The affected ranges of the sheet */
+    effectedRanges: FRange[];
+    /** The payload of the value change */
+    payload: CommandListenerValueChange;
+}
+
+/**
  * Configuration interface for sheet-related events
  * Provides event names and their corresponding event parameter interfaces
  */
@@ -549,6 +574,8 @@ export interface ISheetEventParamConfig {
     SheetHideChanged: ISheetHideChangedEvent;
     /** Event fired before a sheet visibility is changed */
     BeforeSheetHideChange: IBeforeSheetHideChangeEvent;
+    /** Event fired after a sheet value is changed */
+    SheetValueChanged: ISheetValueChangedEvent;
 }
 
 export class FSheetEventName extends FEventName implements IFSheetEventMixin {
@@ -626,6 +653,10 @@ export class FSheetEventName extends FEventName implements IFSheetEventMixin {
 
     override get BeforeSheetHideChange(): 'BeforeSheetHideChange' {
         return 'BeforeSheetHideChange' as const;
+    }
+
+    override get SheetValueChanged(): 'SheetValueChanged' {
+        return 'SheetValueChanged' as const;
     }
 }
 

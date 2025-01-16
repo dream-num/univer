@@ -25,7 +25,7 @@ export interface IFWorkbookSourceBindingMixin {
      * @param {boolean} [isListObject] Whether the source is a list object.
      * @returns {SourceModelBase} The source data of sheet.
      */
-    createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean): SourceModelBase;
+    createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string | undefined): SourceModelBase;
     /**
      * Switch to path mode.In this mode, the path will show in cell.
      */
@@ -62,10 +62,10 @@ export interface IFWorkbookSourceBindingMixin {
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
-    override createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean): SourceModelBase {
+    override createSource(type: DataBindingNodeTypeEnum, isListObject?: boolean, id?: string | undefined): SourceModelBase {
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
-        return sheetsSourceBindService.createSource(this.getId(), type, isListObject);
+        return sheetsSourceBindService.createSource(this.getId(), type, isListObject, id);
     }
 
     override getSource(sourceId: string): SourceModelBase | undefined {

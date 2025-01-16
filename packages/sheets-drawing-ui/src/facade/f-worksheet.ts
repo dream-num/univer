@@ -89,7 +89,7 @@ export interface IFWorksheetLegacy {
      const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
      //  const range = sheet.getRange(0, 0, 3, 3);
      //  univerAPI.getActiveWorkbook().setActiveRange(range);
-     univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
+     const range = univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
             componentKey: 'FloatButton', // React comp key registered in ComponentManager

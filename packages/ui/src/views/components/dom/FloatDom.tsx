@@ -26,6 +26,7 @@ import styles from './index.module.less';
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
     const componentManager = useDependency(ComponentManager);
+
     const size$ = useMemo(() => layer.position$.pipe(
         distinctUntilChanged(
             (prev, curr) => prev.absolute.left === curr.absolute.left &&

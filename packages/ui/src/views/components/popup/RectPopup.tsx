@@ -143,11 +143,6 @@ function RectPopup(props: IRectPopupProps) {
                 );
                 nodeRef.current.style.top = `${positionRef.current.top}px`;
                 nodeRef.current.style.left = `${positionRef.current.left}px`;
-                const width = anchorRect.right - anchorRect.left;
-                const height = anchorRect.bottom - anchorRect.top;
-                nodeRef.current.style.width = `${width}px`;
-                nodeRef.current.style.height = `${height}px`;
-                nodeRef.current.style.background = 'red';
             });
         });
 

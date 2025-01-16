@@ -164,7 +164,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             </header>
 
                             <section
-                                className={[styles.workbenchContainerCanvas, 'content-container'].join(' ')}
+                                className={styles.workbenchContainerCanvas}
                                 ref={contentRef}
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}

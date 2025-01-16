@@ -79,19 +79,14 @@ interface ICanvasFloatDomInfo {
     unitId: string;
     subUnitId: string;
     boundsOfViewArea?: IBoundRectNoAngle;
-    scrollDirectionResponse?: ScrollDirectionResponse; // 滚动响应方向
+    scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
 }
 
-export enum DOMPositionMode {
-    COVER = 'cover', // 完全覆盖
-    FROM_BOTTOM_RIGHT = 'fromBottomRight', // 从右下角开始
-    FROM_TOP_LEFT = 'fromTopLeft', // 从左上角开始
-}
 export interface IDOMRangeLayout {
     width: number;
     height: number;
-    x?: number; // x 方向偏移量
-    y?: number; // y 方向偏移量
+    x?: number; // offsetX
+    y?: number; // offsetY
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {
@@ -450,7 +445,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         onWheel: (evt: WheelEvent) => {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
-                        // props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
+                        props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                         data,
                         unitId,
                     });
@@ -509,7 +504,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 const floatDomInfo = this._domLayerInfoMap.get(id);
                 if (floatDomInfo) {
                     const position = calcPosition(floatDomInfo.rect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
-                    floatDomInfo.position$.next(position);
                     floatDomInfo.position$.next(position);
                 }
             });
@@ -681,7 +675,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
 
-        // this._add$.next({ unitId, subUnitId, id }); // seems no use
+        this._add$.next({ unitId, subUnitId, id });
 
         return {
             id,

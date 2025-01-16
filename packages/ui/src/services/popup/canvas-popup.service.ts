@@ -67,11 +67,7 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
         return this._activePopupId;
     }
 
-    /**
-     * Reload all canvas popups in CanvasPopup.tsx.
-     */
-    private _popupNext() {
-        // see Subscriber in CanvasPopup component
+    private _update() {
         this._popups$.next(Array.from(this._popupMap.entries()));
     }
 
@@ -83,11 +79,6 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
         this._popupMap.clear();
     }
 
-    /**
-     * Add popup config in popupMap and then notify CanvasPopup.tsx to rerender.
-     * @param item
-     * @returns {string} popup id
-     */
     addPopup(item: IPopup): string {
         const id = Tools.generateRandomId();
         this._popupMap.set(id, {
@@ -101,18 +92,18 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
                 }
             },
         });
-        this._popupNext();
+        this._update();
         return id;
     }
 
     removePopup(id: string): void {
         if (this._popupMap.delete(id)) {
-            this._popupNext();
+            this._update();
         }
     }
 
     removeAll(): void {
         this._popupMap.clear();
-        this._popupNext();
+        this._update();
     }
 }

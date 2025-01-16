@@ -14,13 +14,88 @@
  * limitations under the License.
  */
 
+import type { IPopup } from '../../../services/popup/canvas-popup.service';
 import { useDependency } from '@univerjs/core';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { animationFrameScheduler, combineLatest, map, of, throttleTime } from 'rxjs';
 import { ComponentManager } from '../../../common';
-import { useObservable } from '../../../components/hooks/observable';
+import { useObservable, useObservableRef } from '../../../components/hooks/observable';
 import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
-import { SingleDOMPopup } from './dom-popup';
-import { SingleCanvasPopup } from './single-canvas-popup';
+import { RectPopup } from './RectPopup';
+
+interface ISingleCanvasPopupProps {
+    popup: IPopup;
+    children?: React.ReactNode;
+}
+
+const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
+    const [hidden, setHidden] = useState(false);
+    const anchorRect$ = useMemo(() => popup.anchorRect$.pipe(
+        throttleTime(0, animationFrameScheduler),
+        map((anchorRect) => {
+            const { bottom, left, right, top } = anchorRect;
+            const [x = 0, y = 0] = popup.offset ?? [];
+            return {
+                left: left - x,
+                right: right + x,
+                top: top - y,
+                bottom: bottom + y,
+            };
+        })
+    ), [popup.anchorRect$, popup.offset]);
+    const hiddenRects$ = useMemo(() => popup.hiddenRects$?.pipe(throttleTime(0, animationFrameScheduler)) ?? of([]), [popup.hiddenRects$]);
+    const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
+    const excludeRectsRef = useObservableRef(excludeRects$, popup.excludeRects);
+    const { canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
+
+    useEffect(() => {
+        if (!hideOnInvisible) {
+            return;
+        }
+
+        const anchorRectSub = combineLatest([anchorRect$, hiddenRects$]).subscribe(([rectWithOffset, hiddenRects]) => {
+            const rect = canvasElement.getBoundingClientRect();
+            const { top, left, bottom, right } = rect;
+            const rectHeight = rectWithOffset.bottom - rectWithOffset.top;
+            const rectWidth = rectWithOffset.right - rectWithOffset.left;
+
+            const isInHiddenRect = hiddenRects.some((hiddenRect) => {
+                return rectWithOffset.top >= (hiddenRect.top - (0.5 * rectHeight)) &&
+                    rectWithOffset.bottom <= (hiddenRect.bottom + (0.5 * rectHeight)) &&
+                    rectWithOffset.left >= (hiddenRect.left - (0.5 * rectWidth)) &&
+                    rectWithOffset.right <= (hiddenRect.right + (0.5 * rectWidth));
+            });
+
+            if (rectWithOffset.bottom < top || rectWithOffset.top > bottom || rectWithOffset.right < left || rectWithOffset.left > right || isInHiddenRect) {
+                setHidden(true);
+            } else {
+                setHidden(false);
+            }
+        });
+
+        return () => anchorRectSub.unsubscribe();
+    }, [canvasElement, hideOnInvisible, anchorRect$, hiddenRects$]);
+    if ((hidden && hiddenType === 'destroy')) {
+        return null;
+    }
+
+    return (
+        <RectPopup
+            hidden={hidden}
+            anchorRect$={anchorRect$}
+            direction={popup.direction}
+            onClickOutside={popup.onClickOutside}
+            excludeOutside={popup.excludeOutside}
+            excludeRects={excludeRectsRef}
+            onPointerEnter={popup.onPointerEnter}
+            onPointerLeave={popup.onPointerLeave}
+            onClick={popup.onClick}
+            onContextMenu={popup.onContextMenu}
+        >
+            {children}
+        </RectPopup>
+    );
+};
 
 export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
@@ -29,22 +104,7 @@ export function CanvasPopup() {
 
     return popups.map((item) => {
         const [key, popup] = item;
-
-        // e.g. Component is like: packages/sheets-ui/src/views/cell-alert/CellAlertPopup.tsx
         const Component = componentManager.get(popup.componentKey);
-        if (popup.componentKey.indexOf('single-dom-popup') > -1) {
-            return (
-                <SingleDOMPopup
-                    key={key}
-                    popup={popup}
-                >
-                    {Component ? <Component popup={popup} /> : null}
-                </SingleDOMPopup>
-            );
-        }
-        if (popup.componentKey.indexOf('content-popups-container')) {
-            return null;
-        }
         return (
             <SingleCanvasPopup
                 key={key}
@@ -53,42 +113,5 @@ export function CanvasPopup() {
                 {Component ? <Component popup={popup} /> : null}
             </SingleCanvasPopup>
         );
-    });
-}
-
-export function ContentDOMPopup() {
-    const popupService = useDependency(ICanvasPopupService);
-    const componentManager = useDependency(ComponentManager);
-    const popups = useObservable(popupService.popups$, undefined, true);
-
-    // const instanceService = useDependency(IUniverInstanceService);
-    // const domLayerService = useDependency(CanvasFloatDomService);
-    // const layers = useObservable(domLayerService.domLayers$);
-    // const currentUnitId = unitId || instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
-
-    // return layers?.filter((layer) => layer[1].unitId === currentUnitId)?.map((layer) => (
-    //     <FloatDomSingle
-    //         id={layer[0]}
-    //         layer={layer[1]}
-    //         key={layer[0]}
-    //     />
-    // ));
-    // TODO @lumixraku get header height
-    // const headerHeight = 40;
-    return popups.map((item) => {
-        const [key, popup] = item;
-        const Component = componentManager.get(popup.componentKey);
-
-        if (popup.componentKey.indexOf('content-dom-popup')) {
-            return (
-                <SingleDOMPopup
-                    key={key}
-                    popup={popup}
-                >
-                    {Component ? <Component popup={popup} /> : null}
-                </SingleDOMPopup>
-            );
-        }
-        return null;
     });
 }

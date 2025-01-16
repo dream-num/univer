@@ -22,7 +22,6 @@ export interface IFloatDomLayout extends IPosition {
     width: number;
     height: number;
     absolute: {
-        // what does left boolean mean ?
         left: boolean;
         top: boolean;
     };

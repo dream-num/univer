@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import type { ICommand } from '@univerjs/core';
 
 export const CreateFloatDomCommand: ICommand = {
     id: 'debugger.command.create-float-dom',

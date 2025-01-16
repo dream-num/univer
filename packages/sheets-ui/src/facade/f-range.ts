@@ -82,6 +82,7 @@ interface IFRangeSheetsUIMixin {
     ```
         let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
         let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
         let disposable = range.attachPopup({
         componentKey: 'univer.sheet.cell-alert',
         extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
@@ -102,6 +103,22 @@ interface IFRangeSheetsUIMixin {
      * ```
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
+    /**
+     * Attach a DOM popup to the start cell of current range.
+     * @param alert The alert to attach
+     * @returns The disposable object to detach the alert.
+     * @example
+     * ```ts
+        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
+        let disposable = range.attachRangePopup({
+        componentKey: 'univer.sheet.single-dom-popup',
+        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+        });
+     * ```
+     */
+    attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable>;
 
     /**
      *  Highlight the range with the specified style and primary cell.
@@ -192,6 +209,40 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
                 cellAlertService.removeAlert(alert.key);
             },
         };
+    }
+
+    /**
+     * attachDOMPopup
+     * @param popup
+     * @returns {IDisposable} disposable
+        let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
+        let range = sheet.getRange(2, 2, 3, 3);
+        univerAPI.getActiveWorkbook().setActiveRange(range);
+        let disposable = range.attachDOMPopup({
+        componentKey: 'univer.sheet.single-dom-popup',
+        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+        });
+     */
+    override attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable> {
+        popup.direction = popup.direction ?? 'horizontal';
+        popup.extraProps = popup.extraProps ?? {};
+        popup.offset = popup.offset ?? [0, 0];
+
+        const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
+        const sheetsPopupService = this._injector.get(SheetCanvasPopManagerService);
+        const disposePopup = sheetsPopupService.attachRangePopup(
+            this._range,
+            { ...popup, componentKey: key },
+            this.getUnitId(),
+            this._worksheet.getSheetId()
+        );
+        if (disposePopup) {
+            disposableCollection.add(disposePopup);
+            return disposableCollection;
+        }
+
+        disposableCollection.dispose();
+        return null;
     }
 
     override highlight(style?: Nullable<Partial<ISelectionStyle>>, primary?: Nullable<ISelectionCell>): IDisposable {

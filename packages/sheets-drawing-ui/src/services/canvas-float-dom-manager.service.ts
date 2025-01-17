@@ -22,9 +22,8 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
-import type { IFloatDomLayout } from '@univerjs/ui';
+import type { IFloatDom, IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-
 import { Disposable, DisposableCollection, DrawingTypeEnum, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Tools, UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -121,16 +120,6 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         };
     }
     const { left, right, top, bottom } = posOfFloatObject;
-    const freeze = worksheet.getFreeze();
-    const { startColumn, startRow, xSplit, ySplit } = freeze;
-    // freeze start
-    const startSheetView = skeleton.getNoMergeCellPositionByIndex(startRow - ySplit, startColumn - xSplit);
-    //  freeze end
-    const endSheetView = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-    // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-    const freezeWidth = endSheetView.startX - startSheetView.startX;
-    const freezeHeight = endSheetView.startY - startSheetView.startY;
-
     let { top: topBoundOfViewArea, left: leftBoundViewArea, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
 
     // specify edge of viewbound. if not specify, use viewMain.
@@ -156,11 +145,11 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
     // viewMain or viewTop
     if (left < leftBoundViewArea) {
         absolute.left = true;
-        offsetLeft = ((freezeWidth + leftBoundViewArea) + (left - leftBoundViewArea)) * scaleX;
+        offsetLeft = ((leftBoundViewArea) + (left - leftBoundViewArea)) * scaleX;
         offsetRight = Math.max(
             Math.min(
-                ((freezeWidth + leftBoundViewArea) + (right - leftBoundViewArea)) * scaleX,
-                (freezeWidth + leftBoundViewArea) * scaleX
+                ((leftBoundViewArea) + (right - leftBoundViewArea)) * scaleX,
+                (leftBoundViewArea) * scaleX
             ),
             (right - actualScrollX) * scaleX);
     } else {
@@ -174,11 +163,11 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
     // viewMain or viewTop
     if (top < topBoundOfViewArea) {
         absolute.top = true;
-        offsetTop = ((freezeHeight + topBoundOfViewArea) + (top - topBoundOfViewArea)) * scaleY;
+        offsetTop = ((topBoundOfViewArea) + (top - topBoundOfViewArea)) * scaleY;
         offsetBottom = Math.max(
             Math.min(
-                ((freezeHeight + topBoundOfViewArea) + (right - topBoundOfViewArea)) * scaleY,
-                (freezeHeight + topBoundOfViewArea) * scaleY
+                ((topBoundOfViewArea) + (right - topBoundOfViewArea)) * scaleY,
+                (topBoundOfViewArea) * scaleY
             ),
             (bottom - actualScrollY) * scaleY
         );
@@ -900,26 +889,22 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const position$ = new BehaviorSubject<IFloatDomLayout>(initedPosition);
             floatDomInfo.position$ = position$;
 
-            this._canvasFloatDomService.addFloatDom({
+            // used in FloatDom.tsx
+            const floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
                 componentKey: floatDomParam.componentKey,
-                onPointerDown: (evt) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
-                onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
-                onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
+                onPointerDown: () => { },
+                onPointerMove: () => { },
+                onPointerUp: () => { },
                 onWheel: (evt: WheelEvent) => {
                     canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                 },
-                // props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
+                props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                 data,
                 unitId,
-            });
+            };
+            this._canvasFloatDomService.addFloatDom(floatDomCfg);
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
                 const newPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
@@ -1127,19 +1112,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 position$,
                 id: drawingId,
                 componentKey: floatDomParam.componentKey,
-                onPointerDown: (evt) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
-                onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
-                onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                },
+                onPointerDown: () => { },
+                onPointerMove: () => { },
+                onPointerUp: () => { },
                 onWheel: (evt: WheelEvent) => {
                     canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                 },
-                // props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
+                props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                 data,
                 unitId,
             });

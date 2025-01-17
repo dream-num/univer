@@ -100,8 +100,9 @@ export interface IFWorksheetLegacy {
         }, {
         width: 100,
         height: 30,
-        x: '100%',
-        y: '100%'},
+        marginX: '100%', // margin percent to range width, or pixel
+        marginY: '100%'
+    },
     'AIButton') // dom id
     }
 
@@ -129,11 +130,8 @@ export interface IFWorksheetLegacy {
                 props: {
                     a: 1,
                 },
-                data: {
-                    aa: '128',
-                },
             },
-            {width: 100, height: 40, x: 0, y: 0},
+            {width: 100, height: 40, marginX: 0, marginY: 0, horizonOffsetAlign: 'right'},
             'ai-selector' // dom id
         )
     }

@@ -85,8 +85,10 @@ interface ICanvasFloatDomInfo {
 export interface IDOMRangeLayout {
     width: number;
     height: number;
-    x?: number; // offsetX
-    y?: number; // offsetY
+    horizonOffsetAlign?: 'left' | 'right';
+    verticalOffsetAlign?: 'top' | 'bottom';
+    marginX?: number;
+    marginY?: number;
 }
 
 export interface ILimitBound extends IBoundRectNoAngle {
@@ -758,8 +760,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const domWidth = domPos.width ?? rangeWidth;
         const domHeight = domPos.height ?? rangeHeight;
 
-        const domLeft = rangePosition.startX + calculateOffset(domPos.x, rangeWidth);
-        const domTop = rangePosition.startY + calculateOffset(domPos.y, rangeHeight);
+        const domLeft = rangePosition.startX + calculateOffset(domPos.marginX, rangeWidth);
+        const domTop = rangePosition.startY + calculateOffset(domPos.marginY, rangeHeight);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -987,8 +989,22 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const domWidth = domLayout.width ?? rangeWidth;
         const domHeight = domLayout.height ?? rangeHeight;
 
-        const domLeft = headerPosition.startX + calculateOffset(domLayout.x, rangeWidth);
-        const domTop = headerPosition.startY + calculateOffset(domLayout.y, rangeHeight);
+        let domLeft = 0;
+        let domTop = 0;
+        if (domLayout.horizonOffsetAlign === 'right') {
+            const offsetX = calculateOffset(domLayout.marginX, rangeWidth);
+            domLeft = headerPosition.endX - offsetX - domWidth;
+        } else {
+            // default align left
+            domLeft = headerPosition.startX + calculateOffset(domLayout.marginX, rangeWidth);
+        }
+
+        if (domLayout.verticalOffsetAlign === 'bottom') {
+            const offsetY = calculateOffset(domLayout.marginY, rangeHeight);
+            domTop = headerPosition.endY - offsetY - domHeight;
+        } else {
+            domTop = headerPosition.startY + calculateOffset(domLayout.marginY, rangeHeight);
+        }
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,

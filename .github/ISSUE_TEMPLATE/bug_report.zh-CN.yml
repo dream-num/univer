@@ -1,6 +1,6 @@
 name: 🐛 Bug 报告
 description: 尽管我们提供了中文 Bug 报告的入口，但还是建议您使用英语描述问题，这可以让更多的人来帮助您。
-labels: bug
+type: Bug
 title: '[Bug] '
 
 body:

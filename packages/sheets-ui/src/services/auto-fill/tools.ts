@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, Direction, isFormulaId, isFormulaString, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
@@ -328,6 +328,8 @@ export function fillCopy(data: Array<Nullable<ICellData>>, len: number) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
+        removeCellCustom(d);
+
         applyData.push({
             v: null,
             s: null,
@@ -391,6 +393,8 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
 
+            removeCellCustom(d);
+
             const num = Number(data[data.length - 1]?.v) * (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
 
             if (d) {
@@ -405,6 +409,8 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
         for (let i = 1; i <= len; i++) {
             const index = (i - 1) % data.length;
             const d = Tools.deepClone(data[index]);
+
+            removeCellCustom(d);
 
             const forward = direction === Direction.DOWN || direction === Direction.RIGHT;
             const y = forecast(data.length + i, dataNumArr, xArr, forward);
@@ -462,6 +468,8 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
+        removeCellCustom(d);
+
         const last = `${data[data.length - 1]?.v}`;
         const match = last?.match(reg);
         const lastTxt = match?.[match.length - 1];
@@ -487,6 +495,8 @@ export function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
+        removeCellCustom(d);
+
         if (d) {
             delete d.v;
 
@@ -511,6 +521,8 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
+
+        removeCellCustom(d);
 
         let num = 0;
         if (data[data.length - 1]?.v === keyword[0]) {
@@ -544,6 +556,8 @@ export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, ste
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
+
+        removeCellCustom(d);
 
         const formattedValue = `${data[data.length - 1]?.v}`;
         const num = chineseToNumber(formattedValue) + step * i;
@@ -619,6 +633,8 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
     for (let i = 1; i <= len; i++) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
+
+        removeCellCustom(d);
 
         const last = `${data[data.length - 1]?.v}`;
         let num = series.indexOf(last) + step * i;
@@ -801,16 +817,10 @@ export function needsUpdateCellValue(cell: ICellData) {
 
 /**
  * Remove cell.custom
- * @param arrayData
- * @returns
+ * @param cell
  */
-export function removeCellCustom(arrayData: Nullable<ICellData>[] | { s: Nullable<string | IStyleData> }[] | undefined) {
-    if (Array.isArray(arrayData)) {
-        arrayData.forEach((item) => {
-            if (item && 'custom' in item) {
-                delete item.custom;
-            }
-        });
+export function removeCellCustom(cell: Nullable<ICellData>) {
+    if (cell && 'custom' in cell) {
+        delete cell.custom;
     }
-    return arrayData;
 }

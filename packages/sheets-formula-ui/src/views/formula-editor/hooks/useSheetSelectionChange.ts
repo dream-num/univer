@@ -37,12 +37,13 @@ import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffset
 import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToText';
 import { unitRangesToText } from '../../range-selector/utils/unitRangesToText';
 import { useStateRef } from '../hooks/useStateRef';
-import { useSelectionAdd } from './useSelectionAdd';
+import { FormulaSelectingType } from './useFormulaSelection';
 
 const noop = (() => { }) as any;
 export const useSheetSelectionChange = (
     isNeed: boolean,
     isFocus: boolean,
+    isSelecting: FormulaSelectingType,
     unitId: string,
     subUnitId: string,
     sequenceNodes: INode[],
@@ -58,7 +59,6 @@ export const useSheetSelectionChange = (
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const themeService = useDependency(ThemeService);
-    const { getIsNeedAddSelection } = useSelectionAdd(unitId, editor);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');
@@ -70,10 +70,10 @@ export const useSheetSelectionChange = (
     const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
     const refSelectionsService = useDependency(IRefSelectionsService);
     const isScalingRef = useRef(false);
+    const isSelectingRef = useRef(isSelecting);
+    isSelectingRef.current = isSelecting;
 
     const scalingOptionRef = useRef<{ result: string; offset: number }>();
-
-    useEffect(() => {}, []);
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
@@ -93,7 +93,7 @@ export const useSheetSelectionChange = (
                 const sequenceNodes = [...sequenceNodesRef.current];
                 const nodeIndex = findIndexFromSequenceNodes(sequenceNodes, offset, false);
 
-                if (getIsNeedAddSelection()) {
+                if (isSelectingRef.current === FormulaSelectingType.NEED_ADD) {
                     if (offset !== 0) {
                         if (nodeIndex === -1 && sequenceNodes.length) {
                             return;
@@ -202,7 +202,7 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
             };
         }
-    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, getIsNeedAddSelection, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
+    }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed, sequenceNodesRef, subUnitId, unitId, getSheetNameById, sheetName, handleRangeChange, contextRef]);
 
     useEffect(() => {
         if (isFocus && refSelectionsRenderService && editor) {

@@ -134,6 +134,7 @@ export class ListSourceModel extends SourceModelBase {
             };
         } else {
             return {
+                t: typeof data === 'number' ? CellValueType.NUMBER : CellValueType.STRING,
                 v: data,
             };
         }
@@ -187,6 +188,7 @@ export class ObjectSourceModel extends SourceModelBase {
         } else {
             return {
                 v: data,
+                t: typeof data === 'number' ? CellValueType.NUMBER : CellValueType.STRING,
             };
         }
     }

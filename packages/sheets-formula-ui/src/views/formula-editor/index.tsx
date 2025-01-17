@@ -152,15 +152,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (!editorRef.current) {
             return;
         }
-        const preText = highTextRef.current;
         highTextRef.current = text;
         const sequenceNodes = getFormulaToken(text[0] === '=' ? text.slice(1) : '');
         const ranges = highlightDoc(
             editorRef.current,
             sequenceNodes,
             isNeedResetSelection,
-            // remove equals need to remove highlight style
-            preText.slice(1) === text && preText[0] === '=',
             newSelections
         );
         refSelections.current = ranges;

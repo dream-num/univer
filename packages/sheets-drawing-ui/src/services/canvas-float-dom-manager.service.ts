@@ -64,6 +64,11 @@ export interface ICanvasFloatDom {
      * the float-dom type
      */
     type?: DrawingTypeEnum;
+
+    /**
+     * whether allow event pass through float dom to canvas.
+     */
+    eventPassThrough?: boolean;
 }
 
 enum ScrollDirectionResponse {
@@ -715,10 +720,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
-    addFloatDomToRange(range: IRange, layer: ICanvasFloatDom, domPos: IDOMRangeLayout, propId?: string) {
+    addFloatDomToRange(range: IRange, config: ICanvasFloatDom, domPos: IDOMRangeLayout, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
-            unitId: layer.unitId,
-            subUnitId: layer.subUnitId,
+            unitId: config.unitId,
+            subUnitId: config.subUnitId,
         });
         if (!target) {
             throw new Error('cannot find current target!');
@@ -732,7 +737,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!skeletonParam) return;
         // const viewMain = renderObject.scene.getMainViewport();
 
-        const { componentKey, data, allowTransform = true } = layer;
+        const { componentKey, data, allowTransform = true } = config;
         const id = propId ?? generateRandomId();
         // const drawingId = id;
 
@@ -741,9 +746,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
-        // this._ensureMap for what?
         const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, layer);
+        map.set(id, config);
         const rangeWidth = rangePosition.endX - rangePosition.startX;
         const rangeHeight = rangePosition.endY - rangePosition.startY;
         const domWidth = domPos.width ?? rangeWidth;
@@ -756,7 +760,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             subUnitId,
             drawingId: id,
-            drawingType: layer.type || DrawingTypeEnum.DRAWING_DOM,
+            drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
             transform: {
@@ -874,7 +878,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 bottom: viewMain.bottom,
                 right: viewMain.right,
             };
-            // why call twice? there is another calcPosition below.
 
             const floatDomInfo = {
                 dispose: disposableCollection,
@@ -890,7 +893,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             floatDomInfo.position$ = position$;
 
             // used in FloatDom.tsx
-            const floatDomCfg: IFloatDom = {
+            let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
                 componentKey: floatDomParam.componentKey,
@@ -904,6 +907,19 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 data,
                 unitId,
             };
+            if (config.eventPassThrough) {
+                floatDomCfg = { ...floatDomCfg,
+                                onPointerDown: (evt) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                                onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                                onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                };
+            }
             this._canvasFloatDomService.addFloatDom(floatDomCfg);
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
@@ -931,10 +947,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
-    addFloatDomToColumnHeader(column: number, layer: ICanvasFloatDom, domLayout: IDOMRangeLayout, propId?: string) {
+    addFloatDomToColumnHeader(column: number, config: ICanvasFloatDom, domLayout: IDOMRangeLayout, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
-            unitId: layer.unitId,
-            subUnitId: layer.subUnitId,
+            unitId: config.unitId,
+            subUnitId: config.subUnitId,
         });
         if (!target) {
             throw new Error('cannot find current target!');
@@ -948,7 +964,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!skeletonParam) return;
         // const viewMain = renderObject.scene.getMainViewport();
 
-        const { componentKey, data, allowTransform = true } = layer;
+        const { componentKey, data, allowTransform = true } = config;
         const id = propId ?? generateRandomId();
         // const drawingId = id;
 
@@ -968,7 +984,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
         // this._ensureMap for what?
         const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, layer);
+        map.set(id, config);
         const rangeWidth = rangePosition.endX - rangePosition.startX;
         const rangeHeight = rangePosition.endY - rangePosition.startY;
         const domWidth = domLayout.width ?? rangeWidth;
@@ -995,7 +1011,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             subUnitId,
             drawingId: id,
-            drawingType: layer.type || DrawingTypeEnum.DRAWING_DOM,
+            drawingType: config.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
             transform: {
@@ -1007,14 +1023,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             data,
             allowTransform,
         };
-
-        // mutation
-        // ---> this._drawingManagerService.add$.subscribe
-        // this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
-        //     unitId,
-        //     drawings: [sheetDrawingParam],
-        // } as IInsertDrawingCommandParams);
-        // this._add$.next({ unitId, subUnitId, id }); // seems no use
 
         {
             const { unitId, subUnitId, drawingId } = sheetDrawingParam;
@@ -1108,7 +1116,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const position$ = new BehaviorSubject<IFloatDomLayout>(initedPosition);
             floatDomInfo.position$ = position$;
 
-            this._canvasFloatDomService.addFloatDom({
+            let floatDomCfg: IFloatDom = {
                 position$,
                 id: drawingId,
                 componentKey: floatDomParam.componentKey,
@@ -1121,7 +1129,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 props: map.get(drawingId)?.props ?? this._getFloatDomProps(drawingId),
                 data,
                 unitId,
-            });
+            };
+            if (config.eventPassThrough) {
+                floatDomCfg = { ...floatDomCfg,
+                                onPointerDown: (evt) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                                onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                                onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                                },
+                };
+            }
+            this._canvasFloatDomService.addFloatDom(floatDomCfg);
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
                 const newPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);

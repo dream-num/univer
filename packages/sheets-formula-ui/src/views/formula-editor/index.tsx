@@ -173,15 +173,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     }, [formulaText, isFocus, highlight]);
 
-    // useEffect(() => {
-    //     const sub = docSelectionRenderService?.onChangeByEvent$.subscribe((e) => {
-    //         const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
-    //         highlight(formulaText, false, true);
-    //     });
-
-    //     return () => sub?.unsubscribe();
-    // }, [docSelectionRenderService?.onChangeByEvent$, document, highlight]);
-
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
@@ -242,7 +233,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (!isFocusing) {
             return;
         }
-        highlight(`=${refString}`, true, isEnd, [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }]);
+
+        const newSelections = offset !== -1 ? [{ startOffset: offset + 1, endOffset: offset + 1, collapsed: true }] : undefined;
+        highlight(`=${refString}`, true, isEnd, newSelections);
         if (isEnd) {
             focus();
             if (offset !== -1) {

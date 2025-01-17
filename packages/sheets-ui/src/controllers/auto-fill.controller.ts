@@ -74,7 +74,7 @@ import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.op
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import { otherRule } from '../services/auto-fill/rules';
-import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { fillCopy, fillCopyStyles, getDataIndex, getLenS, removeCellCustom } from '../services/auto-fill/tools';
 import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
@@ -364,6 +364,10 @@ export class AutoFillController extends Disposable {
                     customApplyFunctions,
                     copyDataPiece
                 );
+
+                // We do not process cell.custom by default. If the user needs to process it, they can do so in the hook extension.
+                removeCellCustom(arrData);
+
                 const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
                 applyDataInTypes[type].push({ data: arrData, index: arrIndex });
             });

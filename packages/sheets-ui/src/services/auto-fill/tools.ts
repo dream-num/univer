@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { ICellData, IRange, IStyleData, Nullable } from '@univerjs/core';
 import { CellValueType, Direction, isFormulaId, isFormulaString, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
@@ -797,4 +797,20 @@ export function needsUpdateCellValue(cell: ICellData) {
     }
 
     return true;
+}
+
+/**
+ * Remove cell.custom
+ * @param arrayData
+ * @returns
+ */
+export function removeCellCustom(arrayData: Nullable<ICellData>[] | { s: Nullable<string | IStyleData> }[] | undefined) {
+    if (Array.isArray(arrayData)) {
+        arrayData.forEach((item) => {
+            if (item && 'custom' in item) {
+                delete item.custom;
+            }
+        });
+    }
+    return arrayData;
 }

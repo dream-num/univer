@@ -32,9 +32,9 @@ import {
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { combineLatest, isObservable, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, isObservable } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -64,33 +64,44 @@ function MenuWrapper(props: IBaseMenuProps) {
 
     const menuManagerService = useDependency(IMenuManagerService);
 
-    if (!menuType) {
-        return null;
-    };
-    const menuItems = menuManagerService.getMenuByPositionKey(menuType);
+    const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
+
+    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
 
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
             if (!item.children) return item;
 
-            let hasChildren = false;
-            const hiddenObservables = item.children?.map((subItem) => {
-                return subItem.item?.hidden$ ?? new Observable<boolean>((s) => {
-                    s.next(false);
-                    return s.unsubscribe();
-                });
-            });
-            combineLatest(hiddenObservables).subscribe((hiddenValues) => {
-                hasChildren = hiddenValues.every((hidden) => hidden === true);
-
-                if (!hasChildren) {
-                    hasChildren = true;
-                }
-            }).unsubscribe();
-
-            return hasChildren;
+            const itemKey = item.key?.toString() || '';
+            return !hiddenStates[itemKey];
         });
+    }, [menuItems, hiddenStates]);
+
+    useEffect(() => {
+        const subscriptions = menuItems.map((item) => {
+            if (!item.children) return null;
+
+            const hiddenObservables = item.children.map((subItem) =>
+                subItem.item?.hidden$ ?? new BehaviorSubject<boolean>(false)
+            );
+
+            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
+                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
+                setHiddenStates((prev) => ({
+                    ...prev,
+                    [item.key]: isAllHidden,
+                }));
+            });
+        });
+
+        return () => {
+            subscriptions.forEach((sub) => sub?.unsubscribe());
+        };
     }, [menuItems]);
+
+    if (!menuType) {
+        return null;
+    };
 
     return filteredMenuItems && filteredMenuItems.map((item) => item.item
         ? (

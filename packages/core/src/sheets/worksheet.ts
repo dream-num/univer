@@ -15,7 +15,7 @@
  */
 
 import type { IInterceptor } from '../common/interceptor';
-import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { IObjectMatrixChange, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { CustomData, ICellData, ICellDataForSheetInterceptor, ICellDataWithSpanAndDisplay, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
@@ -79,6 +79,11 @@ export class Worksheet {
     protected readonly _viewModel: SheetViewModel;
 
     protected _spanModel: SpanModel;
+    /**
+     * cache for getCell,
+     * `undefined` means not cached, otherwise cached
+     */
+    protected _getCellCache = new ObjectMatrix<Nullable<ICellDataForSheetInterceptor>>();
 
     constructor(
         public readonly unitId: string,
@@ -96,6 +101,49 @@ export class Worksheet {
         this._rowManager = new RowManager(this._snapshot, this._viewModel, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
         this._spanModel = new SpanModel(this._snapshot.mergeData);
+        this._cellData.registerChangeCallback(this._handleObjectMatrixChange.bind(this));
+    }
+
+    private _handleObjectMatrixChange(change: IObjectMatrixChange<ICellData>): void {
+        switch (change.type) {
+            case 'swapRow':
+                this._getCellCache.swapRow(change.src, change.target);
+                break;
+            case 'reset':
+                this._getCellCache.reset();
+                break;
+            case 'setValue':
+                this.markCachedCellDirty(change.row, change.column);
+                break;
+            case 'setRow':
+                this._getCellCache.setRow(change.rowNumber, {});
+                break;
+            case 'insertRows':
+                this._getCellCache.insertRows(change.start, change.count);
+                break;
+            case 'removeRows':
+                this._getCellCache.removeRows(change.start, change.count);
+                break;
+            case 'moveRows':
+                this._getCellCache.moveRows(change.start, change.count, change.target);
+                break;
+            case 'insertColumns':
+                this._getCellCache.insertColumns(change.start, change.count);
+                break;
+            case 'removeColumns':
+                this._getCellCache.removeColumns(change.start, change.count);
+                break;
+            case 'moveColumns':
+                this._getCellCache.moveColumns(change.start, change.count, change.target);
+                break;
+            case 'merge':
+                change.src.forValue((row, col) => {
+                    this.markCachedCellDirty(row, col);
+                });
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -478,6 +526,20 @@ export class Worksheet {
     }
 
     /**
+     * Mark cell cache dirty
+     * @param range
+     */
+    markCachedRangeDirty(range: IRange): void {
+        Range.foreach(range, (row, column) => {
+            this._getCellCache.setValue(row, column, undefined);
+        });
+    }
+
+    markCachedCellDirty(row: number, column: number): void {
+        this._getCellCache.setValue(row, column, undefined);
+    }
+
+    /**
      * Get cellData, includes cellData, customRender, markers, dataValidate, etc.
      *
      * WARNING: All sheet CELL_CONTENT interceptors will be called in this method, cause performance issue.
@@ -492,7 +554,14 @@ export class Worksheet {
             return null;
         }
 
-        return this._viewModel.getCell(row, col);
+        const cache = this._getCellCache.getValue(row, col);
+        if (cache !== undefined) {
+            return cache;
+        }
+
+        const cell = this._viewModel.getCell(row, col) ?? null;
+        this._getCellCache.setValue(row, col, cell);
+        return cell;
     }
 
     /**

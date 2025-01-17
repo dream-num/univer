@@ -173,15 +173,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     }, [formulaText, isFocus, highlight]);
 
-    // useEffect(() => {
-    //     const sub = docSelectionRenderService?.onChangeByEvent$.subscribe((e) => {
-    //         const formulaText = BuildTextUtils.transform.getPlainText(document?.getBody()?.dataStream ?? '');
-    //         highlight(formulaText, false, true);
-    //     });
-
-    //     return () => sub?.unsubscribe();
-    // }, [docSelectionRenderService?.onChangeByEvent$, document, highlight]);
-
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 

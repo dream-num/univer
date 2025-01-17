@@ -96,6 +96,7 @@ function MenuWrapper(props: IBaseMenuProps) {
 
         return () => {
             subscriptions.forEach((sub) => sub?.unsubscribe());
+            setHiddenStates({});
         };
     }, [menuItems]);
 

@@ -33,9 +33,9 @@ import { SidebarOperation } from '../commands/operations/sidebar.operation';
 
 import { ThemeOperation } from '../commands/operations/theme.operation';
 
+import { AIButton, FloatButton } from '../components/float-button';
 import { ImageDemo } from '../components/Image';
 import { RangeLoading } from '../components/range-loading';
-import { FloatButton } from '../components/float-button';
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 // import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
@@ -92,5 +92,6 @@ export class DebuggerController extends Disposable {
         this.disposeWithMe(componentManager.register('ImageDemo', ImageDemo));
         this.disposeWithMe(componentManager.register('RangeLoading', RangeLoading));
         this.disposeWithMe(componentManager.register('FloatButton', FloatButton));
+        this.disposeWithMe(componentManager.register('AIButton', AIButton));
     }
 }

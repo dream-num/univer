@@ -105,7 +105,7 @@ export interface IPaintForScrolling {
     scaleX: number;
     scaleY: number;
 }
-export interface IColumnStyleCfg {
+export interface IHeaderStyleCfg {
     fontFamily: string;
     fontColor: string;
     fontSize: number;
@@ -115,7 +115,7 @@ export interface IColumnStyleCfg {
     backgroundColor: string;
 }
 
-export type IAColumnCfgObj = IColumnStyleCfg & { text: string };
+export type IAColumnCfgObj = IHeaderStyleCfg & { text: string; headerHeight: number };
 export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
 
 export interface IRowStyleCfg {
@@ -128,5 +128,5 @@ export interface IRowStyleCfg {
     backgroundColor: string;
 }
 
-export type IARowCfgObj = IColumnStyleCfg & { text: string };
+export type IARowCfgObj = IHeaderStyleCfg & { text: string };
 export type IARowCfg = undefined | null | string | Partial<IARowCfgObj>;

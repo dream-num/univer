@@ -87,9 +87,7 @@ export interface IFWorksheetLegacy {
     // another example-------------------
     {
      const sheet = univerAPI.getActiveWorkbook().getActiveSheet();
-     //  const range = sheet.getRange(0, 0, 3, 3);
-     //  univerAPI.getActiveWorkbook().setActiveRange(range);
-     univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
+     const range = univerAPI.getActiveWorkbook().getActiveSheet().getActiveRange()
      const {id, dispose } = sheet.addFloatDomToRange(range, {
             allowTransform: false,
             componentKey: 'FloatButton', // React comp key registered in ComponentManager
@@ -102,10 +100,12 @@ export interface IFWorksheetLegacy {
         }, {
         width: 100,
         height: 30,
-        x: '100%',
-        y: '100%'},
+        marginX: '100%', // margin percent to range width, or pixel
+        marginY: '100%'
+    },
     'AIButton') // dom id
     }
+
      * ```
      */
     addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
@@ -130,11 +130,8 @@ export interface IFWorksheetLegacy {
                 props: {
                     a: 1,
                 },
-                data: {
-                    aa: '128',
-                },
             },
-            {width: 100, height: 40, x: 0, y: 0},
+            {width: 100, height: 40, marginX: 0, marginY: 0, horizonOffsetAlign: 'right'},
             'ai-selector' // dom id
         )
     }

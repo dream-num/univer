@@ -258,10 +258,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             checkScrollBar();
         }
     });
-
     useSheetSelectionChange(
         isFocus && Boolean(isSelecting && docFocusing),
         isFocus,
+        isSelecting,
         unitId,
         subUnitId,
         sequenceNodes,

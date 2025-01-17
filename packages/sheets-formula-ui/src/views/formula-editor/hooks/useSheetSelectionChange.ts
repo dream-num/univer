@@ -59,7 +59,6 @@ export const useSheetSelectionChange = (
     const sequenceNodesRef = useStateRef(sequenceNodes);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const themeService = useDependency(ThemeService);
-    // const { getIsNeedAddSelection } = useSelectionAdd(unitId, editor);
 
     const workbook = univerInstanceService.getUnit<Workbook>(unitId);
     const getSheetNameById = useEvent((sheetId: string) => workbook?.getSheetBySheetId(sheetId)?.getName() ?? '');

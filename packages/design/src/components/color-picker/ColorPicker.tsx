@@ -17,7 +17,7 @@
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlphaSlider } from './AlphaSlider';
-import { hsvToHex, hsvToRgb, parseRgba, rgbToHex, rgbToHsv } from './color-conversion';
+import { hexToHsv, hsvToHex, hsvToRgb, rgbToHex } from './color-conversion';
 import { ColorInput } from './ColorInput';
 import { ColorPresets } from './ColorPresets';
 import { ColorSpectrum } from './ColorSpectrum';
@@ -48,10 +48,11 @@ export function ColorPicker({ format = 'hex', value = '#000000', showAlpha = fal
 
     useEffect(() => {
         try {
-            const [r, g, b, a] = parseRgba(value);
-            const [h, s, v] = rgbToHsv(r, g, b);
-            setHsv([h, s, v]);
-            setAlpha(a);
+            if (format === 'hex') {
+                const [h, s, v] = hexToHsv(value);
+                setHsv([h, s, v]);
+                setAlpha(1);
+            }
         } catch (error) {
             console.error('Invalid RGBA value:', error);
         }

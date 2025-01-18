@@ -356,6 +356,8 @@ export class AutoFillController extends Disposable {
             copyDataInType.forEach((copySquad) => {
                 const s = getLenS(copySquad.index, rsd);
                 const len = copySquad.index.length * num + s;
+
+                // We do not process cell.custom by default. If the user needs to process it, they can do so in the hook extension.
                 const arrData = this._applyFunctions(
                     copySquad,
                     len,
@@ -364,6 +366,7 @@ export class AutoFillController extends Disposable {
                     customApplyFunctions,
                     copyDataPiece
                 );
+
                 const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
                 applyDataInTypes[type].push({ data: arrData, index: arrIndex });
             });

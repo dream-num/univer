@@ -265,7 +265,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is clicked
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellClicked, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellClicked, (params)=> {
      *      const { worksheet, workbook, row, column, value, isZenEditor } = params;
      * });
      * ```
@@ -275,7 +275,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is pointer down
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerDown, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params)=> {
      *      const { worksheet, workbook, row, column } = params;
      * });
      * ```
@@ -286,7 +286,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is pointer up
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerUp, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params)=> {
      *      const { worksheet, workbook, row, column } = params;
      * });
      * ```
@@ -297,7 +297,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when a cell is hovered
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellHover, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellHover, (params)=> {
      *      const { worksheet, workbook, row, column } = params;
      * });
      * ```
@@ -307,7 +307,7 @@ export interface IFSheetsUIEventNameMixin {
      * Event fired when move on spreadsheet cells
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.CellPointerMove, (params)=> {
+     * univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params)=> {
      *      const { worksheet, workbook, row, column } = params;
      * });
      * ```

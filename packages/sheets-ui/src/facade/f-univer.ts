@@ -34,7 +34,7 @@ import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FU
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSkeletonChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
-import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { attachSelectionWithCoord, DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
@@ -45,7 +45,7 @@ export interface IFUniverSheetsUIMixin {
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
      * @example
      * ```typescript
-     * univerAPI.customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * univerAPI.customizeColumnHeader({ headerStyle: { size: 40, backgroundColor: '#4e69ee', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
@@ -805,8 +805,44 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
             return;
         }
         const unitId = wb?.getId();
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const activeSheet = wb.getActiveSheet();
+        const subUnitId = activeSheet.getSheetId();
+        const render = renderManagerService.getRenderById(unitId);
+        if (render) {
+            const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
+            if (skeleton) {
+                if (cfg.headerStyle?.size) {
+                    const size = cfg.headerStyle?.size;
+                    skeleton.columnHeaderHeight = cfg.headerStyle?.size;
+                    render.scene.getViewports()[0].top = cfg.headerStyle?.size;
+                    render.scene.getViewport('viewColumnRight')!.setViewportSize({
+                        height: size,
+                    });
+                    render.scene.getViewport('viewColumnLeft')!.setViewportSize({
+                        height: size,
+                    });
+                    render.scene.getViewport('viewRowBottom')!.setViewportSize({
+                        top: size,
+                    });
+                    render.scene.getViewport('viewRowTop')!.setViewportSize({
+                        top: size,
+                    });
+
+                    const selectionService = render?.with(SheetsSelectionsService);
+                    const selectionRenderService = render?.with(ISheetSelectionRenderService);
+                    const currSelections = selectionService.getCurrentSelections();
+                    selectionRenderService.resetSelectionsByModelData(currSelections);
+                }
+            }
+            activeSheet?.refreshCanvas();
+        }
+
         const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         sheetColumn.setCustomHeader(cfg);
+        activeSheet?.refreshCanvas();
+        const r = activeSheet.getRange('A1');
+        activeSheet.setActiveRange(r);
     }
 
     override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {

@@ -85,6 +85,8 @@ export interface ISheetSelectionRenderService {
     setSingleSelectionEnabled(enabled: boolean): void;
 
     refreshSelectionMoveEnd(): void;
+
+    resetSelectionsByModelData(selectionsWithStyleList: readonly ISelectionWithStyle[]): void;
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -249,8 +251,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
         this._selectionControls.push(control);
         const selectionWithCoord = attachSelectionWithCoord(selection, skeleton);
-        control.updateRangeBySelectionWithCoord(selectionWithCoord);
-
+        control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
         control.setControlExtension({
             skeleton,
             scene,
@@ -284,7 +285,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             const control = allSelectionControls[i];
 
             if (control) {
-                control.updateRangeBySelectionWithCoord(selectionWithCoord);
+                control.updateRangeBySelectionWithCoord(selectionWithCoord, skeleton);
             } else {
                 if (this.isSelectionEnabled()) {
                     this.newSelectionControl(this._scene!, skeleton, selectionWithStyle);

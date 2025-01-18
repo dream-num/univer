@@ -113,9 +113,10 @@ export interface IHeaderStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
+    size: number;
 }
 
-export type IAColumnCfgObj = IHeaderStyleCfg & { text: string; headerHeight: number };
+export type IAColumnCfgObj = IHeaderStyleCfg & { text: string };
 export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
 
 export interface IRowStyleCfg {

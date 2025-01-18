@@ -286,6 +286,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     initConfig() {
         this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+
+        window.sk = this;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -310,6 +312,16 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     get columnHeaderHeight(): number {
         return this._columnHeaderHeight;
+    }
+
+    set columnHeaderHeight(value: number) {
+        this._columnHeaderHeight = value;
+        this._worksheetData.columnHeader.height = value;
+    }
+
+    set rowHeaderWidth(value: number) {
+        this._rowHeaderWidth = value;
+        this._worksheetData.rowHeader.width = value;
     }
 
     get imageCacheMap(): ImageCacheMap {

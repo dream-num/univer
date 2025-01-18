@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
-
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -35,7 +33,7 @@ import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, isObservable } from 'rxjs';
+import { combineLatest, isObservable, of } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -82,8 +80,7 @@ function MenuWrapper(props: IBaseMenuProps) {
         const subscriptions = menuItems.map((item) => {
             if (!item.children) return null;
 
-            const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$)
-                .filter(Boolean) as Observable<boolean>[];
+            const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
 
             return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
                 const isAllHidden = hiddenValues.every((hidden) => hidden === true);

@@ -327,13 +327,19 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
                 const { keycode, isShift } = params;
 
+                const docSelectionRenderManager = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+
                 /**
                  * After the user enters the editor and actively moves the editor selection area with the mouse,
                  * the up, down, left, and right keys can no longer switch editing cells,
                  * but move the cursor within the editor instead.
                  */
                 if (keycode != null &&
-                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR))
+                    (
+                        this._cursorChange === CursorChange.CursorChange ||
+                        this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR) ||
+                        docSelectionRenderManager?.isIMEInputing
+                    )
                 ) {
                     this._moveInEditor(keycode, isShift);
                     return;

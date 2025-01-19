@@ -99,7 +99,6 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     if (!position) {
         return null;
     }
-    console.log('endX', position.endX, position.startX);
 
     return (
         <div

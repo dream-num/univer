@@ -219,7 +219,7 @@ const calcPosition = (
     const offsetBound = transformBound2DOMBound(boundOfFloatObject, scene, skeleton, worksheet, floatDomInfo);
     const { scaleX, scaleY } = scene.getAncestorScale();
 
-    let domPos: IFloatDomLayout = {
+    const domPos: IFloatDomLayout = {
         startX: offsetBound.left,
         endX: offsetBound.right,
         startY: offsetBound.top,
@@ -229,10 +229,6 @@ const calcPosition = (
         height: height * scaleY,
         absolute: offsetBound.absolute,
     };
-
-    if (floatDomInfo?.domAnchor) {
-        domPos = calcDomPositionByAnchor(domPos, floatDomInfo?.domAnchor);
-    }
 
     return domPos;
 };
@@ -763,7 +759,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, config);
-        const domPosFromRange = calcDomPositionByAnchor(rangePosition, domAnchor);
+
+        const scene = renderObject.scene;
+        const { scaleX } = scene.getAncestorScale();
+        const domPosFromRange = calcDomPositionByAnchor(rangePosition, domAnchor, scaleX);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -947,6 +946,15 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 const newPos = calcPosition(newRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);
             });
+            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+
+            skm?.currentSkeleton$.subscribe((skeleton) => {
+                if (!skeleton) return;
+                if (skeletonParam.sheetId !== skeleton.sheetId) {
+                    this._removeDom(id, true);
+                }
+            });
+
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
                 const newPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
                 position$.next(
@@ -1000,8 +1008,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             startColumn: column,
             endColumn: column,
         }, currentRender, skeletonParam.skeleton);
-        const headerPosition = rangePosition;
-        headerPosition.startY = 0; // for column header
+        const headerCellPosition = rangePosition;
+        headerCellPosition.startY = 0; // for column header
 
         const sheetTransform = this._getPosition(rangePosition, unitId);
         if (sheetTransform == null) {
@@ -1012,7 +1020,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, config);
 
-        const domLayout = calcDomPositionByAnchor(headerPosition, domLayoutParam);
+        // const headerCellLayout = calcDomPositionByAnchor(headerCellPosition, domLayoutParam);
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
             subUnitId,
@@ -1021,10 +1029,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             componentKey,
             sheetTransform,
             transform: {
-                left: domLayout.startX,
-                top: domLayout.startY,
-                width: domLayout.width,
-                height: domLayout.height,
+                left: headerCellPosition.startX,
+                top: headerCellPosition.startY,
+                width: headerCellPosition.width,
+                height: headerCellPosition.height,
             } as ITransformState,
             data,
             allowTransform,
@@ -1087,15 +1095,28 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const domConfig: IRectProps = {
-                left,
-                top,
-                width,
-                height,
+            const calcOffsetPos = calcDomPositionByAnchor({
+                rotate: 0,
+                startX: headerCellPosition.startX,
+                startY: 0,
+                endX: rangePosition.endX,
+                endY: rangePosition.endY,
+                width: domLayoutParam.width,
+                height: domLayoutParam.height,
+                absolute: {
+                    left: rangePosition.absolute.left,
+                    top: rangePosition.absolute.top,
+                },
+            }, domLayoutParam);
+            const headerRectConfig: IRectProps = {
+                left: calcOffsetPos.startX,
+                top: calcOffsetPos.startY,
+                width: calcOffsetPos.width,
+                height: calcOffsetPos.height,
                 zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
             };
 
-            const domRect = new Rect(rectShapeKey, domConfig);
+            const domRect = new Rect(rectShapeKey, headerRectConfig);
             scene.addObject(domRect, DRAWING_OBJECT_LAYER_INDEX);
             if (floatDomParam.allowTransform !== false) {
                 scene.attachTransformerTo(domRect);
@@ -1110,7 +1131,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 bottom: viewMain.bottom,
                 right: viewMain.right,
             };
-            // why call twice? there is another calcPosition below.
             const floatDomInfo = {
                 dispose: disposableCollection,
                 rect: domRect,
@@ -1118,6 +1138,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 unitId,
                 subUnitId,
                 boundsOfViewArea,
+                domAnchor: domLayoutParam,
                 scrollDirectionResponse: ScrollDirectionResponse.HORIZONTAL,
             } as unknown as ICanvasFloatDomInfo;
 
@@ -1160,10 +1181,46 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     newPosition
                 );
             });
-            rangePos$.subscribe((pos) => {
-                pos.startY = 0;
-                const newPos = calcDomPositionByAnchor(pos, domLayoutParam);
+
+            rangePos$.subscribe((newHeaderPos) => {
+                const calcOffsetPos = calcDomPositionByAnchor({
+                    rotate: 0,
+                    startX: newHeaderPos.startX,
+                    startY: 0,
+                    endX: newHeaderPos.endX,
+                    endY: newHeaderPos.endY,
+                    width: domLayoutParam.width,
+                    height: domLayoutParam.height,
+                    absolute: {
+                        left: rangePosition.absolute.left,
+                        top: rangePosition.absolute.top,
+                    },
+                }, domLayoutParam);
+                // can not update! .left is protected and set props needs not in BASE_OBJECT_ARRAY_Set // why???
+                // domRect.setProps({
+                //     left: calcOffsetPos.startX,
+                //     top: calcOffsetPos.startY,
+                //     width: domLayoutParam.width,
+                //     height: domLayoutParam.height,
+                // });
+                const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                const newRect = new Rect(rectShapeKey, {
+                    left: calcOffsetPos.startX,
+                    top: 0,
+                    width: domLayoutParam.width,
+                    height: domLayoutParam.height,
+                    zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                });
+                const newPos = calcPosition(newRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
                 position$.next(newPos);
+            });
+
+            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            skm?.currentSkeleton$.subscribe((skeleton) => {
+                if (!skeleton) return;
+                if (skeletonParam.sheetId !== skeleton.sheetId) {
+                    this._removeDom(id, true);
+                }
             });
 
             disposableCollection.add(() => {
@@ -1344,28 +1401,32 @@ function calcCellPositionByCell(
     };
 }
 
-function calcDomPositionByAnchor(rangePosition: IFloatDomLayout, domLayoutParam: IDOMAnchor): IFloatDomLayout {
+function calcDomPositionByAnchor(rangePosition: IFloatDomLayout, domLayoutParam?: IDOMAnchor, scale?: number): IFloatDomLayout {
+    scale = scale ?? 1;
+
     const rangeWidth = rangePosition.endX - rangePosition.startX;
     const rangeHeight = rangePosition.endY - rangePosition.startY;
-    const domWidth = domLayoutParam.width ?? rangeWidth;
-    const domHeight = domLayoutParam.height ?? rangeHeight;
+    const domWidth = domLayoutParam?.width ?? rangeWidth;
+    const domHeight = domLayoutParam?.height ?? rangeHeight;
 
     let domLeft = 0;
     let domTop = 0;
 
-    if (domLayoutParam.horizonOffsetAlign === 'right') {
-        const offsetX = calculateOffset(domLayoutParam.marginX, rangeWidth);
-        domLeft = rangePosition.endX - offsetX - domWidth;
-    } else {
+    if (domLayoutParam) {
+        if (domLayoutParam.horizonOffsetAlign === 'right') {
+            const offsetX = calculateOffset(domLayoutParam.marginX, rangeWidth * scale);
+            domLeft = rangePosition.endX - offsetX - domWidth;
+        } else {
         // default align left
-        domLeft = rangePosition.startX + calculateOffset(domLayoutParam.marginX, rangeWidth);
-    }
+            domLeft = rangePosition.startX + calculateOffset(domLayoutParam.marginX, rangeWidth);
+        }
 
-    if (domLayoutParam.verticalOffsetAlign === 'bottom') {
-        const offsetY = calculateOffset(domLayoutParam.marginY, rangeHeight);
-        domTop = rangePosition.endY - offsetY - domHeight;
-    } else {
-        domTop = rangePosition.startY + calculateOffset(domLayoutParam.marginY, rangeHeight);
+        if (domLayoutParam.verticalOffsetAlign === 'bottom') {
+            const offsetY = calculateOffset(domLayoutParam.marginY, rangeHeight * scale);
+            domTop = rangePosition.endY - offsetY - domHeight;
+        } else {
+            domTop = rangePosition.startY + calculateOffset(domLayoutParam.marginY, rangeHeight);
+        }
     }
 
     return {

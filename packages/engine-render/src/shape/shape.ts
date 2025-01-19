@@ -346,7 +346,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     }
 
     /**
-     * this[_key] = props[key]
+     * if BASE_OBJECT_ARRAY_Set.has(key) not exist, then this[_key] = props[key],
      * @param props
      */
     setProps(props?: T): Shape<T> {

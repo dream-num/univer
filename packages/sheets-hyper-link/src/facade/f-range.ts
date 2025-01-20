@@ -33,15 +33,15 @@ export interface IFRangeHyperlinkMixin {
      */
     setHyperLink(url: string, label?: string): Promise<boolean>;
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().getLinks())` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).getLinks())` instead
      */
     getHyperLinks(): ICellHyperLink[];
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().updateLink(id, url))` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().updateLink(id, url))` instead
      */
     updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
     /**
-     * @deprecated use `range.setRichTextValueForCell(range.getRichTextValue().copy().cancelLink(id))` instead
+     * @deprecated use `range.setRichTextValueForCell(range.getValue(true).copy().cancelLink(id))` instead
      */
     cancelHyperLink(id: string): boolean;
 

@@ -234,27 +234,59 @@ export class FRange extends FBaseInitialable {
         }));
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
     /**
-     * @deprecated use `getValueAndRichTextValue` instead. This api can't return rich text value.
+     * Return first cell value in this range
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {CellValue | RichTextValue | null} The cell value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValue()
+     * ```
      */
-    getValue(): CellValue | null {
-        return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
+    getValue(): CellValue | null;
+    getValue(includeRichText: true): RichTextValue | CellValue | null;
+    getValue(includeRichText?: boolean): RichTextValue | CellValue | null {
+        const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
+        if (cell?.v !== undefined && cell?.v !== null) {
+            return cell.v;
+        }
+        if (cell?.p && includeRichText) {
+            return new RichTextValue(cell.p);
+        }
+        return null;
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
     /**
-     * @deprecated use `getValueAndRichTextValues` instead. This api can't return rich text value.
+     * Returns the cell values for the cells in the range.
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValues()
+     * ```
      */
-    getValues(): Nullable<CellValue>[][] {
+    getValues(): Nullable<CellValue>[][];
+    getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
+    getValues(includeRichText?: true): (Nullable<RichTextValue | CellValue>)[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
-        const range: Array<Array<Nullable<CellValue>>> = [];
+        const range: Array<Array<Nullable<RichTextValue | CellValue>>> = [];
 
         for (let r = startRow; r <= endRow; r++) {
-            const row: Array<Nullable<CellValue>> = [];
+            const row: Array<Nullable<RichTextValue | CellValue>> = [];
 
             for (let c = startColumn; c <= endColumn; c++) {
-                row.push(this._worksheet.getCell(r, c)?.v ?? null);
+                const cell = this._worksheet.getCell(r, c);
+                if (includeRichText && cell?.p) {
+                    row.push(new RichTextValue(cell.p));
+                } else {
+                    row.push(cell?.v ?? null);
+                }
             }
 
             range.push(row);
@@ -343,38 +375,6 @@ export class FRange extends FBaseInitialable {
     getRichTextValues(): Nullable<RichTextValue>[][] {
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
-    }
-
-    /**
-     * Returns the value and rich text value for the cell at the start of this range.
-     * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
-     * @example
-     * ```ts
-     * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValueAndRichTextValue()
-     * ```
-     */
-    getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
-        const cell = this.getCellData();
-        return cell?.p ? new RichTextValue(cell.p) : cell?.v;
-    }
-
-    /**
-     * Returns the value and rich text value for the cells in the range.
-     * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
-     * @example
-     * ```ts
-     * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValueAndRichTextValues()
-     * ```
-     */
-    getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
-        const dataGrid = this.getCellDatas();
-        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : data?.v));
     }
 
     /**

@@ -236,8 +236,7 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Return first cell value in this range
-     * @param {boolean} includeRichText Should the returns of this func to include rich text
-     * @returns {CellValue | RichTextValue | null} The cell value
+     * @returns {CellValue | null} The cell value
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -247,6 +246,19 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getValue(): CellValue | null;
+
+    /**
+     * Return first cell value in this range
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {CellValue | RichTextValue | null} The cell value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValue(true)
+     * ```
+     */
     getValue(includeRichText: true): RichTextValue | CellValue | null;
     getValue(includeRichText?: boolean): RichTextValue | CellValue | null {
         const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
@@ -261,17 +273,25 @@ export class FRange extends FBaseInitialable {
 
     /**
      * Returns the cell values for the cells in the range.
-     * @param {boolean} includeRichText Should the returns of this func to include rich text
      * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values.
      * @example
      * ```ts
-     * univerAPI.getActiveWorkbook()
-     *  .getActiveSheet()
-     *  .getActiveRange()
-     *  .getValues()
+     * // Get plain values
+     * const values = range.getValues();
      * ```
      */
     getValues(): Nullable<CellValue>[][];
+
+    /**
+     * Returns the cell values for the cells in the range.
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {Nullable<RichTextValue | CellValue>[][]} A two-dimensional array of cell values.
+     * @example
+     * ```ts
+     * // Get values with rich text if available
+     * const richTextValues = range.getValues(true);
+     * ```
+     */
     getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
     getValues(includeRichText?: true): (Nullable<RichTextValue | CellValue>)[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;

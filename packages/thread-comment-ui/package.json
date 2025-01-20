@@ -68,9 +68,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.2.12",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*",

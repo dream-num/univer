@@ -22,15 +22,7 @@ export { debounce, get, merge, mergeWith, set } from 'lodash-es';
 export { textDiff } from './shared/text-diff';
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
 export { isBooleanString } from './common/boolean';
-export {
-    createInternalEditorID,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
-    isInternalEditorID,
-} from './common/const';
+export * from './common/const';
 export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { ParagraphStyleBuilder, ParagraphStyleValue, RichTextBuilder, RichTextValue, TextDecorationBuilder, TextStyleBuilder, TextStyleValue } from './docs/data-model/rich-text-builder';

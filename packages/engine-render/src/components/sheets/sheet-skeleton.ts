@@ -286,8 +286,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     initConfig() {
         this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
-
-        window.sk = this;
     }
 
     get rowHeightAccumulation(): number[] {

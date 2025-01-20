@@ -34,7 +34,7 @@ import { CanceledError, DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FU
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, getSkeletonChangedEffectedRange, SheetsSelectionsService } from '@univerjs/sheets';
-import { attachSelectionWithCoord, DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, IEditorBridgeService, ISheetClipboardService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SetZoomRatioCommand, SHEET_VIEW_KEY, SheetPasteShortKeyCommand, SheetScrollManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FSheetHooks } from '@univerjs/sheets/facade';
 import { CopyCommand, CutCommand, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, KeyCode, PasteCommand, PLAIN_TEXT_CLIPBOARD_MIME_TYPE, supportClipboardAPI } from '@univerjs/ui';
 import { combineLatest, filter } from 'rxjs';
@@ -45,7 +45,7 @@ export interface IFUniverSheetsUIMixin {
      * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
      * @example
      * ```typescript
-     * univerAPI.customizeColumnHeader({ headerStyle: { size: 40, backgroundColor: '#4e69ee', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * univerAPI.customizeColumnHeader({ headerStyle: { fontColor: '#fff', size: 40, backgroundColor: '#4e69ee', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
      * ```
      */
     customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
@@ -841,8 +841,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         sheetColumn.setCustomHeader(cfg);
         activeSheet?.refreshCanvas();
-        const r = activeSheet.getRange('A1');
-        activeSheet.setActiveRange(r);
     }
 
     override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {

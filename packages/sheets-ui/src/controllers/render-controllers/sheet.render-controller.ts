@@ -239,7 +239,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
 
-        window.sc = scene;
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,

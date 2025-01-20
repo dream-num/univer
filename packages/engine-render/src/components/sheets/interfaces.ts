@@ -113,7 +113,7 @@ export interface IHeaderStyleCfg {
     textAlign: CanvasTextAlign;
     textBaseline: CanvasTextBaseline;
     backgroundColor: string;
-    size: number;
+    size?: number;
 }
 
 export type IAColumnCfgObj = IHeaderStyleCfg & { text: string };

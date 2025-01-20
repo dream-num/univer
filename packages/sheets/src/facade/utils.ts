@@ -106,11 +106,15 @@ export function covertCellValue(value: CellValue | ICellData): ICellData {
     if (isFormulaString(value)) {
         return {
             f: value as string,
+            v: null,
+            p: null,
         };
     }
     if (isCellV(value)) {
         return {
             v: value as Nullable<CellValue>,
+            p: null,
+            f: null,
         };
     }
     if (isICellData(value)) {

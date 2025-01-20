@@ -64,8 +64,8 @@ describe('Test utils', () => {
                 { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
             )
         ).toStrictEqual({
-            1: { 1: { v: 1, f: null, p: null }, 2: { v: 2, f: null, p: null } },
-            2: { 1: { v: 3, f: null, p: null }, 2: { v: 4, f: null, p: null } },
+            1: { 1: { v: 1 }, 2: { v: 2 } },
+            2: { 1: { v: 3 }, 2: { v: 4 } },
         });
 
         expect(
@@ -77,8 +77,8 @@ describe('Test utils', () => {
                 { startRow: 1, startColumn: 1, endRow: 2, endColumn: 2 }
             )
         ).toStrictEqual({
-            1: { 1: { v: 1, f: null, p: null }, 2: { v: 2, f: null, p: null } },
-            2: { 1: { v: 3, f: null, p: null }, 2: { v: 4, f: null, p: null } },
+            1: { 1: { v: 1 }, 2: { v: 2 } },
+            2: { 1: { v: 3 }, 2: { v: 4 } },
         });
     });
 });

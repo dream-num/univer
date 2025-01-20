@@ -353,13 +353,14 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValue()
      * ```
      */
-    getRichTextValue(): Nullable<RichTextValue> {
-        const data = this.getCellData();
-        if (data?.p) {
-            return new RichTextValue(data.p);
-        }
-        return null;
-    }
+    // getRichTextValue(): Nullable<RichTextValue> {
+    //     const data = this.getCellData();
+    //     if (data?.p) {
+    //         return new RichTextValue(data.p);
+    //     }
+
+    //     return null;
+    // }
 
     /**
      * Returns the rich text value for the cells in the range.
@@ -372,10 +373,10 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValues()
      * ```
      */
-    getRichTextValues(): Nullable<RichTextValue>[][] {
-        const dataGrid = this.getCellDataGrid();
-        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
-    }
+    // getRichTextValues(): Nullable<RichTextValue>[][] {
+    //     const dataGrid = this.getCellDataGrid();
+    //     return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
+    // }
 
     /**
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.

@@ -259,14 +259,14 @@ export class FRange extends FBaseInitialable {
      *  .getValue(true)
      * ```
      */
-    getValue(includeRichText: true): RichTextValue | CellValue | null;
-    getValue(includeRichText?: boolean): RichTextValue | CellValue | null {
+    getValue(includeRichText: true): Nullable<CellValue | RichTextValue>;
+    getValue(includeRichText?: boolean): Nullable<CellValue | RichTextValue> {
+        if (includeRichText) {
+            return this.getValueAndRichTextValue();
+        }
         const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
         if (cell?.v !== undefined && cell?.v !== null) {
             return cell.v;
-        }
-        if (cell?.p && includeRichText) {
-            return new RichTextValue(cell.p);
         }
         return null;
     }
@@ -297,6 +297,10 @@ export class FRange extends FBaseInitialable {
      */
     getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
     getValues(includeRichText?: true): (Nullable<RichTextValue | CellValue>)[][] {
+        if (includeRichText) {
+            this.getValueAndRichTextValues();
+        }
+
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Array<Array<Nullable<RichTextValue | CellValue>>> = [];
 
@@ -305,11 +309,7 @@ export class FRange extends FBaseInitialable {
 
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = this._worksheet.getCell(r, c);
-                if (includeRichText && cell?.p) {
-                    row.push(new RichTextValue(cell.p));
-                } else {
-                    row.push(cell?.v ?? null);
-                }
+                row.push(cell?.v ?? null);
             }
 
             range.push(row);
@@ -406,6 +406,38 @@ export class FRange extends FBaseInitialable {
     getRichTextValues(): Nullable<RichTextValue>[][] {
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
+    }
+
+    /**
+     * Returns the value and rich text value for the cell at the start of this range.
+     * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValueAndRichTextValue()
+     * ```
+     */
+    getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
+        const cell = this.getCellData();
+        return cell?.p ? new RichTextValue(cell.p) : cell?.v;
+    }
+
+    /**
+     * Returns the value and rich text value for the cells in the range.
+     * @returns {Nullable<CellValue | RichTextValue>[][]} A two-dimensional array of value and rich text value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValueAndRichTextValues()
+     * ```
+     */
+    getValueAndRichTextValues(): Nullable<CellValue | RichTextValue>[][] {
+        const dataGrid = this.getCellDatas();
+        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : data?.v));
     }
 
     /**

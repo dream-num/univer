@@ -119,6 +119,10 @@ export interface IListDataBindingNode extends ICellBindingNode {
     direction?: ListDataBindingNodeDirectionEnum;
     range?: { startRow: number; startColumn: number; endRow: number; endColumn: number };
     displayName?: string;
+    /**
+     * Whether contain header in the list data binding node.
+     */
+    containHeader?: boolean;
 }
 
 export interface IDataBindingService {

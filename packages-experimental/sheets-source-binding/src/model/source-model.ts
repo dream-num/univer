@@ -107,19 +107,20 @@ export class ListSourceModel extends SourceModelBase {
     }
 
     getData(node: IListDataBindingNode, row: number): ICellData | null {
-        const { path, row: baseRow } = node;
+        const { path, row: baseRow, containHeader } = node;
         const colIndex = this._fieldIndexMap.get(path)!;
         const rowIndex = row - baseRow;
-        if (rowIndex === 0) {
+        if (containHeader && rowIndex === 0) {
             return {
                 v: this._data.fields[colIndex],
             };
         }
         let data;
+        const offset = containHeader ? 1 : 0;
         if (this._isListObject) {
-            data = (this._data.records as Record<string | number, any>)[rowIndex - 1][path];
+            data = (this._data.records as Record<string | number, any>)[rowIndex - offset][path];
         } else {
-            data = this._data.records[rowIndex - 1][colIndex];
+            data = this._data.records[rowIndex - offset][colIndex];
         }
 
         if (node.isDate === true) {

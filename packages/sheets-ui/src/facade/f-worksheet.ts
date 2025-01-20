@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IDisposable, IRange, Nullable } from '@univerjs/core';
+import type { RenderManagerService, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
-import type { IScrollState } from '@univerjs/sheets-ui';
-import { ICommandService } from '@univerjs/core';
+import type { IScrollState, IViewportScrollState } from '@univerjs/sheets-ui';
+import { ICommandService, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY, sheetContentViewportKeys } from '@univerjs/engine-render';
 import { ChangeZoomRatioCommand, SetWorksheetColAutoWidthCommand, SheetScrollManagerService, SheetSkeletonManagerService, SheetsScrollRenderController } from '@univerjs/sheets-ui';
 import { FWorksheet } from '@univerjs/sheets/facade';
@@ -116,6 +116,11 @@ export interface IFWorksheetSkeletonMixin {
      */
     setColumnAutoWidth(columnPosition: number, numColumn: number): FWorksheet;
 
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Scroll, () => {})` instead
+     */
+    onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable;
+
 }
 
 export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSkeletonMixin {
@@ -210,6 +215,19 @@ export class FWorksheetSkeletonMixin extends FWorksheet implements IFWorksheetSk
         const sheetScrollManagerService = render.with(SheetScrollManagerService);
         const scrollState = sheetScrollManagerService.getScrollStateByParam({ unitId, sheetId });
         return scrollState || emptyScrollState;
+    }
+
+    override onScroll(callback: (params: Nullable<IViewportScrollState>) => void): IDisposable {
+        const unitId = this._workbook.getUnitId();
+        const renderManagerService = this._injector.get(IRenderManagerService) as RenderManagerService;
+        const scrollManagerService = renderManagerService.getRenderById(unitId)?.with(SheetScrollManagerService);
+        if (scrollManagerService) {
+            const sub = scrollManagerService.validViewportScrollInfo$.subscribe((params: Nullable<IViewportScrollState>) => {
+                callback(params);
+            });
+            return toDisposable(sub);
+        }
+        return toDisposable(() => { });
     }
 
     override getSkeleton(): Nullable<SpreadsheetSkeleton> {

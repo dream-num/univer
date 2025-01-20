@@ -78,7 +78,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.2.12",
         "@univerjs/ui": "workspace:*",

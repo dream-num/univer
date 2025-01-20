@@ -15,10 +15,12 @@
  */
 
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
+import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachRangeWithCoord } from './selection/util';
 
 export interface ISheetSkeletonManagerParam {
@@ -226,5 +228,32 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         );
 
         return spreadsheetSkeleton;
+    }
+
+    setColumnHeaderSize(sheetId: string, render: IRender, size: number) {
+        const skeleton = this.getWorksheetSkeleton(sheetId)?.skeleton;
+        if (skeleton) {
+            skeleton.columnHeaderHeight = size;
+            render.scene.getViewports()[0].top = size;
+            render.scene.getViewport('viewColumnRight')!.setViewportSize({
+                height: size,
+            });
+            render.scene.getViewport('viewColumnLeft')!.setViewportSize({
+                height: size,
+            });
+            render.scene.getViewport('viewRowBottom')!.setViewportSize({
+                top: size,
+            });
+            render.scene.getViewport('viewRowTop')!.setViewportSize({
+                top: size,
+            });
+            render.scene.getViewport('viewLeftTop')!.setViewportSize({
+                height: size,
+            });
+            const selectionService = render?.with(SheetsSelectionsService);
+            const selectionRenderService = render?.with(ISheetSelectionRenderService);
+            const currSelections = selectionService.getCurrentSelections();
+            selectionRenderService.resetSelectionsByModelData(currSelections);
+        }
     }
 }

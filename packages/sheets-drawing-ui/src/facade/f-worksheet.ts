@@ -18,7 +18,7 @@ import type { IDisposable, IFBlobSource, Nullable } from '@univerjs/core';
 import type { FRange } from '@univerjs/sheets/facade';
 import { DrawingTypeEnum, ImageSourceType, toDisposable } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetImage } from '@univerjs/sheets-drawing';
-import { type ICanvasFloatDom, type IDOMRangeLayout, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { type ICanvasFloatDom, type IDOMAnchor, InsertSheetDrawingCommand, RemoveSheetDrawingCommand, SetSheetDrawingCommand, SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { ComponentManager } from '@univerjs/ui';
@@ -108,7 +108,7 @@ export interface IFWorksheetLegacy {
 
      * ```
      */
-    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
+    addFloatDomToRange(range: FRange, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -137,7 +137,7 @@ export interface IFWorksheetLegacy {
     }
      *```
      */
-    addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domPos: IDOMRangeLayout, id?: string): Nullable<{
+    addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domPos: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }>;
@@ -296,7 +296,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return null;
     }
 
-    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
+    override addFloatDomToRange(fRange: FRange, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }> {
@@ -321,7 +321,7 @@ export class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
         return null;
     }
 
-    override addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domLayout: IDOMRangeLayout, id?: string): Nullable<{
+    override addFloatDomToColumnHeader(column: number, layer: IFICanvasFloatDom, domLayout: IDOMAnchor, id?: string): Nullable<{
         id: string;
         dispose: () => void;
     }> {

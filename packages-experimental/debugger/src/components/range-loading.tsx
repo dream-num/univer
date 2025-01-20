@@ -26,6 +26,7 @@ export const RangeLoading = () => {
         justifyContent: 'center',
         alignItems: 'center',
         textAlign: 'center' as const,
+        transformOrigin: 'top left',
     };
 
     return (

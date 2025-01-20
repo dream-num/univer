@@ -312,6 +312,16 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._columnHeaderHeight;
     }
 
+    set columnHeaderHeight(value: number) {
+        this._columnHeaderHeight = value;
+        this._worksheetData.columnHeader.height = value;
+    }
+
+    set rowHeaderWidth(value: number) {
+        this._rowHeaderWidth = value;
+        this._worksheetData.rowHeader.width = value;
+    }
+
     get imageCacheMap(): ImageCacheMap {
         return this._imageCacheMap;
     }

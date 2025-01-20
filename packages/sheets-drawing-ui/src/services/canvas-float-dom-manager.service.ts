@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-/* eslint-disable no-console */
 import type { IDisposable, IDrawingSearch, IPosition, IRange, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -84,9 +81,10 @@ interface ICanvasFloatDomInfo {
     subUnitId: string;
     boundsOfViewArea?: IBoundRectNoAngle;
     scrollDirectionResponse?: ScrollDirectionResponse; // update float dom pos by scrolling
+    domAnchor?: IDOMAnchor;
 }
 
-export interface IDOMRangeLayout {
+export interface IDOMAnchor {
     width: number;
     height: number;
     horizonOffsetAlign?: 'left' | 'right';
@@ -125,7 +123,7 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         };
     }
     const { left, right, top, bottom } = posOfFloatObject;
-    let { top: topBoundOfViewArea, left: leftBoundViewArea, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
+    let { top: topBoundOfViewArea, left: leftBoundViewArea, viewportScrollX, viewportScrollY } = viewMain;
 
     // specify edge of viewbound. if not specify, use viewMain.
     const { boundsOfViewArea, scrollDirectionResponse } = floatDomInfo || {};
@@ -138,10 +136,10 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
         }
     }
     if (scrollDirectionResponse === ScrollDirectionResponse.HORIZONTAL) {
-        actualScrollY = 0;
+        viewportScrollY = 0;
     }
     if (scrollDirectionResponse === ScrollDirectionResponse.VERTICAL) {
-        actualScrollX = 0;
+        viewportScrollX = 0;
     }
 
     let offsetLeft: number;
@@ -156,11 +154,11 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
                 ((leftBoundViewArea) + (right - leftBoundViewArea)) * scaleX,
                 (leftBoundViewArea) * scaleX
             ),
-            (right - actualScrollX) * scaleX);
+            (right - viewportScrollX) * scaleX);
     } else {
         absolute.left = false;
-        offsetLeft = Math.max((left - actualScrollX) * scaleX, (leftBoundViewArea) * scaleX);
-        offsetRight = Math.max((right - actualScrollX) * scaleX, (leftBoundViewArea) * scaleX);
+        offsetLeft = Math.max((left - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
+        offsetRight = Math.max((right - viewportScrollX) * scaleX, (leftBoundViewArea) * scaleX);
     }
 
     let offsetTop: number;
@@ -174,12 +172,12 @@ export function transformBound2DOMBound(posOfFloatObject: IBoundRectNoAngle, sce
                 ((topBoundOfViewArea) + (right - topBoundOfViewArea)) * scaleY,
                 (topBoundOfViewArea) * scaleY
             ),
-            (bottom - actualScrollY) * scaleY
+            (bottom - viewportScrollY) * scaleY
         );
     } else {
         absolute.top = false;
-        offsetTop = Math.max((top - actualScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
-        offsetBottom = Math.max((bottom - actualScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
+        offsetTop = Math.max((top - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
+        offsetBottom = Math.max((bottom - viewportScrollY) * scaleY, (topBoundOfViewArea) * scaleY);
     }
 
     return {
@@ -218,7 +216,7 @@ const calcPosition = (
     const offsetBound = transformBound2DOMBound(boundOfFloatObject, scene, skeleton, worksheet, floatDomInfo);
     const { scaleX, scaleY } = scene.getAncestorScale();
 
-    return {
+    const domPos: IFloatDomLayout = {
         startX: offsetBound.left,
         endX: offsetBound.right,
         startY: offsetBound.top,
@@ -228,6 +226,8 @@ const calcPosition = (
         height: height * scaleY,
         absolute: offsetBound.absolute,
     };
+
+    return domPos;
 };
 
 export interface ISheetCanvasFloatDomHook {
@@ -236,9 +236,12 @@ export interface ISheetCanvasFloatDomHook {
 
 export class SheetCanvasFloatDomManagerService extends Disposable {
     /**
-     * for update dom container position when scrolling
+     * for update dom container position when scrolling and zoom
      */
     private _domLayerMap: Map<string, Map<string, Map<string, { props?: any }>>> = new Map();
+    /**
+     * for update dom container position when scrolling and zoom
+     */
     private _domLayerInfoMap: Map<string, ICanvasFloatDomInfo> = new Map();
 
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
@@ -274,6 +277,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         });
     }
 
+    /**
+     * For scrolling and zoom
+     * @param unitId
+     * @param subUnitId
+     */
     private _ensureMap(unitId: string, subUnitId: string) {
         let unitMap = this._domLayerMap.get(unitId);
         if (!unitMap) {
@@ -720,7 +728,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
-    addFloatDomToRange(range: IRange, config: ICanvasFloatDom, domPos: IDOMRangeLayout, propId?: string) {
+    addFloatDomToRange(range: IRange, config: ICanvasFloatDom, domAnchor: Partial<IDOMAnchor>, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: config.unitId,
             subUnitId: config.subUnitId,
@@ -735,26 +743,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!currentRender) return;
         const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
         if (!skeletonParam) return;
-        // const viewMain = renderObject.scene.getMainViewport();
 
         const { componentKey, data, allowTransform = true } = config;
         const id = propId ?? generateRandomId();
-        // const drawingId = id;
 
-        const { position: rangePosition } = this._createRangePositionObserver(range, currentRender, skeletonParam.skeleton);
+        const { position: rangePosition, position$: rangePos$ } = this._createRangePositionObserver(range, currentRender, skeletonParam.skeleton);
         const sheetTransform = this._getPosition(rangePosition, unitId);
         if (sheetTransform == null) {
             return;
         }
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, config);
-        const rangeWidth = rangePosition.endX - rangePosition.startX;
-        const rangeHeight = rangePosition.endY - rangePosition.startY;
-        const domWidth = domPos.width ?? rangeWidth;
-        const domHeight = domPos.height ?? rangeHeight;
 
-        const domLeft = rangePosition.startX + calculateOffset(domPos.marginX, rangeWidth);
-        const domTop = rangePosition.startY + calculateOffset(domPos.marginY, rangeHeight);
+        const scene = renderObject.scene;
+        const { scaleX } = scene.getAncestorScale();
+        const domPosFromRange = calcDomPositionByAnchor(rangePosition, domAnchor, scaleX);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -764,27 +767,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             componentKey,
             sheetTransform,
             transform: {
-                left: domLeft,
-                top: domTop,
-                width: domWidth,
-                height: domHeight,
+                left: domPosFromRange.startX,
+                top: domPosFromRange.startY,
+                width: domPosFromRange.width,
+                height: domPosFromRange.height,
             } as ITransformState,
             data,
             allowTransform,
         };
 
-        // mutation
-        // ---> this._drawingManagerService.add$.subscribe
-        // this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
-        //     unitId,
-        //     drawings: [sheetDrawingParam],
-        // } as IInsertDrawingCommandParams);
-        // this._add$.next({ unitId, subUnitId, id }); // seems no use
-
         {
             const { unitId, subUnitId, drawingId } = sheetDrawingParam;
             const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
-            // const floatDomParam = this._drawingManagerService.getDrawingByParam(sheetDrawingParam) as IFloatDomData;
             const floatDomParam = sheetDrawingParam;
 
             const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -798,7 +792,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+            const skMangerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            if (!skMangerService) {
+                return;
+            }
+            const skeleton = skMangerService.getWorksheetSkeleton(subUnitId);
             if (!skeleton) {
                 return;
             }
@@ -823,7 +821,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (activeSheetId !== subUnitId) {
                 return;
             }
-
+            // from floatDomParam.transform
             const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
             const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
@@ -836,7 +834,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             }
 
             const domConfig: IRectProps = {
-                left,
+                left, // from floatDomParam.transform
                 top,
                 width,
                 height,
@@ -883,7 +881,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 dispose: disposableCollection,
                 rect: domRect,
                 boundsOfViewArea,
-                // position$,
+                domAnchor,
                 unitId,
                 subUnitId,
             } as unknown as ICanvasFloatDomInfo;
@@ -908,19 +906,54 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 unitId,
             };
             if (config.eventPassThrough) {
-                floatDomCfg = { ...floatDomCfg,
-                                onPointerDown: (evt) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
-                                onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
-                                onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
+                floatDomCfg = {
+                    ...floatDomCfg,
+                    onPointerDown: (evt) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
                 };
             }
             this._canvasFloatDomService.addFloatDom(floatDomCfg);
+
+            this.disposeWithMe(rangePos$.subscribe((newRangePos) => {
+                const calcOffsetPos = calcDomPositionByAnchor({
+                    rotate: 0,
+                    startX: newRangePos.startX,
+                    startY: newRangePos.startY,
+                    endX: newRangePos.endX,
+                    endY: newRangePos.endY,
+                    width: domAnchor.width ?? newRangePos.width,
+                    height: domAnchor.height ?? newRangePos.height,
+                    absolute: {
+                        left: rangePosition.absolute.left,
+                        top: rangePosition.absolute.top,
+                    },
+                }, domAnchor);
+                const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                const newRect = new Rect(rectShapeKey, {
+                    left: calcOffsetPos.startX,
+                    top: calcOffsetPos.startY,
+                    width: domAnchor.width ?? newRangePos.width,
+                    height: domAnchor.height ?? newRangePos.height,
+                    zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                });
+                const newPos = calcPosition(newRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
+                position$.next(newPos);
+            }));
+            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+
+            skm?.currentSkeleton$.subscribe((skeleton) => {
+                if (!skeleton) return;
+                if (skeletonParam.sheetId !== skeleton.sheetId) {
+                    this._removeDom(id, true);
+                }
+            });
 
             const listener = domRect.onTransformChange$.subscribeEvent(() => {
                 const newPosition = calcPosition(domRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
@@ -947,7 +980,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         };
     }
 
-    addFloatDomToColumnHeader(column: number, config: ICanvasFloatDom, domLayout: IDOMRangeLayout, propId?: string) {
+    addFloatDomToColumnHeader(column: number, config: ICanvasFloatDom, domLayoutParam: IDOMAnchor, propId?: string) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: config.unitId,
             subUnitId: config.subUnitId,
@@ -962,50 +995,27 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (!currentRender) return;
         const skeletonParam = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
         if (!skeletonParam) return;
-        // const viewMain = renderObject.scene.getMainViewport();
 
         const { componentKey, data, allowTransform = true } = config;
         const id = propId ?? generateRandomId();
-        // const drawingId = id;
 
         // rangePostion relative to canvas.(if no scrolling)
-        const { position: rangePosition } = this._createRangePositionObserver({
+        const { position: rangePosition, position$: rangePos$ } = this._createRangePositionObserver({
             startRow: 0,
             endRow: 0,
             startColumn: column,
             endColumn: column,
         }, currentRender, skeletonParam.skeleton);
-        const headerPosition = rangePosition;
-        headerPosition.startY = 0;
+        const headerCellPosition = rangePosition;
+        headerCellPosition.startY = 0; // for column header
 
         const sheetTransform = this._getPosition(rangePosition, unitId);
         if (sheetTransform == null) {
             return;
         }
-        // this._ensureMap for what?
+
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, config);
-        const rangeWidth = rangePosition.endX - rangePosition.startX;
-        const rangeHeight = rangePosition.endY - rangePosition.startY;
-        const domWidth = domLayout.width ?? rangeWidth;
-        const domHeight = domLayout.height ?? rangeHeight;
-
-        let domLeft = 0;
-        let domTop = 0;
-        if (domLayout.horizonOffsetAlign === 'right') {
-            const offsetX = calculateOffset(domLayout.marginX, rangeWidth);
-            domLeft = headerPosition.endX - offsetX - domWidth;
-        } else {
-            // default align left
-            domLeft = headerPosition.startX + calculateOffset(domLayout.marginX, rangeWidth);
-        }
-
-        if (domLayout.verticalOffsetAlign === 'bottom') {
-            const offsetY = calculateOffset(domLayout.marginY, rangeHeight);
-            domTop = headerPosition.endY - offsetY - domHeight;
-        } else {
-            domTop = headerPosition.startY + calculateOffset(domLayout.marginY, rangeHeight);
-        }
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -1015,10 +1025,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             componentKey,
             sheetTransform,
             transform: {
-                left: domLeft,
-                top: domTop,
-                width: domWidth,
-                height: domHeight,
+                left: headerCellPosition.startX,
+                top: headerCellPosition.startY,
+                width: headerCellPosition.width,
+                height: headerCellPosition.height,
             } as ITransformState,
             data,
             allowTransform,
@@ -1041,16 +1051,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+            const skMangerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            if (!skMangerService) {
+                return;
+            }
+            const skeleton = skMangerService.getWorksheetSkeleton(subUnitId);
             if (!skeleton) {
                 return;
             }
 
-            const { transform, drawingType, data } = floatDomParam;
-
-            if (drawingType !== DrawingTypeEnum.DRAWING_DOM && drawingType !== DrawingTypeEnum.DRAWING_CHART) {
-                return;
-            }
+            const { transform, data } = floatDomParam;
 
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -1078,15 +1088,28 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 return;
             }
 
-            const domConfig: IRectProps = {
-                left,
-                top,
-                width,
-                height,
+            const calcOffsetPos = calcDomPositionByAnchor({
+                rotate: 0,
+                startX: headerCellPosition.startX,
+                startY: 0,
+                endX: rangePosition.endX,
+                endY: rangePosition.endY,
+                width: domLayoutParam.width,
+                height: domLayoutParam.height,
+                absolute: {
+                    left: rangePosition.absolute.left,
+                    top: rangePosition.absolute.top,
+                },
+            }, domLayoutParam);
+            const headerRectConfig: IRectProps = {
+                left: calcOffsetPos.startX,
+                top: calcOffsetPos.startY,
+                width: calcOffsetPos.width,
+                height: calcOffsetPos.height,
                 zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
             };
 
-            const domRect = new Rect(rectShapeKey, domConfig);
+            const domRect = new Rect(rectShapeKey, headerRectConfig);
             scene.addObject(domRect, DRAWING_OBJECT_LAYER_INDEX);
             if (floatDomParam.allowTransform !== false) {
                 scene.attachTransformerTo(domRect);
@@ -1101,7 +1124,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 bottom: viewMain.bottom,
                 right: viewMain.right,
             };
-            // why call twice? there is another calcPosition below.
             const floatDomInfo = {
                 dispose: disposableCollection,
                 rect: domRect,
@@ -1109,6 +1131,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 unitId,
                 subUnitId,
                 boundsOfViewArea,
+                domAnchor: domLayoutParam,
                 scrollDirectionResponse: ScrollDirectionResponse.HORIZONTAL,
             } as unknown as ICanvasFloatDomInfo;
 
@@ -1131,16 +1154,17 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 unitId,
             };
             if (config.eventPassThrough) {
-                floatDomCfg = { ...floatDomCfg,
-                                onPointerDown: (evt) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
-                                onPointerMove: (evt: PointerEvent | MouseEvent) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
-                                onPointerUp: (evt: PointerEvent | MouseEvent) => {
-                                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
-                                },
+                floatDomCfg = {
+                    ...floatDomCfg,
+                    onPointerDown: (evt) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
+                    onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                        canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                    },
                 };
             }
             this._canvasFloatDomService.addFloatDom(floatDomCfg);
@@ -1150,6 +1174,40 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 position$.next(
                     newPosition
                 );
+            });
+
+            this.disposeWithMe(rangePos$.subscribe((newHeaderPos) => {
+                const calcOffsetPos = calcDomPositionByAnchor({
+                    rotate: 0,
+                    startX: newHeaderPos.startX,
+                    startY: 0,
+                    endX: newHeaderPos.endX,
+                    endY: newHeaderPos.endY,
+                    width: domLayoutParam.width,
+                    height: domLayoutParam.height,
+                    absolute: {
+                        left: rangePosition.absolute.left,
+                        top: rangePosition.absolute.top,
+                    },
+                }, domLayoutParam);
+                const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                const newRect = new Rect(rectShapeKey, {
+                    left: calcOffsetPos.startX,
+                    top: 0,
+                    width: domLayoutParam.width,
+                    height: domLayoutParam.height,
+                    zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                });
+                const newPos = calcPosition(newRect, renderObject.renderUnit, skeleton.skeleton, target.worksheet, floatDomInfo);
+                position$.next(newPos);
+            }));
+
+            const skm = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+            skm?.currentSkeleton$.subscribe((skeleton) => {
+                if (!skeleton) return;
+                if (skeletonParam.sheetId !== skeleton.sheetId) {
+                    this._removeDom(id, true);
+                }
             });
 
             disposableCollection.add(() => {
@@ -1184,17 +1242,12 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         range: IRange,
         currentRender: IRender,
         skeleton: SpreadsheetSkeleton
-        // activeViewport: Viewport
     ) {
-        // window.sk = skeleton;
         let { startRow, startColumn } = range;
         const topLeftCoord = calcCellPositionByCell(startRow, startColumn, skeleton);
         const topLeftPos$ = new BehaviorSubject(topLeftCoord);
 
         const rightBottomCoord = calcCellPositionByCell(range.endRow, range.endColumn, skeleton);
-        // const rightBottomCellWidth = skeleton.getColWidth(range.endColumn);
-        // const rightBottomCellHeight = skeleton.getRowHeight(range.endRow);
-
         const rightBottomPos$ = new BehaviorSubject(rightBottomCoord);
 
         const updatePosition = () => {
@@ -1232,14 +1285,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
             updatePosition();
         };
-        // const position$ = combineLatest(topLeftPos$, rightBottomPos$);
-        // rotate: number;
-        // width: number;
-        // height: number;
-        // absolute: {
-        //     left: boolean;
-        //     top: boolean;
-        // };
 
         const genPosition = () => {
             return {
@@ -1259,7 +1304,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const position$ = topLeftPos$.pipe(
             map((topLeft) => {
                 const rightBottomCoord = calcCellPositionByCell(range.endRow, range.endColumn, skeleton);
-                console.log('service', topLeft.left, topLeft.top);
                 return {
                     rotate: 0,
                     width: rightBottomCoord.right - topLeft.left,
@@ -1276,7 +1320,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             })
         );
         const position: IFloatDomLayout = genPosition();
-        console.log('init position', position);
 
         return {
             position$,
@@ -1301,34 +1344,59 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 function calcCellPositionByCell(
     row: number,
     col: number,
-    // currentRender: IRender,
     skeleton: SpreadsheetSkeleton
-    // activeViewport?: Viewport
 ): IBoundRectNoAngle {
-    // const { scene, engine } = currentRender;
-
     const primaryWithCoord = skeleton.getCellWithCoordByIndex(row, col);
     const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-
-    // const { scaleX, scaleY } = scene.getAncestorScale();
-    // const scrollXY = {
-    //     x: activeViewport.viewportScrollX,
-    //     y: activeViewport.viewportScrollY,
-    // };
-
-    // const canvasElement = engine.getCanvasElement();
-    // const canvasClientRect = canvasElement.getBoundingClientRect();
-
-    // We should take the scale into account when canvas is scaled by CSS.
-    // const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
-    // const { top, left, width } = canvasClientRect; // real width affected by scale
-    // const scaleAdjust = width / widthOfCanvas;
 
     return {
         left: cellInfo.startX,
         right: cellInfo.endX,
         top: cellInfo.startY,
         bottom: cellInfo.endY,
+    };
+}
+
+function calcDomPositionByAnchor(rangePosition: IFloatDomLayout, domAnchor?: Partial<IDOMAnchor>, scale?: number): IFloatDomLayout {
+    scale = scale ?? 1;
+
+    const rangeWidth = rangePosition.endX - rangePosition.startX;
+    const rangeHeight = rangePosition.endY - rangePosition.startY;
+    const domWidth = domAnchor?.width ?? rangeWidth;
+    const domHeight = domAnchor?.height ?? rangeHeight;
+
+    let domLeft = 0;
+    let domTop = 0;
+
+    if (domAnchor) {
+        if (domAnchor.horizonOffsetAlign === 'right') {
+            const offsetX = calculateOffset(domAnchor.marginX, rangeWidth * scale);
+            domLeft = rangePosition.endX - offsetX - domWidth;
+        } else {
+            // default align left
+            domLeft = rangePosition.startX + calculateOffset(domAnchor.marginX, rangeWidth);
+        }
+
+        if (domAnchor.verticalOffsetAlign === 'bottom') {
+            const offsetY = calculateOffset(domAnchor.marginY, rangeHeight * scale);
+            domTop = rangePosition.endY - offsetY - domHeight;
+        } else {
+            domTop = rangePosition.startY + calculateOffset(domAnchor.marginY, rangeHeight);
+        }
+    }
+
+    return {
+        rotate: 0,
+        startX: domLeft,
+        startY: domTop,
+        endX: rangePosition.endX,
+        endY: rangePosition.endY,
+        width: domWidth,
+        height: domHeight,
+        absolute: {
+            left: rangePosition.absolute.left,
+            top: rangePosition.absolute.top,
+        },
     };
 }
 

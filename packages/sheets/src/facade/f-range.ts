@@ -234,19 +234,70 @@ export class FRange extends FBaseInitialable {
         }));
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
     /**
-     * @deprecated use `getValueAndRichTextValue` instead. This api can't return rich text value.
+     * Return first cell value in this range
+     * @returns {CellValue | null} The cell value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValue()
+     * ```
      */
-    getValue(): CellValue | null {
+    getValue(): CellValue | null;
+
+    /**
+     * Return first cell value in this range
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {CellValue | RichTextValue | null} The cell value
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValue(true)
+     * ```
+     */
+    getValue(includeRichText: true): Nullable<CellValue | RichTextValue>;
+    getValue(includeRichText?: boolean): Nullable<CellValue | RichTextValue> {
+        if (includeRichText) {
+            return this.getValueAndRichTextValue();
+        }
+
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
     /**
-     * @deprecated use `getValueAndRichTextValues` instead. This api can't return rich text value.
+     * Returns the cell values for the cells in the range.
+     * @returns {Nullable<CellValue>[][]} A two-dimensional array of cell values.
+     * @example
+     * ```ts
+     * // Get plain values
+     * const values = range.getValues();
+     * ```
      */
-    getValues(): Nullable<CellValue>[][] {
+    getValues(): Nullable<CellValue>[][];
+
+    /**
+     * Returns the cell values for the cells in the range.
+     * @param {boolean} includeRichText Should the returns of this func to include rich text
+     * @returns {Nullable<RichTextValue | CellValue>[][]} A two-dimensional array of cell values.
+     * @example
+     * ```ts
+     * // Get values with rich text if available
+     * const richTextValues = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValues(true)
+     * ```
+     */
+    getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
+    getValues(includeRichText?: true): (Nullable<RichTextValue | CellValue>)[][] {
+        if (includeRichText) {
+            this.getValueAndRichTextValues();
+        }
+
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Array<Array<Nullable<CellValue>>> = [];
 
@@ -278,7 +329,7 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the cell data for the cells in the range.
+     * Alias for getCellDataGrid.
      * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
      * @example
      * ```ts
@@ -289,6 +340,21 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellDatas(): Nullable<ICellData>[][] {
+        return this.getCellDataGrid();
+    }
+
+    /**
+     * Returns the cell data for the cells in the range.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellDataGrid()
+     * ```
+     */
+    getCellDataGrid(): Nullable<ICellData>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Nullable<ICellData>[][] = [];
 
@@ -302,17 +368,11 @@ export class FRange extends FBaseInitialable {
         return range;
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
-    /**
-     * @deprecated use `getCellDatas` instead.
-     */
-    getCellDataGrid(): Nullable<ICellData>[][] {
-        return this.getCellDatas();
-    }
-
     /**
      * Returns the rich text value for the cell at the start of this range.
      * @returns {Nullable<RichTextValue>} The rich text value
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -321,17 +381,20 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValue()
      * ```
      */
-    getRichTextValue(): Nullable<RichTextValue> {
+    private getRichTextValue(): Nullable<RichTextValue> {
         const data = this.getCellData();
         if (data?.p) {
             return new RichTextValue(data.p);
         }
+
         return null;
     }
 
     /**
      * Returns the rich text value for the cells in the range.
      * @returns {Nullable<RichTextValue>[][]} A two-dimensional array of RichTextValue objects.
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -340,7 +403,7 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValues()
      * ```
      */
-    getRichTextValues(): Nullable<RichTextValue>[][] {
+    private getRichTextValues(): Nullable<RichTextValue>[][] {
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
     }
@@ -348,6 +411,8 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the value and rich text value for the cell at the start of this range.
      * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -356,7 +421,7 @@ export class FRange extends FBaseInitialable {
      *  .getValueAndRichTextValue()
      * ```
      */
-    getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
+    private getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
         const cell = this.getCellData();
         return cell?.p ? new RichTextValue(cell.p) : cell?.v;
     }

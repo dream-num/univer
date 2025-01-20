@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "private": false,
     "description": "UniverSheet normal ui-plugin-sheets",
     "author": "DreamNum <developer@univer.ai>",

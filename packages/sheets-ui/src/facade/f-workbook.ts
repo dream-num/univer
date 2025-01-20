@@ -15,13 +15,13 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import type { ICellPosWithEvent, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
+import type { IMouseEvent, IPointerEvent, RenderManagerService } from '@univerjs/engine-render';
+import type { ICellPosWithEvent, IDragCellPosition, IEditorBridgeServiceVisibleParam, IHoverRichTextInfo, IHoverRichTextPosition, IScrollState, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 
 import type { ICellEventParam } from './f-event';
 import { awaitTime, ICommandService, ILogService, toDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService, ISheetSelectionRenderService, SetCellEditVisibleOperation, SheetScrollManagerService } from '@univerjs/sheets-ui';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { type IDialogPartMethodOptions, IDialogService, type ISidebarMethodOptions, ISidebarService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
@@ -52,6 +52,27 @@ export interface IFWorkbookSheetsUIMixin {
      * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellHover, () => {})` instead
      */
     onCellHover(callback: (cell: IHoverRichTextPosition) => void): IDisposable;
+
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerMove, () => {})` instead
+     */
+    onCellPointerMove(callback: (cell: ICellPosWithEvent, event: IPointerEvent | IMouseEvent) => void): IDisposable;
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerDown, () => {})` instead
+     */
+    onCellPointerDown(callback: (cell: ICellPosWithEvent) => void): IDisposable;
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.CellPointerUp, () => {})` instead
+     */
+    onCellPointerUp(callback: (cell: ICellPosWithEvent) => void): IDisposable;
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.DragOver, () => {})` instead
+     */
+    onDragOver(callback: (cell: IDragCellPosition) => void): IDisposable;
+    /**
+     * @deprecated use `univerAPI.addEvent(univerAPI.Event.Drop, () => {})` instead
+     */
+    onDrop(callback: (cell: IDragCellPosition) => void): IDisposable;
 
     /**
      * Start the editing process
@@ -182,6 +203,53 @@ export class FWorkbookSheetsUIMixin extends FWorkbook implements IFWorkbookSheet
             hoverManagerService.currentRichText$
                 .pipe(filter((cell) => !!cell))
                 .subscribe(callback)
+        );
+    }
+
+    override onCellPointerDown(callback: (cell: ICellPosWithEvent) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerDownCell$.subscribe(callback)
+        );
+    }
+
+    override onCellPointerUp(callback: (cell: ICellPosWithEvent) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentPointerUpCell$.subscribe(callback)
+        );
+    }
+
+    override onCellPointerMove(callback: (cell: ICellPosWithEvent, event: IPointerEvent | IMouseEvent) => void): IDisposable {
+        const hoverManagerService = this._injector.get(HoverManagerService);
+        return toDisposable(
+            hoverManagerService.currentCellPosWithEvent$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: ICellPosWithEvent) => {
+                    callback(cell, cell.event);
+                })
+        );
+    }
+
+    override onDragOver(callback: (cell: IDragCellPosition) => void): IDisposable {
+        const dragManagerService = this._injector.get(DragManagerService);
+        return toDisposable(
+            dragManagerService.currentCell$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: IDragCellPosition) => {
+                    callback(cell);
+                })
+        );
+    }
+
+    override onDrop(callback: (cell: IDragCellPosition) => void): IDisposable {
+        const dragManagerService = this._injector.get(DragManagerService);
+        return toDisposable(
+            dragManagerService.endCell$
+                .pipe(filter((cell) => !!cell))
+                .subscribe((cell: IDragCellPosition) => {
+                    callback(cell);
+                })
         );
     }
 

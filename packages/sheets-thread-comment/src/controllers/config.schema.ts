@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
-import type { DependencyOverride } from '@univerjs/core';
+export const SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY = 'sheets-thread-comment.config';
 
-export const PLUGIN_CONFIG_KEY = 'sheets-thread-comment.config';
+export const configSymbol = Symbol(SHEETS_THREAD_COMMENT_PLUGIN_CONFIG_KEY);
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
-
-export interface IUniverSheetsThreadCommentConfig {
-    menu?: MenuConfig;
-    overrides?: DependencyOverride;
+export interface IUniverSheetsThreadCommentBaseConfig {
 }
 
-export const defaultPluginConfig: IUniverSheetsThreadCommentConfig = {};
+export const defaultPluginConfig: IUniverSheetsThreadCommentBaseConfig = {};

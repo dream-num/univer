@@ -15,21 +15,18 @@
  */
 
 import type { IDisposable, IMutation, IMutationInfo, Workbook } from '@univerjs/core';
+import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
     CommandType,
     ICommandService,
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RxDisposable,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { takeUntil } from 'rxjs/operators';
-
-import type { IRemoteSyncMutationOptions } from '../../services/remote-instance/remote-instance.service';
 import {
     IRemoteInstanceService,
     IRemoteSyncService,
@@ -45,7 +42,6 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
  *
  * Note that only spreadsheets will be synced to the remote calculation instance by default.
  */
-@OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
     private _remoteInstanceService!: IRemoteInstanceService;
 

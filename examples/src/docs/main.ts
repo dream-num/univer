@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FUniver, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -25,10 +25,11 @@ import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-u
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { FUniver } from '@univerjs/facade';
+import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
-import { enUS, ruRU, zhCN } from '../locales';
+import { enUS, faIR, ruRU, zhCN } from '../locales';
+
+import '../global.css';
 
 /* eslint-disable node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -41,6 +42,7 @@ const univer = new Univer({
         [LocaleType.ZH_CN]: zhCN,
         [LocaleType.EN_US]: enUS,
         [LocaleType.RU_RU]: ruRU,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });
@@ -69,7 +71,7 @@ univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
 
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_SIMPLE);
 }
 
 // use for console test

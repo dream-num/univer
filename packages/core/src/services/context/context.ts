@@ -37,9 +37,13 @@ export const FOCUSING_EDITOR_INPUT_FORMULA = 'FOCUSING_EDITOR_INPUT_FORMULA';
 /** The focusing state of the formula editor (Fx bar). */
 export const FOCUSING_FX_BAR_EDITOR = 'FOCUSING_FX_BAR_EDITOR';
 
+/** The focusing state of the cell editor. */
 export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
 
 export const FOCUSING_EDITOR_STANDALONE = 'FOCUSING_EDITOR_INPUT_FORMULA';
+
+/** The focusing state of the editor in side panel, such as Chart Editor Panel. */
+export const FOCUSING_PANEL_EDITOR = 'FOCUSING_PANEL_EDITOR';
 
 // WTF: what does this even means?
 export const FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE = 'FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE';

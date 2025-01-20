@@ -122,6 +122,23 @@ describe('Test betadist function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, A, B);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(2);
+            const alpha2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, alpha2, beta, A, B);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const beta2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, alpha, beta2, A, B);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const A2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(x2, alpha, beta, A2, B);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
+
+            const B2 = ErrorValueObject.create(ErrorType.NAME);
+            const result5 = testFunction.calculate(x2, alpha, beta, A, B2);
+            expect(getObjectValue(result5)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

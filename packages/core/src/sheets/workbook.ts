@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
+import type { Nullable } from '../shared';
 
+import type { CustomData, IRangeType, IWorkbookData, IWorksheetData } from './typedef';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
 import { ILogService } from '../services/log/log.service';
 import { Tools } from '../shared';
@@ -24,8 +26,6 @@ import { BooleanNumber } from '../types/enum';
 import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
-import type { Nullable } from '../shared';
-import type { IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 
 export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
     return `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
@@ -423,5 +423,21 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
         // Active the first sheet.
         this.ensureActiveSheet();
+    }
+
+    /**
+     * Get custom metadata of workbook
+     * @returns {CustomData | undefined} custom metadata
+     */
+    getCustomMetadata(): CustomData | undefined {
+        return this._snapshot.custom;
+    }
+
+    /**
+     * Set custom metadata of workbook
+     * @param {CustomData | undefined} custom custom metadata
+     */
+    setCustomMetadata(custom: CustomData | undefined) {
+        this._snapshot.custom = custom;
     }
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
 import type { IWorkbookData } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
 
 export function getDefaultWorkbookData(): IWorkbookData {
     const DEFAULT_WORKBOOK_DATA_DEMO = {

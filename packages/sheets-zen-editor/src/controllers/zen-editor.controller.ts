@@ -14,51 +14,24 @@
  * limitations under the License.
  */
 
-import {
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-    DocumentFlavor,
-    ICommandService,
-    Inject,
-    IUndoRedoService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    RxDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
-import {
-    DocSelectionManagerService,
-    DocSkeletonManagerService,
-    RichTextEditingMutation,
-} from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, getDocObject } from '@univerjs/docs-ui';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
-import { IZenZoneService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
-import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRange } from '@univerjs/core';
 import type { IDocObjectParam } from '@univerjs/docs-ui';
-
 import type { Viewport } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
-import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
+import {
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    RxDisposable,
+} from '@univerjs/core';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocBackScrollRenderController } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { getEditorObject } from '@univerjs/sheets-ui';
+
+import { takeUntil } from 'rxjs';
 import { IZenEditorManagerService } from '../services/zen-editor.service';
 
-@OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -67,48 +40,6 @@ export class ZenEditorController extends RxDisposable {
 
     private _initialize() {
         this._syncZenEditorSize();
-        this._commandExecutedListener();
-    }
-
-    private _createZenEditorInstance() {
-        // create univer doc formula bar editor instance
-        const INITIAL_SNAPSHOT: IDocumentData = {
-            id: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-            body: {
-                dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-                textRuns: [],
-                tables: [],
-                customBlocks: [],
-                paragraphs: [
-                    {
-                        startIndex: 0,
-                    },
-                ],
-                sectionBreaks: [{
-                    startIndex: 1,
-                }],
-            },
-            tableSource: {},
-            documentStyle: {
-                pageSize: {
-                    width: 595,
-                    height: 842,
-                },
-                documentFlavor: DocumentFlavor.MODERN,
-                marginTop: 50,
-                marginBottom: 50,
-                marginRight: 40,
-                marginLeft: 40,
-                renderConfig: {
-                    vertexAngle: 0,
-                    centerAngle: 0,
-                },
-            },
-            drawings: {},
-            drawingsOrder: [],
-        };
-
-        return this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, INITIAL_SNAPSHOT);
     }
 
     // Listen to changes in the size of the zen editor container to set the size of the editor.
@@ -118,162 +49,21 @@ export class ZenEditorController extends RxDisposable {
                 return;
             }
 
-            const editorObject = getEditorObject(DOCS_ZEN_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-            const zenEditorDataModel = this._univerInstanceService.getUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+            const { width, height } = position;
 
-            if (editorObject == null || zenEditorDataModel == null) {
+            const editorObject = getEditorObject(DOCS_ZEN_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+
+            if (editorObject == null) {
                 return;
             }
 
-            const { width, height } = position;
-
-            const { engine } = editorObject;
-
-            const skeleton = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
-
-            // Update page size when container resized.
-            // zenEditorDataModel.updateDocumentDataPageSize(width);
-
             // resize canvas
             requestIdleCallback(() => {
-                engine.resizeBySize(width, height);
-
+                editorObject.engine.resizeBySize(width, height);
                 this._calculatePagePosition(editorObject);
-
-                if (skeleton) {
-                    this._textSelectionManagerService.refreshSelection();
-                }
+                this._scrollToTop();
             });
         });
-    }
-
-    private _zenEditorInitialState = false;
-
-    private _handleOpenZenEditor() {
-        if (!this._zenEditorInitialState) {
-            this._createZenEditorInstance();
-            this._zenEditorInitialState = true;
-        }
-
-        this._zenZoneService.open();
-
-        const currentSheet = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
-
-        // Need to clear undo/redo service when open zen mode.
-        this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-
-        this._univerInstanceService.focusUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-        this._univerInstanceService.setCurrentUnitForType(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
-        const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
-        if (docSelectionRenderService) {
-            docSelectionRenderService.focus();
-        }
-
-        const visibleState = this._editorBridgeService.isVisible();
-        if (visibleState.visible === false) {
-            this._editorBridgeService.changeVisible({
-                visible: true,
-                eventType: DeviceInputEventType.PointerDown,
-                unitId: currentSheet?.getUnitId() ?? '',
-            });
-        }
-
-        const editCellState = this._editorBridgeService.getLatestEditCellState();
-
-        if (editCellState == null) {
-            return;
-        }
-
-        this._editorSyncHandler(editCellState);
-
-        const textRanges = [
-            {
-                startOffset: 0,
-                endOffset: 0,
-            },
-        ];
-
-        this._textSelectionManagerService.replaceTextRanges(textRanges, false);
-    }
-
-    private _editorSyncHandler(param: IEditorBridgeServiceParam) {
-        const body = param.documentLayoutObject.documentModel?.getBody();
-        const dataStream = body?.dataStream;
-        const paragraphs = body?.paragraphs;
-        const customBlocks = body?.customBlocks;
-        const drawings = param.documentLayoutObject.documentModel?.getDrawings();
-        const drawingsOrder = param.documentLayoutObject.documentModel?.getDrawingsOrder();
-        const customRanges = body?.customRanges;
-
-        let textRuns: ITextRun[] = [];
-
-        if (dataStream == null || (!paragraphs && !customRanges)) {
-            return;
-        }
-
-        if (body?.textRuns?.length) {
-            textRuns = body?.textRuns;
-        }
-
-        this._syncContentAndRender(DOCS_ZEN_EDITOR_UNIT_ID_KEY, dataStream, paragraphs ?? [], textRuns, customBlocks, drawings, drawingsOrder, customRanges);
-
-        // Also need to resize document and scene after sync content.
-        // this._autoScroll();
-    }
-
-    private _syncContentAndRender(
-        unitId: string,
-        dataStream: string,
-        paragraphs: IParagraph[],
-        textRuns: ITextRun[] = [],
-        customBlocks: ICustomBlock[] = [],
-        drawings: IDrawings = {},
-        drawingsOrder: string[] = [],
-        customRanges: ICustomRange[] = []
-    ) {
-        const INCLUDE_LIST = [
-            DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-            DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-        ];
-
-        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-        const skeleton = docSkeletonManagerService?.getSkeleton();
-        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        const docViewModel = docSkeletonManagerService?.getViewModel();
-
-        if (docDataModel == null || docViewModel == null || skeleton == null) {
-            return;
-        }
-
-        const docBody = docDataModel.getBody()!;
-        const snapshot = docDataModel.getSnapshot()!;
-
-        docBody.dataStream = dataStream;
-        docBody.paragraphs = paragraphs;
-        docBody.customBlocks = customBlocks;
-        docBody.customRanges = customRanges;
-        snapshot.drawings = drawings;
-        snapshot.drawingsOrder = drawingsOrder;
-        docBody.textRuns = textRuns;
-
-        // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
-        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            docBody.textRuns = [];
-        }
-
-        docViewModel.reset(docDataModel);
-
-        const currentRender = this._getDocObject();
-        if (currentRender == null) {
-            return;
-        }
-
-        skeleton.calculate();
-
-        if (INCLUDE_LIST.includes(unitId)) {
-            currentRender.document.makeDirty();
-        }
     }
 
     private _calculatePagePosition(currentRender: IDocObjectParam) {
@@ -288,7 +78,7 @@ export class ZenEditorController extends RxDisposable {
         const { width: engineWidth, height: engineHeight } = parent;
 
         let docsLeft = 0;
-        let docsTop = 0;
+        const docsTop = pageMarginTop;
 
         let sceneWidth = 0;
 
@@ -312,15 +102,12 @@ export class ZenEditorController extends RxDisposable {
         }
 
         if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
             sceneHeight = (engineHeight - pageMarginTop * 2) / scaleY;
         } else {
-            docsTop = pageMarginTop;
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
 
-        scene.resize(sceneWidth, sceneHeight + 200);
-
+        scene.resize(sceneWidth, sceneHeight);
         docsComponent.translate(docsLeft, docsTop);
         docBackground.translate(docsLeft, docsTop);
 
@@ -335,53 +122,14 @@ export class ZenEditorController extends RxDisposable {
         return this;
     }
 
-    private _commandExecutedListener() {
-        const updateCommandList = [OpenZenEditorOperation.id];
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    this._handleOpenZenEditor();
-                }
-            })
-        );
-
-        const editCommandList = [RichTextEditingMutation.id];
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (editCommandList.includes(command.id)) {
-                    const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
-
-                    if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                        // sync cell content to formula editor bar when edit cell editor and vice verse.
-                        const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-                        const docBody = editorDocDataModel?.getBody();
-                        const dataStream = docBody?.dataStream;
-                        const paragraphs = docBody?.paragraphs;
-                        const textRuns = docBody?.textRuns;
-                        const customBlocks = docBody?.customBlocks;
-                        const drawings = editorDocDataModel?.getDrawings();
-                        const drawingsOrder = editorDocDataModel?.getDrawingsOrder();
-                        const customRanges = editorDocDataModel?.getCustomRanges();
-                        /**
-                         * Fix the issue where content cannot be saved in the doc under Zen mode.
-                         */
-                        this._editorBridgeService.changeEditorDirty(true);
-
-                        if (dataStream == null || paragraphs == null) {
-                            return;
-                        }
-
-                        this._syncContentAndRender(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder, customRanges);
-                    }
-                }
-            })
-        );
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
+    private _scrollToTop() {
+        const backScrollController = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
+        const textRange = {
+            startOffset: 0,
+            endOffset: 0,
+        };
+        if (backScrollController) {
+            backScrollController.scrollToRange(textRange as ITextRange);
+        }
     }
 }

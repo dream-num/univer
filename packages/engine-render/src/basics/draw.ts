@@ -15,11 +15,11 @@
  */
 
 import type { IPosition } from '@univerjs/core';
-import { BorderStyleTypes } from '@univerjs/core';
-
 import type { UniverRenderingContext } from '../context';
-import { BORDER_TYPE, ORIENTATION_TYPE } from './const';
+
 import type { IDocumentSkeletonLine } from './i-document-skeleton-cached';
+import { BorderStyleTypes } from '@univerjs/core';
+import { BORDER_TYPE as BORDER_LTRB, ORIENTATION_TYPE } from './const';
 import { createCanvasElement } from './tools';
 import { Vector2 } from './vector2';
 
@@ -61,28 +61,28 @@ export function getDevicePixelRatio(): number {
  * @param lineWidthBuffer Solving the problem of mitered corners in the drawing of borders thicker than 2 pixels, caused by the line segments being centered.
  * @param position border draw position
  */
-export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, lineWidthBuffer: number, position: IPosition) {
+export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, lineWidthBuffer: number, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
-    if (type === BORDER_TYPE.TOP) {
+    if (type === BORDER_LTRB.TOP) {
         drawStartX = startX - lineWidthBuffer;
         drawStartY = startY;
         drawEndX = endX + lineWidthBuffer;
         drawEndY = startY;
-    } else if (type === BORDER_TYPE.BOTTOM) {
+    } else if (type === BORDER_LTRB.BOTTOM) {
         drawStartX = startX - lineWidthBuffer;
         drawStartY = endY;
         drawEndX = endX - lineWidthBuffer;
         drawEndY = endY;
-    } else if (type === BORDER_TYPE.LEFT) {
+    } else if (type === BORDER_LTRB.LEFT) {
         drawStartX = startX;
         drawStartY = startY - lineWidthBuffer;
         drawEndX = startX;
         drawEndY = endY + lineWidthBuffer;
-    } else if (type === BORDER_TYPE.RIGHT) {
+    } else if (type === BORDER_LTRB.RIGHT) {
         drawStartX = endX;
         drawStartY = startY - lineWidthBuffer;
         drawEndX = endX;
@@ -97,42 +97,49 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_T
     ctx.stroke();
 }
 
-export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
+export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
-    if (type === BORDER_TYPE.TL_BR) {
-        drawStartX = startX;
-        drawStartY = startY;
-        drawEndX = endX;
-        drawEndY = endY;
-    } else if (type === BORDER_TYPE.TL_BC) {
-        drawStartX = startX;
-        drawStartY = startY;
-        drawEndX = (startX + endX) / 2;
-        drawEndY = endY;
-    } else if (type === BORDER_TYPE.TL_MR) {
-        drawStartX = startX;
-        drawStartY = startY;
-        drawEndX = endX;
-        drawEndY = (startY + endY) / 2;
-    } else if (type === BORDER_TYPE.BL_TR) {
-        drawStartX = startX;
-        drawStartY = endY;
-        drawEndX = endX;
-        drawEndY = startY;
-    } else if (type === BORDER_TYPE.ML_TR) {
-        drawStartX = startX;
-        drawStartY = (startY + endY) / 2;
-        drawEndX = endX;
-        drawEndY = startY;
-    } else if (type === BORDER_TYPE.BC_TR) {
-        drawStartX = (startX + endX) / 2;
-        drawStartY = endY;
-        drawEndX = endX;
-        drawEndY = startY;
+    switch (type) {
+        case BORDER_LTRB.TL_BR:
+            drawStartX = startX;
+            drawStartY = startY;
+            drawEndX = endX;
+            drawEndY = endY;
+            break;
+        case BORDER_LTRB.TL_BC:
+            drawStartX = startX;
+            drawStartY = startY;
+            drawEndX = (startX + endX) / 2;
+            drawEndY = endY;
+            break;
+        case BORDER_LTRB.TL_MR:
+            drawStartX = startX;
+            drawStartY = startY;
+            drawEndX = endX;
+            drawEndY = (startY + endY) / 2;
+            break;
+        case BORDER_LTRB.BL_TR:
+            drawStartX = startX;
+            drawStartY = endY;
+            drawEndX = endX;
+            drawEndY = startY;
+            break;
+        case BORDER_LTRB.ML_TR:
+            drawStartX = startX;
+            drawStartY = (startY + endY) / 2;
+            drawEndX = endX;
+            drawEndY = startY;
+            break;
+        case BORDER_LTRB.BC_TR:
+            drawStartX = (startX + endX) / 2;
+            drawStartY = endY;
+            drawEndX = endX;
+            drawEndY = startY;
+            break;
     }
 
     // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
@@ -143,32 +150,37 @@ export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: 
     ctx.stroke();
 }
 
-export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
+export function clearLineByBorderType(ctx: UniverRenderingContext, type: BORDER_LTRB, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
-    if (type === BORDER_TYPE.TOP) {
-        drawStartX = startX;
-        drawStartY = startY;
-        drawEndX = endX;
-        drawEndY = startY;
-    } else if (type === BORDER_TYPE.BOTTOM) {
-        drawStartX = startX;
-        drawStartY = endY;
-        drawEndX = endX;
-        drawEndY = endY;
-    } else if (type === BORDER_TYPE.LEFT) {
-        drawStartX = startX;
-        drawStartY = startY;
-        drawEndX = startX;
-        drawEndY = endY;
-    } else if (type === BORDER_TYPE.RIGHT) {
-        drawStartX = endX;
-        drawStartY = startY;
-        drawEndX = endX;
-        drawEndY = endY;
+    switch (type) {
+        case BORDER_LTRB.TOP:
+            drawStartX = startX;
+            drawStartY = startY;
+            drawEndX = endX;
+            drawEndY = startY;
+            break;
+        case BORDER_LTRB.BOTTOM:
+            drawStartX = startX;
+            drawStartY = endY;
+            drawEndX = endX;
+            drawEndY = endY;
+            break;
+        case BORDER_LTRB.LEFT:
+            drawStartX = startX;
+            drawStartY = startY;
+            drawEndX = startX;
+            drawEndY = endY;
+            break;
+        case BORDER_LTRB.RIGHT:
+            drawStartX = endX;
+            drawStartY = startY;
+            drawEndX = endX;
+            drawEndY = endY;
+            break;
     }
 
     // ctx.beginPath();
@@ -252,7 +264,7 @@ export function getRotateOrientation(angle: number) {
 }
 
 // rotate calculate logic https://www.processon.com/view/link/630df928f346fb0714c9c4ec
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function getRotateOffsetAndFarthestHypotenuse(
     lines: IDocumentSkeletonLine[],
     rectWidth: number,
@@ -388,8 +400,7 @@ export function getRotateOffsetAndFarthestHypotenuse(
 
 /**
  * Align the resolution, an alignment needs to be done in special cases where the resolution is 1.5, 1.25, etc.
- * @param pixelRatio devicePixelRatio
- * @returns
+ * @returns {left: number, top: number} offset
  */
 export function getTranslateInSpreadContextWithPixelRatio() {
     const offset = 0.5 - getLineOffset();

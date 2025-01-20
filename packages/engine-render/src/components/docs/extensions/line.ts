@@ -15,14 +15,14 @@
  */
 
 import type { IScale, ITextDecoration } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
-
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { calculateRectRotate } from '../../../basics/draw';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+
+import type { UniverRenderingContext } from '../../../context';
+import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
+import { calculateRectRotate } from '../../../basics/draw';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -120,12 +120,10 @@ export class Line extends docExtension {
 
         const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
 
-        const centerAngle = degToRad(centerAngleDeg);
-        const vertexAngle = degToRad(vertexAngleDeg);
-
         ctx.save();
 
-        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+        // translate with precision is handled in moveToByPrecision and lineToByPrecision. NO NEED to do this again!
+        // ctx.translateWithPrecision(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const color =
             (c === BooleanNumber.TRUE ? getColorStyle(glyph.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
@@ -134,6 +132,8 @@ export class Line extends docExtension {
 
         this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
+        const centerAngle = degToRad(centerAngleDeg);
+        const vertexAngle = degToRad(vertexAngleDeg);
         const start = calculateRectRotate(
             originTranslate.addByPoint(left, startY),
             Vector2.create(0, 0),
@@ -150,10 +150,9 @@ export class Line extends docExtension {
         );
 
         ctx.beginPath();
-        ctx.moveToByPrecision(start.x, start.y);
-        ctx.lineToByPrecision(end.x, end.y);
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
         ctx.stroke();
-
         ctx.restore();
     }
 

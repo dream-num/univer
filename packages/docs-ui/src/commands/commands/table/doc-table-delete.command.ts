@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams, getRangeInfoFromRanges } from './table';
 
@@ -95,15 +95,12 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: offset,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -203,15 +200,12 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: retain,
-                    segmentId,
                 });
             }
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len: deleteLen,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -313,15 +307,12 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: offset,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

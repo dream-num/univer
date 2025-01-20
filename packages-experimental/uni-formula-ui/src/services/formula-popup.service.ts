@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
-import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
-import { IShortcutService, KeyCode } from '@univerjs/ui';
-import { IUniFormulaService } from '@univerjs/uni-formula';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
-import { AddDocUniFormulaCommand } from '../commands/commands/doc.command';
-import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
-import { ConfirmFormulaPopupCommand, isSlidePosition } from '../commands/operations/operation';
 import type { IAddDocUniFormulaCommandParams } from '../commands/commands/doc.command';
 import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
 import type { IPopupPosition } from '../commands/operations/operation';
+import { BuildTextUtils, Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula-ui';
+import { IShortcutService, KeyCode } from '@univerjs/ui';
+import { IUniFormulaService } from '@univerjs/uni-formula';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { AddDocUniFormulaCommand } from '../commands/commands/doc.command';
+import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
+import { ConfirmFormulaPopupCommand, isSlidePosition } from '../commands/operations/operation';
 
 export const DOC_FORMULA_POPUP_KEY = 'DOC_FORMULA_POPUP' as const;
 

@@ -74,6 +74,15 @@ describe('Test normInv function', () => {
             const standardDev = NumberValueObject.create(4);
             const result = testFunction.calculate(probability, mean, standardDev);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.2069);
+            const mean2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, mean2, standardDev);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const standardDev2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(probability2, mean, standardDev2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

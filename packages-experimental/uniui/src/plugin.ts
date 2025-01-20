@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
-import { EditorService, IEditorService, IRangeSelectorService, RangeSelectorService } from '@univerjs/docs-ui';
+import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
+import { DependentOn, ICommandService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -28,6 +29,7 @@ import {
     DesktopDialogService,
     DesktopGlobalZoneService,
     DesktopLayoutService,
+    DesktopLocalFileService,
     DesktopLocalStorageService,
     DesktopMessageService,
     DesktopNotificationService,
@@ -44,21 +46,18 @@ import {
     IGlobalZoneService,
     ILayoutService,
     ILeftSidebarService,
+    ILocalFileService,
     IMenuManagerService,
-    IMenuService,
     IMessageService,
     INotificationService,
     IPlatformService,
-    IProgressService,
     IShortcutService,
     ISidebarService,
     IUIController,
     IUIPartsService,
     IZenZoneService,
     MenuManagerService,
-    MenuService,
     PlatformService,
-    ProgressService,
     SharedController,
     ShortcutPanelController,
     ShortcutPanelService,
@@ -67,8 +66,6 @@ import {
     UNIVER_UI_PLUGIN_NAME,
     ZIndexManager,
 } from '@univerjs/ui';
-import type { Dependency } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
 import { UniuiFlowController } from './controllers/uniui-flow.controller';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
@@ -76,8 +73,6 @@ import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
 import { FlowManagerService } from './services/flow/flow-manager.service';
 import { UniToolbarService } from './services/toolbar/uni-toolbar-service';
 import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
-
-const UI_BOOTSTRAP_DELAY = 16;
 
 /**
  * This plugin enables the Uni Mode of Univer. It should replace
@@ -90,11 +85,12 @@ export class UniverUniUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, this._config);
+        this._config = merge({}, this._config);
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
@@ -112,7 +108,6 @@ export class UniverUniUIPlugin extends Plugin {
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
@@ -126,10 +121,8 @@ export class UniverUniUIPlugin extends Plugin {
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
-            [IEditorService, { useClass: EditorService }],
-            [IRangeSelectorService, { useClass: RangeSelectorService }],
+            [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: () => this._injector.createInstance(UniverUniUIController, this._config),
@@ -142,5 +135,12 @@ export class UniverUniUIPlugin extends Plugin {
             [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+
+    override onReady(): void {
+        this._injector.get(IUIController); // Do not move it to onStarting, otherwise the univer instance may not be mounted.
+        this._injector.get(UniuiFlowController);
+        this._injector.get(UniuiLeftSidebarController);
+        this._injector.get(UniuiToolbarController);
     }
 }

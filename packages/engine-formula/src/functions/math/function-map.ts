@@ -19,6 +19,7 @@ import { Acos } from './acos';
 import { Acosh } from './acosh';
 import { Acot } from './acot';
 import { Acoth } from './acoth';
+import { Arabic } from './arabic';
 import { Asin } from './asin';
 import { Asinh } from './asinh';
 import { Atan } from './atan';
@@ -68,7 +69,9 @@ import { Radians } from './radians';
 import { Rand } from './rand';
 import { Randarray } from './randarray';
 import { Randbetween } from './randbetween';
+import { Roman } from './roman';
 import { Round } from './round';
+import { Roundbank } from './roundbank';
 import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
 import { Sec } from './sec';
@@ -99,6 +102,7 @@ export const functionMath = [
     [Acosh, FUNCTION_NAMES_MATH.ACOSH],
     [Acot, FUNCTION_NAMES_MATH.ACOT],
     [Acoth, FUNCTION_NAMES_MATH.ACOTH],
+    [Arabic, FUNCTION_NAMES_MATH.ARABIC],
     [Asin, FUNCTION_NAMES_MATH.ASIN],
     [Asinh, FUNCTION_NAMES_MATH.ASINH],
     [Atan, FUNCTION_NAMES_MATH.ATAN],
@@ -147,7 +151,9 @@ export const functionMath = [
     [Rand, FUNCTION_NAMES_MATH.RAND],
     [Randarray, FUNCTION_NAMES_MATH.RANDARRAY],
     [Randbetween, FUNCTION_NAMES_MATH.RANDBETWEEN],
+    [Roman, FUNCTION_NAMES_MATH.ROMAN],
     [Round, FUNCTION_NAMES_MATH.ROUND],
+    [Roundbank, FUNCTION_NAMES_MATH.ROUNDBANK],
     [Rounddown, FUNCTION_NAMES_MATH.ROUNDDOWN],
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
     [Sec, FUNCTION_NAMES_MATH.SEC],

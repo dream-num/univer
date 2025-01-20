@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ptToPixel } from '../../../../basics/tools';
 import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
 import type { IOpenTypeGlyphInfo } from './text-shaping';
+import { ptToPixel } from '../../../../basics/tools';
 
 export const DEFAULT_MEASURE_TEXT = '0';
 
@@ -225,7 +225,15 @@ export class FontCache {
             const canvas = document.createElement('canvas');
             this._context = canvas.getContext('2d')!;
         }
-
+        if (!this._context) {
+            return {
+                width: 0,
+                fontBoundingBoxAscent: 0,
+                fontBoundingBoxDescent: 0,
+                actualBoundingBoxAscent: 0,
+                actualBoundingBoxDescent: 0,
+            };
+        }
         // const { fontString, fontSize, fontFamily } = fontStyle;
 
         const ctx = this._context;

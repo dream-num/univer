@@ -18,7 +18,8 @@ import type { IRange, IUnitRangeName, IUnitRangeWithName } from '@univerjs/core'
 import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
-import { isReferenceString, UNIT_NAME_REGEX } from '../../basics/regex';
+import { isReferenceString, UNIT_NAME_REGEX_PRECOMPILING } from '../../basics/regex';
+import { prefixToken, SPACE_TOKEN } from '../../basics/token';
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
@@ -152,10 +153,7 @@ export function serializeRange(range: IRange): string {
  * @param range
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
-    if (needsQuoting(sheetName)) {
-        return `'${sheetName}'!${serializeRange(range)}`;
-    }
-    return `${sheetName}!${serializeRange(range)}`;
+    return `${addQuotesBothSides(sheetName)}!${serializeRange(range)}`;
 }
 
 /**
@@ -166,7 +164,7 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  */
 export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
     if (needsQuoting(unit) || needsQuoting(sheetName)) {
-        return `'[${unit}]${sheetName}'!${serializeRange(range)}`;
+        return `'[${quoteSheetName(unit)}]${quoteSheetName(sheetName)}'!${serializeRange(range)}`;
     }
 
     return `[${unit}]${sheetName}!${serializeRange(range)}`;
@@ -200,13 +198,13 @@ export function singleReferenceToGrid(refBody: string) {
 }
 
 export function handleRefStringInfo(refString: string) {
-    const unitIdMatch = new RegExp(UNIT_NAME_REGEX).exec(refString);
+    const unitIdMatch = UNIT_NAME_REGEX_PRECOMPILING.exec(refString);
     let unitId = '';
 
     if (unitIdMatch != null) {
         unitId = unitIdMatch[0].trim();
-        unitId = unitId.slice(1, unitId.length - 1);
-        refString = refString.replace(new RegExp(UNIT_NAME_REGEX), '');
+        unitId = unquoteSheetName(unitId.slice(1, unitId.length - 1));
+        refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 
     const sheetNameIndex = refString.indexOf('!');
@@ -217,6 +215,8 @@ export function handleRefStringInfo(refString: string) {
         if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
             sheetName = sheetName.substring(1, sheetName.length - 1);
         }
+
+        sheetName = unquoteSheetName(sheetName);
         refBody = refString.substring(sheetNameIndex + 1);
     } else {
         refBody = refString;
@@ -262,10 +262,11 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
 
     const endGrid = singleReferenceToGrid(refEndString);
 
-    const startRow = startGrid.row;
-    const startColumn = startGrid.column;
-    const endRow = endGrid.row;
-    const endColumn = endGrid.column;
+    // range A1:B10 === B10:A1
+    const startRow = startGrid.row > endGrid.row ? endGrid.row : startGrid.row;
+    const startColumn = startGrid.column > endGrid.column ? endGrid.column : startGrid.column;
+    const endRow = startGrid.row > endGrid.row ? startGrid.row : endGrid.row;
+    const endColumn = startGrid.column > endGrid.column ? startGrid.column : endGrid.column;
 
     let rangeType = RANGE_TYPE.NORMAL;
     if (Number.isNaN(startRow) && Number.isNaN(endRow)) {
@@ -299,15 +300,17 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
 const EXCEPTION_REF_STRINGS = ['LOG10'];
 
 export function isReferenceStringWithEffectiveColumn(refString: string) {
-    if (!isReferenceString(refString)) {
+    const noPrefixRefString = replaceRefPrefixString(refString);
+
+    if (!isReferenceString(noPrefixRefString)) {
         return false;
     }
 
-    if (EXCEPTION_REF_STRINGS.includes(refString.toUpperCase().trim())) {
+    if (EXCEPTION_REF_STRINGS.includes(noPrefixRefString.toUpperCase().trim())) {
         return false;
     }
 
-    const { range } = deserializeRangeWithSheet(refString);
+    const { range } = deserializeRangeWithSheet(noPrefixRefString);
 
     /**
      * As of the latest information I have, which is up to the end of 2023,
@@ -321,6 +324,23 @@ export function isReferenceStringWithEffectiveColumn(refString: string) {
     }
 
     return true;
+}
+
+export function replaceRefPrefixString(token: string) {
+    const tokenArray = [];
+    let isNotPreFix = false;
+    for (let i = 0, len = token.length; i < len; i++) {
+        const char = token[i];
+        if (char === SPACE_TOKEN && !isNotPreFix) {
+            tokenArray.push(char);
+        } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS || char === prefixToken.PLUS)) {
+            continue;
+        } else {
+            tokenArray.push(char);
+            isNotPreFix = true;
+        }
+    }
+    return tokenArray.join('');
 }
 
 /**
@@ -398,11 +418,36 @@ export function needsQuoting(name: string) {
 
     // Check for spaces, punctuation and special characters
 
-    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?]/.test(name)) {
+    if (/[\s!$%^&*()+\-=\[\]{};':"\\|,.<>\/?（）]/.test(name)) {
         return true;
     }
 
     return false;
+}
+
+/**
+ * Add quotes to the sheet name
+ */
+export function addQuotesBothSides(name: string) {
+    return needsQuoting(name) ? `'${quoteSheetName(name)}'` : name;
+}
+
+/**
+ * Add a single quote before the single quote
+ * @param name
+ * @returns Quoted name
+ */
+function quoteSheetName(name: string) {
+    return name.replace(/'/g, "''");
+}
+
+/**
+ * Replace double single quotes with single quotes
+ * @param name
+ * @returns Unquoted name
+ */
+function unquoteSheetName(name: string) {
+    return name.replace(/''/g, "'");
 }
 
 function isA1Notation(name: string) {

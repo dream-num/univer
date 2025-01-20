@@ -1,0 +1,63 @@
+.sheet-range-selector {
+    &-text-wrap {
+        height: 32px;
+        padding: 6px 8px 2px 6px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-base);
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    &-placeholder {
+        font-size: 14px;
+        color: rgb(var(--grey-500));
+        position: absolute;
+        left: 5px;
+        bottom: 8px;
+    }
+
+    &-error {
+        border: 1px solid rgb(var(--red-500)) !important;
+    }
+
+    &-error-wrap {
+        font-size: 12px;
+        color: rgb(var(--red-500));
+        position: absolute;
+        bottom: -18px;
+        left: 0px;
+    }
+
+    &-text {
+        position: relative;
+        height: 22px;
+        width: 100%;
+    }
+
+    &-active {
+        border-color: rgb(var(--hyacinth-500));
+    }
+
+    &-icon {
+        cursor: pointer;
+    }
+
+    &-dialog {
+        &-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 16px;
+            margin-bottom: 8px;
+
+            &-delete {
+                cursor: pointer;
+            }
+        }
+    }
+}

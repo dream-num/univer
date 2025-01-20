@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
+    BuildTextUtils,
     CommandType,
     GridType,
     ICommandService,
@@ -27,14 +31,10 @@ import {
     TextX,
     TextXActionType,
     Tools,
-    UpdateDocsAttributeType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCharSpaceApply, getNumberUnitValue } from '@univerjs/engine-render';
-import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { hasParagraphInTable } from '../../basics/paragraph';
 import { getRichTextEditPath } from '../util';
 
 interface IListOperationCommandParams {
@@ -44,15 +44,15 @@ interface IListOperationCommandParams {
 export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     id: 'doc.command.list-operation',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
+
     handler: (accessor, params: IListOperationCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let listType: string = params.listType;
+        const listType: string = params.listType;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = docSelectionManagerService.getDocRanges() ?? [];
 
         if (docDataModel == null || docRanges.length === 0) {
@@ -67,35 +67,9 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             return false;
         }
 
-        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
-
         const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs);
 
         const unitId = docDataModel.getUnitId();
-
-        const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType.indexOf(listType) === 0);
-
-        const ID_LENGTH = 6;
-
-        let listId = Tools.generateRandomId(ID_LENGTH);
-
-        if (currentParagraphs.length === 1) {
-            const curIndex = paragraphs.indexOf(currentParagraphs[0]);
-            const prevParagraph = paragraphs[curIndex - 1];
-            const nextParagraph = paragraphs[curIndex + 1];
-
-            if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType.indexOf(listType) === 0) {
-                listId = prevParagraph.bullet.listId;
-                if (listType !== PresetListType.CHECK_LIST) {
-                    listType = prevParagraph.bullet.listType;
-                }
-            } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType.indexOf(listType) === 0) {
-                listId = nextParagraph.bullet.listId;
-                if (listType !== PresetListType.CHECK_LIST) {
-                    listType = nextParagraph.bullet.listType;
-                }
-            }
-        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -103,6 +77,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges: docRanges,
+                isEditing: false,
             },
         };
 
@@ -110,80 +85,18 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         memoryCursor.reset();
 
-        const textX = new TextX();
+        const textX = BuildTextUtils.paragraph.bullet.switch({
+            paragraphs: currentParagraphs,
+            listType,
+            document: docDataModel,
+            segmentId,
+        });
         const jsonX = JSONX.getInstance();
-
-        const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        const lists: Record<string, IListData> = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
-
-        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
-
-        for (const paragraph of currentParagraphs) {
-            const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-            const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: startIndex - memoryCursor.cursor,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: 1,
-                body: {
-                    dataStream: '',
-                    paragraphs: [
-                        isAlreadyList
-                            ? {
-                                paragraphStyle: {
-                                    ...paragraphStyle,
-                                    // hanging: undefined,
-                                    // indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
-                                },
-                                startIndex: 0,
-                            }
-                            : {
-                                startIndex: 0,
-                                paragraphStyle: {
-                                    ...paragraphStyle,
-                                    // indentFirstLine: undefined,
-                                    // hanging: listHanging,
-                                    // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
-                                },
-                                bullet: {
-                                    nestingLevel: bullet?.nestingLevel ?? 0,
-                                    textStyle: {
-                                        fs: 20,
-                                    },
-                                    listType,
-                                    listId,
-                                },
-                            },
-                    ],
-                },
-                segmentId,
-                coverType: UpdateDocsAttributeType.REPLACE,
-            });
-
-            memoryCursor.moveCursorTo(startIndex + 1);
-        }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -196,13 +109,13 @@ interface IChangeListTypeCommandParams {
 export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
     id: 'doc.command.change-list-type',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: (accessor, params: IChangeListTypeCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const { listType } = params;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRanges = docSelectionManagerService.getDocRanges();
         if (docDataModel == null || activeRanges == null || !activeRanges.length) {
             return false;
@@ -216,94 +129,35 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
             return false;
         }
 
-        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
-        const currentParagraphs = getParagraphsRelative(activeRanges, paragraphs);
-        const unitId = docDataModel.getUnitId();
-        const ID_LENGTH = 6;
-        const listId = Tools.generateRandomId(ID_LENGTH);
+        const currentParagraphs = getParagraphsInRanges(selections, paragraphs);
 
+        const unitId = docDataModel.getUnitId();
+        const textX = BuildTextUtils.paragraph.bullet.set({
+            paragraphs: currentParagraphs,
+            listType,
+            segmentId,
+            document: docDataModel,
+        });
+
+        if (!textX) {
+            return false;
+        }
+
+        const jsonX = JSONX.getInstance();
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
                 textRanges: selections,
+                isEditing: false,
             },
         };
-
-        const memoryCursor = new MemoryCursor();
-
-        memoryCursor.reset();
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-
-        // const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        // const lists = {
-        //     ...PRESET_LIST_TYPE,
-        //     ...customLists,
-        // };
-
-        // const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
-
-        for (const paragraph of currentParagraphs) {
-            const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            // const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            // const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-            // const bulletParagraphTextStyle = paragraphProperties.textStyle;
-            // const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            // const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-
-            // const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: startIndex - memoryCursor.cursor,
-                segmentId,
-            });
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: 1,
-                body: {
-                    dataStream: '',
-                    paragraphs: [
-                        {
-                            startIndex: 0,
-                            paragraphStyle: {
-                                ...paragraphStyle,
-                                // indentFirstLine: undefined,
-                                // hanging: listHanging,
-                                // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
-                            },
-                            bullet: {
-                                nestingLevel: bullet?.nestingLevel ?? 0,
-                                textStyle: bullet?.listType === listType
-                                    ? bullet.textStyle
-                                    : {
-                                        fs: 20,
-                                    },
-                                listType,
-                                listId,
-                            },
-                        },
-                    ],
-                },
-                segmentId,
-                coverType: UpdateDocsAttributeType.REPLACE,
-            });
-
-            memoryCursor.moveCursorTo(startIndex + 1);
-        }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -323,7 +177,6 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -332,14 +185,13 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;
         }
 
         const { segmentId } = activeRange;
-        const tables = docDataModel.getBody()?.tables ?? [];
         const selections = docSelectionManagerService.getDocRanges() ?? [];
         const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
 
@@ -350,6 +202,13 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
 
         const unitId = docDataModel.getUnitId();
+        const jsonX = JSONX.getInstance();
+        const textX = BuildTextUtils.paragraph.bullet.changeNestLevel({
+            paragraphs: currentParagraphs,
+            type,
+            segmentId,
+            document: docDataModel,
+        });
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -357,79 +216,14 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
                 unitId,
                 actions: [],
                 textRanges: selections,
+                isEditing: false,
             },
         };
-
-        const memoryCursor = new MemoryCursor();
-
-        memoryCursor.reset();
-
-        const textX = new TextX();
-        const jsonX = JSONX.getInstance();
-
-        const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        const lists = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
-
-        for (const paragraph of currentParagraphs) {
-            const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            const isInTable = hasParagraphInTable(paragraph, tables);
-
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: startIndex - memoryCursor.cursor,
-                segmentId,
-            });
-
-            if (bullet) {
-                const listType = bullet.listType as keyof typeof lists;
-                let maxLevel = lists[listType].nestingLevel.length - 1;
-                if (isInTable) {
-                    maxLevel = Math.min(maxLevel, 2);
-                }
-
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: 1,
-                    body: {
-                        dataStream: '',
-                        paragraphs: [
-                            {
-                                startIndex: 0,
-                                paragraphStyle: {
-                                    ...paragraphStyle,
-                                },
-                                bullet: {
-                                    ...bullet,
-                                    nestingLevel: Math.max(Math.min(bullet.nestingLevel + type, maxLevel), 0),
-                                },
-                            },
-                        ],
-                    },
-                    segmentId,
-                    coverType: UpdateDocsAttributeType.REPLACE,
-                });
-            } else {
-                // TODO: in this case, should set indent to paragraph
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: 1,
-                });
-            }
-
-            memoryCursor.moveCursorTo(startIndex + 1);
-        }
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -485,9 +279,9 @@ export interface IToggleCheckListCommandParams {
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
     id: 'doc.command.toggle-check-list',
+
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -496,7 +290,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const { index, segmentId, textRanges } = params;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -506,11 +300,8 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
             return false;
         }
 
-        const currentParagraph = paragraphs.find((p) => p.startIndex === index);
         const unitId = docDataModel.getUnitId();
-        if (!currentParagraph?.bullet || currentParagraph.bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
-            return false;
-        }
+
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -518,55 +309,24 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
                 actions: [],
                 textRanges: textRanges ?? [],
                 segmentId,
+                isEditing: false,
             },
         };
 
-        const memoryCursor = new MemoryCursor();
-        memoryCursor.reset();
+        const textX = BuildTextUtils.paragraph.bullet.toggleChecklist({
+            document: docDataModel,
+            paragraphIndex: index,
+            segmentId,
+        });
 
-        const textX = new TextX();
+        if (!textX) {
+            return false;
+        }
+
         const jsonX = JSONX.getInstance();
-
-        const { startIndex, paragraphStyle = {} } = currentParagraph;
-        const listType = currentParagraph.bullet.listType === PresetListType.CHECK_LIST ?
-            PresetListType.CHECK_LIST_CHECKED
-            : PresetListType.CHECK_LIST;
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: startIndex - memoryCursor.cursor,
-            segmentId,
-        });
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: 1,
-            body: {
-                dataStream: '',
-                paragraphs: [
-                    {
-                        ...currentParagraph,
-                        paragraphStyle,
-                        startIndex: 0,
-                        bullet: {
-                            ...currentParagraph.bullet,
-                            listType,
-                        },
-                    },
-                ],
-            },
-            coverType: UpdateDocsAttributeType.REPLACE,
-            segmentId,
-        });
-
-        memoryCursor.moveCursorTo(startIndex + 1);
-
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -611,7 +371,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;
@@ -657,6 +417,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
                     endOffset: paragraphStart,
                     collapsed: true,
                 }],
+                isEditing: false,
             },
         };
 
@@ -668,7 +429,6 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         textX.push({
             t: TextXActionType.DELETE,
             len: paragraphEnd - paragraphStart,
-            line: 1,
         });
 
         textX.push({
@@ -706,10 +466,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },

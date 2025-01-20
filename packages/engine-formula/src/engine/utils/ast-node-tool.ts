@@ -17,6 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 
+export interface IExecuteAstNodeData {
+    node: Nullable<BaseAstNode>;
+    refOffsetX: number;
+    refOffsetY: number;
+}
+
 export function getAstNodeTopParent(node: BaseAstNode) {
     let parent: Nullable<BaseAstNode> = node;
     while (parent?.getParent()) {
@@ -24,4 +30,12 @@ export function getAstNodeTopParent(node: BaseAstNode) {
         // console.log(parent);
     }
     return parent;
+}
+
+export function generateExecuteAstNodeData(node: BaseAstNode, refOffsetX: number = 0, refOffsetY: number = 0) {
+    return {
+        node,
+        refOffsetX,
+        refOffsetY,
+    };
 }

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { connectInjector, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
-
 import type { UIPartsService } from '@univerjs/ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
+
+import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
+import { connectInjector, ICommandService, Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
-import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
+import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { takeUntil } from 'rxjs';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
-import { CustomSortPanel } from '../views/CustomSortPanel';
-import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
+import { CustomSortPanel } from '../views/CustomSortPanel';
 import EmbedSortBtn from '../views/EmbedSortBtn';
 import { menuSchema } from './menu.schema';
 import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON } from './sheets-sort.menu';
@@ -34,7 +34,6 @@ import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;
 
-@OnLifecycle(LifecycleStages.Ready, SheetsSortUIController)
 export class SheetsSortUIController extends RxDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

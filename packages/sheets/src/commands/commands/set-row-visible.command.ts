@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
+
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ICommandService,
@@ -22,9 +26,7 @@ import {
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     SetRowHiddenMutation,
@@ -35,8 +37,6 @@ import {
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface ISetSpecificRowsVisibleCommandParams {
     unitId: string;
@@ -47,7 +47,7 @@ export interface ISetSpecificRowsVisibleCommandParams {
 export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-specific-rows-visible',
-    handler: async (accessor: IAccessor, params: ISetSpecificRowsVisibleCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetSpecificRowsVisibleCommandParams) => {
         const { unitId, subUnitId, ranges } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -149,7 +149,7 @@ export interface ISetRowHiddenCommandParams {
 export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',
-    handler: async (accessor: IAccessor, params?: ISetRowHiddenCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetRowHiddenCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

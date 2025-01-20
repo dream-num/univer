@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
+import type { IScrollToCellCommandParams } from '../commands/set-scroll.command';
 import { CommandType, type ICommand, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IScrollToCellCommandParams } from '../commands/set-scroll.command';
 import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 
 export const ScrollToRangeOperation: ICommand<IScrollToCellCommandParams> = {
     id: 'sheet.operation.scroll-to-range',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
         const instanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const scrollController = renderManagerService
             .getRenderById(instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
             .with(SheetsScrollRenderController);
 
-        return scrollController.scrollToRange(params!.range);
+        return scrollController.scrollToRange(params.range, params.forceTop, params.forceLeft);
     },
 };

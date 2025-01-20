@@ -19,7 +19,8 @@
             "skipChecks": true,
             "workspaces": [
                 "common/*",
-                "packages/*"
+                "packages/*",
+                "packages-experimental/action-recorder"
             ]
         }
     }

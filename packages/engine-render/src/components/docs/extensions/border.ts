@@ -15,13 +15,13 @@
  */
 
 import type { BorderStyleTypes, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
-import { getColorStyle } from '@univerjs/core';
-
-import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import { Vector2 } from '../../../basics/vector2';
+
 import type { UniverRenderingContext } from '../../../context';
+import { getColorStyle } from '@univerjs/core';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
+import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
+import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -85,7 +85,7 @@ export class Border extends docExtension {
                 this._preBorderColor = color;
             }
 
-            drawLineByBorderType(ctx, type as BORDER_TYPE, (lineWidth - 1) / 2 / precisionScale, {
+            drawLineByBorderType(ctx, type as BORDER_LTRB, (lineWidth - 1) / 2 / precisionScale, {
                 startX: spanStartPoint.x,
                 startY: spanStartPoint.y,
                 endX: spanStartPoint.x + spanWidth,
@@ -103,11 +103,11 @@ export class Border extends docExtension {
 
     private _createBorderCache(borderData: IBorderData) {
         const { t, b, l, r } = borderData;
-        const borderCache = new Map<BORDER_TYPE, Nullable<IBorderStyleData>>();
-        t && borderCache.set(BORDER_TYPE.TOP, t);
-        b && borderCache.set(BORDER_TYPE.BOTTOM, b);
-        l && borderCache.set(BORDER_TYPE.LEFT, l);
-        r && borderCache.set(BORDER_TYPE.RIGHT, r);
+        const borderCache = new Map<BORDER_LTRB, Nullable<IBorderStyleData>>();
+        t && borderCache.set(BORDER_LTRB.TOP, t);
+        b && borderCache.set(BORDER_LTRB.BOTTOM, b);
+        l && borderCache.set(BORDER_LTRB.LEFT, l);
+        r && borderCache.set(BORDER_LTRB.RIGHT, r);
         return borderCache;
     }
 }

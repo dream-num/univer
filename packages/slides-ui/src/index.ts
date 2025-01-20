@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSlidesUIPlugin } from './slides-ui-plugin';
 export { SlidesUIController } from './controllers/slide-ui.controller';
 export { SlideSideBar } from './components/slide-bar/SlideBar';
@@ -26,10 +28,10 @@ export { SLIDE_EDITOR_ID } from './const';
 
 export { CanvasView } from './controllers/canvas-view';
 
-export { IMAGE_MENU_ID } from './controllers/image.menu';
+export { SLIDES_IMAGE_MENU_ID } from './controllers/image.menu';
 export { SHAPE_MENU_ID } from './controllers/shape.menu';
 
-export { menuSchema } from './controllers/menu.schema';
+export { menuSchema as SlidesUIMenuSchema } from './controllers/menu.schema';
 
 // #region - all commands
 

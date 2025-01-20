@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
+import { type IDrawingParam, LocaleService, useDependency } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
+import React, { useEffect, useState } from 'react';
 import { getUpdateParams } from '../../utils/get-update-params';
-import { DrawingArrange } from './DrawingArrange';
-import { DrawingTransform } from './DrawingTransform';
 import { DrawingAlign } from './DrawingAlign';
-import { ImageCropper } from './ImageCropper';
+import { DrawingArrange } from './DrawingArrange';
 import { DrawingGroup } from './DrawingGroup';
+import { DrawingTransform } from './DrawingTransform';
+import { ImageCropper } from './ImageCropper';
 
 export interface IDrawingCommonPanelProps {
     drawings: IDrawingParam[];

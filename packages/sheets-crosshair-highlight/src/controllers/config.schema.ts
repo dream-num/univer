@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'sheets-crosshair-highlight.config';
+export const SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY = 'sheets-crosshair-highlight.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_CROSSHAIR_HIGHLIGHT_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsCrosshairHighlightConfig {
     menu?: MenuConfig;

@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, OnLifecycle, QuickListTypeMap } from '@univerjs/core';
 import type { Nullable } from 'vitest';
+import type { ITabCommandParams } from '../commands/commands/auto-format.command';
+import { Disposable, Inject, QuickListTypeMap } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from '../commands/commands/auto-format.command';
 import { BreakLineCommand } from '../commands/commands/break-line.command';
 import { ChangeListNestingLevelCommand, ChangeListNestingLevelType, ListOperationCommand, QuickListCommand } from '../commands/commands/list.command';
 import { DocTableTabCommand } from '../commands/commands/table/doc-table-tab.command';
 import { DocAutoFormatService } from '../services/doc-auto-format.service';
-import { isInSameTableCell } from '../services/selection/convert-rect-range';
-import type { ITabCommandParams } from '../commands/commands/auto-format.command';
+import { isInSameTableCellData } from '../services/selection/convert-rect-range';
 
-@OnLifecycle(LifecycleStages.Rendered, DocAutoFormatController)
 export class DocAutoFormatController extends Disposable {
     constructor(
-        @Inject(DocAutoFormatService) private readonly _docAutoFormatService: DocAutoFormatService
+        @Inject(DocAutoFormatService) private readonly _docAutoFormatService: DocAutoFormatService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -77,11 +79,18 @@ export class DocAutoFormatController extends Disposable {
             this._docAutoFormatService.registerAutoFormat({
                 id: TabCommand.id,
                 match: (context) => {
-                    const { selection } = context;
+                    const { selection, unit } = context;
 
                     const { startNodePosition, endNodePosition } = selection;
 
-                    if (startNodePosition && endNodePosition && isInSameTableCell(startNodePosition, endNodePosition)) {
+                    const renderObject = this._renderManagerService.getRenderById(unit.getUnitId());
+                    const skeleton = renderObject?.with(DocSkeletonManagerService).getSkeleton();
+
+                    if (skeleton == null) {
+                        return false;
+                    }
+
+                    if (startNodePosition && endNodePosition && isInSameTableCellData(skeleton, startNodePosition, endNodePosition)) {
                         return true;
                     }
 

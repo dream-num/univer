@@ -15,21 +15,22 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import { CellValueType, LocaleType } from '@univerjs/core';
-import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-import { AstTreeBuilder } from '../../../../engine/analysis/parser';
+
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import { CellValueType, LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
+import { Lexer } from '../../../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { RankEq } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -112,6 +113,7 @@ describe('Test rank function', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},
@@ -144,7 +146,7 @@ describe('Test rank function', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             return getObjectValue(result);
         };

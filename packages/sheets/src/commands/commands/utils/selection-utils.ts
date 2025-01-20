@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
-
-import { SetSelectionsOperation } from '../../operations/selection.operation';
+import type { ICellData, IInterceptor, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISelectionWithStyle } from '../../../basics/selection';
+
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
+import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+import { IgnoreRangeThemeInterceptorKey, RangeThemeInterceptorId } from '../../../services/sheet-interceptor/interceptor-const';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 
 export interface IExpandParams {
     left?: boolean;
@@ -234,6 +235,8 @@ export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
     };
 }
 
+const ignoreRangeThemeInterceptorFilter = (interceptor: IInterceptor<unknown, unknown>) => interceptor.id !== RangeThemeInterceptorId;
+
 /**
  * Copy the styles of a range of cells to another range. Used for insert row and insert column.
  * @param worksheet
@@ -243,7 +246,6 @@ export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
  * @param endColumn
  * @param isRow
  * @param styleRowOrColumn
- * @returns
  */
 export function copyRangeStyles(
     worksheet: Worksheet,
@@ -257,12 +259,56 @@ export function copyRangeStyles(
     const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
     for (let row = startRow; row <= endRow; row++) {
         for (let column = startColumn; column <= endColumn; column++) {
-            const cell = isRow ? worksheet.getCell(styleRowOrColumn, column) : worksheet.getCell(row, styleRowOrColumn);
+            const cell = isRow ?
+                worksheet.getCellWithFilteredInterceptors(styleRowOrColumn, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
+                : worksheet.getCellWithFilteredInterceptors(row, styleRowOrColumn, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
+
             if (!cell || !cell.s) {
                 continue;
             }
             if (!cellValue[row]) {
                 cellValue[row] = {};
+            }
+            cellValue[row][column] = { s: cell.s };
+        }
+    }
+    return cellValue;
+}
+
+export function copyRangeStylesWithoutBorder(
+    worksheet: Worksheet,
+    startRow: number,
+    endRow: number,
+    startColumn: number,
+    endColumn: number,
+    isRow: boolean,
+    styleRowOrColumn: number
+): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue: IObjectMatrixPrimitiveType<ICellData> = {};
+    for (let row = startRow; row <= endRow; row++) {
+        for (let column = startColumn; column <= endColumn; column++) {
+            const cell = isRow
+                ? worksheet.getCellWithFilteredInterceptors(styleRowOrColumn, column, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter)
+                : worksheet.getCellWithFilteredInterceptors(row, styleRowOrColumn, IgnoreRangeThemeInterceptorKey, ignoreRangeThemeInterceptorFilter);
+
+            if (!cell || !cell.s) {
+                continue;
+            }
+            if (!cellValue[row]) {
+                cellValue[row] = {};
+            }
+
+            // univer-pro/issues/3016  insert row/column should not reuse border style
+            if (typeof cell.s === 'string') {
+                const styleData = worksheet.getStyleDataByHash(cell.s);
+                if (styleData) {
+                    delete styleData.bd;
+                    cell.s = worksheet.setStyleData(styleData);
+                }
+            } else {
+                const styleData = { ...cell.s };
+                delete styleData.bd;
+                cell.s = worksheet.setStyleData(styleData);
             }
             cellValue[row][column] = { s: cell.s };
         }

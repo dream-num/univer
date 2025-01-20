@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DataValidationType, ISheetDataValidationRule } from '@univerjs/core';
+import type { IRuleChange, IUpdateRulePayload } from '@univerjs/data-validation';
+import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { isReferenceString } from '@univerjs/engine-formula';
+import { RemoveSheetMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
-import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
-import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { RuleMatrix } from './rule-matrix';
 
-@OnLifecycle(LifecycleStages.Starting, SheetDataValidationModel)
+export interface IValidStatusChange {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    col: number;
+    ruleId: string;
+    status: DataValidationStatus;
+}
+
 export class SheetDataValidationModel extends Disposable {
     private readonly _ruleMatrixMap = new Map<string, Map<string, RuleMatrix>>();
     private readonly _validStatusChange$ = new Subject<IValidStatusChange>();
@@ -42,7 +50,8 @@ export class SheetDataValidationModel extends Disposable {
         @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(DataValidationCacheService) private _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService
+        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initRuleUpdateListener();
@@ -51,6 +60,28 @@ export class SheetDataValidationModel extends Disposable {
             this._ruleChange$.complete();
             this._validStatusChange$.complete();
         });
+
+        this._initUniverInstanceListener();
+    }
+
+    private _initUniverInstanceListener() {
+        this.disposeWithMe(
+            this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+                this._ruleMatrixMap.delete(unit.getUnitId());
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (command.id === RemoveSheetMutation.id) {
+                    const { unitId, subUnitId } = command.params as IRemoveSheetMutationParams;
+                    const subUnitMap = this._ruleMatrixMap.get(unitId);
+                    if (subUnitMap) {
+                        subUnitMap.delete(subUnitId);
+                    }
+                }
+            })
+        );
     }
 
     private _initRuleUpdateListener() {
@@ -58,6 +89,8 @@ export class SheetDataValidationModel extends Disposable {
         for (const [unitId, subUnitMap] of allRules) {
             for (const [subUnitId, rules] of subUnitMap) {
                 for (const rule of rules) {
+                    this._addRule(unitId, subUnitId, rule);
+
                     this._ruleChange$.next({
                         type: 'add',
                         unitId,
@@ -65,14 +98,12 @@ export class SheetDataValidationModel extends Disposable {
                         rule,
                         source: 'patched',
                     });
-                    this._addRule(unitId, subUnitId, rule);
                 }
             }
         }
 
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((ruleChange) => {
-                this._ruleChange$.next(ruleChange);
                 switch (ruleChange.type) {
                     case 'add':
                         this._addRule(ruleChange.unitId, ruleChange.subUnitId, ruleChange.rule);
@@ -84,16 +115,15 @@ export class SheetDataValidationModel extends Disposable {
                         this._removeRule(ruleChange.unitId, ruleChange.subUnitId, ruleChange.rule);
                         break;
                 }
+
+                this._ruleChange$.next(ruleChange);
             })
         );
     }
 
     private _ensureRuleMatrix(unitId: string, subUnitId: string) {
         let unitMap = this._ruleMatrixMap.get(unitId);
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            throw new Error(`workbook not found, unitId: ${unitId}`);
-        }
+
         if (!unitMap) {
             unitMap = new Map();
             this._ruleMatrixMap.set(unitId, unitMap);
@@ -101,11 +131,7 @@ export class SheetDataValidationModel extends Disposable {
 
         let matrix = unitMap.get(subUnitId);
         if (!matrix) {
-            const worksheet = workbook.getSheetBySheetId(subUnitId);
-            if (!worksheet) {
-                throw new Error(`worksheet not found, unitId: ${unitId}, subUnitId: ${subUnitId}`);
-            }
-            matrix = new RuleMatrix(new Map(), worksheet);
+            matrix = new RuleMatrix(new Map(), unitId, subUnitId, this._univerInstanceService);
             unitMap.set(subUnitId, matrix);
         }
 
@@ -113,16 +139,10 @@ export class SheetDataValidationModel extends Disposable {
     }
 
     private _addRuleSideEffect(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
-            if (isReferenceString(rule.formula1 ?? '')) {
-                // polyfill old-version ref-string, transform to formula
-                rule.formula1 = `=${rule.formula1}`;
-            }
-        }
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(unitId, subUnitId, rule);
-        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule);
         this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
     }
 
@@ -136,24 +156,33 @@ export class SheetDataValidationModel extends Disposable {
 
     private _updateRule(unitId: string, subUnitId: string, ruleId: string, oldRule: ISheetDataValidationRule, payload: IUpdateRulePayload) {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
+        const newRule = {
+            ...oldRule,
+            ...payload.payload,
+        };
+
         if (payload.type === UpdateRuleType.RANGE) {
             ruleMatrix.updateRange(ruleId, payload.payload);
-            this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
-            this._dataValidationCustomFormulaService.updateRuleRanges(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload);
-        } else if (payload.type === UpdateRuleType.SETTING) {
-            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
-            this._dataValidationFormulaService.updateRuleFormulaText(unitId, subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2);
-            this._dataValidationCustomFormulaService.updateRuleFormula(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
+        } else if (payload.type === UpdateRuleType.ALL) {
+            ruleMatrix.updateRange(ruleId, payload.payload.ranges);
         }
+
+        this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
+        this._dataValidationCacheService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationFormulaService.removeRule(unitId, subUnitId, oldRule.uid);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, newRule);
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, newRule);
     }
 
     private _removeRule(unitId: string, subUnitId: string, oldRule: ISheetDataValidationRule): void {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.removeRule(oldRule);
         this._dataValidationCacheService.removeRule(unitId, subUnitId, oldRule);
+        this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, oldRule.uid);
     }
 
-    getValidator(type: DataValidationType) {
+    getValidator(type: DataValidationType | string) {
         return this._dataValidatorRegistryService.getValidatorItem(type);
     }
 
@@ -171,9 +200,8 @@ export class SheetDataValidationModel extends Disposable {
         return this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
     }
 
-    validator(cell: Nullable<ICellDataForSheetInterceptor>, rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
+    validator(rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId, worksheet } = pos;
-        const ruleId = rule.uid;
         const onCompete = (status: DataValidationStatus, changed: boolean) => {
             if (_onCompete) {
                 _onCompete(status, changed);
@@ -184,24 +212,22 @@ export class SheetDataValidationModel extends Disposable {
                     subUnitId,
                     ruleId: rule.uid,
                     status,
+                    row,
+                    col,
                 });
             }
         };
+
+        const cell = worksheet.getCellValueOnly(row, col);
         const validator = this.getValidator(rule.type);
         const cellRaw = worksheet.getCellRaw(row, col);
         const cellValue = getCellValueOrigin(cellRaw);
-        const interceptValue = getCellValueOrigin(cell);
 
         if (validator) {
             const cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
             const current = cache.getValue(row, col);
-            if (!current || current.value !== cellValue || current.interceptValue !== interceptValue || current.ruleId !== ruleId) {
-                cache.setValue(row, col, {
-                    value: cellValue,
-                    interceptValue,
-                    status: DataValidationStatus.VALIDATING,
-                    ruleId,
-                });
+            if (current === null || current === undefined) {
+                cache.setValue(row, col, DataValidationStatus.VALIDATING);
                 validator.validator(
                     {
                         value: cellValue,
@@ -217,39 +243,23 @@ export class SheetDataValidationModel extends Disposable {
                     rule
                 ).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
-                    cache.setValue(row, col, {
-                        value: cellValue,
-                        status: realStatus,
-                        ruleId,
-                        interceptValue,
-                    });
-                    onCompete(realStatus, true);
+                    if (realStatus === DataValidationStatus.VALID) {
+                        cache.realDeleteValue(row, col);
+                    } else {
+                        cache.setValue(row, col, realStatus);
+                    }
+                    const now = cache.getValue(row, col);
+                    onCompete(realStatus, current !== now);
                 });
                 return DataValidationStatus.VALIDATING;
             }
-            onCompete(current.status, false);
-            return current.status;
+
+            onCompete(current ?? DataValidationStatus.VALID, false);
+            return current ?? DataValidationStatus.VALID;
         } else {
             onCompete(DataValidationStatus.VALID, false);
             return DataValidationStatus.VALID;
         }
-    }
-
-    getRuleErrorMsg(unitId: string, subUnitId: string, ruleId: string) {
-        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        if (!rule) {
-            return '';
-        }
-        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-        if (rule.error) {
-            return rule.error;
-        }
-
-        if (validator) {
-            return validator.getRuleFinalError(rule);
-        }
-
-        return '';
     }
 
     getRuleObjectMatrix(unitId: string, subUnitId: string) {

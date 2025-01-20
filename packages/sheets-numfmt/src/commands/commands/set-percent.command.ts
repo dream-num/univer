@@ -15,10 +15,9 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-
-import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const SetPercentCommand: ICommand = {

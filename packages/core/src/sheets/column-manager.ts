@@ -15,10 +15,12 @@
  */
 
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
-import { getArrayLength } from '../shared/object-matrix';
 import type { Nullable } from '../shared/types';
+import type { IStyleData } from '../types/interfaces';
+import type { CustomData, IColumnData, IRange, IWorksheetData } from './typedef';
+import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
-import { type IColumnData, type IRange, type IWorksheetData, RANGE_TYPE } from './typedef';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -48,6 +50,25 @@ export class ColumnManager {
             return true;
         }
         return col.hd !== BooleanNumber.TRUE;
+    }
+
+    /**
+     * Get the column style
+     * @param {number} col Column index
+     * @returns {string | Nullable<IStyleData>} Style data, may be undefined
+     */
+    getColumnStyle(col: number) {
+        return this._columnData[col]?.s;
+    }
+
+    /**
+     * Set the set column  default style
+     * @param {number} col Column index
+     * @param {string | Nullable<IStyleData>} style Style data
+     */
+    setColumnStyle(col: number, style: string | Nullable<IStyleData>) {
+        const coldData = this.getColumnOrCreate(col);
+        coldData.s = style;
     }
 
     /**
@@ -175,7 +196,6 @@ export class ColumnManager {
     /**
      * get given column data
      * @param columnPos column index
-     * @returns
      */
     getColumn(columnPos: number): Nullable<Partial<IColumnData>> {
         const column = this._columnData[columnPos];
@@ -185,22 +205,37 @@ export class ColumnManager {
     }
 
     /**
+     * Remove column data of given column
+     * @param columnPos
+     */
+    removeColumn(columnPos: number) {
+        delete this._columnData[columnPos];
+    }
+
+    /**
      * get given column data or create a column data when it's null
      * @param columnPos column index
-     * @returns
+     * @returns {Partial<IColumnData>} columnData
      */
     getColumnOrCreate(columnPos: number): Partial<IColumnData> {
         const { _columnData } = this;
-        const config = this._config;
         const column = _columnData[columnPos];
         if (column) {
             return column;
         }
-        const create = {
-            w: config.defaultColumnWidth,
-            hd: BooleanNumber.FALSE,
-        };
+        const create = {};
         this._columnData[columnPos] = create;
         return create;
+    }
+
+    setCustomMetadata(index: number, custom: CustomData | undefined) {
+        const row = this.getColumn(index);
+        if (row) {
+            row.custom = custom;
+        }
+    }
+
+    getCustomMetadata(index: number): CustomData | undefined {
+        return this.getColumn(index)?.custom;
     }
 }

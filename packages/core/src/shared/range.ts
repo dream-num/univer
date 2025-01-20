@@ -14,41 +14,69 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType } from '../sheets/typedef';
-import { Rectangle } from './rectangle';
 import type { IRange } from '../sheets/typedef';
+import type { Nullable } from './types';
+import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
+import { Rectangle } from './rectangle';
 
 export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false): IRange {
+    if (refOffsetX === 0 && refOffsetY === 0) {
+        return range;
+    }
+
     let newRange = { ...range };
 
     const startAbsoluteRefType = newRange.startAbsoluteRefType || AbsoluteRefType.NONE;
     const endAbsoluteRefType = newRange.endAbsoluteRefType || AbsoluteRefType.NONE;
 
+    const rangeType = newRange.rangeType || RANGE_TYPE.NORMAL;
+
     if (!ignoreAbsolute && startAbsoluteRefType === AbsoluteRefType.ALL && endAbsoluteRefType === AbsoluteRefType.ALL) {
         return newRange;
     }
 
+    const start = moveRangeByRangeType(newRange.startRow, refOffsetY, newRange.startColumn, refOffsetX, rangeType);
+    const end = moveRangeByRangeType(newRange.endRow, refOffsetY, newRange.endColumn, refOffsetX, rangeType);
+
     if (ignoreAbsolute || (startAbsoluteRefType === AbsoluteRefType.NONE && endAbsoluteRefType === AbsoluteRefType.NONE)) {
-        return Rectangle.moveOffset(newRange, refOffsetX, refOffsetY);
+        return newRange = {
+            ...newRange,
+            startRow: start.row,
+            startColumn: start.column,
+            endRow: end.row,
+            endColumn: end.column,
+        };
     }
 
     if (startAbsoluteRefType === AbsoluteRefType.NONE) {
-        newRange = { ...newRange, startRow: newRange.startRow + refOffsetY, startColumn: newRange.startColumn + refOffsetX };
+        newRange = { ...newRange, startRow: start.row, startColumn: start.column };
     } else if (startAbsoluteRefType === AbsoluteRefType.COLUMN) {
-        newRange = { ...newRange, startRow: newRange.startRow + refOffsetY };
+        newRange = { ...newRange, startRow: start.row };
     } else if (startAbsoluteRefType === AbsoluteRefType.ROW) {
-        newRange = { ...newRange, startColumn: newRange.startColumn + refOffsetX };
+        newRange = { ...newRange, startColumn: start.column };
     }
 
     if (endAbsoluteRefType === AbsoluteRefType.NONE) {
-        newRange = { ...newRange, endRow: newRange.endRow + refOffsetY, endColumn: newRange.endColumn + refOffsetX };
+        newRange = { ...newRange, endRow: end.row, endColumn: end.column };
     } else if (endAbsoluteRefType === AbsoluteRefType.COLUMN) {
-        newRange = { ...newRange, endRow: newRange.endRow + refOffsetY };
+        newRange = { ...newRange, endRow: end.row };
     } else if (endAbsoluteRefType === AbsoluteRefType.ROW) {
-        newRange = { ...newRange, endColumn: newRange.endColumn + refOffsetX };
+        newRange = { ...newRange, endColumn: end.column };
     }
 
     return newRange;
+}
+
+function moveRangeByRangeType(row: number, rowOffset: number, column: number, columnOffset: number, rangeType: RANGE_TYPE): { row: number; column: number } {
+    if (rangeType === RANGE_TYPE.NORMAL) {
+        return { row: row + rowOffset, column: column + columnOffset };
+    } else if (rangeType === RANGE_TYPE.ROW) {
+        return { row: row + rowOffset, column };
+    } else if (rangeType === RANGE_TYPE.COLUMN) {
+        return { row, column: column + columnOffset };
+    } else {
+        return { row, column };
+    }
 }
 
 /**
@@ -227,3 +255,158 @@ export function multiSubtractSingleRange(ranges: IRange[], toDelete: IRange) {
     });
     return Rectangle.mergeRanges(res);
 };
+
+ /**
+  * Computes the intersection of two ranges.
+  * If there is an overlap between the two ranges, returns a new range representing the intersection.
+  * If there is no overlap, returns null.
+  *
+  * @param src - The source range.
+  * @param target - The target range.
+  * @returns The intersected range or null if there is no intersection.
+  */
+export function getIntersectRange(src: IRange, target: IRange): Nullable<IRange> {
+    const rowOverlap = getOverlap1D(
+        src.startRow,
+        src.endRow,
+        target.startRow,
+        target.endRow
+    );
+    const colOverlap = getOverlap1D(
+        src.startColumn,
+        src.endColumn,
+        target.startColumn,
+        target.endColumn
+    );
+
+    if (!rowOverlap || !colOverlap) {
+        return null;
+    }
+
+    const [startRow, endRow] = rowOverlap;
+    const [startColumn, endColumn] = colOverlap;
+
+    // Determine rangeType based on input rangeTypes and overlaps
+    const rangeType = determineRangeType(
+        src.rangeType,
+        target.rangeType,
+        startRow,
+        endRow,
+        startColumn,
+        endColumn
+    );
+
+    return {
+        startRow,
+        endRow,
+        startColumn,
+        endColumn,
+        rangeType,
+    };
+}
+
+/**
+ * Computes the overlap between two one-dimensional ranges.
+ * Treats NaN values as unbounded (from -Infinity to +Infinity).
+ *
+ * @param start1 - The start of the first range (inclusive). NaN indicates unbounded.
+ * @param end1 - The end of the first range (exclusive). NaN indicates unbounded.
+ * @param start2 - The start of the second range (inclusive). NaN indicates unbounded.
+ * @param end2 - The end of the second range (exclusive). NaN indicates unbounded.
+ * @returns A tuple containing the start and end of the overlap, or null if there is no overlap.
+ */
+function getOverlap1D(
+    start1: number,
+    end1: number,
+    start2: number,
+    end2: number
+): [number, number] | null {
+    // Treat NaN as unbounded (-Infinity to +Infinity)
+    const s1 = isNaN(start1) ? -Infinity : start1;
+    const e1 = isNaN(end1) ? Infinity : end1;
+    const s2 = isNaN(start2) ? -Infinity : start2;
+    const e2 = isNaN(end2) ? Infinity : end2;
+
+    const start = Math.max(s1, s2);
+    const end = Math.min(e1, e2);
+
+    if (start <= end) {
+        const resultStart = start === -Infinity ? Number.NaN : start;
+        const resultEnd = end === Infinity ? Number.NaN : end;
+        return [resultStart, resultEnd];
+    } else {
+        return null;
+    }
+}
+
+/**
+ * Determines the rangeType of the intersection based on the rangeTypes of the input ranges and the overlap.
+ * The logic prioritizes the input rangeTypes and determines the intersection's rangeType accordingly.
+ *
+ * @param src - The source range.
+ * @param target - The target range.
+ * @param startRow - The start row of the overlap.
+ * @param endRow - The end row of the overlap.
+ * @param startColumn - The start column of the overlap.
+ * @param endColumn - The end column of the overlap.
+ * @returns The rangeType of the intersection.
+ */
+function determineRangeType(
+    srcType: RANGE_TYPE | undefined,
+    targetType: RANGE_TYPE | undefined,
+    startRow: number,
+    endRow: number,
+    startColumn: number,
+    endColumn: number
+): RANGE_TYPE {
+    // Default to NORMAL if types are undefined
+    const resolvedSrcType = srcType !== undefined ? srcType : inferRangeType(startRow, endRow, startColumn, endColumn);
+    const resolvedTargetType = targetType !== undefined ? targetType : inferRangeType(startRow, endRow, startColumn, endColumn);
+
+    if (resolvedSrcType === RANGE_TYPE.ALL || resolvedTargetType === RANGE_TYPE.ALL) {
+        // Intersection with ALL results in the other range's type
+        if (resolvedSrcType === resolvedTargetType) {
+            return resolvedSrcType;
+        }
+        return resolvedSrcType === RANGE_TYPE.ALL ? resolvedTargetType : resolvedSrcType;
+    } else if (resolvedSrcType === resolvedTargetType) {
+        // Both ranges have the same type
+        return resolvedSrcType;
+    } else if (resolvedSrcType === RANGE_TYPE.NORMAL || resolvedTargetType === RANGE_TYPE.NORMAL) {
+        // Intersection with NORMAL results in NORMAL
+        return RANGE_TYPE.NORMAL;
+    } else {
+        // Different types (ROW and COLUMN), intersection is NORMAL
+        return RANGE_TYPE.NORMAL;
+    }
+}
+
+/**
+ * Infers the rangeType based on whether start and end rows or columns are NaN (unbounded).
+ * Determines if the range represents rows, columns, normal range, or all cells.
+ *
+ * @param startRow - The start row of the range.
+ * @param endRow - The end row of the range.
+ * @param startColumn - The start column of the range.
+ * @param endColumn - The end column of the range.
+ * @returns The inferred rangeType.
+ */
+function inferRangeType(
+    startRow: number,
+    endRow: number,
+    startColumn: number,
+    endColumn: number
+): RANGE_TYPE {
+    const hasRow = !isNaN(startRow) && !isNaN(endRow);
+    const hasColumn = !isNaN(startColumn) && !isNaN(endColumn);
+
+    if (hasRow && hasColumn) {
+        return RANGE_TYPE.NORMAL;
+    } else if (hasRow) {
+        return RANGE_TYPE.ROW;
+    } else if (hasColumn) {
+        return RANGE_TYPE.COLUMN;
+    } else {
+        return RANGE_TYPE.ALL;
+    }
+}

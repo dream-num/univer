@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@univerjs/core';
-
-import { AstNodePromiseType } from '../../basics/common';
-import { ErrorType } from '../../basics/error-type';
 import type { BaseFunction } from '../../functions/base-function';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
     AsyncObject,
     BaseReferenceObject,
     FunctionVariantType,
-    NodeValueType,
-} from '../reference-object/base-reference-object';
+    NodeValueType } from '../reference-object/base-reference-object';
+import type { FormulaFunctionResultValueType } from '../value-object/primitive-object';
+import { Inject, Injector } from '@univerjs/core';
+import { AstNodePromiseType } from '../../basics/common';
+import { ErrorType } from '../../basics/error-type';
+import { matchToken } from '../../basics/token';
+import { FormulaDataModel } from '../../models/formula-data.model';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IDefinedNamesService } from '../../services/defined-names.service';
+import { IFunctionService } from '../../services/function.service';
+
+import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
-import { prefixHandler } from '../utils/prefixHandler';
-import { IDefinedNamesService } from '../../services/defined-names.service';
-import { matchToken } from '../../basics/token';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -45,7 +47,8 @@ export class FunctionNode extends BaseAstNode {
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService
+        private _definedNamesService: IDefinedNamesService,
+        private _formulaDataModel: FormulaDataModel
     ) {
         super(token);
 
@@ -55,6 +58,18 @@ export class FunctionNode extends BaseAstNode {
 
         if (this._functionExecutor.isAddress()) {
             this.setAddress();
+        }
+
+        if (this._functionExecutor.needsLocale) {
+            this._setLocale();
+        }
+
+        if (this._functionExecutor.needsSheetsInfo) {
+            this._setSheetsInfo();
+        }
+
+        if (this._functionExecutor.needsFormulaDataModel) {
+            this._functionExecutor.setFormulaDataModel(this._formulaDataModel);
         }
     }
 
@@ -70,7 +85,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
             if (object == null) {
                 continue;
             }
@@ -81,7 +97,7 @@ export class FunctionNode extends BaseAstNode {
             }
         }
 
-        const resultVariant = this._calculate(variants);
+        const resultVariant = await this._calculateAsync(variants);
         let result: FunctionVariantType;
         if (resultVariant.isAsyncObject() || resultVariant.isAsyncArrayObject()) {
             result = await (resultVariant as AsyncObject | AsyncArrayObject).getValue();
@@ -92,6 +108,7 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result);
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -103,7 +120,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
 
             if (object == null) {
                 continue;
@@ -155,14 +173,21 @@ export class FunctionNode extends BaseAstNode {
             return;
         }
 
-        const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+        let lookupCountRow: number;
+        let lookupCountColumn: number;
+
+        if (lookupVectorOrArray?.isReferenceObject()) {
+            const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+            const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
+
+            lookupCountRow = endRow - startRow + 1;
+            lookupCountColumn = endColumn - startColumn + 1;
+        } else {
+            lookupCountRow = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getRowCount() : 1;
+            lookupCountColumn = lookupVectorOrArray?.isArray() ? (lookupVectorOrArray as ArrayValueObject).getColumnCount() : 1;
+        }
 
         const resultVectorRange = (resultVector as BaseReferenceObject).getRangeData();
-
-        const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
-
-        const lookupCountRow = endRow - startRow + 1;
-        const lookupCountColumn = endColumn - startColumn + 1;
 
         const { startRow: reStartRow, startColumn: reStartColumn, endRow: reEndRow, endColumn: reEndColumn } = resultVectorRange;
 
@@ -178,7 +203,77 @@ export class FunctionNode extends BaseAstNode {
         }
     }
 
+    /**
+     * Transform the result of a custom function to a NodeValueType.
+     */
+    private _handleCustomResult(resultVariantCustom: FormulaFunctionResultValueType): NodeValueType {
+        if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
+            return ValueObjectFactory.create(resultVariantCustom);
+        }
+
+        const arrayValues = transformToValueObject(resultVariantCustom);
+        return ArrayValueObject.create({
+            calculateValueList: arrayValues,
+            rowCount: arrayValues.length,
+            columnCount: arrayValues[0]?.length || 0,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        });
+    }
+
+    private _handleAddressFunction() {
+        /**
+         * In Excel, to inject a defined name into a function that has positioning capabilities,
+         * such as using the INDIRECT function to reference a named range,
+         * you can write it as follows:
+         * =INDIRECT("DefinedName1")
+         */
+        if (this._functionExecutor.isAddress()) {
+            this._setDefinedNamesForFunction();
+        }
+    }
+
+    private _mapVariantsToValues(variants: BaseValueObject[]) {
+        return variants.map((variant) => {
+            if (variant.isArray()) {
+                return (variant as ArrayValueObject).toValue();
+            }
+
+            if (variant.isLambda()) {
+                return variant;
+            }
+
+            return variant.getValue();
+        });
+    }
+
     private _calculate(variants: BaseValueObject[]) {
+        // Check the number of parameters
+        const { minParams, maxParams } = this._functionExecutor;
+        if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+        let resultVariant: NodeValueType;
+
+        this._setRefInfo();
+
+        if (this._functionExecutor.isCustom()) {
+            const resultVariantCustom = this._functionExecutor.calculateCustom(
+                ...this._mapVariantsToValues(variants)
+            ) as FormulaFunctionResultValueType;
+
+            resultVariant = this._handleCustomResult(resultVariantCustom);
+        } else {
+            this._handleAddressFunction();
+            resultVariant = this._functionExecutor.calculate(...variants);
+        }
+
+        return resultVariant;
+    }
+
+    private async _calculateAsync(variants: BaseValueObject[]) {
         // Check the number of parameters
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
@@ -190,40 +285,13 @@ export class FunctionNode extends BaseAstNode {
         this._setRefInfo();
 
         if (this._functionExecutor.isCustom()) {
-            const resultVariantCustom = this._functionExecutor.calculateCustom(
-                ...variants.map((variant) => {
-                    if (variant.isArray()) {
-                        return (variant as ArrayValueObject).toValue();
-                    }
-
-                    return variant.getValue();
-                })
+            const resultVariantCustom = await this._functionExecutor.calculateCustom(
+                ...this._mapVariantsToValues(variants)
             );
-            if (typeof resultVariantCustom !== 'object' || resultVariantCustom == null) {
-                resultVariant = ValueObjectFactory.create(resultVariantCustom);
-            } else {
-                const arrayValues = transformToValueObject(resultVariantCustom);
 
-                resultVariant = ArrayValueObject.create({
-                    calculateValueList: arrayValues,
-                    rowCount: arrayValues.length,
-                    columnCount: arrayValues[0]?.length || 0,
-                    unitId: '',
-                    sheetId: '',
-                    row: -1,
-                    column: -1,
-                });
-            }
+            resultVariant = this._handleCustomResult(resultVariantCustom);
         } else {
-            /**
-             * In Excel, to inject a defined name into a function that has positioning capabilities,
-             * such as using the INDIRECT function to reference a named range,
-             * you can write it as follows:
-             * =INDIRECT("DefinedName1")
-             */
-            if (this._functionExecutor.isAddress()) {
-                this._setDefinedNamesForFunction();
-            }
+            this._handleAddressFunction();
             resultVariant = this._functionExecutor.calculate(...variants);
         }
 
@@ -247,6 +315,12 @@ export class FunctionNode extends BaseAstNode {
         const { currentUnitId, currentSubUnitId, currentRow, currentColumn } = this._runtimeService;
 
         this._functionExecutor.setRefInfo(currentUnitId, currentSubUnitId, currentRow, currentColumn);
+
+        if (this._functionExecutor.needsSheetRowColumnCount) {
+            const { rowCount, columnCount } = this._currentConfigService.getSheetRowColumnCount(currentUnitId, currentSubUnitId);
+
+            this._functionExecutor.setSheetRowColumnCount(rowCount, columnCount);
+        }
     }
 
     private _setRefData(variant: FunctionVariantType) {
@@ -267,6 +341,36 @@ export class FunctionNode extends BaseAstNode {
 
         referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
     }
+
+    private _setLocale() {
+        this._functionExecutor.setLocale(this._currentConfigService.getLocale());
+    }
+
+    private _setSheetsInfo() {
+        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
+    }
+}
+
+export class ErrorFunctionNode extends BaseAstNode {
+    constructor(
+        token: string = 'Error'
+    ) {
+        super(token);
+    }
+
+    override get nodeType() {
+        return NodeType.FUNCTION;
+    }
+
+    override async executeAsync() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+
+        return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    override execute() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+    }
 }
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
@@ -275,7 +379,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
     }
@@ -291,7 +396,14 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
+        return new FunctionNode(
+            token,
+            functionExecutor,
+            this._currentConfigService,
+            this._runtimeService,
+            this._definedNamesService,
+            this._formulaDataModel
+        );
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -300,7 +412,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._runtimeService);
 
         if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
             return ErrorNode.create(ErrorType.VALUE);

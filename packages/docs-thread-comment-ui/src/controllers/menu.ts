@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
+import { SHEET_EDITOR_UNITS, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
 import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 export const shouldDisableAddComment = (accessor: IAccessor) => {
@@ -49,7 +49,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, SHEET_EDITOR_UNITS),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(DocSelectionManagerService);
             const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {

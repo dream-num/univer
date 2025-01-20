@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
+import type { UniverRenderingContext } from './context';
 
+import type { Scene } from './scene';
+import type { SceneViewer } from './scene-viewer';
+import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
-import type { UniverRenderingContext } from './context';
-import type { Scene } from './scene';
-import type { SceneViewer } from './scene-viewer';
 
 export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
@@ -125,7 +125,7 @@ export class Layer extends Disposable {
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
         this._layerBehavior(o);
-
+        this.makeDirty(true);
         return this;
     }
 
@@ -189,7 +189,6 @@ export class Layer extends Disposable {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
-
         /**
          * parent is SceneViewer, make it dirty
          */

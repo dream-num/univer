@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
-export const IMAGE_MENU_ID = 'doc.menu.image';
+export const DOCS_IMAGE_MENU_ID = 'doc.menu.image';
 export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageCommand.id;
 
 // TODO: @Jocs, remove this when cell support drawing.
@@ -43,7 +43,7 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
                 if (tables && tables.length) {
                     if (tables.some((table) => {
                         const { startIndex, endIndex } = table;
-                        return (startOffset >= startIndex && startOffset <= endIndex) || (endOffset >= startIndex && endOffset <= endIndex);
+                        return (startOffset >= startIndex && startOffset < endIndex) || (endOffset >= startIndex && endOffset < endIndex);
                     })) {
                         subscriber.next(true);
                         return;
@@ -63,7 +63,7 @@ const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
-        id: IMAGE_MENU_ID,
+        id: DOCS_IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',

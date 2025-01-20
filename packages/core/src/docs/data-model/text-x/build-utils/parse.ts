@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
 import { generateRandomId, Tools } from '../../../../shared';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
-import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
 
 const tags = [
     // DataStreamTreeTokenType.PARAGRAPH, // 段落
@@ -28,19 +28,24 @@ const tags = [
     DataStreamTreeTokenType.TABLE_CELL_END, // 表格开始
     DataStreamTreeTokenType.TABLE_ROW_END, // 表格开始
     DataStreamTreeTokenType.TABLE_END, // 表格结束
-    DataStreamTreeTokenType.CUSTOM_RANGE_START, // 自定义范围开始
-    DataStreamTreeTokenType.CUSTOM_RANGE_END, // 自定义范围结束
     // DataStreamTreeTokenType.COLUMN_BREAK, // 换列
     // DataStreamTreeTokenType.PAGE_BREAK, // 换页
     // DataStreamTreeTokenType.DOCS_END, // 文档结尾
     // DataStreamTreeTokenType.TAB, // 制表符
-    DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
-
+    // DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
 ];
 
 export const getPlainText = (dataStream: string) => {
     const text = dataStream.endsWith('\r\n') ? dataStream.slice(0, -2) : dataStream;
     return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
+};
+
+export const isEmptyDocument = (dataStream?: string) => {
+    if (!dataStream) {
+        return true;
+    }
+    const text = getPlainText(dataStream).replaceAll('\r', '');
+    return text === '';
 };
 
 export const fromPlainText = (text: string): IDocumentBody => {
@@ -49,16 +54,15 @@ export const fromPlainText = (text: string): IDocumentBody => {
     const customRanges: ICustomRange[] = [];
     let cursor = 0;
     let newDataStream = '';
-    let linkCount = 0;
 
     const loopParagraph = (i: number, insertP = true) => {
         const paragraphText = dataStream.slice(cursor, i);
         if (Tools.isLegalUrl(paragraphText)) {
             const id = generateRandomId();
-            const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${paragraphText}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+            const urlText = `${paragraphText}`;
             const range: ICustomRange = {
-                startIndex: cursor + linkCount * 2,
-                endIndex: cursor + linkCount * 2 + urlText.length - 1,
+                startIndex: cursor,
+                endIndex: cursor + urlText.length - 1,
                 rangeId: id,
                 rangeType: CustomRangeType.HYPERLINK,
                 properties: {
@@ -68,16 +72,15 @@ export const fromPlainText = (text: string): IDocumentBody => {
             customRanges.push(range);
             newDataStream += urlText;
             cursor = i + 1;
-            linkCount++;
             if (insertP) {
                 newDataStream += '\r';
-                paragraphs.push({ startIndex: i + linkCount * 2 });
+                paragraphs.push({ startIndex: i });
             }
         } else {
             newDataStream += dataStream.slice(cursor, i + 1);
             cursor = i + 1;
             if (insertP) {
-                paragraphs.push({ startIndex: i + linkCount * 2 });
+                paragraphs.push({ startIndex: i });
             }
         }
     };
@@ -90,7 +93,7 @@ export const fromPlainText = (text: string): IDocumentBody => {
         }
     }
 
-    if (end !== dataStream.length - 1) {
+    if (end !== dataStream.length - 1 || dataStream.length === 1) {
         loopParagraph(dataStream.length, false);
     }
     return {

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { IUniverInstanceService, useDependency } from '@univerjs/core';
-import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { SheetPermissionPanelList } from '../panel-list';
-import { SheetPermissionPanelDetail } from '../panel-detail';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import React from 'react';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
+import { SheetPermissionPanelDetail } from '../panel-detail/PermissionDetailPanel';
+import { SheetPermissionPanelList } from '../panel-list';
 
-interface ISheetPermissionPanelProps { showDetail: boolean; fromSheetBar: boolean };
+interface ISheetPermissionPanelProps {
+    showDetail: boolean;
+    fromSheetBar: boolean;
+    rule?: IPermissionPanelRule;
+    oldRule?: IPermissionPanelRule;
+};
 
-export const SheetPermissionPanel = ({ showDetail, fromSheetBar }: ISheetPermissionPanelProps) => {
+export const SheetPermissionPanel = ({ showDetail, fromSheetBar, rule, oldRule }: ISheetPermissionPanelProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
@@ -39,6 +45,15 @@ export const SheetPermissionPanel = ({ showDetail, fromSheetBar }: ISheetPermiss
     const key = selectionRanges.reduce((acc, range) => acc + serializeRangeWithSheet(worksheet.getName(), range), '');
 
     return (
-        showDetail ? <SheetPermissionPanelDetail fromSheetBar={fromSheetBar} key={key} /> : <SheetPermissionPanelList key={key} />
+        showDetail
+            ? (
+                <SheetPermissionPanelDetail
+                    fromSheetBar={fromSheetBar}
+                    rule={rule}
+                    oldRule={oldRule}
+                    key={fromSheetBar ? 'sheet-bar' : 'normal'}
+                />
+            )
+            : <SheetPermissionPanelList key={key} />
     );
 };

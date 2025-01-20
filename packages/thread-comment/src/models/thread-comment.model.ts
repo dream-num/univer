@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
-import { BehaviorSubject, map, Subject } from 'rxjs';
-import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import type { Nullable } from '@univerjs/core';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
+import { Disposable, Inject, LifecycleService, LifecycleStages } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
 
 export type CommentUpdate = {
     unitId: string;
@@ -41,6 +42,7 @@ export type CommentUpdate = {
 } | {
     type: 'updateRef';
     payload: IUpdateCommentRefPayload;
+    threadId: string;
 } | {
     type: 'resolve';
     payload: {
@@ -52,52 +54,90 @@ export type CommentUpdate = {
     payload: IThreadComment;
 });
 
+export interface IThreadInfo {
+    unitId: string;
+    subUnitId: string;
+    threadId: string;
+    root: IThreadComment;
+    children: IThreadComment[];
+    relativeUsers: Set<string>;
+}
+
 export class ThreadCommentModel extends Disposable {
-    private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
-    private _commentsTreeMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
-    private _threadMap: Map<string, Map<string, IThreadComment>> = new Map();
+    private _commentsMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
+    private _threadMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
 
     private _commentUpdate$ = new Subject<CommentUpdate>();
-    private _commentsMap$ = new BehaviorSubject<Record<string, Record<string, Record<string, IThreadComment>>>>({});
-
     commentUpdate$ = this._commentUpdate$.asObservable();
-    commentMap$ = this._commentsMap$.asObservable();
+
+    private _tasks: { unitId: string; subUnitId: string; threadIds: string[] }[] = [];
 
     constructor(
         @Inject(IThreadCommentDataSourceService) private readonly _dataSourceService: IThreadCommentDataSourceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         super();
 
         this.disposeWithMe(() => {
             this._commentUpdate$.complete();
-            this._commentsMap$.complete();
         });
+
+        this.disposeWithMe(this._lifecycleService.lifecycle$.subscribe((stage) => {
+            const taskMap = new Map<string, Map<string, Set<string>>>();
+
+            if (stage === LifecycleStages.Rendered) {
+                this._tasks.forEach(({ unitId, subUnitId, threadIds }) => {
+                    let unitMap = taskMap.get(unitId);
+                    if (!unitMap) {
+                        unitMap = new Map();
+                        taskMap.set(unitId, unitMap);
+                    }
+                    let subUnitMap = unitMap.get(subUnitId);
+                    if (!subUnitMap) {
+                        subUnitMap = new Set();
+                        unitMap.set(subUnitId, subUnitMap);
+                    }
+                    for (const threadId of threadIds) {
+                        subUnitMap.add(threadId);
+                    }
+                });
+
+                this._tasks = [];
+                taskMap.forEach((subUnitMap, unitId) => {
+                    subUnitMap.forEach((threadIds, subUnitId) => {
+                        this.syncThreadComments(unitId, subUnitId, Array.from(threadIds));
+                    });
+                });
+            }
+        }));
     }
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {
-        let unitMap = this._commentsMap[unitId];
-
-        if (!unitMap) {
-            unitMap = {};
-            this._commentsMap[unitId] = unitMap;
-        }
-
-        let subUnitMap = unitMap[subUnitId];
-        if (!subUnitMap) {
-            subUnitMap = {};
-            unitMap[subUnitId] = subUnitMap;
-        }
-
-        return subUnitMap;
-    }
-
-    private _ensureCommentChildrenMap(unitId: string, subUnitId: string) {
-        let unitMap = this._commentsTreeMap.get(unitId);
+        let unitMap = this._commentsMap.get(unitId);
 
         if (!unitMap) {
             unitMap = new Map();
-            this._commentsTreeMap.set(unitId, unitMap);
+            this._commentsMap.set(unitId, unitMap);
+        }
+
+        let subUnitMap = unitMap.get(subUnitId);
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
+        }
+        return subUnitMap;
+    }
+
+    ensureMap(unitId: string, subUnitId: string) {
+        return this._ensureCommentMap(unitId, subUnitId);
+    }
+
+    private _ensureThreadMap(unitId: string, subUnitId: string) {
+        let unitMap = this._threadMap.get(unitId);
+
+        if (!unitMap) {
+            unitMap = new Map();
+            this._threadMap.set(unitId, unitMap);
         }
 
         let subUnitMap = unitMap.get(subUnitId);
@@ -109,50 +149,25 @@ export class ThreadCommentModel extends Disposable {
         return subUnitMap;
     }
 
-    private _ensureThreadMap(unitId: string) {
-        let unitMap = this._threadMap.get(unitId);
-
-        if (!unitMap) {
-            unitMap = new Map();
-            this._threadMap.set(unitId, unitMap);
-        }
-
-        return unitMap;
-    }
-
-    private _refreshCommentsMap$() {
-        this._commentsMap$.next({
-            ...this._commentsMap,
-        });
-    }
-
-    ensureMap(unitId: string, subUnitId: string) {
-        const commentMap = this._ensureCommentMap(unitId, subUnitId);
-        const commentChildrenMap = this._ensureCommentChildrenMap(unitId, subUnitId);
-
-        return {
-            commentMap,
-            commentChildrenMap,
-        };
-    }
-
     private _replaceComment(unitId: string, subUnitId: string, comment: IBaseComment) {
-        const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const currentComment = commentMap[comment.id];
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const currentComment = commentMap.get(comment.id);
 
         if (currentComment) {
+            const { children, ...rest } = comment;
             const newComment = {
-                ...comment,
+                ...rest,
                 ref: currentComment.ref,
             };
-            commentMap[comment.id] = newComment;
-            comment.children?.forEach((child) => {
-                commentMap[child.id] = {
+            commentMap.set(comment.id, newComment);
+
+            children?.forEach((child) => {
+                commentMap.set(child.id, {
                     ...child,
                     ref: '',
-                };
+                });
             });
-            commentChildrenMap.set(comment.id, newComment);
+
             this._commentUpdate$.next({
                 unitId,
                 subUnitId,
@@ -175,8 +190,15 @@ export class ThreadCommentModel extends Disposable {
     }
 
     async syncThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {
+        if (this._lifecycleService.stage < LifecycleStages.Rendered) {
+            this._tasks.push({ unitId, subUnitId, threadIds });
+            return;
+        }
+
+        const threadMap = this._ensureThreadMap(unitId, subUnitId);
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const comments = await this._dataSourceService.listThreadComments(unitId, subUnitId, threadIds);
-        if (!comments.length) {
+        if (!comments) {
             return;
         }
         const deleteThreads = new Set<string>(threadIds);
@@ -184,20 +206,30 @@ export class ThreadCommentModel extends Disposable {
             this._replaceComment(unitId, subUnitId, comment);
             deleteThreads.delete(comment.threadId);
         });
+
         deleteThreads.forEach((id) => {
-            const thread = this.getThread(unitId, id);
-            if (thread) {
-                this.deleteComment(thread.unitId, thread.subUnitId, thread.id);
-            }
+            threadMap.delete(id);
+            commentMap.forEach((comment, commentId) => {
+                if (comment.threadId === id) {
+                    commentMap.delete(commentId);
+                }
+            });
         });
-        this._refreshCommentsMap$();
     }
 
     addComment(unitId: string, subUnitId: string, origin: IThreadComment, shouldSync?: boolean) {
-        const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const comment = origin;
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const { parentId, children = [], ...rest } = origin;
+        const comment = {
+            ...rest,
+            parentId: parentId === origin.id ? undefined : parentId,
+        };
+        if (!comment.threadId) {
+            comment.threadId = comment.parentId || comment.id;
+        }
+
         const addCommentItem = (item: IThreadComment) => {
-            commentMap[item.id] = item;
+            commentMap.set(item.id, item);
             this._commentUpdate$.next({
                 unitId,
                 subUnitId,
@@ -207,26 +239,15 @@ export class ThreadCommentModel extends Disposable {
             });
         };
 
-        const parentId = comment.parentId;
-        if (parentId) {
-            const parent = commentMap[parentId];
-            parent.children = [
-                ...parent.children ?? [],
-                comment,
-            ];
-            addCommentItem(comment);
-        } else {
-            commentChildrenMap.set(comment.id, comment);
-            const threadMap = this._ensureThreadMap(unitId);
+        addCommentItem(comment);
+        const threadMap = this._ensureThreadMap(unitId, subUnitId);
+        if (!comment.parentId) {
             threadMap.set(comment.threadId, comment);
-            addCommentItem(comment);
-            comment.children?.forEach((child) => addCommentItem({
-                ...child,
-                ref: '',
-            }));
+            for (const child of children) {
+                addCommentItem(child as IThreadComment);
+            }
         }
 
-        this._refreshCommentsMap$();
         if (shouldSync) {
             this.syncThreadComments(unitId, subUnitId, [comment.threadId]);
         }
@@ -234,11 +255,12 @@ export class ThreadCommentModel extends Disposable {
     }
 
     updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload, silent?: boolean) {
-        const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap[payload.commentId];
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const oldComment = commentMap.get(payload.commentId);
         if (!oldComment) {
-            return false;
+            return true;
         }
+
         oldComment.updated = true;
         oldComment.text = payload.text;
         oldComment.attachments = payload.attachments;
@@ -251,13 +273,12 @@ export class ThreadCommentModel extends Disposable {
             payload,
             silent,
         });
-        this._refreshCommentsMap$();
         return true;
     }
 
     updateCommentRef(unitId: string, subUnitId: string, payload: IUpdateCommentRefPayload, silent?: boolean) {
-        const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap[payload.commentId];
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const oldComment = commentMap.get(payload.commentId);
         if (!oldComment) {
             return false;
         }
@@ -269,14 +290,14 @@ export class ThreadCommentModel extends Disposable {
             type: 'updateRef',
             payload,
             silent,
+            threadId: oldComment.threadId,
         });
-        this._refreshCommentsMap$();
         return true;
     }
 
     resolveComment(unitId: string, subUnitId: string, commentId: string, resolved: boolean) {
-        const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap[commentId];
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const oldComment = commentMap.get(commentId);
         if (!oldComment) {
             return false;
         }
@@ -291,83 +312,67 @@ export class ThreadCommentModel extends Disposable {
                 resolved,
             },
         });
-        this._refreshCommentsMap$();
         return true;
     }
 
     getComment(unitId: string, subUnitId: string, commentId: string) {
-        const { commentMap } = this.ensureMap(unitId, subUnitId);
-        return commentMap[commentId] as IThreadComment | undefined;
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        return commentMap.get(commentId) as IThreadComment | undefined;
     }
 
-    getComment$(unitId: string, subUnitId: string, commentId: string) {
-        return this._commentsMap$.pipe(map((records) => records[unitId][subUnitId][commentId]));
+    getRootComment(unitId: string, subUnitId: string, threadId: string) {
+        const threadMap = this._ensureThreadMap(unitId, subUnitId);
+        return threadMap.get(threadId);
     }
 
-    getCommentWithChildren(unitId: string, subUnitId: string, commentId: string) {
-        const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const current = commentMap[commentId];
-        if (!current) {
-            return undefined;
-        }
+    getThread(unitId: string, subUnitId: string, threadId: string): Nullable<IThreadInfo> {
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const comments = Array.from(commentMap.values()).filter((comment) => comment.threadId === threadId);
 
+        let root: IThreadComment | undefined;
+        const children: IThreadComment[] = [];
         const relativeUsers = new Set<string>();
-        const root = commentChildrenMap.get(commentId);
+
+        for (const comment of comments) {
+            if (!comment.parentId) {
+                root = comment;
+            } else {
+                children.push(comment);
+            }
+
+            relativeUsers.add(comment.personId);
+        }
 
         if (!root) {
             return undefined;
         }
 
-        [root, ...root.children ?? []].forEach((comment) => {
-            relativeUsers.add(comment.personId);
-            comment.text.customRanges?.forEach((range) => {
-                if (range.rangeType === CustomRangeType.MENTION) {
-                    relativeUsers.add(range.rangeId);
-                }
-            });
-        });
-
         return {
-            root: current,
-            children: root.children ?? [],
+            root,
+            children,
             relativeUsers,
+            unitId,
+            subUnitId,
+            threadId,
         };
     }
 
-    deleteComment(unitId: string, subUnitId: string, commentId: string) {
-        const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const current = commentMap[commentId];
+    getCommentWithChildren(unitId: string, subUnitId: string, commentId: string) {
+        const comment = this.getComment(unitId, subUnitId, commentId);
+        if (!comment) {
+            return undefined;
+        }
+        return this.getThread(unitId, subUnitId, comment.threadId);
+    }
+
+    private _deleteComment(unitId: string, subUnitId: string, commentId: string) {
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const current = commentMap.get(commentId);
         if (!current) {
-            return true;
+            return;
         }
 
-        if (current.parentId) {
-            const root = commentChildrenMap.get(current.parentId);
-            if (root && root.children) {
-                const index = root.children.findIndex((comment) => comment.id === commentId);
-                root.children.splice(index, 1);
-            }
-            delete commentMap[commentId];
-        } else {
-            delete commentMap[commentId];
-            const comment = commentChildrenMap.get(commentId);
-            commentChildrenMap.delete(commentId);
-            const threadMap = this._ensureThreadMap(unitId);
-            threadMap.delete(current.threadId);
-            comment?.children?.forEach((child) => {
-                delete commentMap[child.id];
-                this._commentUpdate$.next({
-                    unitId,
-                    subUnitId,
-                    type: 'delete',
-                    payload: {
-                        commentId: child.id,
-                        isRoot: false,
-                        comment: child as IThreadComment,
-                    },
-                });
-            });
-        }
+        commentMap.delete(commentId);
 
         this._commentUpdate$.next({
             unitId,
@@ -379,42 +384,78 @@ export class ThreadCommentModel extends Disposable {
                 comment: current,
             },
         });
-        this._refreshCommentsMap$();
+    }
+
+    deleteThread(unitId: string, subUnitId: string, threadId: string) {
+        const threadMap = this._ensureThreadMap(unitId, subUnitId);
+        threadMap.delete(threadId);
+
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        commentMap.forEach((comment) => {
+            if (comment.threadId === threadId) {
+                this._deleteComment(unitId, subUnitId, comment.id);
+            }
+        });
+    }
+
+    deleteComment(unitId: string, subUnitId: string, commentId: string) {
+        const commentMap = this._ensureCommentMap(unitId, subUnitId);
+        const current = commentMap.get(commentId);
+        if (!current) {
+            return true;
+        }
+
+        if (current.parentId) {
+            this._deleteComment(unitId, subUnitId, commentId);
+        } else {
+            this.deleteThread(unitId, subUnitId, current.threadId);
+        }
+
         return true;
     }
 
-    getUnit(unitId: string) {
-        const unitMap = this._commentsMap[unitId];
-        if (!unitMap) {
-            return [];
-        }
-
-        return Array.from(Object.entries(unitMap)).map(([subUnitId, subUnitMap]) => [subUnitId, Array.from(Object.values(subUnitMap))] as const);
-    }
-
     deleteUnit(unitId: string) {
-        const unitMap = this._commentsMap[unitId];
+        const unitMap = this._commentsMap.get(unitId);
         if (!unitMap) {
             return;
         }
 
-        Object.entries(unitMap).forEach(([subUnitId, subUnitMap]) => {
-            Object.values(subUnitMap).forEach((comment) => {
+        unitMap.forEach((subUnitMap, subUnitId) => {
+            subUnitMap.forEach((comment) => {
                 this.deleteComment(unitId, subUnitId, comment.id);
             });
         });
     }
 
-    getRootCommentIds(unitId: string, subUnitId: string) {
-        const commentChildrenMap = this._ensureCommentChildrenMap(unitId, subUnitId);
-        return Array.from(commentChildrenMap.keys());
+    getUnit(unitId: string) {
+        const unitMap = this._threadMap.get(unitId);
+        if (!unitMap) {
+            return [];
+        }
+
+        const threads: IThreadInfo[] = [];
+
+        unitMap.forEach((subUnitSet, subUnitId) => {
+            subUnitSet.forEach((threadComment, threadId) => {
+                const thread = this.getThread(unitId, subUnitId, threadId);
+                if (thread) {
+                    threads.push(thread);
+                }
+            });
+        });
+
+        return threads;
     }
 
     getAll() {
-        return this._commentsMap;
-    }
+        const all: { unitId: string; threads: IThreadInfo[] }[] = [];
+        this._commentsMap.forEach((unitMap, unitId) => {
+            all.push({
+                unitId,
+                threads: this.getUnit(unitId),
+            });
+        });
 
-    getThread(unitId: string, threadId: string) {
-        return this._ensureThreadMap(unitId).get(threadId);
+        return all;
     }
 }

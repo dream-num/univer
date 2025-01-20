@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IDocumentBody } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
+import { CommandType } from '@univerjs/core';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 
 export interface IAddCommentMutationParams {

@@ -15,22 +15,20 @@
  */
 
 import type { Dependency, SlideDataModel } from '@univerjs/core';
-import { IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-
+import type { IUniverSlidesUIConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, IUniverInstanceService, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
+import { CanvasView } from './controllers/canvas-view';
+import { defaultPluginConfig, SLIDES_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SlidePopupMenuController } from './controllers/popup-menu.controller';
+import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
+import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { SlidesUIController } from './controllers/slide-ui.controller';
 import { SlideRenderController } from './controllers/slide.render-controller';
-import { SlidePopupMenuController } from './controllers/popup-menu.controller';
-import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 import { ISlideEditorBridgeService, SlideEditorBridgeService } from './services/slide-editor-bridge.service';
-import { SlideEditorBridgeRenderController } from './controllers/slide-editor-bridge.render-controller';
 import { ISlideEditorManagerService, SlideEditorManagerService } from './services/slide-editor-manager.service';
-import { SlideEditingRenderController } from './controllers/slide-editing.render-controller';
+import { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 import { SlideRenderService } from './services/slide-render.service';
-import { CanvasView } from './controllers/canvas-view';
-import type { IUniverSlidesUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
@@ -48,11 +46,15 @@ export class UniverSlidesUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SLIDES_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -74,6 +76,7 @@ export class UniverSlidesUIPlugin extends Plugin {
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
+
         mergeOverrideWithDependencies([
             [CanvasView],
             // cannot register in _renderManagerService now.
@@ -89,7 +92,9 @@ export class UniverSlidesUIPlugin extends Plugin {
         ] as Dependency[], this._config.override).forEach((m) => {
             this._injector.add(m);
         });
+
         this._injector.get(CanvasView);
+        this._injector.get(SlideRenderService);
     }
 
     override onRendered(): void {
@@ -98,13 +103,18 @@ export class UniverSlidesUIPlugin extends Plugin {
             // need TextSelectionRenderService which init by EditorContainer
             [SlideEditorBridgeRenderController],
             [SlideEditingRenderController],
-
         ] as Dependency[]).forEach((m) => {
             // find all renderMap and register module to each item in renderMap
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));
         });
 
         this._markSlideAsFocused();
+
+        this._injector.get(SlidesUIController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(SlidePopupMenuController);
     }
 
     private _markSlideAsFocused() {

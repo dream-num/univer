@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import { IMenuManagerService, ToolbarItem } from '@univerjs/ui';
+import type { IMenuItem } from '@univerjs/ui';
 import type { ComponentType } from 'react';
-import React from 'react';
+import { IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { useWorkbooks } from '@univerjs/sheets-ui';
+import { IMenuManagerService, ToolbarItem } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
 import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';
 import styles from './index.module.less';
@@ -33,31 +34,41 @@ export function UniToolbar() {
     const instanceService = useDependency(IUniverInstanceService);
     const focusedUnit = useObservable(instanceService.focused$);
     const menuManagerService = useDependency(IMenuManagerService);
+    const isMenuChange = useObservable(menuManagerService.menuChanged$);
+    const [uniVisibleItems, setUniVisibleItems] = useState<(IMenuItem | null)[]>([]);
 
     const type = focusedUnit ? (instanceService.getUnit(focusedUnit)?.type ?? UniverInstanceType.UNIVER_UNKNOWN) : UniverInstanceType.UNIVER_UNKNOWN;
 
-    const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_MAIN);
-
     const toolbarItems = uniToolbarService.getItems();
-
-    const uniVisibleItems = toolbarItems.map((item) => {
-        const { impl } = item;
-        const typeImpl = impl.find((item) => item.type === type);
-        const visibleItem = menus.find((item) => item.key === typeImpl?.id)?.item;
-        if (visibleItem) {
-            return visibleItem;
-        }
-        const placeHolderImpl = impl.find((item) => item.type === UniverInstanceType.UNIVER_UNKNOWN);
-        const placeHolderItem = menus.find((item) => item.key === placeHolderImpl?.id)?.item;
-        if (placeHolderItem) {
-            return placeHolderItem;
-        }
-        return null;
-    }).filter((item) => {
-        return !!item && !item.id.startsWith('FAKE_');
-    });
-
     const hasWorkbooks = useWorkbooks().length > 0;
+
+    // The initialization of the UniToolbar component may be earlier than the initialization of the SheetUIController in the onReady cycle, resulting in the UNI_MENU_POSITIONS.TOOLBAR_MAIN menu not being registered
+    // Function to update the visible items
+    const updateVisibleItems = () => {
+        const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_MAIN);
+        if (menus) {
+            const visibleItems = toolbarItems.map((item) => {
+                const { impl } = item;
+                const typeImpl = impl.find((item) => item.type === type);
+                const visibleItem = menus.find((item) => item.key === typeImpl?.id)?.item;
+                if (visibleItem) {
+                    return visibleItem;
+                }
+                const placeHolderImpl = impl.find((item) => item.type === UniverInstanceType.UNIVER_UNKNOWN);
+                const placeHolderItem = menus.find((item) => item.key === placeHolderImpl?.id)?.item;
+                if (placeHolderItem) {
+                    return placeHolderItem;
+                }
+                return null;
+            }).filter((item) => !!item && !item.id.startsWith('FAKE_'));
+            setUniVisibleItems(visibleItems);
+        }
+    };
+
+    // Listen for menu changes and update visible items
+    useEffect(() => {
+        updateVisibleItems();
+    }, [isMenuChange]);
 
     return (
         <div className={styles.uniToolbar}>

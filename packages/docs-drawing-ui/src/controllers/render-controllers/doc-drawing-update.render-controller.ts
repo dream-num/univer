@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IDrawingParam, Nullable } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IImageIoServiceParam } from '@univerjs/drawing';
+import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
+import { BooleanNumber, Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IImageIoServiceParam } from '@univerjs/drawing';
-import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
+import { debounceTime } from 'rxjs';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
-import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -55,7 +56,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
-
+        this._transformDrawingListener();
         this._editAreaChangeListener();
     }
 
@@ -190,6 +191,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         imageWidth: number, imageHeight: number
     ): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._docSelectionRenderService.getActiveTextRange();
+        // TODO: NO need to get the cursor position, because the insert image is inline.
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
             top: 0,
@@ -205,8 +207,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 posOffset: position.left,
             },
             positionV: {
-                relativeFrom: ObjectRelativeFromV.MARGIN,
-                posOffset: position.top,
+                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                posOffset: 0,
             },
             angle: 0,
         };
@@ -249,6 +251,17 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         return { scene, transformer, docsLeft, docsTop };
     }
 
+    private _transformDrawingListener() {
+        const res = this._getCurrentSceneAndTransformer();
+        if (res && res.transformer) {
+            this.disposeWithMe(res.transformer.changeEnd$.pipe(debounceTime(30)).subscribe((params) => {
+                this._docSelectionManagerService.refreshSelection();
+            }));
+        } else {
+            throw new Error('transformer is not init');
+        }
+    }
+
     private _focusDrawingListener() {
         this.disposeWithMe(
             this._drawingManagerService.focus$.subscribe((params) => {
@@ -266,12 +279,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
-                    // Need to remove text selections when focus drawings.
-                    const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
-                    if (activeTextRange) {
-                        this._docSelectionManagerService.replaceTextRanges([]);
-                    }
-
+                    this._setDrawingSelections(params);
                     const prevSegmentId = this._docSelectionRenderService.getSegment();
                     const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);
 
@@ -394,5 +402,19 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 }
             })
         );
+    }
+
+    private _setDrawingSelections(params: IDrawingParam[]) {
+        const { unit } = this._context;
+        const customBlocks = unit.getSnapshot().body?.customBlocks ?? [];
+        const ranges = params.map((item) => {
+            const id = item.drawingId;
+            const block = customBlocks.find((b) => b.blockId === id);
+            if (block) {
+                return block.startIndex;
+            }
+            return null;
+        }).filter((e) => e !== null).map((offset) => ({ startOffset: offset, endOffset: offset + 1 }));
+        this._docSelectionManagerService.replaceDocRanges(ranges);
     }
 }

@@ -15,26 +15,26 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import type { ErrorType } from '../../basics/error-type';
+
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
 
 import { AstNodePromiseType } from '../../basics/common';
-import type { ErrorType } from '../../basics/error-type';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
 interface IAstNodeNodeJson {
     token: string;
     children?: IAstNodeNodeJson[];
-    nodeType: string;
+    nodeType: number;
 }
 
 export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
-export class BaseAstNode extends Disposable {
+export class BaseAstNode {
     private _children: BaseAstNode[] = [];
 
-    private _definedNames: Array<string> = [];
+    private _definedNames: Nullable<Array<string>>;
 
     private _parent: Nullable<BaseAstNode>;
 
@@ -46,19 +46,23 @@ export class BaseAstNode extends Disposable {
 
     private _address = false;
 
-    private _refOffsetX: number = 0;
-
-    private _refOffsetY: number = 0;
+    private _isForcedCalculateFunction = false;
 
     constructor(private _token: string) {
-        super();
+
     }
 
-    override dispose(): void {
+    dispose(): void {
         this._children.forEach((node) => {
             node.dispose();
         });
         this._valueObject?.dispose();
+
+        this._valueObject = null;
+
+        this._children = [];
+
+        this._definedNames = null;
 
         this._parent = null;
     }
@@ -73,6 +77,10 @@ export class BaseAstNode extends Disposable {
 
     isAddress() {
         return this._address;
+    }
+
+    isForcedCalculateFunction() {
+        return this._isForcedCalculateFunction;
     }
 
     setAsync() {
@@ -90,6 +98,10 @@ export class BaseAstNode extends Disposable {
     setParent(node: BaseAstNode) {
         this._parent = node;
         node.addChildren(this);
+    }
+
+    setForcedCalculateFunction() {
+        this._isForcedCalculateFunction = true;
     }
 
     getChildren() {
@@ -128,18 +140,6 @@ export class BaseAstNode extends Disposable {
         /* abstract */
     }
 
-    setRefOffset(x: number = 0, y: number = 0) {
-        this._refOffsetX = x;
-        this._refOffsetY = y;
-    }
-
-    getRefOffset() {
-        return {
-            x: this._refOffsetX,
-            y: this._refOffsetY,
-        };
-    }
-
     async executeAsync(): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
@@ -170,11 +170,15 @@ export class BaseAstNode extends Disposable {
     }
 
     hasDefinedName(definedName: string) {
-        return this._definedNames.includes(definedName);
+        return this._definedNames?.includes(definedName) || false;
     }
 
     setDefinedNames(definedNames: Array<string>) {
         this._definedNames = definedNames;
+    }
+
+    getDefinedNames() {
+        return this._definedNames;
     }
 }
 

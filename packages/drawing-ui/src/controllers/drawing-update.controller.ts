@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    Nullable,
-} from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingOrderMapParam } from '@univerjs/drawing';
+import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
     checkIfMove,
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
-import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
@@ -45,7 +40,6 @@ interface IDrawingTransformCache {
     transform: ITransformState;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, DrawingUpdateController)
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -577,23 +571,19 @@ export class DrawingUpdateController extends Disposable {
     private _insertDrawing(params: IDrawingSearch[]) {
         const sceneList: Scene[] = [];
         (params).forEach((param) => {
-            const { unitId, subUnitId, drawingId } = param;
+            const { unitId } = param;
 
             const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
-
             if (drawingParam == null) {
                 return;
             }
 
-            const { transform, drawingType } = drawingParam;
-
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
 
+            const { scene } = renderObject;
             if (!sceneList.includes(scene)) {
                 sceneList.push(scene);
             }
@@ -673,6 +663,8 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+
+                    scene.getTransformer()?.debounceRefreshControls();
                 });
             })
         );
@@ -803,9 +795,9 @@ export class DrawingUpdateController extends Disposable {
                     }).filter((transform) => transform != null) as ITransformState[];
 
                     if (drawings.length > 0) {
-                        this._drawingManagerService.focusDrawing(drawings);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, drawings);
                     } else {
-                        this._drawingManagerService.focusDrawing(null);
+                        this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
                     }
                 })
             )

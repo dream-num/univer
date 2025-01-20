@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
+import type { KeyCode } from './keycode';
+import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCodeToChar, MetaKeys } from './keycode';
-import type { KeyCode } from './keycode';
 
 /**
  * A shortcut item that could be registered to the {@link IShortcutService}.
@@ -101,6 +100,11 @@ export interface IShortcutService {
      */
     forceEscape(): IDisposable;
 
+    /**
+     * Dispatch a keyboard event to the shortcut service and check if there is a shortcut that matches the event.
+     * @param e - the keyboard event to be dispatched.
+     */
+    dispatch(e: KeyboardEvent): IShortcutItem<object> | undefined;
     /**
      * Register a shortcut item to the shortcut service.
      * @param {IShortcutItem} shortcut - the shortcut item to be registered.
@@ -236,6 +240,14 @@ export class ShortcutService extends Disposable implements IShortcutService {
     }
 
     private _resolveKeyboardEvent(e: KeyboardEvent): void {
+        const candidate = this.dispatch(e);
+        if (candidate) {
+            this._commandService.executeCommand(candidate.id, candidate.staticParameters);
+            e.preventDefault();
+        }
+    }
+
+    dispatch(e: KeyboardEvent): IShortcutItem<object> | undefined {
         // Should get the container element of the Univer instance and see if
         // the event target is a descendant of the container element.
         // Also we should check through escape list and force catching list.
@@ -248,34 +260,21 @@ export class ShortcutService extends Disposable implements IShortcutService {
         ) {
             return;
         }
-
-        const shouldPreventDefault = this._dispatch(e);
-        if (shouldPreventDefault) {
-            e.preventDefault();
-        }
-    }
-
-    private _dispatch(e: KeyboardEvent): boolean {
         const binding = this._deriveBindingFromEvent(e);
         if (binding === null) {
-            return false;
+            return undefined;
         }
 
         const shortcuts = this._shortCutMapping.get(binding);
         if (shortcuts === undefined) {
-            return false;
+            return undefined;
         }
 
-        const shouldTrigger = Array.from(shortcuts)
+        const candidateShortcut = Array.from(shortcuts)
             .sort((s1, s2) => (s2.priority ?? 0) - (s1.priority ?? 0))
             .find((s) => s.preconditions?.(this._contextService) ?? true);
 
-        if (shouldTrigger) {
-            this._commandService.executeCommand(shouldTrigger.id, shouldTrigger.staticParameters);
-            return true;
-        }
-
-        return false;
+        return candidateShortcut;
     }
 
     private _getBindingFromItem(item: IShortcutItem): number {

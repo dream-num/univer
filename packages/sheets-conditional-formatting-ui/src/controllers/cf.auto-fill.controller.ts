@@ -15,24 +15,20 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
-
-import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
+import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingAutoFillController)
 export class ConditionalFormattingAutoFillController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IAutoFillService) private _autoFillService: IAutoFillService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
-
     ) {
         super();
 
@@ -89,21 +85,21 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                     targetRange
                 );
                 const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
-                const sourceCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const sourceCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     unitId,
                     subUnitId,
                     sourceRow,
                     sourceCol
                 );
                 const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
-                const targetCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const targetCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     unitId,
                     subUnitId,
                     targetRow,
                     targetCol
                 );
                 if (targetCellCf) {
-                    targetCellCf.cfList.forEach((cf) => {
+                    targetCellCf.forEach((cf) => {
                         let matrix = matrixMap.get(cf.cfId);
                         if (!matrixMap.get(cf.cfId)) {
                             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cf.cfId);
@@ -123,7 +119,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 }
 
                 if (sourceCellCf) {
-                    sourceCellCf.cfList.forEach((cf) => {
+                    sourceCellCf.forEach((cf) => {
                         let matrix = matrixMap.get(cf.cfId);
                         if (!matrixMap.get(cf.cfId)) {
                             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cf.cfId);

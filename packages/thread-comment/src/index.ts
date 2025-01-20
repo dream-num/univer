@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-export { type CommentUpdate, ThreadCommentModel } from './models/thread-comment.model';
+export { type CommentUpdate, type IThreadInfo, ThreadCommentModel } from './models/thread-comment.model';
 export { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 export { TC_PLUGIN_NAME } from './types/const';
 export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
 export { UniverThreadCommentPlugin } from './plugin';
+export { getDT } from './common/utils';
 
 export {
     type IThreadCommentDataSource,
@@ -26,7 +27,6 @@ export {
     ThreadCommentDataSourceService,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';
-
 // #region - all commands
 
 export {

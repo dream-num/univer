@@ -30,6 +30,7 @@ import type {
     LocaleService,
 } from '@univerjs/core';
 
+import type { DataStreamTreeNode } from '../components/docs/view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type {
     DocumentSkeletonPageType,
@@ -41,8 +42,8 @@ import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonTable,
 } from './i-document-skeleton-cached';
-import type { Vector2 } from './vector2';
 import type { ITransformerConfig } from './transformer-config';
+import type { Vector2 } from './vector2';
 
 export interface IObjectFullState extends ITransformState {
     strokeWidth?: number;
@@ -111,11 +112,13 @@ export interface IParagraphTableCache {
     tableId: string;
     table: IDocumentSkeletonTable;
     hasPositioned: boolean;
+    isSlideTable: boolean;
+    tableNode: DataStreamTreeNode;
 }
 
 export interface IParagraphConfig {
     paragraphIndex: number;
-    paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    paragraphNonInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     skeTablesInParagraph?: IParagraphTableCache[];
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;

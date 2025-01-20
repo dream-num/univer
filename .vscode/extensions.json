@@ -7,6 +7,8 @@
         "kingwl.vscode-vitest-runner",
         "streetsidesoftware.code-spell-checker",
         "tldraw-org.tldraw-vscode",
-        "usernamehw.errorlens"
+        "usernamehw.errorlens",
+        "vitest.explorer",
+        "davidanson.vscode-markdownlint"
     ]
 }

@@ -2,10 +2,19 @@
     display: flex;
     flex-direction: column;
 
+    .form-layout-inner {
+        .form-layout-content {
+            margin-bottom: 0;
+        }
+    }
+
     &-label {
         font-size: var(--font-size-sm);
         min-height: var(--font-size-sm);
         color: rgba(var(--color-black));
+        margin-bottom: var(--margin-xs);
+        display: flex;
+        align-items: center;
     }
 
     &-desc {
@@ -15,7 +24,6 @@
     }
 
     &-content {
-        margin-top: var(--margin-xs);
         margin-bottom: var(--margin-sm);
 
         .input-affix-wrapper {
@@ -43,7 +51,8 @@
 
     &-error {
         color: rgba(var(--red-400));
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-xxs);
+        margin-top: var(--margin-xxs);
     }
 }
 

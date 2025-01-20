@@ -15,24 +15,25 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import { BooleanNumber, CellValueType, LocaleType } from '@univerjs/core';
-import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-import { AstTreeBuilder } from '../../../../engine/analysis/parser';
+
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanNumber, CellValueType, LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
+import { Lexer } from '../../../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Subtotal } from '../index';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -156,6 +157,7 @@ describe('Test subtotal', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},
@@ -188,7 +190,7 @@ describe('Test subtotal', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();

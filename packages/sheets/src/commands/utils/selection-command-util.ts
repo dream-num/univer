@@ -16,14 +16,15 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { IContextService } from '@univerjs/core';
-import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { IRefSelectionsService } from '../../services/selections/ref-selections.service';
+import { REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '../../services/selections/selection.service';
 
 export function getSelectionsService(
-    accessor: IAccessor
+    accessor: IAccessor,
+    fromCurrentSelection?: boolean
 ): SheetsSelectionsService {
     const contextService = accessor.get(IContextService);
-    const disabledNormalSelections = contextService.getContextValue(DISABLE_NORMAL_SELECTIONS);
+    const isInRefSelectionMode = contextService.getContextValue(REF_SELECTIONS_ENABLED);
 
-    return accessor.get(disabledNormalSelections ? IRefSelectionsService : SheetsSelectionsService);
+    return accessor.get(isInRefSelectionMode && !fromCurrentSelection ? IRefSelectionsService : SheetsSelectionsService);
 }

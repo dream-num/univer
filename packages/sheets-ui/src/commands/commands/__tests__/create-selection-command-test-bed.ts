@@ -16,93 +16,20 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
+import { SelectAllService } from '../../../services/select-all/select-all.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../set-frozen.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
-import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { createCommandTestBed } from './create-command-test-bed';
-
-export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {
-    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
-        [ShortcutExperienceService],
-        [SelectAllService],
-    ]);
-
-    const commandService = get(ICommandService);
-    [MoveSelectionCommand, ExpandSelectionCommand, SelectAllCommand, SetSelectionsOperation].forEach((c) => {
-        commandService.registerCommand(c);
-    });
-
-    return {
-        univer,
-        get,
-        sheet,
-    };
-}
-
-export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
-    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
-        [SheetScrollManagerService],
-        [ShortcutExperienceService],
-        [IRenderManagerService, { useClass: RenderManagerService }],
-    ]);
-
-    const commandService = get(ICommandService);
-    [
-        SetSelectionFrozenCommand,
-        SetRowFrozenCommand,
-        SetColumnFrozenCommand,
-        CancelFrozenCommand,
-        SetSelectionsOperation,
-        SetFrozenMutation,
-    ].forEach((c) => {
-        commandService.registerCommand(c);
-    });
-
-    const unitId = sheet.getUnitId();
-    const injector = univer.__getInjector();
-
-    // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
-    const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
-        unit: sheet,
-        unitId,
-        type: UniverInstanceType.UNIVER_SHEET,
-
-        engine: null as any,
-        scene: null as any,
-        mainComponent: null as any,
-        components: null as any,
-        isMainScene: true,
-    }, injector);
-
-    injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
-    injector.get(IRenderManagerService).addRender(unitId, {
-        unitId,
-        type: UniverInstanceType.UNIVER_SHEET,
-        engine: new Disposable() as any,
-        scene: new DisposableCollection() as any,
-        mainComponent: null as any,
-        components: new Map(),
-        isMainScene: true,
-        with: injector.get.bind(injector),
-    });
-
-    return {
-        univer,
-        get,
-        sheet,
-    };
-}
 
 export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookData = {
     id: 'test',
@@ -223,3 +150,88 @@ export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookData = {
     sheetOrder: [],
     styles: {},
 };
+
+export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {
+    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
+        [ShortcutExperienceService],
+        [SelectAllService],
+        [IRenderManagerService, { useClass: RenderManagerService }],
+    ]);
+
+    const commandService = get(ICommandService);
+    [MoveSelectionCommand, ExpandSelectionCommand, SelectAllCommand, SetSelectionsOperation].forEach((c) => {
+        commandService.registerCommand(c);
+    });
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
+}
+
+export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
+    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
+        [SheetScrollManagerService],
+        [ShortcutExperienceService],
+        [IRenderManagerService, { useClass: RenderManagerService }],
+    ]);
+
+    const commandService = get(ICommandService);
+    [
+        SetSelectionFrozenCommand,
+        SetRowFrozenCommand,
+        SetColumnFrozenCommand,
+        CancelFrozenCommand,
+        SetSelectionsOperation,
+        SetFrozenMutation,
+    ].forEach((c) => {
+        commandService.registerCommand(c);
+    });
+
+    const unitId = sheet.getUnitId();
+    const injector = univer.__getInjector();
+
+    // NOTE: this is a hack. Please refer to ./services/clipboard/__tests__/clipboard-test-bed.ts
+    const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
+        unit: sheet,
+        unitId,
+        type: UniverInstanceType.UNIVER_SHEET,
+
+        engine: null as any,
+        scene: null as any,
+        mainComponent: null as any,
+        components: null as any,
+        isMainScene: true,
+    }, injector);
+
+    injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
+    injector.get(IRenderManagerService).addRender(unitId, {
+        unitId,
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: new Disposable() as any,
+        scene: new DisposableCollection() as any,
+        mainComponent: null as any,
+        components: new Map(),
+        isMainScene: true,
+        with: injector.get.bind(injector),
+    });
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
+}
+
+// export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
+//     constructor(
+//         @Inject(Injector) private readonly _injector: Injector
+//     ) { }
+
+//     getRenderById(_unitId: string): Nullable<IRender> {
+//         return {
+//             with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
+//         } as unknown as IRender;
+//     }
+// }

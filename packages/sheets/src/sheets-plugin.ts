@@ -14,33 +14,38 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, merge, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, SHEETS_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
-
+import { SheetPermissionCheckController } from './controllers/permission/sheet-permission-check.controller';
+import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
+
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
+import { RangeProtectionCache } from './model/range-protection.cache';
+import { SheetRangeThemeModel } from './model/range-theme-model';
+
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
-
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
+import { SheetRangeThemeService } from './services/range-theme-service';
 import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from './services/selections/selection-manager.service';
+import { SheetsSelectionsService } from './services/selections/selection.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-import type { IUniverSheetsConfig } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -57,8 +62,12 @@ export class UniverSheetsPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_PLUGIN_CONFIG_KEY, rest);
 
         this._initConfig();
         this._initDependencies();
@@ -67,6 +76,9 @@ export class UniverSheetsPlugin extends Plugin {
     private _initConfig(): void {
         if (this._config?.onlyRegisterFormulaRelatedMutations) {
             this._configService.setConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY, true);
+        }
+        if (this._config?.isRowStylePrecedeColumnStyle) {
+            this._configService.setConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE, true);
         }
     }
 
@@ -79,6 +91,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
+            [SheetRangeThemeService],
 
             // controllers
             [BasicWorksheetController],
@@ -90,10 +103,17 @@ export class UniverSheetsPlugin extends Plugin {
             [WorksheetPermissionService],
             [WorksheetProtectionRuleModel],
             [WorksheetProtectionPointModel],
+            [SheetPermissionViewModelController],
+            [SheetPermissionInitController],
+            [SheetPermissionCheckController],
+
+            // range theme
+            [SheetRangeThemeModel],
 
             // range protection
             [RangeProtectionRenderModel],
             [RangeProtectionRuleModel],
+            [RangeProtectionCache],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
             [IExclusiveRangeService, {
@@ -106,16 +126,42 @@ export class UniverSheetsPlugin extends Plugin {
             dependencies.push([CalculateResultApplyController]);
         }
 
-        mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            this._injector.add(d);
-        });
+        registerDependencies(this._injector, mergeOverrideWithDependencies(dependencies, this._config.override));
 
-        this._injector.get(SheetInterceptorService);
-        this._injector.get(RangeProtectionService);
-        this._injector.get(IExclusiveRangeService);
+        touchDependencies(this._injector, [
+            [SheetInterceptorService],
+            [RangeProtectionService],
+            [IExclusiveRangeService],
+        ]);
     }
 
-    override onStarting(_injector?: Injector): void {
-        this._injector.get(MergeCellController);
+    override onStarting(): void {
+        touchDependencies(this._injector, [
+            [BasicWorksheetController],
+            [MergeCellController],
+            [WorkbookPermissionService],
+            [WorksheetPermissionService],
+            [SheetPermissionViewModelController],
+        ]);
+    }
+
+    override onRendered(): void {
+        touchDependencies(this._injector, [
+            [INumfmtService],
+            [SheetPermissionInitController],
+        ]);
+    }
+
+    override onReady(): void {
+        touchDependencies(this._injector, [
+            [CalculateResultApplyController],
+            [DefinedNameDataController],
+            [SheetRangeThemeModel],
+            [NumberCellDisplayController],
+            [RangeProtectionRenderModel],
+            [RangeProtectionRefRangeService],
+            [RefRangeService],
+            [SheetPermissionCheckController],
+        ]);
     }
 }

@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Pv extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 5;
+
+    override needsLocale = true;
 
     override calculate(rate: BaseValueObject, nper: BaseValueObject, pmt: BaseValueObject, fv?: BaseValueObject, type?: BaseValueObject): BaseValueObject {
         const _fv = fv ?? NumberValueObject.create(0);
@@ -84,7 +87,7 @@ export class Pv extends BaseFunction {
             }
 
             if (rowIndex === 0 && columnIndex === 0) {
-                return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+                return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
             } else {
                 return NumberValueObject.create(result);
             }

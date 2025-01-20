@@ -15,13 +15,12 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Range, Rectangle, Tools } from '@univerjs/core';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkAutoFillController)
 export class SheetsHyperLinkAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,

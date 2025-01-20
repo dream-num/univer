@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { skip } from 'rxjs';
 import type { Ctor, IDisposable } from '../../common/di';
+import type { Plugin, PluginCtor } from './plugin';
+import { skip } from 'rxjs';
 import { Inject, Injector } from '../../common/di';
-
-import { Disposable } from '../../shared/lifecycle';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
+import { Disposable } from '../../shared/lifecycle';
 import { LifecycleStages } from '../lifecycle/lifecycle';
-import { getLifecycleStagesAndBefore, LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
+import { getLifecycleStagesAndBefore, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
-import { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
+import { DependentOnSymbol, PluginRegistry, PluginStore } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
@@ -60,6 +60,8 @@ export class PluginService implements IDisposable {
             this._checkPluginSeen.bind(this),
             this._immediateInitPlugin.bind(this)
         );
+
+        this._pluginHoldersForTypes.set(UniverInstanceType.UNIVER_UNKNOWN, this._pluginHolderForUniver);
 
         this._pluginHolderForUniver.start();
     }
@@ -181,21 +183,23 @@ export class PluginHolder extends Disposable {
     protected readonly _pluginRegistry = new PluginRegistry();
     /** Stores initialized plugin instances. */
     protected readonly _pluginStore = new PluginStore();
-
-    private readonly _awaitingPlugins: Plugin[][] = [];
+    /** Plugins instances as they are registered in batches. */
+    private readonly _pluginsInBatches: Plugin[][] = [];
 
     constructor(
         private _checkPluginRegistered: (pluginCtor: PluginCtor) => boolean,
         private _registerPlugin: <T extends PluginCtor>(plugin: T, config?: ConstructorParameters<T>[0]) => void,
         @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
-        @Inject(LifecycleInitializerService) protected readonly _lifecycleInitializerService: LifecycleInitializerService
+
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         super();
 
         this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(skip(1)).subscribe((stage) => {
-            this._awaitingPlugins.forEach((plugins) => this._runStage(plugins, stage));
+            // Lifecycle of plugins should be coordinated. For example, if a plugin A depends on another plugin B, B should go
+            // through the lifecycle first.  As a temporary solution, we make sure that plugin with type Common goes through the lifecycle first.
+            this._pluginsInBatches.forEach((plugins) => this._runStage(plugins, stage));
         }));
     }
 
@@ -207,7 +211,7 @@ export class PluginHolder extends Disposable {
 
         this._pluginRegistry.removePlugins();
 
-        this._awaitingPlugins.length = 0;
+        this._pluginsInBatches.length = 0;
     }
 
     register<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
@@ -280,24 +284,14 @@ export class PluginHolder extends Disposable {
         // Let plugins go through already reached lifecycle stages.
         getLifecycleStagesAndBefore(this._lifecycleService.stage).subscribe((stage) => this._runStage(plugins, stage));
         // Push to the queue for later lifecycle.
-        this._awaitingPlugins.push(plugins);
+        this._pluginsInBatches.push(plugins);
     }
 
     private _runStage(plugins: Plugin[], stage: LifecycleStages): void {
         plugins.forEach((p) => {
             switch (stage) {
                 case LifecycleStages.Starting:
-                    if (p.onStarting.length > 0 && p.onStarting !== Plugin.prototype.onStarting && !this._warnedAboutOnStartingDeprecation) {
-                        this._logService.warn(
-                            '[PluginService]',
-                            p.onStarting.length,
-                            `Plugin "${p.getPluginName()}" is using deprecated "onStarting" method with arguments. Please use "this._injector" instead.`
-                        );
-
-                        this._warnedAboutOnStartingDeprecation = true;
-                    }
-
-                    p.onStarting(this._injector);
+                    p.onStarting();
                     break;
                 case LifecycleStages.Ready:
                     p.onReady();
@@ -310,8 +304,6 @@ export class PluginHolder extends Disposable {
                     break;
             }
         });
-
-        // Plugins run first, and then we should run the modules.
-        this._lifecycleInitializerService.initModulesOnStage(stage);
     }
 }
+

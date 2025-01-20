@@ -42,6 +42,7 @@ export const AfterSpaceCommand: ICommand = {
     async handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(AfterSpaceCommand.id);
+
         return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };
@@ -52,6 +53,7 @@ export const EnterCommand: ICommand = {
     async handler(accessor) {
         const autoFormatService = accessor.get(DocAutoFormatService);
         const mutations = autoFormatService.onAutoFormat(EnterCommand.id);
+
         return (await sequenceExecuteAsync(mutations, accessor.get(ICommandService))).result;
     },
 };

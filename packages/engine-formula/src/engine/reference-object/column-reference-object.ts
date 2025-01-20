@@ -17,22 +17,25 @@
 import { type IRange, RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
-import { deserializeRangeWithSheet } from '../utils/reference';
-import { ErrorValueObject } from '../value-object/base-value-object';
 import { matchToken } from '../../basics/token';
+
+import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class ColumnReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
-        const grid = deserializeRangeWithSheet(token);
+        const grid = deserializeRangeWithSheetWithCache(token);
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
+            ...grid.range,
             startColumn: grid.range.startColumn,
             startRow: Number.NaN,
-            endColumn: -1,
+            endColumn: grid.range.endColumn,
             endRow: Number.NaN,
+            rangeType: RANGE_TYPE.COLUMN,
         };
         this.setRangeData(range);
     }
@@ -63,6 +66,11 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         const newColumnRange = columnReferenceObject.getRangeData();
 
         const newColumn = newColumnRange.startColumn;
+
+        // if the column is already in the range, return the same object
+        if (newColumn >= currentRangeData.startColumn && newColumn <= currentRangeData.endColumn) {
+            return this;
+        }
 
         const column = currentRangeData.startColumn;
 

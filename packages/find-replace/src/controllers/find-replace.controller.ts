@@ -22,9 +22,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
-    OnLifecycle,
     RxDisposable,
     toDisposable,
 } from '@univerjs/core';
@@ -37,6 +35,7 @@ import { ComponentManager,
 } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 
+import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
     GoToNextMatchOperation,
     GoToPreviousMatchOperation,
@@ -45,7 +44,6 @@ import {
 } from '../commands/operations/find-replace.operation';
 import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/FindReplaceDialog';
-import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
     GoToNextFindMatchShortcutItem,
     GoToPreviousFindMatchShortcutItem,
@@ -61,7 +59,6 @@ const FIND_REPLACE_PANEL_WIDTH = 350;
 const FIND_REPLACE_PANEL_RIGHT_PADDING = 20;
 const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 
-@OnLifecycle(LifecycleStages.Rendered, FindReplaceController)
 export class FindReplaceController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

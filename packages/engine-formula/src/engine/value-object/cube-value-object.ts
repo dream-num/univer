@@ -34,6 +34,13 @@ export class CubeValueObject extends BaseValueObject {
         this._values = values;
     }
 
+    override dispose(): void {
+        this._values.forEach((value) => {
+            value.dispose();
+        });
+        this._values = [];
+    }
+
     override sum() {
         const result = NumberValueObject.create(0);
         this._values.forEach((arr) => {

@@ -15,17 +15,17 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import type { INumfmtService } from './type';
+
 import {
+    CellValueType,
     Disposable,
     ILogService,
     IResourceManagerService,
     IUniverInstanceService,
     Range,
 } from '@univerjs/core';
-
-import { getCellTypeByPattern } from '../../basics/cell-type';
-import { getCellValue } from '../../basics/cell-value';
-import type { INumfmtService } from './type';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 
 export class NumfmtService extends Disposable implements INumfmtService {
     constructor(
@@ -114,10 +114,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
                         cell.s = styleId;
 
                         // Setting the text format for a cell will set the CellValueType to text
-                        const type = getCellTypeByPattern(cell, value.pattern);
-                        if (cell.v !== undefined) {
-                            cell.t = type;
-                            cell.v = getCellValue(type, cell);
+                        if (value.pattern === DEFAULT_TEXT_FORMAT) {
+                            cell.t = CellValueType.STRING;
                         }
                     }
                 });

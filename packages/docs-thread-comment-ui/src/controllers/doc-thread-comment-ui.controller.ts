@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { CommentSingle } from '@univerjs/icons';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
-import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
-import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
+import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
+import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Rendered, DocThreadCommentUIController)
 export class DocThreadCommentUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

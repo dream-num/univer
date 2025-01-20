@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-sort",
-    "version": "0.2.15",
+    "version": "0.5.4",
     "private": false,
     "description": "A library for sorting data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",
@@ -21,14 +21,14 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
@@ -41,8 +41,17 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./locale/*": {
+                "import": "./lib/es/locale/*.js",
+                "require": "./lib/cjs/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            },
+            "./facade": {
+                "import": "./lib/es/facade.js",
+                "require": "./lib/cjs/facade.js",
+                "types": "./lib/types/facade/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -56,12 +65,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
-    },
-    "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/sheets": "workspace:*"
+        "build": "univer-cli build"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -70,23 +74,8 @@
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
-        "rxjs": "^7.8.1",
-        "typescript": "^5.6.2",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.1"
-    },
-    "univerSpace": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
-            "types": "./lib/types/index.d.ts"
-        },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "typescript": "^5.7.2",
+        "vite": "^6.0.7",
+        "vitest": "^2.1.8"
     }
 }

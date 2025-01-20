@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { AddImageSingle } from '@univerjs/icons';
-import { ImageUploadIcon } from '../views/menu/image.menu';
-import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
-import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
 
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
+import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
+
+import { InsertDocImageCommand } from '../commands/commands/insert-image.command';
+import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
+import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
+import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
+import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 import { ClearDocDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawing.command';
-import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
-import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
-import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
-import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
-import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
-import { InsertDocImageCommand } from '../commands/commands/insert-image.command';
-import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
+import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
+import { ImageUploadIcon } from '../views/menu/image.menu';
 import { menuSchema } from './menu.schema';
+import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
-@OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
 export class DocDrawingUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,

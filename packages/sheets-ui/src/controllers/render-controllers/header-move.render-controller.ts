@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import type {
+    EventState,
+    IRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelectionModel } from '@univerjs/sheets';
 import {
     createInterceptorKey, Disposable, ICommandService,
     Inject,
@@ -32,16 +40,8 @@ import {
     MoveRowsCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
-import type {
-    EventState,
-    IRange,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 
-import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
@@ -77,7 +77,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     public readonly interceptor = new InterceptorManager({ HEADER_MOVE_PERMISSION_CHECK });
 
-    private readonly _workbookSelections: WorkbookSelections;
+    private readonly _workbookSelections: WorkbookSelectionModel;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -181,7 +181,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-            const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+            const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
             const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -213,7 +213,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             }
             // if matchSelectionData true, then into grab header mode.
 
-            const startScrollXY = scene.getVpScrollXYInfoByPosToVp(
+            const startScrollXY = scene.getScrollXYInfoByViewport(
                 Vector2.FromArray([this._startOffsetX, this._startOffsetY])
             );
 
@@ -242,7 +242,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 initScrollTimer();
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                     Vector2.FromArray([moveOffsetX, moveOffsetY])
                 );
 
@@ -367,7 +367,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = skeleton.getCellPositionByOffset(
+        const moveActualSelection = skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,

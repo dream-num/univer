@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDrawingSubunitMap } from '@univerjs/drawing';
-import { IDrawingManagerService } from '@univerjs/drawing';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
-import { ISheetDrawingService } from '../services/sheet-drawing.service';
+import { Disposable, ICommandService, IResourceManagerService, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
+import { ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsDrawingLoadController)
 export class SheetsDrawingLoadController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -72,4 +71,3 @@ export class SheetsDrawingLoadController extends Disposable {
         );
     }
 }
-

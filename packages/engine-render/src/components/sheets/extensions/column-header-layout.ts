@@ -15,19 +15,19 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import { numberToABC } from '@univerjs/core';
+import type { UniverRenderingContext } from '../../../context';
 
+import type { IAColumnCfg, IAColumnCfgObj, IHeaderStyleCfg } from '../interfaces';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import { numberToABC } from '@univerjs/core';
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
-import type { UniverRenderingContext } from '../../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
-import type { IAColumnCfg, IAColumnCfgObj, IColumnStyleCfg } from '../interfaces';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultColumnHeaderLayoutExtension';
 export interface IColumnsHeaderCfgParam {
-    headerStyle?: Partial<IColumnStyleCfg>;
+    headerStyle?: Partial<IHeaderStyleCfg>;
     columnsCfg?: IAColumnCfg[];
 }
 const DEFAULT_COLUMN_STYLE = {
@@ -47,7 +47,7 @@ export class ColumnHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
     override Z_INDEX = 10;
     columnsCfg: IAColumnCfg[] = [];
-    headerStyle: IColumnStyleCfg = {
+    headerStyle: IHeaderStyleCfg = {
         fontSize: DEFAULT_COLUMN_STYLE.fontSize,
         fontFamily: DEFAULT_COLUMN_STYLE.fontFamily,
         fontColor: DEFAULT_COLUMN_STYLE.fontColor,
@@ -78,7 +78,7 @@ export class ColumnHeaderLayout extends SheetExtension {
             if (typeof columnsCfg[colIndex] == 'string') {
                 columnsCfg[colIndex] = { text: columnsCfg[colIndex] } as IAColumnCfgObj;
             }
-            curColSpecCfg = columnsCfg[colIndex] as IColumnStyleCfg & { text: string };
+            curColSpecCfg = columnsCfg[colIndex] as IHeaderStyleCfg & { text: string };
             mergeWithSpecCfg = { ...this.headerStyle, ...curColSpecCfg };
         } else {
             mergeWithSpecCfg = { ...this.headerStyle, text: numberToABC(colIndex) };
@@ -87,7 +87,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         return [mergeWithSpecCfg, specStyle] as [IAColumnCfgObj, boolean];
     }
 
-    setStyleToCtx(ctx: UniverRenderingContext, columnStyle: Partial<IColumnStyleCfg>): void {
+    setStyleToCtx(ctx: UniverRenderingContext, columnStyle: Partial<IHeaderStyleCfg>): void {
         if (columnStyle.textAlign) ctx.textAlign = columnStyle.textAlign;
         if (columnStyle.textBaseline) ctx.textBaseline = columnStyle.textBaseline;
         if (columnStyle.fontColor) ctx.fillStyle = columnStyle.fontColor;

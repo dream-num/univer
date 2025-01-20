@@ -14,43 +14,50 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService,
+import type { Dependency } from '@univerjs/core';
+import type { IUniverDocsUIConfig } from './controllers/config.schema';
+import {
+    DependentOn, ICommandService,
     IConfigService,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
+    merge,
     mergeOverrideWithDependencies,
-    Plugin, UniverInstanceType,
+    Plugin,
+    touchDependencies,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
-import type { Dependency } from '@univerjs/core';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
-import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
+import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
+import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
 import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
+import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand, ReplaceTextRunsCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
-import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { AppUIController } from './controllers';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, DOCS_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocAutoFormatController } from './controllers/doc-auto-format.controller';
 import { DocHeaderFooterController } from './controllers/doc-header-footer.controller';
 import { DocMoveCursorController } from './controllers/doc-move-cursor.controller';
@@ -58,7 +65,6 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocTableController } from './controllers/doc-table.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
-import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocChecklistRenderController } from './controllers/render-controllers/doc-checklist.render-controller';
 import { DocClipboardController } from './controllers/render-controllers/doc-clipboard.controller';
 import { DocContextMenuRenderController } from './controllers/render-controllers/doc-contextmenu.render-controller';
@@ -67,11 +73,13 @@ import { DocIMEInputController } from './controllers/render-controllers/doc-ime-
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
 import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
+import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
@@ -92,7 +100,6 @@ import {
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
-import type { IUniverDocsUIConfig } from './controllers/config.schema';
 
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
@@ -110,11 +117,16 @@ export class UniverDocsUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_UI_PLUGIN_CONFIG_KEY, rest);
+
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
@@ -123,11 +135,27 @@ export class UniverDocsUIPlugin extends Plugin {
     override onReady(): void {
         this._initRenderBasics();
         this._markDocAsFocused();
+
+        touchDependencies(this._injector, [
+            [DocStateChangeManagerService],
+            [DocsRenderService],
+        ]);
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
+
+        touchDependencies(this._injector, [
+            [DocAutoFormatController],
+            [DocMoveCursorController],
+            [DocParagraphSettingController],
+            [DocTableController],
+
+            // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+            // plugin can be added in LifecycleStages.Ready
+            [DocUIController],
+        ]);
     }
 
     private _initCommand() {
@@ -171,6 +199,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocTableDeleteRowsCommand,
             DocTableDeleteColumnsCommand,
             DocTableDeleteTableCommand,
+            CloseHeaderFooterCommand,
             DocTableTabCommand,
             TabCommand,
             AfterSpaceCommand,
@@ -181,16 +210,19 @@ export class UniverDocsUIPlugin extends Plugin {
             ToggleCheckListCommand,
             QuickListCommand,
             IMEInputCommand,
+            SwitchDocModeCommand,
             DocParagraphSettingCommand,
             InnerPasteCommand,
             CutContentCommand,
             ReplaceContentCommand,
+            ReplaceSnapshotCommand,
             CoverContentCommand,
             SetDocZoomRatioCommand,
-            SelectAllOperation,
+            DocSelectAllCommand,
             DocParagraphSettingPanelOperation,
             MoveCursorOperation,
             MoveSelectionOperation,
+            ReplaceTextRunsCommand,
         ].forEach((e) => {
             this._commandService.registerCommand(e);
         });
@@ -219,18 +251,15 @@ export class UniverDocsUIPlugin extends Plugin {
     }
 
     private _initDependencies(injector: Injector) {
-        const dependencies: Dependency[] = [
+        const dependencies = mergeOverrideWithDependencies([
             [DocClipboardController],
             [DocEditorBridgeController],
-            // Controller
             [DocUIController],
             [DocAutoFormatController],
             [DocTableController],
             [DocMoveCursorController],
             [AppUIController],
             [DocParagraphSettingController],
-
-            // Services
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
@@ -238,11 +267,9 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocsRenderService],
             [DocStateChangeManagerService],
             [DocAutoFormatService],
-        ];
-
-        const dependency = mergeOverrideWithDependencies(dependencies, this._config.override);
-
-        dependency.forEach((d) => injector.add(d));
+            [DocMenuStyleService],
+        ], this._config.override);
+        dependencies.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {
@@ -267,13 +294,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderBasics(): void {
         ([
-            // Services.
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
             [DocInterceptorService],
             [DocPageLayoutService],
             [DocIMEInputManagerService],
-            // Controllers.
             [DocRenderController],
             [DocZoomRenderController],
         ] as Dependency[]).forEach((m) => {
@@ -283,9 +308,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderModules(): void {
         ([
-            // Services
             [DocEventManagerService],
-            // Controllers.
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
             [DocHeaderFooterController],

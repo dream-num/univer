@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '../shared/types';
+import type { IStyleData } from '../types/interfaces';
+import type { CustomData, IRange, IRowData, IWorksheetData } from './typedef';
+import type { SheetViewModel } from './view-model';
 import { getArrayLength, type IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';
-import { type IRange, type IRowData, type IWorksheetData, RANGE_TYPE } from './typedef';
-import type { Nullable } from '../shared/types';
-import type { SheetViewModel } from './view-model';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -40,6 +42,25 @@ export class RowManager {
      */
     getRowData(): IObjectArrayPrimitiveType<Partial<IRowData>> {
         return this._rowData;
+    }
+
+    /**
+     * Get the row style
+     * @param {number} row Row index
+     * @returns {string | Nullable<IStyleData>} Style data, may be undefined
+     */
+    getRowStyle(row: number) {
+        return this._rowData[row]?.s;
+    }
+
+    /**
+     * Set row default style
+     * @param {number} row The row index
+     * @param {string | Nullable<IStyleData>} style The style data
+     */
+    setRowStyle(row: number, style: string | Nullable<IStyleData>) {
+        const rowData = this.getRowOrCreate(row);
+        rowData.s = style;
     }
 
     getRowDatas(rowPos: number, numRows: number): IObjectArrayPrimitiveType<Partial<IRowData>> {
@@ -83,9 +104,17 @@ export class RowManager {
     }
 
     /**
+     * Remove row data of given row
+     * @param rowPos
+     */
+    removeRow(rowPos: number) {
+        delete this._rowData[rowPos];
+    }
+
+    /**
      * Get given row data or create a row data when it's null
      * @param rowPos row index
-     * @returns
+     * @returns {Partial<IRowData>} rowData
      */
     getRowOrCreate(rowPos: number): Partial<IRowData> {
         const { _rowData } = this;
@@ -93,8 +122,8 @@ export class RowManager {
         if (row) {
             return row;
         }
-        const config = this._config;
-        const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
+
+        const create = {};
         _rowData[rowPos] = create;
 
         return create;
@@ -183,9 +212,20 @@ export class RowManager {
 
     /**
      * Get count of row in the sheet
-     * @returns
+     * @returns {number} row count
      */
     getSize(): number {
         return getArrayLength(this._rowData);
+    }
+
+    setCustomMetadata(index: number, custom: CustomData | undefined) {
+        const row = this.getRow(index);
+        if (row) {
+            row.custom = custom;
+        }
+    }
+
+    getCustomMetadata(index: number): CustomData | undefined {
+        return this.getRow(index)?.custom;
     }
 }

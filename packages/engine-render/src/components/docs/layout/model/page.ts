@@ -15,19 +15,19 @@
  */
 
 import type { ITable, Nullable } from '@univerjs/core';
-import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
-import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { dealWithSection } from '../block/section';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
+import { BooleanNumber, PageOrientType } from '@univerjs/core';
+import { BreakType, DocumentSkeletonPageType } from '../../../../basics/i-document-skeleton-cached';
+import { dealWithSection } from '../block/section';
 import { resetContext, updateBlockIndex } from '../tools';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import { createSkeletonSection } from './section';
 
 function getHeaderFooterMaxHeight(pageHeight: number) {
@@ -239,7 +239,7 @@ function _createSkeletonHeaderFooter(
     const page = dealWithSection(
         ctx,
         headerOrFooterViewModel,
-        headerOrFooterViewModel.children[0],
+        headerOrFooterViewModel.getChildren()[0],
         areaPage,
         headerFooterConfig,
         layoutAnchor
@@ -248,7 +248,6 @@ function _createSkeletonHeaderFooter(
     if (ctx.isDirty && count < 10) {
         count++;
         resetContext(ctx);
-        headerOrFooterViewModel.resetCache();
 
         return _createSkeletonHeaderFooter(
             ctx,
@@ -279,21 +278,20 @@ function _createSkeletonHeaderFooter(
     return page;
 }
 
-export function createSkeletonCellPage(
+export function createNullCellPage(
     ctx: ILayoutContext,
-    viewModel: DocumentViewModel,
-    cellNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     tableConfig: ITable,
     row: number,
-    col: number
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
 ) {
     const { lists, footerTreeMap, headerTreeMap, localeService, drawings } = sectionBreakConfig;
     const { skeletonResourceReference } = ctx;
     const { cellMargin, tableRows, tableColumns, tableId } = tableConfig;
     const cellConfig = tableRows[row].tableCells[col];
-    // Table cell only has one section.
-    const sectionNode = cellNode.children[0];
+
     const {
         start = { v: 10 },
         end = { v: 10 },
@@ -301,7 +299,8 @@ export function createSkeletonCellPage(
         bottom = { v: 5 },
     } = cellConfig.margin ?? cellMargin ?? {};
     const pageWidth = tableColumns[col].size.width.v;
-    const pageHeight = Number.POSITIVE_INFINITY;
+    const pageHeight = maxCellPageHeight;
+
     const cellSectionBreakConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,
@@ -318,21 +317,66 @@ export function createSkeletonCellPage(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, cellSectionBreakConfig, skeletonResourceReference);
+    const areaPage = createSkeletonPage(
+        ctx,
+        // Set first page height to availableHeight.
+        Object.assign({}, cellSectionBreakConfig, {
+            pageSize: {
+                width: pageWidth,
+                height: Number.isFinite(availableHeight) ? availableHeight : pageHeight,
+            },
+        }),
+        skeletonResourceReference
+    );
     areaPage.type = DocumentSkeletonPageType.CELL;
     areaPage.segmentId = tableId;
 
-    const page = dealWithSection(
+    return {
+        page: areaPage,
+        sectionBreakConfig: cellSectionBreakConfig,
+    };
+}
+
+export function createSkeletonCellPages(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
+    cellNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    tableConfig: ITable,
+    row: number,
+    col: number,
+    availableHeight: number = Number.POSITIVE_INFINITY,
+    maxCellPageHeight: number = Number.POSITIVE_INFINITY
+) {
+    // Table cell only has one section.
+    const sectionNode = cellNode.children[0];
+
+    const { page: areaPage, sectionBreakConfig: cellSectionBreakConfig } = createNullCellPage(
+        ctx,
+        sectionBreakConfig,
+        tableConfig,
+        row,
+        col,
+        availableHeight,
+        maxCellPageHeight
+    );
+
+    const { pages } = dealWithSection(
         ctx,
         viewModel,
         sectionNode,
         areaPage,
         cellSectionBreakConfig
-    ).pages[0];
+    );
 
-    updateBlockIndex([page], cellNode.startIndex);
+    for (const p of pages) {
+        p.type = DocumentSkeletonPageType.CELL;
+        p.segmentId = tableConfig.tableId;
+    }
 
-    return page;
+    updateBlockIndex(pages, cellNode.startIndex);
+
+    return pages;
 }
 
 function _getVerticalMargin(

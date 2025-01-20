@@ -1,0 +1,127 @@
+.watermark {
+    &-panel {
+        margin: 16px 0;
+
+        &-type-title {
+            font-size: 15px;
+            color: rgb(var(--text-color-secondary));
+        }
+
+        &-type-select {
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        &-setting {
+            width: 100%;
+            min-height: 100px;
+            border-radius: 8px;
+        }
+
+        &-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+
+            &-button-wrapper {
+                display: flex;
+                align-items: center;
+            }
+
+            &-reset {
+                cursor: pointer;
+                white-space: nowrap;
+                color: rgb(var(--primary-color));
+                border-bottom: 1px solid rgb(var(--primary-color));
+            }
+        }
+    }
+
+    &-text-setting {
+        font-size: 14px;
+
+        &-header {
+            font-size: 15px;
+            color: rgb(var(--text-color-secondary));
+            margin: 16px 0;
+        }
+
+        &-font {
+            &-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 16px;
+            }
+
+            &-style-part {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 16px;
+
+                &:first-child {
+                    margin-top: 0;
+                }
+            }
+        }
+
+        &-layout {
+            &-font-wrapper {
+                width: calc(50% - 8px);
+                align-self: flex-start;
+                white-space: nowrap;
+            }
+        }
+    }
+
+    &-image-setting {
+        font-size: 14px;
+    }
+
+    &-input {
+        height: 28px;
+        box-sizing: border-box;
+
+        &-content {
+            width: 220px;
+        }
+    }
+
+    &-icon {
+        width: 18px;
+        height: 18px;
+        margin: 2px;
+
+        &-wrapper {
+            cursor: pointer;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+
+            &-select {
+                background-color: rgb(var(--grey-100));
+            }
+
+            &:hover {
+                background-color: rgb(var(--grey-100));
+            }
+
+            &:first-child {
+                margin-left: 28px;
+            }
+
+            &:last-child {
+                margin-right: 28px;
+            }
+        }
+    }
+
+    &-color-picker-wrapper {
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #fff;
+        border: 1px solid rgb(var(--grey-100));
+    }
+}

@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
-import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, remove, toDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 import { DOC_INTERCEPTOR_POINT } from './interceptor-const';
 
-@OnLifecycle(LifecycleStages.Starting, DocInterceptorService)
 export class DocInterceptorService extends Disposable implements IRenderModule {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
 

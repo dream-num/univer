@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IParagraph } from '@univerjs/core';
+import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import type { ICommand, IParagraph } from '@univerjs/core';
+import { getTextRunAtPosition } from '../../basics/paragraph';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { InsertCommand } from './core-editing.command';
+import { ToggleCheckListCommand } from './list.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
@@ -38,20 +41,10 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
         for (const paragraph of paragraphs) {
             if (prevParagraph.bullet) {
                 paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
-                if (paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED) {
-                    paragraph.bullet.listType = PresetListType.CHECK_LIST;
-                }
             }
 
             if (prevParagraph.paragraphStyle) {
                 paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
-                if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
-                    if (paragraph.paragraphStyle?.textStyle) {
-                        paragraph.paragraphStyle.textStyle.st = {
-                            s: BooleanNumber.FALSE,
-                        };
-                    }
-                }
             }
         }
     }
@@ -61,13 +54,15 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
+
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const rectRanges = docSelectionManagerService.getRectRanges();
         if (activeTextRange == null) {
@@ -78,68 +73,77 @@ export const BreakLineCommand: ICommand = {
         if (rectRanges && rectRanges.length) {
             const { startOffset } = activeTextRange;
 
-            docSelectionManagerService.replaceTextRanges([{
+            docSelectionManagerService.replaceDocRanges([{
                 startOffset,
                 endOffset: startOffset,
             }]);
+
             return true;
         }
 
         const { segmentId } = activeTextRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (!docDataModel || !body) {
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '').getBody();
+        if (docDataModel == null || body == null) {
             return false;
         }
 
         const unitId = docDataModel.getUnitId();
-        const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
+
+        const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
-        // line breaks to 2
-        if (prevParagraph && prevParagraph.startIndex > endOffset) {
-            const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
-            bodyAfter.customRanges = bodyAfter.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
-
-            const deleteRange = {
-                startOffset,
-                endOffset: prevParagraph.startIndex + 1,
-                collapsed: false,
-            };
-            updateAttributeByInsert(
-                bodyAfter,
-                {
-                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-                },
-                1,
-                0
-            );
-
-            const result = await commandService.executeCommand(InsertCommand.id, {
-                unitId,
-                body: bodyAfter,
-                range: deleteRange,
-                segmentId,
-                cursorOffset: 1,
-            });
-
-            return result;
-        } else {
-            // split paragraph into two.
-            const result = await commandService.executeCommand(InsertCommand.id, {
-                unitId,
-                body: {
-                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-                },
-                range: activeTextRange,
-                segmentId,
-            });
-
-            return result;
+        if (!prevParagraph) {
+            return false;
         }
+
+        const prevParagraphIndex = prevParagraph.startIndex;
+
+        const defaultTextStyle = docMenuStyleService.getDefaultStyle();
+        const styleCache = docMenuStyleService.getStyleCache();
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], endOffset, defaultTextStyle, styleCache);
+
+        const insertBody: IDocumentBody = {
+            dataStream: DataStreamTreeTokenType.PARAGRAPH,
+            paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+            textRuns: [{
+                st: 0,
+                ed: 1,
+                ts: {
+                    ...curTextRun.ts,
+                },
+            }],
+        };
+
+        const deleteRange = {
+            startOffset,
+            endOffset,
+            collapsed: startOffset === endOffset,
+        };
+
+        const result = await commandService.executeCommand(InsertCommand.id, {
+            unitId,
+            body: insertBody,
+            range: deleteRange,
+            segmentId,
+        });
+
+        if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
+            const params = {
+                index: prevParagraphIndex + 1 - (endOffset - startOffset),
+                segmentId,
+                textRanges: [{
+                    startOffset: startOffset + 1,
+                    endOffset: startOffset + 1,
+                }],
+            };
+            const toggleCheckListResult = await commandService.executeCommand(ToggleCheckListCommand.id, params);
+
+            return Boolean(toggleCheckListResult) && result;
+        }
+
+        return result;
     },
 };
 

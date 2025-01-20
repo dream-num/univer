@@ -1,4 +1,0 @@
-{
-    "extends": "@univerjs-infra/shared/tsconfigs/node",
-    "include": ["vite.config.ts"]
-}

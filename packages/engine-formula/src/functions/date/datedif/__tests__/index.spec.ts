@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Datedif } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_DATE } from '../../function-names';
+import { Datedif } from '../index';
 
 describe('Test datedif function', () => {
     const testFunction = new Datedif(FUNCTION_NAMES_DATE.DATEDIF);
@@ -70,14 +70,32 @@ describe('Test datedif function', () => {
             const unit = StringValueObject.create('YY');
             const result = testFunction.calculate(startDate, endDate, unit);
             expect(result.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const unit2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(startDate, endDate, unit2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const unit3 = BooleanValueObject.create(true);
+            const result3 = testFunction.calculate(startDate, endDate, unit3);
+            expect(result3.getValue()).toStrictEqual(ErrorType.NUM);
+
+            const unit4 = NumberValueObject.create(11);
+            const result4 = testFunction.calculate(startDate, endDate, unit4);
+            expect(result4.getValue()).toStrictEqual(ErrorType.NUM);
         });
 
         it('value is error', () => {
-            const startDate = NumberValueObject.create(1);
+            const startDate = StringValueObject.create('2011/1/29');
             const endDate = ErrorValueObject.create(ErrorType.NAME);
-            const unit = StringValueObject.create('YY');
+            const unit = StringValueObject.create('d');
             const result = testFunction.calculate(startDate, endDate, unit);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+
+            const startDate2 = ErrorValueObject.create(ErrorType.NAME);
+            const endDate2 = StringValueObject.create('2021/3/31');
+            const unit2 = StringValueObject.create('d');
+            const result2 = testFunction.calculate(startDate2, endDate2, unit2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('value is boolean', () => {
@@ -90,10 +108,16 @@ describe('Test datedif function', () => {
 
         it('value is normal string', () => {
             const startDate = StringValueObject.create('test');
-            const endDate = StringValueObject.create('2021-12-31');
+            const endDate = StringValueObject.create('2021-3-31');
             const unit = StringValueObject.create('d');
             const result = testFunction.calculate(startDate, endDate, unit);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+
+            const startDate2 = StringValueObject.create('2011-1-29');
+            const endDate2 = StringValueObject.create('test');
+            const unit2 = StringValueObject.create('d');
+            const result2 = testFunction.calculate(startDate2, endDate2, unit2);
+            expect(result2.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('value is array', () => {
@@ -138,7 +162,85 @@ describe('Test datedif function', () => {
             });
 
             const result = testFunction.calculate(startDate, endDate, unit);
-            expect(result.getValue()).toStrictEqual(6);
+            expect(result.getValue()).toStrictEqual(5);
+        });
+
+        it('M more test', () => {
+            const startDate = StringValueObject.create('2011/1/1');
+            const endDate = StringValueObject.create('2013/9/1');
+            const unit = StringValueObject.create('M');
+            const result = testFunction.calculate(startDate, endDate, unit);
+            expect(result.getValue()).toStrictEqual(32);
+
+            const startDate2 = StringValueObject.create('2014/3/1');
+            const endDate2 = StringValueObject.create('2016/2/1');
+            const result2 = testFunction.calculate(startDate2, endDate2, unit);
+            expect(result2.getValue()).toStrictEqual(23);
+
+            const startDate3 = StringValueObject.create('2009/1/2');
+            const endDate3 = StringValueObject.create('2012/1/1');
+            const result3 = testFunction.calculate(startDate3, endDate3, unit);
+            expect(result3.getValue()).toStrictEqual(35);
+        });
+
+        it('MD more test', () => {
+            const startDate = StringValueObject.create('2010-7-29');
+            const endDate = StringValueObject.create('2012-1-28');
+            const unit = StringValueObject.create('MD');
+            const result = testFunction.calculate(startDate, endDate, unit);
+            expect(result.getValue()).toStrictEqual(30);
+
+            const endDate2 = StringValueObject.create('2012-2-28');
+            const result2 = testFunction.calculate(startDate, endDate2, unit);
+            expect(result2.getValue()).toStrictEqual(30);
+
+            const endDate3 = StringValueObject.create('2012-3-28');
+            const result3 = testFunction.calculate(startDate, endDate3, unit);
+            expect(result3.getValue()).toStrictEqual(28);
+
+            const endDate4 = StringValueObject.create('2012-4-28');
+            const result4 = testFunction.calculate(startDate, endDate4, unit);
+            expect(result4.getValue()).toStrictEqual(30);
+
+            const endDate5 = StringValueObject.create('2012-5-28');
+            const result5 = testFunction.calculate(startDate, endDate5, unit);
+            expect(result5.getValue()).toStrictEqual(29);
+        });
+
+        it('YM more test', () => {
+            const startDate = StringValueObject.create('2011/1/1');
+            const endDate = StringValueObject.create('2013/9/1');
+            const unit = StringValueObject.create('YM');
+            const result = testFunction.calculate(startDate, endDate, unit);
+            expect(result.getValue()).toStrictEqual(8);
+
+            const startDate2 = StringValueObject.create('2014/3/1');
+            const endDate2 = StringValueObject.create('2016/2/1');
+            const result2 = testFunction.calculate(startDate2, endDate2, unit);
+            expect(result2.getValue()).toStrictEqual(11);
+
+            const startDate3 = StringValueObject.create('2009/1/2');
+            const endDate3 = StringValueObject.create('2012/1/1');
+            const result3 = testFunction.calculate(startDate3, endDate3, unit);
+            expect(result3.getValue()).toStrictEqual(11);
+        });
+
+        it('YD more test', () => {
+            const startDate = StringValueObject.create('2011/1/1');
+            const endDate = StringValueObject.create('2013/9/1');
+            const unit = StringValueObject.create('YD');
+            const result = testFunction.calculate(startDate, endDate, unit);
+            expect(result.getValue()).toStrictEqual(243);
+
+            const startDate2 = StringValueObject.create('2014/3/1');
+            const endDate2 = StringValueObject.create('2016/2/1');
+            const result2 = testFunction.calculate(startDate2, endDate2, unit);
+            expect(result2.getValue()).toStrictEqual(337);
+
+            const startDate3 = StringValueObject.create('2009/1/2');
+            const endDate3 = StringValueObject.create('2012/1/1');
+            const result3 = testFunction.calculate(startDate3, endDate3, unit);
+            expect(result3.getValue()).toStrictEqual(364);
         });
     });
 });

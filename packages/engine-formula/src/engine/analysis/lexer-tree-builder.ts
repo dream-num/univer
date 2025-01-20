@@ -15,19 +15,20 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
+import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 
+import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { isFormulaLexerToken } from '../../basics/match-token';
-import { REFERENCE_SINGLE_RANGE_REGEX } from '../../basics/regex';
+import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
+
+import { regexTestSingeRange } from '../../basics/regex';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
-    SPACE_TOKEN,
     SUFFIX_TOKEN_SET,
     suffixToken,
 } from '../../basics/token';
@@ -38,9 +39,9 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
+import { isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
+import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
-import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRangeToRefString } from '../utils/reference';
 import { LexerNode } from './lexer-node';
 
 enum bracketType {
@@ -49,7 +50,7 @@ enum bracketType {
     LAMBDA,
 }
 
-const FORMULA_CACHE_LRU_COUNT = 100000;
+const FORMULA_CACHE_LRU_COUNT = 2000;
 
 export const FormulaLexerNodeCache = new FormulaAstLRU<LexerNode>(FORMULA_CACHE_LRU_COUNT);
 
@@ -76,10 +77,13 @@ export class LexerTreeBuilder extends Disposable {
 
     private _colonState = false; // :
 
+    private _formulaErrorCount = 0;
+
     private _tableBracketState = false; // Table3[[#All],[Column1]:[Column2]]
 
     override dispose(): void {
         this._resetTemp();
+
         this._currentLexerNode.dispose();
 
         FormulaLexerNodeCache.clear();
@@ -259,7 +263,7 @@ export class LexerTreeBuilder extends Disposable {
         return newSequenceNodes;
     }
 
-    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType) {
+    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType, currentSheetName: string = '') {
         const nodes = this.sequenceNodesBuilder(formulaString);
         if (nodes == null) {
             return formulaString;
@@ -278,7 +282,7 @@ export class LexerTreeBuilder extends Disposable {
 
             if (node.nodeType === sequenceNodeType.REFERENCE) {
                 const { token, endIndex } = node;
-                const sequenceGrid = deserializeRangeWithSheet(token);
+                const sequenceGrid = deserializeRangeWithSheetWithCache(token);
                 if (sequenceGrid == null) {
                     continue;
                 }
@@ -294,7 +298,7 @@ export class LexerTreeBuilder extends Disposable {
                 const newToken = serializeRangeToRefString({
                     range: newRange,
                     unitId,
-                    sheetName,
+                    sheetName: sheetName || currentSheetName,
                 });
 
                 const minusCount = newToken.length - token.length;
@@ -341,7 +345,7 @@ export class LexerTreeBuilder extends Disposable {
 
             const { token } = node;
 
-            const sequenceGrid = deserializeRangeWithSheet(token);
+            const sequenceGrid = deserializeRangeWithSheetWithCache(token);
 
             const { sheetName, unitId: sequenceUnitId } = sequenceGrid;
 
@@ -426,11 +430,11 @@ export class LexerTreeBuilder extends Disposable {
 
             let preSegment = preItem?.segment || '';
 
-            let startIndex = i - preSegment.length;
+            const startIndex = i - preSegment.length;
 
             let endIndex = i - 1;
 
-            let deleteEndIndex = i - 1;
+            const deleteEndIndex = i - 1;
 
             if (i === len - 1 && this._isLastMergeString(currentString)) {
                 preSegment += currentString;
@@ -445,22 +449,12 @@ export class LexerTreeBuilder extends Disposable {
 
             const preSegmentTrim = preSegment.trim();
 
-            const preSegmentNotPrefixToken = this._replacePrefixString(preSegmentTrim);
+            const preSegmentNotPrefixToken = replaceRefPrefixString(preSegmentTrim);
 
             if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION && preSegmentTrim[0] !== matchToken.OPEN_BRACES) {
                 maybeString = false;
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.STRING, preSegment, startIndex, endIndex, deleteEndIndex);
-            } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
-                /**
-                 * =-A1  Separate the negative sign from the ref string.
-                 */
-                if (preSegmentNotPrefixToken.length !== preSegmentTrim.length) {
-                    const minusCount = preSegmentTrim.length - preSegmentNotPrefixToken.length;
-                    deleteEndIndex += minusCount;
-                    startIndex += minusCount;
-
-                    preSegment = this._replacePrefixString(preSegment);
-                }
+            } else if (regexTestSingeRange(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.REFERENCE, preSegment, startIndex, endIndex, deleteEndIndex);
             } else if (Tools.isStringNumber(preSegmentTrim)) {
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.NUMBER, preSegment, startIndex, endIndex, deleteEndIndex);
@@ -556,7 +550,57 @@ export class LexerTreeBuilder extends Disposable {
             i++;
         }
 
-        return newSequenceNodes;
+        return this._minusSplitSequenceNode(newSequenceNodes);
+    }
+
+    /**
+     * =-A1  Separate the negative sign from the ref string.
+     */
+    private _minusSplitSequenceNode(sequenceNodes: Array<string | ISequenceNode>): (string | ISequenceNode)[] {
+        // After the while loop, process nodes to split '-@A1:B10' or '@-A1:B10' into operators and 'A1:B10'
+        const finalSequenceNodes: Array<string | ISequenceNode> = [];
+        for (const node of sequenceNodes) {
+            if (typeof node !== 'string') {
+                const token = node.token;
+                // Use a regular expression to match leading whitespace and operators '-', '@'
+                const match = token.match(/^(\s*([-@+]\s*)+)(.*)$/); // Captures leading whitespace and operators, then the rest
+                if (match) {
+                    const operatorPart = match[1]; // Includes leading whitespace and operators
+                    const referencePart = match[3]; // The rest of the token after operators
+
+                    if (isReferenceStringWithEffectiveColumn(referencePart.trim())) {
+                        // The referencePart is a valid reference
+                        // Calculate the length of the operator part
+                        const operatorLength = operatorPart.length;
+                        const operatorStart = node.startIndex;
+                        const operatorEnd = node.startIndex + operatorLength - 1;
+
+                        // Create an operator node for operatorPart
+                        const operatorNode: ISequenceNode = {
+                            nodeType: sequenceNodeType.NORMAL, // Use appropriate nodeType for operators
+                            token: operatorPart,
+                            startIndex: operatorStart,
+                            endIndex: operatorEnd,
+                        };
+
+                        // Create a reference node for referencePart
+                        const refNode: ISequenceNode = {
+                            nodeType: sequenceNodeType.REFERENCE,
+                            token: referencePart,
+                            startIndex: operatorEnd + 1,
+                            endIndex: node.endIndex,
+                        };
+
+                        finalSequenceNodes.push(operatorNode);
+                        finalSequenceNodes.push(refNode);
+                        continue;
+                    }
+                }
+            }
+            finalSequenceNodes.push(node);
+        }
+
+        return finalSequenceNodes;
     }
 
     private _pushSequenceNode(
@@ -566,23 +610,6 @@ export class LexerTreeBuilder extends Disposable {
     ) {
         const segmentCount = deleteEndIndex - node.startIndex + 1;
         sequenceNodes.splice(sequenceNodes.length - segmentCount, segmentCount, node);
-    }
-
-    private _replacePrefixString(token: string) {
-        const tokenArray = [];
-        let isNotPreFix = false;
-        for (let i = 0, len = token.length; i < len; i++) {
-            const char = token[i];
-            if (char === SPACE_TOKEN && !isNotPreFix) {
-                tokenArray.push(char);
-            } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS)) {
-                continue;
-            } else {
-                tokenArray.push(char);
-                isNotPreFix = true;
-            }
-        }
-        return tokenArray.join('');
     }
 
     nodeMakerTest(formulaString: string) {
@@ -900,6 +927,14 @@ export class LexerTreeBuilder extends Disposable {
         this._tableBracketState = false;
     }
 
+    private _formalErrorOccurred() {
+        this._formulaErrorCount += 1;
+    }
+
+    private _hasFormalError() {
+        return this._formulaErrorCount > 0;
+    }
+
     private _getLastChildCurrentLexerNode() {
         const children = this._currentLexerNode.getChildren();
         if (children && children.length > 0) {
@@ -1025,6 +1060,34 @@ export class LexerTreeBuilder extends Disposable {
         children.splice(-1);
     }
 
+    /**
+     * fix univer-pro/issues/2447
+     * =1/3+
+     * =+
+     * =sum(A1+)
+     */
+    private _formulaErrorLastTokenCheck(formulaStringArray: string[], indexRaw: number) {
+        const lastToken = this._findPreviousToken(formulaStringArray, indexRaw) || '';
+        const isFirstCheck = formulaStringArray.length - 1 === indexRaw;
+        if (!isFirstCheck && this._isOperatorToken(lastToken)) {
+            return true;
+        }
+
+        if (isFirstCheck && isTokenCannotBeAtEnd(lastToken)) {
+            return true;
+        }
+
+        if (SUFFIX_TOKEN_SET.has(lastToken)) {
+            const lastTwoToken = this._findSecondLastNonSpaceToken(formulaStringArray, indexRaw);
+
+            if (lastTwoToken == null || isTokenCannotPrecedeSuffixToken(lastTwoToken)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private _findPreviousToken(data: string[], indexRaw: number) {
         let index = indexRaw;
         while (index >= 0) {
@@ -1036,12 +1099,59 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    private _negativeCondition(prevString: string) {
+    private _findSecondLastNonSpaceToken(data: string[], indexRaw: number): string | null {
+        let index = indexRaw;
+        let nonSpaceTokenCount = 0;
+        while (index >= 0) {
+            const token = data[index];
+            if (token !== ' ') {
+                nonSpaceTokenCount++;
+                if (nonSpaceTokenCount === 2) {
+                    return token;
+                }
+            }
+            index--;
+        }
+        return null;
+    }
+
+    private _findNextToken(data: string[], indexRaw: number) {
+        let index = indexRaw;
+        while (index >= 0) {
+            const token = data[index];
+            if (token !== ' ') {
+                return token;
+            }
+            index++;
+        }
+    }
+
+    private _unexpectedEndingTokenExcludeOperator(prevString: string) {
         if (
-            OPERATOR_TOKEN_SET.has(prevString) ||
+            // OPERATOR_TOKEN_SET.has(prevString) ||
             prevString === matchToken.OPEN_BRACKET ||
             prevString === matchToken.COMMA ||
+            prevString === operatorToken.EQUALS ||
             prevString === ''
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    private _unexpectedEndingToken(prevString: string) {
+        if (
+            this._isOperatorToken(prevString) ||
+            this._unexpectedEndingTokenExcludeOperator(prevString)
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    private _isOperatorToken(prevString: string) {
+        if (
+            OPERATOR_TOKEN_SET.has(prevString)
         ) {
             return true;
         }
@@ -1074,6 +1184,8 @@ export class LexerTreeBuilder extends Disposable {
         this._lambdaState = false; // Lambda
 
         this._colonState = false; // :
+
+        this._formulaErrorCount = 0;
     }
 
     private _checkErrorState(): boolean {
@@ -1090,6 +1202,10 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         if (this._doubleQuotationState > 0) {
+            return true;
+        }
+
+        if (this._hasFormalError()) {
             return true;
         }
 
@@ -1138,22 +1254,29 @@ export class LexerTreeBuilder extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
-        let formulaString = formulaStringRaw.replace(/\r/g, ' ').replace(/\n/g, ' ');
+        // Editor will add '\r\n' at the end of the formula string
+        let formulaString = formulaStringRaw.replace(/\r\n$/, '').replace(/\r/g, ' ').replace(/\n/g, ' ');
 
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }
 
-        let isZeroAdded = false;
-        if (formulaString.substring(0, 1) === operatorToken.MINUS) {
-            formulaString = `0${formulaString}`;
-            isZeroAdded = true;
-        }
+        // let isZeroAdded = false;
+        // if (formulaString.substring(0, 1) === operatorToken.MINUS) {
+        //     formulaString = `0${formulaString}`;
+        //     isZeroAdded = true;
+        // }
 
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
+
         let cur = 0;
         this._resetTemp();
+
+        if (this._formulaErrorLastTokenCheck(formulaStringArray, formulaStringArrayCount - 1)) {
+            this._formalErrorOccurred();
+        }
+
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
 
@@ -1176,7 +1299,7 @@ export class LexerTreeBuilder extends Disposable {
                 for (let i = 0; i < errorType.length; i++) {
                     const curStr = formulaStringArray[cur];
                     this._pushSegment(curStr);
-                    this._addSequenceArray(sequenceArray, curStr, cur, isZeroAdded);
+                    this._addSequenceArray(sequenceArray, curStr, cur);
                     cur++;
                 }
                 this._resetSegment();
@@ -1209,9 +1332,9 @@ export class LexerTreeBuilder extends Disposable {
                          * Copy or auto-fill at complex formula get error formula offset
                          */
 
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
                         cur++;
                         this._closeBracket();
                         continue;
@@ -1228,6 +1351,10 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
+                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                    this._formalErrorOccurred();
+                }
+
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();
                 const currentBracket = this._getCurrentBracket();
@@ -1319,10 +1446,28 @@ export class LexerTreeBuilder extends Disposable {
             } else if (currentString === matchToken.SINGLE_QUOTATION && this.isDoubleQuotationClose()) {
                 if (this.isSingleQuotationClose()) {
                     this._openSingleQuotation();
+
+                    // If the current segment is blank, reset the segment.
+                    // Process the space before the double single quotes of sheet name.
+                    // e.g. = 'dv-test'!C27
+                    if (this._segmentCount() === 0) {
+                        this._resetSegment();
+                    }
                 } else {
                     const nextCurrentString = formulaStringArray[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.SINGLE_QUOTATION) {
+                        // handle 'Sheet'1'!A1
+
+                        // Add the first single quotation
+                        this._pushSegment(currentString);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
+
+                        // Add the second single quotation
+                        this._pushSegment(nextCurrentString);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
+                        cur++;
+                        continue;
                     } else {
                         this._closeSingleQuotation();
                     }
@@ -1336,6 +1481,10 @@ export class LexerTreeBuilder extends Disposable {
                 this.isBracesClose() &&
                 this.isSquareBracketClose()
             ) {
+                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                    this._formalErrorOccurred();
+                }
+
                 const currentBracket = this._getCurrentBracket();
                 /**
                  * Handle the occurrence of commas, where in the formula,
@@ -1516,17 +1665,33 @@ export class LexerTreeBuilder extends Disposable {
                 if (currentString === operatorToken.MINUS && (trimSegment === '')) {
                     // negative number
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
-                    if (this._negativeCondition(prevString)) {
-                        this._pushSegment(operatorToken.MINUS);
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
-
+                    const nextString = this._findNextToken(formulaStringArray, cur + 1) || '';
+                    if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
+                        this._pushNodeToChildren('0');
+                        this._pushNodeToChildren(operatorToken.MINUS);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
+                        this._resetSegment();
                         cur++;
                         continue;
+                    } else if (this._unexpectedEndingToken(prevString)) {
+                        if (nextString === operatorToken.PLUS) {
+                            this._pushSegment(operatorToken.MINUS);
+                            // this._pushSegment(operatorToken.PLUS);
+                            this._addSequenceArray(sequenceArray, currentString, cur);
+                            this._addSequenceArray(sequenceArray, operatorToken.PLUS, cur + 1);
+                            cur += 2;
+                            continue;
+                        } else {
+                            this._pushSegment(operatorToken.MINUS);
+                            this._addSequenceArray(sequenceArray, currentString, cur);
+                            cur++;
+                            continue;
+                        }
                     }
                 } else if (this._segment.length > 0 && this._isScientificNotation(formulaStringArray, cur, currentString)) {
                     this._pushSegment(currentString);
 
-                    this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                    this._addSequenceArray(sequenceArray, currentString, cur);
 
                     cur++;
                     continue;
@@ -1543,9 +1708,9 @@ export class LexerTreeBuilder extends Disposable {
                         this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
 
                         this._resetSegment();
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
                         cur++;
                         continue;
                     } else {
@@ -1559,7 +1724,7 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushSegment(currentString);
             }
 
-            this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+            this._addSequenceArray(sequenceArray, currentString, cur);
             cur++;
         }
 
@@ -1589,14 +1754,12 @@ export class LexerTreeBuilder extends Disposable {
         return preOneChar && preOneChar.toUpperCase() === 'E';
     }
 
-    private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number, isZeroAdded: boolean) {
-        if (!(isZeroAdded && cur === 0)) {
-            sequenceArray?.push({
-                segment: this._segment,
-                currentString,
-                cur,
-                currentLexerNode: this._currentLexerNode,
-            });
-        }
+    private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number) {
+        sequenceArray?.push({
+            segment: this._segment,
+            currentString,
+            cur,
+            currentLexerNode: this._currentLexerNode,
+        });
     }
 }

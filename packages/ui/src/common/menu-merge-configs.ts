@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import type { MenuConfig, MenuItemConfig } from '../services/menu/menu';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 
 export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig: MenuItemConfig | null): T {
     if (!additionalConfig || !baseConfig) return baseConfig;
@@ -24,7 +24,7 @@ export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig
     const { hidden, disabled, activated } = additionalConfig;
 
     // Update properties directly if they exist in additionalConfig
-    const properties: (keyof MenuItemConfig)[] = ['group', 'type', 'icon', 'title', 'tooltip', 'positions'];
+    const properties: (keyof MenuItemConfig)[] = ['type', 'icon', 'title', 'tooltip'];
     properties.forEach((prop) => {
         if (additionalConfig[prop] !== undefined) {
             // Use type assertion to assure TypeScript about the operation's safety

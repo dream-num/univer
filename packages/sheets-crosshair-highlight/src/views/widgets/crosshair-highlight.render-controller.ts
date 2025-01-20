@@ -15,16 +15,16 @@
  */
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
-
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
+import { ColorKit, Disposable, IContextService, Inject, RANGE_TYPE } from '@univerjs/core';
+import { IRefSelectionsService, REF_SELECTIONS_ENABLED, SheetsSelectionsService } from '@univerjs/sheets';
+import { getCoordByCell, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { combineLatest, map, merge, startWith, tap } from 'rxjs';
 import { SHEETS_CROSSHAIR_HIGHLIGHT_Z_INDEX } from '../../const';
-import { CrossHairRangeCollection } from '../../util';
 import { SheetsCrosshairHighlightService } from '../../services/crosshair.service';
+import { CrossHairRangeCollection } from '../../util';
 import { SheetCrossHairHighlightShape } from './crosshair-highlight-shape';
 
 export class SheetCrosshairHighlightRenderController extends Disposable implements IRenderModule {
@@ -71,7 +71,7 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
         const workbook = this._context.unit;
 
         this.disposeWithMe(combineLatest([
-            this._contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS).pipe(startWith(false)),
+            this._contextService.subscribeContextValue$(REF_SELECTIONS_ENABLED).pipe(startWith(false)),
             this._sheetSkeletonManagerService.currentSkeleton$,
             this._sheetsCrosshairHighlightService.enabled$,
             this._sheetsCrosshairHighlightService.color$.pipe(tap((color) => (this._color = color))),
@@ -80,19 +80,21 @@ export class SheetCrosshairHighlightRenderController extends Disposable implemen
                 this._sheetsSelectionsService.selectionMoveStart$,
                 this._sheetsSelectionsService.selectionMoving$,
                 this._sheetsSelectionsService.selectionMoveEnd$,
+                this._sheetsSelectionsService.selectionSet$,
                 workbook.activeSheet$.pipe(map(() => this._sheetsSelectionsService.getCurrentSelections()))
             ),
             merge(
                 this._refSelectionsService.selectionMoveStart$,
                 this._refSelectionsService.selectionMoving$,
                 this._refSelectionsService.selectionMoveEnd$,
+                this._sheetsSelectionsService.selectionSet$,
                 workbook.activeSheet$.pipe(map(() => this._refSelectionsService.getCurrentSelections()))
             ),
-        ]).subscribe(([normalSelDisabled, _, enabled, _color, normalSelections, refSelection]) => {
+        ]).subscribe(([refSelectionEnabled, _, enabled, _color, normalSelections, refSelection]) => {
             this._clear();
 
             if (!enabled) return;
-            const selections = normalSelDisabled ? refSelection : normalSelections;
+            const selections = refSelectionEnabled ? refSelection : normalSelections;
 
             this._rangeCollection.reset();
             this._transformSelection(selections, workbook.getActiveSheet());

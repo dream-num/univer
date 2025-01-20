@@ -15,16 +15,15 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
 import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
+
+import { CellValueType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
 import { compareNull, compareNumber, compareString, isNullValue } from './utils';
 
 export type ICommonComparableCellValue = number | string | null;
 
-@OnLifecycle(LifecycleStages.Ready, SheetsSortController)
 export class SheetsSortController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

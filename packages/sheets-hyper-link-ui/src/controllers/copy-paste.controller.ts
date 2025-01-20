@@ -15,15 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
+import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 import { isLegalLink } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
     private _plainTextFilter = new Set<(text: string) => boolean>();
 
@@ -140,7 +139,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
             unitId: string;
             subUnitId: string;
         }
@@ -153,16 +152,14 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        if (
-            [
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
-            ].includes(
-                copyInfo.pasteType
-            )
-        ) {
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+        ];
+
+        if (specialPastes.includes(copyInfo.pasteType)) {
             return { redos: [], undos: [] };
         }
 

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
-
-import { SheetsFilterService } from '@univerjs/sheets-filter';
-
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import type { ICommandInfo } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+
+import { expandToContinuousRange, getSheetCommandTarget, RangeProtectionPermissionViewPoint, SheetPermissionCheckController, SheetsSelectionsService, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
 import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {
@@ -41,8 +39,8 @@ export class SheetsFilterPermissionController extends Disposable {
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionInterceptorBaseController)
-        private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @Inject(SheetPermissionCheckController)
+        private readonly _sheetPermissionCheckPermission: SheetPermissionCheckController,
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetsSelectionsService) private _sheetsSelectionService: SheetsSelectionsService
     ) {
@@ -62,7 +60,7 @@ export class SheetsFilterPermissionController extends Disposable {
                     const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
                     let permission;
                     if (filterRange) {
-                        permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                        permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
                         }, [filterRange]);
@@ -72,12 +70,12 @@ export class SheetsFilterPermissionController extends Disposable {
                             let newRange = { ...range };
                             const isCellRange = range.startColumn === range.endColumn && range.startRow === range.endRow;
                             newRange = isCellRange ? expandToContinuousRange(newRange, { left: true, right: true, up: true, down: true }, worksheet) : newRange;
-                            permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                            permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
                                 rangeTypes: [RangeProtectionPermissionViewPoint],
                                 worksheetTypes: [WorksheetViewPermission, WorksheetFilterPermission],
                             }, [newRange], unitId, subUnitId);
                         } else {
-                            permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithoutRange({
+                            permission = this._sheetPermissionCheckPermission.permissionCheckWithoutRange({
                                 rangeTypes: [RangeProtectionPermissionViewPoint],
                                 worksheetTypes: [WorksheetViewPermission, WorksheetFilterPermission],
                             });
@@ -85,7 +83,7 @@ export class SheetsFilterPermissionController extends Disposable {
                     }
 
                     if (!permission) {
-                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.filterErr'));
+                        this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.filterErr'));
                     }
                 }
                 if (command.id === OpenFilterPanelOperation.id) {
@@ -96,12 +94,12 @@ export class SheetsFilterPermissionController extends Disposable {
                     if (colRange) {
                         colRange.startColumn = params.col;
                         colRange.endColumn = params.col;
-                        const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                        const permission = this._sheetPermissionCheckPermission.permissionCheckWithRanges({
                             rangeTypes: [RangeProtectionPermissionViewPoint],
                             worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission],
                         }, [colRange]);
                         if (!permission) {
-                            this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.filterErr'));
+                            this._sheetPermissionCheckPermission.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.filterErr'));
                         }
                     }
                 }

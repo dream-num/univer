@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { ITextRange, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
+import type { IDocRange } from './range-interface';
 import { BooleanNumber, COLORS, DOC_RANGE_TYPE, RANGE_DIRECTION, Tools } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
-import type { ITextRange, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene, ThinScene } from '@univerjs/engine-render';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -25,7 +26,6 @@ import {
     NodePositionConvertToCursor,
     NodePositionMap,
 } from './convert-text-range';
-import type { IDocRange } from './range-interface';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
@@ -106,7 +106,7 @@ export class TextRange implements IDocRange {
     private _anchorBlinkTimer: Nullable<ReturnType<typeof setInterval>> = null;
 
     constructor(
-        private _scene: ThinScene,
+        private _scene: Scene,
         private _document: Documents,
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
@@ -476,8 +476,8 @@ export class TextRange implements IDocRange {
         }
 
         this._anchorShape = anchor;
-
         this._scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
+        this.activeStatic();
     }
 
     private _setCursorList(cursorList: ITextRange[]) {

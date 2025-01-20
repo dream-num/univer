@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 
+import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { RangeSelector, TextEditor } from '@univerjs/docs-ui';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
-import React, { useEffect, useState } from 'react';
-import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { SCOPE_WORKBOOK_VALUE } from './component-name';
+import { SCOPE_WORKBOOK_VALUE_DEFINED_NAME } from '@univerjs/sheets';
+import { ComponentManager, useSidebarClick } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
@@ -49,7 +51,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         name,
         formulaOrRefString,
         comment = '',
-        localSheetId = SCOPE_WORKBOOK_VALUE,
+        localSheetId = SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
         hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
         id,
 
@@ -60,12 +62,17 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const definedNamesService = useDependency(IDefinedNamesService);
     const functionService = useDependency(IFunctionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+    const componentManager = useDependency(ComponentManager);
 
+    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+    const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
     if (workbook == null) {
         return;
     }
 
-    const unitId = workbook.getUnitId();
+    const unitId = useMemo(() => workbook.getUnitId(), []);
+
+    const subUnitId = useMemo(() => workbook.getActiveSheet().getSheetId(), []);
 
     const [nameValue, setNameValue] = useState(name);
 
@@ -81,14 +88,21 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
 
+    const rangeSelectorActionsRef = useRef<any>({});
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
+
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
-        value: SCOPE_WORKBOOK_VALUE,
+        value: SCOPE_WORKBOOK_VALUE_DEFINED_NAME,
     }];
 
     const isFormula = (token: string) => {
         return !isReferenceStrings(token);
     };
+
+    useEffect(() => {
+        isFocusRangeSelectorSet(false);
+    }, [subUnitId]);
 
     useEffect(() => {
         setValidFormulaOrRange(true);
@@ -118,19 +132,8 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         });
     });
 
-    const convertRangeToString = (ranges: IUnitRange[]) => {
-        const refs = ranges.map((range) => {
-            return serializeRangeToRefString({
-                ...range,
-                sheetName: workbook.getSheetBySheetId(range.sheetId)?.getName() || '',
-            });
-        });
-
-        return refs.join(',');
-    };
-
-    const rangeSelectorChange = (ranges: IUnitRange[]) => {
-        setFormulaOrRefStringValue(convertRangeToString(ranges));
+    const rangeSelectorChange = (rangesText: string) => {
+        setFormulaOrRefStringValue(rangesText);
     };
 
     const formulaEditorChange = (value: Nullable<string>) => {
@@ -177,10 +180,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
+        const currentSheetName = workbook.getActiveSheet().getName();
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL, currentSheetName),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });
@@ -188,15 +192,34 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const typeValueChange = (value: string | number | boolean) => {
         const type = value as string;
-        if (type === 'formula' && formulaOrRefStringValue.substring(0, 1) !== operatorToken.EQUALS) {
-            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
-            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
-        } else if (formulaOrRefStringValue.substring(0, 1) === operatorToken.EQUALS) {
-            setFormulaOrRefStringValue('');
-            setFormulaOrRefStringValue('');
+        if (type === 'formula') {
+            if (formulaOrRefString[0] === operatorToken.EQUALS) {
+                setFormulaOrRefStringValue(formulaOrRefString);
+            } else {
+                setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
+            }
+        } else {
+            if (formulaOrRefString[0] === operatorToken.EQUALS) {
+                setFormulaOrRefStringValue('');
+            } else {
+                setFormulaOrRefStringValue(formulaOrRefString);
+            }
         }
         setTypeValue(type);
     };
+
+    const formulaEditorActionsRef = useRef<any>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
 
     return (
         <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
@@ -209,12 +232,40 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     <Radio value="formula">{localeService.t('definedName.ratioFormula')}</Radio>
                 </RadioGroup>
             </div>
-            <div style={{ display: typeValue === 'range' ? 'block' : 'none' }}>
-                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
-            </div>
-            <div style={{ display: typeValue === 'range' ? 'none' : 'block' }}>
-                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
-            </div>
+            {typeValue === 'range'
+                ? (
+                    RangeSelector && (
+                        <RangeSelector
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            initValue={formulaOrRefStringValue}
+                            onChange={rangeSelectorChange}
+                            isFocus={isFocusRangeSelector}
+                            onFocus={() => isFocusRangeSelectorSet(true)}
+                            actions={rangeSelectorActionsRef.current}
+                            isSupportAcrossSheet
+                        />
+                    )
+                )
+                : (FormulaEditor && (
+                    <FormulaEditor
+                        initValue={formulaOrRefStringValue as any}
+                        unitId={unitId}
+                        subUnitId={subUnitId}
+                        isFocus={isFocusFormulaEditor}
+                        isSupportAcrossSheet
+                        onChange={(v = '') => {
+                            const formula = v || '';
+                            formulaEditorChange(formula);
+                        }}
+                        onVerify={(res: boolean) => {
+                            setValidFormulaOrRange(res);
+                        }}
+
+                        onFocus={() => isFocusFormulaEditorSet(true)}
+                        actions={formulaEditorActionsRef.current}
+                    />
+                ))}
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
             </div>

@@ -15,19 +15,16 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import type { IAddCfCommandParams } from '../commands/commands/add-cf.command';
+import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
+import { RangeProtectionPermissionEditPoint, SheetPermissionCheckController, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { AddCfCommand } from '../commands/commands/add-cf.command';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingPermissionController)
 export class ConditionalFormattingPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController
 
     ) {
         super();
@@ -39,13 +36,13 @@ export class ConditionalFormattingPermissionController extends Disposable {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 if (command.id === AddCfCommand.id) {
-                    const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    const permission = this._sheetPermissionCheckController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],
                         worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission],
                     }, (command.params as IAddCfCommandParams).rule.ranges);
                     if (!permission) {
-                        this._sheetPermissionInterceptorBaseController.haveNotPermissionHandle(this._localeService.t('permission.dialog.setStyleErr'));
+                        this._sheetPermissionCheckController.blockExecuteWithoutPermission(this._localeService.t('permission.dialog.setStyleErr'));
                     }
                 }
             })

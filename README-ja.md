@@ -76,6 +76,7 @@ Univer はスプレッドシート、ドキュメント、プレゼンテーシ�
 - **データ検証**：セルに入力できるデータの種類を制限する機能をサポートしています。
 - **条件付き書式**：特定の基準に基づいてセルに書式を適用する機能をサポートしています。
 - **コメント**：セルにコメントを追加して追加情報を提供することができます。
+- **十字型ハイライト**：選択したセルを素早く特定するために、スプレッドシートに十字ハイライトを表示することができます。
 - **ピボットテーブル**[^1]：データを集計して分析するためのピボットテーブルをサポートします。
 - **共同編集**[^1]：複数のユーザーが同時にスプレッドシートを編集することをサポートします。
 - **印刷**[^1]：スプレッドシートを印刷したり、PDF にエクスポートしたりすることができます。
@@ -106,6 +107,7 @@ Univer は多言語をサポートしており、以下の言語が利用可能�
 - `en-US`
 - `ru-RU`
 - `vi-VN`
+- `fa-IR`
 
 `zh-CN` と `en-US` は公式サポート言語であり、その他の言語はコミュニティによって提供されています。
 
@@ -294,5 +296,5 @@ Copyright © 2021-2024 DreamNum Co,Ltd. All Rights Reserved.
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
+import type { IParagraph, IParagraphStyle, ITextRun, Nullable } from '@univerjs/core';
+import type { ICellDataWithSpanInfo } from '../type';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
@@ -93,4 +94,33 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
     }
 
     return paragraphs;
+}
+
+export function convertToCellStyle(cell: ICellDataWithSpanInfo, dataStream: string, textRuns: ITextRun[] | undefined) {
+    const dataStreamLength = dataStream.length;
+    const textRunsLength = textRuns?.length ?? 0;
+    const canConvertToCellStyle = textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength;
+
+    if (cell.p) {
+        if (canConvertToCellStyle && cell.p.body?.textRuns?.length) {
+            cell.p.body.textRuns = [];
+            return {
+                ...cell,
+                s: textRuns![0].ts,
+            };
+        } else {
+            return cell;
+        }
+    } else {
+        if (canConvertToCellStyle) {
+            return {
+                ...cell,
+                s: textRuns![0].ts,
+            };
+        } else {
+            return cell;
+        }
+    }
+
+    return cell;
 }

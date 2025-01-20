@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
-import { CustomRangeType, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
-import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ICellWithCoord, ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IFontCacheItem } from '@univerjs/engine-render';
+import { CustomRangeType, HorizontalAlign, IUniverInstanceService, PresetListType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOC_VERTICAL_PADDING, getLineBounding, NodePositionConvertToCursor } from '@univerjs/docs-ui';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '../editor-bridge.service';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
     const pageIndex = -1;
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, pageIndex);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const skeletonData = skeleton.getSkeletonData();
     let end = range.endOffset;
     if (range.segmentId) {
@@ -34,7 +34,7 @@ const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleto
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -79,7 +79,7 @@ const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, skeleton: DocumentS
         top: rect.top,
         bottom: rect.bottom,
         left: rect.left,
-        right: rect.left,
+        right: rect.right,
     };
 };
 
@@ -137,12 +137,66 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     const docModel = docSkeleton.getViewModel().getDataModel();
     const hyperLinks = docModel.getBody()?.customRanges?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK) ?? [];
     const checkLists = docModel.getBody()?.paragraphs?.filter((p) => p.bullet?.listType.indexOf(PresetListType.CHECK_LIST) === 0) ?? [];
-
+    const drawings = docSkeleton.getSkeletonData()?.pages[0].skeDrawings;
     return {
         links: hyperLinks.map((link) => calcLinkPosition(docSkeleton, link, paddingLeft, paddingTop)!).filter(Boolean),
         checkLists: checkLists.map((list) => calcBulletPosition(docSkeleton, list, paddingLeft, paddingTop)!).filter(Boolean),
+        drawings: drawings
+            ? Array.from(drawings.keys()).map((key) => ({
+                drawingId: key,
+                rect: {
+                    top: drawings!.get(key)!.aTop,
+                    bottom: drawings!.get(key)!.aTop + drawings!.get(key)!.width,
+                    left: drawings!.get(key)!.aLeft,
+                    right: drawings!.get(key)!.aLeft + drawings!.get(key)!.height,
+                },
+            }))
+            : [],
     };
 };
+
+export function calcPadding(cell: ICellWithCoord, font: IFontCacheItem, isNum: boolean) {
+    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const vt = font.verticalAlign;
+    const ht = font.horizontalAlign;
+
+    let paddingTop = 0;
+    switch (vt) {
+        case VerticalAlign.UNSPECIFIED:
+        case VerticalAlign.BOTTOM:
+            paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
+            break;
+        case VerticalAlign.MIDDLE:
+            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startY - height) / 2;
+            break;
+        default:
+            break;
+    }
+
+    let paddingLeft = 0;
+    switch (ht) {
+        case HorizontalAlign.RIGHT:
+            paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            break;
+        case HorizontalAlign.CENTER:
+            paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
+            break;
+        case HorizontalAlign.UNSPECIFIED:{
+            if (isNum) {
+                paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return {
+        paddingLeft,
+        paddingTop,
+    };
+}
 
 export const getCustomRangePosition = (injector: Injector, unitId: string, subUnitId: string, row: number, col: number, rangeId: string) => {
     const univerInstanceService = injector.get(IUniverInstanceService);
@@ -164,28 +218,43 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
 
     if (!skeleton || !currentRender) return;
 
-    const font = skeleton.getFont(row, col)?.documentSkeleton;
-
-    if (!font) {
+    const font = skeleton.getFont(row, col);
+    const docSkeleton = font?.documentSkeleton;
+    if (!docSkeleton) {
         return null;
     }
-    const customRange = font.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
+    const customRange = docSkeleton.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
     if (!customRange) {
         return null;
     }
 
     const PADDING = DOC_VERTICAL_PADDING;
-    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, font);
-    const cell = skeleton.getCellByIndex(row, col);
+
+    const cellIndex = skeleton.getCellWithCoordByIndex(row, col);
+    let { actualColumn, actualRow } = cellIndex;
+
+    skeleton.overflowCache.forValue((r, c, range) => {
+        if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualColumn && range.endColumn >= actualColumn) {
+            actualColumn = c;
+            actualRow = r;
+        }
+    });
+
+    const actualCell = skeleton.getCellWithCoordByIndex(actualRow, actualColumn);
+    const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
+    const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
+    const { paddingLeft, paddingTop } = calcPadding(actualCell, font, false);
+    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, docSkeleton);
+
     return {
         rects: rects?.map((rect) => ({
-            top: rect.top + cell.startY - PADDING,
-            bottom: rect.bottom + cell.startY + PADDING,
-            left: rect.left + cell.startX,
-            right: rect.right + cell.startX,
+            top: rect.top + actualCell.mergeInfo.startY + paddingTop + topOffset + PADDING,
+            bottom: rect.bottom + actualCell.mergeInfo.startY + paddingTop + topOffset + PADDING,
+            left: rect.left + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
+            right: rect.right + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
         })),
         customRange,
-        label: font.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };
 
@@ -236,6 +305,6 @@ export const getEditingCustomRangePosition = (injector: Injector, unitId: string
             right: rect.right + canvasClientRect.left,
         })),
         customRange,
-        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex, customRange.endIndex + 1),
     };
 };

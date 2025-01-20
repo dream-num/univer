@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
     IConfigService,
     Inject,
     Injector,
+    merge,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
-
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { SheetsSortUIService } from './services/sheets-sort-ui.service';
+import { defaultPluginConfig, SHEETS_SORT_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
-import type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 
 const NAME = 'SHEET_SORT_UI_PLUGIN';
 
@@ -45,8 +45,12 @@ export class UniverSheetsSortUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_SORT_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -54,5 +58,9 @@ export class UniverSheetsSortUIPlugin extends Plugin {
             [SheetsSortUIService],
             [SheetsSortUIController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsSortUIController);
     }
 }

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '../../common/di';
-import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
 import type { IResources } from '../resource-manager/type';
+import { createIdentifier } from '../../common/di';
 
+export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
 export interface IResourceLoaderService {
     saveUnit<T = object>(unitId: string): T & { resources: IResources } | null;
 }
-export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
-runOnLifecycle(LifecycleStages.Ready, IResourceLoaderService);

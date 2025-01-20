@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-import { copyCustomRange, getCustomRangesInterestsWithRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
-import { fromPlainText, getPlainText } from './parse';
-import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
-import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
+import { addCustomDecorationTextX, deleteCustomDecorationTextX } from './custom-decoration';
+import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
+import { addDrawing } from './drawings';
+import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
+import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
+import { isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
+import { addCustomRangeTextX, deleteCustomRangeTextX, deleteSelectionTextX, replaceSelectionTextRuns, replaceSelectionTextX, retainSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
     static customRange = {
         add: addCustomRangeTextX,
         delete: deleteCustomRangeTextX,
-
         copyCustomRange,
-        getCustomRangesInterestsWithRange,
-        shouldDeleteCustomRange,
-
+        getCustomRangesInterestsWithSelection,
         isIntersecting,
+    };
+
+    static customDecoration = {
+        add: addCustomDecorationTextX,
+        delete: deleteCustomDecorationTextX,
     };
 
     static selection = {
         replace: replaceSelectionTextX,
-
         makeSelection,
         normalizeSelection,
-        getDeleteSelection,
-        getInsertSelection,
-
-        getDeleteActions: getRetainAndDeleteFromReplace,
-        getDeleteExculdeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
+        delete: deleteSelectionTextX,
+        replaceTextRuns: replaceSelectionTextRuns,
+        retain: retainSelectionTextX,
     };
 
     static range = {
@@ -50,6 +52,20 @@ export class BuildTextUtils {
     static transform = {
         getPlainText,
         fromPlainText,
+        isEmptyDocument,
+    };
+
+    static paragraph = {
+        bullet: {
+            set: setParagraphBullet,
+            switch: switchParagraphBullet,
+            toggleChecklist: toggleChecklistParagraph,
+            changeNestLevel: changeParagraphBulletNestLevel,
+        },
+    };
+
+    static drawing = {
+        add: addDrawing,
     };
 }
 

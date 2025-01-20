@@ -16,9 +16,9 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 
-export const PLUGIN_CONFIG_KEY = 'sheets.config';
+export const SHEETS_PLUGIN_CONFIG_KEY = 'sheets.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
@@ -28,6 +28,10 @@ export interface IUniverSheetsConfig {
      * web worker environment or server-side-calculation.
      */
     onlyRegisterFormulaRelatedMutations?: true;
+     /**
+      * If the row style and column style be set both, and the row style should precede the column style or not.
+      */
+    isRowStylePrecedeColumnStyle?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { IMAGE_MENU_ID as DocsImageMenuId } from '@univerjs/docs-drawing-ui';
+import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_IMAGE_MENU_ID } from '@univerjs/docs-drawing-ui';
 import { BulletListCommand, DocCreateTableOperation, DocUIController, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import { ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService } from '@univerjs/uniui';
 import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_TABLE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID } from './menu';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, UniDocsUIController)
 export class UniDocsUIController extends DocUIController {
     constructor(
         @Inject(Injector) injector: Injector,
@@ -59,7 +58,7 @@ export class UniDocsUIController extends DocUIController {
             [BuiltinUniToolbarItemId.FONT_SIZE, SetInlineFormatFontSizeCommand.id],
             [BuiltinUniToolbarItemId.COLOR, SetInlineFormatTextColorCommand.id],
             [BuiltinUniToolbarItemId.BACKGROUND, SetInlineFormatTextBackgroundColorCommand.id],
-            [BuiltinUniToolbarItemId.IMAGE, DocsImageMenuId],
+            [BuiltinUniToolbarItemId.IMAGE, DOCS_IMAGE_MENU_ID],
             [BuiltinUniToolbarItemId.TABLE, DOC_TABLE_MUTATION_ID],
             [BuiltinUniToolbarItemId.ORDER_LIST, OrderListCommand.id],
             [BuiltinUniToolbarItemId.UNORDER_LIST, BulletListCommand.id],

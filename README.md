@@ -5,7 +5,7 @@
     <img src="./docs/img/banner-dark.png" alt="Univer" width="400" />
 </picture>
 
-The Ultimate Office Suite of the Next Generation. <br />
+Univer: An Isomorphic Full-Stack Framework for Creating and Editing Spreadsheets, Docs, and Slides Across Web and Server <br />
 Extensible. High-performance. Embedded to your application.
 
 **English** | [简体中文][readme-zh-link] | [日本語][readme-ja-link] <br />
@@ -47,10 +47,12 @@ Extensible. High-performance. Embedded to your application.
 ## 🌈 Highlights
 
 - 📈 Univer is designed to support **spreadsheets**, **documents** and **presentation**.
+- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js (in the future, mobile devices as well), with the same API.
 - ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
 - 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
-- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* and *Facade API* that makes it a delight for developers to implement their unique requirements on the top of Univer.
+- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* that makes it a delight for developers to implement their unique requirements on the top of Univer.
 - 💄 Univer is **highly customizable**, allowing you to personalize its appearance using *themes*. It also provides support for internationalization (i18n).
+- 🥤 Univer is **easy to work with**. The *Presets* & *Facade API* make it easy to hands on.
 - ⚡ Univer in **performant**.
   - ✏️ Univer boasts an efficient *rendering engine* based on canvas, capable of rendering various document types flawlessly. The rendering engines supports advanced typesetting features such as *punctuation squeezing*, *text and image layout* and *scroll buffering*.
   - 🧮 Univer incorporates a lightning-fast *formula engine* that can operate in Web Workers or even on the server side.
@@ -74,13 +76,14 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Data Validation**: Supports restricting the type of data that can be entered into a cell.
 - **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
 - **Comments**: Enables adding comments to cells to provide additional information.
+- **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
 - **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
-- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously.
+- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
 - **Import & Export**[^1]: Support for importing and exporting data in XLSX.
 - **Charts**[^2]: Third-party chart support via [VChart][vchart-link].
 
-### 📝 Univer Doc (Under Development)
+### 📝 Univer Doc (beta)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
 - **Lists**: Supports ordered lists, unordered lists, and task lists.
@@ -104,8 +107,9 @@ Univer supports multiple languages, including:
 - `en-US`
 - `ru-RU`
 - `vi-VN`
+- `fa-IR`
 
-`zh-CN` and `en-US` are officially supported, while the others are contributed by the community.
+`zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 
 You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
 
@@ -130,6 +134,11 @@ You can find all the examples in the [Univer Examples](https://univer.ai/example
 <!-- ## 📦 Ecosystem
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+
+## 🔗 Links
+
+- [Official Site](https://univer.ai)
+- [Presets Repository](https://github.com/dream-num/univer-presets)
 
 ## 💬 Community
 
@@ -292,5 +301,5 @@ Licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) lic
 [examples-link-12]: https://univer.ai/pro/examples/docs-collaboration/
 [examples-link-13]: https://univer.ai/pro/examples/docs-collaboration-playground/
 [examples-link-14]: https://univer.ai/examples/slides/
-[examples-link-15]: https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA
+[examples-link-15]: https://univer.ai/guides/sheet/features/zen-editor
 [examples-link-16]: https://youtu.be/kpV0MvQuFZA

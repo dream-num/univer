@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
+import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     Rect,
     ScrollBar,
@@ -25,12 +29,10 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/engine-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
-import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
-
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
@@ -49,13 +51,13 @@ const FRAME_STACK_THRESHOLD = 60;
 export class SheetRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @IContextService private readonly _contextService: IContextService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
         super();
+
         this._addNewRender();
         this._initRenderMetricSubscriber();
     }
@@ -74,6 +76,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
+
+        // TODO: we should attach the context object to the RenderContext object on scene.canvas.
         engine.runRenderLoop(() => scene.render());
     }
 
@@ -93,7 +97,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         engine.endFrame$.subscribe(() => {
             const validRenderInfo = this._renderFrameTimeMetric &&
-            Object.keys(this._renderFrameTimeMetric).filter((key) => key.startsWith(SHEET_EXTENSION_PREFIX)).length > 0;
+                Object.keys(this._renderFrameTimeMetric).filter((key) => key.startsWith(SHEET_EXTENSION_PREFIX)).length > 0;
 
             if (validRenderInfo) {
                 this._afterRenderMetric$.next({
@@ -108,8 +112,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             if (!this._renderFrameTimeMetric[key]) {
                 this._renderFrameTimeMetric[key] = [];
             }
-            value = Math.round(value * 100) / 100;
-            this._renderFrameTimeMetric[key].push(value);
+            this._renderFrameTimeMetric[key].push(Math.round(value * 100) / 100);
         });
 
         engine.renderFrameTags$.subscribe(([key, value]: [string, any]) => {
@@ -117,7 +120,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         });
 
         const frameInfoList: IExtendFrameInfo[] = [];
-        this._afterRenderMetric$.pipe(withLatestFrom(engine.endFrame$)).subscribe(([sceneRenderDetail, basicFrameTimeInfo]: [IAfterRender$Info, IBasicFrameInfo ]) => {
+        this._afterRenderMetric$.pipe(withLatestFrom(engine.endFrame$)).subscribe(([sceneRenderDetail, basicFrameTimeInfo]: [IAfterRender$Info, IBasicFrameInfo]) => {
             frameInfoList.push({
                 ...{
                     FPS: basicFrameTimeInfo.FPS,
@@ -203,12 +206,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { scene, components } = this._context;
 
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            throw new Error('No active sheet found');
-        }
-
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
-
         this._addViewport(worksheet);
 
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
@@ -237,19 +235,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
-
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY,
@@ -257,75 +251,52 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY: 0,
         });
-
         const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY,
         });
-
         const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY: 0,
         });
-
         const viewRowTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
         });
-
         const viewRowBottom = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
             top: columnHeader.height,
             bottom: 0,
             width: rowHeader.width,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: false,
         });
-
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
         });
-
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
             height: columnHeader.height,
             right: 0,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: true,
         });
-
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
             height: columnHeader.height,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
         });
 
         return {
@@ -355,17 +326,12 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _addViewport(worksheet: Worksheet) {
         const scene = this._context.scene;
-        if (scene == null) {
-            return;
-        }
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        // this._initMouseWheel(scene, viewMain);
         const _scrollBar = new ScrollBar(viewMain);
 
         scene.attachControl();
-
         return viewMain;
     }
 
@@ -396,34 +362,34 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     private _initCommandListener(): void {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-            const { unit: workbook, unitId: workbookId } = this._context;
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            const { unit: workbook } = this._context;
             const { id: commandId } = command;
 
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
+                const params = command.params;
+                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                // const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();
+
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
                 const workbookId = this._context.unitId;
                 const worksheetId = worksheet.getSheetId();
-                const params = command.params;
-                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
 
                 if (unitId !== workbookId || subUnitId !== worksheetId) {
                     return;
                 }
 
-                if (commandId !== SetWorksheetActiveOperation.id) {
-                    this._sheetSkeletonManagerService.makeDirty({
-                        sheetId: worksheetId,
-                        commandId,
-                    }, true);
-                }
+                // DO NOT judge if SetWorksheetActiveOperation is executed.
+                // issue #univer-pro/issues/2310
+                // if (commandId !== SetWorksheetActiveOperation.id) {
+                // }
+                this._sheetSkeletonManagerService.makeDirty({
+                    sheetId: worksheetId,
+                    commandId,
+                }, true);
 
-                // Change the skeleton to render when the sheet is changed.
-                // Should also check the init sheet.
-                // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
-                // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
                     sheetId: worksheetId,
                     commandId,
@@ -434,13 +400,20 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
             // All mutations must be executed. Using reCalculate alone will not trigger a refresh.
             if (command.type === CommandType.MUTATION) {
-                this._markUnitDirty(workbookId, command);
+                this._markUnitDirty(command);
             }
         }));
     }
 
-    private _markUnitDirty(unitId: string, command: ICommandInfo) {
+    private _markUnitDirty(command: ICommandInfo) {
         const { mainComponent: spreadsheet, scene } = this._context;
+
+        if (command.id === SetFormulaCalculationNotificationMutation.id) {
+            const params = command.params as ISetFormulaCalculationNotificationMutation;
+            if (params.stageInfo != null) {
+                return;
+            }
+        }
 
         if (spreadsheet) {
             spreadsheet.makeDirty(); // refresh spreadsheet

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { binomialCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class BinomInv extends BaseFunction {
     override minParams = 3;
@@ -52,6 +52,18 @@ export class BinomInv extends BaseFunction {
         const resultArray = trialsArray.mapValue((trialsObject, rowIndex, columnIndex) => {
             const probabilitySObject = probabilitySArray.get(rowIndex, columnIndex) as BaseValueObject;
             const alphaObject = alphaArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
 
             return this._handleSignleObject(trialsObject, probabilitySObject, alphaObject);
         });

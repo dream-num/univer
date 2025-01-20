@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { SheetsUIPart } from '@univerjs/sheets-ui';
 
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
 import { of } from 'rxjs';
@@ -27,7 +28,6 @@ import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter
 import styles from './index.module.less';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
-import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 
 /**
  * This Filter Panel component is used to filter the data in the sheet.

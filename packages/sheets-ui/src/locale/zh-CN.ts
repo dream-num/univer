@@ -109,6 +109,9 @@ const locale = {
             right: '右框线',
         },
         more: '更多',
+        hideGridlines: '隐藏网格线',
+        showGridlines: '展示网格线',
+        toggleGridlines: '切换网格线',
     },
     defaultFmt: {
         Automatic: {
@@ -597,6 +600,7 @@ const locale = {
             setCellStyle: '设置单元格样式',
             copy: '复制',
             alert: '提示',
+            search: '搜索',
             alertContent: '该范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
             userEmpty: '没有指定的人员，分享链接以邀请特定的人。',
             listEmpty: '你还没有设置任何范围或工作表为受保护状态。',

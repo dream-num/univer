@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
-import { DocMentionPopupService } from './services/doc-mention-popup.service';
-import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
-import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
-import { DocMentionService } from './services/doc-mention.service';
 import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, DOCS_MENTION_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
+import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
+import { DocMentionPopupService } from './services/doc-mention-popup.service';
+import { DocMentionService } from './services/doc-mention.service';
+import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 
 export class UniverDocsMentionUIPlugin extends Plugin {
     static override pluginName = DOC_MENTION_UI_PLUGIN;
@@ -36,23 +36,32 @@ export class UniverDocsMentionUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DOCS_MENTION_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
-        const deps: Dependency[] = [
+        ([
             [DocMentionService],
             [DocMentionPopupService],
             [DocMentionUIController],
             [DocMentionTriggerController],
-        ];
-
-        deps.forEach((dep) => {
+        ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
+
+        this._injector.get(DocMentionUIController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(DocMentionTriggerController);
+        this._injector.get(DocMentionPopupService);
     }
 }

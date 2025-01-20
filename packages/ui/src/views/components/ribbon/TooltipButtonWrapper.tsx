@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDropdownProps, ITooltipProps, NullableTooltipRef } from '@univerjs/design';
-import { Dropdown, Tooltip } from '@univerjs/design';
-import React, { createContext, forwardRef, useContext, useMemo, useState } from 'react';
+import type { IDropdownOverlayProps, ITooltipProps } from '@univerjs/design';
+import { DropdownOverlay, DropdownProvider, DropdownTrigger, Tooltip } from '@univerjs/design';
+import React, { createContext, forwardRef, useContext, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
 const TooltipWrapperContext = createContext({
     dropdownVisible: false,
     setDropdownVisible: (_visible: boolean) => {},
 });
 
-export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref) => {
+export interface ITooltipWrapperRef {
+    el: HTMLSpanElement | null;
+}
+
+export const TooltipWrapper = forwardRef<ITooltipWrapperRef, ITooltipProps>((props, ref) => {
     const { children, ...tooltipProps } = props;
+    const spanRef = useRef<HTMLSpanElement>(null);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -48,14 +53,17 @@ export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((pro
         setDropdownVisible: handleChangeDropdownVisible,
     }), [dropdownVisible]);
 
+    useImperativeHandle(ref, () => ({
+        el: spanRef.current,
+    }));
+
     return (
         <Tooltip
-            ref={ref}
             {...tooltipProps}
             visible={tooltipVisible}
             onVisibleChange={handleChangeTooltipVisible}
         >
-            <span>
+            <span ref={spanRef}>
                 <TooltipWrapperContext.Provider value={contextValue}>
                     {children}
                 </TooltipWrapperContext.Provider>
@@ -64,9 +72,7 @@ export const TooltipWrapper = forwardRef<NullableTooltipRef, ITooltipProps>((pro
     );
 });
 
-export function DropdownWrapper(props: IDropdownProps) {
-    const { children, ...dropdownProps } = props;
-
+export function DropdownWrapper({ children, overlay, disabled, offset }: IDropdownOverlayProps & { overlay: React.ReactNode; disabled?: boolean }) {
     const { setDropdownVisible } = useContext(TooltipWrapperContext);
 
     function handleVisibleChange(visible: boolean) {
@@ -74,13 +80,18 @@ export function DropdownWrapper(props: IDropdownProps) {
     }
 
     return (
-        <Dropdown
-            onVisibleChange={handleVisibleChange}
-            {...dropdownProps}
-        >
-            <div onClick={(e) => e.stopPropagation()}>
-                {children}
-            </div>
-        </Dropdown>
+        <DropdownProvider disabled={disabled} onVisibleChange={handleVisibleChange}>
+            <DropdownTrigger>
+                <div className="univer-h-full" onClick={(e) => e.stopPropagation()}>
+                    {children}
+                </div>
+            </DropdownTrigger>
+            <DropdownOverlay offset={offset}>
+                {/* TODO: When the new Menu Component is ready, plz remove the univer-theme class */}
+                <div className="univer-grid univer-gap-2 univer-theme">
+                    {overlay}
+                </div>
+            </DropdownOverlay>
+        </DropdownProvider>
     );
 }

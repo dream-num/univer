@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
+import type { ICellAlert } from '../../services/cell-alert-manager.service';
 import { ErrorSingle, WarningSingle } from '@univerjs/icons';
 import cs from 'clsx';
-import type { ICellAlert } from '../../services/cell-alert-manager.service';
+import React from 'react';
 import { CellAlertType } from '../../services/cell-alert-manager.service';
-import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import styles from './index.module.less';
 
+/**
+ *
+ * @param root0
+ * @param root0.popup
+ */
 export function CellAlert({ popup }: { popup: ICanvasPopup }) {
     const alert = popup.extraProps?.alert;
 

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { getDT } from '@univerjs/thread-comment';
+import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
-import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
@@ -98,7 +99,7 @@ export const StartAddCommentOperation: ICommand = {
         }
 
         const docSelectionRenderManager = renderManagerService.getRenderById(doc.getUnitId())?.with(DocSelectionRenderService);
-
+        docSelectionRenderManager?.setReserveRangesStatus(true);
         if (textRange.collapsed) {
             if (panelService.panelVisible) {
                 panelService.setPanelVisible(false);
@@ -131,7 +132,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
-        docSelectionRenderManager?.blurEditor();
+        docSelectionRenderManager?.blur();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

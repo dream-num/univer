@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { Subscription } from 'rxjs';
-
 import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
-import { Transform } from '../basics/transform';
-import { BaseScrollBar } from './base-scroll-bar';
-import { Rect } from './rect';
+
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
-import type { ThinScene } from '../thin-scene';
+import type { Scene } from '../scene';
 import type { Viewport } from '../viewport';
 import type { IScrollBarProps } from './base-scroll-bar';
+import { Subscription } from 'rxjs';
+import { Transform } from '../basics/transform';
+import { BaseScrollBar } from './base-scroll-bar';
+import { Rect } from './rect';
 
-const MINI_THUMB_SIZE = 17;
+const MIN_THUMB_SIZE = 17;
 
 export class ScrollBar extends BaseScrollBar {
     protected _viewport!: Viewport;
 
-    private _mainScene: Nullable<ThinScene>;
+    private _mainScene: Nullable<Scene>;
 
     private _lastX: number = -1;
 
@@ -50,6 +50,9 @@ export class ScrollBar extends BaseScrollBar {
 
     private _verticalPointerUpSub: Nullable<Subscription>;
 
+    /**
+     * The thickness of a scrolling bar.
+     */
     barSize = 14;
 
     barBorder = 1;
@@ -70,6 +73,15 @@ export class ScrollBar extends BaseScrollBar {
     barBackgroundColor = 'rgba(255,255,255,0.5)';
 
     barBorderColor = 'rgba(255,255,255,0.7)';
+
+    /**
+     * The min width of horizon thumb.
+     */
+    minThumbSizeH = MIN_THUMB_SIZE;
+    /**
+     * The min height of vertical thumb.
+     */
+    minThumbSizeV = MIN_THUMB_SIZE;
 
     private _eventSub = new Subscription();
 
@@ -213,9 +225,9 @@ export class ScrollBar extends BaseScrollBar {
             this.thumbLengthRatio;
 
         // this._horizontalThumbWidth = this._horizontalThumbWidth < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._horizontalThumbWidth;
-        if (this.horizontalThumbWidth < MINI_THUMB_SIZE) {
-            this.horizontalMinusMiniThumb = MINI_THUMB_SIZE - this.horizontalThumbWidth;
-            this.horizontalThumbWidth = MINI_THUMB_SIZE;
+        if (this.horizontalThumbWidth < this.minThumbSizeH) {
+            this.horizontalMinusMiniThumb = this.minThumbSizeH - this.horizontalThumbWidth;
+            this.horizontalThumbWidth = this.minThumbSizeH;
         }
 
         this.horizonScrollTrack?.transformByState({
@@ -226,6 +238,7 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         if (this.horizontalThumbWidth >= parentWidth - this.barSize) {
+            // why hide the thumb rect ?
             this.horizonThumbRect?.setProps({
                 visible: false,
             });
@@ -255,9 +268,9 @@ export class ScrollBar extends BaseScrollBar {
         this.verticalThumbHeight =
             ((this.verticalBarHeight * this.verticalBarHeight) / contentHeight) * this.thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
-        if (this.verticalThumbHeight < MINI_THUMB_SIZE) {
-            this.verticalMinusMiniThumb = MINI_THUMB_SIZE - this.verticalThumbHeight;
-            this.verticalThumbHeight = MINI_THUMB_SIZE;
+        if (this.verticalThumbHeight < this.minThumbSizeV) {
+            this.verticalMinusMiniThumb = this.minThumbSizeV - this.verticalThumbHeight;
+            this.verticalThumbHeight = this.minThumbSizeV;
         }
 
         this.verticalScrollTrack?.transformByState({
@@ -268,6 +281,7 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         if (this.verticalThumbHeight >= parentHeight - this.barSize) {
+            // why hide the thumb rect ?
             this.verticalThumbRect?.setProps({
                 visible: false,
             });
@@ -383,7 +397,7 @@ export class ScrollBar extends BaseScrollBar {
             });
 
             this._lastY = e.offsetY;
-            mainScene.getEngine()?.setRemainCapture();
+            mainScene.getEngine()?.setCapture();
         });
 
         this._verticalPointerUpSub = mainScene.onPointerUp$.subscribeEvent((_evt: unknown, _state: EventState) => {
@@ -480,7 +494,7 @@ export class ScrollBar extends BaseScrollBar {
                 x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;
-            mainScene.getEngine()?.setRemainCapture();
+            mainScene.getEngine()?.setCapture();
         });
         this._horizonPointerUpSub = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             const srcElement = this.horizonThumbRect;

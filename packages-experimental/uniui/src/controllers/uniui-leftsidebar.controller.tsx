@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISidebarService } from '@univerjs/ui';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ILeftSidebarService } from '@univerjs/ui';
 import { distinctUntilChanged, map } from 'rxjs';
 import { Outline } from '../views/outline/Outline';
 
 const OUTLINE_COMPONENT = 'OUTLINE_COMPONENT';
 
-@OnLifecycle(LifecycleStages.Ready, UniuiLeftSidebarController)
 export class UniuiLeftSidebarController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,

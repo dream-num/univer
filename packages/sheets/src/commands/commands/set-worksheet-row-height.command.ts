@@ -15,6 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import type {
+    ISetWorksheetRowHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams,
+} from '../mutations/set-worksheet-row-height.mutation';
+
 import {
     BooleanNumber,
     CommandType,
@@ -25,13 +30,8 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type {
-    ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
-} from '../mutations/set-worksheet-row-height.mutation';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
@@ -295,7 +295,7 @@ export interface ISetWorksheetRowIsAutoHeightCommandParams {
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
-    handler: async (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);

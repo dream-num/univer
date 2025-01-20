@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets/src/services/ref-selections.service.ts"]
+    "include": ["src"]
 }

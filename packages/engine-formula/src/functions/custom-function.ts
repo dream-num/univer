@@ -21,3 +21,9 @@ export class CustomFunction extends BaseFunction {
         return true;
     }
 }
+
+export class AsyncCustomFunction extends CustomFunction {
+    override isAsync(): boolean {
+        return true;
+    }
+}

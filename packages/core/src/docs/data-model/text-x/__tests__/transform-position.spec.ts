@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { TextXAction } from '@univerjs/core';
-import { TextXActionType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import type { TextXAction } from '../action-types';
 
+import { describe, expect, it } from 'vitest';
+import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 describe('transformPosition()', () => {
@@ -26,7 +26,6 @@ describe('transformPosition()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -39,13 +38,11 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -58,13 +55,12 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -79,9 +75,8 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 1,
-                line: 0,
             },
         ];
 
@@ -92,14 +87,13 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 5,
             },
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 1,
-                line: 0,
             },
         ];
 
@@ -110,14 +104,13 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 1,
             },
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 5,
-                line: 0,
             },
         ];
 
@@ -128,22 +121,20 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 2,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
             },
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 2,
-                line: 0,
             },
         ];
 
@@ -154,22 +145,20 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 2,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
             },
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 4,
-                line: 0,
             },
         ];
 
@@ -180,20 +169,18 @@ describe('transformPosition()', () => {
         const actions: TextXAction[] = [
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 1,
-                line: 0,
             },
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
+
                 len: 1,
             },
             {
                 t: TextXActionType.DELETE,
-                segmentId: '',
+
                 len: 4,
-                line: 0,
             },
         ];
 

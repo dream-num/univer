@@ -15,13 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingPermissionController)
 export class SheetDrawingPermissionController extends Disposable {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,

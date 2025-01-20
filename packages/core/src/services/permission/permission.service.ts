@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { IPermissionPoint, IPermissionService } from './type';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Disposable } from '../../shared';
-import type { IPermissionPoint, IPermissionService } from './type';
 import { PermissionStatus } from './type';
 
 export class PermissionService extends Disposable implements IPermissionService {
@@ -26,6 +26,16 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     private _permissionPointUpdate$ = new Subject<IPermissionPoint<unknown>>();
     public permissionPointUpdate$ = this._permissionPointUpdate$.asObservable();
+
+    private _showComponents = true;
+
+    setShowComponents(showComponents: boolean) {
+        this._showComponents = showComponents;
+    }
+
+    getShowComponents() {
+        return this._showComponents;
+    }
 
     deletePermissionPoint(permissionId: string) {
         const permissionPoint = this._permissionPointMap.get(permissionId);

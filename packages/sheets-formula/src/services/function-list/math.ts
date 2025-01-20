@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_MATH, FunctionType } from '@univerjs/engine-formula';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
+import { FUNCTION_NAMES_MATH, FunctionType } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
     {
@@ -122,16 +122,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.ARABIC.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ARABIC.functionParameter.number1.name',
-                detail: 'formula.functionList.ARABIC.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ARABIC.functionParameter.number2.name',
-                detail: 'formula.functionList.ARABIC.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ARABIC.functionParameter.text.name',
+                detail: 'formula.functionList.ARABIC.functionParameter.text.detail',
+                example: '"LVII"',
                 require: 1,
                 repeat: 0,
             },
@@ -789,7 +782,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MDETERM.functionParameter.array.name',
                 detail: 'formula.functionList.MDETERM.functionParameter.array.detail',
-                example: '{3,6,1;1,1,0;3,10,2}',
+                example: 'A1:C3',
                 require: 1,
                 repeat: 0,
             },
@@ -804,7 +797,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MINVERSE.functionParameter.array.name',
                 detail: 'formula.functionList.MINVERSE.functionParameter.array.detail',
-                example: '{3,6,1;1,1,0;3,10,2}',
+                example: 'A1:C3',
                 require: 1,
                 repeat: 0,
             },
@@ -1097,17 +1090,17 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.ROMAN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ROMAN.functionParameter.number1.name',
-                detail: 'formula.functionList.ROMAN.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ROMAN.functionParameter.number.name',
+                detail: 'formula.functionList.ROMAN.functionParameter.number.detail',
+                example: '499',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ROMAN.functionParameter.number2.name',
-                detail: 'formula.functionList.ROMAN.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
+                name: 'formula.functionList.ROMAN.functionParameter.form.name',
+                detail: 'formula.functionList.ROMAN.functionParameter.form.detail',
+                example: '0',
+                require: 0,
                 repeat: 0,
             },
         ],
@@ -1129,6 +1122,28 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
                 name: 'formula.functionList.ROUND.functionParameter.numDigits.name',
                 detail: 'formula.functionList.ROUND.functionParameter.numDigits.detail',
                 example: '1',
+                require: 1,
+                repeat: 0,
+            },
+        ],
+    },
+    {
+        functionName: FUNCTION_NAMES_MATH.ROUNDBANK,
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.ROUNDBANK.description',
+        abstract: 'formula.functionList.ROUNDBANK.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.ROUNDBANK.functionParameter.number.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.number.detail',
+                example: '2.345',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.name',
+                detail: 'formula.functionList.ROUNDBANK.functionParameter.numDigits.detail',
+                example: '2',
                 require: 1,
                 repeat: 0,
             },
@@ -1238,7 +1253,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SERIESSUM.functionParameter.coefficients.name',
                 detail: 'formula.functionList.SERIESSUM.functionParameter.coefficients.detail',
-                example: '{1,-0.5,0.041666667,-0.001388889}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },

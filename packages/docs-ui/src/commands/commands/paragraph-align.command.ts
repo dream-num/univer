@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+
 import {
     CommandType, HorizontalAlign,
     ICommandService,
@@ -25,9 +28,6 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-
-import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 import { getParagraphsInRanges } from './list.command';
 
@@ -92,7 +92,6 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
-                segmentId,
             });
 
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
@@ -114,7 +113,6 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
                         },
                     ],
                 },
-                segmentId,
                 coverType: UpdateDocsAttributeType.REPLACE,
             });
 

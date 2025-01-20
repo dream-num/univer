@@ -8,6 +8,14 @@
         position: relative;
     }
 
+    &-custom-header {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background-color: rgb(var(--color-white));
+    }
+
     &-header {
         // height: 32px;
     }
@@ -46,7 +54,7 @@
         }
 
         &-doc-content {
-            background: rgb(var(--grey-50));
+            background: rgb(var(--bg-color-secondary));
         }
 
         &-canvas {

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
-
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
+import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
+
+import { attachSelectionWithCoord, getCoordByCell, ISheetSelectionRenderService, SelectionControl, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
+import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 
@@ -39,8 +39,11 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
+/**
+ * Show selected range in filter.
+ */
 export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
-    private _filterRangeShape: SelectionShape | null = null;
+    private _filterRangeShape: SelectionControl | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
 
@@ -84,8 +87,8 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) =>
                         command.type === CommandType.MUTATION
-                        && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
-                        && FILTER_MUTATIONS.has(command.id)
+                        && (command.params as Partial<ISheetCommandSharedParams>)?.unitId === workbook.getUnitId()
+                        && (FILTER_MUTATIONS.has(command.id) || command.id === SetRangeValuesMutation.id)
                     ),
                     throttleTime(20, undefined, { leading: false, trailing: true }),
                     map(getParams),
@@ -106,19 +109,21 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _renderRange(range: IRange, skeleton: SpreadsheetSkeleton): void {
         const { scene } = this._context;
-        const { rangeWithCoord, style } = this._selectionRenderService.attachSelectionWithCoord({
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        const filterRangeShape = this._filterRangeShape = new SelectionControl(
+            scene, DEFAULT_Z_INDEX, this._themeService, {
+                rowHeaderWidth,
+                columnHeaderHeight,
+                enableAutoFill: false,
+                highlightHeader: false,
+            });
+        const selectionWithStyle = {
             range,
             primary: null,
-            style: null,
-        });
-
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const filterRangeShape = this._filterRangeShape = new SelectionShape(scene, DEFAULT_Z_INDEX, this._themeService, true);
-        filterRangeShape.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, {
-            hasAutoFill: false,
-            fill: 'rgba(0, 0, 0, 0.0)',
-            ...style,
-        } as ISelectionStyle);
+            style: { fill: 'rgba(0, 0, 0, 0.0)' },
+        };
+        const selectionWithCoord = attachSelectionWithCoord(selectionWithStyle, skeleton);
+        filterRangeShape.updateRangeBySelectionWithCoord(selectionWithCoord);
         filterRangeShape.setEvent(false);
 
         scene.makeDirty(true);

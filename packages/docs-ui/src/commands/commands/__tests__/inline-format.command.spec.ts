@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation, SetTextSelectionsOperation } from '@univerjs/docs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import type { DocumentDataModel, ICommand, Injector, IStyleBase, Univer } from '@univerjs/core';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
@@ -75,6 +74,7 @@ describe('Test inline format commands', () => {
                 startOffset: 0,
                 endOffset: 5,
                 collapsed: false,
+                isActive: true,
             },
         ]);
 

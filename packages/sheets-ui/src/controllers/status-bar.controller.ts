@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import {
     CellValueType,
     createInterceptorKey,
@@ -23,33 +29,23 @@ import {
     Inject,
     InterceptorManager,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     RANGE_TYPE,
     splitIntoGrid,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+
 import {
-    FormulaDataModel,
     FUNCTION_NAMES_MATH,
     FUNCTION_NAMES_STATISTICAL,
-    IFunctionService,
 } from '@univerjs/engine-formula';
 import {
     INumfmtService,
     SetRangeValuesMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
-
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
 import { IStatusBarService } from '../services/status-bar.service';
-import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 
 export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
 
@@ -115,19 +111,14 @@ function calculateValues(valueSet: CalculateValueSet) {
     ];
 }
 
-@OnLifecycle(LifecycleStages.Ready, StatusBarController)
 export class StatusBarController extends Disposable {
-    private _calculateTimeout: number | NodeJS.Timeout = -1;
-
     public interceptor = new InterceptorManager({ STATUS_BAR_PERMISSION_CORRECT });
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IFunctionService private readonly _functionService: IFunctionService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(INumfmtService) private _numfmtService: INumfmtService
     ) {
         super();

@@ -1,3 +1,8 @@
+const jsdoc = require('eslint-plugin-jsdoc');
+const eslintPluginReadableTailwind = require('eslint-plugin-readable-tailwind');
+const noExternalImportsInFacade = require('./plugins/no-external-imports-in-facade');
+const noSelfPackageImports = require('./plugins/no-self-package-imports');
+
 exports.baseRules = {
     curly: ['error', 'multi-line'],
     'no-param-reassign': ['warn'],
@@ -44,6 +49,7 @@ exports.baseRules = {
     'react/no-unstable-context-value': 'warn',
     'react/no-unstable-default-props': 'warn',
     'command/command': 'off',
+    'jsdoc/tag-lines': 'off',
 
     // TODO: debatable rules
     'react/no-duplicate-key': 'warn',
@@ -107,6 +113,14 @@ exports.baseRules = {
 exports.typescriptPreset = () => {
     return {
         files: ['**/*.ts', '**/*.tsx'],
+        plugins: {
+            univer: {
+                rules: {
+                    'no-external-imports-in-facade': noExternalImportsInFacade,
+                    'no-self-package-imports': noSelfPackageImports,
+                },
+            },
+        },
         rules: {
             'ts/naming-convention': [
                 'warn',
@@ -134,11 +148,60 @@ exports.typescriptPreset = () => {
     };
 };
 
+exports.univerSourcePreset = () => {
+    return {
+        files: ['**/*.ts', '**/*.tsx'],
+        ignores: [
+            '**/__tests__/**/*',
+            '**/*.spec.ts',
+            '**/*.test.ts',
+        ],
+        rules: {
+            'univer/no-self-package-imports': 'error',
+        },
+        languageOptions: {
+            parser: require('@typescript-eslint/parser'),
+        },
+    };
+};
+
 exports.facadePreset = () => {
     return {
-        files: ['**/facade/src/**/*.ts'],
+        files: ['**/src/facade/**/*.ts'],
+        ignores: [
+            '**/core/src/**/*.ts',
+            '**/__tests__/**/*',
+            '**/*.spec.ts',
+            '**/*.test.ts',
+        ],
         rules: {
             'ts/explicit-function-return-type': 'error',
+            'univer/no-external-imports-in-facade': 'error',
+            ...jsdoc.configs.recommended.rules,
+            'jsdoc/tag-lines': 'off',
+        },
+    };
+};
+
+exports.tailwindcssPreset = () => {
+    return {
+        files: ['**/*.{jsx,tsx}'],
+        languageOptions: {
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+        },
+        plugins: {
+            'readable-tailwind': eslintPluginReadableTailwind,
+        },
+        rules: {
+            ...eslintPluginReadableTailwind.configs.warning.rules,
+            ...eslintPluginReadableTailwind.configs.error.rules,
+            'jsonc/sort-keys': ['warn'],
+            'readable-tailwind/multiline': ['warn', { printWidth: 120, group: 'newLine' }],
+            'react-hooks/rules-of-hooks': 'off',
         },
     };
 };

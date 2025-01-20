@@ -19,8 +19,10 @@
  */
 export enum LocaleType {
     EN_US = 'enUS',
+    FR_FR = 'frFR',
     ZH_CN = 'zhCN',
     RU_RU = 'ruRU',
     ZH_TW = 'zhTW',
     VI_VN = 'viVN',
+    FA_IR = 'faIR',
 }

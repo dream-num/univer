@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithMergeInfo, ISelectionWithCoord, Nullable } from '@univerjs/core';
-import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
+import type { ICellWithCoord, IRangeWithCoord, Nullable } from '@univerjs/core';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
+import { convertCellToRange, RANGE_TYPE } from '@univerjs/core';
 
+/**
+ * Data model for SelectionControl.model
+ * NOT Same as @univerjs/sheet.WorkbookSelectionModel, that's data model for Workbook
+ */
 export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;
     private _startRow: number = -1;
@@ -30,8 +35,11 @@ export class SelectionRenderModel implements IRangeWithCoord {
     /**
      * The highlight cell of a selection. aka: current cell
      */
-    private _primary: Nullable<ISelectionCellWithMergeInfo>;
+    private _primary: Nullable<ICellWithCoord>;
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
+
+    constructor() {
+    }
 
     get startColumn() { return this._startColumn; }
     get startRow() { return this._startRow; }
@@ -88,9 +96,9 @@ export class SelectionRenderModel implements IRangeWithCoord {
         return false;
     }
 
-    highlightToSelection() {
+    highlightToSelection(): Nullable<IRangeWithCoord> {
         if (!this._primary) return;
-        return makeCellToSelection(this._primary);
+        return convertCellToRange(this._primary);
     }
 
     getRange(): IRangeWithCoord {
@@ -126,7 +134,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         };
     }
 
-    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithMergeInfo>) {
+    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ICellWithCoord>) {
         const {
             startColumn,
             startRow,
@@ -152,19 +160,19 @@ export class SelectionRenderModel implements IRangeWithCoord {
         if (rangeType !== undefined) {
             this._rangeType = rangeType;
         }
-        this.setCurrentCell(currentCell);
+        if (currentCell !== undefined) {
+            this.setCurrentCell(currentCell);
+        }
     }
 
     /**
      * Set primary cell.
-     *
-     * TODO @lumixraku there are 3 concepts for same thing, primary and current and highlight, primary is better cuz selectionModel is using primary.
+     * @TODO lumixraku there are 3 concepts for same thing, primary and current and highlight
+     * highlight is best. primary sometimes means the actual cell(actual means ignore merge)
      * @param currentCell
      */
-    setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
-        if (currentCell) {
-            this._primary = currentCell;
-        }
+    setCurrentCell(currentCell: Nullable<ICellWithCoord>) {
+        this._primary = currentCell;
     }
 
     clearCurrentCell() {

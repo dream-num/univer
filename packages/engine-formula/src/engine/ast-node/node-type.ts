@@ -15,19 +15,19 @@
  */
 
 export enum NodeType {
-    REFERENCE = 'ReferenceNode',
-    VALUE = 'ValueNode',
-    OPERATOR = 'OperatorNode',
-    FUNCTION = 'FunctionNode',
-    LAMBDA = 'LambdaNode',
-    LAMBDA_PARAMETER = 'LambdaNodeParameter',
-    ERROR = 'ErrorNode',
-    BASE = 'Base',
-    ROOT = 'Root',
-    UNION = 'UnionNode',
-    PREFIX = 'PrefixNode',
-    SUFFIX = 'SuffixNode',
-    NULL = 'NullNode',
+    REFERENCE = 1,
+    VALUE = 2,
+    OPERATOR = 3,
+    FUNCTION = 4,
+    LAMBDA = 5,
+    LAMBDA_PARAMETER = 6,
+    ERROR = 7,
+    BASE = 8,
+    ROOT = 9,
+    UNION = 10,
+    PREFIX = 11,
+    SUFFIX = 12,
+    NULL = 13,
 }
 
 export const NODE_ORDER_MAP = new Map([

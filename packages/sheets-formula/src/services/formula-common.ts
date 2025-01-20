@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 
 export enum FormulaResultStatus {
     NOT_REGISTER = 1,
@@ -24,10 +24,10 @@ export enum FormulaResultStatus {
 }
 
 export interface IOtherFormulaResult {
-    result?: Nullable<ICellData>[][];
+    result?: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>;
     status: FormulaResultStatus;
     formulaId: string;
-    callbacks: Set<(value: Nullable<ICellData>[][]) => void>;
+    callbacks: Set<(value: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]>) => void>;
     extra?: Record<string, any>;
 }
 

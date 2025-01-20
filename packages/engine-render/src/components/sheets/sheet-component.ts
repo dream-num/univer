@@ -16,12 +16,12 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 
-import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
-import { RenderComponent } from '../component';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import { RENDER_CLASS_TYPE } from '../../basics/const';
+import { RenderComponent } from '../component';
 
 export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     constructor(
@@ -37,6 +37,7 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
 
     updateSkeleton(spreadsheetSkeleton: SpreadsheetSkeleton) {
         this._skeleton = spreadsheetSkeleton;
+        this.getScene()?.updateTransformerZero(spreadsheetSkeleton.rowHeaderWidth, spreadsheetSkeleton.columnHeaderHeight);
     }
 
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {

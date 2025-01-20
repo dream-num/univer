@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum, useDependency } from '@univerjs/core';
-
-import {
-    Menu as DesignMenu,
-    MenuItem as DesignMenuItem,
-    MenuItemGroup as DesignMenuItemGroup,
-    SubMenu as DesignSubMenu,
-} from '@univerjs/design';
-import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
-import clsx from 'clsx';
-import React, { useMemo, useState } from 'react';
-import { combineLatest, isObservable, map } from 'rxjs';
-
-import { ILayoutService } from '../../../services/layout/layout.service';
-import { MenuItemType } from '../../../services/menu/menu';
-import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import { CustomLabel } from '../../custom-label/CustomLabel';
-import { useScrollYOverContainer } from '../../hooks/layout';
-import { useObservable } from '../../hooks/observable';
-import styles from './index.module.less';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -42,6 +22,25 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
+import { isRealNum, useDependency } from '@univerjs/core';
+import {
+    Menu as DesignMenu,
+    MenuItem as DesignMenuItem,
+    MenuItemGroup as DesignMenuItemGroup,
+    SubMenu as DesignSubMenu,
+} from '@univerjs/design';
+import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
+import clsx from 'clsx';
+
+import React, { useEffect, useMemo, useState } from 'react';
+import { combineLatest, isObservable, of } from 'rxjs';
+import { ILayoutService } from '../../../services/layout/layout.service';
+import { MenuItemType } from '../../../services/menu/menu';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { CustomLabel } from '../../custom-label/CustomLabel';
+import { useScrollYOverContainer } from '../../hooks/layout';
+import { useObservable } from '../../hooks/observable';
+import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
 
@@ -64,32 +63,43 @@ function MenuWrapper(props: IBaseMenuProps) {
 
     const menuManagerService = useDependency(IMenuManagerService);
 
-    if (!menuType) {
-        return null;
-    };
-    const menuItems = menuManagerService.getMenuByPositionKey(menuType);
+    const menuItems = useMemo(() => menuType ? menuManagerService.getMenuByPositionKey(menuType) : [], [menuType, menuManagerService]);
+
+    const [hiddenStates, setHiddenStates] = useState<Record<string, boolean>>({});
 
     const filteredMenuItems = useMemo(() => {
         return menuItems.filter((item) => {
             if (!item.children) return item;
 
-            let hasChildren = false;
-            const hiddenObservables = item.children?.map((item) => item.item?.hidden$).filter((item) => !!item);
-
-            combineLatest(hiddenObservables)
-                .pipe(
-                    map((hiddenValues) => hiddenValues.every((hidden) => hidden === true))
-                )
-                .subscribe((allHidden) => {
-                    if (!allHidden) {
-                        hasChildren = true;
-                    }
-                })
-                .unsubscribe();
-
-            return hasChildren;
+            const itemKey = item.key?.toString() || '';
+            return !hiddenStates[itemKey];
         });
+    }, [menuItems, hiddenStates]);
+
+    useEffect(() => {
+        const subscriptions = menuItems.map((item) => {
+            if (!item.children) return null;
+
+            const hiddenObservables = item.children.map((subItem) => subItem.item?.hidden$ ?? of(false));
+
+            return combineLatest(hiddenObservables).subscribe((hiddenValues) => {
+                const isAllHidden = hiddenValues.every((hidden) => hidden === true);
+                setHiddenStates((prev) => ({
+                    ...prev,
+                    [item.key]: isAllHidden,
+                }));
+            });
+        });
+
+        return () => {
+            subscriptions.forEach((sub) => sub?.unsubscribe());
+            setHiddenStates({});
+        };
     }, [menuItems]);
+
+    if (!menuType) {
+        return null;
+    };
 
     return filteredMenuItems && filteredMenuItems.map((item) => item.item
         ? (

@@ -15,14 +15,20 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
+    IMoveRangeCommandParams,
+    IReorderRangeMutationParams,
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '@univerjs/sheets';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
+    MoveRangeCommand,
+    ReorderRangeCommand,
     SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetRowAutoHeightMutation,
@@ -31,17 +37,13 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
-@OnLifecycle(LifecycleStages.Ready, AutoHeightController)
 export class AutoHeightController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
@@ -90,22 +92,25 @@ export class AutoHeightController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
         // for intercept'SetRangeValuesCommand' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
-                if (command.id !== SetRangeValuesCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
+            getMutations: (command) => {
+                if (command.id === SetRangeValuesCommand.id) {
+                    const params = command.params as ISetRangeValuesRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight(params.range);
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
+
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
@@ -150,6 +155,25 @@ export class AutoHeightController extends Disposable {
                 }
 
                 return this.getUndoRedoParamsOfAutoHeight(selections);
+            },
+        }));
+
+        this.disposeWithMe(sheetInterceptorService.interceptAfterCommand({
+            getMutations: (command) => {
+                if (command.id === MoveRangeCommand.id) {
+                    const params = command.params as IMoveRangeCommandParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.fromRange, params.toRange]);
+                }
+
+                if (command.id === ReorderRangeCommand.id) {
+                    const params = command.params as IReorderRangeMutationParams;
+                    return this.getUndoRedoParamsOfAutoHeight([params.range]);
+                }
+
+                return {
+                    redos: [],
+                    undos: [],
+                };
             },
         }));
     }

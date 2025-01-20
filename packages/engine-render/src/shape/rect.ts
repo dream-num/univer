@@ -16,10 +16,10 @@
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import { ObjectType } from '../base-object';
-import { Shape } from './shape';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { ObjectType } from '../base-object';
+import { Shape } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;
@@ -33,6 +33,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     override objectType = ObjectType.RECT;
 
     private _radius: number = 0;
+
     /**
      * For rendering, in many case object size is bigger than visual size for better user interaction.
      */
@@ -62,6 +63,10 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
 
     get radius() {
         return this._radius;
+    }
+
+    setObjectType(type: ObjectType) {
+        this.objectType = type;
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps) {

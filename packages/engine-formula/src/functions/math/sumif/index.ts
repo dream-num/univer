@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
-import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { valueObjectCompare } from '../../../engine/utils/object-compare';
+import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -26,9 +27,31 @@ export class Sumif extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(range: FunctionVariantType, criteria: FunctionVariantType, sumRange?: FunctionVariantType): BaseValueObject {
+        let _criteria = criteria;
+
+        if (criteria.isReferenceObject()) {
+            _criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (_criteria.isArray()) {
+            const resultArray = (_criteria as ArrayValueObject).mapValue((criteriaObject) => this._handleSingleObject(range, criteriaObject, sumRange));
+
+            if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
+                return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+            }
+
+            return resultArray;
+        }
+
+        return this._handleSingleObject(range, _criteria as BaseValueObject, sumRange);
+    }
+
+    private _handleSingleObject(range: FunctionVariantType, criteria: BaseValueObject, sumRange?: FunctionVariantType): BaseValueObject {
         if (range.isError()) {
-            return range;
+            return range as ErrorValueObject;
         }
 
         if (criteria.isError()) {
@@ -36,39 +59,45 @@ export class Sumif extends BaseFunction {
         }
 
         if (sumRange?.isError()) {
-            return sumRange;
+            return sumRange as ErrorValueObject;
         }
 
-        if (!range.isArray() || (sumRange && !sumRange.isArray())) {
+        if (!range.isReferenceObject() || (sumRange && !sumRange.isReferenceObject())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (criteria.isArray()) {
-            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem, sumRange));
-        }
+        const _range = (range as BaseReferenceObject).toArrayValueObject();
 
-        return this._handleSingleObject(range, criteria, sumRange);
-    }
+        let resultArrayObject = valueObjectCompare(_range, criteria);
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        let resultArrayObject = valueObjectCompare(range, criteria);
-
-        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
         // When comparing non-numbers and numbers, it does not take the result
-        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, _range, criteria);
 
-        // sumRange has the same dimensions as range
-        const sumRangeArray = sumRange
-            ? (sumRange as ArrayValueObject).slice(
-                [0, (range as ArrayValueObject).getRowCount()],
-                [0, (range as ArrayValueObject).getColumnCount()]
-            )
-            : (range as ArrayValueObject);
+        const rangeRowCount = _range.getRowCount();
+        const rangeColumnCount = _range.getColumnCount();
 
-        if (!sumRangeArray) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        let _sumRange = _range;
+
+        if (sumRange) {
+            _sumRange = (sumRange as BaseReferenceObject).toArrayValueObject();
+
+            const sumRangeRowCount = _sumRange.getRowCount();
+            const sumRangeColumnCount = _sumRange.getColumnCount();
+
+            // sumRange has different dimensions than range, then adjust sumRange dimensions to match range dimensions
+            // TODO: @DR-Univer The current situation is that the cell value in the extended range changes,
+            // but it is not within the formula parameter range, so it will not trigger the formula to recalculate.
+            if (rangeRowCount !== sumRangeRowCount || rangeColumnCount !== sumRangeColumnCount) {
+                const rangeData = (sumRange as BaseReferenceObject).getRangeData();
+                rangeData.endRow = rangeData.startRow + rangeRowCount - 1;
+                rangeData.endColumn = rangeData.startColumn + rangeColumnCount - 1;
+
+                (sumRange as BaseReferenceObject).setRangeData(rangeData);
+
+                _sumRange = (sumRange as BaseReferenceObject).toArrayValueObject();
+            }
         }
 
-        return sumRangeArray.pick(resultArrayObject as ArrayValueObject).sum();
+        return _sumRange.pick(resultArrayObject as ArrayValueObject).sum();
     }
 }

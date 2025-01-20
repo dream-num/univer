@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'docs-thread-comment-ui.config';
+export const DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY = 'docs-thread-comment-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_THREAD_COMMENT_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsThreadCommentUIConfig {
     menu?: MenuConfig;

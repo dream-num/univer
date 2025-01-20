@@ -15,15 +15,15 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
-import { DocRenderController } from '@univerjs/docs-ui';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { CustomDecorationType, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOC_INTERCEPTOR_POINT, DocInterceptorService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocRenderController } from '@univerjs/docs-ui';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
-@OnLifecycle(LifecycleStages.Starting, DocThreadCommentRenderController)
 export class DocThreadCommentRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -31,12 +31,14 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._interceptorViewModel();
         this._initReRender();
+        this._initSyncComments();
     }
 
     private _initReRender() {
@@ -86,5 +88,63 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 });
             },
         });
+    }
+
+    private _initSyncComments() {
+        const unitId = this._context.unit.getUnitId();
+        const subUnitId = DEFAULT_DOC_SUBUNIT_ID;
+        const threadIds = this._context.unit.getBody()?.customDecorations?.filter((i) => i.type === CustomDecorationType.COMMENT).map((i) => i.id) ?? [];
+        threadIds.forEach((id) => {
+            const comment = this._threadCommentModel.getComment(unitId, subUnitId, id);
+            if (!comment) {
+                this._threadCommentModel.addComment(unitId, subUnitId, { id, threadId: id, ref: '', dT: '', personId: '', text: { dataStream: '' }, unitId, subUnitId });
+            }
+        });
+        threadIds.length && this._threadCommentModel.syncThreadComments(this._context.unit.getUnitId(), DEFAULT_DOC_SUBUNIT_ID, threadIds);
+
+        let prevThreadIds: string[] = threadIds.sort();
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === RichTextEditingMutation.id) {
+                const params = commandInfo.params as IRichTextEditingMutationParams;
+                if (params.unitId !== this._context.unit.getUnitId()) {
+                    return;
+                }
+
+                const currentThreadIds = this._context.unit.getBody()?.customDecorations?.filter((i) => i.type === CustomDecorationType.COMMENT).map((i) => i.id) ?? [];
+                const currentThreadIdsSorted = currentThreadIds.sort();
+                if (JSON.stringify(prevThreadIds) !== JSON.stringify(currentThreadIdsSorted)) {
+                    const preIds = new Set(prevThreadIds);
+                    const currentIds = new Set(currentThreadIdsSorted);
+                    const addIds = new Set<string>();
+                    const deleteIds = new Set<string>();
+
+                    currentThreadIds.forEach((id) => {
+                        if (!preIds.has(id)) {
+                            addIds.add(id);
+                        }
+                    });
+
+                    prevThreadIds.forEach((id) => {
+                        if (!currentIds.has(id)) {
+                            deleteIds.add(id);
+                        }
+                    });
+
+                    prevThreadIds = currentThreadIdsSorted;
+                    addIds.forEach((id) => {
+                        const comment = this._threadCommentModel.getComment(unitId, subUnitId, id);
+                        if (!comment) {
+                            this._threadCommentModel.addComment(unitId, subUnitId, { id, threadId: id, ref: '', dT: '', personId: '', text: { dataStream: '' }, unitId, subUnitId });
+                        }
+                    });
+
+                    // deleteIds.forEach((id) => {
+                    //     this._threadCommentModel.deleteThread(unitId, subUnitId, id);
+                    // });
+
+                    this._threadCommentModel.syncThreadComments(unitId, subUnitId, [...addIds]);
+                }
+            }
+        }));
     }
 }

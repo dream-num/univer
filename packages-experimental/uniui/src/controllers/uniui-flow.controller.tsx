@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IFlowViewport } from '../services/flow/flow-manager.service';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { auditTime, throttleTime } from 'rxjs';
 import { SetFlowViewportOperation } from '../commands/operations/set-flow-viewport.operation';
-import type { IFlowViewport } from '../services/flow/flow-manager.service';
-import { FlowManagerService } from '../services/flow/flow-manager.service';
 import { UniFocusUnitOperation } from '../commands/operations/uni-focus-unit.operation';
+import { FlowManagerService } from '../services/flow/flow-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, UniuiFlowController)
 export class UniuiFlowController extends Disposable {
     constructor(
         @ICommandService protected readonly _commandService: ICommandService,

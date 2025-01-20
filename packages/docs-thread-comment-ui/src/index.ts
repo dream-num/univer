@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverDocsThreadCommentUIPlugin } from './plugin';
 
 // #region - all commands

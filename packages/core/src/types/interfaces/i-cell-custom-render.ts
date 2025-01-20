@@ -17,15 +17,15 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Nullable } from '../../shared';
-import type { Worksheet } from '../../sheets/worksheet';
+import type { ICellDataForSheetInterceptor, ICellWithCoord } from '../../sheets/typedef';
 import type { Workbook } from '../../sheets/workbook';
-import type { ICellDataForSheetInterceptor, ISelectionCellWithMergeInfo } from '../../sheets/typedef';
+import type { Worksheet } from '../../sheets/worksheet';
 import type { IStyleData } from './i-style-data';
 
 export interface ICellRenderContext {
-    data: ICellDataForSheetInterceptor;
+    data: Nullable<ICellDataForSheetInterceptor>;
     style: Nullable<IStyleData>;
-    primaryWithCoord: ISelectionCellWithMergeInfo;
+    primaryWithCoord: ICellWithCoord;
     unitId: string;
     subUnitId: string;
     row: number;

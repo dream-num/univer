@@ -16,6 +16,8 @@
 
 /* eslint-disable ts/no-explicit-any */
 
+import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -31,12 +33,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
+
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-
-import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
@@ -117,12 +118,17 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
             injector.add([IRenderManagerService, { useClass: MockRenderManagerService as unknown as Ctor<IRenderManagerService> }]);
 
             injector.add([DocSelectionManagerService]);
+            injector.add([DocMenuStyleService]);
             injector.add([DocStateEmitService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([DocIMEInputManagerService]);
             injector.add([DocSelectionRenderService]);
 
             dependencies?.forEach((d) => injector.add(d));
+        }
+
+        override onReady(): void {
+            this._injector.get(DocStateChangeManagerService);
         }
     }
 

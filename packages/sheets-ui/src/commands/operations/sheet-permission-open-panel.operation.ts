@@ -15,15 +15,18 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
+import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../consts/permission';
 
 export interface IPermissionOpenPanelParam {
     fromSheetBar?: boolean;
     showDetail?: boolean;
+    rule?: IPermissionPanelRule;
+    oldRule?: IPermissionPanelRule;
 }
 
 export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelParam> = {
@@ -34,7 +37,7 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
         const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
         const sheetPermissionUserManagerService = accessor.get(SheetPermissionUserManagerService);
 
-        const { showDetail = true, fromSheetBar = false } = _params;
+        const { showDetail = true, fromSheetBar = false, rule, oldRule } = _params;
 
         const sidebarProps = {
             header: { title: 'permission.panel.title' },
@@ -42,12 +45,10 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
                 label: UNIVER_SHEET_PERMISSION_PANEL,
                 showDetail,
                 fromSheetBar,
+                rule,
+                oldRule,
             },
             width: 330,
-            footer: {
-                label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
-                showDetail,
-            },
             onClose: () => {
                 sheetPermissionPanelModel.reset();
                 sheetPermissionUserManagerService.reset();

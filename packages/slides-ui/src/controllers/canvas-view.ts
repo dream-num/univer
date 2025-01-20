@@ -15,20 +15,18 @@
  */
 
 import type { IPageElement, Nullable } from '@univerjs/core';
-import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type {
     BaseObject,
     IRenderModule,
 } from '@univerjs/engine-render';
+import type { PageID } from '../type';
+import { RxDisposable } from '@univerjs/core';
+
 import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
-
-import type { PageID } from '../type';
 import { SlideRenderController } from './slide.render-controller';
 
-// export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
-@OnLifecycle(LifecycleStages.Ready, CanvasView)
 export class CanvasView extends RxDisposable implements IRenderModule {
     constructor(
         // this controller needs by commands. root injector. T

@@ -20,6 +20,7 @@ import { AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    CancelFrozenCommand,
     CopySheetCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
@@ -31,11 +32,9 @@ import { AddWorksheetMergeAllCommand,
     InsertRowBeforeCommand,
     InsertSheetCommand,
     RemoveSheetCommand,
-    SetFrozenCancelCommand,
     SetFrozenCommand,
     SetHorizontalTextAlignCommand,
     SetOverlineCommand,
-    SetRangeProtectionCommand,
     SetRangeValuesCommand,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
@@ -47,8 +46,8 @@ import { AddWorksheetMergeAllCommand,
     SetWorksheetActivateCommand,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
-import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
-import { SetRangeBoldCommand,
+import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
+import { AutoFillCommand, RefillCommand, SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
@@ -73,7 +72,7 @@ import {
     IUIPartsService,
 } from '@univerjs/ui';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
-import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
+import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ActionRecorderService } from '../services/action-recorder.service';
 import { RecorderPanel } from '../views/components/RecorderPanel';
@@ -104,6 +103,8 @@ export class ActionRecorderController extends Disposable {
             OpenRecordPanelOperation,
             CloseRecordPanelOperation,
             ReplayLocalRecordCommand,
+            ReplayLocalRecordOnNamesakeCommand,
+            ReplayLocalRecordOnActiveCommand,
         ]).forEach((command) => this._commandSrv.registerCommand(command));
     }
 
@@ -140,8 +141,8 @@ export class ActionRecorderController extends Disposable {
             // SetBoldCommand,
             // SetFontFamilyCommand,
             // SetFontSizeCommand,
-            SetFrozenCancelCommand,
             SetFrozenCommand,
+            CancelFrozenCommand,
             SetHorizontalTextAlignCommand,
             // SetItalicCommand,
             SetOverlineCommand,
@@ -149,7 +150,6 @@ export class ActionRecorderController extends Disposable {
             SetRangeFontFamilyCommand,
             SetRangeFontSizeCommand,
             SetRangeItalicCommand,
-            SetRangeProtectionCommand,
             SetRangeStrickThroughCommand,
             SetRangeSubscriptCommand,
             SetRangeSuperscriptCommand,
@@ -170,6 +170,8 @@ export class ActionRecorderController extends Disposable {
             SheetPasteFormatCommand,
             SheetPasteShortKeyCommand,
             SheetPasteValueCommand,
+            AutoFillCommand,
+            RefillCommand,
 
             SetWorksheetActivateCommand,
             SetWorksheetActiveOperation,

@@ -15,13 +15,15 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
-import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, IPasteHookValueType, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import type { IDeleteDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, type IDrawingJsonUndo1, IDrawingManagerService, ImageSourceType } from '@univerjs/drawing';
+import { Disposable, DrawingTypeEnum, ICommandService, Tools } from '@univerjs/core';
+import { IDrawingManagerService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingApplyType, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+
 import { COPY_TYPE, discreteRangeToRange, ISheetClipboardService, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { transformToDrawingPosition } from '../basics/transform-position';
@@ -75,7 +77,13 @@ function focusDocument() {
     };
 }
 
-@OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
+const specialPastes: IPasteHookValueType[] = [
+    PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+    PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+    PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+    PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
+];
+
 export class SheetsDrawingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         drawings: ISheetDrawing[];
@@ -99,6 +107,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         return this._drawingService.getFocusDrawings() as ISheetDrawing[];
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_IMAGE_UI_PLUGIN',
@@ -154,7 +163,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
                 const mutations = this._copyInfo.copyRange
                     ? this._generateRangeDrawingsPasteMutations({ pasteType, unitId, subUnitId, pasteRange }, { copyRange, copyType })
-                    : this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
+                    : this._generateSingleDrawingPasteMutations({ pasteTo, pasteType }, COPY_TYPE.COPY);
 
                 return mutations;
             },
@@ -165,7 +174,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
             onPasteEmpty: (pasteTo: ISheetDiscreteRangeLocation) => {
                 if (this._copyInfo) {
-                    return this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
+                    return this._generateSingleDrawingPasteMutations({ pasteTo, pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE }, COPY_TYPE.COPY);
                 } else {
                     return { undos: [], redos: [] };
                 }
@@ -173,7 +182,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
             onPasteFiles: (pasteTo: ISheetDiscreteRangeLocation, files) => {
                 if (this._copyInfo) {
-                    return this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
+                    return this._generateSingleDrawingPasteMutations({ pasteTo, pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE }, COPY_TYPE.COPY);
                 } else {
                     // Paste image from external
                     const images = files.filter((file) => file.type.includes('image'));
@@ -241,7 +250,16 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         }
     }
 
-    private _generateSingleDrawingPasteMutations(pasteTo: ISheetDiscreteRangeLocation, copyType: COPY_TYPE) {
+    private _generateSingleDrawingPasteMutations(pasteContext: {
+        pasteTo: ISheetDiscreteRangeLocation;
+        pasteType: IPasteHookValueType;
+    }, copyType: COPY_TYPE) {
+        const { pasteType, pasteTo } = pasteContext;
+
+        if (specialPastes.includes(pasteType)) {
+            return { redos: [], undos: [] };
+        }
+
         const { unitId, subUnitId, range } = pasteTo;
         const render = this._renderManagerService.getRenderById(unitId);
         const skeletonManagerService = render?.with(SheetSkeletonManagerService);
@@ -351,12 +369,13 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         return { redos, undos };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _generateRangeDrawingsPasteMutations(
         pasteContext: {
             unitId: string;
             subUnitId: string;
             pasteRange: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
         },
         copyContext: {
             copyType: COPY_TYPE;
@@ -369,21 +388,13 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             pasteType,
             pasteRange,
         } = pasteContext;
+
         const {
             copyRange,
             copyType,
         } = copyContext;
 
-        if (
-            [
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
-            ].includes(
-                String(pasteType)
-            )
-        ) {
+        if (specialPastes.includes(pasteType)) {
             return { redos: [], undos: [] };
         }
 
@@ -397,9 +408,8 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
         if (!copyRange) {
             return this._generateSingleDrawingPasteMutations({
-                unitId,
-                subUnitId,
-                range: pasteRange,
+                pasteTo: { unitId, subUnitId, range: discreteRangeToRange(pasteRange) as unknown as IDiscreteRange },
+                pasteType,
             }, copyType);
         }
 

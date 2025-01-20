@@ -15,21 +15,21 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, Inject, isRealNum, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { HoverManagerService } from '../services/hover-manager.service';
+import { CellValueType, Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
+import { IZenZoneService } from '@univerjs/ui';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
+import { HoverManagerService } from '../services/hover-manager.service';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 
-@OnLifecycle(LifecycleStages.Rendered, ForceStringAlertRenderController)
 export class ForceStringAlertRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
         this._init();
@@ -37,6 +37,7 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
 
     private _init() {
         this._initCellAlertPopup();
+        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -75,7 +76,19 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
                 }
             }
 
-            this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            this._hideAlert();
         }));
+    }
+
+    private _initZenService() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            if (visible) {
+                this._hideAlert();
+            }
+        }));
+    }
+
+    private _hideAlert() {
+        this._cellAlertManagerService.removeAlert(ALERT_KEY);
     }
 }

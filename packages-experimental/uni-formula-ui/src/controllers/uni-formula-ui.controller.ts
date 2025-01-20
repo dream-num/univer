@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { UniFormulaPopup } from '../views/components/DocFormulaPopup';
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand, ShowFormulaPopupOperation } from '../commands/operations/operation';
+import { UniFormulaPopup } from '../views/components/DocFormulaPopup';
 
-@OnLifecycle(LifecycleStages.Steady, UniFormulaUniController)
 export class UniFormulaUniController extends Disposable {
     constructor(
         @ICommandService private readonly _commandSrv: ICommandService,

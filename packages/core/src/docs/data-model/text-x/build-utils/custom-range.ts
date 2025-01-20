@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, generateRandomId, Tools } from '@univerjs/core';
-import type { ICustomRange, ITextRange } from '@univerjs/core';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { CustomRangeType, ICustomRange, IDocumentBody } from '../../../../types/interfaces';
+import { generateRandomId, Tools } from '../../../../shared';
 
-export function isCustomRangeSplitSymbol(text: string) {
-    return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
-}
-
+/**
+ * Check if two ranges intersect
+ * @param line1Start - The start of the first range
+ * @param line1End - The end of the first range
+ * @param line2Start - The start of the second range
+ * @param line2End - The end of the second range
+ * @returns True if the ranges intersect, false otherwise
+ */
 export function isIntersecting(line1Start: number, line1End: number, line2Start: number, line2End: number) {
     if ((line1Start <= line2Start && line1End >= line2Start) ||
         (line1Start >= line2Start && line1Start <= line2End)) {
@@ -29,32 +34,7 @@ export function isIntersecting(line1Start: number, line1End: number, line2Start:
     return false;
 }
 
-export function shouldDeleteCustomRange(deleteStart: number, deleteLen: number, customRange: ICustomRange, dataStream: string) {
-    const dataStreamSlice = dataStream.slice(customRange.startIndex + 1, customRange.endIndex);
-    const start = Math.max(deleteStart - (customRange.startIndex + 1), 0);
-    const end = (deleteStart + deleteLen - 1) - (customRange.startIndex + 1);
-
-    if (end < 0) {
-        return false;
-    }
-
-    if (start === 0 && end >= dataStreamSlice.length) {
-        return true;
-    }
-
-    const result = dataStreamSlice.slice(0, start) + dataStreamSlice.slice(start + deleteLen);
-
-    for (let i = 0, len = result.length; i < len; i++) {
-        const letter = result[i];
-        if (!isCustomRangeSplitSymbol(letter)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-export function getCustomRangesInterestsWithRange(range: ITextRange, customRanges: ICustomRange[]) {
+export function getCustomRangesInterestsWithSelection(range: ITextRange, customRanges: ICustomRange[]) {
     const result: ICustomRange[] = [];
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
@@ -63,7 +43,7 @@ export function getCustomRangesInterestsWithRange(range: ITextRange, customRange
                 result.push(customRange);
             }
         } else {
-            if (isIntersecting(range.startOffset, range.endOffset, customRange.startIndex, customRange.endIndex)) {
+            if (isIntersecting(range.startOffset, range.endOffset - 1, customRange.startIndex, customRange.endIndex)) {
                 result.push(customRange);
             }
         }
@@ -102,3 +82,33 @@ export function excludePointsFromRange(range: [number, number], points: number[]
     return newRanges;
 }
 
+export function getIntersectingCustomRanges(startIndex: number, endIndex: number, customRanges: ICustomRange[], rangeType?: CustomRangeType) {
+    const relativeCustomRanges = [];
+
+    for (let i = 0, len = customRanges.length; i < len; i++) {
+        const customRange = customRanges[i];
+        // intersect
+        if ((rangeType === undefined || customRange.rangeType === rangeType) && Math.max(customRange.startIndex, startIndex) <= Math.min(customRange.endIndex, endIndex)) {
+            relativeCustomRanges.push({ ...customRange });
+        }
+
+        // optimize
+        if (customRange.startIndex > endIndex) {
+            break;
+        }
+    }
+
+    return relativeCustomRanges;
+}
+
+export function getSelectionForAddCustomRange(range: ITextRange, body: IDocumentBody) {
+    const ranges = getIntersectingCustomRanges(range.startOffset, range.collapsed ? range.startOffset : range.endOffset - 1, body.customRanges ?? []);
+    const startOffset = Math.min(range.startOffset, (ranges[0]?.startIndex ?? Infinity));
+    const endOffset = Math.max(range.endOffset, (ranges[ranges.length - 1]?.endIndex ?? -Infinity) + 1);
+
+    return {
+        startOffset,
+        endOffset,
+        collapsed: startOffset === endOffset,
+    };
+}

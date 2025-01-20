@@ -17,25 +17,30 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
+import type { EventState, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IDeltaColumnWidthCommandParams,
+    IDeltaRowHeightCommand,
+    ISetWorksheetRowIsAutoHeightCommandParams,
+} from '@univerjs/sheets';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import {
     createInterceptorKey,
     Disposable,
     ICommandService,
     Inject,
     InterceptorManager,
-    toDisposable,
+    RANGE_TYPE,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
-import type { EventState, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 
-import type {
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommand,
-    ISetWorksheetRowIsAutoHeightCommandParams,
+import {
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { Subscription } from 'rxjs';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -92,6 +97,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -274,240 +280,270 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         }
 
         this.disposeWithMe(
-            toDisposable(
-                eventBindingObject.onPointerEnter$.subscribeEvent(() => {
-                    if (eventBindingObject == null) {
-                        return;
-                    }
+            eventBindingObject.onPointerEnter$.subscribeEvent(() => {
+                if (eventBindingObject == null) {
+                    return;
+                }
 
-                    eventBindingObject.show();
+                eventBindingObject.show();
 
-                    scene.setCursor(
-                        initialType === HEADER_RESIZE_TYPE.ROW ? CURSOR_TYPE.ROW_RESIZE : CURSOR_TYPE.COLUMN_RESIZE
+                scene.setCursor(
+                    initialType === HEADER_RESIZE_TYPE.ROW ? CURSOR_TYPE.ROW_RESIZE : CURSOR_TYPE.COLUMN_RESIZE
+                );
+            })
+        );
+
+        this.disposeWithMe(
+            eventBindingObject.onPointerLeave$.subscribeEvent(() => {
+                if (eventBindingObject == null) {
+                    return;
+                }
+
+                eventBindingObject.hide();
+
+                scene.resetCursor();
+            })
+        );
+
+        this.disposeWithMe(
+            eventBindingObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (skeleton == null) return;
+
+                const scene = this._context.scene;
+
+                const engine = scene.getEngine();
+                const canvasMaxHeight = engine?.height || 0;
+                const canvasMaxWidth = engine?.width || 0;
+                const viewPort = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+                const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonScrollTrack?.height || 0) + 10;
+                const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalScrollTrack?.width || 0) + 10;
+                const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
+                const { scaleX, scaleY } = scene.getAncestorScale();
+
+                this._startOffsetX = transformCoord.x;
+
+                this._startOffsetY = transformCoord.y;
+
+                const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
+                const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
+                const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
+
+                let isStartMove = false;
+                let moveChangeX = 0;
+                let moveChangeY = 0;
+
+                const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
+
+                const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidth
+                    ? canvasMaxWidth
+                    : columnTotalWidth + rowHeaderWidth;
+
+                const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeight
+                    ? canvasMaxHeight
+                    : rowTotalHeight + columnHeaderHeight;
+
+                const scale = Math.max(scaleX, scaleY);
+
+                const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
+
+                if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                    this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
+                        width: shapeWidth,
+                        height: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
+                        fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
+                        left: 0,
+                        top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                    });
+                } else {
+                    this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
+                        width: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
+                        height: shapeHeight,
+                        fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
+                        left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                        top: 0,
+                    });
+                }
+
+                const rowResizeRectX = this._columnResizeRect?.left || 0;
+                const rowResizeRectY = this._rowResizeRect?.top || 0;
+                scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
+                scene.disableObjectsEvent();
+
+                // TODO: do it in another way
+                // this._editorBridgeService.changeVisible({
+                //     visible: false,
+                //     eventType: DeviceInputEventType.PointerDown,
+                // });
+
+                this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+                    const relativeCoords = scene.getCoordRelativeToViewport(
+                        Vector2.FromArray([this._startOffsetX, this._startOffsetY])
                     );
-                })
-            )
-        );
 
-        this.disposeWithMe(
-            toDisposable(
-                eventBindingObject.onPointerLeave$.subscribeEvent(() => {
-                    if (eventBindingObject == null) {
-                        return;
-                    }
+                    const scrollXY = scene.getScrollXYInfoByViewport(relativeCoords, viewPort);
 
-                    eventBindingObject.hide();
+                    const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
-                    scene.resetCursor();
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                eventBindingObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                    if (skeleton == null) return;
-
-                    const scene = this._context.scene;
-
-                    const engine = scene.getEngine();
-                    const canvasMaxHeight = engine?.height || 0;
-                    const canvasMaxWidth = engine?.width || 0;
-                    const viewPort = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-
-                    const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonScrollTrack?.height || 0) + 10;
-                    const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalScrollTrack?.width || 0) + 10;
-                    const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
+                    const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
                     const { scaleX, scaleY } = scene.getAncestorScale();
-
-                    this._startOffsetX = transformCoord.x;
-
-                    this._startOffsetY = transformCoord.y;
-
-                    const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-                    const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-                    const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
-
-                    let isStartMove = false;
-                    let moveChangeX = 0;
-                    let moveChangeY = 0;
-
-                    const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
-
-                    const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidth
-                        ? canvasMaxWidth
-                        : columnTotalWidth + rowHeaderWidth;
-
-                    const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeight
-                        ? canvasMaxHeight
-                        : rowTotalHeight + columnHeaderHeight;
-
                     const scale = Math.max(scaleX, scaleY);
-
                     const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
 
-                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
-                            width: shapeWidth,
-                            height: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
-                            fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
-                            left: 0,
-                            top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                        });
-                    } else {
-                        this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
-                            width: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
-                            height: shapeHeight,
-                            fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
-                            left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                            top: 0,
-                        });
+                    moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
+
+                    moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
+
+                    if (
+                        Math.abs(initialType === HEADER_RESIZE_TYPE.ROW ? moveChangeY : moveChangeX) >=
+                        MINIMAL_OFFSET
+                    ) {
+                        isStartMove = true;
                     }
 
-                    const rowResizeRectX = this._columnResizeRect?.left || 0;
-
-                    const rowResizeRectY = this._rowResizeRect?.top || 0;
-
-                    scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
-
-                    scene.disableObjectsEvent();
-
-                    // TODO: do it in another way
-                    // this._editorBridgeService.changeVisible({
-                    //     visible: false,
-                    //     eventType: DeviceInputEventType.PointerDown,
-                    // });
-
-                    this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-                        const relativeCoords = scene.getRelativeToViewportCoord(
-                            Vector2.FromArray([this._startOffsetX, this._startOffsetY])
-                        );
-
-                        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords, viewPort);
-
-                        const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
-
-                        const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
-
-                        const { scaleX, scaleY } = scene.getAncestorScale();
-
-                        const scale = Math.max(scaleX, scaleY);
-
-                        const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
-
-                        moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
-
-                        moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
-
-                        if (
-                            Math.abs(initialType === HEADER_RESIZE_TYPE.ROW ? moveChangeY : moveChangeX) >=
-                            MINIMAL_OFFSET
-                        ) {
-                            isStartMove = true;
+                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                        if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
+                            moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
                         }
 
-                        if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                            if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
-                                moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
-                            }
-
-                            if (moveChangeY < -(cell.endY - cell.startY) + 2) {
-                                moveChangeY = -(cell.endY - cell.startY) + 2;
-                            }
-
-                            if (isStartMove) {
-                                this._resizeHelperShape?.transformByState({
-                                    top: currentOffsetY + moveChangeY,
-                                });
-
-                                this._rowResizeRect?.transformByState({
-                                    top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                                });
-
-                                this._rowResizeRect?.show();
-
-                                scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
-                            }
-                        } else {
-                            if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
-                                moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
-                            }
-
-                            if (moveChangeX < -(cell.endX - cell.startX) + 2) {
-                                moveChangeX = -(cell.endX - cell.startX) + 2;
-                            }
-
-                            if (isStartMove) {
-                                this._resizeHelperShape?.transformByState({
-                                    left: currentOffsetX + moveChangeX,
-                                });
-
-                                this._columnResizeRect?.transformByState({
-                                    left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                                });
-
-                                this._columnResizeRect?.show();
-
-                                scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
-                            }
+                        if (moveChangeY < -(cell.endY - cell.startY) + 2) {
+                            moveChangeY = -(cell.endY - cell.startY) + 2;
                         }
-                    });
-
-                    this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((upEvt: IPointerEvent | IMouseEvent) => {
-                        const scene = this._context.scene;
-
-                        this._clearObserverEvent();
-                        this._resizeHelperShape?.dispose();
-                        this._resizeHelperShape = null;
-
-                        scene.enableObjectsEvent();
 
                         if (isStartMove) {
-                            scene.resetCursor();
+                            this._resizeHelperShape?.transformByState({
+                                top: currentOffsetY + moveChangeY,
+                            });
 
-                            this._rowResizeRect?.hide();
-                            this._columnResizeRect?.hide();
+                            this._rowResizeRect?.transformByState({
+                                top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                            });
 
-                            if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                                this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
-                                    deltaY: moveChangeY,
-                                    anchorRow: this._currentRow,
-                                });
-                            } else {
-                                this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
-                                    DeltaColumnWidthCommand.id,
-                                    {
-                                        deltaX: moveChangeX,
-                                        anchorCol: this._currentColumn,
-                                    }
-                                );
-                            }
+                            this._rowResizeRect?.show();
+
+                            scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
                         }
-                    });
-                })
-            )
+                    } else {
+                        if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
+                            moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
+                        }
+
+                        if (moveChangeX < -(cell.endX - cell.startX) + 2) {
+                            moveChangeX = -(cell.endX - cell.startX) + 2;
+                        }
+
+                        if (isStartMove) {
+                            this._resizeHelperShape?.transformByState({
+                                left: currentOffsetX + moveChangeX,
+                            });
+
+                            this._columnResizeRect?.transformByState({
+                                left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                            });
+
+                            this._columnResizeRect?.show();
+
+                            scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
+                        }
+                    }
+                });
+
+                this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((upEvt: IPointerEvent | IMouseEvent) => {
+                    const scene = this._context.scene;
+
+                    this._clearObserverEvent();
+                    this._resizeHelperShape?.dispose();
+                    this._resizeHelperShape = null;
+
+                    scene.enableObjectsEvent();
+
+                    if (isStartMove) {
+                        scene.resetCursor();
+
+                        this._rowResizeRect?.hide();
+                        this._columnResizeRect?.hide();
+
+                        if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                            this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+                                deltaY: moveChangeY,
+                                anchorRow: this._currentRow,
+                            });
+                        } else {
+                            this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
+                                DeltaColumnWidthCommand.id,
+                                {
+                                    deltaX: moveChangeX,
+                                    anchorCol: this._currentColumn,
+                                }
+                            );
+                        }
+                    }
+                });
+            })
         );
 
         this.disposeWithMe(
-            toDisposable(
-                eventBindingObject.onDblclick$.subscribeEvent(() => {
-                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        const scene = this._context.scene;
+            eventBindingObject.onDblclick$.subscribeEvent(() => {
+                const scene = this._context.scene;
+                scene.resetCursor();
 
-                        scene.resetCursor();
+                const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (!sk) return;
 
+                const startRow = 0;
+                const startColumn = 0;
+                const endRow = sk.worksheet.getRowCount() - 1 || 0;
+                const endColumn = sk.worksheet.getColumnCount() - 1 || 0;
+                switch (initialType) {
+                    case HEADER_RESIZE_TYPE.COLUMN: {
+                        const curSelections = this._selectionManagerService.getCurrentSelections();
+                        const ranges: IRange[] = [];
+                        for (let i = 0; i < curSelections.length; i++) {
+                            const selection = curSelections[i];
+
+                            // if dbclick column is in selection range, then the selection range should put into auto col process.
+                            if (selection.range.rangeType === RANGE_TYPE.COLUMN && this._currentColumn <= selection.range.endColumn && this._currentColumn >= selection.range.startColumn) {
+                                ranges.push({
+                                    startColumn: selection.range.startColumn,
+                                    endColumn: selection.range.endColumn,
+                                    startRow,
+                                    endRow,
+                                });
+                            }
+                        }
+                        // if _currentColumn (dblick column) is not in selection range, then auto width currentColumn
+                        if (ranges.length === 0) {
+                            ranges.push({
+                                startColumn: this._currentColumn,
+                                endColumn: this._currentColumn,
+                                startRow,
+                                endRow,
+                            });
+                        }
+
+                        this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
+                            SetWorksheetColAutoWidthCommand.id, { ranges }
+                        );
+                        this._columnResizeRect?.hide();
+                        break;
+                    }
+                    case HEADER_RESIZE_TYPE.ROW:
                         this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
                             SetWorksheetRowIsAutoHeightCommand.id,
                             {
-                                ranges: [{ startRow: this._currentRow, endRow: this._currentRow, startColumn: 0, endColumn: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getColumnCount() || 0 }],
+                                ranges: [{
+                                    startRow: this._currentRow,
+                                    endRow: this._currentRow,
+                                    startColumn,
+                                    endColumn,
+                                }],
                             }
                         );
-
                         this._rowResizeRect?.hide();
-                    }
-                })
-            )
+                        break;
+                }
+            })
         );
     }
 

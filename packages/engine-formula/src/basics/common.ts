@@ -84,7 +84,7 @@ export interface IRuntimeUnitDataPrimitiveType {
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: Nullable<ICellData>[][] }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]> }> }>;
 }
 
 export interface IUnitSheetNameMap {
@@ -125,8 +125,18 @@ export interface IFormulaData {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
 }
 
+export interface IFormulaIdMap {
+    f: string;
+    r: number;
+    c: number;
+}
+
+export interface IFormulaIdMapData {
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaIdMap }> }>;
+}
+
 export interface IOtherFormulaData {
-    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaDataItem }> }>;
+    [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IOtherFormulaDataItem }> }>;
 }
 /**
  * @f  formulaString, the text string of the formula.
@@ -140,6 +150,11 @@ export interface IFormulaDataItem {
     // row: number;
     // column: number;
     // sheetId: string;
+}
+
+export interface IOtherFormulaDataItem {
+    f: string; // formulaString
+    ranges: IRange[];
 }
 
 export interface ISuperTable {
@@ -163,16 +178,19 @@ export interface IUnitExcludedCell {
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
+    arrayFormulaRange: IArrayFormulaRangeType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
+    clearDependencyTreeCache?: IUnitSheetIdToNameMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;
     unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
+    maxIteration?: number;
 }
 
 export enum ConcatenateType {

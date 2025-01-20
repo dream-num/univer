@@ -15,15 +15,15 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { ThreadCommentModel } from './models/thread-comment.model';
-import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
-import { TC_PLUGIN_NAME } from './types/const';
-import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
-import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 import type { IUniverThreadCommentConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ICommandService, IConfigService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
+import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
+import { defaultPluginConfig, THREAD_COMMENT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
+import { ThreadCommentModel } from './models/thread-comment.model';
+import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+import { TC_PLUGIN_NAME } from './types/const';
 
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
@@ -38,8 +38,12 @@ export class UniverThreadCommentPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(THREAD_COMMENT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -68,5 +72,7 @@ export class UniverThreadCommentPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+
+        this._injector.get(ThreadCommentResourceController);
     }
 }

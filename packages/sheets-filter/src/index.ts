@@ -25,9 +25,10 @@ export {
     lessThanOrEqualTo,
     notEquals,
 } from './models/custom-filters';
-export { FILTER_MUTATIONS, SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
+export { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
 export type { IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IFilters } from './models/types';
 export { CustomFilterOperator } from './models/types';
+export { FILTER_MUTATIONS } from './common/const';
 
 // #region - all commands
 
@@ -39,5 +40,15 @@ export {
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
 } from './commands/mutations/sheets-filter.mutation';
+export {
+    ClearSheetsFilterCriteriaCommand,
+    type ISetSheetFilterRangeCommandParams,
+    type ISetSheetsFilterCriteriaCommandParams,
+    ReCalcSheetsFilterCommand,
+    RemoveSheetFilterCommand,
+    SetSheetFilterRangeCommand,
+    SetSheetsFilterCriteriaCommand,
+    SmartToggleSheetsFilterCommand,
+} from './commands/commands/sheets-filter.command';
 
 // #endregion

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { BehaviorSubject, distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
@@ -40,7 +40,7 @@ interface IBulletBound {
 }
 
 const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, skeleton: DocumentSkeleton, pageIndex: number): IBoundRectNoAngle[] | undefined => {
-    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, false, range.segmentId, pageIndex);
+    const startPosition = skeleton.findNodePositionByCharIndex(range.startOffset, true, range.segmentId, pageIndex);
     const skeletonData = skeleton.getSkeletonData();
     let end = range.endOffset;
     if (range.segmentId) {
@@ -49,7 +49,7 @@ const calcDocRangePositions = (range: ITextRangeParam, documents: Documents, ske
             end = Math.min(root.ed, end);
         }
     }
-    const endPosition = skeleton.findNodePositionByCharIndex(end, false, range.segmentId, pageIndex);
+    const endPosition = skeleton.findNodePositionByCharIndex(end, true, range.segmentId, pageIndex);
     if (!endPosition || !startPosition) {
         return;
     }
@@ -104,7 +104,7 @@ interface IBulletActive {
 
 export class DocEventManagerService extends Disposable implements IRenderModule {
     private readonly _hoverCustomRanges$ = new BehaviorSubject<ICustomRangeActive[]>([]);
-    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex)));
+    readonly hoverCustomRanges$ = this._hoverCustomRanges$.pipe(distinctUntilChanged((pre, aft) => pre.length === aft.length && pre.every((item, i) => aft[i].range.rangeId === item.range.rangeId && aft[i].segmentId === item.segmentId && aft[i].segmentPageIndex === item.segmentPageIndex && aft[i].range.startIndex === item.range.startIndex)));
 
     private readonly _clickCustomRanges$ = new Subject<ICustomRangeActive>();
     readonly clickCustomRanges$ = this._clickCustomRanges$.asObservable();
@@ -199,7 +199,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const onPointerDown$ = fromEventSubject(this._context.mainComponent!.onPointerDown$);
         const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
         this.disposeWithMe(onPointerDown$.pipe(
-            mergeMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
+            switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
             filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
             // filter(({ down, up }) => down.offsetX === up.offsetX && down.offsetY === up.offsetY)
         ).subscribe(({ down }) => {
@@ -225,7 +225,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         customRanges.forEach((range) => {
             const textRange: ITextRangeParam = {
                 startOffset: range.startIndex,
-                endOffset: range.endIndex,
+                endOffset: range.endIndex + 1,
                 collapsed: false,
                 segmentId,
             };

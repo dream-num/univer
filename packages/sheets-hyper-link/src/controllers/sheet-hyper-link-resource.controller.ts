@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ISheetHyperLink } from '../types/interfaces/i-hyper-link';
+import { Disposable, Inject, IResourceManagerService } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 import { HyperLinkModel } from '../models/hyper-link.model';
-import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
 import { SHEET_HYPER_LINK_PLUGIN } from '../types/const';
 
-type UnitHyperLinkJSON = Record<string, ICellHyperLink[]>;
+type UnitHyperLinkJSON = Record<string, ISheetHyperLink[]>;
 
-@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkResourceController)
 export class SheetsHyperLinkResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,

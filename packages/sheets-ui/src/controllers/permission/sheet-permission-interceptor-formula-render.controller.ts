@@ -15,26 +15,22 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DisposableCollection, Inject, Injector, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRenderModel, WorksheetViewPermission } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { UnitAction } from '@univerjs/protocol';
+import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, RxDisposable } from '@univerjs/core';
 import { NullValueObject } from '@univerjs/engine-formula';
+import { UnitAction } from '@univerjs/protocol';
+import { getSheetCommandTarget, RangeProtectionCache, WorksheetViewPermission } from '@univerjs/sheets';
 import { StatusBarController } from '../status-bar.controller';
 
-export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
-
-@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorFormulaRenderController)
 export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(StatusBarController) private readonly _statusBarController: StatusBarController,
-        @Inject(RangeProtectionRenderModel) private _rangeProtectionRenderModel: RangeProtectionRenderModel
+        @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache
     ) {
         super();
         this._initStatusBarPermissionInterceptor();
@@ -71,7 +67,7 @@ export class SheetPermissionInterceptorFormulaRenderController extends RxDisposa
                                     if (cellValue === undefined) {
                                         return;
                                     }
-                                    const permission = this._rangeProtectionRenderModel.getCellInfo(unitId, subUnitId, rowIndex + startRow, colIndex + startCol)?.[0];
+                                    const permission = this._rangeProtectionCache.getCellInfo(unitId, subUnitId, rowIndex + startRow, colIndex + startCol);
                                     if (permission?.[UnitAction.View] === false) {
                                         itemValue[rowIndex][colIndex] = NullValueObject.create();
                                     }

@@ -1,0 +1,47 @@
+{
+    "name": "@univerjs/mockdata",
+    "version": "0.0.1",
+    "private": true,
+    "description": "",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./src/index.ts",
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-drawing": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-drawing": "workspace:*",
+        "@univerjs/sheets-filter": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-hyper-link": "workspace:*",
+        "@univerjs/sheets-sort": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "typescript": "^5.7.2"
+    }
+}

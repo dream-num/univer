@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '../utils/interface';
+
 import {
     CommandType,
     ICommandService,
@@ -25,15 +28,12 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-
 import { WorksheetEditPermission } from '../../services/permission/permission-point';
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
@@ -60,7 +60,6 @@ export const SetRangeValuesCommand: ICommand = {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const permissionService = accessor.get(IPermissionService);
-
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 

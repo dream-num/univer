@@ -15,6 +15,10 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
+
+import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { EffectRefRangeParams } from './type';
 import {
     CommandType,
     createInterceptorKey,
@@ -23,21 +27,15 @@ import {
     Inject,
     InterceptorManager,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../selections/selection-manager.service';
-import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
-import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
-import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import type { EffectRefRangeParams } from './type';
+import { SheetsSelectionsService } from '../selections/selection.service';
+import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
 
@@ -108,7 +106,6 @@ class WatchRange extends Disposable {
 /**
  * Collect side effects caused by ref range change
  */
-@OnLifecycle(LifecycleStages.Ready, RefRangeService)
 export class RefRangeService extends Disposable {
     interceptor = new InterceptorManager({ MERGE_REDO, MERGE_UNDO });
 

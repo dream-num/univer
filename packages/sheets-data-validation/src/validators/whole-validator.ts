@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
+import { OperatorErrorTitleMap } from '../types';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { isLegalFormulaResult } from '../utils/formula';
+import { FORMULA1, FORMULA2 } from './const';
 import { getCellValueNumber } from './decimal-validator';
+import { getTransformedFormula } from './util';
 
-export class WholeValidator extends BaseDataValidator<number> {
-    private _formulaService = this.injector.get(DataValidationFormulaService);
+export class WholeValidator extends BaseDataValidator {
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     id: string = DataValidationType.WHOLE;
     title: string = 'dataValidation.whole.title';
@@ -41,20 +47,18 @@ export class WholeValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = BASE_FORMULA_INPUT_NAME;
-    dropDownInput?: string;
 
     private _isFormulaOrInt(formula: string) {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));
     }
 
-    override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
+    override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
         const num = getCellValueNumber(cellValue);
         return !Number.isNaN(num) && Number.isInteger(num);
     }
 
-    override transform(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
+    override transform(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
         return {
             ...cellInfo,
@@ -70,19 +74,25 @@ export class WholeValidator extends BaseDataValidator<number> {
         return +formula;
     }
 
-    async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string) {
-        const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
+        const res1 = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, rule.uid, row, column);
+        const res2 = await this._customFormulaService.getCellFormula2Value(unitId, subUnitId, rule.uid, row, column);
         const { formula1, formula2 } = rule;
 
+        const formula1Result = isFormulaString(formula1) ? res1?.v : formula1;
+        const formula2Result = isFormulaString(formula2) ? res2?.v : formula2;
+        const isFormulaValid = isLegalFormulaResult(`${formula1Result}`) && isLegalFormulaResult(`${formula2Result}`);
+
         const info = {
-            formula1: this._parseNumber(isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.v : formula1),
-            formula2: this._parseNumber(isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.v : formula2),
+            formula1: this._parseNumber(formula1Result),
+            formula2: this._parseNumber(formula2Result),
+            isFormulaValid,
         };
 
         return info;
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase, unitId: string, subUnitId: string): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRuleBase, _unitId: string, _subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {
@@ -107,77 +117,12 @@ export class WholeValidator extends BaseDataValidator<number> {
         };
     }
 
-    override async validatorIsEqual(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        const { value: cellValue } = cellInfo;
-        if (Number.isNaN(formula1)) {
-            return true;
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase, position: ISheetLocationBase) {
+        if (!rule.operator) {
+            return this.titleStr;
         }
-
-        return cellValue === formula1;
-    }
-
-    override async validatorIsNotEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellInfo.value !== formula1;
-    }
-
-    override async validatorIsBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value >= start && cellInfo.value <= end;
-    }
-
-    override async validatorIsNotBetween(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1, formula2 } = formula;
-        if (Number.isNaN(formula1) || Number.isNaN(formula2)) {
-            return true;
-        }
-
-        const start = Math.min(formula1, formula2);
-        const end = Math.max(formula1, formula2);
-        return cellInfo.value < start || cellInfo.value > end;
-    }
-
-    override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value > formula1;
-    }
-
-    override async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value >= formula1;
-    }
-
-    override async validatorIsLessThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-        return cellInfo.value < formula1;
-    }
-
-    override async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {
-        const { formula1 } = formula;
-        if (Number.isNaN(formula1)) {
-            return true;
-        }
-
-        return cellInfo.value <= formula1;
+        const { transformedFormula1, transformedFormula2 } = getTransformedFormula(this._lexerTreeBuilder, rule as ISheetDataValidationRule, position);
+        const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, transformedFormula1 ?? '').replace(FORMULA2, transformedFormula2 ?? '');
+        return `${errorMsg}`;
     }
 }

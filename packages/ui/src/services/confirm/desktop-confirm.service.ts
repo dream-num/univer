@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject, Injector } from '@univerjs/core';
-import { Subject } from 'rxjs';
-
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
-import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
-import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
 import type { IConfirmService } from './confirm.service';
+import { connectInjector, Disposable, toDisposable } from '@univerjs/core';
+
+import { type IDisposable, Inject, Injector } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
+import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 
 export class DesktopConfirmService extends Disposable implements IConfirmService {
     private _confirmOptions: IConfirmPartMethodOptions[] = [];
-    readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
+    readonly confirmOptions$ = new BehaviorSubject<IConfirmPartMethodOptions[]>([]);
 
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

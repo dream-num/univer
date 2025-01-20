@@ -20,6 +20,7 @@ import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEW
 import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
 import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { attachSelectionWithCoord } from '../../../services/selection/util';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
 /**
@@ -44,22 +45,19 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
     private _init(): void {
         let listenToSelectionChangeEvent = false;
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
-        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionsList: ISelectionWithStyle[]) => {
-            if (!selectionsList || listenToSelectionChangeEvent === false) {
+        this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selectionWithStyleList: ISelectionWithStyle[]) => {
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+            if (!skeleton || !selectionWithStyleList || listenToSelectionChangeEvent === false) {
                 return;
             }
 
             listenToSelectionChangeEvent = false;
 
-            const selectionRangeWithStyle = selectionsList[0];
-            // if (!selectionRangeWithStyle.primary || Rectangle.equals(selectionRangeWithStyle.range, selectionRangeWithStyle.primary)) {
-                // return;
-            // }
+            const selectionRangeWithStyle = selectionWithStyleList[0] as unknown as ISelectionWithStyle;
 
             if (!selectionRangeWithStyle.primary) return;
 
-            const canvasRect = this._layoutService.getContentElement().getBoundingClientRect();
-            const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle as unknown as ISelectionWithStyle);
+            const selectionWithCoord = attachSelectionWithCoord(selectionRangeWithStyle, skeleton);
             const rangeType = selectionRangeWithStyle.range.rangeType;
 
             const { scene } = this._context;
@@ -70,33 +68,33 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             let clientX = 0;
             let clientY = 0;
 
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const rowHeaderWidth = skeleton.rowHeaderWidth;
 
             // TODO @lumixraku popup should positioned by transform not topleft.
             // using transform & transform-origin would be easy to position popup
+            const canvasRect = this._layoutService.getContentElement().getBoundingClientRect();
             switch (rangeType) {
                 case RANGE_TYPE.NORMAL:
-                    clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
-                    clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
+                    clientX = selectionWithCoord.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+                    clientY = selectionWithCoord.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
                 case RANGE_TYPE.COLUMN:
-                    clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+                    clientX = selectionWithCoord.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
                     // slightly lower than control point for easy to drag control point.
-                    clientY = Math.min(canvasRect.height / 2, range.rangeWithCoord.endY) + 40;
+                    clientY = Math.min(canvasRect.height / 2, selectionWithCoord.rangeWithCoord.endY) + 40;
                     break;
                 case RANGE_TYPE.ROW:
                     // slightly left than control point for easy to drag control point.
                     clientX = (canvasRect.width - rowHeaderWidth) / 2 + 20;
-                    clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
+                    clientY = selectionWithCoord.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
                 case RANGE_TYPE.ALL:
-                    clientX = range.rangeWithCoord.startX + canvasRect.left;
-                    clientY = range.rangeWithCoord.startY + canvasRect.top;
+                    clientX = selectionWithCoord.rangeWithCoord.startX + canvasRect.left;
+                    clientY = selectionWithCoord.rangeWithCoord.startY + canvasRect.top;
                     break;
                 default:
-                    clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
-                    clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
+                    clientX = selectionWithCoord.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+                    clientY = selectionWithCoord.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
             }
             // in case clientXY is not in screen area.

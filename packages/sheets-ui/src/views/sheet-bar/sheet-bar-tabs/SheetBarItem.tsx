@@ -54,7 +54,12 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         <div
             key={sheetId}
             data-id={sheetId}
-            className={currentSelected ? `${styles.slideTabActive} ${styles.slideTabItem}` : styles.slideTabItem}
+            className={currentSelected
+                ? `
+                  ${styles.slideTabActive}
+                  ${styles.slideTabItem}
+                `
+                : styles.slideTabItem}
             style={{
                 backgroundColor: !currentSelected && color ? color : '',
                 color: !currentSelected && color ? getTextColor(color) : '',

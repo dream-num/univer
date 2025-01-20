@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, Injector, ITextDecoration, ITextRotation, Univer } from '@univerjs/core';
+import type { IColorStyle, Injector, ITextDecoration, ITextRotation, Univer, Workbook } from '@univerjs/core';
+import type { ISetStyleCommandParams } from '../set-style.command';
 import {
     BooleanNumber,
     FontItalic,
@@ -25,14 +26,16 @@ import {
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
+    UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import type { ISetStyleCommandParams } from '../set-style.command';
+import { InsertSheetCommand } from '../insert-sheet.command';
 import {
     SetBackgroundColorCommand,
     SetBoldCommand,
@@ -77,6 +80,8 @@ describe("Test commands used for updating cells' styles", () => {
         commandService.registerCommand(SetTextRotationCommand);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(InsertSheetCommand);
+        commandService.registerCommand(InsertSheetMutation);
     });
 
     afterEach(() => univer.dispose());
@@ -753,6 +758,54 @@ describe("Test commands used for updating cells' styles", () => {
                 const result = await commandService.executeCommand(SetTextRotationCommand.id);
                 expect(result).toBeFalsy();
             });
+        });
+    });
+
+    describe('set style with specific range', () => {
+        it('should use the correct unitId and subUnitId when range is provided', async () => {
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+
+            // Insert a new sheet
+            expect(await commandService.executeCommand(InsertSheetCommand.id)).toBeTruthy();
+
+            const newSheet = workbook.getSheets()[1]; // Get the newly inserted sheet
+            const unitId = workbook.getUnitId();
+            const subUnitId = newSheet.getSheetId();
+
+            const range = { startRow: 0, startColumn: 0, endColumn: 1, endRow: 1, rangeType: RANGE_TYPE.NORMAL };
+
+            const commandParams: ISetStyleCommandParams<IColorStyle> = {
+                range,
+                unitId,
+                subUnitId,
+                style: {
+                    type: 'bg',
+                    value: { rgb: '#FF0000' },
+                },
+            };
+
+            expect(await commandService.executeCommand(SetStyleCommand.id, commandParams)).toBeTruthy();
+
+            // Verify that the background color was set correctly
+            const getBackgroundColor = (row: number, col: number) =>
+                workbook.getSheetBySheetId(subUnitId)!
+                    .getRange(row, col)
+                    .getBackground();
+
+            expect(getBackgroundColor(0, 0)).toBe('#FF0000');
+            expect(getBackgroundColor(0, 1)).toBe('#FF0000');
+            expect(getBackgroundColor(1, 0)).toBe('#FF0000');
+            expect(getBackgroundColor(1, 1)).toBe('#FF0000');
+
+            // undo
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getBackgroundColor(0, 0)).toBe('#fff');
+            expect(getBackgroundColor(1, 1)).toBe('#fff');
+
+            // redo
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getBackgroundColor(0, 0)).toBe('#FF0000');
+            expect(getBackgroundColor(1, 1)).toBe('#FF0000');
         });
     });
 });

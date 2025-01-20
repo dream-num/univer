@@ -14,33 +14,28 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces';
-import { BooleanNumber } from '../../../../types/enum';
-import { TextX } from '../text-x';
 import type { TextXAction } from '../action-types';
-import { TextXActionType } from '../action-types';
+import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { BooleanNumber } from '../../../../types/enum';
+import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 describe('test TextX static methods invert and makeInvertible', () => {
     it('test TextX static method invert', () => {
         const actions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 5,
-            segmentId: '',
         }, {
             t: TextXActionType.INSERT,
             len: 5,
-            line: 0,
-            segmentId: '',
             body: {
                 dataStream: 'hello',
             },
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
-            segmentId: '',
             body: {
                 dataStream: 'world',
                 textRuns: [
@@ -56,7 +51,6 @@ describe('test TextX static methods invert and makeInvertible', () => {
         }, {
             t: TextXActionType.RETAIN,
             len: 2,
-            segmentId: '',
             body: {
                 dataStream: '',
                 textRuns: [
@@ -87,20 +81,15 @@ describe('test TextX static methods invert and makeInvertible', () => {
         const exceptActions = [{
             t: TextXActionType.RETAIN,
             len: 5,
-            segmentId: '',
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
-            segmentId: '',
             body: {
                 dataStream: 'hello',
             },
         }, {
             t: TextXActionType.INSERT,
             len: 5,
-            line: 0,
-            segmentId: '',
             body: {
                 dataStream: 'world',
                 textRuns: [
@@ -116,7 +105,6 @@ describe('test TextX static methods invert and makeInvertible', () => {
         }, {
             t: TextXActionType.RETAIN,
             len: 2,
-            segmentId: '',
             coverType: UpdateDocsAttributeType.REPLACE,
             oldBody: {
                 dataStream: '',
@@ -163,7 +151,7 @@ describe('test TextX static methods invert and makeInvertible', () => {
 
         const textX = new TextX();
 
-        textX.retain(3, '', {
+        textX.retain(3, {
             dataStream: '',
             textRuns: [{
                 st: 0,
@@ -202,7 +190,6 @@ describe('test TextX static methods invert and makeInvertible', () => {
                 customDecorations: [],
             },
             coverType: UpdateDocsAttributeType.COVER,
-            segmentId: '',
         }];
 
         expect(textX.serialize()).toEqual(expectedActions);
@@ -231,16 +218,11 @@ describe('test TextX static methods invert and makeInvertible', () => {
         const expectedActions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 3,
-            segmentId: '',
         }, {
             t: TextXActionType.DELETE,
             len: 2,
-            segmentId: '',
-            line: 0,
             body: {
                 dataStream: 'lo',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [{
                     st: 0,
                     ed: 2,

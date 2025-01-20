@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
+import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import {
     BooleanNumber,
     COLORS,
-    Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
-    OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
+    Disposable, ICommandService, IUniverInstanceService, ObjectRelativeFromH, ObjectRelativeFromV,
+    PositionedObjectLayoutType, throttle, toDisposable, Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
-import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
-import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 
 const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
 
@@ -55,8 +55,6 @@ function isInTableCell(nodePosition: INodeSearch) {
 }
 
 // Listen doc drawing transformer change, and update drawing data.
-
-@OnLifecycle(LifecycleStages.Rendered, DocDrawingTransformerController)
 export class DocDrawingTransformerController extends Disposable {
     private _liquid = new Liquid();
     private _listenerOnImageMap = new Set();

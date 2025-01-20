@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILocale } from './interface';
 import dajsViVN from 'dayjs/locale/vi';
 import PickerViVN from 'rc-picker/lib/locale/vi_VN';
-import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {

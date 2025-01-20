@@ -46,6 +46,7 @@ const locale: typeof zhCN = {
         order: 'Ordered list',
         unorder: 'Unordered list',
         checklist: 'Task list',
+        documentFlavor: 'Modern Mode',
         alignLeft: 'Align Left',
         alignCenter: 'Align Center',
         alignRight: 'Align Right',

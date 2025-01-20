@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Pv } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Pv } from '../index';
 
 describe('Test pv function', () => {
     const testFunction = new Pv(FUNCTION_NAMES_FINANCIAL.NPER);
@@ -124,7 +124,7 @@ describe('Test pv function', () => {
             const type = NumberValueObject.create(0);
             const result = testFunction.calculate(rate, nper, pmt, fv, type);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [ErrorType.VALUE, 1918748.3979545343, 0, ErrorType.NA],
+                [ErrorType.VALUE, 1918748.3979545343, -0, ErrorType.NA],
                 [-5, 2000, ErrorType.NAME, ErrorType.NA],
                 [0, 0, 0, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],

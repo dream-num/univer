@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICustomComponentProps } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
+import type { ICustomComponentProps } from '../../services/menu/menu';
 
 export interface IFontSizeProps extends ICustomComponentProps<string> {
     value: string;

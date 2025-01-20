@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
-import { handleStringToStyle, textTrim } from '@univerjs/ui';
-import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+/* eslint-disable complexity */
 
+import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { extractNodeStyle } from './parse-node-style';
-import parseToDom, { generateParagraphs } from './utils';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
+
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -29,6 +27,10 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
+import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { handleStringToStyle, textTrim } from '@univerjs/ui';
+import { extractNodeStyle } from './parse-node-style';
+import parseToDom, { convertToCellStyle, generateParagraphs } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -107,7 +109,7 @@ export class HtmlToUSMService {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
@@ -205,20 +207,13 @@ export class HtmlToUSMService {
                     customRanges,
                 };
 
-                const dataStreamLength = dataStream.length;
-                const textRunsLength = textRuns?.length ?? 0;
-                if (!customRanges?.length && (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength))) {
-                    valueMatrix.setValue(0, 0, {
-                        v: dataStream,
-                    });
+                if (!customRanges?.length) {
+                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream }, dataStream, textRuns));
                 } else {
                     const p = this._generateDocumentDataModelSnapshot({
                         body: singleDocBody,
                     });
-                    valueMatrix.setValue(0, 0, {
-                        v: dataStream,
-                        p,
-                    });
+                    valueMatrix.setValue(0, 0, convertToCellStyle({ v: dataStream, p }, dataStream, textRuns));
                 }
 
                 rowProperties.push({}); // TODO@yuhongz
@@ -255,7 +250,6 @@ export class HtmlToUSMService {
         return css;
     }
 
-    // eslint-disable-next-line complexity
     private _getStyle(node: HTMLElement, styleStr: string) {
         const recordStyle: Record<string, string> = turnToStyleObject(styleStr);
         const style = node.style;
@@ -514,7 +508,6 @@ export class HtmlToUSMService {
         return documentModel?.getSnapshot();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private process(
         parent: Nullable<ChildNode>,
         nodes: NodeListOf<ChildNode>,
@@ -543,24 +536,6 @@ export class HtmlToUSMService {
                     textRuns: [],
                 };
 
-                // if ((parent as Element).tagName.toUpperCase() === 'A') {
-                //     const id = Tools.generateRandomId();
-                //     text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-                //     doc.customRanges = [
-                //         ...(doc.customRanges ?? []),
-                //         {
-                //             startIndex: doc.dataStream.length,
-                //             endIndex: doc.dataStream.length + text.length - 1,
-                //             rangeId: id,
-                //             rangeType: CustomRangeType.HYPERLINK,
-                //         },
-                //     ];
-                //     doc.payloads = {
-                //         ...doc.payloads,
-                //         [id]: (parent as HTMLAnchorElement).href,
-                //     };
-                // }
-
                 doc.dataStream += text;
                 newDoc.dataStream += text;
                 if (style && Object.getOwnPropertyNames(style).length) {
@@ -577,6 +552,12 @@ export class HtmlToUSMService {
                 }
             } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
                 continue;
+            } else if (node.nodeName.toLowerCase() === 'br') {
+                if (!doc.paragraphs) {
+                    doc.paragraphs = [];
+                }
+                doc.paragraphs.push({ startIndex: doc.dataStream.length });
+                doc.dataStream += '\r';
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {
                     continue;
@@ -609,13 +590,7 @@ export class HtmlToUSMService {
 
     private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
         const body = doc.body!;
-        const element = node as HTMLElement;
-        const start = body.dataStream.length;
-        if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
-        }
-
-        return start;
+        return body.dataStream.length;
     }
 
     private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
@@ -623,7 +598,6 @@ export class HtmlToUSMService {
         const element = node as HTMLElement;
 
         if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
             body.customRanges = body.customRanges ?? [];
             body.customRanges.push({
                 startIndex: start,

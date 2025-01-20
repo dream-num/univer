@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { BaseDataValidator } from '../validators/base-data-validator';
 import { toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import type { BaseDataValidator } from '../validators/base-data-validator';
 
 export enum DataValidatorRegistryScope {
     SHEET = 'sheet',
@@ -57,7 +57,7 @@ export class DataValidatorRegistryService {
         }
     }
 
-    register(validator: BaseDataValidator<any>) {
+    register(validator: BaseDataValidator) {
         this._validatorMap.set(validator.id, validator);
 
         if (Array.isArray(validator.scopes)) {

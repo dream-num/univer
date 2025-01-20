@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
 export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
 export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
 
 // #region - all commands
 
-export {
-    ClearSheetsFilterCriteriaCommand,
-    type ISetSheetFilterRangeCommandParams,
-    type ISetSheetsFilterCriteriaCommandParams,
-    ReCalcSheetsFilterCommand,
-    RemoveSheetFilterCommand,
-    SetSheetFilterRangeCommand,
-    SetSheetsFilterCriteriaCommand,
-    SmartToggleSheetsFilterCommand,
-} from './commands/commands/sheets-filter.command';
 export {
     ChangeFilterByOperation,
     CloseFilterPanelOperation,

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Range } from '@univerjs/core';
-import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
 import type { IIconType } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
+import { Range } from '@univerjs/core';
+import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
@@ -68,7 +68,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 if (!icon) {
                     return;
                 }
-                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                const cellInfo = spreadsheetSkeleton.getCellWithCoordByIndex(row, col, false);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

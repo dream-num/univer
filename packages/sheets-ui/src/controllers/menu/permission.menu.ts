@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
-
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
+
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
-import { permissionLockIconKey, permissionMenuIconKey } from '../../consts/permission';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
+import { permissionLockIconKey, permissionMenuIconKey } from '../../consts/permission';
 import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
 
 export const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
@@ -62,8 +62,8 @@ export function sheetPermissionEditProtectContextMenuFactory(accessor: IAccessor
         id: SetRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.editProtectRange',
-        hidden$: getEditPermissionHidden$(accessor),
         disabled$: getPermissionDisableBase$(accessor),
+        hidden$: getEditPermissionHidden$(accessor),
     };
 }
 

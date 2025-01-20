@@ -170,6 +170,7 @@ const locale: typeof zhCN = {
             errorMessage: {
                 notBlank: 'Điều kiện không được để trống',
                 formulaError: 'Lỗi công thức',
+                rangeError: 'Bad selection',
             },
         },
     },

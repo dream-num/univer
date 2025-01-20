@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable, DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
-import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import { UnitAction, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
+import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import type { ICellPermission } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import { Disposable, DisposableCollection, fromEventSubject, Inject, IPermissionService, sortRules } from '@univerjs/core';
+import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
+import { UnitAction, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { throttleTime } from 'rxjs';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable implements IRenderModule {
     private _enterActiveRender: Nullable<{
         render: ICellCustomRender;
@@ -34,7 +34,6 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: UniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
@@ -83,7 +82,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                         y: activeViewport.viewportScrollY,
                     };
 
-                    const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+                    const cellPos = skeleton.getCellIndexByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
                     // const mergeCell = skeleton.mergeData.find((range) => {
                     //     const { startColumn, startRow, endColumn, endRow } = range;
@@ -121,7 +120,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const info: ICellRenderContext = {
                         data: cellData,
                         style: skeleton.getsStyles().getStyleByCell(cellData),
-                        primaryWithCoord: skeleton.getCellByIndex(cellIndex.actualRow, cellIndex.actualCol),
+                        primaryWithCoord: skeleton.getCellWithCoordByIndex(cellIndex.actualRow, cellIndex.actualCol),
                         unitId,
                         subUnitId,
                         row,
@@ -164,7 +163,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     }
                 });
 
-                const moveDisposable = spreadsheet.onPointerMove$.subscribeEvent((evt) => {
+                const moveDisposable = fromEventSubject(spreadsheet.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;
@@ -183,6 +182,11 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                                 cellContext,
                             };
                             activeRender.onPointerEnter?.(cellContext, evt);
+                        }
+                    } else {
+                        if (this._enterActiveRender) {
+                            this._enterActiveRender.render.onPointerLeave?.(this._enterActiveRender.cellContext, evt);
+                            this._enterActiveRender = null;
                         }
                     }
                 });

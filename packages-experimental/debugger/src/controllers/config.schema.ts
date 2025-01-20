@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'debugger.config';
+export const DEBUGGER_PLUGIN_CONFIG_KEY = 'debugger.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DEBUGGER_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDebuggerConfig {
     menu?: MenuConfig;

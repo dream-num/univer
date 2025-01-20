@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IFunctionNames } from '../basics/function';
+import type { BaseFunction } from '../functions/base-function';
+import type { IUniverEngineFormulaConfig } from './config.schema';
+
+import { Disposable, ICommandService, IConfigService } from '@univerjs/core';
 import { type Ctor, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
-
-import type { IFunctionNames } from '../basics/function';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
@@ -40,7 +42,6 @@ import {
     SetSuperTableOptionMutation,
 } from '../commands/mutations/set-super-table.mutation';
 import { functionArray } from '../functions/array/function-map';
-import type { BaseFunction } from '../functions/base-function';
 import { functionCompatibility } from '../functions/compatibility/function-map';
 import { functionCube } from '../functions/cube/function-map';
 import { functionDatabase } from '../functions/database/function-map';
@@ -57,10 +58,8 @@ import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
-import type { IUniverEngineFormulaConfig } from './config.schema';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
+import { ENGINE_FORMULA_PLUGIN_CONFIG_KEY } from './config.schema';
 
-@OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -105,7 +104,7 @@ export class FormulaController extends Disposable {
     }
 
     private _registerFunctions() {
-        const config = this._configService.getConfig<IUniverEngineFormulaConfig>(PLUGIN_CONFIG_KEY);
+        const config = this._configService.getConfig<IUniverEngineFormulaConfig>(ENGINE_FORMULA_PLUGIN_CONFIG_KEY);
 
         const functions: BaseFunction[] = (
             [

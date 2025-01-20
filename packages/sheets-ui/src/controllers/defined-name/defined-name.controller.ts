@@ -15,13 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, ThemeService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { getNormalSelectionStyle, getPrimaryForRange, ScrollToCellOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
+import { getPrimaryForRange, ScrollToCellOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { filter, merge } from 'rxjs';
+import { genNormalSelectionStyle } from '../../services/selection/const';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsDefinedNameController)
 export class SheetsDefinedNameController extends Disposable {
     constructor(
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
@@ -39,7 +39,8 @@ export class SheetsDefinedNameController extends Disposable {
         this.disposeWithMe(merge(
             this._selectionManagerService.selectionMoveStart$,
             this._selectionManagerService.selectionMoving$,
-            this._selectionManagerService.selectionMoveEnd$
+            this._selectionManagerService.selectionMoveEnd$,
+            this._selectionManagerService.selectionSet$
         )
             .pipe(filter((params) => !!params))
             .subscribe((params) => {
@@ -136,7 +137,7 @@ export class SheetsDefinedNameController extends Disposable {
 
             selections.push({
                 range: unitRange.range,
-                style: getNormalSelectionStyle(this._themeService),
+                style: genNormalSelectionStyle(this._themeService),
                 primary,
             });
         }

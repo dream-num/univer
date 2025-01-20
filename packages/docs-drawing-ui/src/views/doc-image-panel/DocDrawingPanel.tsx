@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDrawingParam } from '@univerjs/core';
 import { useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import { DrawingCommonPanel } from '@univerjs/drawing-ui';
-import type { IDrawingParam } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import styles from './index.module.less';
-import { DocDrawingTextWrap } from './DocDrawingTextWrap';
+import { DrawingCommonPanel } from '@univerjs/drawing-ui';
+import React, { useEffect, useState } from 'react';
 import { DocDrawingPosition } from './DocDrawingPosition';
+import { DocDrawingTextWrap } from './DocDrawingTextWrap';
+import styles from './index.module.less';
 
 export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);

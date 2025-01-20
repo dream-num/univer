@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
+import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { getFormulaResult } from '../utils/formula';
-import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { CheckboxRender } from '../widgets/checkbox-widget';
+import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -55,20 +53,20 @@ export class CheckboxValidator extends BaseDataValidator {
     override title: string = 'dataValidation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-    override formulaInput: string = CHECKBOX_FORMULA_INPUT_NAME;
 
-    override canvasRender = this.injector.createInstance(CheckboxRender);
+    override readonly offsetFormulaByRange = false;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string }) {
-        const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
+    override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string; row: number; column: number }) => {
+        const { unitId, subUnitId } = pos;
+        const { formula1, formula2 } = this.parseFormulaSync(rule, unitId, subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
 
         const res = !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
         return res;
-    }
+    };
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const { formula1, formula2 } = rule;
@@ -101,13 +99,17 @@ export class CheckboxValidator extends BaseDataValidator {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<ICheckboxFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
-        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
+
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2;
+        const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2));
+
         return {
             formula1: transformCheckboxValue(originFormula1),
             formula2: transformCheckboxValue(originFormula2),
             originFormula1,
             originFormula2,
+            isFormulaValid,
         };
     }
 
@@ -117,17 +119,19 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
-    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
+    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string): ICheckboxFormulaResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
-        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2;
+        const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2)); // TODO@Dushusir Handling return type errors, not sure if this is correct
 
         return {
             formula1: transformCheckboxValue(originFormula1),
             formula2: transformCheckboxValue(originFormula2),
             originFormula1,
             originFormula2,
+            isFormulaValid,
         };
     }
 

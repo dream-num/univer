@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../../types/interfaces';
 import { insertTextToContent } from '../../../../shared';
 import {
     insertCustomBlocks,
@@ -24,7 +25,6 @@ import {
     insertTables,
     insertTextRuns,
 } from './common';
-import type { IDocumentBody } from '../../../../types/interfaces';
 
 export function updateAttributeByInsert(
     body: IDocumentBody,

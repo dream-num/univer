@@ -24,6 +24,8 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = `${PREFIX}ZEN_EDITOR`;
 
 export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
+export const IS_ROW_STYLE_PRECEDE_COLUMN_STYLE = 'isRowStylePrecedeColumnStyle';
+
 export function createInternalEditorID(id: string) {
     return `${PREFIX}${id}`;
 }

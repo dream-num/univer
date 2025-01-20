@@ -15,8 +15,8 @@
  */
 
 import type { Ctor, Injector } from '../../common/di';
-import { Disposable } from '../../shared';
 import { UniverInstanceType } from '../../common/unit';
+import { Disposable } from '../../shared';
 
 export const DependentOnSymbol = Symbol('DependentOn');
 
@@ -36,7 +36,7 @@ export abstract class Plugin extends Disposable {
 
     protected abstract _injector: Injector;
 
-    onStarting(_injector?: Injector): void {
+    onStarting(): void {
         // empty
     }
 

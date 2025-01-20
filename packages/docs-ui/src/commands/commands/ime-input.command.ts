@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, SHEET_EDITOR_UNITS, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { ICommand, ICommandInfo } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { getCustomDecorationAtPosition, getCustomRangeAtPosition, getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
@@ -29,6 +31,8 @@ export interface IIMEInputCommandParams {
     isCompositionStart: boolean;
     isCompositionEnd: boolean;
 }
+
+const UNITS = SHEET_EDITOR_UNITS;
 
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     id: 'doc.command.ime-input',
@@ -40,19 +44,21 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const imeInputManagerService = renderManagerService.getRenderById(unitId)?.with(DocIMEInputManagerService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null || imeInputManagerService == null) {
             return false;
         }
 
         const previousActiveRange = imeInputManagerService.getActiveRange();
-        if (!previousActiveRange) {
+        if (previousActiveRange == null) {
             return false;
         }
+
         const { style, segmentId } = previousActiveRange;
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
@@ -60,9 +66,9 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             return false;
         }
 
-        const insertRange = BuildTextUtils.selection.getInsertSelection(previousActiveRange, body);
+        const insertRange = previousActiveRange;
         Object.assign(previousActiveRange, insertRange);
-        const { startOffset } = previousActiveRange;
+        const { startOffset, endOffset } = previousActiveRange;
 
         const len = newText.length;
 
@@ -84,22 +90,32 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
+        const defaultTextStyle = docMenuStyleService.getDefaultStyle();
+        const styleCache = docMenuStyleService.getStyleCache();
+        const curCustomRange = getCustomRangeAtPosition(body.customRanges ?? [], startOffset + oldTextLen, UNITS.includes(unitId));
+        const curTextRun = getTextRunAtPosition(
+            body.textRuns ?? [],
+            isCompositionStart ? endOffset : startOffset + oldTextLen,
+            defaultTextStyle,
+            styleCache
+        );
+
+        const customDecorations = getCustomDecorationAtPosition(body.customDecorations ?? [], startOffset + oldTextLen);
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const { dos, retain, cursor } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0, body);
+            const dos = BuildTextUtils.selection.delete([previousActiveRange], body, 0, null, false);
             textX.push(...dos);
             doMutation.params!.textRanges = [{
-                startOffset: startOffset + len + retain,
-                endOffset: startOffset + len + retain,
+                startOffset: startOffset + len,
+                endOffset: startOffset + len,
                 collapsed: true,
             }];
         } else {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
-                segmentId,
             });
         }
 
@@ -107,8 +123,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             textX.push({
                 t: TextXActionType.DELETE,
                 len: oldTextLen,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -116,10 +130,27 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: newText,
+                textRuns: curTextRun
+                    ? [{
+                        ...curTextRun,
+                        st: 0,
+                        ed: newText.length,
+                    }]
+                    : [],
+                customRanges: curCustomRange
+                    ? [{
+                        ...curCustomRange,
+                        startIndex: 0,
+                        endIndex: newText.length - 1,
+                    }]
+                    : [],
+                customDecorations: customDecorations.map((customDecoration) => ({
+                    ...customDecoration,
+                    startIndex: 0,
+                    endIndex: newText.length - 1,
+                })),
             },
             len: newText.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

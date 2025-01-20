@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
+import type { IImageData } from '@univerjs/drawing';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
+import { DrawingTypeEnum, type IDrawingSearch } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, Image } from '@univerjs/engine-render';
+import { IDialogService } from '@univerjs/ui';
 import { insertGroupObject } from '../controllers/utils';
+import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
+
+const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 export class DrawingRenderService {
     constructor(
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IImageIoService private readonly _imageIoService: IImageIoService
+        @IImageIoService private readonly _imageIoService: IImageIoService,
+        @IDialogService private readonly _dialogService: IDialogService
     ) { }
 
     // eslint-disable-next-line max-lines-per-function
@@ -95,9 +101,9 @@ export class DrawingRenderService {
                 continue;
             }
 
-            const imageObject = scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
+            scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
             if (this._drawingManagerService.getDrawingEditable()) {
-                imageObject.attachTransformerTo(image);
+                scene.attachTransformerTo(image);
             }
 
             groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
@@ -126,5 +132,56 @@ export class DrawingRenderService {
                 return this.renderImages(drawingParam as IImageData, scene);
             default:
         }
+    }
+
+    previewImage(key: string, src: string, width: number, height: number) {
+        const dialogId = `${key}-viewer-dialog`;
+
+        const screenWidth = window.innerWidth - IMAGE_VIEWER_DROPDOWN_PADDING;
+        const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
+
+        const adjustSize = this._adjustImageSize(width, height, screenWidth, screenHeight);
+        const dialog = this._dialogService.open({
+            width: Math.max(adjustSize.width, 200),
+            id: dialogId,
+            style: { margin: '0', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
+            children: {
+                label: {
+                    name: COMPONENT_IMAGE_VIEWER,
+                    props: {
+                        src,
+                        width: adjustSize.width,
+                        height: adjustSize.height,
+                    },
+                },
+            },
+            destroyOnClose: true,
+            draggable: false,
+            onClose: () => {
+                this._dialogService.close(dialogId);
+                dialog.dispose();
+            },
+        });
+    }
+
+    private _adjustImageSize(nativeWidth: number, nativeHeight: number, screenWidth: number, screenHeight: number) {
+        // Use native size if the image is smaller than the screen
+        if (nativeWidth <= screenWidth && nativeHeight <= screenHeight) {
+            return {
+                width: nativeWidth,
+                height: nativeHeight,
+            };
+        }
+
+        // Calculate scale ratios
+        const widthRatio = screenWidth / nativeWidth;
+        const heightRatio = screenHeight / nativeHeight;
+        const scale = Math.min(widthRatio, heightRatio); // Choose the smaller ratio to ensure the image fits within the screen
+
+        // Return new dimensions
+        return {
+            width: Math.floor(nativeWidth * scale),
+            height: Math.floor(nativeHeight * scale),
+        };
     }
 }

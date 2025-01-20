@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { chromium, expect, test } from '@playwright/test';
-/* eslint-disable no-console */
 import type { Page } from '@playwright/test';
-import { sheetData as emptySheetData } from '../mockdata/emptysheet';
-import { sheetData as freezeData } from '../mockdata/freezesheet';
-import { sheetData as mergeCellData } from '../mockdata/mergecell';
-import { sheetData as overflowData } from '../mockdata/overflow';
+/* eslint-disable no-console */
+import { chromium, expect, test } from '@playwright/test';
+import { sheetData as emptySheetData } from '../__testing__/emptysheet';
+import { sheetData as freezeData } from '../__testing__/freezesheet';
+import { sheetData as mergeCellData } from '../__testing__/mergecell';
+import { sheetData as overflowData } from '../__testing__/overflow';
 
 export interface IFPSData {
     fpsData: number[];
@@ -52,7 +52,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
     const fpsCounterPromise = await page.evaluate(({ testDuration, deltaX, deltaY }: IMeasureFPSParam) => {
         let intervalID;
         // dispatch wheel event
-        const dispathWheelEvent = () => {
+        const dispatchWheelEvent = () => {
             const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
             const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
 
@@ -95,7 +95,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
             return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
         };
 
-        dispathWheelEvent();
+        dispatchWheelEvent();
 
         let frameCount = 0;
         const frameTimes = [];
@@ -133,6 +133,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
 }
 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
+    // Default Size Of browser: 1280x720 pixels. And default DPR is 1.
     test(title, async ({ page }) => {
         let port = 3000;
         if (!isCI) {

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { NumericTuple } from '@flatten-js/interval-tree';
+import IntervalTree from '@flatten-js/interval-tree';
+
 export class InvertedIndexCache {
     /**
      * {
@@ -29,8 +32,7 @@ export class InvertedIndexCache {
      */
     private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, Set<number>>>>> = new Map();
 
-    private _continueBuildingCache: Map<string, Map<string, Map<number, { startRow: number; endRow: number }>>> =
-        new Map();
+    private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
     set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row)) {
@@ -68,31 +70,17 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean) {
-        return this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
-    }
-
-    getCellPosition(
-        unitId: string,
-        sheetId: string,
-        column: number,
-        value: string | number | boolean,
-        startRow: number,
-        endRow: number
-    ) {
-        const rows = this.getCellPositions(unitId, sheetId, column, value);
-        if (rows == null) {
-            return;
-        }
-
-        for (const row of rows) {
-            if (row >= startRow && row <= endRow) {
-                return row;
-            }
-        }
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
+        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
+        // return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {
+        if (column === -1 || startRow === -1 || endRow === -1) {
+            return;
+        }
+
         let unitMap = this._continueBuildingCache.get(unitId);
         if (unitMap == null) {
             unitMap = new Map();
@@ -107,52 +95,128 @@ export class InvertedIndexCache {
 
         let columnMap = sheetMap.get(column);
         if (columnMap == null) {
-            columnMap = { startRow, endRow };
+            columnMap = new IntervalTree<NumericTuple>();
+            columnMap.insert([startRow, endRow]);
             sheetMap.set(column, columnMap);
             return;
         }
 
-        columnMap.startRow = Math.min(columnMap.startRow, startRow);
-
-        columnMap.endRow = Math.max(columnMap.endRow, endRow);
+        this._handleNewInterval(columnMap, startRow, endRow);
     }
 
     shouldContinueBuildingCache(unitId: string, sheetId: string, column: number, row: number) {
-        const rowRange = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
-        if (rowRange == null) {
-            return true;
-        }
-
-        const { startRow, endRow } = rowRange;
-
-        if (row >= startRow && row <= endRow) {
+        if (column === -1 || row === -1) {
             return false;
         }
 
-        return true;
+        const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
+
+        if (!columnMap) {
+            return true;
+        }
+
+        const result = columnMap.search([row, row]);
+
+        return result.length === 0;
     }
 
     canUseCache(unitId: string, sheetId: string, column: number, rangeStartRow: number, rangeEndRow: number) {
-        if (column === -1 || rangeStartRow === -1 || rangeEndRow === -1) {
-            return false;
-        }
-        const rowRange = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
-        if (rowRange == null) {
-            return false;
-        }
+        const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
 
-        const { startRow, endRow } = rowRange;
-
-        if (!(rangeStartRow > endRow || rangeEndRow < startRow)) {
-            return true;
+        if (column === -1 || rangeStartRow === -1 || rangeEndRow === -1 || !columnMap) {
+            return {
+                rowsInCache: [],
+                rowsNotInCache: [],
+            };
         }
 
-        return false;
+        const result = columnMap.search([rangeStartRow, rangeEndRow]);
+
+        if (result.length === 0) {
+            return {
+                rowsInCache: [],
+                rowsNotInCache: [],
+            };
+        }
+
+        result.sort((a, b) => a[0] - b[0]);
+
+        const rowsInCache: NumericTuple[] = [];
+        const rowsNotInCache: NumericTuple[] = [];
+
+        let _rangeStartRow = rangeStartRow;
+
+        for (let i = 0; i < result.length; i++) {
+            const [start, end] = result[i];
+
+            if (_rangeStartRow >= start) {
+                if (rangeEndRow <= end) {
+                    rowsInCache.push([_rangeStartRow, rangeEndRow]);
+                    break;
+                }
+
+                rowsInCache.push([_rangeStartRow, end]);
+                _rangeStartRow = end + 1;
+
+                if (i === result.length - 1 && _rangeStartRow <= rangeEndRow) {
+                    rowsNotInCache.push([_rangeStartRow, rangeEndRow]);
+                }
+            } else {
+                if (rangeEndRow > end) {
+                    rowsInCache.push([start, end]);
+                    rowsNotInCache.push([_rangeStartRow, start - 1]);
+                    _rangeStartRow = end + 1;
+
+                    if (i === result.length - 1 && _rangeStartRow <= rangeEndRow) {
+                        rowsNotInCache.push([_rangeStartRow, rangeEndRow]);
+                    }
+                    continue;
+                }
+
+                rowsInCache.push([start, rangeEndRow]);
+                rowsNotInCache.push([_rangeStartRow, start - 1]);
+            }
+        }
+
+        return {
+            rowsInCache,
+            rowsNotInCache,
+        };
     }
 
     clear() {
         this._cache.clear();
         this._continueBuildingCache.clear();
+    }
+
+    private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {
+        let result = columnMap.search([startRow, endRow]);
+
+        // the range is not overlapping with any existing range
+        if (result.length === 0) {
+            // check if the range is adjacent to any existing range
+            const adjacentRange: NumericTuple = [startRow - 1 < 0 ? 0 : startRow - 1, endRow + 1];
+
+            result = columnMap.search(adjacentRange);
+
+            // the range is not overlapping or adjacent to any existing range, then insert it
+            if (result.length === 0) {
+                columnMap.insert([startRow, endRow]);
+                return;
+            }
+        }
+
+        // merge overlapping or adjacent ranges
+        let min = startRow;
+        let max = endRow;
+
+        for (const interval of result) {
+            min = Math.min(min, interval[0]);
+            max = Math.max(max, interval[1]);
+            columnMap.remove(interval);
+        }
+
+        columnMap.insert([min, max]);
     }
 }
 

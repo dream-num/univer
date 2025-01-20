@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
 import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { DropdownLegacy } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
@@ -29,8 +29,8 @@ import {
     SetWorksheetShowCommand,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import React, { useCallback, useEffect, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
@@ -51,6 +51,7 @@ export interface ISheetBarMenuProps {
 
 export function SheetBarMenu(props: ISheetBarMenuProps) {
     const { style } = props;
+
     const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
 
@@ -134,7 +135,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
     return (
-        <Dropdown
+        <DropdownLegacy
             placement="topLeft"
             trigger={['click']}
             overlay={(
@@ -144,9 +145,15 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                             key={item.index}
                             onClick={() => handleClick(item)}
                             className={item.selected
-                                ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
+                                ? `
+                                  ${styles.sheetBarMenuItem}
+                                  ${styles.sheetBarMenuItemSelect}
+                                `
                                 : item.hidden
-                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
+                                    ? `
+                                      ${styles.sheetBarMenuItem}
+                                      ${styles.sheetBarMenuItemHide}
+                                    `
                                     : styles.sheetBarMenuItem}
                         >
                             <span className={styles.sheetBarMenuItemIcon}>
@@ -169,6 +176,6 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                     <ConvertSingle />
                 </SheetBarButton>
             </div>
-        </Dropdown>
+        </DropdownLegacy>
     );
 }

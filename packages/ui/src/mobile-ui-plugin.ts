@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from './controllers/config.schema';
 import { DependentOn, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import type { Dependency } from '@univerjs/core';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
-import { IUIController } from './controllers/ui/ui.controller';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
+import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -35,7 +36,6 @@ import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { IMenuService, MenuService } from './services/menu/menu.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
@@ -44,14 +44,12 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
-import type { IUniverUIConfig } from './controllers/config.schema';
 
 export const UNIVER_MOBILE_UI_PLUGIN_NAME = 'UNIVER_MOBILE_UI_PLUGIN';
 
@@ -80,7 +78,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
@@ -94,7 +91,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
 
             // controllers
@@ -109,5 +105,8 @@ export class UniverMobileUIPlugin extends Plugin {
         ], this._config.override);
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(IUIController);
+        this._injector.get(ErrorController);
     }
 }

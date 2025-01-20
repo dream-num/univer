@@ -1,6 +1,6 @@
 name: 🚀 Feature request
 description: Suggest an idea
-labels: feature request
+type: Feature
 title: '[Feature] '
 
 body:

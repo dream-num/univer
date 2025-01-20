@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsFindReplaceConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { defaultPluginConfig, SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
-import type { IUniverSheetsFindReplaceConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_FIND_REPLACE_PLUGIN';
 
@@ -37,11 +37,19 @@ export class UniverSheetsFindReplacePlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_FIND_REPLACE_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([[SheetsFindReplaceController]] as Dependency[]).forEach((d) => this._injector.add(d));
+    }
+
+    override onSteady(): void {
+        this._injector.get(SheetsFindReplaceController);
     }
 }

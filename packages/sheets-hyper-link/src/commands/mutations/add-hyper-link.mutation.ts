@@ -15,14 +15,14 @@
  */
 
 import type { ICommand } from '@univerjs/core';
+import type { ISheetHyperLink } from '../../types/interfaces/i-hyper-link';
 import { CommandType } from '@univerjs/core';
 import { HyperLinkModel } from '../../models/hyper-link.model';
-import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
 
 export interface IAddHyperLinkMutationParams {
     unitId: string;
     subUnitId: string;
-    link: ICellHyperLink;
+    link: ISheetHyperLink;
 }
 
 export const AddHyperLinkMutation: ICommand<IAddHyperLinkMutationParams> = {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { getColumnWidths, getEmptyTableCell, getEmptyTableRow, getInsertColumnActionsParams, getInsertColumnBody, getInsertRowActionsParams, getInsertRowBody, getRangeInfoFromRanges, getTableColumn, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
 
@@ -160,7 +160,6 @@ export const DocTableInsertRowCommand: ICommand<IDocTableInsertRowCommandParams>
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: offset,
-                segmentId,
             });
         }
 
@@ -170,8 +169,6 @@ export const DocTableInsertRowCommand: ICommand<IDocTableInsertRowCommandParams>
             t: TextXActionType.INSERT,
             body: insertBody,
             len: insertBody.dataStream.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -271,7 +268,6 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: offset,
-                segmentId,
             });
 
             const insertBody = getInsertColumnBody();
@@ -280,8 +276,6 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
                 t: TextXActionType.INSERT,
                 body: insertBody,
                 len: insertBody.dataStream.length,
-                line: 0,
-                segmentId,
             });
         }
 

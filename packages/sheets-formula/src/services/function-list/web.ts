@@ -24,16 +24,9 @@ export const FUNCTION_LIST_WEB: IFunctionInfo[] = [
         abstract: 'formula.functionList.ENCODEURL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ENCODEURL.functionParameter.number1.name',
-                detail: 'formula.functionList.ENCODEURL.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ENCODEURL.functionParameter.number2.name',
-                detail: 'formula.functionList.ENCODEURL.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ENCODEURL.functionParameter.text.name',
+                detail: 'formula.functionList.ENCODEURL.functionParameter.text.detail',
+                example: '"https://univer.ai/"',
                 require: 1,
                 repeat: 0,
             },

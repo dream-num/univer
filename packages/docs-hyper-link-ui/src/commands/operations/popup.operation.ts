@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, ICommand } from '@univerjs/core';
+import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
     const textSelectionService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getDocRanges();
-    if (!textRanges.length || textRanges.length > 1) {
+    const textRanges = textSelectionService.getTextRanges();
+    if (!textRanges?.length) {
         return true;
     }
 
@@ -33,26 +33,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         return true;
     }
 
-    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
-    const paragraphs = body?.paragraphs;
-    if (!paragraphs) {
-        return true;
-    }
-
-    for (let i = 0, len = paragraphs.length; i < len; i++) {
-        const p = paragraphs[i];
-        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
-            return true;
-        }
-
-        if (p.startIndex > activeRange.endOffset!) {
-            break;
-        }
-    }
-
-    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
-    // can't insert hyperlink in range contains other custom ranges
-    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
+    return false;
 };
 
 export interface IShowDocHyperLinkEditPopupOperationParams {
@@ -61,6 +42,8 @@ export interface IShowDocHyperLinkEditPopupOperationParams {
         linkId: string;
         segmentId?: string;
         segmentPage?: number;
+        startIndex: number;
+        endIndex: number;
     };
 }
 
@@ -89,6 +72,8 @@ export interface IShowDocHyperLinkInfoPopupOperationParams {
     segmentId?: string;
     unitId: string;
     segmentPage?: number;
+    startIndex: number;
+    endIndex: number;
 }
 
 export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IShowDocHyperLinkInfoPopupOperationParams> = {

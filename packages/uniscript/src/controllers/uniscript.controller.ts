@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Steady, UniscriptController)
 export class UniscriptController extends Disposable {
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,

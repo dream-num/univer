@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
-import { merge, type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { ReplaceContentCommand } from '../../commands/commands/replace-content.command';
+import { Disposable, isInternalEditorID, UniverInstanceType } from '@univerjs/core';
+import { KeyCode } from '@univerjs/ui';
+import { merge, type Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
 
 interface IEditorEvent {
@@ -48,13 +50,13 @@ interface IEditor {
     // Emit when doc selection changed.
     selectionChange$: Observable<IDocSelectionInnerParam>;
 
+    isFocus(): boolean;
     // Methods
     // The focused editor is the editor that will receive keyboard and similar events by default.
     focus(): void;
     // The Editor.blur() method removes keyboard focus from the current editor.
     blur(): void;
     // has focus.
-    isFocus(): boolean;
     // Selects the entire content of the editor.
     // Calling editor.select() will not necessarily focus the editor, so it is often used with Editor.focus
     select(): void;
@@ -81,7 +83,7 @@ export interface IEditorCanvasStyle {
 }
 
 export interface IEditorConfigParams {
-    initialSnapshot?: IDocumentData;
+    initialSnapshot: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
@@ -91,50 +93,16 @@ export interface IEditorConfigParams {
     // Boolean. The value is not editable
     readonly?: boolean;
 
+    backScrollOffset?: number;
     // The unique id of editor.
-    editorUnitId: string;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSheetEditor: boolean;
-    /**
-     * If the editor is for formula editing.
-     * @deprecated this is a temp fix before refactoring editor.
-     */
-    isFormulaEditor: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingle: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputFormula: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputRange: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputContent: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingleChoice: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetUnitId: Nullable<string>;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetSubUnitId: Nullable<string>;
+    editorUnitId?: string;
+
+    // show scrollBar
+    scrollBar?: boolean;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
     render: IRender;
-    documentDataModel: DocumentDataModel;
     editorDom: HTMLDivElement;
 }
 
@@ -152,7 +120,6 @@ export class Editor extends Disposable implements IEditor {
     paste$: Observable<IEditorInputConfig> = this._paste$.asObservable();
 
     // Editor get focus.
-    private _focus = false;
     private readonly _focus$ = new Subject<IEditorInputConfig>();
     focus$: Observable<IEditorInputConfig> = this._focus$.asObservable();
 
@@ -164,12 +131,6 @@ export class Editor extends Disposable implements IEditor {
     private readonly _selectionChange$ = new Subject<IDocSelectionInnerParam>();
     selectionChange$: Observable<IDocSelectionInnerParam> = this._selectionChange$.asObservable();
 
-    private _valueLegality = true;
-
-    private _openForSheetUnitId: Nullable<string>;
-
-    private _openForSheetSubUnitId: Nullable<string>;
-
     constructor(
         private _param: IEditorOptions,
         private _univerInstanceService: IUniverInstanceService,
@@ -178,10 +139,12 @@ export class Editor extends Disposable implements IEditor {
         private _undoRedoService: IUndoRedoService
     ) {
         super();
-        this._openForSheetUnitId = this._param.openForSheetUnitId;
-        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
 
         this._listenSelection();
+    }
+
+    get docSelectionRenderService() {
+        return this._param.render.with(DocSelectionRenderService);
     }
 
     private _listenSelection() {
@@ -215,7 +178,13 @@ export class Editor extends Disposable implements IEditor {
         this.disposeWithMe(
             merge(
                 docSelectionRenderService.onInput$,
-                docSelectionRenderService.onKeydown$,
+                docSelectionRenderService.onKeydown$.pipe(filter((e) => {
+                    const event = e.event as KeyboardEvent;
+                    if (event.ctrlKey || event.metaKey) {
+                        return [KeyCode.X, KeyCode.V].includes(event.keyCode);
+                    }
+                    return [KeyCode.BACKSPACE].includes(event.keyCode);
+                })),
                 docSelectionRenderService.onCompositionupdate$,
                 docSelectionRenderService.onCompositionend$,
                 docSelectionRenderService.onPaste$
@@ -253,6 +222,14 @@ export class Editor extends Disposable implements IEditor {
         );
     }
 
+    isFocus() {
+        const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
+        return docSelectionRenderService.isFocusing && Boolean(docSelectionRenderService.getActiveTextRange());
+    }
+
+    /**
+     * @deprecated use `IEditorService.focus` as instead. this is for internal usage.
+     */
     focus() {
         const curDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
         const editorUnitId = this.getEditorId();
@@ -266,27 +243,26 @@ export class Editor extends Disposable implements IEditor {
         docSelectionRenderService.focus();
 
         // Step 3: Sets the selection of the last selection, and if not, to the beginning of the document.
-        const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
-            unitId: editorUnitId,
-            subUnitId: editorUnitId,
-        });
+        // const lastSelectionInfo = this._docSelectionManagerService.getDocRanges({
+        //     unitId: editorUnitId,
+        //     subUnitId: editorUnitId,
+        // });
 
-        if (lastSelectionInfo) {
-            this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
-                unitId: editorUnitId,
-                subUnitId: editorUnitId,
-            }, false);
-        }
-
-        this._focus = true;
+        // if (lastSelectionInfo) {
+        //     this._docSelectionManagerService.replaceDocRanges(lastSelectionInfo, {
+        //         unitId: editorUnitId,
+        //         subUnitId: editorUnitId,
+        //     }, false);
+        // }
     }
 
+    /**
+     * @deprecated use `IEditorService.blur` as instead. this is for internal usage.
+     */
     blur(): void {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 
         docSelectionRenderService.blur();
-
-        this._focus = false;
     }
 
     // Selects the entire content of the editor.
@@ -322,33 +298,64 @@ export class Editor extends Disposable implements IEditor {
         return this._docSelectionManagerService.getDocRanges(params);
     }
 
+    getCursorPosition(): number {
+        const selectionRanges = this.getSelectionRanges();
+
+        return selectionRanges.find((range) => range.collapsed)?.startOffset ?? -1;
+    }
+
     // get editor id.
     getEditorId(): string {
-        return this._param.editorUnitId;
+        return this._getEditorId();
     }
 
     // get document data.
     getDocumentData(): IDocumentData {
-        const editorUnitId = this.getEditorId();
-        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+        const docDataModel = this._getDocDataModel();
 
         return docDataModel.getSnapshot();
     }
 
+    getDocumentDataModel() {
+        return this._getDocDataModel();
+    }
+
     // Set the new document data.
     setDocumentData(data: IDocumentData, textRanges: Nullable<ITextRangeWithStyle[]>) {
-        const { id, body } = data;
+        const { id } = data;
 
-        this._commandService.executeCommand(ReplaceContentCommand.id, {
+        this._commandService.syncExecuteCommand(ReplaceSnapshotCommand.id, {
             unitId: id,
-            body: {
-                ...body,
-                dataStream: body?.dataStream.endsWith('\r\n')
-                    ? body.dataStream.substring(0, body.dataStream.length - 2)
-                    : body!.dataStream,
-            },
+            snapshot: data,
             textRanges,
         });
+    }
+
+    replaceText(text: string, resetCursor = true) {
+        const data = this.getDocumentData();
+
+        this.setDocumentData(
+            {
+                ...data,
+                body: {
+                    dataStream: `${text}\r\n`,
+                    paragraphs: [{
+                        startIndex: 0,
+                    }],
+                    customRanges: [],
+                    sectionBreaks: [],
+                    tables: [],
+                    textRuns: [],
+                },
+            },
+            resetCursor
+                ? [{
+                    startOffset: text.length,
+                    endOffset: text.length,
+                    collapsed: true,
+                }]
+                : null
+        );
     }
 
     // Clear the undo redo history of this editor.
@@ -358,11 +365,10 @@ export class Editor extends Disposable implements IEditor {
         return this._undoRedoService.clearUndoRedo(editorUnitId);
     }
 
-    /**
-     * @deprecated use getDocumentData.
-     */
-    get documentDataModel() {
-        return this._param.documentDataModel;
+    override dispose(): void {
+        const docDataModel = this._getDocDataModel();
+
+        docDataModel.dispose();
     }
 
     /**
@@ -370,6 +376,13 @@ export class Editor extends Disposable implements IEditor {
      */
     get editorUnitId() {
         return this._param.editorUnitId;
+    }
+
+    /**
+     * @deprecated @TODO: @JOCS remove this in the future.
+     */
+    get params() {
+        return this._param;
     }
 
     get cancelDefaultResizeListener() {
@@ -380,96 +393,32 @@ export class Editor extends Disposable implements IEditor {
         return this._param.render;
     }
 
-    isSingleChoice() {
-        return this._param.isSingleChoice;
-    }
-
-    /** @deprecated */
-    setOpenForSheetUnitId(unitId: Nullable<string>) {
-        this._openForSheetUnitId = unitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetUnitId() {
-        return this._openForSheetUnitId;
-    }
-
-    /** @deprecated */
-    setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
-        this._openForSheetSubUnitId = subUnitId;
-    }
-
-    /** @deprecated */
-    getOpenForSheetSubUnitId() {
-        return this._openForSheetSubUnitId;
-    }
-
-    /** @deprecated */
-    isValueLegality() {
-        return this._valueLegality === true;
-    }
-
-    /** @deprecated */
-    setValueLegality(state = true) {
-        this._valueLegality = state;
-    }
-
-    isFocus() {
-        return this._focus;
-    }
-
-    /** @deprecated */
-    setFocus(state = false) {
-        this._focus = state;
-    }
-
-    /** @deprecated */
-    isSingle() {
-        return this._param.isSingle === true || this.onlyInputRange();
-    }
-
     isReadOnly() {
         return this._param.readonly === true;
-    }
-
-    /** @deprecated */
-    onlyInputContent() {
-        return this._param.onlyInputContent === true;
-    }
-
-    /** @deprecated */
-    onlyInputFormula() {
-        return this._param.onlyInputFormula === true;
-    }
-
-    /** @deprecated */
-    onlyInputRange() {
-        return this._param.onlyInputRange === true;
     }
 
     getBoundingClientRect() {
         return this._param.editorDom.getBoundingClientRect();
     }
 
+    get editorDOM() {
+        return this._param.editorDom;
+    }
+
     isVisible() {
         return this._param.visible;
     }
 
-    /** @deprecated */
     isSheetEditor() {
-        return this._param.isSheetEditor === true;
-    }
-
-    /** @deprecated */
-    isFormulaEditor() {
-        return this._param.isFormulaEditor === true;
+        return isInternalEditorID(this._getEditorId());
     }
 
     /**
      * @deprecated use getDocumentData.
      */
     getValue() {
-        const value = this._param.documentDataModel.getBody()?.dataStream || '';
+        const docDataModel = this._getDocDataModel();
+        const value = docDataModel.getBody()?.dataStream || '';
         return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
     }
 
@@ -477,7 +426,8 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use getDocumentData.
      */
     getBody() {
-        return this._param.documentDataModel.getBody();
+        const docDataModel = this._getDocDataModel();
+        return docDataModel.getBody();
     }
 
     /**
@@ -490,42 +440,12 @@ export class Editor extends Disposable implements IEditor {
         };
     }
 
-    verticalAlign() {
-        const documentDataModel = this._param?.documentDataModel;
-
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const { width, height } = this._param.editorDom.getBoundingClientRect();
-
-        if (height === 0 || width === 0) {
-            return;
-        }
-
-        if (!this.isSingle()) {
-            documentDataModel.updateDocumentDataPageSize(width, undefined);
-            return;
-        }
-
-        let fontSize = DEFAULT_STYLES.fs;
-
-        if (this._param.canvasStyle?.fontSize) {
-            fontSize = this._param.canvasStyle.fontSize;
-        }
-
-        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
-
-        documentDataModel.updateDocumentDataMargin({
-            t: top < 0 ? 0 : top,
-        });
-
-        documentDataModel.updateDocumentDataPageSize(undefined, undefined);
-    }
-
+    /**
+     * @deprecated.
+     */
     updateCanvasStyle() {
-        const documentDataModel = this._param.documentDataModel;
-        if (documentDataModel == null) {
+        const docDataModel = this._getDocDataModel();
+        if (docDataModel == null) {
             return;
         }
 
@@ -539,6 +459,17 @@ export class Editor extends Disposable implements IEditor {
             documentStyle.textStyle.fs = this._param.canvasStyle.fontSize;
         }
 
-        documentDataModel.updateDocumentStyle(documentStyle);
+        docDataModel.updateDocumentStyle(documentStyle);
+    }
+
+    private _getDocDataModel() {
+        const editorUnitId = this._getEditorId();
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+
+        return docDataModel;
+    }
+
+    private _getEditorId() {
+        return this._param.initialSnapshot?.id || this._param.editorUnitId || '';
     }
 }

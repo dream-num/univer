@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentSkeleton, IDocumentSkeletonPage, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { DocumentFlavor, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
-import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -28,7 +28,6 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
@@ -58,7 +57,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         skeleton.calculate();
 
-        if (this._editorService.isEditor(unitId)) {
+        // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -75,8 +76,6 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             top: 0,
             bottom: 0,
             right: 0,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
 
@@ -136,9 +135,11 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
     private _addComponent() {
         const { scene, unit: documentModel, components } = this._context;
+        const DEFAULT_PAGE_MARGIN_LEFT = 20;
+        const DEFAULT_PAGE_MARGIN_TOP = 20;
         const config = {
-            pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
-            pageMarginTop: documentModel.documentStyle.marginTop || 0,
+            pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
+            pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
         };
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
@@ -177,6 +178,16 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.changeSkeleton(skeleton);
         docBackground.changeSkeleton(skeleton);
 
+        const { unitId } = this._context;
+
+        // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
+            this._context.mainComponent?.makeDirty();
+
+            return;
+        }
+
         this._recalculateSizeBySkeleton(skeleton);
     }
 
@@ -209,9 +220,21 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         let width = 0;
         let height = 0;
 
+        const docDataModel = this._context.unit;
+
+        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const { pageWidth, pageHeight } = page;
+            let { pageWidth, pageHeight } = page;
+
+            // Mainly for modern mode, because pageHeight will be INFINITY in modern mode.
+            if (documentFlavor === DocumentFlavor.MODERN) {
+                const modernPageSize = getPageSizeInModernMode(page);
+
+                pageWidth = modernPageSize.pageWidth;
+                pageHeight = modernPageSize.pageHeight;
+            }
 
             if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
                 height += pageHeight;
@@ -236,8 +259,36 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
 
-        if (!this._editorService.isEditor(unitId)) {
+        const editor = this._editorService.getEditor(unitId);
+
+        // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
+        if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
     }
+}
+
+function getPageSizeInModernMode(page: IDocumentSkeletonPage) {
+    let { pageWidth, pageHeight } = page;
+    const { marginLeft, marginRight, marginTop, marginBottom, skeDrawings, skeTables } = page;
+
+    if (pageWidth === Number.POSITIVE_INFINITY) {
+        pageWidth = page.width + marginLeft + marginRight;
+    }
+
+    if (pageHeight === Number.POSITIVE_INFINITY) {
+        pageHeight = page.height + marginTop + marginBottom;
+    }
+
+    for (const drawing of skeDrawings.values()) {
+        pageWidth = Math.max(pageWidth, drawing.aLeft + drawing.width + marginLeft + marginRight);
+        pageHeight = Math.max(pageHeight, drawing.aTop + drawing.height + marginTop + marginBottom);
+    }
+
+    for (const table of skeTables.values()) {
+        pageWidth = Math.max(pageWidth, table.left + table.width + marginLeft + marginRight);
+        pageHeight = Math.max(pageHeight, table.top + table.height + marginTop + marginBottom);
+    }
+
+    return { pageWidth, pageHeight };
 }

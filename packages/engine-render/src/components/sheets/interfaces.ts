@@ -17,13 +17,15 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
-    ISelectionCellWithMergeInfo,
+    ICellWithCoord,
+    IFontRenderExtension,
+    ImageCacheMap,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 
-import type { BORDER_TYPE } from '../../basics/const';
+import type { BORDER_TYPE as BORDER_LTRB } from '../../basics/const';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
@@ -33,7 +35,7 @@ export interface BorderCache {
 }
 
 export interface BorderCacheItem {
-    type: BORDER_TYPE;
+    type: BORDER_LTRB;
     style: BorderStyleTypes;
     color: string;
 }
@@ -50,12 +52,14 @@ export interface IFontCacheItem {
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;
     // content?: string;
+    imageCacheMap: ImageCacheMap;
+    fontRenderExtension?: IFontRenderExtension;
 }
 
 type colorString = string;
 export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
-    backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>;
+    backgroundPositions?: ObjectMatrix<ICellWithCoord>;
     font?: Record<string, ObjectMatrix<IFontCacheItem>>;
     fontMatrix: ObjectMatrix<IFontCacheItem>;
     border?: ObjectMatrix<BorderCache>;
@@ -101,7 +105,7 @@ export interface IPaintForScrolling {
     scaleX: number;
     scaleY: number;
 }
-export interface IColumnStyleCfg {
+export interface IHeaderStyleCfg {
     fontFamily: string;
     fontColor: string;
     fontSize: number;
@@ -111,7 +115,7 @@ export interface IColumnStyleCfg {
     backgroundColor: string;
 }
 
-export type IAColumnCfgObj = IColumnStyleCfg & { text: string };
+export type IAColumnCfgObj = IHeaderStyleCfg & { text: string; headerHeight: number };
 export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
 
 export interface IRowStyleCfg {
@@ -124,5 +128,5 @@ export interface IRowStyleCfg {
     backgroundColor: string;
 }
 
-export type IARowCfgObj = IColumnStyleCfg & { text: string };
+export type IARowCfgObj = IHeaderStyleCfg & { text: string };
 export type IARowCfg = undefined | null | string | Partial<IARowCfgObj>;

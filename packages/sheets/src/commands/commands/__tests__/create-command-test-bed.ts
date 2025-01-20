@@ -29,14 +29,14 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
-import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import enUS from '../../../locale/en-US';
-import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
-import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
-import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
+import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
+import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
+import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -106,6 +106,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetInterceptorService]);
 
             dependencies?.forEach((d) => injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
     }
 

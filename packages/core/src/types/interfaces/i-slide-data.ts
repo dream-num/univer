@@ -19,7 +19,8 @@ import type { IKeyType, Nullable } from '../../shared/types';
 import type { IWorksheetData } from '../../sheets/typedef';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/prst-geom-type';
-import type { ICustomBlock, IDocumentData, ILists, ITransformState } from './i-document-data';
+import type { ICustomBlock, IDocumentData, ILists } from './i-document-data';
+import type { ITransformState } from './i-drawing';
 import type { IImageProperties } from './i-image-properties';
 import type { IPlaceholder } from './i-placeholder';
 import type { IShapeProperties } from './i-shape-properties';
@@ -86,7 +87,7 @@ interface IMasterProperties {
     name: string;
 }
 
-export interface IRichTextProps extends ITransformState, IStyleBase {
+export interface ISlideRichTextProps extends ITransformState, IStyleBase {
     text?: string;
     rich?: IDocumentData;
 }
@@ -115,7 +116,7 @@ export interface IPageElement {
     // elementGroup: IGroup;
     shape?: IShape;
     image?: IImage;
-    richText?: IRichTextProps;
+    richText?: ISlideRichTextProps;
 
     /** @deprecated */
     spreadsheet?: {

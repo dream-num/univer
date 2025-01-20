@@ -15,23 +15,24 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import { CellValueType, LocaleType } from '@univerjs/core';
-import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-import { AstTreeBuilder } from '../../../../engine/analysis/parser';
+
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { CellValueType, LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../../basics/error-type';
+import { Lexer } from '../../../../engine/analysis/lexer';
+import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { Isformula } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -63,7 +64,7 @@ const getTestWorkbookData = (): IWorkbookData => {
                         2: {
                             v: 3,
                             t: CellValueType.NUMBER,
-                            f: 'SUM(A1:B1)',
+                            f: '=SUM(A1:B1)',
                         },
                         3: {
                             v: '#NAME?',
@@ -104,6 +105,7 @@ describe('Test isformula function', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},
@@ -136,7 +138,7 @@ describe('Test isformula function', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();

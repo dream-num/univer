@@ -16,22 +16,21 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
-
-import { distinctUntilChanged } from 'rxjs';
-import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import { FilterSingle } from '@univerjs/icons';
+import { MessageType } from '@univerjs/design';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { MessageType } from '@univerjs/design';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
-import { FilterPanel } from '../views/components/SheetsFilterPanel';
+import { FilterSingle } from '@univerjs/icons';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand, SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+
+import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
+import { distinctUntilChanged } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
-import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
-import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
+import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { menuSchema } from './menu.schema';
+import { SheetsFilterUIMobileController } from './sheets-filter-ui-mobile.controller';
+import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 

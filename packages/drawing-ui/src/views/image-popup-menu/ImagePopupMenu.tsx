@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
+import { DropdownLegacy } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useState } from 'react';
@@ -79,7 +79,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <Dropdown
+            <DropdownLegacy
                 placement="bottomLeft"
                 trigger={['click']}
                 overlay={(
@@ -109,7 +109,7 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
                     />
                     {showMore && <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />}
                 </div>
-            </Dropdown>
+            </DropdownLegacy>
         </div>
     );
 };

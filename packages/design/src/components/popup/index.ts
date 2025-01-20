@@ -15,4 +15,3 @@
  */
 
 export { type IPopupProps, Popup } from './Popup';
-export { RectPopup, type IRectPopupProps } from './RectPopup';

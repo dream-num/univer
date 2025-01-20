@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { Subject } from 'rxjs';
-import { LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IObjectPointModel, IPointRuleModel, IWorksheetProtectionPointRule } from '../type';
+import { Subject } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Starting, WorksheetProtectionPointModel)
 export class WorksheetProtectionPointModel {
     private _model: IPointRuleModel = new Map();
 

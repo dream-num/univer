@@ -15,6 +15,8 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IMoveRangeCommandParams } from '@univerjs/sheets';
 import {
     Disposable,
     DisposableCollection,
@@ -22,10 +24,8 @@ import {
     Inject,
     toDisposable,
 } from '@univerjs/core';
-import type { IMoveRangeCommandParams } from '@univerjs/sheets';
-import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
 
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { MoveRangeCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 
 export class MoveRangeRenderController extends Disposable implements IRenderModule {
@@ -51,7 +51,7 @@ export class MoveRangeRenderController extends Disposable implements IRenderModu
                 selectionControls.forEach((controlSelection) => {
                     disposableCollection.add(
                         toDisposable(
-                            controlSelection.selectionMoved$.subscribe((_toRange) => {
+                            controlSelection.selectionMoveEnd$.subscribe((_toRange) => {
                                 if (!_toRange) {
                                     return;
                                 }

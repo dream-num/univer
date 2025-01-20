@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const PLUGIN_CONFIG_KEY = 'docs.config';
+export const DOCS_PLUGIN_CONFIG_KEY = 'docs.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(DOCS_PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;

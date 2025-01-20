@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import type { MenuSchemaType } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    CancelFrozenCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand, CopySheetCommand,
@@ -40,9 +42,9 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
+    ToggleGridlinesCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
-import type { MenuSchemaType } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     // SheetCutCommand,
@@ -78,7 +80,8 @@ import {
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
     ChangeSheetProtectionFromSheetBarCommand,
@@ -88,6 +91,7 @@ import { RenameSheetOperation } from '../commands/operations/rename-sheet.operat
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
+import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
@@ -105,6 +109,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     CancelFrozenMenuItemFactory,
+    ColAutoWidthMenuItemFactory,
     CopyMenuItemFactory,
     // CutMenuItemFactory,
     FitContentMenuItemFactory,
@@ -484,8 +489,12 @@ export const menuSchema: MenuSchemaType = {
                 order: 3,
                 menuItemFactory: SetColWidthMenuItemFactory,
             },
-            [SHEET_FROZEN_HEADER_MENU_ID]: {
+            [SetWorksheetColAutoWidthCommand.id]: {
                 order: 4,
+                menuItemFactory: ColAutoWidthMenuItemFactory,
+            },
+            [SHEET_FROZEN_HEADER_MENU_ID]: {
+                order: 5,
                 menuItemFactory: SheetFrozenHeaderMenuItemFactory,
                 [SetSelectionFrozenCommand.id]: {
                     order: 0,
@@ -497,7 +506,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [SHEET_PERMISSION_CONTEXT_MENU_ID]: {
-                order: 5,
+                order: 6,
                 menuItemFactory: sheetPermissionContextMenuFactory,
                 [AddRangeProtectionFromContextMenuCommand.id]: {
                     order: 0,
@@ -695,6 +704,14 @@ export const menuSchema: MenuSchemaType = {
             [ViewSheetPermissionFromSheetBarCommand.id]: {
                 order: 10,
                 menuItemFactory: sheetPermissionViewAllProtectRuleSheetBarMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.FOOTER_MENU]: {
+        [ContextMenuGroup.OTHERS]: {
+            [ToggleGridlinesCommand.id]: {
+                order: 1,
+                menuItemFactory: ToggleGridlinesMenuFactory,
             },
         },
     },

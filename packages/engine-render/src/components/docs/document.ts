@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-
-import { Subject } from 'rxjs';
 import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
-import { BORDER_TYPE, drawLineByBorderType } from '../../basics';
+
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
+import type { Transform } from '../../basics/transform';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { UniverRenderingContext } from '../../context';
+import type { Scene } from '../../scene';
+import type { ComponentExtension, IExtensionConfig } from '../extension';
+import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -28,14 +36,6 @@ import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { Liquid } from './liquid';
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
-import type { Transform } from '../../basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
-import type { Scene } from '../../scene';
-import type { ComponentExtension, IExtensionConfig } from '../extension';
-import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
-import type { DocumentSkeleton } from './layout/doc-skeleton';
 import './extensions';
 
 export interface IPageRenderConfig {
@@ -53,11 +53,8 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
 
 export class Documents extends DocComponent {
     private readonly _pageRender$ = new Subject<IPageRenderConfig>();
+
     readonly pageRender$ = this._pageRender$.asObservable();
-
-    docsLeft: number = 0;
-
-    docsTop: number = 0;
 
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
@@ -180,6 +177,7 @@ export class Documents extends DocComponent {
                 pagePaddingBottom,
                 verticalAlign
             );
+
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle, verticalOffsetNoAngle);
             const centerAngle = degToRad(centerAngleDeg);
             const vertexAngle = degToRad(vertexAngleDeg);
@@ -564,7 +562,16 @@ export class Documents extends DocComponent {
         this._drawTableCellBorders(ctx, page, cell);
         const { sections, marginLeft, marginTop } = cell;
 
+        // eslint-disable-next-line no-param-reassign
         alignOffsetNoAngle = Vector2.create(alignOffsetNoAngle.x + marginLeft, alignOffsetNoAngle.y + marginTop);
+
+        ctx.save();
+        const { x, y } = this._drawLiquid;
+        const { pageWidth, pageHeight } = cell;
+        ctx.beginPath();
+        ctx.rectByPrecision(x + page.marginLeft, y + page.marginTop, pageWidth, pageHeight);
+        ctx.closePath();
+        ctx.clip();
 
         for (const section of sections) {
             const { columns } = section;
@@ -706,6 +713,8 @@ export class Documents extends DocComponent {
 
             this._drawLiquid.translateRestore();
         }
+
+        ctx.restore();
     }
 
     private _drawTableCellBorders(
@@ -723,28 +732,28 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
-        drawLineByBorderType(ctx, BORDER_TYPE.LEFT, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.TOP, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.RIGHT, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.BOTTOM, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,

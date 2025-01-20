@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomDecorationType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
+import type { ICommand, ITextRange } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
+import { CommandType, CustomDecorationType, ICommandService, sequenceExecute } from '@univerjs/core';
 import { addCustomDecorationBySelectionFactory } from '@univerjs/docs-ui';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
-import type { ICommand, ITextRange } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
 export interface IAddDocCommentComment {
@@ -43,8 +43,9 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
         const doMutation = addCustomDecorationBySelectionFactory(
             accessor,
             {
-                id: comment.id,
+                id: comment.threadId,
                 type: CustomDecorationType.COMMENT,
+                unitId,
             }
         );
         if (doMutation) {
@@ -66,7 +67,7 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
                 },
             };
 
-            return (await sequenceExecuteAsync([addComment, doMutation, activeOperation], commandService)).result;
+            return (await sequenceExecute([addComment, doMutation, activeOperation], commandService)).result;
         }
 
         return false;

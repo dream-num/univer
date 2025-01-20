@@ -16,25 +16,26 @@
 
 // Refer to packages/ui/src/views/App.tsx
 
-import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
-import {
-    builtInGlobalComponents,
-    BuiltInUIPart,
-    ComponentContainer,
-    ContextMenu,
-    IMessageService,
-    type IWorkbenchOptions,
-    UNI_DISABLE_CHANGING_FOCUS_KEY,
-    useComponentsOfPart,
-    useObservable,
-} from '@univerjs/ui';
 import type {
     NodeTypes,
     ReactFlowInstance,
     Viewport,
 } from '@xyflow/react';
+import { debounce, ICommandService, IContextService, IUniverInstanceService, LocaleService, ThemeService, useDependency } from '@univerjs/core';
+import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { MenuSingle } from '@univerjs/icons';
+import {
+    builtInGlobalComponents,
+    BuiltInUIPart,
+    ComponentContainer,
+    ContextMenu,
+    type IWorkbenchOptions,
+    UNI_DISABLE_CHANGING_FOCUS_KEY,
+    useComponentsOfPart,
+    useObservable,
+} from '@univerjs/ui';
 import {
     Background,
     NodeResizer,
@@ -42,13 +43,10 @@ import {
     ReactFlowProvider,
     useNodesState,
 } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import clsx from 'clsx';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { MenuSingle } from '@univerjs/icons';
+import { createPortal } from 'react-dom';
 import { UniFocusUnitOperation } from '../../commands/operations/uni-focus-unit.operation';
 import { FlowManagerService } from '../../services/flow/flow-manager.service';
 import { IUnitGridService } from '../../services/unit-grid/unit-grid.service';
@@ -58,6 +56,7 @@ import { LeftSidebar, RightSidebar } from '../uni-sidebar/UniSidebar';
 import { type IFloatingToolbarRef, UniFloatingToolbar } from '../uni-toolbar/UniFloatToolbar';
 import { UniToolbar } from '../uni-toolbar/UniToolbar';
 import styles from './workbench.module.less';
+import '@xyflow/react/dist/style.css';
 // Refer to packages/ui/src/views/workbench/Workbench.tsx
 
 export interface IUniWorkbenchProps extends IWorkbenchOptions {
@@ -76,7 +75,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const messageService = useDependency(IMessageService);
     const unitGridService = useDependency(IUnitGridService);
     const instanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -119,7 +117,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     }, [commandService]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const resizeUnits = useCallback(debounce(() => {
-        renderManagerService.getRenderAll().forEach(((renderer) => renderer.engine.resize()));
+        renderManagerService.getRenderAll().forEach((renderer) => renderer.engine.resize());
     }, 400), [renderManagerService]); // TODO: this is not
 
     // Create a portal container for injecting global component themes.
@@ -127,7 +125,6 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
-        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.localeChanged$.subscribe(() => {
@@ -146,7 +143,7 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
             // cleanup
             document.body.removeChild(portalContainer);
         };
-    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
+    }, [localeService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     const nodeTypes: NodeTypes = {
         customNode: UnitNode,

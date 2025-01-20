@@ -20,7 +20,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CopySheetCommand, InsertColMutation, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { CopySheetCommand, InsertColByRangeCommand, InsertColMutation, InsertRowByRangeCommand, InsertSheetMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColByRangeCommand, RemoveColCommand, RemoveColMutation, RemoveRowByRangeCommand, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
 import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
@@ -156,14 +156,20 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
         MoveColsCommand,
         MoveColsMutation,
         InsertColMutation,
+        InsertColByRangeCommand,
+        InsertRowByRangeCommand,
         RemoveRowCommand,
         RemoveRowMutation,
         RemoveColCommand,
         RemoveColMutation,
+        RemoveColByRangeCommand,
+        RemoveRowByRangeCommand,
         SetSelectionsOperation,
         SetRangeValuesMutation,
         CopySheetCommand,
         InsertSheetMutation,
+        MoveRangeCommand,
+        MoveRangeMutation,
     ]
     ).forEach((command) => commandService.registerCommand(command));
 
@@ -384,6 +390,30 @@ describe('test controller of sheets filter', () => {
             const filterModel = (sheetsFilterService as SheetsFilterService).getFilterModel('test', sheet2.getSheetId());
             expect(filterModel).toBeTruthy();
             expect(filterModel?.getFilterColumn(0)?.getColumnData()).toStrictEqual({ colId: 0, filters: { blank: true } });
+        });
+    });
+
+    describe('test interceptor of move range', () => {
+        it('moved range intersect with filter range should expand filter', async () => {
+            const res = await commandService.executeCommand(MoveRangeCommand.id, {
+                fromRange: {
+                    startRow: 10,
+                    startColumn: 7,
+                    endRow: 16,
+                    endColumn: 7,
+                    rangeType: 0,
+                },
+                toRange: {
+                    startRow: 4,
+                    startColumn: 3,
+                    endRow: 10,
+                    endColumn: 3,
+                    rangeType: 0,
+                },
+            });
+            expect(res).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 0, endRow: 10, endColumn: 5 });
         });
     });
 });

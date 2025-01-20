@@ -14,15 +14,43 @@
  * limitations under the License.
  */
 
+import type { IDocumentStyle } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
-import { CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import { CloseHeaderFooterCommand, CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import styles from './index.module.less';
+
+function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number): string {
+    const { useFirstPageHeaderFooter, evenAndOddHeaders, defaultHeaderId, defaultFooterId, firstPageHeaderId, firstPageFooterId, evenPageHeaderId, evenPageFooterId } = documentStyle;
+
+    if (editArea === DocumentEditArea.HEADER) {
+        if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            if (pageIndex === 0) {
+                return firstPageHeaderId!;
+            } else {
+                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+            }
+        } else {
+            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+        }
+    } else {
+        if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            if (pageIndex === 0) {
+                return firstPageFooterId!;
+            } else {
+                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+            }
+        } else {
+            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+        }
+    }
+}
 
 export interface IDocHeaderFooterOptionsProps {
     unitId: string;
@@ -33,7 +61,9 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const commandService = useDependency(ICommandService);
-    const docSelectionManagerService = useDependency(DocSelectionManagerService);
+
+    const layoutService = useDependency(ILayoutService);
+
     const { unitId } = props;
 
     const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService)!;
@@ -100,6 +130,22 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 },
             });
         } else {
+            const segmentPageIndex = docSelectionRenderService.getSegmentPage();
+            const prevSegmentId = docSelectionRenderService.getSegment();
+
+            const needFocusSegmentId = getSegmentId(
+                {
+                    ...documentStyle,
+                    [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                },
+                editArea,
+                segmentPageIndex
+            );
+
+            if (needFocusSegmentId && needFocusSegmentId !== prevSegmentId) {
+                docSelectionRenderService.setSegment(needFocusSegmentId);
+            }
+
             commandService.executeCommand(CoreHeaderFooterCommandId, {
                 unitId,
                 headerFooterProps: {
@@ -107,6 +153,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 },
             });
         }
+
+        layoutService.focus();
     };
 
     const handleMarginChange = async (val: number, type: 'marginHeader' | 'marginFooter') => {
@@ -128,30 +176,9 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     };
 
     const closeHeaderFooter = () => {
-        const renderObject = renderManagerService.getRenderById(unitId);
-        if (renderObject == null) {
-            return;
-        }
-
-        const { scene } = renderObject;
-        const transformer = scene.getTransformerByCreate();
-        const docSkeletonManagerService = renderObject.with(DocSkeletonManagerService);
-        const skeleton = docSkeletonManagerService?.getSkeleton();
-        const viewModel = docSkeletonManagerService?.getViewModel();
-        const render = renderManagerService.getRenderById(unitId);
-
-        if (render == null || viewModel == null || skeleton == null) {
-            return;
-        }
-
-        // TODO: @JOCS, these codes bellow should be automatically executed?
-        docSelectionManagerService.replaceTextRanges([]); // Clear text selection.
-        transformer.clearSelectedObjects();
-        docSelectionRenderService.setSegment('');
-        docSelectionRenderService.setSegmentPage(-1);
-        viewModel.setEditArea(DocumentEditArea.BODY);
-        skeleton.calculate();
-        render.mainComponent?.makeDirty(true);
+        commandService.executeCommand(CloseHeaderFooterCommand.id, {
+            unitId,
+        });
     };
 
     useEffect(() => {

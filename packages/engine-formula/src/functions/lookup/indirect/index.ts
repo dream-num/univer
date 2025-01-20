@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../../../basics/regex';
-import { operatorToken } from '../../../basics/token';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
+import { operatorToken } from '../../../basics/token';
 import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
 import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
-import { deserializeRangeWithSheet } from '../../../engine/utils/reference';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+
+import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/reference-cache';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
@@ -93,18 +94,18 @@ export class Indirect extends BaseFunction {
             return this._setDefault(rangeReferenceObject);
         }
 
-        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(refTextV)) {
+        if (regexTestSingeRange(refTextV)) {
             return this._setDefault(new CellReferenceObject(refTextV));
         }
-        if (new RegExp(REFERENCE_REGEX_ROW).test(refTextV)) {
+        if (regexTestRow(refTextV)) {
             return this._setDefault(new RowReferenceObject(refTextV));
         }
 
-        if (new RegExp(REFERENCE_REGEX_COLUMN).test(refTextV)) {
+        if (regexTestColumn(refTextV)) {
             return this._setDefault(new ColumnReferenceObject(refTextV));
         }
 
-        const gridRange = deserializeRangeWithSheet(refTextV);
+        const gridRange = deserializeRangeWithSheetWithCache(refTextV);
 
         const { range, sheetName, unitId } = gridRange;
 

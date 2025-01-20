@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
-import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { RangeMutation } from '../../models/rule-matrix';
+import { CommandType, DataValidationType, ICommandService, isFormulaString, isRangesEqual, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
+import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
-import { createDefaultNewRule } from '../../utils/create';
+import { shouldOffsetFormulaByRange } from '../../utils/formula';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
-import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
-import type { RangeMutation } from '../../models/rule-matrix';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
@@ -56,6 +56,8 @@ export function getDataValidationDiffMutations(
     source: DataValidationChangeSource = 'command',
     fillDefaultValue = true
 ) {
+    const lexerTreeBuilder = accessor.get(LexerTreeBuilder);
+    const validatorRegistryService = accessor.get(DataValidatorRegistryService);
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
     const sheetDataValidationModel = accessor.get(SheetDataValidationModel);
@@ -69,7 +71,7 @@ export function getDataValidationDiffMutations(
     }
     const { worksheet } = target;
     const redoMatrix = new ObjectMatrix<ICellData>();
-
+    let setRangeValue = false;
     function setRangesDefaultValue(ranges: IRange[], defaultValue: CellValue) {
         if (!fillDefaultValue) {
             return;
@@ -78,7 +80,8 @@ export function getDataValidationDiffMutations(
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);
                 const value = getStringCellValue(cellData);
-                if (isBlankCell(cellData) || value === defaultValue) {
+                if ((isBlankCell(cellData) || value === defaultValue) && !cellData?.p) {
+                    setRangeValue = true;
                     redoMatrix.setValue(row, column, {
                         v: defaultValue,
                         p: null,
@@ -113,32 +116,109 @@ export function getDataValidationDiffMutations(
                 });
                 break;
             case 'update': {
-                redoMutations.push({
-                    id: UpdateDataValidationMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        ruleId: diff.ruleId,
-                        payload: {
-                            type: UpdateRuleType.RANGE,
-                            payload: diff.newRanges,
-                        },
-                        source,
-                    } as IUpdateDataValidationMutationParams,
-                });
-                undoMutations.unshift({
-                    id: UpdateDataValidationMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        ruleId: diff.ruleId,
-                        payload: {
-                            type: UpdateRuleType.RANGE,
-                            payload: diff.oldRanges,
-                        },
-                        source,
-                    } as IUpdateDataValidationMutationParams,
-                });
+                if (shouldOffsetFormulaByRange(diff.rule.type, validatorRegistryService)) {
+                    const originRow = diff.oldRanges[0].startRow;
+                    const originColumn = diff.oldRanges[0].startColumn;
+                    const newRow = diff.newRanges[0].startRow;
+                    const newColumn = diff.newRanges[0].startColumn;
+                    const rowDiff = newRow - originRow;
+                    const columnDiff = newColumn - originColumn;
+                    const newFormula = isFormulaString(diff.rule.formula1!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula1!, columnDiff, rowDiff) : diff.rule.formula1;
+                    const newFormula2 = isFormulaString(diff.rule.formula2!) ? lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula2!, columnDiff, rowDiff) : diff.rule.formula2;
+
+                    if (newFormula !== diff.rule.formula1 || newFormula2 !== diff.rule.formula2 || !isRangesEqual(diff.newRanges, diff.oldRanges)) {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.ALL,
+                                    payload: {
+                                        formula1: newFormula,
+                                        formula2: newFormula2,
+                                        ranges: diff.newRanges,
+                                    },
+                                },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.ALL,
+                                    payload: {
+                                        formula1: diff.rule.formula1,
+                                        formula2: diff.rule.formula2,
+                                        ranges: diff.oldRanges,
+                                    },
+                                },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+                    } else {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.newRanges,
+                                },
+                                source,
+                            } as IUpdateDataValidationMutationParams,
+                        });
+
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.RANGE,
+                                    payload: diff.oldRanges,
+                                },
+                                source,
+                            } as IUpdateDataValidationMutationParams,
+                        });
+                    }
+                } else {
+                    redoMutations.push({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.newRanges,
+                            },
+                            source,
+                        } as IUpdateDataValidationMutationParams,
+                    });
+
+                    undoMutations.unshift({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.oldRanges,
+                            },
+                            source,
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                }
+
                 const rule = sheetDataValidationModel.getRuleById(unitId, subUnitId, diff.ruleId);
                 if (rule && rule.type === DataValidationType.CHECKBOX) {
                     const validator = sheetDataValidationModel.getValidator(DataValidationType.CHECKBOX) as CheckboxValidator;
@@ -178,22 +258,24 @@ export function getDataValidationDiffMutations(
         }
     });
 
-    const redoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: {
-            unitId,
-            subUnitId,
-            cellValue: redoMatrix.getData(),
-        } as ISetRangeValuesMutationParams,
-    };
+    if (setRangeValue) {
+        const redoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                cellValue: redoMatrix.getData(),
+            } as ISetRangeValuesMutationParams,
+        };
 
-    const undoSetRangeValues = {
-        id: SetRangeValuesMutation.id,
-        params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
-    };
+        const undoSetRangeValues = {
+            id: SetRangeValuesMutation.id,
+            params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
+        };
 
-    redoMutations.push(redoSetRangeValues);
-    undoMutations.push(undoSetRangeValues);
+        redoMutations.push(redoSetRangeValues);
+        undoMutations.push(undoSetRangeValues);
+    }
 
     return {
         redoMutations,
@@ -204,7 +286,7 @@ export function getDataValidationDiffMutations(
 export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataValidationRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.updateDataValidationRuleRange',
-    async handler(accessor, params) {
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -227,7 +309,7 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             redoMutations,
             unitID: unitId,
         });
-        await sequenceExecuteAsync(redoMutations, commandService);
+        sequenceExecute(redoMutations, commandService);
         return true;
     },
 };
@@ -241,7 +323,7 @@ export interface IAddSheetDataValidationCommandParams {
 export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.addDataValidation',
-    async handler(accessor, params) {
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -253,11 +335,15 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
         const matrix = sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
         matrix.addRule(rule);
         const diffs = matrix.diff(sheetDataValidationModel.getRules(unitId, subUnitId));
+        const validator = sheetDataValidationModel.getValidator(rule.type);
 
         const mutationParams: IAddDataValidationMutationParams = {
             unitId,
             subUnitId,
-            rule,
+            rule: {
+                ...rule,
+                ...validator?.normalizeFormula(rule, unitId, subUnitId),
+            },
         };
 
         const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, accessor);
@@ -282,42 +368,8 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             undoMutations,
         });
 
-        await sequenceExecuteAsync(redoMutations, commandService);
+        sequenceExecute(redoMutations, commandService);
         return true;
-    },
-};
-
-export const AddSheetDataValidationAndOpenCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'data-validation.command.addRuleAndOpen',
-    async handler(accessor) {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
-
-        const { workbook, worksheet } = target;
-        const rule = createDefaultNewRule(accessor);
-        const commandService = accessor.get(ICommandService);
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-
-        const addParams: IAddSheetDataValidationCommandParams = {
-            rule,
-            unitId,
-            subUnitId,
-        };
-
-        const res = await commandService.executeCommand(AddSheetDataValidationCommand.id, addParams);
-
-        if (res) {
-            commandService.executeCommand(OpenValidationPanelOperation.id, {
-                ruleId: rule.uid,
-                isAdd: true,
-            });
-
-            return true;
-        }
-        return false;
     },
 };
 
@@ -395,39 +447,44 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
                 const { worksheet } = target;
                 const { formula2: oldFormula2 = CHECKBOX_FORMULA_2, formula1: oldFormula1 = CHECKBOX_FORMULA_1 } = rule;
                 const { formula2 = CHECKBOX_FORMULA_2, formula1 = CHECKBOX_FORMULA_1 } = setting;
+                let setted = false;
                 ranges.forEach((range) => {
                     Range.foreach(range, (row, column) => {
                         const cellData = worksheet.getCellRaw(row, column);
                         const value = getStringCellValue(cellData);
-                        if (isBlankCell(cellData) || value === String(oldFormula2)) {
+                        if ((isBlankCell(cellData) || value === String(oldFormula2)) && !cellData?.p) {
                             redoMatrix.setValue(row, column, {
                                 v: formula2,
                                 p: null,
                             });
-                        } else if (value === String(oldFormula1)) {
+                            setted = true;
+                        } else if (value === String(oldFormula1) && !cellData?.p) {
                             redoMatrix.setValue(row, column, {
                                 v: formula1,
                                 p: null,
                             });
+                            setted = true;
                         }
                     });
                 });
 
-                const redoSetRangeValues = {
-                    id: SetRangeValuesMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        cellValue: redoMatrix.getData(),
-                    } as ISetRangeValuesMutationParams,
-                };
+                if (setted) {
+                    const redoSetRangeValues = {
+                        id: SetRangeValuesMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            cellValue: redoMatrix.getData(),
+                        } as ISetRangeValuesMutationParams,
+                    };
 
-                const undoSetRangeValues = {
-                    id: SetRangeValuesMutation.id,
-                    params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
-                };
-                redoMutations.push(redoSetRangeValues);
-                undoMutations.push(undoSetRangeValues);
+                    const undoSetRangeValues = {
+                        id: SetRangeValuesMutation.id,
+                        params: SetRangeValuesUndoMutationFactory(accessor, redoSetRangeValues.params),
+                    };
+                    redoMutations.push(redoSetRangeValues);
+                    undoMutations.push(undoSetRangeValues);
+                }
             }
         }
         const res = sequenceExecute(redoMutations, commandService);

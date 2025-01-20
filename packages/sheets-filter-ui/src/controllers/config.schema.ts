@@ -16,9 +16,9 @@
 
 import type { MenuConfig } from '@univerjs/ui';
 
-export const PLUGIN_CONFIG_KEY = 'sheets-filter-ui.config';
+export const SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY = 'sheets-filter-ui.config';
 
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+export const configSymbol = Symbol(SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsFilterUIConfig {
     menu?: MenuConfig;

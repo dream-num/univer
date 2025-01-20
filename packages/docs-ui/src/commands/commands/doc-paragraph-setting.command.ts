@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 import { getParagraphsInRanges } from './list.command';
 
@@ -68,7 +68,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startIndex - memoryCursor.cursor,
-                segmentId,
             });
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
             const paragraphStyle: IParagraphStyle = {
@@ -88,7 +87,6 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
                         },
                     ],
                 },
-                segmentId,
                 coverType: UpdateDocsAttributeType.REPLACE,
             });
 

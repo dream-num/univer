@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
 import type { Nullable, Workbook } from '@univerjs/core';
+
+import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
-import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import clsx from 'clsx';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { Confirm, Tooltip } from '@univerjs/design';
-import styles from './index.module.less';
+import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SCOPE_WORKBOOK_VALUE_DEFINED_NAME, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
 import { DefinedNameInput } from './DefinedNameInput';
-import { SCOPE_WORKBOOK_VALUE } from './component-name';
+import styles from './index.module.less';
 
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
@@ -73,9 +72,8 @@ export const DefinedNameContainer = () => {
             id = Tools.generateRandomId(10);
             commandService.executeCommand(InsertDefinedNameCommand.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
         } else {
-            const oldDefinedName = definedNamesService.getValueById(unitId, id);
-            const newDefinedName = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
-            commandService.executeCommand(SetDefinedNameCommand.id, { unitId, oldDefinedName: { ...oldDefinedName, unitId }, newDefinedName });
+            const newDefinedName: ISetDefinedNameMutationParam = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
+            commandService.executeCommand(SetDefinedNameCommand.id, newDefinedName);
         }
         setEditState(false);
         setEditorKey(null);
@@ -95,8 +93,20 @@ export const DefinedNameContainer = () => {
         setDeleteConformKey(null);
     }
 
-    const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
-        definedNamesService.focusRange(unitId, definedName.id);
+    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+        // The worksheet may be hidden, so we need to show it first
+        const { formulaOrRefString, id } = definedName;
+        const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);
+        if (!worksheet) {
+            return;
+        }
+
+        const isHidden = worksheet.isSheetHidden();
+        if (isHidden) {
+            await commandService.executeCommand(SetWorksheetShowCommand.id, { unitId, subUnitId: worksheet.getSheetId() });
+        }
+
+        definedNamesService.focusRange(unitId, id);
     };
 
     const getInsertDefinedName = () => {
@@ -166,7 +176,7 @@ export const DefinedNameContainer = () => {
                         <IncreaseSingle />
                         <span className={styles.definedNameContainerAddButtonText}>{localeService.t('definedName.addButton')}</span>
                     </div>
-                    <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />
+                    {editState && <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />}
                 </div>
 
                 {definedNames.map((definedName, index) => {
@@ -177,17 +187,17 @@ export const DefinedNameContainer = () => {
                                     <div className={styles.definedNameContainerItemName}>
                                         {definedName.name}
                                         <span className={styles.definedNameContainerItemNameForSheet}>
-                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
+                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE_DEFINED_NAME || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
                                     </div>
                                     <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>
                                 </div>
-                                <Tooltip title={localeService.t('definedName.updateButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <Tooltip title={localeService.t('definedName.updateButton')} placement="top">
                                     <div className={clsx(styles.definedNameContainerItemUpdate, styles.definedNameContainerItemShow)} onClick={() => { closeInsertOpenKeyEditor(definedName.id); }}>
                                         <CheckMarkSingle />
                                     </div>
                                 </Tooltip>
-                                <Tooltip title={localeService.t('definedName.deleteButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <Tooltip title={localeService.t('definedName.deleteButton')} placement="top">
                                     <div className={clsx(styles.definedNameContainerItemDelete, styles.definedNameContainerItemShow)} onClick={() => { deleteDefinedName(definedName.id); }}>
                                         <DeleteSingle />
                                     </div>
@@ -196,17 +206,20 @@ export const DefinedNameContainer = () => {
                             <Confirm visible={deleteConformKey === definedName.id} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
                                 {localeService.t('definedName.deleteConfirmText')}
                             </Confirm>
-                            <DefinedNameInput
-                                confirm={insertConfirm}
-                                cancel={closeInput}
-                                state={definedName.id === editorKey}
-                                id={definedName.id}
-                                inputId={definedName.id + index}
-                                name={definedName.name}
-                                formulaOrRefString={definedName.formulaOrRefString}
-                                comment={definedName.comment}
-                                localSheetId={definedName.localSheetId}
-                            />
+                            {definedName.id === editorKey && (
+                                <DefinedNameInput
+                                    confirm={insertConfirm}
+                                    cancel={closeInput}
+                                    state={definedName.id === editorKey}
+                                    id={definedName.id}
+                                    inputId={definedName.id + index}
+                                    name={definedName.name}
+                                    formulaOrRefString={definedName.formulaOrRefString}
+                                    comment={definedName.comment}
+                                    localSheetId={definedName.localSheetId}
+                                />
+                            )}
+
                         </div>
                     );
                 })}

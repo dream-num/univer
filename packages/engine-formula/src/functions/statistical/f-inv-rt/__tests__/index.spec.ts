@@ -78,6 +78,14 @@ describe('Test fInvRt function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const result = testFunction.calculate(probability, degFreedom1, degFreedom2);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.01);
+            const degFreedom3 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, degFreedom3, degFreedom2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const result3 = testFunction.calculate(probability2, degFreedom1, degFreedom3);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

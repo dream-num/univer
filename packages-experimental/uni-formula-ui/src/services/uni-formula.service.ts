@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+import type {
+    DocumentDataModel,
+    ICellData,
+    ICommand,
+    IDisposable,
+    IDocumentBody,
+    Nullable,
+    SlideDataModel } from '@univerjs/core';
+import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import {
     BuildTextUtils,
     CommandType,
@@ -29,22 +38,13 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { replaceSelectionFactory } from '@univerjs/docs-ui';
+import { replaceSelectionFactory } from '@univerjs/docs';
 import { RichText } from '@univerjs/engine-render';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { CanvasView } from '@univerjs/slides-ui';
 import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula';
 import { take } from 'rxjs';
-import type {
-    DocumentDataModel,
-    ICellData,
-    ICommand,
-    IDisposable,
-    IDocumentBody,
-    Nullable,
-    SlideDataModel } from '@univerjs/core';
-import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
 import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';
@@ -235,7 +235,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
             this._docFormulas.set(key, { unitId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -265,7 +265,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
             const pseudoId = getPseudoUnitKey(unitId);
             this._checkSyncingUnit(pseudoId);
 
-            const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+            const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
             this._slideFormulas.set(key, { unitId, pageId, elementId, rangeId, f, formulaId: id, v, t });
             this._formulaIdToKey.set(id, key);
 
@@ -320,7 +320,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
                 const pseudoId = getPseudoUnitKey(unitId);
                 this._checkSyncingUnit(pseudoId);
 
-                const id = this._registerOtherFormulaSrv.registerFormula(pseudoId, PSEUDO_SUBUNIT, f);
+                const id = this._registerOtherFormulaSrv.registerFormulaWithRange(pseudoId, PSEUDO_SUBUNIT, f);
                 value.formulaId = id;
                 this._formulaIdToKey.set(id, key);
             }
@@ -354,7 +354,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                         const docItem = this._docFormulas.get(key);
                         if (docItem) {
-                            const r = result.result?.[0][0];
+                            const r = result.result?.[0][0][0][0]; // Ranges defaults to one row and one column
                             if (docItem.v === r?.v && docItem.t === r?.t) return null;
 
                             return { position: { rangeId: docItem.rangeId }, unitId: docItem.unitId, cache: r };
@@ -362,7 +362,7 @@ export class UniFormulaService extends DumbUniFormulaService implements IUniForm
 
                         const slideItem = this._slideFormulas.get(key);
                         if (slideItem) {
-                            const r = result.result?.[0][0];
+                            const r = result.result?.[0][0][0][0]; // Ranges defaults to one row and one column
                             if (slideItem.v === r?.v && slideItem.t === r?.t) return null;
 
                             return {

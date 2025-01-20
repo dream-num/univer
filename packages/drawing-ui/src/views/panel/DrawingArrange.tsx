@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
+import type { IDrawingParam } from '@univerjs/core';
+import { ArrangeTypeEnum, LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import type { IDrawingParam } from '@univerjs/drawing';
-import { ArrangeTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IDrawingArrangeProps {

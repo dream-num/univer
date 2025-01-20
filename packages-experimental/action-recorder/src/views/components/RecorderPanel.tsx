@@ -45,8 +45,8 @@ function RecordPanelImpl() {
         if (!recording) commandService.executeCommand(CloseRecordPanelOperation.id);
     }, [commandService, recording]);
 
-    const startRecording = useCallback(() => {
-        if (!recording) commandService.executeCommand(StartRecordingActionCommand.id);
+    const startRecording = useCallback((replaceId?: boolean) => {
+        if (!recording) commandService.executeCommand(StartRecordingActionCommand.id, { replaceId });
     }, [commandService, recording]);
 
     const completeRecording = useCallback(() => {
@@ -69,7 +69,8 @@ function RecordPanelImpl() {
             <div className={styles.actionRecorderPanelTitle}>{titleText}</div>
             <div className={styles.actionRecorderPanelActions}>
                 <Button type="default" size="small" onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
-                <Button type="primary" size="small" onClick={recording ? completeRecording : startRecording}>{ recording ? 'Save' : 'Start' }</Button>
+                <Button type="primary" size="small" onClick={recording ? completeRecording : () => startRecording()}>{ recording ? 'Save' : 'Start' }</Button>
+                { !recording && <Button type="primary" size="small" onClick={() => startRecording(true)}>Start(N)</Button>}
             </div>
         </div>
     );

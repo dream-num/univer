@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { combineLatest, Observable } from 'rxjs';
 import type { IAccessor } from '@univerjs/core';
 import type { IRectRangeWithStyle } from '@univerjs/engine-render';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { Subscriber } from 'rxjs';
+import { DOC_RANGE_TYPE, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { combineLatest, Observable } from 'rxjs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
-import { DeleteLeftCommand } from '../../commands/commands/delete.command';
+import { DeleteLeftCommand } from '../../commands/commands/doc-delete.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
@@ -31,8 +32,9 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     return new Observable<boolean>((subscriber) => {
         const observable = docSelectionManagerService.textSelection$.subscribe(() => {
-            const range = docSelectionManagerService.getActiveTextRange();
-            if (range && !range.collapsed) {
+            const ranges = docSelectionManagerService.getDocRanges();
+            const legal = ranges.some((range) => range.collapsed === false || range.rangeType === DOC_RANGE_TYPE.RECT);
+            if (legal) {
                 subscriber.next(false);
             } else {
                 subscriber.next(true);
@@ -52,38 +54,43 @@ function inSameTable(rectRanges: Readonly<IRectRangeWithStyle[]>) {
     return tableIds.every((tableId) => tableId === tableIds[0]);
 }
 
+function notInTableSubscriber(subscriber: Subscriber<boolean>, docSelectionManagerService: DocSelectionManagerService, univerInstanceService: IUniverInstanceService) {
+    const rectRanges = docSelectionManagerService.getRectRanges();
+    const activeRange = docSelectionManagerService.getActiveTextRange();
+
+    if (rectRanges && rectRanges.length && inSameTable(rectRanges) && activeRange == null) {
+        subscriber.next(false);
+        return;
+    }
+
+    if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
+        const { segmentId, startOffset, endOffset } = activeRange;
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
+
+        if (tables && tables.length) {
+            if (tables.some((table) => {
+                const { startIndex, endIndex } = table;
+                return (startOffset > startIndex && startOffset < endIndex) || (endOffset > startIndex && endOffset < endIndex);
+            })) {
+                subscriber.next(false);
+                return;
+            }
+        }
+    }
+    subscriber.next(true);
+}
+
 const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable<boolean>((subscriber) => {
         const observable = docSelectionManagerService.textSelection$.subscribe(() => {
-            const rectRanges = docSelectionManagerService.getRectRanges();
-            const activeRange = docSelectionManagerService.getActiveTextRange();
-
-            if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
-                subscriber.next(false);
-                return;
-            }
-
-            if (activeRange && (rectRanges == null || rectRanges.length === 0)) {
-                const { segmentId, startOffset, endOffset } = activeRange;
-                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-                const tables = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.tables;
-
-                if (tables && tables.length) {
-                    if (tables.some((table) => {
-                        const { startIndex, endIndex } = table;
-                        return (startOffset > startIndex && startOffset < endIndex) || (endOffset > startIndex && endOffset < endIndex);
-                    })) {
-                        subscriber.next(false);
-                        return;
-                    }
-                }
-            }
-
-            subscriber.next(true);
+            notInTableSubscriber(subscriber, docSelectionManagerService, univerInstanceService);
         });
+
+        notInTableSubscriber(subscriber, docSelectionManagerService, univerInstanceService);
 
         return () => observable.unsubscribe();
     });

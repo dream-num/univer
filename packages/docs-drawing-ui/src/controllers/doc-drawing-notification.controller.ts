@@ -16,22 +16,20 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { ICommandInfo, JSONXActions, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingSearch, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     JSONX,
-    LifecycleStages,
-    OnLifecycle,
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -42,6 +40,7 @@ interface IAddOrRemoveDrawing {
 }
 
 // Check whether drawings are added or deleted from the mutation and obtain the drawing ID.
+// eslint-disable-next-line complexity
 function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDrawing[]> {
     if (JSONX.isNoop(actions) || !Array.isArray(actions)) {
         return null;
@@ -117,7 +116,6 @@ function getReOrderedDrawings(actions: JSONXActions): number[] {
     return drawingIndexes;
 }
 
-@OnLifecycle(LifecycleStages.Ready, DocDrawingAddRemoveController)
 export class DocDrawingAddRemoveController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -200,6 +198,7 @@ export class DocDrawingAddRemoveController extends Disposable {
     }
 
     private _addDrawings(unitId: string, drawings: IDocDrawing[]) {
+        // console.log('=addDrawings', drawings);
         const drawingManagerService = this._drawingManagerService;
         const docDrawingService = this._docDrawingService;
 

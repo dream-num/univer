@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject } from '../../../basics/date';
-import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { excelDateSerial, excelSerialToDate, getDateSerialNumberByObject, getDaysInMonth } from '../../../basics/date';
+import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -91,31 +91,66 @@ export class Datedif extends BaseFunction {
 
         const unitValue = `${unit.getValue()}`.toLocaleUpperCase();
 
-        let _endDateSerialNumber;
+        let diff = 0;
+        let newDate;
 
         switch (unitValue) {
             case 'Y':
                 // The number of complete years in the period.
-                return NumberValueObject.create(endYear - startYear);
+                diff = endYear - startYear;
+
+                if (endMonth < startMonth || (endMonth === startMonth && endDay < startDay)) {
+                    diff -= 1;
+                }
+                break;
             case 'M':
                 // The number of complete months in the period.
-                return NumberValueObject.create((endYear - startYear) * 12 + endMonth - startMonth);
+                diff = (endYear - startYear) * 12 + endMonth - startMonth;
+
+                if (endDay < startDay) {
+                    diff -= 1;
+                }
+                break;
             case 'D':
                 // The number of days in the period.
-                return NumberValueObject.create(Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber));
+                diff = Math.floor(endDateSerialNumber) - Math.floor(startDateSerialNumber);
+                break;
             case 'MD':
                 // The difference between the days in start_date and end_date. The months and years of the dates are ignored.
-                return NumberValueObject.create(endDay - startDay);
+                diff = endDay - startDay;
+
+                if (endDay < startDay) {
+                    newDate = new Date(Date.UTC(endYear, endMonth - 1, 0));
+                    diff += getDaysInMonth(newDate.getUTCFullYear(), newDate.getUTCMonth());
+                }
+                break;
             case 'YM':
                 // The difference between the months in start_date and end_date. The days and years of the dates are ignored.
-                return NumberValueObject.create(endMonth - startMonth);
+                diff = endMonth - startMonth;
+
+                if (endMonth < startMonth || (endMonth === startMonth && endDay < startDay)) {
+                    diff += 12;
+                }
+
+                if (endDay < startDay) {
+                    diff -= 1;
+                }
+                break;
             case 'YD':
                 // The difference between the days of start_date and end_date. The years of the dates are ignored.
                 // The year is the year of the start date
-                _endDateSerialNumber = excelDateSerial(new Date(Date.UTC(startYear, endMonth - 1, endDay)));
-                return NumberValueObject.create(Math.floor(_endDateSerialNumber) - Math.floor(startDateSerialNumber));
+                newDate = new Date(Date.UTC(startYear, endMonth - 1, endDay));
+
+                if (endMonth < startMonth || (endMonth === startMonth && endDay < startDay)) {
+                    newDate = new Date(Date.UTC(startYear + 1, endMonth - 1, endDay));
+                }
+
+                diff = Math.floor(excelDateSerial(newDate)) - Math.floor(startDateSerialNumber);
+                break;
             default:
                 return ErrorValueObject.create(ErrorType.NUM);
         }
+
+        return NumberValueObject.create(diff);
     }
 }

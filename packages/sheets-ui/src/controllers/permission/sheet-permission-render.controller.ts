@@ -14,34 +14,41 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager } from '@univerjs/ui';
+import { connectInjector, Disposable, IConfigService, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
-import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
-import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
-import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
-import { AlertDialog } from '../../views/permission/error-msg-dialog';
+import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_BACKGROUND, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../../views/permission';
+import { AlertDialog } from '../../views/permission/error-msg-dialog';
+import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
+import { PermissionDetailUserPart } from '../../views/permission/panel-detail/PermissionDetailUserPart';
+import { type IUniverSheetsUIConfig, SHEETS_UI_PLUGIN_CONFIG_KEY } from '../config.schema';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
 }
 
 export class SheetPermissionRenderManagerController extends Disposable {
-    constructor(@Inject(ComponentManager) private _componentManager: ComponentManager) {
+    constructor(
+        @Inject(Injector) private _injector: Injector,
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(IUIPartsService) private _uiPartsService: IUIPartsService
+    ) {
         super();
         this._init();
     }
 
     private _init(): void {
         this._initComponents();
+        this._initUiPartComponents();
     }
 
     private _initComponents(): void {
@@ -52,7 +59,6 @@ export class SheetPermissionRenderManagerController extends Disposable {
             [permissionCheckIconKey, CheckMarkSingle],
             [permissionLockIconKey, LockSingle],
             [UNIVER_SHEET_PERMISSION_PANEL, SheetPermissionPanel],
-            [UNIVER_SHEET_PERMISSION_PANEL_FOOTER, SheetPermissionPanelFooter],
             [UNIVER_SHEET_PERMISSION_USER_DIALOG, SheetPermissionUserDialog],
             [UNIVER_SHEET_PERMISSION_DIALOG, SheetPermissionDialog],
             [UNIVER_SHEET_PERMISSION_ALERT_DIALOG, AlertDialog],
@@ -62,6 +68,14 @@ export class SheetPermissionRenderManagerController extends Disposable {
                 component
             ));
         });
+    }
+
+    private _initUiPartComponents(): void {
+        const configService = this._injector.get(IConfigService);
+        const config = configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        if (!config?.customComponents?.has(UNIVER_SHEET_PERMISSION_USER_PART)) {
+            this.disposeWithMe(this._uiPartsService.registerComponent(UNIVER_SHEET_PERMISSION_USER_PART, () => connectInjector(PermissionDetailUserPart, this._injector)));
+        }
     }
 }
 
@@ -73,10 +87,15 @@ export class SheetPermissionRenderController extends Disposable implements IRend
         private readonly _context: IRenderContext,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IPermissionService private _permissionService: IPermissionService
+        @IPermissionService private _permissionService: IPermissionService,
+        @IConfigService private _configService: IConfigService
     ) {
         super();
 
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
+            return;
+        }
         this._initRender();
         this._initSkeleton();
 
@@ -123,30 +142,28 @@ export class WorksheetProtectionRenderController extends Disposable implements I
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
-
+        @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(IConfigService) private _configService: IConfigService
     ) {
         super();
+
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(SHEETS_UI_PLUGIN_CONFIG_KEY);
+        if (config?.customComponents?.has(UNIVER_SHEET_PERMISSION_BACKGROUND)) {
+            return;
+        }
+
         this._initRender();
         this._initSkeleton();
     }
 
     private _initRender() {
-        const register = (renderId: string) => {
-            const render = renderId && this._renderManagerService.getRenderById(renderId);
-            const spreadsheetRender = render && render.mainComponent as Spreadsheet;
-            if (spreadsheetRender) {
-                if (!spreadsheetRender.getExtensionByKey(worksheetProtectionKey)) {
-                    spreadsheetRender.register(this._worksheetProtectionRenderExtension);
-                }
+        const renderId = this._context.unitId;
+        const render = renderId && this._renderManagerService.getRenderById(renderId);
+        const spreadsheetRender = render && render.mainComponent as Spreadsheet;
+        if (spreadsheetRender) {
+            if (!spreadsheetRender.getExtensionByKey(worksheetProtectionKey)) {
+                spreadsheetRender.register(this._worksheetProtectionRenderExtension);
             }
-        };
-        this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((renderId) => {
-            renderId && register(renderId);
-        }));
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!;
-        if (workbook) {
-            register(workbook.getUnitId());
         }
     }
 

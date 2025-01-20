@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
-import { LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IModel, IObjectModel, IWorksheetProtectionRule } from '../type';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 type IRuleChangeType = 'add' | 'set' | 'delete';
 
-@OnLifecycle(LifecycleStages.Starting, WorksheetProtectionRuleModel)
 export class WorksheetProtectionRuleModel {
     /**
      *

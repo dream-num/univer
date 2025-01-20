@@ -133,6 +133,8 @@ export enum RENDER_CLASS_TYPE {
 }
 
 export const MAXIMUM_ROW_HEIGHT = 2000;
+export const MAXIMUM_COL_WIDTH = 2000;
+export const MIN_COL_WIDTH = 2;
 
 export const FIX_ONE_PIXEL_BLUR_OFFSET = 0.5;
 

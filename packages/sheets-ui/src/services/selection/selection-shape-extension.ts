@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
-/* eslint-disable max-lines-per-function */
-import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { IFreeze, Injector, IRange, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
+
+import type { SelectionControl } from './selection-control';
+import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
+
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
-import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import type { SelectionControl } from './selection-shape';
+import { genNormalSelectionStyle, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { attachSelectionWithCoord } from './util';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -34,6 +36,14 @@ const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 export interface ISelectionShapeTargetSelection {
     originControl: SelectionControl;
     targetSelection: IRangeWithCoord;
+}
+
+export interface ISelectionShapeExtensionOption {
+    skeleton: SpreadsheetSkeleton;
+    scene: Scene;
+    themeService: ThemeService;
+    injector: Injector;
+    selectionHooks: Record<string, () => void>;
 }
 
 /**
@@ -57,6 +67,9 @@ export class SelectionShapeExtension {
 
     private _scenePointerUpSub: Nullable<Subscription>;
 
+    /**
+     * The shadow selection under cursor when move whole selection control(for moving normal selection)
+     */
     private _helperSelection: Nullable<Rect>;
 
     private _scrollTimer!: ScrollTimer;
@@ -78,20 +91,24 @@ export class SelectionShapeExtension {
 
     private _fillControlColors: string[] = [];
 
+    private _skeleton: SpreadsheetSkeleton;
+    private _scene: Scene;
+    private readonly _themeService: ThemeService;
+    private readonly _injector: Injector;
+    private _selectionHooks: Record<string, () => void>;
     constructor(
         private _control: SelectionControl,
-        private _skeleton: SpreadsheetSkeleton,
-        private _scene: Scene,
-        private readonly _themeService: ThemeService,
-
-        /** @deprecated injection in extensions should be strictly limited. */
-        // TODO@ybzky: remove injector here, permission control should be update from the outside.
-        private readonly _injector: Injector,
-        private _selectionHooks: Record<string, () => void>
+        options: ISelectionShapeExtensionOption
     ) {
+        this._skeleton = options.skeleton;
+        this._scene = options.scene;
+        this._themeService = options.themeService;
+        this._injector = options.injector;
+        this._selectionHooks = options.selectionHooks;
+
         this._initialControl();
         this._initialWidget();
-        this._initialFill();
+        this._initialAutoFill();
 
         this._control.dispose$.subscribe(() => {
             this.dispose();
@@ -175,18 +192,22 @@ export class SelectionShapeExtension {
                 control.resetCursor();
             });
 
-            control.onPointerDown$.subscribeEvent(this._controlEvent.bind(this));
+            control.onPointerDown$.subscribeEvent(this._controlPointerDownHandler.bind(this));
         });
     }
 
+    /**
+     * Move the whole selection control after cursor turn into move state.
+     * NOT same as widgetMoving, that's for 8 control points.
+     * @param moveOffsetX
+     * @param moveOffsetY
+     */
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
-
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
-
+        const scrollXY = scene.getScrollXYInfoByViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const actualCellIndex = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -194,47 +215,36 @@ export class SelectionShapeExtension {
             scrollXY
         );
 
-        const { row, column } = moveActualSelection;
-
+        const { row, column } = actualCellIndex;
         const maxRow = this._skeleton.getRowCount() - 1;
-
         const maxColumn = this._skeleton.getColumnCount() - 1;
 
-        let startRow = row + this._relativeSelectionPositionRow;
-
-        if (startRow < 0) {
-            startRow = 0;
-        }
-
+        let startRow = Math.max(0, row + this._relativeSelectionPositionRow);
         let endRow = startRow + this._relativeSelectionRowLength;
-
         if (endRow > maxRow) {
             endRow = maxRow;
-
             if (endRow - startRow < this._relativeSelectionRowLength) {
                 startRow = endRow - this._relativeSelectionRowLength;
             }
         }
 
-        let startColumn = column + this._relativeSelectionPositionColumn;
-
-        if (startColumn < 0) {
-            startColumn = 0;
-        }
-
+        let startColumn = Math.max(0, column + this._relativeSelectionPositionColumn);
         let endColumn = startColumn + this._relativeSelectionColumnLength;
-
         if (endColumn > maxColumn) {
             endColumn = maxColumn;
-
             if (endColumn - startColumn < this._relativeSelectionColumnLength) {
                 startColumn = endColumn - this._relativeSelectionColumnLength;
             }
         }
-
+        const primaryCell = this._skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn);
+        const selection: ISelectionWithStyle = {
+            range: { startRow, endRow, startColumn, endColumn },
+            primary: primaryCell,
+            style: null,
+        };
+        const selectionWithCoord = attachSelectionWithCoord(selection, this._skeleton);
         const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
         const endCell = this._skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
-
         const startY = startCell?.startY || 0;
         const endY = endCell?.endY || 0;
         const startX = startCell?.startX || 0;
@@ -247,38 +257,34 @@ export class SelectionShapeExtension {
             height: endY - startY,
         });
 
-        this._targetSelection = {
-            startY,
-            endY,
-            startX,
-            endX,
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
-        };
+        this._targetSelection = { ...selectionWithCoord.rangeWithCoord };
+        // DO NOT UPDATE CURR CELL while dragging whole selection.
+        // Updating the primary cell during the middle of a drag operation may result in the primary cell being out of range in certain scenarios.
+        // ex: dragging normal selection to a merged area. there is a check to see if this move is valid, if not, the selection process would revert back to  original state.
 
-        this._control.selectionMoving$.next(this._targetSelection);
+        // normal selection should keep the original state when dragging whole selection.
+        // Now ref selection needs _control.selectionMoving$ update selection when dragging.
+        this._control.selectionMoving$.next(selectionWithCoord.rangeWithCoord);
     }
 
     /**
-     * Drag move whole selectionControl when cusor turns to crosshair. Not for dragging 8 control points.
+     * Drag move whole selectionControl when cursor turns to crosshair. Not for dragging 8 control points.
      * @param evt
      */
-    private _controlEvent(evt: IMouseEvent | IPointerEvent) {
+    private _controlPointerDownHandler(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
+        const scrollXY = scene.getScrollXYInfoByViewport(relativeCoords);
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const actualSelection = this._skeleton.getCellPositionByOffset(
+        const actualSelection = this._skeleton.getCellIndexByOffset(
             newEvtOffsetX,
             newEvtOffsetY,
             scaleX,
@@ -348,7 +354,7 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -368,10 +374,9 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableObjectsEvent();
             this._scrollTimer?.dispose();
-            this._control.selectionMoved$.next(this._targetSelection);
+            this._control.selectionMoveEnd$.next(this._targetSelection);
 
-            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
-            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoveEnd$
             this._selectionHooks.selectionMoveEnd?.();
         });
     }
@@ -432,7 +437,7 @@ export class SelectionShapeExtension {
         const scene = this._scene;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
         this._startOffsetX = evtOffsetX;
         this._startOffsetY = evtOffsetY;
@@ -471,9 +476,9 @@ export class SelectionShapeExtension {
         } else if (cursor === CURSOR_TYPE.SOUTH_RESIZE) {
             this._relativeSelectionPositionRow = startRow;
         }
-
         const scrollTimer = ScrollTimer.create(scene);
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
         this._scrollTimer = scrollTimer;
 
         scene.disableObjectsEvent();
@@ -481,7 +486,7 @@ export class SelectionShapeExtension {
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -502,8 +507,7 @@ export class SelectionShapeExtension {
             this._scrollTimer?.dispose();
             this._control.selectionScaled$.next(this._targetSelection);
 
-            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoved$,
-            // because selectionMoveEnd will dispose all selectionControls, then this._control will be null.
+            // _selectionHooks.selectionMoveEnd should placed after this._control.selectionMoveEnd$,
             this._selectionHooks.selectionMoveEnd?.();
         });
     }
@@ -517,9 +521,9 @@ export class SelectionShapeExtension {
     private _widgetMoving(moveOffsetX: number, moveOffsetY: number, cursor: CURSOR_TYPE) {
         const scene = this._scene;
 
-        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXYInfoByViewport(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -528,7 +532,7 @@ export class SelectionShapeExtension {
         );
 
         const { row, column } = moveActualSelection;
-        const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
+        // const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
         // const maxRow = this._skeleton.getRowCount() - 1;
         // const maxColumn = this._skeleton.getColumnCount() - 1;
         let startRow = this._relativeSelectionPositionRow;
@@ -570,38 +574,37 @@ export class SelectionShapeExtension {
             endColumn = this._relativeSelectionPositionColumn + this._relativeSelectionColumnLength;
         }
 
-        const {
-            startRow: finalStartRow,
-            startColumn: finalStartColumn,
-            endRow: finalEndRow,
-            endColumn: finalEndColumn,
-        } = this._swapPositions(startRow, startColumn, endRow, endColumn);
+        const range = this._swapPositions(startRow, startColumn, endRow, endColumn);
+        const primaryCell = this._skeleton.getCellWithMergeInfoByIndex(startRow, startColumn);
+        const selectionWithStyle: ISelectionWithStyle = { range, primary: primaryCell, style: null };
+        const selectionRangeWithCoord = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
+        this._targetSelection = { ...selectionRangeWithCoord.rangeWithCoord };
+        // const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
+        // const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
 
-        const startCell = this._skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-        const endCell = this._skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+        // const startY = startCell?.startY || 0;
+        // const endY = endCell?.endY || 0;
+        // const startX = startCell?.startX || 0;
+        // const endX = endCell?.endX || 0;
 
-        const startY = startCell?.startY || 0;
-        const endY = endCell?.endY || 0;
-        const startX = startCell?.startX || 0;
-        const endX = endCell?.endX || 0;
+        // this._targetSelection = {
+        //     startY,
+        //     endY,
+        //     startX,
+        //     endX,
+        //     startRow,
+        //     endRow,
+        //     startColumn,
+        //     endColumn,
+        // };
+        // const primaryWithCoord = this._skeleton.getCellWithCoordByIndex(startRow, startColumn);
+        // this._control.updateRange(this._targetSelection, primaryWithCoord);
 
-        this._targetSelection = {
-            startY,
-            endY,
-            startX,
-            endX,
-            startRow,
-            endRow,
-            startColumn,
-            endColumn,
-        };
-
-        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.currentStyle);
-        this._control.clearHighlight();
+        this._control.updateRangeBySelectionWithCoord(selectionRangeWithCoord);
         this._control.selectionScaling$.next(this._targetSelection);
     }
 
-    private _initialFill() {
+    private _initialAutoFill() {
         const { fillControl } = this._control;
 
         fillControl.onPointerEnter$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
@@ -617,11 +620,11 @@ export class SelectionShapeExtension {
             fillControl.resetCursor();
         });
 
-        fillControl.onPointerDown$.subscribeEvent(this._fillEvent.bind(this));
+        fillControl.onPointerDown$.subscribeEvent(this._autoFillForPointerdown.bind(this));
     }
 
     // eslint-disable-next-line complexity
-    private _fillMoving(moveOffsetX: number, moveOffsetY: number) {
+    private _autoFillMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
         // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
         // const scrollXY = activeViewport ? scene.getScrollXY(activeViewport) : { x: 0, y: 0 };
@@ -629,7 +632,7 @@ export class SelectionShapeExtension {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+        const moveActualSelection = this._skeleton.getCellIndexByOffset(
             moveOffsetX,
             moveOffsetY,
             scaleX,
@@ -639,7 +642,7 @@ export class SelectionShapeExtension {
 
         const { row, column } = moveActualSelection;
 
-        const moveRelativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        const moveRelativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const maxRow = this._skeleton.getRowCount() - 1;
 
@@ -764,12 +767,12 @@ export class SelectionShapeExtension {
         this._control.selectionFilling$.next(this._targetSelection);
     }
 
-    private _fillEvent(evt: IMouseEvent | IPointerEvent) {
+    private _autoFillForPointerdown(evt: IMouseEvent | IPointerEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getCoordRelativeToViewport(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -797,7 +800,7 @@ export class SelectionShapeExtension {
         const style = this._control.currentStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
-        const defaultStyle = getNormalSelectionStyle(this._themeService);
+        const defaultStyle = genNormalSelectionStyle(this._themeService);
         if (stroke == null) {
             stroke = defaultStyle.stroke;
         }
@@ -852,11 +855,11 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getCoordRelativeToViewport(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
-            this._fillMoving(newMoveOffsetX, newMoveOffsetY);
+            this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
 
             scene.setCursor(CURSOR_TYPE.CROSSHAIR);
 
@@ -900,7 +903,7 @@ export class SelectionShapeExtension {
             }
 
             scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._fillMoving(newMoveOffsetX, newMoveOffsetY);
+                this._autoFillMoving(newMoveOffsetX, newMoveOffsetY);
             });
         });
 
@@ -926,7 +929,16 @@ export class SelectionShapeExtension {
         return this._skeleton.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn).length > 0;
     }
 
-    private _swapPositions(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    /**
+     * Make sure startRow < endRow and startColumn < endColumn
+     *
+     * @param startRow
+     * @param startColumn
+     * @param endRow
+     * @param endColumn
+     * @returns {IRange} range
+     */
+    private _swapPositions(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
         const finalStartRow = Math.min(startRow, endRow);
         const finalStartColumn = Math.min(startColumn, endColumn);
         const finalEndRow = Math.max(startRow, endRow);

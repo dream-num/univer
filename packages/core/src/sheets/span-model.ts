@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
+import type { IRange } from './typedef';
 import { LRUMap, Rectangle, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
-import type { IRange } from './typedef';
 
-interface IMergeDataCache {
-    [key: string]: number;
-}
 export class SpanModel extends Disposable {
     /**
      * @property Cache for RANGE_TYPE.NORMAL
      */
-    private _cellCache: IMergeDataCache = {};
+    private _cellCache: Map<number, Map<number, number>> = new Map();
     /**
      * @property Cache for RANGE_TYPE.ROW
      */
-    private _rowCache: IMergeDataCache = {};
+    private _rowCache: Map<number, number> = new Map();
     /**
      * @property Cache for RANGE_TYPE.COLUMN
      */
-    private _columnCache: IMergeDataCache = {};
+    private _columnCache: Map<number, number> = new Map();
+    /**
+     * @property Whether has RANGE_TYPE.ROW
+     */
+    private _hasRow: boolean = false;
+    /**
+     * @property Whether has RANGE_TYPE.COLUMN
+     */
+    private _hasColumn: boolean = false;
     /**
      * @property Whether has RANGE_TYPE.ALL
      */
@@ -64,13 +69,15 @@ export class SpanModel extends Disposable {
     }
 
     private _clearCache() {
-        this._cellCache = {};
-        this._rowCache = {};
-        this._columnCache = {};
+        this._cellCache.clear();
+        this._rowCache.clear();
+        this._columnCache.clear();
         this._hasAll = false;
         this._allIndex = -1;
         this._rangeMap.clear();
         this._skeletonCache.clear();
+        this._hasColumn = false;
+        this._hasRow = false;
     }
 
     private _createCache(mergeData: IRange[]) {
@@ -102,16 +109,16 @@ export class SpanModel extends Disposable {
     private _createRowCache(range: IRange, index: number) {
         const { startRow, endRow } = range;
         for (let i = startRow; i <= endRow; i++) {
-            const key = `${i}`;
-            this._rowCache[key] = index;
+            this._rowCache.set(i, index);
+            this._hasRow = true;
         }
     }
 
     private _createColumnCache(range: IRange, index: number) {
         const { startColumn, endColumn } = range;
         for (let i = startColumn; i <= endColumn; i++) {
-            const key = `${i}`;
-            this._columnCache[key] = index;
+            this._columnCache.set(i, index);
+            this._hasColumn = true;
         }
     }
 
@@ -122,8 +129,13 @@ export class SpanModel extends Disposable {
 
     private _createCellCache(range: IRange, index: number) {
         for (let i = range.startRow; i <= range.endRow; i++) {
+            let columnCache = this._cellCache.get(i);
+            if (columnCache == null) {
+                columnCache = new Map();
+                this._cellCache.set(i, columnCache);
+            }
             for (let j = range.startColumn; j <= range.endColumn; j++) {
-                this._cellCache[`${i}-${j}`] = index;
+                columnCache.set(j, index);
             }
         }
     }
@@ -149,6 +161,16 @@ export class SpanModel extends Disposable {
             return this._mergeData[index];
         }
         return null;
+    }
+
+    /**
+     * Return index of merge data if (row,col) is in merge range. -1 means not in merge range.
+     * @param row
+     * @param column
+     * @returns {number} index of merge range.
+     */
+    public getMergeDataIndex(row: number, column: number) {
+        return this._getMergeDataIndex(row, column);
     }
 
     public isRowContainsMergedCell(row: number) {
@@ -273,17 +295,24 @@ export class SpanModel extends Disposable {
         if (this._hasAll) {
             return this._allIndex;
         }
-        const rowKey = `${row}`;
-        const columnKey = `${column}`;
-        if (this._rowCache[rowKey] !== undefined) {
-            return this._rowCache[rowKey];
+
+        if (this._hasRow) {
+            const rowValue = this._rowCache.get(row);
+            if (rowValue !== undefined) {
+                return rowValue;
+            }
         }
-        if (this._columnCache[columnKey] !== undefined) {
-            return this._columnCache[columnKey];
+
+        if (this._hasColumn) {
+            const columnValue = this._columnCache.get(column);
+            if (columnValue !== undefined) {
+                return columnValue;
+            }
         }
-        const key = `${row}-${column}`;
-        if (this._cellCache[key] !== undefined) {
-            return this._cellCache[key];
+
+        const cellValue = this._cellCache.get(row)?.get(column);
+        if (cellValue !== undefined) {
+            return cellValue;
         }
         return -1;
     }

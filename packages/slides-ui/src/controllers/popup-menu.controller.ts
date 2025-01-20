@@ -15,19 +15,17 @@
  */
 
 import type { IDisposable, Nullable, SlideDataModel } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { BaseObject, ObjectType, Scene } from '@univerjs/engine-render';
+import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISidebarService } from '@univerjs/ui';
-
-import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
-import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
+import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
+import { SlideCanvasPopMangerService } from '../services/slide-popup-manager.service';
 import { CanvasView } from './canvas-view';
 
-@OnLifecycle(LifecycleStages.Steady, SlidePopupMenuController)
 export class SlidePopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
@@ -46,14 +44,7 @@ export class SlidePopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
-        // this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        // this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
         this._univerInstanceService.getAllUnitsForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).forEach((slide) => this._create(slide));
-    }
-
-    private _dispose(workbook: SlideDataModel) {
-        // const unitId = workbook.getUnitId();
-        // this._renderManagerService.removeRender(unitId);
     }
 
     private _create(slide: Nullable<SlideDataModel>) {

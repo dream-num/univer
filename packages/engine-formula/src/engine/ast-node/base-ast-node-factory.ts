@@ -15,16 +15,19 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
 
 import { LexerNode } from '../analysis/lexer-node';
 import { BaseAstNode } from './base-ast-node';
 
 export const DEFAULT_AST_NODE_FACTORY_Z_INDEX = 100;
 
-export abstract class BaseAstNodeFactory extends Disposable {
+export abstract class BaseAstNodeFactory {
     get zIndex() {
         return 0;
+    }
+
+    dispose(): void {
+
     }
 
     create(param: LexerNode | string, currentRow?: number, currentColumn?: number): BaseAstNode {

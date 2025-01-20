@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDeleteDrawingCommandParams } from './interfaces';
 import {
     CommandType,
     ICommandService,
@@ -26,9 +29,6 @@ import {
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, getRichTextEditPath } from '@univerjs/docs-ui';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDeleteDrawingCommandParams } from './interfaces';
 
 /**
  * The command to remove new sheet image
@@ -93,15 +93,12 @@ export const RemoveDocDrawingCommand: ICommand = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: startIndex - memoryCursor.cursor,
-                    segmentId: '',
                 });
             }
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             });
 
             memoryCursor.moveCursorTo(startIndex + 1);

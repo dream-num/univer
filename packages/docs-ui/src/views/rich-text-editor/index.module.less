@@ -1,0 +1,41 @@
+.rich-text-editor {
+    &-active {
+        border-color: rgb(var(--hyacinth-500)) !important;
+    }
+
+    &-wrap {
+        height: 32px;
+        padding: 6px 8px 2px 6px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-base);
+        box-sizing: border-box;
+        position: relative;
+
+        .rich-text-editor-text {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .rich-text-editor-error-wrap {
+            font-size: 12px;
+            color: rgb(var(--red-500));
+            position: absolute;
+            bottom: -18px;
+            left: 0px;
+        }
+    }
+
+    &-placeholder {
+        font-size: 14px;
+        color: rgb(var(--grey-500));
+        position: absolute;
+        left: 5px;
+        top: 5px;
+    }
+}

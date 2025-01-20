@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
-import React from 'react';
 import type { IDisposable, UnitModel } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
+import type { IUniverUIConfig } from '../config.schema';
+import type { IWorkbenchOptions } from './ui.controller';
+import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { render as createRoot, unmount } from 'rc-util/lib/React/render';
+import React from 'react';
+import { filter, take } from 'rxjs';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -28,15 +31,13 @@ import { FloatDom } from '../../views/components/dom/FloatDom';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { menuSchema } from '../menus/menu.schema';
-import type { IUniverUIConfig } from '../config.schema';
-import type { IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
-@OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
     private _steadyTimeout: NodeJS.Timeout;
     private _renderTimeout: NodeJS.Timeout;
+
     constructor(
         private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -51,8 +52,7 @@ export class DesktopUIController extends Disposable {
 
         this._initBuiltinComponents();
         this._initMenus();
-
-        Promise.resolve().then(() => this._bootstrapWorkbench());
+        this._bootstrapWorkbench();
     }
 
     private _initMenus(): void {
@@ -61,7 +61,6 @@ export class DesktopUIController extends Disposable {
 
     private _bootstrapWorkbench(): void {
         this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
-            clearTimeout(this._renderTimeout);
             clearTimeout(this._steadyTimeout);
         }));
 
@@ -82,25 +81,28 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                this._renderTimeout = setTimeout(() => {
-                    const allRenders = this._renderManagerService.getRenderAll();
+                this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Ready), take(1)).subscribe(() => {
+                    this._renderTimeout = setTimeout(() => {
+                        const allRenders = this._renderManagerService.getRenderAll();
 
-                    for (const [key, render] of allRenders) {
-                        if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
-                        render.engine.setContainer(contentElement);
-                    }
+                        for (const [key, render] of allRenders) {
+                            if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
+                            render.engine.setContainer(contentElement);
+                        }
 
-                    this._lifecycleService.stage = LifecycleStages.Rendered;
-                    this._steadyTimeout = setTimeout(() => {
-                        this._lifecycleService.stage = LifecycleStages.Steady;
-                    }, STEADY_TIMEOUT);
-                }, 300);
+                        this._lifecycleService.stage = LifecycleStages.Rendered;
+                        this._steadyTimeout = setTimeout(() => {
+                            this._lifecycleService.stage = LifecycleStages.Steady;
+                        }, STEADY_TIMEOUT);
+                    }, 300);
+                }));
             })
         );
     }
 
     private _initBuiltinComponents(): void {
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FLOATING, () => connectInjector(CanvasPopup, this._injector)));
+        // this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(ContentDOMPopup, this._injector)));
         this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }
 }

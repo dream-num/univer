@@ -18,4 +18,5 @@ export enum UpdateRuleType {
     SETTING,
     RANGE,
     OPTIONS,
+    ALL,
 }

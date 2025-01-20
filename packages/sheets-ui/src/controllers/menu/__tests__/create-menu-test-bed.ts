@@ -16,7 +16,8 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { Inject, Injector, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtectionRuleModel, RangeProtectionService, RefRangeService, SheetInterceptorService,
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { RangeProtectionCache, RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtectionRuleModel, RangeProtectionService, RefRangeService, SheetInterceptorService,
     SheetsSelectionsService,
     WorkbookPermissionService,
     WorksheetPermissionService,
@@ -24,7 +25,6 @@ import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtec
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { IMenuManagerService, IPlatformService, IShortcutService, MenuManagerService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -77,8 +77,13 @@ export function createMenuTestBed() {
 
             injector.add([RangeProtectionRefRangeService]);
             injector.add([RangeProtectionRenderModel]);
+            injector.add([RangeProtectionCache]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([RangeProtectionService]);
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
     }
 

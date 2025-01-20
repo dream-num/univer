@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, merge, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { defaultPluginConfig, UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
+import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -40,7 +41,6 @@ import { DesktopLayoutService, ILayoutService } from './services/layout/layout.s
 import { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
 import { ILocalFileService } from './services/local-file/local-file.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { IMenuService, MenuService } from './services/menu/menu.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
@@ -49,14 +49,12 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
-import type { IUniverUIConfig } from './controllers/config.schema';
 
 export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 
@@ -78,27 +76,29 @@ export class UniverUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (rest.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
-
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
-            [IMenuService, { useClass: MenuService }],
             [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
@@ -113,17 +113,26 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
                 deps: [Injector],
-            },
-            ],
+            }],
             [SharedController],
             [ErrorController],
             [ShortcutPanelController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(IUIController);
+        this._injector.get(ErrorController);
+    }
+
+    override onReady(): void {
+        this._injector.get(SharedController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(ShortcutPanelController);
     }
 }

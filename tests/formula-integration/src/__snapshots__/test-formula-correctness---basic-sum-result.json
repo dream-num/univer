@@ -1,0 +1,124 @@
+{
+    "id": "-23yFfY3SZ2pr9nPYERZXg",
+    "sheetOrder": [
+        "4FDtSTxrsa_03719b8_jm"
+    ],
+    "name": "New Sheet",
+    "appVersion": "1",
+    "locale": "enUS",
+    "styles": {
+        "1l4gGD": {
+            "ff": "Arial",
+            "fs": 11
+        }
+    },
+    "sheets": {
+        "4FDtSTxrsa_03719b8_jm": {
+            "id": "4FDtSTxrsa_03719b8_jm",
+            "name": "Sheet1",
+            "rowCount": 1000,
+            "columnCount": 20,
+            "freeze": {
+                "xSplit": 0,
+                "ySplit": 0,
+                "startRow": -1,
+                "startColumn": -1
+            },
+            "hidden": 0,
+            "rowData": {
+                "0": {
+                    "ah": 24
+                },
+                "1": {
+                    "ah": 24
+                }
+            },
+            "tabColor": "",
+            "mergeData": [],
+            "rowHeader": {
+                "width": 46,
+                "hidden": 0
+            },
+            "scrollTop": 200,
+            "zoomRatio": 1,
+            "columnData": {},
+            "scrollLeft": 100,
+            "rightToLeft": 0,
+            "columnHeader": {
+                "height": 20,
+                "hidden": 0
+            },
+            "showGridlines": 1,
+            "defaultRowHeight": 24,
+            "defaultColumnWidth": 88,
+            "cellData": {
+                "0": {
+                    "0": {
+                        "v": 1,
+                        "t": 2,
+                        "s": "1l4gGD"
+                    },
+                    "1": {
+                        "f": "=SUM(A1:A2)",
+                        "t": 2,
+                        "v": 3
+                    }
+                },
+                "1": {
+                    "0": {
+                        "v": 2,
+                        "t": 2,
+                        "s": "1l4gGD"
+                    }
+                }
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "SHEET_UNIVER_THREAD_COMMENT_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_RANGE_PROTECTION_PLUGIN",
+            "data": ""
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_CONDITIONAL_FORMATTING_PLUGIN",
+            "data": ""
+        },
+        {
+            "name": "SHEET_HYPER_LINK_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_DRAWING_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_DEFINED_NAME_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_RANGE_THEME_MODEL_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_DATA_VALIDATION_PLUGIN",
+            "data": "{}"
+        },
+        {
+            "name": "SHEET_FILTER_PLUGIN",
+            "data": "{}"
+        }
+    ],
+    "rev": 4
+}

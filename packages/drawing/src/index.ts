@@ -22,12 +22,7 @@ export { UniverDrawingPlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';
 export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
 export { ImageIoService } from './services/image-io-impl.service';
-export type { IRotationSkewFlipTransform, ITransformState } from './services/interface';
 export {
-    ArrangeTypeEnum,
-    DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-    type DrawingType,
-    DrawingTypeEnum,
     type IDrawingGroupUpdateParam,
     IDrawingManagerService,
     type IDrawingMap,
@@ -35,10 +30,9 @@ export {
     type IDrawingMapItemData,
     type IDrawingOrderMapParam,
     type IDrawingOrderUpdateParam,
-    type IDrawingParam,
-    type IDrawingSearch,
-    type IDrawingSpace,
     type IDrawingSubunitMap,
     type IDrawingVisibleParam,
     type IUnitDrawingService,
 } from './services/drawing-manager.service';
+
+export { SetDrawingSelectedOperation } from './commands/operations/set-drawing-selected.operation';

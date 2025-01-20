@@ -15,11 +15,11 @@
  */
 
 import type { IScale } from '@univerjs/core';
-import { getColorStyle } from '@univerjs/core';
-
 import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import { Vector2 } from '../../../basics/vector2';
+
 import type { UniverRenderingContext } from '../../../context';
+import { getColorStyle } from '@univerjs/core';
+import { Vector2 } from '../../../basics/vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -52,11 +52,11 @@ export class Background extends docExtension {
 
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
-        const DELTA = 1.5;
+        const DELTA = 1;
 
         if (background && content !== '\r') {
             ctx.fillStyle = background;
-            ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y - 1, width + 1, contentHeight + 2 * DELTA);
+            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y + 1, width + 1, contentHeight + 2 * DELTA);
         }
     }
 

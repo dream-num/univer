@@ -17,12 +17,16 @@
 import { CommandType, type ICommand } from '@univerjs/core';
 import { ActionRecorderService } from '../../services/action-recorder.service';
 
-export const StartRecordingActionCommand: ICommand = {
+interface IStartRecordingActionCommandParams {
+    replaceId?: boolean;
+}
+
+export const StartRecordingActionCommand: ICommand<IStartRecordingActionCommandParams> = {
     id: 'action-recorder.command.start-recording',
     type: CommandType.COMMAND,
-    handler: (accessor) => {
+    handler: (accessor, params) => {
         const actionRecorderService = accessor.get(ActionRecorderService);
-        actionRecorderService.startRecording();
+        actionRecorderService.startRecording(!!params?.replaceId);
         return true;
     },
 };

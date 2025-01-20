@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService, ThemeService } from '@univerjs/core';
 import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import {
     SetBoldCommand,
@@ -25,7 +26,6 @@ import {
     SetTextColorCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { ICommand } from '@univerjs/core';
 
 /**
  * It is used to set the bold style of selections or one cell, need to distinguish between
@@ -174,5 +174,22 @@ export const SetRangeTextColorCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetTextColorCommand.id, params);
+    },
+};
+
+export const ResetRangeTextColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.reset-range-text-color',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(EDITOR_ACTIVATED);
+        const themeService = accessor.get(ThemeService);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatTextColorCommand.id, { value: null });
+        }
+
+        return commandService.executeCommand(SetTextColorCommand.id, { value: themeService.getCurrentTheme().textColor });
     },
 };

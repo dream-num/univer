@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
@@ -25,9 +27,7 @@ import {
     WorksheetInsertColumnPermission,
     WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
 
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';

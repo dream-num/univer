@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { SheetsUIMenuSchema } from '@univerjs/sheets-ui';
 import { type MenuSchemaType, RibbonStartGroup } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '@univerjs/uniui';
-import { menuSchema as sheetsUIMenuSchema } from '@univerjs/sheets-ui';
 import {
     SHEET_BOLD_MUTATION_ID,
     SHEET_ITALIC_MUTATION_ID,
@@ -29,7 +29,7 @@ import {
 } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (sheetsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
+    [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (SheetsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
     [FONT_GROUP_MENU_ID]: {
         [SHEET_BOLD_MUTATION_ID]: {
             order: 0,

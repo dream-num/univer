@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
-import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SlidesUIController } from '@univerjs/slides-ui';
+import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SLIDES_IMAGE_MENU_ID, SlidesUIController } from '@univerjs/slides-ui';
 import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
+import React from 'react';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, UniSlidesUIController)
 export class UniSlidesUIController extends SlidesUIController {
     constructor(
         @Inject(Injector) _injector: Injector,
@@ -50,7 +49,7 @@ export class UniSlidesUIController extends SlidesUIController {
         this._menuManagerService.appendRootMenu(menuSchema);
 
         ([
-            [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],
+            [BuiltinUniToolbarItemId.IMAGE, SLIDES_IMAGE_MENU_ID],
             [BuiltinUniToolbarItemId.FONT_GROUP, SHAPE_MENU_ID],
             [BuiltinUniToolbarItemId.TABLE, SlideAddTextCommand.id],
         ]).forEach(([id, menuId]) => {

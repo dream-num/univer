@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
+import type { IUnitRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { serializeRange } from '../engine/utils/reference';
+import { handleRefStringInfo, serializeRange } from '../engine/utils/reference';
 
 export interface IDefinedNamesServiceParam {
     id: string;
@@ -72,6 +72,9 @@ export interface IDefinedNamesService {
     focusRange$: Observable<IDefinedNamesServiceFocusParam>;
 
     focusRange(unitId: string, id: string): void;
+
+    getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
+
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
@@ -96,7 +99,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     private readonly _focusRange$ = new Subject<IDefinedNamesServiceFocusParam>();
     readonly focusRange$ = this._focusRange$.asObservable();
 
-    constructor() {
+    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
         // this.registerDefinedName('workbook-01', { id: 'test1', name: 'name-01', formulaOrRefString: '=sum(A1:B10)', comment: 'this is comment', localSheetId: 'sheet-0011', hidden: false });
     }
@@ -105,11 +108,17 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._definedNameMap = {};
     }
 
+    getWorksheetByRef(unitId: string, ref: string) {
+        const { sheetName } = handleRefStringInfo(ref);
+        return this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(sheetName);
+    }
+
     focusRange(unitId: string, id: string) {
         const item = this.getValueById(unitId, id);
         if (item == null) {
             return;
         }
+
         this._focusRange$.next({ ...item, unitId });
     }
 

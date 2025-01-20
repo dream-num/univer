@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
-import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { Ctor } from '@univerjs/core';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 
 /**
  * Base configuration for the plugin.
@@ -25,11 +24,32 @@ export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula.base.config';
 
 export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 
+export enum CalculationMode {
+    /**
+     * Force calculation of all formulas
+     */
+    FORCED,
+
+    /**
+     * Partial calculation, only cells with formulas but no v values are calculated
+     */
+    WHEN_EMPTY,
+
+    /**
+     * All formulas are not calculated
+     */
+    NO_CALCULATION,
+}
+
 export interface IUniverSheetsFormulaBaseConfig {
-    menu?: MenuConfig;
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+
+    /**
+     * Define the calculation mode during initialization, default is `WHEN_EMPTY`
+     */
+    initialFormulaComputing?: CalculationMode;
 }
 
 export const defaultPluginBaseConfig: IUniverSheetsFormulaBaseConfig = {};
@@ -52,9 +72,3 @@ export const defaultPluginRemoteConfig: IUniverSheetsFormulaRemoteConfig = {};
 export const PLUGIN_CONFIG_KEY_MOBILE = 'sheets-formula.mobile.config';
 
 export const configSymbolMobile = Symbol(PLUGIN_CONFIG_KEY_MOBILE);
-
-export interface IUniverSheetsFormulaMobileConfig {
-    menu?: MenuConfig;
-}
-
-export const defaultPluginMobileConfig: IUniverSheetsFormulaMobileConfig = {};

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, skipParseTagNames, Tools } from '@univerjs/core';
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
+import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
+import { CustomRangeType, DataStreamTreeTokenType, DrawingTypeEnum, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, skipParseTagNames, Tools } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/drawing';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
-import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();
@@ -37,7 +38,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
 }
 
 // TODO: get from page width.
-const DEFAULT_TABLE_WIDTH = 600;
+const DEFAULT_TABLE_WIDTH = 660;
 
 interface ITableCache {
     table: ITable;
@@ -67,7 +68,7 @@ export class HtmlToUDMService {
 
     private _afterProcessRules: IAfterProcessRule[] = [];
 
-    convert(html: string): Partial<IDocumentData> {
+    convert(html: string, metaConfig: { unitId?: string } = {}): Partial<IDocumentData> {
         const pastePlugin = HtmlToUDMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         const dom = parseToDom(html)!;
 
@@ -77,11 +78,13 @@ export class HtmlToUDMService {
             sectionBreaks: [],
             tables: [],
             textRuns: [],
+            customBlocks: [],
         };
 
         const docData: Partial<IDocumentData> = {
             body,
             tableSource: {},
+            id: metaConfig?.unitId ?? '',
         };
 
         if (pastePlugin) {
@@ -99,9 +102,9 @@ export class HtmlToUDMService {
         return docData;
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _process(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: Partial<IDocumentData>) {
         const body = doc.body!;
-
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 if (node.nodeValue?.trim() === '') {
@@ -124,6 +127,48 @@ export class HtmlToUDMService {
                         ed: body.dataStream.length,
                         ts: style,
                     });
+                }
+            } else if (node.nodeName === 'IMG') {
+                const element = node as HTMLImageElement;
+                const imageSourceType = element.dataset.imageSourceType;
+                const source = imageSourceType === ImageSourceType.UUID ? element.dataset.source : element.src;
+
+                if (source && imageSourceType) {
+                    const width = Number(element.dataset.width || 100);
+                    const height = Number(element.dataset.height || 100);
+                    const docTransformWidth = Number(element.dataset.docTransformWidth || width);
+                    const docTransformHeight = Number(element.dataset.docTransformHeight || height);
+                    // 外部会进行替换.
+                    const id = Tools.generateRandomId(6);
+                    doc.body?.customBlocks?.push({ startIndex: body.dataStream.length, blockId: id });
+                    body.dataStream += '\b';
+                    if (!doc.drawings) {
+                        doc.drawings = {};
+                    }
+                    doc.drawings[id] = {
+                        drawingId: id,
+                        title: '',
+                        description: '',
+                        imageSourceType,
+                        source,
+                        transform: { width, height, left: 0 },
+                        docTransform: {
+                            size: { width: docTransformWidth, height: docTransformHeight },
+                            angle: 0,
+                            positionH: {
+                                relativeFrom: ObjectRelativeFromH.PAGE,
+                                posOffset: 0,
+                            },
+                            positionV: {
+                                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                                posOffset: 0,
+                            },
+                        },
+                        layoutType: PositionedObjectLayoutType.INLINE,
+                        drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                        unitId: doc.id || '',
+                        subUnitId: doc.id || '',
+                    } as any;
                 }
             } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
                 continue;
@@ -285,13 +330,7 @@ export class HtmlToUDMService {
 
     private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
         const body = doc.body!;
-        const element = node as HTMLElement;
-        const start = body.dataStream.length;
-        if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
-        }
-
-        return start;
+        return body.dataStream.length;
     }
 
     private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
@@ -299,7 +338,6 @@ export class HtmlToUDMService {
         const element = node as HTMLElement;
 
         if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
             body.customRanges = body.customRanges ?? [];
             body.customRanges.push({
                 startIndex: start,

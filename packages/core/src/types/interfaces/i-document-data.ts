@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, ISize } from '../../shared/shape';
-import type { Nullable } from '../../shared/types';
+import type { ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type { IDrawingParam } from './i-drawing';
+import type { IMention } from './i-mention';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
 // Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
@@ -134,6 +135,7 @@ export interface IDocumentBody {
     // links?: { [index: number]: IHyperlink }; // links
 
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
+
     customDecorations?: ICustomDecoration[];
 
     /**
@@ -195,7 +197,7 @@ export interface INestingLevel {
     startNumber: number;
 
     // Union field glyph_kind can be only one of the following:
-    glyphType?: GlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
+    glyphType?: ListGlyphType; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType
     glyphSymbol?: string; // the tag of the unordered list
     // End of list of possible types for union field glyph_kind.
 }
@@ -212,7 +214,7 @@ export enum FollowNumberWithType {
 /**
  * An enumeration of the supported glyph types.
  */
-export enum GlyphType {
+export enum ListGlyphType {
     BULLET, // The glyph type is unspecified or unsupported.
     NONE, // 	An empty string.
     DECIMAL, // 	A number, like 1, 2, or 3.
@@ -359,6 +361,8 @@ export interface ICustomRange<T extends Record<string, any> = Record<string, any
 
 export type IHyperLinkCustomRange = ICustomRange<{ url: string }>;
 
+export type IMentionCustomRange = ICustomRange<IMention>;
+
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -368,6 +372,8 @@ export enum CustomRangeType {
     CUSTOM,
     MENTION,
     UNI_FORMULA,
+
+    DELTED = 9999,
 }
 
 /**
@@ -382,6 +388,7 @@ export interface ICustomBlock {
 
 export enum CustomDecorationType {
     COMMENT,
+    DELETED = 9999,
 }
 
 export interface ICustomDecoration {
@@ -411,6 +418,7 @@ export interface IHeaderAndFooterBase {
 }
 
 export enum DocumentFlavor {
+    UNSPECIFIED,
     TRADITIONAL,
     MODERN,
 }
@@ -481,6 +489,7 @@ export interface IDocumentRenderConfig {
     wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
     isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
+    zeroWidthParagraphBreak?: BooleanNumber; // Whether to render the paragraph \r to zero width. the default value is false.
 }
 
 export interface ISectionBreakBase {
@@ -838,7 +847,7 @@ export interface IDistFromText {
 }
 
 export interface ITableAnchor {
-    positionH: IObjectPositionH; // horzAnchor (Table Horizontal Anchor)
+    positionH: IObjectPositionH; // horizontal Anchor (Table Horizontal Anchor)
     positionV: IObjectPositionV;
 }
 
@@ -904,7 +913,7 @@ export interface ITable {
 // the value the h attribute.
 //  If the value of hRule is exact, then the table row's height should be exactly the
 // value of the h attribute.
-export enum TableCellHeightRule {
+export enum TableRowHeightRule {
     AUTO,
     AT_LEAST,
     EXACT,
@@ -916,7 +925,7 @@ export interface ITableColumn { // 合并拆分列，HTML 合并单元格
 
 export interface ITableRowSize {
     val: INumberUnit;
-    hRule: TableCellHeightRule;
+    hRule: TableRowHeightRule;
 }
 
 /**
@@ -1075,66 +1084,3 @@ export enum PageOrientType {
 
 // #region - tech dept
 
-// TODO@Jocs: these types are here because of drawing coupled into the core of the document's model, which
-// is an anti-pattern. After fixing the problem, these types should be removed.
-
-/** @deprecated */
-export enum ArrangeTypeEnum {
-    forward,
-    backward,
-    front,
-    back,
-}
-
-/** @deprecated */
-export enum DrawingTypeEnum {
-    UNRECOGNIZED = -1,
-    DRAWING_IMAGE = 0,
-    DRAWING_SHAPE = 1,
-    DRAWING_CHART = 2,
-    DRAWING_TABLE = 3,
-    DRAWING_SMART_ART = 4,
-    DRAWING_VIDEO = 5,
-    DRAWING_GROUP = 6,
-    DRAWING_UNIT = 7,
-    DRAWING_DOM = 8,
-}
-
-/** @deprecated */
-export type DrawingType = DrawingTypeEnum | number;
-
-/** @deprecated */
-export interface IDrawingSpace {
-    unitId: string;
-    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
-}
-
-/** @deprecated */
-export interface IDrawingSearch extends IDrawingSpace {
-    drawingId: string;
-}
-
-/** @deprecated */
-export interface IRotationSkewFlipTransform {
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
-
-/** @deprecated */
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
-
-/** @deprecated */
-export interface IDrawingParam extends IDrawingSearch {
-    drawingType: DrawingType;
-    transform?: Nullable<ITransformState>;
-    transforms?: Nullable<ITransformState[]>;
-    // The same drawing render in different place, like image in header and footer.
-    // The default value is BooleanNumber.FALSE. if it's true, Please use transforms.
-    isMultiTransform?: BooleanNumber;
-    groupId?: string;
-}
-
-// #endregion

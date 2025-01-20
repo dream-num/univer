@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -25,6 +26,8 @@ export class Syd extends BaseFunction {
     override minParams = 4;
 
     override maxParams = 4;
+
+    override needsLocale = true;
 
     override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, per: BaseValueObject): BaseValueObject {
         const maxRowLength = Math.max(
@@ -83,7 +86,7 @@ export class Syd extends BaseFunction {
             const result = (costValue - salvageValue) * (lifeValue - perValue + 1) * 2 / (lifeValue * (lifeValue + 1));
 
             if (rowIndex === 0 && columnIndex === 0) {
-                return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+                return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
             }
 
             return NumberValueObject.create(result);

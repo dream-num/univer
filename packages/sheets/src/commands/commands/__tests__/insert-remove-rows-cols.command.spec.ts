@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, IRange, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -25,11 +26,11 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
@@ -40,13 +41,14 @@ import { SetSelectionsOperation } from '../../operations/selection.operation';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertColByRangeCommand,
     InsertColCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
+    InsertRowByRangeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -69,6 +71,10 @@ describe('Test insert and remove rows cols commands', () => {
             InsertColAfterCommand,
             InsertColBeforeCommand,
             InsertColCommand,
+            InsertColByRangeCommand,
+            InsertRowByRangeCommand,
+            RemoveColByRangeCommand,
+            RemoveRowByRangeCommand,
             RemoveRowCommand,
             RemoveColCommand,
 

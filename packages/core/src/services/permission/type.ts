@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
 import type { UnitAction, UnitObject } from '@univerjs/protocol';
-import { createIdentifier } from '../../common/di';
-import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
-import type { IRange } from '../../sheets/typedef';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { Nullable } from '../../shared/types';
+import type { IRange } from '../../sheets/typedef';
+import { createIdentifier } from '../../common/di';
 
 export enum PermissionStatus {
     INIT = 'init',
@@ -63,7 +62,9 @@ export interface IPermissionService {
     composePermission$(permissionId: string[]): Observable<IPermissionPoint<unknown>[]>;
     composePermission(permissionId: string[]): IPermissionPoint<unknown>[];
     getAllPermissionPoint(): Map<string, Observable<IPermissionPoint<unknown>>>;
+
+    getShowComponents(): boolean;
+    setShowComponents(showComponents: boolean): void;
 }
 
 export const IPermissionService = createIdentifier<IPermissionService>('univer.permission-service');
-runOnLifecycle(LifecycleStages.Starting, IPermissionService);

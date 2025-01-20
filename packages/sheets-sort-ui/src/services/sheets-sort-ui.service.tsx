@@ -15,27 +15,25 @@
  */
 
 import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISheetRangeLocation } from '@univerjs/sheets';
+
+import type { ISortOption } from '@univerjs/sheets-sort';
 import {
     Disposable,
     ICommandService,
     ILogService,
     Inject,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
     LocaleType,
-    OnLifecycle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
 import { expandToContinuousRange, getPrimaryForRange, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { ISheetRangeLocation } from '@univerjs/sheets';
-
-import type { ISortOption } from '@univerjs/sheets-sort';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
-import React from 'react';
 import { IConfirmService } from '@univerjs/ui';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ExtendConfirm } from '../views/ExtendConfirm';
 
@@ -61,7 +59,6 @@ const SORT_ERROR_MESSAGE = {
     FORMULA_ARRAY: 'sheets-sort.error.formula-array',
 };
 
-@OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortUIService extends Disposable {
     private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
     readonly customSortState$ = this._customSortState$.asObservable();

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DrawingUpdateController } from './controllers/drawing-update.controller';
+import type { IUniverDrawingUIConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, merge, Plugin } from '@univerjs/core';
+import { defaultPluginConfig, DRAWING_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DrawingUIController } from './controllers/drawing-ui.controller';
+import { DrawingUpdateController } from './controllers/drawing-update.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
 import { DrawingRenderService } from './services/drawing-render.service';
-import type { IUniverDrawingUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_DRAWING_UI_PLUGIN';
 
@@ -37,23 +37,31 @@ export class UniverDrawingUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(DRAWING_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         this._initDependencies();
     }
 
+    override onRendered(): void {
+        this._injector.get(DrawingUpdateController);
+        this._injector.get(DrawingUIController);
+        this._injector.get(ImageCropperController);
+        this._injector.get(ImageUpdateController);
+    }
+
     private _initDependencies(): void {
         const dependencies: Dependency[] = [
-
-            // services
             [DrawingRenderService],
-            // controllers
             [DrawingUpdateController],
             [DrawingUIController],
             [ImageCropperController],

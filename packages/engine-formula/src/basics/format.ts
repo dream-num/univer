@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
 import { numfmt } from '@univerjs/core';
+import { stripErrorMargin } from '../engine/utils/math-kit';
 
 /**
  * covert number to preview string by pattern
@@ -26,4 +28,27 @@ import { numfmt } from '@univerjs/core';
  */
 export const getFormatPreview = (pattern: string, value: number) => {
     return numfmt.format(pattern, value, { throws: false });
+};
+
+export const getTextValueOfNumberFormat = (text: BaseValueObject): string => {
+    let textValue = `${text.getValue()}`;
+
+    if (text.isNull()) {
+        textValue = '';
+    }
+
+    if (text.isBoolean()) {
+        textValue = textValue.toLocaleUpperCase();
+    }
+
+    if (text.isNumber()) {
+        if (text.getPattern() !== '') {
+            textValue = getFormatPreview(text.getPattern(), +text.getValue());
+        } else {
+            // Specify Number.EPSILON to not discard necessary digits in the case of non-precision errors, for example, the length of 1/3 is 17
+            textValue = `${stripErrorMargin(+text.getValue())}`;
+        }
+    }
+
+    return textValue;
 };

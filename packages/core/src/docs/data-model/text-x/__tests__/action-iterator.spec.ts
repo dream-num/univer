@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { BooleanNumber } from '../../../../types/enum/text-style';
 import { ActionIterator } from '../action-iterator';
 import { TextXActionType } from '../action-types';
-import { BooleanNumber } from '../../../../types/enum/text-style';
 
 describe('Test action iterator', () => {
     it('test action iterator basic use', () => {
@@ -37,11 +37,9 @@ describe('Test action iterator', () => {
                 }],
             },
             len: 5,
-            line: 0,
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         expect(iterator.hasNext()).toBe(true);
@@ -77,11 +75,8 @@ describe('Test action iterator', () => {
                         bl: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
             },
             len: 2,
-            line: 0,
         });
 
         expect(iterator.peekType()).toBe(TextXActionType.INSERT);
@@ -92,8 +87,6 @@ describe('Test action iterator', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'llo',
-                customRanges: [],
-                customDecorations: [],
                 textRuns: [{
                     st: 0,
                     ed: 3,
@@ -103,7 +96,6 @@ describe('Test action iterator', () => {
                 }],
             },
             len: 3,
-            line: 0,
         });
 
         expect(iterator.peekType()).toBe(TextXActionType.DELETE);
@@ -113,7 +105,6 @@ describe('Test action iterator', () => {
         expect(action).toEqual({
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         });
 
         expect(iterator.hasNext()).toBe(false);
@@ -141,7 +132,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         expect(iterator.rest()).toEqual([{
@@ -150,7 +140,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         iterator.next(3);
@@ -161,7 +150,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
     });
 });

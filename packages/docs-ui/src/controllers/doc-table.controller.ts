@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
+import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../views/table/create/component-name';
 import { DocCreateTableConfirm } from '../views/table/create/TableCreate';
-import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DocTableController)
 export class DocTableController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

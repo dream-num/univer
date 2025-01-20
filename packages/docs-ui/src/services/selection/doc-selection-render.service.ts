@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
-import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
+import type { RectRange } from './rect-range';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { CURSOR_TYPE, getSystemHighlightColor, GlyphType, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import { ILayoutService, KeyCode } from '@univerjs/ui';
+import { BehaviorSubject, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
-import type { RectRange } from './rect-range';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -54,6 +54,12 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
+
+    readonly onChangeByEvent$ = merge(
+        this._onInput$,
+        this._onKeydown$.pipe(filter((e) => (e.event as KeyboardEvent).keyCode === KeyCode.BACKSPACE)),
+        this._onCompositionend$
+    );
 
     private readonly _onPaste$ = new Subject<IEditorInputConfig>();
     readonly onPaste$ = this._onPaste$.asObservable();
@@ -87,6 +93,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
+    private _onPointerEvent = false;
 
     private _viewPortObserverMap = new Map<
         string,
@@ -99,9 +106,20 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _isIMEInputApply = false;
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
-    private _editorFocusing = true;
     // When the user switches editors, whether to clear the doc ranges.
     private _reserveRanges = false;
+
+    get isOnPointerEvent() {
+        return this._onPointerEvent;
+    }
+
+    get isFocusing() {
+        return this._input === document.activeElement;
+    }
+
+    get canFocusing() {
+        return this.isFocusing || document.activeElement === document.body || document.activeElement === null;
+    }
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
@@ -161,52 +179,93 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._selectionStyle = style;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _currentSegmentId: segmentId,
             _currentSegmentPage: segmentPage,
             _selectionStyle: style,
         } = this;
-
         const { scene, mainComponent } = this._context;
         const document = mainComponent as Documents;
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
 
+        const generalAddRange = (startOffset: number, endOffset: number) => {
+            const rangeList = getRangeListFromCharIndex(
+                startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
+            );
+
+            if (rangeList == null) {
+                return;
+            }
+
+            const { textRanges, rectRanges } = rangeList;
+
+            for (const textRange of textRanges) {
+                this._addTextRange(textRange);
+            }
+
+            this._addRectRanges(rectRanges);
+        };
+
         for (const range of ranges) {
-            const { startOffset, endOffset, rangeType } = range;
+            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
 
             if (rangeType === DOC_RANGE_TYPE.RECT) {
                 const rectRange = getRectRangeFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
+                    startOffset,
+                    endOffset,
+                    scene,
+                    document,
+                    docSkeleton,
+                    style,
+                    segmentId,
+                    segmentPage
                 );
 
                 if (rectRange) {
                     this._addRectRanges([rectRange]);
                 }
             } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
-                const textRange = getTextRangeFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
-                );
+                // TODO: Remove try catch when text range in cell support across pages.
+                try {
+                    let textRange: Nullable<TextRange> = null;
 
-                if (textRange) {
-                    this._addTextRange(textRange);
+                    if (startNodePosition && endNodePosition) {
+                        textRange = getTextRangeFromCharIndex(
+                            startNodePosition.isBack ? startOffset : startOffset - 1,
+                            endNodePosition.isBack ? endOffset : endOffset - 1,
+                            scene,
+                            document,
+                            docSkeleton,
+                            style,
+                            segmentId,
+                            segmentPage,
+                            startNodePosition.isBack,
+                            endNodePosition.isBack
+                        );
+                    } else {
+                        textRange = getTextRangeFromCharIndex(
+                            startOffset,
+                            endOffset,
+                            scene,
+                            document,
+                            docSkeleton,
+                            style,
+                            segmentId,
+                            segmentPage
+                        );
+                    }
+
+                    if (textRange) {
+                        this._addTextRange(textRange);
+                    }
+                // eslint-disable-next-line unused-imports/no-unused-vars
+                } catch (_e) {
+                    generalAddRange(startOffset, endOffset);
                 }
             } else {
-                const rangeList = getRangeListFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
-                );
-
-                if (rangeList == null) {
-                    continue;
-                }
-
-                const { textRanges, rectRanges } = rangeList;
-
-                for (const textRange of textRanges) {
-                    this._addTextRange(textRange);
-                }
-
-                this._addRectRanges(rectRanges);
+                generalAddRange(startOffset, endOffset);
             }
         }
 
@@ -263,12 +322,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        if (isFocusing || force) {
+        if (this.canFocusing || force) {
             this.focus();
         }
     }
@@ -278,30 +336,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     focus(): void {
-        if (!this._editorFocusing) {
-            return;
-        }
         this._input.focus();
     }
 
     blur() {
         this._input.blur();
-    }
-
-    /**
-     * @deprecated
-     */
-    focusEditor(): void {
-        this._editorFocusing = true;
-        this.focus();
-    }
-
-    /**
-     * @deprecated
-     */
-    blurEditor(): void {
-        this._editorFocusing = false;
-        this.blur();
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
@@ -406,7 +445,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     // Handle pointer down.
     // eslint-disable-next-line max-lines-per-function, complexity
     __onPointDown(evt: IPointerEvent | IMouseEvent) {
-        this._editorFocusing = true;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
@@ -456,7 +494,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangePosition(position);
-        } else if (!evt.ctrlKey && !this._isEmpty()) {
+        } else if (evt.ctrlKey) {
+            this._removeAllCollapsedTextRanges();
+        } else if (!this._isEmpty()) {
             this._removeAllRanges();
         }
 
@@ -473,7 +513,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         let preMoveOffsetX = evtOffsetX;
 
         let preMoveOffsetY = evtOffsetY;
-
+        this._onPointerEvent = true;
         this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
@@ -496,16 +536,30 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
+            this._onPointerEvent = false;
             scene.enableObjectsEvent();
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
-                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
+                if (evt.ctrlKey) {
+                    // No need to add cursor when select multi text ranges by CTRL key.
+                    this._disposeScrollTimers();
+                    return;
+                }
 
+                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
                 for (const textRange of this._rangeListCache) {
-                    this._addTextRange(textRange);
+                    if (evt.ctrlKey) {
+                        if (textRange.collapsed) {
+                            textRange.dispose();
+                        } else {
+                            this._addTextRange(textRange);
+                        }
+                    } else {
+                        this._addTextRange(textRange);
+                    }
                 }
 
                 this._addRectRanges(this._rectRangeListCache);
@@ -528,11 +582,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._textSelectionInner$.next(selectionInfo);
 
-            this._scrollTimers.forEach((timer) => {
-                timer?.dispose();
-            });
-
-            this._scrollTimers = [];
+            this._disposeScrollTimers();
 
             this._updateInputPosition(true);
         }));
@@ -545,6 +595,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getActiveTextRange() {
         return this._getActiveRangeInstance();
+    }
+
+    private _disposeScrollTimers() {
+        this._scrollTimers.forEach((timer) => {
+            timer?.dispose();
+        });
+
+        this._scrollTimers = [];
     }
 
     private _setSystemHighlightColorToStyle() {
@@ -567,6 +625,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     private _getAllRectRanges() {
         return this._rectRangeList.map(serializeRectRange);
+    }
+
+    getAllTextRanges() {
+        return this._getAllTextRanges();
+    }
+
+    getAllRectRanges() {
+        return this._getAllRectRanges();
     }
 
     private _getActiveRange(): Nullable<ITextRangeWithStyle> {
@@ -639,6 +705,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.contentEditable = 'true';
 
         this._input.classList.add('univer-editor');
+        this._input.id = `__editor_${this._context.unitId}`;
         this._input.style.cssText = `
             position: absolute;
             overflow: hidden;
@@ -668,7 +735,11 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
 
         const HALF = 0.5;
-        const isBack = ratioX < HALF;
+        let isBack = ratioX < HALF;
+
+        if (glyph.glyphType === GlyphType.LIST) {
+            isBack = true;
+        }
 
         return {
             ...position,
@@ -706,20 +777,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rectRangeList = newRanges;
     }
 
-    private _removeCollapsedTextRange() {
-        const oldTextRanges = this._rangeList;
-
-        this._rangeList = [];
-
-        for (const textRange of oldTextRanges) {
-            if (textRange.collapsed) {
-                textRange.dispose();
-            } else {
-                this._rangeList.push(textRange);
-            }
-        }
-    }
-
     private _removeAllRanges() {
         this._removeAllTextRanges();
         this._removeAllRectRanges();
@@ -752,6 +809,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         });
 
         this._rectRangeList = [];
+    }
+
+    private _removeAllCollapsedTextRanges() {
+        for (const range of this._rangeList) {
+            if (range.collapsed) {
+                range.dispose();
+            }
+        }
     }
 
     private _deactivateAllTextRanges() {
@@ -886,15 +951,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number) {
+        const { _currentSegmentId: segmentId, _currentSegmentPage: segmentPage } = this;
         const focusNode = this._findNodeByCoord(moveOffsetX, moveOffsetY, {
             strict: true,
-            segmentId: this._currentSegmentId,
-            segmentPage: this._currentSegmentPage,
+            segmentId,
+            segmentPage,
         });
 
         const focusNodePosition = this._getNodePosition(focusNode);
 
-        if (!focusNodePosition || focusNode == null) {
+        if (focusNodePosition == null || focusNode == null) {
             return;
         }
 
@@ -913,23 +979,23 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this._removeAllCacheRanges();
 
-        const { _anchorNodePosition, _focusNodePosition, _selectionStyle, _currentSegmentId, _currentSegmentPage } = this;
+        const { _anchorNodePosition, _selectionStyle } = this;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-        if (_anchorNodePosition == null || _focusNodePosition == null || mainComponent == null) {
+        if (_anchorNodePosition == null || mainComponent == null) {
             return;
         }
 
         const ranges = getRangeListFromSelection(
             _anchorNodePosition,
-            _focusNodePosition,
+            focusNodePosition,
             scene,
             mainComponent as Documents,
             skeleton,
             _selectionStyle,
-            _currentSegmentId,
-            _currentSegmentPage
+            segmentId,
+            segmentPage
         );
 
         if (ranges == null) {
@@ -951,7 +1017,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         this.deactivate();
 
-        this._context.scene?.getEngine()?.setRemainCapture();
+        this._context.scene?.getEngine()?.setCapture();
     }
 
     __attachScrollEvent() {
@@ -1187,4 +1253,3 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onPointerDown$.complete();
     }
 }
-

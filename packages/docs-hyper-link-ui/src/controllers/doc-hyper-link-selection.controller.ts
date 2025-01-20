@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
-@OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)
 export class DocHyperLinkSelectionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -49,7 +48,7 @@ export class DocHyperLinkSelectionController extends Disposable {
                             const index = customRanges?.findIndex((value) => (value.startIndex) < startOffset && value.endIndex > endOffset - 1) ?? -1;
                             if (index > -1) {
                                 const customRange = customRanges![index];
-                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, segmentId, segmentPage });
+                                this._docHyperLinkService.showInfoPopup({ unitId, linkId: customRange.rangeId, segmentId, segmentPage, startIndex: customRange.startIndex, endIndex: customRange.endIndex });
                                 return;
                             }
                         } else {

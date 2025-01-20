@@ -86,6 +86,15 @@ describe('Test binomInv function', () => {
             const alpha = NumberValueObject.create(0.75);
             const result = testFunction.calculate(trials, probabilityS, alpha);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const trials2 = NumberValueObject.create(6);
+            const probabilityS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(trials2, probabilityS2, alpha);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const alpha2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(trials2, probabilityS, alpha2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

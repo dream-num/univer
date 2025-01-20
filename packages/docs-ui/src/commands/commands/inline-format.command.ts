@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-import {
-    BaselineOffset, BooleanNumber, CommandType,
-    ICommandService, IUniverInstanceService,
-    JSONX, MemoryCursor,
-    TextX, TextXActionType,
-} from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type {
+    DocumentDataModel,
     ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+    ITextStyle,
+    Nullable,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import {
+    BaselineOffset, BooleanNumber, CommandType,
+    DOC_RANGE_TYPE,
+    getBodySlice,
+    ICommandService, IUniverInstanceService,
+    JSONX, MemoryCursor,
+    TextX, TextXActionType,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
 
 function handleInlineFormat(
@@ -227,23 +235,31 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const docRanges = docSelectionManagerService.getDocRanges();
+        const activeRange = docRanges.find((r) => r.isActive) ?? docRanges[0];
 
         if (docRanges.length === 0) {
             return false;
         }
 
-        const segmentId = docRanges[0].segmentId;
+        const { segmentId } = docRanges[0];
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
+            return false;
+        }
+
+        const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+        if (body == null) {
             return false;
         }
 
@@ -258,10 +274,16 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             case SetInlineFormatStrikethroughCommand.id: // fallthrough
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
+                const defaultStyle = docMenuStyleService.getDefaultStyle();
+                const curTextStyle = getStyleInTextRange(
+                    body,
+                    activeRange,
+                    defaultStyle
+                );
+
                 formatValue = getReverseFormatValueInSelection(
-                    docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.textRuns!,
-                    preCommandId,
-                    docRanges
+                    curTextStyle,
+                    preCommandId
                 );
 
                 break;
@@ -309,9 +331,33 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         memoryCursor.reset();
 
         for (const range of docRanges) {
-            const { startOffset, endOffset } = range;
+            let { startOffset, endOffset, rangeType } = range;
 
             if (startOffset == null || endOffset == null) {
+                continue;
+            }
+
+            // Use to fix https://github.com/dream-num/univer-pro/issues/3101
+            if (rangeType === DOC_RANGE_TYPE.RECT) {
+                startOffset = startOffset - 1;
+            }
+
+            if (startOffset === endOffset) {
+                // Cache the menu style for next input.
+                const cacheStyle = docMenuStyleService.getStyleCache();
+                const key = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
+
+                docMenuStyleService.setStyleCache(
+                    {
+                        [key]: cacheStyle?.[key] !== undefined
+                            ? getReverseFormatValue(
+                                cacheStyle,
+                                key,
+                                preCommandId
+                            )
+                            : formatValue,
+                    }
+                );
                 continue;
             }
 
@@ -334,7 +380,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len,
-                    segmentId,
                 });
             }
 
@@ -342,7 +387,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 t: TextXActionType.RETAIN,
                 body,
                 len: endOffset - startOffset,
-                segmentId,
             });
 
             memoryCursor.reset();
@@ -365,71 +409,105 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
     return value !== null && typeof value === 'object';
 }
 
+function getReverseFormatValue(ts: Nullable<ITextStyle>, key: keyof IStyleBase, preCommandId: string) {
+    if (/bl|it/.test(key)) {
+        return ts?.[key] === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+    }
+
+    if (/ul|st/.test(key)) {
+        return isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.TRUE
+            ? {
+                s: BooleanNumber.FALSE,
+            }
+            : {
+                s: BooleanNumber.TRUE,
+            };
+    }
+
+    if (/va/.test(key)) {
+        if (preCommandId === SetInlineFormatSubscriptCommand.id) {
+            return ts?.[key] === BaselineOffset.SUBSCRIPT
+                ? BaselineOffset.NORMAL
+                : BaselineOffset.SUBSCRIPT;
+        } else {
+            return ts?.[key] === BaselineOffset.SUPERSCRIPT
+                ? BaselineOffset.NORMAL
+                : BaselineOffset.SUPERSCRIPT;
+        }
+    }
+}
+
+// eslint-disable-next-line complexity
+export function getStyleInTextRange(
+    body: IDocumentBody,
+    textRange: ITextRangeWithStyle,
+    defaultStyle: ITextStyle
+): ITextStyle {
+    const { startOffset, endOffset, collapsed } = textRange;
+
+    if (collapsed) {
+        const textRuns = body.textRuns ?? [];
+        let textRun: Nullable<ITextRun> = null;
+
+        for (let i = textRuns.length - 1; i >= 0; i--) {
+            const curTextRun = textRuns[i];
+            if (curTextRun.st < startOffset && startOffset <= curTextRun.ed) {
+                textRun = curTextRun;
+                break;
+            }
+        }
+
+        return textRun?.ts ? { ...defaultStyle, ...textRun.ts } : defaultStyle;
+    }
+
+    const { textRuns = [] } = getBodySlice(body, startOffset, endOffset);
+
+    const style = Tools.deepClone(defaultStyle);
+
+    // Get the min font size in range.
+    style.fs = Math.max(style.fs!, ...textRuns.map((t) => t?.ts?.fs ?? style.fs!));
+    style.ff = textRuns.find((t) => t.ts?.ff != null)?.ts?.ff ?? style.ff;
+    style.it = textRuns.length && textRuns.every((t) => t.ts?.it === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    style.bl = textRuns.length && textRuns.every((t) => t.ts?.bl === BooleanNumber.TRUE) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    style.ul = textRuns.length && textRuns.every((t) => t.ts?.ul?.s === BooleanNumber.TRUE) ? textRuns[0].ts?.ul : style.ul;
+    style.st = textRuns.length && textRuns.every((t) => t.ts?.st?.s === BooleanNumber.TRUE) ? textRuns[0].ts?.st : style.st;
+    style.bg = textRuns.find((t) => t.ts?.bg != null)?.ts?.bg ?? style.bg;
+    style.cl = textRuns.find((t) => t.ts?.cl != null)?.ts?.cl ?? style.cl;
+
+    const vas = textRuns.filter((t) => t?.ts?.va != null);
+
+    if (vas.length > 0 && vas.length === textRuns.length) {
+        const va = vas[0].ts?.va;
+        let isSame = true;
+
+        for (let i = 1; i < vas.length; i++) {
+            if (vas[i].ts?.va !== va) {
+                isSame = false;
+                break;
+            }
+        }
+
+        if (isSame) {
+            style.va = va;
+        }
+    }
+
+    return style;
+}
+
 /**
  * When clicking on a Bold menu item, you should un-bold if there is bold in the selections,
  * or bold if there is no bold text. This method is used to get the reverse style value calculated
  * from textRuns in the selection
  */
-// eslint-disable-next-line complexity
+
 function getReverseFormatValueInSelection(
-    textRuns: ITextRun[],
-    preCommandId: string,
-    docRanges: ITextRangeWithStyle[]
+    textStyle: ITextStyle,
+    preCommandId: string
 ): BooleanNumber | ITextDecoration | BaselineOffset {
-    let ti = 0;
-    let si = 0;
     const key: keyof IStyleBase = COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId];
 
-    while (ti !== textRuns.length && si !== docRanges.length) {
-        const { startOffset, endOffset } = docRanges[si];
+    const reverseValue = getReverseFormatValue(textStyle, key, preCommandId)!;
 
-        // TODO: @jocs handle sid in textRun
-        const { st, ed, ts } = textRuns[ti];
-
-        if (endOffset! <= st) {
-            si++;
-        } else if (ed <= startOffset!) {
-            ti++;
-        } else {
-            if (/bl|it/.test(key)) {
-                return ts?.[key] === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
-            }
-
-            if (/ul|st/.test(key)) {
-                return isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.TRUE
-                    ? {
-                        s: BooleanNumber.FALSE,
-                    }
-                    : {
-                        s: BooleanNumber.TRUE,
-                    };
-            }
-
-            if (/va/.test(key)) {
-                if (preCommandId === SetInlineFormatSubscriptCommand.id) {
-                    return ts?.[key] === BaselineOffset.SUBSCRIPT
-                        ? BaselineOffset.NORMAL
-                        : BaselineOffset.SUBSCRIPT;
-                } else {
-                    return ts?.[key] === BaselineOffset.SUPERSCRIPT
-                        ? BaselineOffset.NORMAL
-                        : BaselineOffset.SUPERSCRIPT;
-                }
-            }
-
-            ti++;
-        }
-    }
-
-    if (/bl|it/.test(key)) {
-        return BooleanNumber.TRUE;
-    } else if (/ul|st/.test(key)) {
-        return {
-            s: BooleanNumber.TRUE,
-        };
-    } else {
-        return preCommandId === SetInlineFormatSubscriptCommand.id
-            ? BaselineOffset.SUBSCRIPT
-            : BaselineOffset.SUPERSCRIPT;
-    }
+    return reverseValue;
 }

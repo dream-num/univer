@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ITextRange } from '@univerjs/core';
+import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import type { DocumentDataModel, ITextRange } from '@univerjs/core';
-import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DocThreadCommentSelectionController)
 export class DocThreadCommentSelectionController extends Disposable {
     constructor(
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
@@ -50,6 +49,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                 if (commandInfo.id === SetTextSelectionsOperation.id) {
                     const params = commandInfo.params as ISetTextSelectionsOperationParams;
                     const { unitId, ranges } = params;
+                    if (isInternalEditorID(unitId)) return;
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0] as ITextRangeWithStyle | undefined;
                     if (lastSelection?.startOffset === primary?.startOffset && lastSelection?.endOffset === primary?.endOffset) {

@@ -15,24 +15,20 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
+import type { ISheetRangeLocation } from '@univerjs/sheets';
+import type { ISortOption } from './interface';
 import {
     Disposable,
     ICommandService,
     Inject,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     Rectangle,
 } from '@univerjs/core';
-
-import type { ISheetRangeLocation } from '@univerjs/sheets';
-import { getSheetCommandTarget } from '@univerjs/sheets';
 import { FormulaDataModel } from '@univerjs/engine-formula';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { type ICellValueCompareFn, SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
-import type { ISortOption } from './interface';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortService extends Disposable {
     private _compareFns: ICellValueCompareFn[] = [];
 

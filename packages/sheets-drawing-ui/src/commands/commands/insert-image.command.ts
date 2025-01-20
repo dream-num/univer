@@ -41,7 +41,18 @@ export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
 
             return (await Promise.all(awaitFiles)).every((result) => result);
         } else {
-            return sheetDrawingUpdateController.insertFloatImage();
+            return sheetDrawingUpdateController.insertFloatImage() ?? false;
         }
+    },
+};
+
+export const InsertCellImageCommand: ICommand = {
+    id: 'sheet.command.insert-cell-image',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+            ?.with(SheetDrawingUpdateController)
+            .insertCellImage() ?? false;
     },
 };

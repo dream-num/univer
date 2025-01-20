@@ -15,11 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, ConditionalFormattingMenuController)
 export class ConditionalFormattingMenuController extends Disposable {
     private _sidebarDisposable: IDisposable | null = null;
 

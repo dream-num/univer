@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import { GlyphType, numberToListABC } from '@univerjs/core';
+import { ListGlyphType, numberToListABC } from '@univerjs/core';
 
-export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string) {
+export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType | string) {
     // if (!(glyphType in GlyphType)) {
     //     return dealWidthCustomBulletOrderedSymbol(startIndex, startNumber, glyphType as string); // 插件定义更多类型的bullet
     // }
 
-    return generateOrderedSymbol(startIndex, startNumber, glyphType as GlyphType);
+    return generateOrderedSymbol(startIndex, startNumber, glyphType as ListGlyphType);
 }
 
-function generateOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType) {
+function generateOrderedSymbol(startIndex: number, startNumber: number, glyphType: ListGlyphType) {
     // startIndex从0开始，startNumber为用户输入默认是1
-    if (glyphType === GlyphType.DECIMAL) {
+    if (glyphType === ListGlyphType.DECIMAL) {
         return decimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.DECIMAL_ZERO) {
+    if (glyphType === ListGlyphType.DECIMAL_ZERO) {
         return zeroDecimal(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.UPPER_LETTER) {
+    if (glyphType === ListGlyphType.UPPER_LETTER) {
         return upperAlpha(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.LOWER_LETTER) {
+    if (glyphType === ListGlyphType.LOWER_LETTER) {
         return alpha(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.UPPER_ROMAN) {
+    if (glyphType === ListGlyphType.UPPER_ROMAN) {
         return upperRoman(startIndex, startNumber);
     }
-    if (glyphType === GlyphType.LOWER_ROMAN) {
+    if (glyphType === ListGlyphType.LOWER_ROMAN) {
         return roman(startIndex, startNumber);
     }
 

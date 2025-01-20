@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
-import { IEditorService, TextEditor } from '@univerjs/docs-ui';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/docs-ui';
 
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import type { IDocumentData } from '@univerjs/core';
 import { SLIDE_EDITOR_ID } from '../../const';
 // import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
@@ -70,7 +70,7 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
             ],
         },
         documentStyle: {
-            documentFlavor: DocumentFlavor.MODERN,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
         },
     };
 
@@ -131,14 +131,12 @@ export const SlideEditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            <TextEditor
-                id={SLIDE_EDITOR_ID}
+            {/* <RichTextEditor
+                editorId={SLIDE_EDITOR_ID}
                 className={styles.editorInput}
-                snapshot={snapshot}
-                cancelDefaultResizeListener={false}
-                isSheetEditor={false}
+                initialValue={snapshot}
                 isSingle={false}
-            />
+            /> */}
         </div>
     );
 };

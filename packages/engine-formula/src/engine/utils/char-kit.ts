@@ -15,30 +15,58 @@
  */
 
 /**
- * Korean in Excel does not count as two characters. Here we calculate all Chinese, Japanese and Korean characters as two characters.
+ * excel logic is cofusing, so we use google sheet logic
  *
- * ā -> 1
- * ー -> 2
- *
- * @param str
- * @returns
+ * @param text
+ * @returns number
  */
-export function charLenByte(str: string) {
+export function charLenByte(text: string): number {
     let byteCount = 0;
 
-    for (let i = 0; i < str.length; i++) {
-        const charCode = str.charCodeAt(i);
-
-        if (
-            (charCode >= 0x3040 && charCode <= 0x30FF) || // Japanese hiragana and katakana
-            (charCode >= 0x4E00 && charCode <= 0x9FFF) || // Chinese (simplified and traditional)
-            (charCode >= 0xAC00 && charCode <= 0xD7AF) // Korean language
-        ) {
-            byteCount += 2;
-        } else {
-            byteCount += 1;
-        }
+    for (let i = 0; i < text.length; i++) {
+        byteCount += getCharLenByteInText(text, i);
     }
 
     return byteCount;
+}
+
+export function getCharLenByteInText(text: string, charIndex: number, direction: 'ltr' | 'rtl' = 'ltr'): number {
+    const codePoint = getCodePoint(text, charIndex, direction);
+    return codePoint > 255 ? 2 : 1;
+}
+
+function highSurrogate(charCode: number): boolean {
+    return charCode >= 0xD800 && charCode <= 0xDBFF;
+}
+
+function lowSurrogate(charCode: number): boolean {
+    return charCode >= 0xDC00 && charCode <= 0xDFFF;
+}
+
+function surrogatePair(highSurrogate: number, lowSurrogate: number): number {
+    const highBits = (highSurrogate & 0x3FF) << 10;
+    const lowBits = lowSurrogate & 0x3FF;
+    return highBits + lowBits + 0x10000;
+}
+
+function getCodePoint(str: string, index: number, direction: 'ltr' | 'rtl' = 'ltr'): number {
+    const charCode = str.charCodeAt(index);
+
+    if (direction === 'ltr' && highSurrogate(charCode) && index + 1 < str.length) {
+        const nextCharCode = str.charCodeAt(index + 1);
+
+        if (lowSurrogate(nextCharCode)) {
+            return surrogatePair(charCode, nextCharCode);
+        }
+    }
+
+    if (direction === 'rtl' && lowSurrogate(charCode) && index - 1 >= 0) {
+        const prevCharCode = str.charCodeAt(index - 1);
+
+        if (highSurrogate(prevCharCode)) {
+            return surrogatePair(prevCharCode, charCode);
+        }
+    }
+
+    return charCode;
 }

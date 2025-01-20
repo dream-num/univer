@@ -14,53 +14,56 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import React, { useEffect } from 'react';
+import type { DocumentDataModel, ITypeMentionList } from '@univerjs/core';
+import { ICommandService, IMentionIOService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { IEditorService } from '@univerjs/docs-ui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { filter } from 'rxjs';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
-import { MentionType } from '../../types/enums/mention-type';
 import { MentionList } from '../mention-list';
-import type { IMention } from '../../types/interfaces/i-mention';
 
 export const MentionEditPopup = () => {
     const popupService = useDependency(DocMentionPopupService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const editPopup = useObservable(popupService.editPopup$);
-    const userService = useDependency(UserManagerService);
+    const mentionIOService = useDependency(IMentionIOService);
+    const editorService = useDependency(IEditorService);
+    const documentDataModel = editPopup ? univerInstanceService.getUnit<DocumentDataModel>(editPopup.unitId) : null;
+    const textSelectionService = useDependency(DocSelectionManagerService);
+    const [mentions, setMentions] = useState<ITypeMentionList[]>([]);
+    const textSelection$ = useMemo(() =>
+        textSelectionService.textSelection$.pipe(
+            filter((selection) => selection.unitId === editPopup?.unitId)
+        ), [textSelectionService.textSelection$, editPopup]);
 
-    const mentions: IMention[] = userService.list().map((user) => ({
-        objectId: user.userID,
-        label: user.name,
-        objectType: MentionType.PERSON,
-        extra: {
-            icon: user.avatar,
-        },
-    }));
-
-    const renderManagerService = useDependency(IRenderManagerService);
-
-    const docSelectionRenderService = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+    const textSelection = useObservable(textSelection$);
+    const search = editPopup ? documentDataModel?.getBody()?.dataStream.slice(editPopup.anchor, textSelection?.textRanges[0].startOffset) : '';
 
     useEffect(() => {
-        docSelectionRenderService?.blur();
-        return () => {
-            docSelectionRenderService?.focus();
-        };
-    }, [docSelectionRenderService]);
-
+        (async () => {
+            if (editPopup) {
+                const res = await mentionIOService.list({ unitId: editPopup.unitId, search });
+                setMentions(res.list);
+            }
+        })();
+    }, [mentionIOService, editPopup, search]);
     if (!editPopup) {
         return null;
     }
 
     return (
         <MentionList
-            onClick={() => popupService.closeEditPopup()}
+            editorId={editPopup.unitId}
+            onClick={() => {
+                popupService.closeEditPopup();
+                editorService.focus(editPopup.unitId);
+            }}
             mentions={mentions}
-            onSelect={(mention) => {
-                commandService.executeCommand(AddDocMentionCommand.id, {
+            onSelect={async (mention) => {
+                await commandService.executeCommand(AddDocMentionCommand.id, {
                     unitId: univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!.getUnitId(),
                     mention: {
                         ...mention,
@@ -68,6 +71,7 @@ export const MentionEditPopup = () => {
                     },
                     startIndex: editPopup.anchor,
                 });
+                editorService.focus(editPopup.unitId);
             }}
         />
     );

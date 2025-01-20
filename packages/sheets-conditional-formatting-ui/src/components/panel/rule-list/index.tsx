@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Select, Tooltip } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
-import { useHighlightRange } from '@univerjs/sheets-ui';
-
-import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IRange, Workbook } from '@univerjs/core';
-import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
-import GridLayout from 'react-grid-layout';
-import { debounceTime, Observable } from 'rxjs';
-import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
-import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
-import { MoveCfCommand } from '../../../commands/commands/move-cf.command';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import { Preview } from '../../preview';
-import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
-import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
 
+import { ICommandService, Injector, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Select, Tooltip } from '@univerjs/design';
+import { serializeRange } from '@univerjs/engine-formula';
+import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
+import { checkRangesEditablePermission, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
+import { useHighlightRange } from '@univerjs/sheets-ui';
+import { useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import GridLayout from 'react-grid-layout';
+import { debounceTime, Observable } from 'rxjs';
+import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
+import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
+import { MoveCfCommand } from '../../../commands/commands/move-cf.command';
+import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
+import { Preview } from '../../preview';
 import styles from './index.module.less';
+import 'react-grid-layout/css/styles.css';
+
+import 'react-resizable/css/styles.css';
 
 interface IRuleListProps {
     onClick: (rule: IConditionFormattingRule) => void;
@@ -189,10 +189,9 @@ export const RuleList = (props: IRuleListProps) => {
                     }
                 });
                 return () => disposable.dispose();
-            }).pipe(debounceTime(16))
-                .subscribe(() => {
-                    ruleListSet(getRuleList);
-                });
+            }).pipe(debounceTime(16)).subscribe(() => {
+                ruleListSet(getRuleList);
+            });
         return () => {
             subscription.unsubscribe();
         };
@@ -324,20 +323,35 @@ export const RuleList = (props: IRuleListProps) => {
                 </div>
                 <div className={styles.btnList}>
                     <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
-                        <div className={`${styles.icon}`} onClick={handleCreate}>
+                        <div
+                            className={`
+                              ${styles.icon}
+                            `}
+                            onClick={handleCreate}
+                        >
                             <IncreaseSingle />
                         </div>
                     </Tooltip>
                     {(ruleList.length && isHasAllRuleEditPermission)
                         ? (
                             <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
-                                <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
+                                <div
+                                    className={`
+                                      ${styles.gap}
+                                      ${styles.icon}
+                                    `}
+                                    onClick={handleClear}
+                                >
                                     <DeleteSingle />
                                 </div>
                             </Tooltip>
                         )
                         : (
-                            <div className={`${styles.gap}  ${styles.disabled}`}>
+                            <div className={`
+                              ${styles.gap}
+                              ${styles.disabled}
+                            `}
+                            >
                                 <DeleteSingle />
                             </div>
                         )}
@@ -369,10 +383,16 @@ export const RuleList = (props: IRuleListProps) => {
                                             onClick={() => {
                                                 onClick(rule);
                                             }}
-                                            className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`}
+                                            className={`
+                                              ${styles.ruleItem}
+                                              ${draggingId === index ? styles.active : ''}
+                                            `}
                                         >
                                             <div
-                                                className={`${styles.draggableHandle} draggableHandle`}
+                                                className={`
+                                                  ${styles.draggableHandle}
+                                                  draggableHandle
+                                                `}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 <SequenceSingle />
@@ -383,7 +403,10 @@ export const RuleList = (props: IRuleListProps) => {
                                             </div>
                                             <div className={styles.preview}><Preview rule={rule.rule} /></div>
                                             <div
-                                                className={`${styles.deleteItem} ${draggingId === index ? styles.active : ''}`}
+                                                className={`
+                                                  ${styles.deleteItem}
+                                                  ${draggingId === index ? styles.active : ''}
+                                                `}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(rule);

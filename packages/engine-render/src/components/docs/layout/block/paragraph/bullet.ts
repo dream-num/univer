@@ -16,9 +16,9 @@
 
 import type { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 
+import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../../basics/tools';
 import { getBulletOrderedSymbol } from './bullet-ruler';
-import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
 
 export function dealWithBullet(
     bullet?: IBullet,
@@ -91,7 +91,7 @@ function _getBulletSke(
     nestings: INestingLevel[],
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     textStyleConfig?: ITextStyle,
-    localeService?: LocaleService
+    _localeService?: LocaleService
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const {
@@ -105,7 +105,7 @@ function _getBulletSke(
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
 
-    const fontStyle = getFontStyleString(textStyle, localeService); // 获得canvas.font格式的字体样式
+    const fontStyle = getFontStyleString(textStyle); // 获得canvas.font格式的字体样式
 
     let symbolContent: string;
     if (glyphSymbol) {

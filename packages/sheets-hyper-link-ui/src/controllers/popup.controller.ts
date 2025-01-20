@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
+import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -24,6 +27,7 @@ import {
     ClearSelectionFormatCommand,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
+    SheetPermissionCheckController,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
     WorkbookViewPermission,
@@ -32,23 +36,19 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { debounceTime, map, mergeMap, Observable } from 'rxjs';
-import type { Nullable, Workbook } from '@univerjs/core';
-import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { Subscription } from 'rxjs';
+import { debounceTime, map, Observable, switchMap } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
 export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
         @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
         @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
+        @Inject(SheetPermissionCheckController) private readonly _sheetPermissionCheckController: SheetPermissionCheckController,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
@@ -76,13 +76,13 @@ export class SheetsHyperLinkPopupController extends Disposable {
             };
         }
 
-        const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+        const viewPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookViewPermission],
             worksheetTypes: [WorksheetViewPermission],
             rangeTypes: [RangeProtectionPermissionViewPoint],
         }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
 
-        const editPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+        const editPermission = this._sheetPermissionCheckController.permissionCheckWithRanges({
             workbookTypes: [WorkbookEditablePermission],
             worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
             rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -105,10 +105,14 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
-
                 const { unitId, subUnitId, row, col } = currentCell;
                 const renderer = this._renderManagerService.getRenderById(unitId);
                 if (!renderer) {
+                    return;
+                }
+                const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                if (!worksheet) {
                     return;
                 }
                 const hoverRenderController = renderer.with(HoverRenderController);
@@ -137,7 +141,15 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
                 const { viewPermission, editPermission, copyPermission } = this._getLinkPermission(currentCell);
 
-                if (!viewPermission || !currentCell.customRange) {
+                if (!viewPermission) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                    return;
+                }
+                const cell = worksheet.getCellStyleOnly(targetRow, targetCol);
+                const style = workbook!.getStyles().getStyleByCell(cell);
+                const tr = style?.tr?.a;
+
+                if (!tr && !currentCell.customRange) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;
                 }
@@ -152,6 +164,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     type: HyperLinkEditSourceType.VIEWING,
                     unitId,
                     subUnitId,
+                    showAll: Boolean(tr),
                 });
             })
         );
@@ -161,7 +174,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         let subscribe: Nullable<Subscription> = null;
         this.disposeWithMe(
             this._editorBridgeService.currentEditCellState$
-                .pipe(mergeMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
+                .pipe(switchMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
                 .subscribe(({ visible, state }) => {
                     if (!state) {
                         return;
@@ -237,13 +250,16 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.EDITING);
                     this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
                     this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.VIEWING);
+                } else {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.ZEN_EDITOR);
+                    this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.ZEN_EDITOR);
                 }
             })
         );
 
         this.disposeWithMe(
             this._univerInstanceService.focused$.pipe(
-                mergeMap((id) => {
+                switchMap((id) => {
                     const render = id === DOCS_ZEN_EDITOR_UNIT_ID_KEY ? this._renderManagerService.getRenderById(id) : null;
                     if (render) {
                         return render.with(DocEventManagerService).hoverCustomRanges$.pipe(debounceTime(200));

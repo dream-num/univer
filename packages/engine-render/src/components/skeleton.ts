@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LocaleService } from '@univerjs/core';
-
 import type { IFontLocale } from '../basics/interfaces';
+import { Disposable, Inject, LocaleService } from '@univerjs/core';
 
 export class Skeleton extends Disposable {
     private _fontLocale!: IFontLocale;
 
     private _dirty = true;
 
-    constructor(@Inject(LocaleService) protected readonly _localService: LocaleService) {
+    constructor(@Inject(LocaleService) protected readonly _localeService: LocaleService) {
         super();
 
         this._localeInitial();

@@ -1,12 +1,17 @@
+@import '../../sheet-container/index.module.less';
+
 @padding-left-right: 24px;
 @line-height: 20px;
 
 .sheet-bar-menu {
+    max-height: calc(100vh - @sheet-footer-bar-height);
     display: grid;
     gap: var(--margin-xxs);
     align-items: center;
+    overflow-y: auto;
 
     box-sizing: border-box;
+    margin: 0;
     padding: var(--padding-sm);
 
     background-color: rgb(var(--bg-color-secondary));

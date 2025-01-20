@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDataValidationRule } from '@univerjs/core';
+import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { Disposable, ILogService, Tools } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
-import type { DataValidationStatus, IDataValidationRule } from '@univerjs/core';
 import { getRuleOptions, getRuleSetting } from '../common/util';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
-import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 
-type DataValidationChangeType = 'update' | 'add' | 'remove';
+export type DataValidationChangeType = 'update' | 'add' | 'remove';
 export type DataValidationChangeSource = 'command' | 'patched';
 
 export interface IRuleChange {
@@ -32,13 +32,6 @@ export interface IRuleChange {
     source: DataValidationChangeSource;
     updatePayload?: IUpdateRulePayload;
     oldRule?: IDataValidationRule;
-}
-
-export interface IValidStatusChange {
-    unitId: string;
-    subUnitId: string;
-    ruleId: string;
-    status: DataValidationStatus;
 }
 
 interface ISubUnitDataValidation {
@@ -128,6 +121,11 @@ export class DataValidationModel extends Disposable {
 
             case UpdateRuleType.OPTIONS: {
                 Object.assign(rule, getRuleOptions(payload.payload));
+                break;
+            }
+
+            case UpdateRuleType.ALL: {
+                Object.assign(rule, payload.payload);
                 break;
             }
             default:

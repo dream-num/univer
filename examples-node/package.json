@@ -1,0 +1,44 @@
+{
+    "name": "examples-node",
+    "private": true,
+    "description": "Examples run on Node.js",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "scripts": {
+        "prepare": "tsx ./scripts/generate-locales.ts",
+        "build:demo": "tsx ./esbuild.config.ts",
+        "lint:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-drawing": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
+        "@univerjs/rpc-node": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-drawing": "workspace:*",
+        "@univerjs/sheets-filter": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-hyper-link": "workspace:*",
+        "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-sort": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
+        "@univerjs-infra/shared": "workspace:*",
+        "esbuild": "^0.24.2",
+        "fs-extra": "^11.2.0",
+        "typescript": "^5.7.2"
+    }
+}

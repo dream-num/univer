@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
 import type { Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { SetWorksheetShowCommand } from '@univerjs/sheets';
+import { ISidebarService } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
-import styles from './index.module.less';
+import { DEFINED_NAME_CONTAINER } from './component-name';
 
 export interface IDefinedNameOverlayProps {
 
@@ -32,6 +34,8 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const sidebarService = useDependency(ISidebarService);
+
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
 
@@ -55,29 +59,105 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
+    // When closing the panel, clear the react cache
+    useEffect(() => {
+        const d = sidebarService.sidebarOptions$.subscribe((info) => {
+            if (info.id === DEFINED_NAME_CONTAINER) {
+                if (!info.visible) {
+                    setTimeout(() => {
+                        sidebarService.sidebarOptions$.next({ visible: false });
+                    });
+                }
+            }
+        });
+        return () => {
+            d.unsubscribe();
+        };
+    }, []);
+
     const openSlider = () => {
         commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
 
-    const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
-        definedNamesService.focusRange(unitId, definedName.id);
+    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+        // The worksheet may be hidden, so we need to show it first
+        const { formulaOrRefString, id } = definedName;
+        const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);
+        if (!worksheet) {
+            return;
+        }
+
+        const isHidden = worksheet.isSheetHidden();
+        if (isHidden) {
+            await commandService.executeCommand(SetWorksheetShowCommand.id, { unitId, subUnitId: worksheet.getSheetId() });
+        }
+
+        definedNamesService.focusRange(unitId, id);
     };
 
     return (
-        <div className={styles.definedNameOverlay}>
-            <div className={styles.definedNameOverlayContainer}>
+        <div className="univer-w-[300px]">
+            <ul
+                className={`
+                  univer-max-h-[360px] univer-overflow-y-auto univer-scrollbar-thin univer-scrollbar-thumb-gray-300
+                  univer-scrollbar-track-transparent univer-scrollbar-w-[4px] univer-m-0 univer-list-none univer-p-0
+                `}
+            >
                 {definedNames.map((definedName, index) => {
                     return (
-                        <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
-                            <div className={styles.definedNameOverlayItemName} title={definedName.name}>{definedName.name}</div>
-                            <div className={styles.definedNameOverlayItemFormula} title={definedName.formulaOrRefString}>{definedName.formulaOrRefString}</div>
-                        </div>
+                        <li
+                            key={index}
+                            className={`
+                              univer-px-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                              dark:hover:univer-bg-gray-600
+                              hover:univer-bg-gray-100
+                            `}
+                            onClick={() => { focusDefinedName(definedName); }}
+                        >
+                            <div
+                                className={`
+                                  univer-flex univer-py-1 univer-items-center univer-justify-between univer-border-b
+                                  univer-border-solid univer-border-0 univer-border-gray-200 univer-gap-2
+                                `}
+                            >
+                                <div
+                                    className={`
+                                      univer-text-gray-600 univer-text-sm univer-overflow-hidden univer-text-ellipsis
+                                      univer-flex-shrink-0 univer-w-[50%] univer-whitespace-nowrap
+                                    `}
+                                    title={definedName.name}
+                                >
+                                    {definedName.name}
+                                </div>
+                                <div
+                                    className={`
+                                      univer-text-gray-400 univer-text-xs univer-flex-shrink-0 univer-overflow-hidden
+                                      univer-text-ellipsis univer-w-[50%] univer-whitespace-nowrap
+                                    `}
+                                    title={definedName.formulaOrRefString}
+                                >
+                                    {definedName.formulaOrRefString}
+                                </div>
+                            </div>
+                        </li>
                     );
                 })}
-            </div>
-            <div className={styles.definedNameOverlayManager} onClick={openSlider}>
-                <div className={styles.definedNameOverlayManagerTitle}>{localeService.t('definedName.managerTitle')}</div>
-                <div className={styles.definedNameOverlayManagerContent}>{localeService.t('definedName.managerDescription')}</div>
+            </ul>
+
+            <div
+                className={`
+                  univer-p-2 univer-cursor-pointer univer-transition-colors univer-duration-200
+                  dark:hover:univer-bg-gray-600
+                  hover:univer-bg-gray-100
+                `}
+                onClick={openSlider}
+            >
+                <div className="univer-text-sm univer-font-semibold univer-text-gray-600 univer-mb-2">
+                    {localeService.t('definedName.managerTitle')}
+                </div>
+                <div className="univer-text-xs univer-text-gray-400">
+                    {localeService.t('definedName.managerDescription')}
+                </div>
             </div>
         </div>
     );

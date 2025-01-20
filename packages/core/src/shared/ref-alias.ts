@@ -78,8 +78,8 @@ export class RefAlias<T extends Record<string, unknown>, K extends keyof T = key
         }
     }
 
-    deleteValue(key: string) {
-        const value = this.getValue(key);
+    deleteValue(key: string, keyGroup?: K[]) {
+        const value = this.getValue(key, keyGroup);
         if (value) {
             this._keys.forEach((keyItem) => {
                 const keyMap = this._keyMaps.get(keyItem);

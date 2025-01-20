@@ -14,33 +14,32 @@
  * limitations under the License.
  */
 
-import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
-import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { getFormulaCellData } from '../utils/formula';
-
-function isLegalFormulaResult(res: string) {
-    return !(ERROR_TYPE_SET as Set<string>).has(res);
-}
+import { isLegalFormulaResult } from '../utils/formula';
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
     override title: string = 'dataValidation.custom.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-    override formulaInput: string = CUSTOM_FORMULA_INPUT_NAME;
 
-    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+    private readonly _lexerTreeBuilder = this.injector.get(LexerTreeBuilder);
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = isFormulaString(rule.formula1);
+        const formulaText = rule.formula1 ?? '';
+        const result = this._lexerTreeBuilder.checkIfAddBracket(formulaText);
+        const valid = result === 0 && formulaText.startsWith(operatorToken.EQUALS);
+
         return {
-            success,
-            formula1: success ? '' : this.localeService.t('dataValidation.validFail.formula'),
+            success: success && valid,
+            formula1: success && valid ? '' : this.localeService.t('dataValidation.validFail.formula'),
         };
     }
 
@@ -48,14 +47,18 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return {
             formula1: undefined,
             formula2: undefined,
+            isFormulaValid: true,
         };
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): Promise<boolean> {
         const { column, row, unitId, subUnitId } = cellInfo;
-        const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
-        const cellData = getFormulaCellData(result?.result);
+        const cellData = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, _rule.uid, row, column);
         const formulaResult = cellData?.v;
+
+        if (!isLegalFormulaResult(String(formulaResult))) {
+            return false;
+        }
 
         if (Tools.isDefine(formulaResult) && formulaResult !== '') {
             if (cellData!.t === CellValueType.BOOLEAN) {
@@ -82,5 +85,9 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
         return this.localeService.t('dataValidation.custom.error');
+    }
+
+    override generateRuleName(rule: IDataValidationRuleBase): string {
+        return (this.localeService.t('dataValidation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
     }
 }

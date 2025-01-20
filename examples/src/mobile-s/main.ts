@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
+import type { FUniver } from '@univerjs/core';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDataValidationMobileUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFilterMobileUIPlugin } from '@univerjs/sheets-filter-ui';
-import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
-import type { FUniver } from '@univerjs/facade';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { enUS } from '../locales';
+import { enUS, faIR } from '../locales';
+
+import '../global.css';
 
 // univer
 const univer = new Univer({
@@ -41,6 +43,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });
@@ -54,9 +57,10 @@ univer.registerPlugin(UniverMobileUIPlugin, {
     container: 'app',
     contextMenu: true,
 });
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
-} as IUniverRPCMainThreadConfig);
+
+const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+univer.registerPlugin(UniverRPCMainThreadPlugin, { workerURL: worker });
+univer.onDispose(() => worker.terminate());
 
 univer.registerPlugin(UniverDocsUIPlugin);
 univer.registerPlugin(UniverSheetsPlugin);
@@ -65,9 +69,10 @@ univer.registerPlugin(UniverSheetsMobileUIPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
+univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingMobileUIPlugin);
-univer.registerPlugin(UniverSheetsDataValidationMobilePlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationMobileUIPlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

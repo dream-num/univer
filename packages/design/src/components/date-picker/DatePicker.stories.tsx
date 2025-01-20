@@ -15,9 +15,9 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React, { useState } from 'react';
+import { dayjs } from '@univerjs/core';
 
-import Dayjs from 'dayjs';
+import React, { useState } from 'react';
 import { DatePicker } from './DatePicker';
 
 const meta: Meta<typeof DatePicker> = {
@@ -33,12 +33,10 @@ export default meta;
 
 export const DatePickerBasic = {
     render() {
-        const [value, setValue] = useState<Dayjs.Dayjs>(Dayjs());
+        const [value, setValue] = useState<dayjs.Dayjs>(dayjs());
 
         return (
-            <>
-                <DatePicker value={value} onChange={setValue} />
-            </>
+            <DatePicker value={value} onChange={setValue} />
         );
     },
 };

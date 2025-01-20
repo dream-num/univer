@@ -33,8 +33,9 @@ export const findNodePathFromTree = (tree: ITreeNodeProps[], key: string) => {
     tree.some(recursive);
     return result;
 };
-export const createCacheWithFindNodePathFromTree = (tree: ITreeNodeProps[]) => {
-    const cache = new Map<string, string[]>();
+
+export const createCacheWithFindNodePathFromTree = (tree: ITreeNodeProps[], defaultCache?: Map<string, string[]>) => {
+    const cache = defaultCache ?? new Map<string, string[]>();
     let cacheTree = tree;
     return {
         findNodePathFromTreeWithCache: (key: string) => {

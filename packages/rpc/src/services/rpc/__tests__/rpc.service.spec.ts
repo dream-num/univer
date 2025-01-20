@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-import { awaitTime } from '@univerjs/core';
-import { of, Subject } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+/* eslint-disable ts/no-explicit-any */
 
 import type { Observable } from 'rxjs';
-import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
 import type { IMessageProtocol } from '../rpc.service';
+import { awaitTime } from '@univerjs/core';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
 
-describe('Test ChannelClient & ChannelServer', () => {
+async function wait() {
+    return awaitTime(1);
+}
+
+describe('test ChannelClient & ChannelServer', () => {
     let clientProtocol: TestMessageProtocolForClient;
     let serverProtocol: TestMessageProtocolForServer;
 
     let client: ChannelClient;
     let server: ChannelServer;
+
+    // Here we mock an in-memory message protocol for client and server.
 
     class TestMessageProtocolForClient implements IMessageProtocol {
         private readonly _message$ = new Subject<any>();
@@ -63,8 +70,8 @@ describe('Test ChannelClient & ChannelServer', () => {
         server = new ChannelServer(serverProtocol);
     });
 
-    describe('Test fromService and toService', async () => {
-        it('Should remote call work', async () => {
+    describe('test fromModule and toModule', async () => {
+        it('should remote call work', async () => {
             interface INameService {
                 getName(): Promise<string>;
                 getCount$(): Observable<number>;
@@ -89,13 +96,107 @@ describe('Test ChannelClient & ChannelServer', () => {
             // Should not emit any value when the returned observable is not subscribe.
             const values: number[] = [];
             const observable = clientService.getCount$();
-            await awaitTime(300);
+            await wait();
             expect(values).toEqual([]);
 
             // Should send request only after the observable is subscribed.
             const subscription = observable.subscribe((value) => values.push(value));
-            await awaitTime(300);
+            await wait();
             expect(values).toEqual([1, 2, 3]);
+            expect(subscription.closed).toBe(true);
+        });
+
+        it('should remote subscription work', async () => {
+            interface ISignalService {
+                getSignal$(): Observable<number>;
+            }
+
+            const signalSubject$ = new BehaviorSubject<number>(0);
+
+            const clientService = toModule<ISignalService>(client.getChannel('test'));
+            server.registerChannel(
+                'test',
+                fromModule({
+                    getSignal$(): Observable<number> {
+                        return signalSubject$.asObservable();
+                    },
+                })
+            );
+
+            let err: string = '';
+            let completed = false;
+
+            const values: number[] = [];
+            const subscription = clientService.getSignal$()
+                .subscribe({
+                    next(value) {
+                        values.push(value);
+                    },
+                    error(e) {
+                        err = e;
+                    },
+                    complete() {
+                        completed = true;
+                    },
+                });
+
+            await wait();
+            expect(values).toEqual([0]);
+
+            signalSubject$.next(1);
+            await wait();
+            expect(values).toEqual([0, 1]);
+
+            signalSubject$.error(new Error('mock error'));
+            await wait();
+            expect(err).toEqual('mock error');
+
+            subscription.unsubscribe();
+            signalSubject$.next(2);
+            await wait();
+            expect(values).toEqual([0, 1]);
+
+            signalSubject$.complete();
+            await wait();
+            expect(completed).toBe(false);
+        });
+
+        it('should remote completion work', async () => {
+            interface ISignalService {
+                getSignal$(): Observable<number>;
+            }
+
+            const signalSubject$ = new BehaviorSubject<number>(0);
+
+            const clientService = toModule<ISignalService>(client.getChannel('test'));
+            server.registerChannel(
+                'test',
+                fromModule({
+                    getSignal$(): Observable<number> {
+                        return signalSubject$.asObservable();
+                    },
+                })
+            );
+
+            let completed = false;
+
+            const values: number[] = [];
+            const subscription = clientService.getSignal$()
+                .subscribe({
+                    next(value) {
+                        values.push(value);
+                    },
+                    complete() {
+                        completed = true;
+                    },
+                });
+
+            await wait();
+            expect(values).toEqual([0]);
+
+            signalSubject$.complete();
+            await wait();
+            expect(completed).toBe(true);
             expect(subscription.closed).toBe(true);
         });
     });

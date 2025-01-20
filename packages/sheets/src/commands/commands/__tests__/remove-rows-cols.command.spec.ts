@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -25,17 +26,17 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
 
+import { beforeEach, describe, expect, it } from 'vitest';
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
-import { SetSelectionsOperation } from '../../operations/selection.operation';
-import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
-import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
+import { SheetsSelectionsService } from '../../../services/selections/selection.service';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
+import { InsertColByRangeCommand, InsertRowByRangeCommand } from '../insert-row-col.command';
+import { RemoveColByRangeCommand, RemoveColCommand, RemoveRowByRangeCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test remove rows cols', () => {
@@ -53,10 +54,14 @@ describe('Test remove rows cols', () => {
         [
             RemoveRowCommand,
             RemoveColCommand,
+            RemoveRowByRangeCommand,
+            RemoveColByRangeCommand,
             RemoveColMutation,
             RemoveRowMutation,
             InsertRowMutation,
             InsertColMutation,
+            InsertRowByRangeCommand,
+            InsertColByRangeCommand,
             SetSelectionsOperation,
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));

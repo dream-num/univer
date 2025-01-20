@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { Tools } from '../../../shared/tools';
+/* eslint-disable no-param-reassign */
+
 import type { TextXAction } from './action-types';
+import { Tools } from '../../../shared/tools';
 import { TextXActionType } from './action-types';
 import { getBodySlice } from './utils';
 
@@ -40,6 +42,7 @@ export class ActionIterator {
         if (nextAction) {
             const offset = this._offset;
             const actionLength = nextAction.len;
+
             if (length >= actionLength - offset) {
                 // Return the action if the length is great than action length, and reset offset to 0.
                 length = actionLength - offset;
@@ -70,7 +73,7 @@ export class ActionIterator {
                 return Tools.deepClone({
                     ...nextAction,
                     len: length,
-                    body: getBodySlice(nextAction.body!, offset, offset + length),
+                    body: getBodySlice(nextAction.body!, offset, offset + length, false),
                 });
             }
         } else {
@@ -114,6 +117,7 @@ export class ActionIterator {
             const index = this._index;
             const next = this.next();
             const restActions = this._actions.slice(this._index);
+
             this._offset = offset;
             this._index = index;
 

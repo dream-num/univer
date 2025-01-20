@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsSortConfig } from './controllers/config.schema';
 
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, SHEETS_SORT_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
-import type { IUniverSheetsSortConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_SORT_PLUGIN';
 
@@ -36,8 +36,12 @@ export class UniverSheetsSortPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { ...rest } = this._config;
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        const { ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
+        this._configService.setConfig(SHEETS_SORT_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -45,5 +49,9 @@ export class UniverSheetsSortPlugin extends Plugin {
             [SheetsSortController],
             [SheetsSortService],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetsSortController);
     }
 }

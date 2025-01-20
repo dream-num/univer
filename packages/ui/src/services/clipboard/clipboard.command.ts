@@ -25,7 +25,7 @@ export const CopyCommand: IMultiCommand = {
     priority: 0,
     type: CommandType.COMMAND,
     preconditions: () => false,
-    handler: async () => true,
+    handler: () => true,
 };
 
 const CutCommandName = 'univer.command.cut';
@@ -47,5 +47,7 @@ export const PasteCommand: IMultiCommand = {
     priority: 0,
     type: CommandType.COMMAND,
     preconditions: () => false,
-    handler: async () => true,
+    handler: () => true,
 };
+
+export const SheetPasteShortKeyCommandName = 'sheet.command.paste-by-short-key';

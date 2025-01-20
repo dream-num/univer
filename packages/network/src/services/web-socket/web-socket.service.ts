@@ -24,7 +24,7 @@ export type SocketBodyType = string | ArrayBufferLike | Blob | ArrayBufferView;
 /**
  * This service is responsible for establishing bidi-directional connection to a remote server.
  */
-export const ISocketService = createIdentifier<ISocketService>('univer.socket');
+export const ISocketService = createIdentifier<ISocketService>('univer.network.socket.service');
 export interface ISocketService {
     createSocket(url: string): Nullable<ISocket>;
 }

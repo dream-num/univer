@@ -15,13 +15,14 @@
  */
 
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, Inject, Injector } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
+import { attachRangeWithCoord } from './selection/util';
 
 export interface ISheetSkeletonManagerParam {
-    unitId?: string;
+    unitId: string;
     sheetId: string;
     skeleton: SpreadsheetSkeleton;
     dirty: boolean;
@@ -112,6 +113,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
     private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const param = this._getSkeleton(searchParam);
+        const unitId = this._context.unitId;
         if (param != null) {
             this._reCalculate(param);
         } else {
@@ -124,6 +126,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
             const skeleton = this._buildSkeleton(worksheet);
             this._sheetSkeletonParam.push({
+                unitId,
                 sheetId,
                 skeleton,
                 dirty: false,
@@ -131,7 +134,6 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }
 
         this._currentSkeletonSearchParam = searchParam;
-        const unitId = this._context.unitId;
         const sheetId = this._currentSkeletonSearchParam.sheetId;
         const sheetSkeletonManagerParam = this.getUnitSkeleton(unitId, sheetId);
         this._currentSkeletonBefore$.next(sheetSkeletonManagerParam);
@@ -154,6 +156,11 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         param.skeleton.calculate();
     }
 
+    /**
+     * Make param dirty, if param is dirty, then the skeleton will be makeDirty in _reCalculate()
+     * @param searchParm
+     * @param state
+     */
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {
         const param = this._getSkeleton(searchParm);
         if (param == null) {
@@ -176,6 +183,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         const newSkeleton = this._buildSkeleton(worksheet);
         this._sheetSkeletonParam.push({
+            unitId: this._context.unitId,
             sheetId: searchParam.sheetId,
             skeleton: newSkeleton,
             dirty: false,
@@ -211,42 +219,12 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
     }
 
     private _buildSkeleton(worksheet: Worksheet) {
-        const config = worksheet.getConfig();
         const spreadsheetSkeleton = this._injector.createInstance(
             SpreadsheetSkeleton,
             worksheet,
-            config,
-            worksheet.getCellMatrix(),
             this._context.unit.getStyles()
         );
 
         return spreadsheetSkeleton;
     }
-}
-
-export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
-    const { startRow, startColumn, endRow, endColumn, rangeType } = range;
-
-    // after the selection is moved, it may be stored endRow < startRow or endColumn < startColumn
-    // so startCell and endCell need get min value to draw the selection
-    const _startRow = endRow < startRow ? endRow : startRow;
-    const _endRow = endRow < startRow ? startRow : endRow;
-
-    const _startColumn = endColumn < startColumn ? endColumn : startColumn;
-    const _endColumn = endColumn < startColumn ? startColumn : endColumn;
-
-    const startCell = skeleton.getNoMergeCellPositionByIndex(_startRow, _startColumn);
-    const endCell = skeleton.getNoMergeCellPositionByIndex(_endRow, _endColumn);
-
-    return {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-        rangeType,
-        startY: startCell?.startY || 0,
-        endY: endCell?.endY || 0,
-        startX: startCell?.startX || 0,
-        endX: endCell?.endX || 0,
-    };
 }

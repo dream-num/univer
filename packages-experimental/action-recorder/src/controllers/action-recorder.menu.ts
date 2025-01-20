@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem, MenuSchemaType } from '@univerjs/ui';
-import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
+import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
+import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ActionRecorderService } from '../services/action-recorder.service';
 
@@ -50,6 +50,22 @@ export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem {
     };
 }
 
+export function ReplayLocalRecordOnNamesakeMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: ReplayLocalRecordOnNamesakeCommand.id,
+        title: 'action-recorder.menu.replay-local-name',
+        type: MenuItemType.BUTTON,
+    };
+}
+
+export function ReplayLocalRecordOnActiveMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: ReplayLocalRecordOnActiveCommand.id,
+        title: 'action-recorder.menu.replay-local-active',
+        type: MenuItemType.BUTTON,
+    };
+}
+
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
         [RECORD_MENU_ITEM_ID]: {
@@ -62,6 +78,14 @@ export const menuSchema: MenuSchemaType = {
             [ReplayLocalRecordCommand.id]: {
                 order: 2,
                 menuItemFactory: ReplayLocalRecordMenuItemFactory,
+            },
+            [ReplayLocalRecordOnNamesakeCommand.id]: {
+                order: 3,
+                menuItemFactory: ReplayLocalRecordOnNamesakeMenuItemFactory,
+            },
+            [ReplayLocalRecordOnActiveCommand.id]: {
+                order: 4,
+                menuItemFactory: ReplayLocalRecordOnActiveMenuItemFactory,
             },
         },
 

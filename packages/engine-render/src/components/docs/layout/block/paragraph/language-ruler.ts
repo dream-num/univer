@@ -16,12 +16,12 @@
 
 import type { IParagraph } from '@univerjs/core';
 
-import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
-import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
-import { getFontCreateConfig } from '../../tools';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
+import { getFontCreateConfig } from '../../tools';
 
 // Handle English word, English punctuation, number characters.
 // https://en.wikipedia.org/wiki/CJK_characters

@@ -15,15 +15,15 @@
  */
 
 import type { IAccessor, IDisposable } from '../../common/di';
-import { createIdentifier, Inject, Injector } from '../../common/di';
+import type { IKeyValue } from '../../shared/types';
 
 import { findLast, remove } from '../../common/array';
+import { createIdentifier, Inject, Injector } from '../../common/di';
+import { CustomCommandExecutionError } from '../../common/error';
 import { sequence, sequenceAsync } from '../../common/sequence';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
-import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
-import { CustomCommandExecutionError } from '../../common/error';
 
 /**
  * The type of a command.
@@ -36,14 +36,14 @@ export enum CommandType {
      */
     COMMAND = 0,
     /**
-     * MUTATION is the change made to the data saved to snapshot, such as inserting rows and columns,
-     * modifying cell content, modifying filter ranges, etc. If you want to add collaborative editing capabilities to
-     * Univer, it is the smallest unit of conflict resolution.
+     * OPERATION is the change made to data that is not saved to snapshot, without conflict resolution,
+     * such as modifying scroll position, modifying sidebar state, etc.
      */
     OPERATION = 1,
     /**
-     * OPERATION is the change made to data that is not saved to snapshot, without conflict resolution,
-     * such as modifying scroll position, modifying sidebar state, etc.
+     * MUTATION is the change made to the data saved to snapshot, such as inserting rows and columns,
+     * modifying cell content, modifying filter ranges, etc. If you want to add collaborative editing capabilities to
+     * Univer, it is the smallest unit of conflict resolution.
      */
     MUTATION = 2,
 }
@@ -270,7 +270,7 @@ class CommandRegistry {
     }
 }
 
-interface ICommandExecutionStackItem extends ICommandInfo {}
+interface ICommandExecutionStackItem extends ICommandInfo { }
 
 export const NilCommand: ICommand = {
     id: 'nil',
@@ -370,13 +370,13 @@ export class CommandService extends Disposable implements ICommandService {
 
                 return result;
             }
+
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
         } catch (error) {
             if (error instanceof CustomCommandExecutionError) {
                 // If need custom logic, can add it here
                 return false as R;
             } else {
-                this._logService.error(error);
                 throw error;
             }
         }
@@ -423,8 +423,11 @@ export class CommandService extends Disposable implements ICommandService {
 
             throw new Error(`[CommandService]: command "${id}" is not registered.`);
         } catch (error) {
-            this._logService.error(error);
-            throw error;
+            if (error instanceof CustomCommandExecutionError) {
+                return false as R;
+            } else {
+                throw error;
+            }
         }
     }
 

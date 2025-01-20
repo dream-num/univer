@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
-import { erf, erfcINV } from './engineering';
-import { calculateCombin } from './math';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import { isRealNum } from '@univerjs/core';
+import { ErrorValueObject } from '../engine/value-object/base-value-object';
+import { erf, erfcINV } from './engineering';
+import { ErrorType } from './error-type';
+import { calculateCombin, calculateFactorial, calculateMmult, inverseMatrixByLUD, inverseMatrixByUSV, matrixTranspose } from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -120,7 +122,7 @@ export function betaINV(probability: number, alpha: number, beta: number): numbe
 function incompleteBetaFunction(x: number, alpha: number, beta: number): number {
     const bt = (x === 0 || x === 1)
         ? 0
-        : Math.exp(logGamma(alpha + beta) - logGamma(alpha) - logGamma(beta) + alpha * Math.log(x) + beta * Math.log(1 - x));
+        : Math.exp(gammaln(alpha + beta) - gammaln(alpha) - gammaln(beta) + alpha * Math.log(x) + beta * Math.log(1 - x));
 
     if (x < (alpha + 1) / (alpha + beta + 2)) {
         return bt * betaContinuedFraction(x, alpha, beta) / alpha;
@@ -192,33 +194,169 @@ function betaFunction(alpha: number, beta: number): number {
         return Math.exp(betaFunctionNaturalLogarithm(alpha, beta));
     }
 
-    return gammaFunction(alpha) * gammaFunction(beta) / gammaFunction(alpha + beta);
+    return gamma(alpha) * gamma(beta) / gamma(alpha + beta);
 }
 
 function betaFunctionNaturalLogarithm(alpha: number, beta: number): number {
-    return logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta);
+    return gammaln(alpha) + gammaln(beta) - gammaln(alpha + beta);
 }
 
-function logGamma(x: number): number {
-    const coefficients = [
-        76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
-        -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
-    ];
-
-    let y = x;
-    let tmp = x + 5.5;
-    tmp -= (x + 0.5) * Math.log(tmp);
-    let ser = 1.000000000190015;
-
-    for (let j = 0; j < 6; j++) {
-        y += 1;
-        ser += coefficients[j] / y;
+export function binomialCDF(x: number, trials: number, probability: number): number {
+    if (x < 0) {
+        return 0;
     }
 
-    return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
+    if (x >= trials) {
+        return 1;
+    }
+
+    if (probability < 0 || probability > 1 || trials <= 0) {
+        return Number.NaN;
+    }
+
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += binomialPDF(i, trials, probability);
+    }
+
+    return result;
 }
 
-function gammaFunction(x: number): number {
+export function binomialPDF(x: number, trials: number, probability: number): number {
+    if (probability === 0 || probability === 1) {
+        if (trials * probability === x) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    return calculateCombin(trials, x) * (probability ** x) * ((1 - probability) ** (trials - x));
+}
+
+export function chisquareCDF(x: number, degFreedom: number): number {
+    if (x <= 0) {
+        return 0;
+    }
+
+    return lowRegGamma(degFreedom / 2, x / 2);
+}
+
+export function chisquarePDF(x: number, degFreedom: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x === 0 && degFreedom === 2) {
+        return 0.5;
+    }
+
+    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - gammaln(degFreedom / 2));
+}
+
+export function chisquareINV(probability: number, degFreedom: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return 2 * lowRegGammaInverse(probability, degFreedom / 2);
+}
+
+export function centralFCDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return incompleteBetaFunction((degFreedom1 * x) / (degFreedom1 * x + degFreedom2), degFreedom1 / 2, degFreedom2 / 2);
+}
+
+export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x === 0 && degFreedom1 < 2) {
+        return Infinity;
+    }
+
+    if (x === 0 && degFreedom1 === 2) {
+        return 1;
+    }
+
+    let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
+    result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
+    result *= x ** ((degFreedom1 / 2) - 1);
+    result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
+
+    return result;
+}
+
+export function centralFINV(probability: number, degFreedom1: number, degFreedom2: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
+}
+
+export function exponentialCDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return 1 - Math.exp(-lambda * x);
+}
+
+export function exponentialPDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return lambda * Math.exp(-lambda * x);
+}
+
+export function forecastLinear(x: number, knownYs: number[], knownXs: number[]): number {
+    const n = knownYs.length;
+
+    let knownYsSum = 0;
+    let knownXsSum = 0;
+
+    for (let i = 0; i < n; i++) {
+        knownYsSum += knownYs[i];
+        knownXsSum += knownXs[i];
+    }
+
+    const knownYsMean = knownYsSum / n;
+    const knownXsMean = knownXsSum / n;
+
+    let num = 0;
+    let den = 0;
+
+    for (let i = 0; i < n; i++) {
+        num += (knownYs[i] - knownYsMean) * (knownXs[i] - knownXsMean);
+        den += (knownXs[i] - knownXsMean) ** 2;
+    }
+
+    if (den === 0) {
+        return Infinity;
+    }
+
+    const b = num / den;
+    const a = knownYsMean - b * knownXsMean;
+
+    return a + b * x;
+}
+
+export function gamma(x: number): number {
     const p = [
         -1.716185138865495, 24.76565080557592, -379.80425647094563,
         629.3311553128184, 866.9662027904133, -31451.272968848367,
@@ -284,61 +422,27 @@ function gammaFunction(x: number): number {
     return res;
 }
 
-export function binomialCDF(x: number, trials: number, probability: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    if (x >= trials) {
-        return 1;
-    }
-
-    if (probability < 0 || probability > 1 || trials <= 0) {
-        return Number.NaN;
-    }
-
-    let result = 0;
-
-    for (let i = 0; i <= x; i++) {
-        result += binomialPDF(i, trials, probability);
-    }
-
-    return result;
-}
-
-export function binomialPDF(x: number, trials: number, probability: number): number {
-    if (probability === 0 || probability === 1) {
-        if (trials * probability === x) {
-            return 1;
-        }
-
-        return 0;
-    }
-
-    return calculateCombin(trials, x) * (probability ** x) * ((1 - probability) ** (trials - x));
-}
-
-export function chisquareCDF(x: number, degFreedom: number): number {
+export function gammaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
         return 0;
     }
 
-    return lowRegGamma(degFreedom / 2, x / 2);
+    return lowRegGamma(alpha, x / beta);
 }
 
-export function chisquarePDF(x: number, degFreedom: number): number {
+export function gammaPDF(x: number, alpha: number, beta: number): number {
     if (x < 0) {
         return 0;
     }
 
-    if (x === 0 && degFreedom === 2) {
-        return 0.5;
+    if (x === 0 && alpha === 1) {
+        return 1 / beta;
     }
 
-    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
+    return Math.exp((alpha - 1) * Math.log(x) - x / beta - gammaln(alpha) - alpha * Math.log(beta));
 }
 
-export function chisquareINV(probability: number, degFreedom: number): number {
+export function gammaINV(probability: number, alpha: number, beta: number): number {
     if (probability <= 0) {
         return 0;
     }
@@ -347,7 +451,25 @@ export function chisquareINV(probability: number, degFreedom: number): number {
         return Infinity;
     }
 
-    return 2 * lowRegGammaInverse(probability, degFreedom / 2);
+    return beta * lowRegGammaInverse(probability, alpha);
+}
+
+export function gammaln(x: number): number {
+    const coefficients = [
+        76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
+        -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
+    ];
+
+    let y = x;
+    let tmp = x + 5.5;
+    tmp -= (x + 0.5) * Math.log(tmp);
+    let ser = 1.000000000190015;
+
+    for (let j = 0; j < 6; j++) {
+        ser += coefficients[j] / ++y;
+    }
+
+    return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
 }
 
 function lowRegGamma(a: number, x: number): number {
@@ -355,9 +477,11 @@ function lowRegGamma(a: number, x: number): number {
         return Number.NaN;
     }
 
+    const EPSILON = 1e-30;
+
     // calculate maximum number of itterations required for a
-    const MAX_ITER = Math.min(-~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17), 10000);
-    const aln = logGamma(a);
+    const MAX_ITER = -~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17);
+    const aln = gammaln(a);
     const exp = Math.exp(-x + a * Math.log(x) - aln);
 
     let _a = a;
@@ -371,6 +495,10 @@ function lowRegGamma(a: number, x: number): number {
 
         for (let i = 1; i <= MAX_ITER; i++) {
             sum += del *= x / ++_a;
+
+            if (Math.abs(del) < Math.abs(sum) * EPSILON) {
+                break;
+            }
         }
 
         return sum * exp;
@@ -381,7 +509,7 @@ function lowRegGamma(a: number, x: number): number {
     }
 
     let b = x + 1 - a;
-    let c = 1 / 1.0e-30;
+    let c = 1 / EPSILON;
     let d = 1 / b;
     let h = d;
 
@@ -390,9 +518,23 @@ function lowRegGamma(a: number, x: number): number {
 
         b += 2;
         d = temp * d + b;
+
+        if (Math.abs(d) < EPSILON) {
+            d = EPSILON;
+        }
+
         c = b + temp / c;
+
+        if (Math.abs(c) < EPSILON) {
+            c = EPSILON;
+        }
+
         d = 1 / d;
         h *= d * c;
+
+        if (Math.abs(d * c - 1) < EPSILON) {
+            break;
+        }
     }
 
     return 1 - h * exp;
@@ -431,7 +573,7 @@ function lowRegGammaInverse(p: number, a: number): number {
     }
 
     const EPSILON = 1e-8;
-    const aln = logGamma(a);
+    const aln = gammaln(a);
 
     let err, t;
 
@@ -466,100 +608,64 @@ function lowRegGammaInverse(p: number, a: number): number {
     return x;
 }
 
-export function studentTINV(probability: number, degFreedom: number): number {
-    let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
-    x = Math.sqrt(degFreedom * (1 - x) / x);
+export function hypergeometricCDF(x: number, n: number, M: number, N: number): number {
+    let result = 0;
 
-    return (probability > 0.5) ? x : -x;
-}
-
-export function exponentialCDF(x: number, lambda: number): number {
-    if (x < 0) {
-        return 0;
+    for (let i = 0; i <= x; i++) {
+        result += hypergeometricPDF(i, n, M, N);
     }
-
-    return 1 - Math.exp(-lambda * x);
-}
-
-export function exponentialPDF(x: number, lambda: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    return lambda * Math.exp(-lambda * x);
-}
-
-export function centralFCDF(x: number, degFreedom1: number, degFreedom2: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    return incompleteBetaFunction((degFreedom1 * x) / (degFreedom1 * x + degFreedom2), degFreedom1 / 2, degFreedom2 / 2);
-}
-
-export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    if (x === 0 && degFreedom1 < 2) {
-        return Infinity;
-    }
-
-    if (x === 0 && degFreedom1 === 2) {
-        return 1;
-    }
-
-    let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
-    result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
-    result *= x ** ((degFreedom1 / 2) - 1);
-    result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
 
     return result;
 }
 
-export function centralFINV(probability: number, degFreedom1: number, degFreedom2: number): number {
-    if (probability <= 0) {
+export function hypergeometricPDF(x: number, n: number, M: number, N: number): number {
+    if (n - x > N - M) {
         return 0;
     }
 
-    if (probability >= 1) {
-        return Infinity;
-    }
-
-    return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
+    return calculateCombin(M, x) * calculateCombin(N - M, n - x) / calculateCombin(N, n);
 }
 
-export function forecastLinear(x: number, knownYs: number[], knownXs: number[]): number {
-    const n = knownYs.length;
-
-    let knownYsSum = 0;
-    let knownXsSum = 0;
-
-    for (let i = 0; i < n; i++) {
-        knownYsSum += knownYs[i];
-        knownXsSum += knownXs[i];
+export function lognormalCDF(x: number, mean: number, standardDev: number): number {
+    if (x < 0) {
+        return 0;
     }
 
-    const knownYsMean = knownYsSum / n;
-    const knownXsMean = knownXsSum / n;
+    return 0.5 + 0.5 * erf((Math.log(x) - mean) / Math.sqrt(2 * standardDev * standardDev));
+}
 
-    let num = 0;
-    let den = 0;
-
-    for (let i = 0; i < n; i++) {
-        num += (knownYs[i] - knownYsMean) * (knownXs[i] - knownXsMean);
-        den += (knownXs[i] - knownXsMean) ** 2;
+export function lognormalPDF(x: number, mean: number, standardDev: number): number {
+    if (x <= 0) {
+        return 0;
     }
 
-    if (den === 0) {
-        return Infinity;
+    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - ((Math.log(x) - mean) ** 2) / (2 * standardDev * standardDev));
+}
+
+export function lognormalINV(probability: number, mean: number, standardDev: number): number {
+    return Math.exp(normalINV(probability, mean, standardDev));
+}
+
+export function negbinomialCDF(numberF: number, numberS: number, probabilityS: number): number {
+    if (numberF < 0) {
+        return 0;
     }
 
-    const b = num / den;
-    const a = knownYsMean - b * knownXsMean;
+    let result = 0;
 
-    return a + b * x;
+    for (let i = 0; i <= numberF; i++) {
+        result += negbinomialPDF(i, numberS, probabilityS);
+    }
+
+    return result;
+}
+
+export function negbinomialPDF(numberF: number, numberS: number, probabilityS: number): number {
+    if (numberF < 0) {
+        return 0;
+    }
+
+    return calculateCombin(numberF + numberS - 1, numberS - 1) * (probabilityS ** numberS) * ((1 - probabilityS) ** numberF);
 }
 
 export function normalCDF(x: number, mean: number, standardDev: number): number {
@@ -573,6 +679,39 @@ export function normalPDF(x: number, mean: number, standardDev: number): number 
 export function normalINV(probability: number, mean: number, standardDev: number): number {
     // eslint-disable-next-line
     return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
+}
+
+export function poissonCDF(x: number, mean: number): number {
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += poissonPDF(i, mean);
+    }
+
+    return result;
+}
+
+export function poissonPDF(x: number, mean: number): number {
+    return Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
+}
+
+export function studentTCDF(x: number, degFreedom: number): number {
+    const result = 0.5 * incompleteBetaFunction(degFreedom / (x ** 2 + degFreedom), degFreedom / 2, 0.5);
+
+    return x < 0 ? result : 1 - result;
+}
+
+export function studentTPDF(x: number, degFreedom: number): number {
+    const pow = (1 + (x ** 2) / degFreedom) ** (-(degFreedom + 1) / 2);
+
+    return 1 / (Math.sqrt(degFreedom) * betaFunction(0.5, degFreedom / 2)) * pow;
+}
+
+export function studentTINV(probability: number, degFreedom: number): number {
+    let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
+    x = Math.sqrt(degFreedom * (1 - x) / x);
+
+    return (probability > 0.5) ? x : -x;
 }
 
 export function getTwoArrayNumberValues(
@@ -638,5 +777,286 @@ export function getTwoArrayNumberValues(
         array1Values,
         array2Values,
         noCalculate,
+    };
+}
+
+// eslint-disable-next-line
+export function checkKnownsArrayDimensions(knownYs: BaseValueObject, knownXs?: BaseValueObject, newXs?: BaseValueObject) {
+    const knownYsRowCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getRowCount() : 1;
+    const knownYsColumnCount = knownYs.isArray() ? (knownYs as ArrayValueObject).getColumnCount() : 1;
+
+    let knownXsRowCount = knownYsRowCount;
+    let knownXsColumnCount = knownYsColumnCount;
+
+    if (knownXs && !knownXs.isNull()) {
+        knownXsRowCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getRowCount() : 1;
+        knownXsColumnCount = knownXs.isArray() ? (knownXs as ArrayValueObject).getColumnCount() : 1;
+
+        if (
+            (knownYsRowCount === 1 && (knownXsColumnCount !== knownYsColumnCount)) ||
+            (knownYsColumnCount === 1 && knownXsRowCount !== knownYsRowCount) ||
+            (knownYsRowCount !== 1 && knownYsColumnCount !== 1 && (knownXsRowCount !== knownYsRowCount || knownXsColumnCount !== knownYsColumnCount))
+        ) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.REF),
+            };
+        }
+    }
+
+    if (newXs && !newXs.isNull()) {
+        const newXsRowCount = newXs.isArray() ? (newXs as ArrayValueObject).getRowCount() : 1;
+        const newXsColumnCount = newXs.isArray() ? (newXs as ArrayValueObject).getColumnCount() : 1;
+
+        if (
+            (knownYsRowCount === 1 && knownXsRowCount > 1 && newXsRowCount !== knownXsRowCount) ||
+            (knownYsColumnCount === 1 && knownXsColumnCount > 1 && newXsColumnCount !== knownXsColumnCount)
+        ) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.REF),
+            };
+        }
+    }
+
+    return {
+        isError: false,
+        errorObject: null,
+    };
+}
+
+export function getKnownsArrayValues(array: BaseValueObject): number[][] | ErrorValueObject {
+    const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+    const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+    const values: number[][] = [];
+
+    for (let r = 0; r < rowCount; r++) {
+        values[r] = [];
+
+        for (let c = 0; c < columnCount; c++) {
+            const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+
+            if (valueObject.isError() || valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            values[r].push(+valueObject.getValue());
+        }
+    }
+
+    return values;
+}
+
+export function getSerialNumbersByRowsColumns(rowCount: number, columnCount: number): number[][] {
+    const values: number[][] = [];
+
+    let n = 1;
+
+    for (let r = 0; r < rowCount; r++) {
+        values[r] = [];
+
+        for (let c = 0; c < columnCount; c++) {
+            values[r].push(n++);
+        }
+    }
+
+    return values;
+}
+
+export function getSlopeAndIntercept(knownXsValues: number[], knownYsValues: number[], constb: number, isExponentialTransform: boolean) {
+    let Y = knownYsValues;
+
+    if (isExponentialTransform) {
+        Y = knownYsValues.map((value) => Math.log(value));
+    }
+
+    let slope, intercept;
+
+    if (constb) {
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsTrue(knownXsValues, Y));
+    } else {
+        ({ slope, intercept } = getSlopeAndInterceptOfConstbIsFalse(knownXsValues, Y));
+    }
+
+    if (isExponentialTransform) {
+        slope = Math.exp(slope);
+        intercept = Math.exp(intercept);
+    }
+
+    if (Number.isNaN(slope) && !constb) {
+        slope = 0;
+    }
+
+    return { slope, intercept, Y };
+}
+
+function getSlopeAndInterceptOfConstbIsTrue(knownXsValues: number[], knownYsValues: number[]) {
+    const n = knownYsValues.length;
+
+    let sumX = 0;
+    let sumY = 0;
+    let sumX2 = 0;
+    let sumXY = 0;
+
+    for (let i = 0; i < n; i++) {
+        sumX += knownXsValues[i];
+        sumY += knownYsValues[i];
+        sumX2 += knownXsValues[i] * knownXsValues[i];
+        sumXY += knownXsValues[i] * knownYsValues[i];
+    }
+
+    const temp = n * sumXY - sumX * sumY;
+    const slope = temp / (n * sumX2 - sumX * sumX);
+    const intercept = 1 / n * sumY - slope * (1 / n) * sumX;
+
+    return {
+        slope,
+        intercept,
+    };
+}
+
+function getSlopeAndInterceptOfConstbIsFalse(knownXsValues: number[], knownYsValues: number[]) {
+    const matrixX = [[...knownXsValues]];
+    const matrixY = [...knownYsValues];
+
+    let rowCount = matrixX.length;
+    let columnCount = matrixX[0].length;
+    let minCount = Math.min(rowCount, columnCount);
+    const newMatrix = new Array(minCount).fill(0);
+
+    for (let i = 0; i < minCount; i++) {
+        const matrixXRow = matrixX[i];
+
+        let sumSquare = 0;
+
+        for (let j = 0; j < columnCount; j++) {
+            sumSquare += matrixXRow[j] ** 2;
+        }
+
+        const value = matrixXRow[i] < 0 ? Math.sqrt(sumSquare) : -Math.sqrt(sumSquare);
+
+        newMatrix[i] = value;
+
+        if (value !== 0) {
+            matrixXRow[i] -= value;
+
+            for (let j = i + 1; j < rowCount; j++) {
+                let sum = 0;
+
+                for (let k = i; k < columnCount; k++) {
+                    sum -= matrixX[j][k] * matrixXRow[k];
+                }
+
+                sum /= (value * matrixXRow[i]);
+
+                for (let k = i; k < columnCount; k++) {
+                    matrixX[j][k] -= sum * matrixXRow[k];
+                }
+            }
+        }
+    }
+
+    rowCount = matrixX.length;
+    columnCount = matrixX[0].length;
+    minCount = Math.min(rowCount, columnCount);
+    const result = new Array(rowCount).fill(0);
+
+    for (let i = 0; i < minCount; i++) {
+        const matrixXRow = matrixX[i];
+
+        let sum = 0;
+
+        for (let j = 0; j < columnCount; j++) {
+            sum += matrixY[j] * matrixXRow[j];
+        }
+
+        sum /= (newMatrix[i] * matrixXRow[i]);
+
+        for (let j = 0; j < columnCount; j++) {
+            matrixY[j] += sum * matrixXRow[j];
+        }
+    }
+
+    for (let i = newMatrix.length - 1; i >= 0; i--) {
+        matrixY[i] /= newMatrix[i];
+
+        const temp = matrixY[i];
+        const matrixXRow = matrixX[i];
+
+        result[i] = temp;
+
+        for (let j = 0; j < i; j++) {
+            matrixY[j] -= temp * matrixXRow[j];
+        }
+    }
+
+    return {
+        slope: result[0],
+        intercept: 0,
+    };
+}
+
+export function getKnownsArrayCoefficients(knownYsValues: number[][], knownXsValues: number[][], newXsValues: number[][], constb: number, isExponentialTransform: boolean) {
+    const isOneRow = knownYsValues.length === 1 && knownYsValues[0].length > 1;
+
+    let Y = knownYsValues;
+
+    if (isExponentialTransform) {
+        Y = knownYsValues.map((row) => row.map((value) => Math.log(value)));
+    }
+
+    let X = knownXsValues;
+    let newX = newXsValues;
+
+    if (isOneRow) {
+        Y = matrixTranspose(Y);
+        X = matrixTranspose(X);
+        newX = matrixTranspose(newX);
+    }
+
+    if (constb) {
+        X = X.map((row) => [...row, 1]);
+    }
+
+    const XT = matrixTranspose(X);
+    const XTX = calculateMmult(XT, X);
+    const XTY = calculateMmult(XT, Y);
+
+    let XTXInverse = inverseMatrixByLUD(XTX);
+
+    if (!XTXInverse) {
+        XTXInverse = inverseMatrixByUSV(XTX);
+
+        if (!XTXInverse) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+    }
+
+    let coefficients = calculateMmult(XTXInverse, XTY);
+
+    if (!constb) {
+        coefficients.push([0]);
+    }
+
+    coefficients = matrixTranspose(coefficients);
+
+    const pop = coefficients[0].pop() as number;
+
+    coefficients[0].reverse();
+    coefficients[0].push(pop);
+
+    if (isExponentialTransform) {
+        for (let i = 0; i < coefficients[0].length; i++) {
+            coefficients[0][i] = Math.exp(coefficients[0][i]);
+        }
+    }
+
+    return {
+        coefficients,
+        Y,
+        X,
+        newX,
+        XTXInverse,
     };
 }

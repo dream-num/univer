@@ -65,7 +65,6 @@ test('no error on constructing and disposing sheet unit', async ({ page }) => {
 });
 
 test('no error when dispose a unit', async ({ page }) => {
-    // test.setTimeout(40 * 1000);
     let errored = false;
 
     page.on('pageerror', (error) => {

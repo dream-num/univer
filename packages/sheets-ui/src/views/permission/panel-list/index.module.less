@@ -1,6 +1,8 @@
 .sheet-permission-list-panel-wrapper {
     margin-top: var(--margin-xs);
-    height: 100%;
+    height: calc(100% - 8px);
+    display: flex;
+    flex-direction: column;
 }
 
 .sheet-permission-list-panel-header {
@@ -39,9 +41,11 @@
 
 .sheet-permission-list-item-header-icon {
     border-radius: var(--border-radius-base);
+
     &:hover {
         background-color: rgb(var(--grey-200));
     }
+
     height: 24px;
     padding: 4px;
     box-sizing: border-box;
@@ -117,7 +121,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    flex: 1;
 }
 
 .sheet-permission-list-empty-text {
@@ -140,4 +144,20 @@
     height: 16px;
     line-height: 16px;
     color: rgb(var(--grey-600));
+}
+
+.sheet-permission-panel-add-wrapper {
+    padding: 20px 0;
+    margin-top: auto;
+}
+
+.sheet-permission-panel-add-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    div {
+        margin-right: 4px;
+    }
 }

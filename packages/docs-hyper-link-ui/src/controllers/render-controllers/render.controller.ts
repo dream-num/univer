@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { distinctUntilChanged, pairwise } from 'rxjs';
@@ -41,11 +41,18 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
                 if (!data) {
                     return next(data);
                 }
-                const { unitId } = pos;
+                const { unitId, index } = pos;
                 const activeLink = this._hyperLinkService.showing;
-                const { linkId, unitId: linkUnitId } = activeLink || {};
 
-                const isActive = linkUnitId === unitId && data.rangeId === linkId;
+                if (!activeLink) {
+                    return next({
+                        ...data,
+                        active: false,
+                    });
+                }
+                const { linkId, unitId: linkUnitId, startIndex, endIndex } = activeLink;
+                const isActive = linkUnitId === unitId && data.rangeId === linkId && index >= startIndex && index <= endIndex;
+
                 return next({
                     ...data,
                     active: isActive,
@@ -57,7 +64,7 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
     private _initReRender() {
         this.disposeWithMe(this._hyperLinkService.showingLink$
             .pipe(
-                distinctUntilChanged((prev, aft) => prev?.linkId === aft?.linkId && prev?.unitId === aft?.unitId),
+                distinctUntilChanged((prev, aft) => prev?.linkId === aft?.linkId && prev?.unitId === aft?.unitId && prev?.startIndex === aft?.startIndex),
                 pairwise()
             )
             .subscribe(([preLink, link]) => {

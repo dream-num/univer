@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -31,6 +31,7 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../../commands/commands/add-worksheet-merge.command';
+import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../../commands/commands/hide-row-col-confirm.command';
@@ -47,6 +48,7 @@ import {
 } from '../../commands/commands/inline-format.command';
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
+import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -56,7 +58,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
@@ -70,6 +71,7 @@ import {
 } from '../../commands/commands/set-selection.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
@@ -80,6 +82,9 @@ import { RenameSheetOperation } from '../../commands/operations/rename-sheet.ope
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { SetFormatPainterOperation } from '../../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
+import { SheetPermissionOpenDialogOperation } from '../../commands/operations/sheet-permission-open-dialog.operation';
+import { SheetPermissionOpenPanelOperation } from '../../commands/operations/sheet-permission-open-panel.operation';
+import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../../components/color-picker';
@@ -89,18 +94,13 @@ import {
     FontFamily,
     FontFamilyItem,
 } from '../../components/font-family';
+
 import { FONT_SIZE_COMPONENT, FontSize } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
-import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
-import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 
-import { SheetPermissionOpenPanelOperation } from '../../commands/operations/sheet-permission-open-panel.operation';
-import { SheetPermissionOpenDialogOperation } from '../../commands/operations/sheet-permission-open-dialog.operation';
-import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
-import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../../commands/commands/worksheet-protection.command';
-
+import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,
@@ -151,10 +151,8 @@ import {
     ZoomInShortcutItem,
     ZoomOutShortcutItem,
 } from '../shortcuts/view.shortcut';
-import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, SheetUIMobileController)
 export class SheetUIMobileController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -236,7 +234,6 @@ export class SheetUIMobileController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
-            CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,
@@ -261,11 +258,7 @@ export class SheetUIMobileController extends Disposable {
             ChangeSheetProtectionFromSheetBarCommand,
             DeleteRangeProtectionFromContextMenuCommand,
             SetRangeProtectionFromContextMenuCommand,
-            AddWorksheetProtectionCommand,
-            DeleteWorksheetProtectionCommand,
-            SetWorksheetProtectionCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
-            SetProtectionCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

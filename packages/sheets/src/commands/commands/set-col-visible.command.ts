@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
+
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ICommandService,
@@ -22,9 +26,7 @@ import {
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     SetColHiddenMutation,
@@ -35,8 +37,6 @@ import {
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface ISetSpecificColsVisibleCommandParams {
     unitId: string;
@@ -47,7 +47,7 @@ export interface ISetSpecificColsVisibleCommandParams {
 export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-visible-on-cols',
-    handler: async (accessor, params: ISetSpecificColsVisibleCommandParams) => {
+    handler: (accessor, params: ISetSpecificColsVisibleCommandParams) => {
         const { unitId, subUnitId, ranges } = params;
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
@@ -120,7 +120,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
 export const SetSelectedColsVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selected-cols-visible',
-    handler: async (accessor: IAccessor) => {
+    handler: (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
 
@@ -151,7 +151,7 @@ export interface ISetColHiddenCommandParams {
 export const SetColHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-hidden',
-    handler: async (accessor: IAccessor, params?: ISetColHiddenCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetColHiddenCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

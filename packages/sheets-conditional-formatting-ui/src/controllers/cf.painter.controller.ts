@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
 import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IAddConditionalRuleMutationParams, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 import type { IFormatPainterHook } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
 
 const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
     const getRowLength = (range: IRange) => range.endRow - range.startRow + 1;
@@ -73,7 +73,6 @@ const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
     return repeatList;
 };
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingPainterController)
 export class ConditionalFormattingPainterController extends Disposable {
     private _painterConfig: Nullable<{ unitId: string; subUnitId: string; range: IRange }> = null;
     constructor(
@@ -141,14 +140,14 @@ export class ConditionalFormattingPainterController extends Disposable {
                     targetRange
                 );
 
-                const sourceCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const sourceCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     sourceUnitId,
                     sourceSubUnitId,
                     sourcePositionRange.startRow,
                     sourcePositionRange.startColumn
                 );
 
-                const targetCellCf = this._conditionalFormattingViewModel.getCellCf(
+                const targetCellCf = this._conditionalFormattingViewModel.getCellCfs(
                     targetUnitId,
                     targetSubUnitId,
                     targetPositionRange.startRow,
@@ -156,7 +155,7 @@ export class ConditionalFormattingPainterController extends Disposable {
                 );
 
                 if (targetCellCf) {
-                    targetCellCf.cfList.forEach((cf) => {
+                    targetCellCf.forEach((cf) => {
                         let matrix = matrixMap.get(cf.cfId);
                         if (!matrixMap.get(cf.cfId)) {
                             const rule = this._conditionalFormattingRuleModel.getRule(targetUnitId, targetSubUnitId, cf.cfId);
@@ -176,7 +175,7 @@ export class ConditionalFormattingPainterController extends Disposable {
                 }
 
                 if (sourceCellCf) {
-                    sourceCellCf.cfList.forEach((cf) => {
+                    sourceCellCf.forEach((cf) => {
                         const matrix = matrixMap.get(cf.cfId);
                         matrix && matrix.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, 1);
                     });

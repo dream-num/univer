@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
+import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
+
 import {
     functionArray,
     functionCompatibility,
@@ -37,9 +40,6 @@ import {
     IFunctionService,
     isReferenceStrings,
 } from '@univerjs/engine-formula';
-import type { IDisposable } from '@univerjs/core';
-
-import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
@@ -115,7 +115,7 @@ export interface IDescriptionService {
     isFormulaDefinedName(name: string): boolean;
 }
 
-export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
+export const IDescriptionService = createIdentifier<IDescriptionService>('formula.description-service');
 
 export class DescriptionService implements IDescriptionService, IDisposable {
     private _descriptions: IFunctionInfo[] = [];

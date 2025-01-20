@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, LifecycleStages, OnLifecycle, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
+import type { JSONXActions, Nullable } from '@univerjs/core';
+import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import { DocStateEmitService, type IDocStateChangeParams, type IRichTextEditingMutationParams } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-import type { JSONXActions, Nullable } from '@univerjs/core';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';
 
 type ChangeStateCacheType = 'history' | 'collaboration';
 
 const DEBOUNCE_DELAY = 300;
 
+interface IStateCache {
+    history: IDocStateChangeParams[];
+    collaboration: IDocStateChangeParams[];
+}
+
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and
 // the collaboration module.
-@OnLifecycle(LifecycleStages.Ready, DocStateChangeManagerService)
 export class DocStateChangeManagerService extends RxDisposable {
     private readonly _docStateChange$ = new BehaviorSubject<Nullable<IDocStateChangeParams>>(null);
     readonly docStateChange$ = this._docStateChange$.asObservable();
@@ -50,6 +54,18 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         this._initialize();
         this._listenDocStateChange();
+    }
+
+    getStateCache(unitId: string) {
+        return {
+            history: this._historyStateCache.get(unitId) ?? [],
+            collaboration: this._changeStateCache.get(unitId) ?? [],
+        };
+    }
+
+    setStateCache(unitId: string, cache: IStateCache) {
+        this._historyStateCache.set(unitId, cache.history);
+        this._changeStateCache.set(unitId, cache.collaboration);
     }
 
     private _setChangeState(changeState: IDocStateChangeParams) {
@@ -82,8 +98,8 @@ export class DocStateChangeManagerService extends RxDisposable {
                 return;
             }
 
-            const { isCompositionEnd, ...changeState } = changeStateInfo;
-            const imeInputManagerService = this._renderManagerService.getRenderById(changeStateInfo.unitId)?.with(DocIMEInputManagerService);
+            const { isCompositionEnd, isSync, syncer, ...changeState } = changeStateInfo;
+            const imeInputManagerService = this._renderManagerService.getRenderById(isSync ? syncer! : changeStateInfo.unitId)?.with(DocIMEInputManagerService);
 
             if (imeInputManagerService == null) {
                 return;

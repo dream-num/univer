@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 import type { Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getLastColumn, getLastLine, lineIterator } from '@univerjs/engine-render';
 
 export function firstLineInTable(table: IDocumentSkeletonTable) {
     const firstRow = table.rows[0];
@@ -80,26 +80,53 @@ export function findLineBeforeAndAfterTable(table: Nullable<IDocumentSkeletonTab
     };
 }
 
-export function findBellowCell(cell: IDocumentSkeletonPage) {
-    const row = cell.parent as IDocumentSkeletonRow;
-    const table = row?.parent as IDocumentSkeletonTable;
-
-    if (row == null || table == null) {
-        return;
-    }
-
-    const bellowRow = table.rows[table.rows.indexOf(row) + 1];
-
-    if (bellowRow == null) {
-        return;
-    }
-
-    const col = row.cells.indexOf(cell);
-
-    return bellowRow.cells[col];
+function isEmptyCellPage(cell: IDocumentSkeletonPage) {
+    return cell.sections[0].columns[0].lines.length === 0;
 }
 
-export function findAboveCell(cell: IDocumentSkeletonPage) {
+export function findBellowCell(cell: IDocumentSkeletonPage): Nullable<IDocumentSkeletonPage> {
+    const row = cell.parent as IDocumentSkeletonRow;
+    const table = row?.parent as IDocumentSkeletonTable;
+
+    const tableId = table?.tableId;
+
+    if (row == null || table == null) {
+        return;
+    }
+
+    const col = row.cells.indexOf(cell);
+
+    let bellowRow = table.rows[table.rows.indexOf(row) + 1];
+
+    if (bellowRow == null) {
+        if (tableId.indexOf('#-#')) {
+            const [id, index] = tableId.split('#-#');
+            const pages = (table.parent?.parent as IDocumentSkeletonCached)?.pages;
+            const nextTableId = `${id}#-#${Number.parseInt(index) + 1}`;
+
+            if (pages) {
+                for (const page of pages) {
+                    const { skeTables } = page;
+                    if (skeTables.has(nextTableId)) {
+                        const nextTable = skeTables.get(nextTableId);
+                        if (nextTable?.rows.length) {
+                            bellowRow = nextTable.rows.find((r) => !r.isRepeatRow)!;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (bellowRow != null) {
+        const cell = bellowRow.cells[col];
+
+        return isEmptyCellPage(cell) ? findBellowCell(cell) : cell;
+    }
+}
+
+export function findAboveCell(cell: IDocumentSkeletonPage): Nullable<IDocumentSkeletonPage> {
     const row = cell.parent as IDocumentSkeletonRow;
     const table = row?.parent as IDocumentSkeletonTable;
 
@@ -107,15 +134,35 @@ export function findAboveCell(cell: IDocumentSkeletonPage) {
         return;
     }
 
-    const aboveRow = table.rows[table.rows.indexOf(row) - 1];
-
-    if (aboveRow == null) {
-        return;
-    }
+    let aboveRow = table.rows[table.rows.indexOf(row) - 1];
 
     const col = row.cells.indexOf(cell);
 
-    return aboveRow.cells[col];
+    if (aboveRow == null || aboveRow.isRepeatRow) {
+        if (table.tableId.indexOf('#-#')) {
+            const [id, index] = table.tableId.split('#-#');
+            const pages = (table.parent?.parent as IDocumentSkeletonCached)?.pages;
+            const nextTableId = `${id}#-#${Number.parseInt(index) - 1}`;
+            if (pages) {
+                for (const page of pages) {
+                    const { skeTables } = page;
+                    if (skeTables.has(nextTableId)) {
+                        const nextTable = skeTables.get(nextTableId);
+                        if (nextTable?.rows.length) {
+                            aboveRow = nextTable.rows[nextTable.rows.length - 1];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (aboveRow != null) {
+        const cell = aboveRow.cells[col];
+
+        return isEmptyCellPage(cell) ? findAboveCell(cell) : cell;
+    }
 }
 
 export function findTableBeforeLine(line: IDocumentSkeletonLine, page: IDocumentSkeletonPage) {
@@ -141,7 +188,8 @@ export function firstLineInCell(cell: IDocumentSkeletonPage) {
 }
 
 export function lastLineInCell(cell: IDocumentSkeletonPage) {
-    const lastLine = getLastLine(cell);
+    const lastColumn = getLastColumn(cell);
+    const lastLine = lastColumn.lines[lastColumn.lines.length - 1];
 
     return lastLine;
 }

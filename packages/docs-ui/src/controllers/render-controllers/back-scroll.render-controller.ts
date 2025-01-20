@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Inject, RxDisposable } from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { takeUntil } from 'rxjs';
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
 import type { Documents, INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, RxDisposable } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { takeUntil } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
@@ -50,6 +50,10 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
                 return;
             }
 
+            if (this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                return;
+            }
+
             this._scrollToSelection();
         });
     }
@@ -62,7 +66,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         const { startOffset } = range;
         const anchorNodePosition = skeleton.findNodePositionByCharIndex(startOffset);
 
-        this.scrollToNode(anchorNodePosition);
+        anchorNodePosition && this.scrollToNode(anchorNodePosition);
     }
 
     scrollToNode(startNodePosition: Nullable<INodePosition>) {
@@ -88,7 +92,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const isEditor = !!this._editorService.getEditor(unitId);
+        const editor = this._editorService.getEditor(unitId);
 
         if (viewportMain == null) {
             return;
@@ -104,7 +108,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         let offsetY = 0;
         let offsetX = 0;
 
-        const delta = isEditor ? 0 : 100;
+        const delta = editor ? editor.params.backScrollOffset ?? 0 : 100;
 
         if (top < boundTop) {
             offsetY = top - boundTop - delta;

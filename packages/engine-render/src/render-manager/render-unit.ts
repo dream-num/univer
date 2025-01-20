@@ -15,10 +15,10 @@
  */
 
 import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
+import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
 
 /**
  * Public interface of a {@link RenderUnit}.
@@ -36,12 +36,13 @@ export interface IRender {
     isThumbNail?: boolean;
 
     with<T>(dependency: DependencyIdentifier<T>): T;
+    getRenderContext?(): IRenderContext;
 }
 
 /**
  * Every render module should implement this interface.
  */
-export interface IRenderModule extends IDisposable {}
+export interface IRenderModule extends IDisposable { }
 
 /**
  * Necessary context for a render module.This interface would be the first argument of render modules' constructor
@@ -77,12 +78,13 @@ export class RenderUnit extends Disposable implements IRender {
     get components(): Map<string, RenderComponentType> { return this._renderContext.components; }
 
     constructor(
-        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >,
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit'>,
         @Inject(Injector) parentInjector: Injector
     ) {
         super();
 
         this._injector = parentInjector.createChild();
+
         this._renderContext = {
             unit: init.unit,
             unitId: init.unit.getUnitId(),
@@ -138,5 +140,9 @@ export class RenderUnit extends Disposable implements IRender {
             const [identifier] = Array.isArray(dep) ? dep : [dep, null];
             j.get(identifier);
         });
+    }
+
+    getRenderContext(): IRenderContext {
+        return this._renderContext;
     }
 }

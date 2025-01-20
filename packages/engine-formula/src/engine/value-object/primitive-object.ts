@@ -15,17 +15,20 @@
  */
 
 import { isRealNum } from '@univerjs/core';
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken, operatorToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { comparePatternPriority } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export type PrimitiveValueType = string | boolean | number | null;
+
+export type FormulaFunctionValueType = PrimitiveValueType | PrimitiveValueType[][] | BaseValueObject;
+export type FormulaFunctionResultValueType = PrimitiveValueType | PrimitiveValueType[][];
 
 export class NullValueObject extends BaseValueObject {
     private static _instance: NullValueObject;
@@ -432,27 +435,15 @@ export class BooleanValueObject extends BaseValueObject {
     }
 }
 
-const NUMBER_CACHE_LRU_COUNT = 200000;
-
-export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBER_CACHE_LRU_COUNT);
-
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
 
     static create(value: number, pattern: string = '') {
-        // The same number may have different number formats
-        const key = `${value}-${pattern}`;
-        const cached = NumberValueObjectCache.get(key);
-        if (cached) {
-            return cached;
-        }
-
         const instance = new NumberValueObject(value);
         if (pattern) {
             instance.setPattern(pattern);
         }
 
-        NumberValueObjectCache.set(key, instance);
         return instance;
     }
 
@@ -797,30 +788,51 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.powInverse(this);
         }
 
-        const currentValue = this.getValue();
-        const value = valueObject.getValue();
+        if (this.isError()) {
+            return this;
+        }
 
-        if (typeof value === 'string') {
+        const currentValue = this.getValue();
+
+        let _valueObject = valueObject;
+
+        if (valueObject.isString()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        if (_valueObject.isError()) {
+            return _valueObject;
+        }
+
+        const value = +_valueObject.getValue();
+
+        if (Number.isNaN(value)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-        if (typeof value === 'number') {
-            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+
+        if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (currentValue === 0) {
+            if (value < 0) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
+
+            if (value === 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = pow(currentValue, value);
-
-            if (!Number.isFinite(result)) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            return NumberValueObject.create(result);
-        }
-        if (typeof value === 'boolean') {
-            return NumberValueObject.create(pow(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(0);
         }
 
-        return this;
+        const result = pow(currentValue, value);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
     }
 
     override sqrt(): BaseValueObject {
@@ -1286,7 +1298,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
-const STRING_CACHE_LRU_COUNT = 200000;
+const STRING_CACHE_LRU_COUNT = 100000;
 
 export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {

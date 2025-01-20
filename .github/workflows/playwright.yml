@@ -2,7 +2,8 @@ name: 🎭 Playwright Tests
 
 on:
     pull_request:
-        branches: [dev]
+        branches:
+            - dev
 
 jobs:
     e2e-test:
@@ -25,35 +26,30 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
-              run: pnpm exec playwright test
+              run: pnpm exec playwright test --output=playwright-assets
 
             - name: 🚀 Deploy to Vercel
               uses: amondnet/vercel-action@v25
-              id: vercel-e2e-report
+              if: failure()
+              id: vercel-e2e-report # we only need to upload to Vercel if this CI fails
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}
-                  vercel-project-id: ${{ secrets.PROJECT_ID_E2E}}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_E2E }}
 
-            - name: Generate Playwright Report
+            - name: Write Playwright Report to PR Comment
               uses: daun/playwright-report-summary@v3
               if: always()
               with:
                   report-file: playwright-report.json
                   custom-info: 'For more information, [see full report](${{ steps.vercel-e2e-report.outputs.preview-url }})'
 
-              # - name: Set Label
-              #   uses: actions/github-script@v6
-              #   if: failure()
-              #   with:
-              #       script: |
-              #           const { owner, repo } = context.repo;
-              #           const prNumber = context.payload.pull_request.number;
-              #           const labelsToAdd = ['qa:rejected'];
-
-              #           await github.rest.issues.addLabels({
-              #               owner,
-              #               repo,
-              #               issue_number: prNumber,
-              #               labels: labelsToAdd,
-              #           });
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
+              with:
+                  name: playwright-report
+                  path: |
+                      playwright-report/
+                      test-results/
+                  retention-days: 30

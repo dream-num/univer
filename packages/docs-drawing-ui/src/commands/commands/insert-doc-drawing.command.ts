@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IInsertDrawingCommandParams } from './interfaces';
 import {
     BuildTextUtils,
     CommandType,
@@ -25,9 +28,6 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
-import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
  * The command to insert new drawings
@@ -74,11 +74,10 @@ export const InsertDocDrawingCommand: ICommand = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: startOffset,
-                    segmentId,
                 });
             }
         } else {
-            const { dos } = BuildTextUtils.selection.getDeleteActions(activeTextRange, segmentId, 0, body);
+            const dos = BuildTextUtils.selection.delete([activeTextRange], body, 0, null, false);
             textX.push(...dos);
 
             const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [activeTextRange]);
@@ -123,8 +122,6 @@ export const InsertDocDrawingCommand: ICommand = {
                 })),
             },
             len: drawings.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(documentDataModel, segmentId);

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
-import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 import type { Nullable } from '../../../../shared';
 import type {
     ICustomBlock,
@@ -28,23 +25,27 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { shallowEqual } from '../../../../common/equal';
+import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
+import { isSameStyleTextRun } from '../../../../shared/compare';
+import { getBodySlice } from '../utils';
 
-export function normalizeTextRuns(textRuns: ITextRun[]) {
+export function normalizeTextRuns(textRuns: ITextRun[], reserveEmptyTextRun = false): ITextRun[] {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
-        const { ed, ts } = textRun;
+        const { st, ed, ts } = textRun;
 
         if (textRun.sId === undefined) {
             delete textRun.sId;
         }
 
-        // if (st === ed) {
-        //     continue;
-        // }
+        if (st === ed) {
+            continue;
+        }
 
         // Delete textRun if it has no style(ts is empty or has no sId)
-        if (Tools.isEmptyObject(ts) && textRun.sId == null) {
+        if (!reserveEmptyTextRun && Tools.isEmptyObject(ts) && textRun.sId == null) {
             continue;
         }
 
@@ -78,7 +79,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
  * @param textLength The length of the inserted content text.
  * @param currentIndex Determining the index where the content will be inserted into the current content.
  */
-// eslint-disable-next-line max-lines-per-function
+
 export function insertTextRuns(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -105,61 +106,32 @@ export function insertTextRuns(
 
     for (let i = 0; i < len; i++) {
         const textRun = textRuns[i];
-        const nextRun = textRuns[i + 1];
+        // const nextRun = textRuns[i + 1];
         const { st, ed } = textRun;
 
-        if (ed < currentIndex) {
+        if (ed <= currentIndex) {
             newTextRuns.push(textRun);
-        } else if (currentIndex >= st && currentIndex <= ed) {
-            // The inline format used to handle no selection will insert a textRun
-            // with `st` equal to `ed` at the current cursor,
-            // and when we insert text, the style should follow the new textRun.
-            if (nextRun && nextRun.st === nextRun.ed && currentIndex === nextRun.st) {
-                newTextRuns.push(textRun);
-                continue;
+        } else if (currentIndex > st && currentIndex < ed) {
+            hasInserted = true;
+
+            const firstSplitTextRun = {
+                ...textRun,
+                ed: currentIndex,
+            };
+
+            newTextRuns.push(firstSplitTextRun);
+
+            if (insertTextRuns.length) {
+                newTextRuns.push(...insertTextRuns);
             }
 
-            if (!hasInserted) {
-                hasInserted = true;
-                textRun.ed += textLength;
+            const lastSplitTextRun = {
+                ...textRun,
+                st: currentIndex + textLength,
+                ed: ed + textLength,
+            };
 
-                const pendingTextRuns = [];
-
-                if (insertTextRuns.length) {
-                    const startSplitTextRun = {
-                        ...textRun,
-                        st,
-                        ed: insertTextRuns[0].st,
-                    };
-
-                    if (startSplitTextRun.ed > startSplitTextRun.st) {
-                        pendingTextRuns.push(startSplitTextRun);
-                    }
-
-                    pendingTextRuns.push(...insertTextRuns);
-
-                    const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-                    const endSplitTextRun = {
-                        ...textRun,
-                        st: lastInsertTextRuns.ed,
-                        ed: ed + textLength,
-                    };
-
-                    if (endSplitTextRun.ed > endSplitTextRun.st) {
-                        pendingTextRuns.push(endSplitTextRun);
-                    }
-                } else {
-                    pendingTextRuns.push(textRun);
-                }
-
-                newTextRuns.push(...pendingTextRuns);
-            } else {
-                textRun.st += textLength;
-                textRun.ed += textLength;
-
-                newTextRuns.push(textRun);
-            }
+            newTextRuns.push(lastSplitTextRun);
         } else {
             // currentIndex < st
             textRun.st += textLength;
@@ -178,8 +150,6 @@ export function insertTextRuns(
         hasInserted = true;
         newTextRuns.push(...insertTextRuns);
     }
-
-    // console.log(JSON.stringify(newTextRuns, null, 2));
 
     body.textRuns = normalizeTextRuns(newTextRuns);
 }
@@ -287,11 +257,7 @@ export function insertCustomBlocks(
     textLength: number,
     currentIndex: number
 ) {
-    const { customBlocks } = body;
-
-    if (customBlocks == null) {
-        return;
-    }
+    const { customBlocks = [] } = body;
 
     for (let i = 0, len = customBlocks.length; i < len; i++) {
         const customBlock = customBlocks[i];
@@ -310,6 +276,10 @@ export function insertCustomBlocks(
 
         customBlocks.push(...insertCustomBlocks);
         customBlocks.sort(sortRulesFactory('startIndex'));
+    }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
     }
 }
 
@@ -345,6 +315,152 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     }
 }
 
+export function sliceByParagraph(body: IDocumentBody) {
+    const { dataStream, paragraphs = [] } = body;
+    const ranges = [];
+
+    let cursor = 0;
+    for (let i = 0, len = paragraphs.length; i < len; i++) {
+        const paragraph = paragraphs[i];
+        const { startIndex } = paragraph;
+        if (cursor < startIndex) {
+            ranges.push({
+                startOffset: cursor,
+                endOffset: startIndex,
+            });
+            cursor = startIndex;
+        }
+        ranges.push({
+            startOffset: startIndex,
+            endOffset: startIndex + 1,
+        });
+        cursor = startIndex + 1;
+    }
+
+    if (cursor < dataStream.length) {
+        ranges.push({
+            startOffset: cursor,
+            endOffset: dataStream.length,
+        });
+    }
+
+    return ranges.map((range) => getBodySlice(body, range.startOffset, range.endOffset));
+}
+
+const ID_SPLIT_SYMBOL = '$';
+const getRootId = (id: string) => id.split(ID_SPLIT_SYMBOL)[0];
+
+export function mergeContinuousRanges(ranges: ICustomRange[]): ICustomRange[] {
+    if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+
+    const mergedRanges: ICustomRange[] = [];
+    let currentRange = { ...ranges[0] };
+    currentRange.rangeId = getRootId(currentRange.rangeId);
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+        nextRange.rangeId = getRootId(nextRange.rangeId);
+        if (
+            nextRange.rangeId === currentRange.rangeId &&
+            shallowEqual(currentRange.properties, nextRange.properties) &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+        }
+    }
+    // Push the last range
+    mergedRanges.push(currentRange);
+
+    const idMap: Record<string, number> = Object.create(null);
+    for (let i = 0, len = mergedRanges.length; i < len; i++) {
+        const range = mergedRanges[i];
+        const id = range.rangeId;
+        if (idMap[id]) {
+            range.rangeId = `${id}${ID_SPLIT_SYMBOL}${idMap[id]}`;
+            idMap[id] = idMap[id] + 1;
+        } else {
+            idMap[id] = 1;
+        }
+    }
+
+    return mergedRanges;
+}
+
+export function splitCustomRangesByIndex(customRanges: ICustomRange[], currentIndex: number) {
+    const matchedCustomRangeIndex = customRanges.findIndex((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+    const matchedCustomRange = customRanges[matchedCustomRangeIndex];
+
+    if (matchedCustomRange) {
+        customRanges.splice(matchedCustomRangeIndex, 1, {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: matchedCustomRange.startIndex,
+            endIndex: currentIndex - 1,
+            properties: { ...matchedCustomRange.properties },
+        },
+        {
+            rangeId: matchedCustomRange.rangeId,
+            rangeType: matchedCustomRange.rangeType,
+            startIndex: currentIndex,
+            endIndex: matchedCustomRange.endIndex,
+            properties: { ...matchedCustomRange.properties },
+        });
+    }
+}
+
+export function mergeContinuousDecorations(ranges: ICustomDecoration[]): ICustomDecoration[] {
+    if (ranges.length <= 1) return ranges;
+    ranges.sort((a, b) => a.startIndex - b.startIndex);
+
+    const mergedRanges: ICustomDecoration[] = [];
+    let currentRange = { ...ranges[0] };
+
+    for (let i = 1; i < ranges.length; i++) {
+        const nextRange = ranges[i];
+        if (
+            nextRange.id === currentRange.id &&
+            currentRange.endIndex + 1 >= nextRange.startIndex
+        ) {
+            // Merge continuous ranges with same rangeId
+            currentRange.endIndex = nextRange.endIndex;
+        } else {
+            // Push current range and start a new one
+            mergedRanges.push(currentRange);
+            currentRange = { ...nextRange };
+        }
+    }
+    // Push the last range
+    mergedRanges.push(currentRange);
+
+    return mergedRanges;
+}
+
+export function splitCustomDecoratesByIndex(customDecorations: ICustomDecoration[], currentIndex: number) {
+    const matches = customDecorations.filter((c) => c.startIndex < currentIndex && c.endIndex >= currentIndex);
+
+    matches.forEach((matched) => {
+        const index = customDecorations.indexOf(matched);
+        customDecorations.splice(index, 1, {
+            id: matched.id,
+            type: matched.type,
+            startIndex: matched.startIndex,
+            endIndex: currentIndex - 1,
+        },
+        {
+            id: matched.id,
+            type: matched.type,
+            startIndex: currentIndex,
+            endIndex: matched.endIndex,
+        });
+    });
+}
+
 export function insertCustomRanges(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -356,64 +472,32 @@ export function insertCustomRanges(
     }
 
     const { customRanges } = body;
-    const customRangeMap: Record<string, ICustomRange> = {};
+    splitCustomRangesByIndex(customRanges, currentIndex);
+
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
-        customRangeMap[customRange.rangeId] = customRange;
-        const { startIndex, endIndex } = customRange;
+        const { startIndex } = customRange;
+        // move custom range when insert text before it
         if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
-        } else if (endIndex > currentIndex - 1) {
-            customRange.endIndex += textLength;
         }
     }
 
-    const currentRange = customRanges.find((range) => range.startIndex > currentIndex && range.endIndex < currentIndex);
-
-    if (currentRange) {
-        return;
-    }
-
-    const insertCustomRanges: ICustomRange[] = [];
+    const insertRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
-            const oldCustomRange = customRangeMap[customRange.rangeId];
-
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
-            if (oldCustomRange) {
-                if (oldCustomRange.startIndex <= customRange.startIndex &&
-                    oldCustomRange.endIndex >= customRange.endIndex) {
-                    continue;
-                }
-
-                const isClosed =
-                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
-
-                if (isClosed) {
-                    insertCustomRanges.push(customRange);
-                    continue;
-                }
-
-                // old is start
-                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
-                    oldCustomRange.endIndex = customRange.endIndex;
-                    continue;
-                }
-                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-                    oldCustomRange.startIndex = customRange.startIndex;
-                    continue;
-                }
-            }
-            insertCustomRanges.push(customRange);
+            // new custom range
+            insertRanges.push(customRange);
         }
 
-        customRanges.push(...insertCustomRanges);
-        customRanges.sort(sortRulesFactory('startIndex'));
+        customRanges.push(...insertRanges);
     }
+
+    body.customRanges = mergeContinuousRanges(customRanges);
 }
 
 interface IIndexRange {
@@ -467,33 +551,34 @@ export function insertCustomDecorations(
     if (!body.customDecorations) {
         body.customDecorations = [];
     }
+
     const { customDecorations } = body;
-    if (textLength > 0) {
-        for (let i = 0, len = customDecorations.length; i < len; i++) {
-            const customDecoration = customDecorations[i];
-            const { startIndex, endIndex } = customDecoration;
-            if (startIndex >= currentIndex) {
-                customDecoration.startIndex += textLength;
-                customDecoration.endIndex += textLength;
-            } else if (endIndex > currentIndex - 1) {
-                customDecoration.endIndex += textLength;
-            }
+    splitCustomDecoratesByIndex(customDecorations, currentIndex);
+
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const { startIndex } = customDecoration;
+        // move custom range when insert text before it
+        if (startIndex >= currentIndex) {
+            customDecoration.startIndex += textLength;
+            customDecoration.endIndex += textLength;
         }
     }
 
+    const insertRanges: ICustomDecoration[] = [];
     if (insertBody.customDecorations) {
-        const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
-            insertCustomDecorations.push(customDecoration);
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;
+            // new custom range
+            insertRanges.push(customDecoration);
         }
 
-        customDecorations.push(...insertCustomDecorations);
-        body.customDecorations = mergeDecorations(customDecorations);
-        body.customDecorations.sort(sortRulesFactory('startIndex'));
+        customDecorations.push(...insertRanges);
     }
+
+    body.customDecorations = mergeContinuousDecorations(customDecorations);
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -502,20 +587,6 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
-
-    // Handles special case where repeated set inline format style by cursor.
-    if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
-        const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
-        removeTextRuns.push({
-            ...textRun,
-            st: textRun.st - currentIndex,
-            ed: textRun.ed - currentIndex,
-        });
-
-        body.textRuns = body.textRuns?.filter((t) => t !== textRun);
-
-        return removeTextRuns;
-    }
 
     if (textRuns) {
         const newTextRuns = [];
@@ -534,12 +605,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     ed: ed - startIndex,
                 });
 
-                // https://github.com/dream-num/univer-pro/issues/2044.
-                if (startIndex === st) {
-                    textRun.ed = st;
-                } else {
-                    continue;
-                }
+                continue;
             } else if (st <= startIndex && ed >= endIndex) {
                 /**
                  * If the selection range is smaller than the current textRun,
@@ -692,8 +758,7 @@ export function deleteSectionBreaks(body: IDocumentBody, textLength: number, cur
 }
 
 export function deleteCustomBlocks(body: IDocumentBody, textLength: number, currentIndex: number) {
-    const { customBlocks } = body;
-
+    const { customBlocks = [] } = body;
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
@@ -717,6 +782,10 @@ export function deleteCustomBlocks(body: IDocumentBody, textLength: number, curr
         }
         body.customBlocks = newCustomBlocks;
     }
+
+    if (customBlocks.length && !body.customBlocks) {
+        body.customBlocks = customBlocks;
+    }
     return removeCustomBlocks;
 }
 
@@ -727,6 +796,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
 
     const endIndex = currentIndex + textLength - 1;
     const removeTables: ICustomTable[] = [];
+
     if (tables) {
         const newTables = [];
         for (let i = 0, len = tables.length; i < len; i++) {
@@ -743,6 +813,10 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
             } else if (st <= startIndex && ed >= endIndex) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 table.startIndex = segments[0];
                 table.endIndex = segments[1];
 
@@ -758,6 +832,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
         }
         body.tables = newTables;
     }
+
     return removeTables;
 }
 
@@ -765,24 +840,26 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const { customRanges } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength - 1;
+    // TODO: @JOCS, removeCustomRanges is not used, should we remove it?
     const removeCustomRanges: ICustomRange[] = [];
+
     if (customRanges) {
         const newCustomRanges = [];
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
-            // delete custom-range start means delete custom-range
-            if (startIndex <= st && endIndex >= st) {
-                removeCustomRanges.push({
-                    ...customRange,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
-                });
+            // delete decoration
+            if (st >= startIndex && ed <= endIndex) {
+                removeCustomRanges.push(customRange);
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
+            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];
             } else if (endIndex < st) {
@@ -791,7 +868,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             }
             newCustomRanges.push(customRange);
         }
-        body.customRanges = newCustomRanges;
+
+        body.customRanges = mergeContinuousRanges(newCustomRanges);
     }
 
     return removeCustomRanges;
@@ -803,6 +881,7 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength - 1;
     const removeCustomDecorations: ICustomDecoration[] = [];
+
     if (customDecorations) {
         const newCustomDecorations = [];
         for (let i = 0, len = customDecorations.length; i < len; i++) {
@@ -815,6 +894,11 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
                 // substr decoration
             } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+
+                if (segments.length === 0) {
+                    continue;
+                }
+
                 customDecoration.startIndex = segments[0];
                 customDecoration.endIndex = segments[1];
             } else if (endIndex < st) {
@@ -827,5 +911,6 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
         }
         body.customDecorations = newCustomDecorations;
     }
+
     return removeCustomDecorations;
 }

@@ -14,9 +14,4 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Rectangle } from '@univerjs/core';
-
-export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]) => {
-    return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
-};
+export { isRangesEqual } from '@univerjs/core';

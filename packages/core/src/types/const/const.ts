@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import {
     BooleanNumber,
     HorizontalAlign,
@@ -153,6 +154,15 @@ export const DEFAULT_STYLES = {
         l: 0,
     },
     n: null,
+    /**
+     * border
+     */
+    bd: {
+        b: null,
+        l: null,
+        r: null,
+        t: null,
+    },
 };
 
 export const DEFAULT_SLIDE = {
@@ -164,3 +174,4 @@ export const DEFAULT_SLIDE = {
     },
 };
 
+export const SHEET_EDITOR_UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];

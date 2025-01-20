@@ -16,13 +16,13 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
-import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
+import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 import { ZenEditorMenuItemFactory } from '../views/menu';
 
 export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.MAIN_AREA]: {
         [ContextMenuGroup.OTHERS]: {
-            [OpenZenEditorOperation.id]: {
+            [OpenZenEditorCommand.id]: {
                 order: 2,
                 menuItemFactory: ZenEditorMenuItemFactory,
             },

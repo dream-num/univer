@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { FunctionNode } from '../ast-node/function-node';
+import type { LambdaNode } from '../ast-node/lambda-node';
+import type { ReferenceNode } from '../ast-node/reference-node';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
+import type { PreCalculateNodeType } from '../utils/node-type';
 import { Disposable } from '@univerjs/core';
-
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import type { FunctionNode, LambdaNode } from '../ast-node';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
-import type { PreCalculateNodeType } from '../utils/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 
 export class Interpreter extends Disposable {
@@ -32,41 +35,49 @@ export class Interpreter extends Disposable {
         super();
     }
 
-    async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
+    async executeAsync(nodeData: IExecuteAstNodeData): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!node) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (!nodeData || !nodeData.node) {
+            return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        await this._executeAsync(node);
+        const node = nodeData.node;
+        const refOffsetX = nodeData.refOffsetX;
+        const refOffsetY = nodeData.refOffsetY;
+
+        await this._executeAsync(node, refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
         if (value == null) {
-            throw new Error('node value is null');
+            return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
         return Promise.resolve(value);
     }
 
-    execute(node: BaseAstNode): FunctionVariantType {
+    execute(nodeData: IExecuteAstNodeData): FunctionVariantType {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!node) {
+        if (!nodeData || !nodeData.node) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        this._execute(node);
+        const node = nodeData.node;
+        const refOffsetX = nodeData.refOffsetX;
+        const refOffsetY = nodeData.refOffsetY;
+
+        this._execute(node, refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
         if (value == null) {
-            throw new Error('node value is null');
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return value;
@@ -77,7 +88,10 @@ export class Interpreter extends Disposable {
         return node.getValue();
     }
 
-    checkAsyncNode(node: BaseAstNode) {
+    checkAsyncNode(node: Nullable<BaseAstNode>) {
+        if (node == null) {
+            return false;
+        }
         const result: boolean[] = [];
         this._checkAsyncNode(node, result);
 
@@ -101,7 +115,7 @@ export class Interpreter extends Disposable {
         }
     }
 
-    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
+    private async _executeAsync(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): Promise<AstNodePromiseType> {
         if (this._runtimeService.isStopExecution()) {
             return Promise.resolve(AstNodePromiseType.ERROR);
         }
@@ -120,7 +134,11 @@ export class Interpreter extends Disposable {
                 item.execute();
                 continue;
             }
-            await this._executeAsync(item);
+            await this._executeAsync(item, refOffsetX, refOffsetY);
+        }
+
+        if (node.nodeType === NodeType.REFERENCE) {
+            (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
         if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
@@ -132,7 +150,7 @@ export class Interpreter extends Disposable {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    private _execute(node: BaseAstNode): AstNodePromiseType {
+    private _execute(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): AstNodePromiseType {
         if (this._runtimeService.isStopExecution()) {
             return AstNodePromiseType.ERROR;
         }
@@ -151,7 +169,11 @@ export class Interpreter extends Disposable {
                 item.execute();
                 continue;
             }
-            this._execute(item);
+            this._execute(item, refOffsetX, refOffsetY);
+        }
+
+        if (node.nodeType === NodeType.REFERENCE) {
+            (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
         node.execute();

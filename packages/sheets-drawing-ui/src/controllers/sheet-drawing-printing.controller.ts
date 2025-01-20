@@ -15,13 +15,12 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import { Disposable, DrawingTypeEnum, Inject, Tools } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingPrintingController)
 export class SheetDrawingPrintingController extends Disposable {
     constructor(
         @Inject(SheetPrintInterceptorService) private readonly _sheetPrintInterceptorService: SheetPrintInterceptorService,
@@ -82,8 +81,8 @@ export class SheetDrawingPrintingController extends Disposable {
                         if (data.length) {
                             data.forEach((param) => {
                                 if (!param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {
-                                    const start = skeleton.skeleton.getCellPositionByOffset(param.transform.left, param.transform.top, scaleX, scaleY, { x: 0, y: 0 });
-                                    const end = skeleton.skeleton.getCellPositionByOffset(param.transform.left + param.transform.width, param.transform.top + param.transform.height, scaleX, scaleY, { x: 0, y: 0 });
+                                    const start = skeleton.skeleton.getCellIndexByOffset(param.transform.left, param.transform.top, scaleX, scaleY, { x: 0, y: 0 });
+                                    const end = skeleton.skeleton.getCellIndexByOffset(param.transform.left + param.transform.width, param.transform.top + param.transform.height, scaleX, scaleY, { x: 0, y: 0 });
                                     if (start.column < newRange.startColumn) {
                                         newRange.startColumn = start.column;
                                     }

@@ -14,35 +14,44 @@
  * limitations under the License.
  */
 
-import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
-import { map } from 'rxjs/operators';
-
 import type { IMenuButtonItem } from '../../services/menu/menu';
+import { EDITOR_ACTIVATED, FOCUSING_FX_BAR_EDITOR, IContextService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+
+import { combineLatest, merge, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { MenuItemType } from '../../services/menu/menu';
 
-export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+const undoRedoDisableFactory$ = (accessor: IAccessor) => {
     const undoRedoService = accessor.get(IUndoRedoService);
+    const contextService = accessor.get(IContextService);
 
+    return combineLatest([
+        undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+        merge([of({}), contextService.contextChanged$]),
+    ]).pipe(map(([undoDisable]) => {
+        return undoDisable || contextService.getContextValue(EDITOR_ACTIVATED) || contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+    }));
+};
+
+export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: UndoCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UndoSingle',
         title: 'Undo',
         tooltip: 'toolbar.undo',
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
+        disabled$: undoRedoDisableFactory$(accessor),
     };
 }
 
 export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const undoRedoService = accessor.get(IUndoRedoService);
-
     return {
         id: RedoCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'RedoSingle',
         title: 'Redo',
         tooltip: 'toolbar.redo',
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
+        disabled$: undoRedoDisableFactory$(accessor),
     };
 }

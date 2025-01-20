@@ -15,11 +15,13 @@
  */
 
 import { UnitAction } from '@univerjs/protocol';
-import { WorksheetCopyPermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditExtraObjectPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetInsertColumnPermission, WorksheetInsertHyperlinkPermission, WorksheetInsertRowPermission, WorksheetPivotTablePermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetSortPermission, WorksheetViewPermission } from '../permission-point';
+import { WorksheetCopyPermission, WorksheetDeleteColumnPermission, WorksheetDeleteProtectionPermission, WorksheetDeleteRowPermission, WorksheetEditExtraObjectPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetInsertColumnPermission, WorksheetInsertHyperlinkPermission, WorksheetInsertRowPermission, WorksheetManageCollaboratorPermission, WorksheetPivotTablePermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetSortPermission, WorksheetViewPermission } from '../permission-point';
 
 export const getAllWorksheetPermissionPoint = () => [
     WorksheetEditPermission,
     WorksheetViewPermission,
+    WorksheetManageCollaboratorPermission,
+    WorksheetDeleteProtectionPermission,
 ];
 
 // Changes require synchronization of the following arrays

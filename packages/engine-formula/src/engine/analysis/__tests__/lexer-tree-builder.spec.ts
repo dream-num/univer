@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { LexerNode } from '../lexer-node';
 
 import { AbsoluteRefType } from '@univerjs/core';
-import type { LexerNode } from '../lexer-node';
-import { LexerTreeBuilder } from '../lexer-tree-builder';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
@@ -164,7 +164,7 @@ describe('lexer nodeMaker test', () => {
 
         it('negative ref', () => {
             const node = lexerTreeBuilder.treeBuilder('= ------A1 ') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" -","-","-","-","-","A1 ","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","-","-","-","-","-A1 ","-"]}');
         });
 
         it('scientific notation', () => {
@@ -173,8 +173,8 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('parentheses and arithmetic', () => {
-            const node = lexerTreeBuilder.treeBuilder('=-(+2)+2') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","2","+"]}');
+            const node = lexerTreeBuilder.treeBuilder('=-(+2)+2', false) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":0,"ed":0,"children":[{"token":"P_1","st":-2,"ed":0,"children":["+","2"]}]},"+","2"]}');
         });
 
         it('ref:ref parser', () => {
@@ -220,6 +220,36 @@ describe('lexer nodeMaker test', () => {
         it('array error lexer text', () => {
             const node = lexerTreeBuilder.treeBuilder('=RANK({1,2,121,#NAME?},A1:F1,0)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"RANK","st":0,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":["{1,2,121,#NAME?}"]},{"token":"P_1","st":18,"ed":20,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"F1","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":24,"ed":26,"children":["0"]}]}]}');
+        });
+
+        it('double minus for function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(--1*2)--A1-1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["0","-1","2","*","-"]}]},"-A1","-","1","-"]}');
+        });
+
+        it('double minus for formula Outside of Functions', () => {
+            const node = lexerTreeBuilder.treeBuilder('=--1*2') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","-1","2","*","-"]}');
+        });
+
+        it('one minus for formula', () => {
+            const node = lexerTreeBuilder.treeBuilder('=   -A1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["   -A1"]}');
+        });
+
+        it('operator with concatenate test', () => {
+            const node = lexerTreeBuilder.treeBuilder('="a"&1+2') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["\\"a\\"","1","2","+","&"]}');
+        });
+
+        it('test lexer ref with at and minus', () => {
+            const node = lexerTreeBuilder.treeBuilder('= --@A1:B10') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0",{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]},"-"]}');
+        });
+
+        it('test lexer ref with at and minus and plus', () => {
+            const node = lexerTreeBuilder.treeBuilder('= --+@A1:B10') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0",{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]},"-"]}');
         });
     });
 
@@ -516,6 +546,78 @@ describe('lexer nodeMaker test', () => {
                 ]
             );
         });
+
+        it('multi blank to minus formula', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=      -A1')).toStrictEqual(
+                [
+                    {
+                        endIndex: 6,
+                        nodeType: 0,
+                        startIndex: 0,
+                        token: '      -',
+                    },
+                    {
+                        endIndex: 8,
+                        nodeType: 4,
+
+                        startIndex: 7,
+                        token: 'A1',
+                    },
+                ]
+            );
+        });
+
+        it('one minus sequences error', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=-\r\n')).toStrictEqual(
+                [
+                    '-',
+                ]
+            );
+        });
+
+        it('test tow minus for range ref', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=  --A1:A10')).toStrictEqual(
+                [
+                    ' ',
+                    ' ',
+                    '-',
+                    {
+                        endIndex: 3,
+                        nodeType: 0,
+                        startIndex: 3,
+                        token: '-',
+                    },
+                    {
+                        endIndex: 9,
+                        nodeType: 4,
+                        startIndex: 4,
+                        token: 'A1:A10',
+                    },
+                ]
+            );
+        });
+
+        it('test sequence ref with at and minus', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=  --@A1:A10')).toStrictEqual(
+                [
+                    ' ',
+                    ' ',
+                    '-',
+                    {
+                        endIndex: 4,
+                        nodeType: 0,
+                        startIndex: 3,
+                        token: '-@',
+                    },
+                    {
+                        endIndex: 10,
+                        nodeType: 4,
+                        startIndex: 5,
+                        token: 'A1:A10',
+                    },
+                ]
+            );
+        });
     });
 
     describe('convertRefersToAbsolute', () => {
@@ -552,6 +654,13 @@ describe('lexer nodeMaker test', () => {
         it('Complex Formula', () => {
             const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
             expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
+        });
+
+        it('manually set current sheet name', () => {
+            let result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2');
+            result = lexerTreeBuilder.convertRefersToAbsolute('=A1:B2,C1:D2,F3:G5', AbsoluteRefType.ALL, AbsoluteRefType.ALL, 'Sheet1');
+            expect(result).toStrictEqual('=Sheet1!$A$1:$B$2,Sheet1!$C$1:$D$2,Sheet1!$F$3:$G$5');
         });
     });
 
@@ -604,6 +713,23 @@ describe('lexer nodeMaker test', () => {
         it('move omit absolute column', () => {
             const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A$1:B$3)', 1, 1, true);
             expect(result).toStrictEqual('=sum(B$2:C$4)');
+        });
+
+        it('sheet name quote', () => {
+            let result = lexerTreeBuilder.moveFormulaRefOffset("= 'dv-test'!F26", 0, 1, true);
+            expect(result).toStrictEqual("= 'dv-test'!F27");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, 1, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!F27)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 0, -1, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!F25)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", 1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!G26)");
+
+            result = lexerTreeBuilder.moveFormulaRefOffset("=SUM( 'dv-test'!F26)", -1, 0, true);
+            expect(result).toStrictEqual("=SUM( 'dv-test'!E26)");
         });
     });
 });

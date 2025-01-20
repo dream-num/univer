@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { IFormulaDirtyData } from '../services/current-data.service';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { convertRuntimeToUnitData } from '../basics/runtime';
+import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
-import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import { CalculateFormulaService } from '../services/calculate-formula.service';
-import type { IAllRuntimeData } from '../services/runtime.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
-import { convertRuntimeToUnitData } from '../basics/runtime';
+import { ICalculateFormulaService } from '../services/calculate-formula.service';
+import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
+import { DEFAULT_CYCLE_REFERENCE_COUNT } from './config.schema';
 
-@OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICalculateFormulaService private readonly _calculateFormulaService: ICalculateFormulaService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
@@ -51,30 +47,17 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-
-        this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._calculateFormulaService.stopFormulaExecution();
-                } else if (command.id === SetFormulaDataMutation.id) {
-                    const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
-
-                    // formulaData is the incremental data sent from the main thread and needs to be merged into formulaDataModel
-                    this._formulaDataModel.mergeFormulaData(formulaData);
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
 
-                    if (params.forceCalculation === true) {
-                        this._calculate(true);
-                    } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
-
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap);
-                    }
+                    this._calculate(params);
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
 
@@ -92,37 +75,29 @@ export class CalculateController extends Disposable {
     }
 
     private async _calculate(
-        forceCalculate: boolean = false,
-        dirtyRanges: IUnitRange[] = [],
-        dirtyNameMap: IDirtyUnitSheetNameMap = {},
-        dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
-        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {}
+        formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
-        if (
-            dirtyRanges.length === 0 &&
-            Object.keys(dirtyNameMap).length === 0 &&
-            Object.keys(dirtyDefinedNameMap).length === 0 &&
-            Object.keys(dirtyUnitFeatureMap).length === 0 &&
-            Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
-            forceCalculate === false
-        ) {
-            return;
-        }
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {}, maxIteration = DEFAULT_CYCLE_REFERENCE_COUNT } = formulaDirtyData;
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
+        // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
         this._calculateFormulaService.execute({
             formulaData,
             arrayFormulaCellData,
+            arrayFormulaRange,
             forceCalculate,
             dirtyRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
+            clearDependencyTreeCache,
+            maxIteration,
         });
     }
 
@@ -139,7 +114,7 @@ export class CalculateController extends Disposable {
                 case FormulaExecutedStateType.STOP_EXECUTION:
                     break;
                 case FormulaExecutedStateType.SUCCESS:
-                    this._applyFormula(data);
+                    this._applyResult(data);
                     break;
                 case FormulaExecutedStateType.INITIAL:
                     break;
@@ -155,9 +130,7 @@ export class CalculateController extends Disposable {
                 }
             );
         });
-    }
 
-    private _initialExecuteFormulaProcessListener() {
         /**
          * Assignment operation after formula calculation.
          */
@@ -174,7 +147,7 @@ export class CalculateController extends Disposable {
         });
     }
 
-    private async _applyFormula(data: IAllRuntimeData) {
+    private async _applyResult(data: IAllRuntimeData) {
         const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
@@ -182,16 +155,11 @@ export class CalculateController extends Disposable {
             return;
         }
 
-        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(arrayFormulaRange);
-
         if (arrayFormulaRange) {
             this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
-            // Synchronous to the main thread
             this._commandService.executeCommand(
                 SetArrayFormulaDataMutation.id,
                 {

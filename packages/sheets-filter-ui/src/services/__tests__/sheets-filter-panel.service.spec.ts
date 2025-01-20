@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import type { Dependency, IOperation, IWorkbookData } from '@univerjs/core';
+import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import type { IFilterConditionFormParams } from '../../models/conditions';
+import type { IFilterByValueWithTreeItem } from '../sheets-filter-panel.service';
 import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter/commands/commands/sheets-filter.command.js';
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
+import { E_ITEMS, ITEMS, ITEMS_WITH_EMPTY, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
-import { E_ITEMS, ITEMS, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
-import type { IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
-import { SetSheetsFilterCriteriaCommand } from '../../commands/commands/sheets-filter.command';
+import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
@@ -36,6 +37,43 @@ const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> 
         return true;
     },
 };
+
+function countLeafNodesByCheckedStatus(
+    items: IFilterByValueWithTreeItem[],
+    checkedStatus: boolean
+): number {
+    let count = 0;
+
+    function traverse(node: IFilterByValueWithTreeItem) {
+        if (node.leaf && node.checked === checkedStatus) {
+            count++;
+        }
+        if (node.children) {
+            node.children.forEach(traverse);
+        }
+    }
+
+    items.forEach(traverse);
+    return count;
+}
+
+function getAllLeafNodes(
+    items: IFilterByValueWithTreeItem[]
+): IFilterByValueWithTreeItem[] {
+    const leafNodes: IFilterByValueWithTreeItem[] = [];
+
+    function traverse(node: IFilterByValueWithTreeItem) {
+        if (node.leaf) {
+            leafNodes.push(node);
+        }
+        if (node.children) {
+            node.children.forEach(traverse);
+        }
+    }
+
+    items.forEach(traverse);
+    return leafNodes;
+}
 
 function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const univer = new Univer();
@@ -65,11 +103,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(SheetsFilterPanelTestPlugin);
 
-    univer.createUniverSheet(workbookData);
-
-    // It should be registered later in avoid of time sequence problem.
-    // injector.add([ISnapshotPersistenceService, { useClass: LocalSnapshotService }]);
-    // injector.get(ISnapshotPersistenceService);
+    univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     const commandService = get(ICommandService);
 
@@ -239,13 +273,7 @@ describe('test "SheetsFilterPanelService"', () => {
             expect(sheetsFilterPanelService.filterBy).toBe(FilterBy.VALUES);
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             expect(filterByModel instanceof ByValuesModel).toBeTruthy();
-            expect(filterByModel.filterItems).toEqual([...ITEMS, {
-                checked: true,
-                count: 1,
-                index: 11,
-                isEmpty: true,
-                value: 'sheets-filter.panel.empty',
-            }]);
+            expect(filterByModel.filterItems).toEqual(ITEMS_WITH_EMPTY);
         });
 
         it('should count empty cells', async () => {
@@ -262,12 +290,13 @@ describe('test "SheetsFilterPanelService"', () => {
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
             expect(filterByModel instanceof ByValuesModel).toBeTruthy();
             const filterItems = filterByModel.filterItems;
-            expect(filterItems[filterItems.length - 1]).toEqual({
-                checked: true,
+            const emptyItem = filterItems.find((item) => item.key === 'empty');
+            expect(emptyItem).toEqual({
+                title: 'sheets-filter.panel.empty',
                 count: 4,
-                index: 11,
-                isEmpty: true,
-                value: 'sheets-filter.panel.empty',
+                leaf: true,
+                checked: true,
+                key: 'empty',
             });
         });
 
@@ -287,32 +316,32 @@ describe('test "SheetsFilterPanelService"', () => {
             const filterItems = filterByModel.filterItems;
             expect(filterItems).toEqual([
                 {
-                    checked: true,
-                    count: 1,
-                    index: 0,
-                    isEmpty: false,
-                    value: 'a',
-                },
-                {
-                    checked: true,
-                    count: 1,
-                    index: 1,
-                    isEmpty: false,
-                    value: 'b',
-                },
-                {
-                    checked: true,
-                    count: 1,
-                    index: 2,
-                    isEmpty: false,
-                    value: 'c',
-                },
-                {
-                    checked: true,
+                    title: 'sheets-filter.panel.empty',
                     count: 3,
-                    index: 11,
-                    isEmpty: true,
-                    value: 'sheets-filter.panel.empty',
+                    leaf: true,
+                    checked: true,
+                    key: 'empty',
+                },
+                {
+                    title: 'c',
+                    leaf: true,
+                    checked: true,
+                    key: 'c',
+                    count: 1,
+                },
+                {
+                    title: 'b',
+                    leaf: true,
+                    checked: true,
+                    key: 'b',
+                    count: 1,
+                },
+                {
+                    title: 'a',
+                    leaf: true,
+                    checked: true,
+                    key: 'a',
+                    count: 1,
                 },
             ]);
         });
@@ -333,25 +362,25 @@ describe('test "SheetsFilterPanelService"', () => {
             const filterItems = filterByModel.filterItems;
             expect(filterItems).toEqual([
                 {
-                    checked: true,
-                    count: 2, // show be the same with rowSpan
-                    index: 2,
-                    isEmpty: false,
-                    value: '3',
-                },
-                {
-                    checked: true,
-                    count: 1,
-                    index: 3,
-                    isEmpty: false,
-                    value: 'e',
-                },
-                {
-                    checked: true,
+                    title: 'sheets-filter.panel.empty',
                     count: 3,
-                    index: 10,
-                    isEmpty: true,
-                    value: 'sheets-filter.panel.empty',
+                    leaf: true,
+                    checked: true,
+                    key: 'empty',
+                },
+                {
+                    title: 'e',
+                    leaf: true,
+                    checked: true,
+                    key: 'e',
+                    count: 1,
+                },
+                {
+                    title: '3',
+                    leaf: true,
+                    checked: true,
+                    key: '3',
+                    count: 2,
                 },
             ]);
         });
@@ -367,19 +396,16 @@ describe('test "SheetsFilterPanelService"', () => {
             await tick();
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
-            filterByModel.onFilterCheckToggled(ITEMS[0], true);
-            expect(filterByModel.filterItems[0].checked).toBeTruthy();
-
-            filterByModel.onFilterOnly(ITEMS[5]);
+            filterByModel.onFilterOnly([ITEMS[5].key]);
             expect(filterByModel.filterItems[0].checked).toBeFalsy();
             expect(filterByModel.filterItems[1].checked).toBeFalsy();
             expect(filterByModel.filterItems[5].checked).toBeTruthy();
 
             filterByModel.onCheckAllToggled(true);
-            expect(filterByModel.filterItems.filter((i) => i.checked).length).toBe(10);
+            expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(10);
 
             filterByModel.onCheckAllToggled(false);
-            expect(filterByModel.filterItems.filter((i) => i.checked).length).toBe(0);
+            expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(0);
         });
 
         it('should execute command when "apply" is called', async () => {
@@ -393,14 +419,14 @@ describe('test "SheetsFilterPanelService"', () => {
             await tick();
 
             const filterByModel = sheetsFilterPanelService.filterByModel as ByValuesModel;
-            filterByModel.onFilterCheckToggled(ITEMS[0], true);
-            expect(filterByModel.filterItems[0].checked).toBeTruthy();
+            filterByModel.onFilterCheckToggled(ITEMS[0]);
+            expect(filterByModel.filterItems[0].checked).toBeFalsy();
 
-            filterByModel.onFilterOnly(ITEMS[5]);
+            filterByModel.onFilterOnly([ITEMS[5].key]);
             expect(await filterByModel.apply()).toBeTruthy();
 
             const filterModel = sheetsFilterService.activeFilterModel;
-            expect(filterModel!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5, 7, 8, 9, 10]));
+            expect(filterModel!.filteredOutRows).toEqual(new Set([2, 3, 4, 5, 6, 7, 8, 9, 10]));
         });
 
         describe('with searching', async () => {
@@ -445,9 +471,10 @@ describe('test "SheetsFilterPanelService"', () => {
 
                 filterByModel.setSearchString('e');
                 vitest.advanceTimersByTime(600);
-                expect(filterByModel.filterItems.length).toBe(7);
+                expect(filterByModel.filterItems.length).toBe(3);
+                expect(getAllLeafNodes(filterByModel.filterItems).length).toBe(7);
                 filterByModel.onCheckAllToggled(true);
-                expect(filterByModel.rawFilterItems.filter((i) => i.checked).length).toBe(8); // the original "1" should be checked as well
+                expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(7); // the original "1" should be checked as well
             });
 
             it('should filter only applied to searched results', async () => {
@@ -464,9 +491,9 @@ describe('test "SheetsFilterPanelService"', () => {
 
                 filterByModel.setSearchString('e');
                 vitest.advanceTimersByTime(600);
-                expect(filterByModel.filterItems.length).toBe(7);
-                filterByModel.onFilterOnly(filterByModel.filterItems[5]);
-                expect(filterByModel.rawFilterItems.filter((i) => i.checked).length).toBe(2); // the original "1" should be checked as well
+                expect(filterByModel.filterItems.length).toBe(3);
+                filterByModel.onFilterOnly([filterByModel.filterItems[2].key]);
+                expect(countLeafNodesByCheckedStatus(filterByModel.filterItems, true)).toBe(1); // the original "1" should be checked as well
             });
         });
     });

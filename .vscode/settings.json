@@ -2,15 +2,22 @@
     "typescript.tsdk": "node_modules/typescript/lib",
 
     "editor.rulers": [120],
+
     "javascript.preferences.importModuleSpecifier": "relative",
     "typescript.preferences.importModuleSpecifier": "relative",
+
+    "commentTranslate.multiLineMerge": true,
     "commentTranslate.targetLanguage": "zh-CN",
     "commentTranslate.hover.enabled": true,
     "commentTranslate.source": "Google",
+
     "cSpell.words": [
+        "ABJAD",
         "adjustability",
+        "AIUEO",
         "Bandings",
         "Catmull",
+        "CHOSUNG",
         "clazz",
         "clsx",
         "codelf",
@@ -30,6 +37,7 @@
         "Duplicatable",
         "Dushusir",
         "endindex",
+        "endregion",
         "esbuild",
         "Ethi",
         "evented",
@@ -38,7 +46,9 @@
         "EXTRALIGHT",
         "FONTFACE",
         "fract",
+        "FULLSTOP",
         "gainsboro",
+        "GANADA",
         "GANTT",
         "Gggpound",
         "Govett",
@@ -51,6 +61,7 @@
         "hoverable",
         "IHTTP",
         "ilvl",
+        "IROHA",
         "IRPC",
         "Jamo",
         "jikkai",
@@ -60,6 +71,7 @@
         "Kaiti",
         "KANBAN",
         "kcode",
+        "kdbush",
         "keyof",
         "Lerp",
         "letterform",
@@ -70,7 +82,9 @@
         "Liti",
         "localforage",
         "LRTBV",
+        "LTRB",
         "Luckysheet",
+        "lumixraku",
         "makearray",
         "mengshukeji",
         "Monoton",
@@ -89,12 +103,15 @@
         "prst",
         "PWDEBUG",
         "Quan",
+        "rbush",
         "redi",
+        "rowheader",
         "shrinkability",
         "Sider",
         "strechability",
         "SUMIF",
         "SUMIFS",
+        "syncer",
         "Tahoma",
         "tblp",
         "TBRL",
@@ -115,6 +132,7 @@
         "Unprotect",
         "unsync",
         "Verdana",
+        "viewbound",
         "viewports",
         "vlookup",
         "wendellhu",
@@ -129,20 +147,21 @@
     ],
     "vsicons.presets.angular": false,
 
-    // Enable the ESlint flat config support
-    "eslint.experimental.useFlatConfig": true,
-
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
-    "editor.formatOnSave": false,
     "search.followSymlinks": false,
 
     // Auto fix
+    "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
         "source.organizeImports": "never"
     },
-
+    "eslint.workingDirectories": [
+        { "mode": "auto" }
+    ],
+    // Enable the ESlint flat config support
+    "eslint.useFlatConfig": true,
     // Silent the stylistic rules in you IDE, but still auto fix them
     "eslint.rules.customizations": [
         { "rule": "style/*", "severity": "off" },
@@ -156,7 +175,6 @@
         { "rule": "*quotes", "severity": "off" },
         { "rule": "*semi", "severity": "off" }
     ],
-
     // Enable eslint for all supported languages
     "eslint.validate": [
         "javascript",
@@ -173,5 +191,8 @@
         "less",
         "css"
     ],
-    "commentTranslate.multiLineMerge": true
+
+    "editor.quickSuggestions": {
+        "strings": "on"
+    }
 }

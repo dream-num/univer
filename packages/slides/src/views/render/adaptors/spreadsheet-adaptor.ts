@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { IContextService, Inject, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
+import type { EventState, IPageElement } from '@univerjs/core';
+import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
+import { IConfigService, IContextService, Inject, Injector, LocaleService, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import {
     getColor,
     Rect,
@@ -27,8 +29,6 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import type { EventState, ICellData, Injector, IPageElement } from '@univerjs/core';
-import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
@@ -52,7 +52,9 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
     }
@@ -64,7 +66,6 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return this;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
         const {
             id,
@@ -89,23 +90,18 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const { worksheet, styles } = spreadsheetModel;
 
-        const { cellData } = worksheet;
-
-        const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
         const styleModel = new Styles(styles);
         const spreadsheetSkeleton = new SpreadsheetSkeleton(
             new Worksheet(id, worksheet, styleModel), // FIXME: worksheet in slide doesn't has a Worksheet object
-            worksheet,
-            cellDataMatrix,
             styleModel,
             this._localeService,
-            this._contextService
+            this._contextService,
+            this._configService,
+            this._injector
         );
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
         const allWidth = columnTotalWidth + worksheet.rowHeader.width || 0;
-
         const allHeight = rowTotalHeight + worksheet.columnHeader.height || 0;
 
         const sv = new SceneViewer(SHEET_VIEW_KEY.SCENE_VIEWER + id, {

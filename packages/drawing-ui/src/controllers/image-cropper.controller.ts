@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { MessageType } from '@univerjs/design';
-import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { IImageData } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
+import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
+import { checkIfMove, Disposable, ICommandService, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { filter, switchMap } from 'rxjs';
-import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
-@OnLifecycle(LifecycleStages.Rendered, ImageCropperController)
 export class ImageCropperController extends Disposable {
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
 
@@ -263,7 +262,7 @@ export class ImageCropperController extends Disposable {
                 transformer?.refreshControls();
                 imageCropperObject.makeDirty(true);
 
-                this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
+                this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, [{ unitId, subUnitId, drawingId }]);
             })
         );
     }

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { betaCDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -91,6 +91,26 @@ export class Betadist extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
+        if (xObject.isError()) {
+            return xObject;
+        }
+
+        if (alphaObject.isError()) {
+            return alphaObject;
+        }
+
+        if (betaObject.isError()) {
+            return betaObject;
+        }
+
+        if (AObject.isError()) {
+            return AObject;
+        }
+
+        if (BObject.isError()) {
+            return BObject;
+        }
+
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(xObject, alphaObject, betaObject, AObject, BObject);
 
         if (isError) {

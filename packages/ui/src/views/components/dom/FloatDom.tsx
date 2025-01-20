@@ -14,66 +14,129 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
-import React, { memo } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
-import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
-import { useObservable } from '../../../components/hooks/observable';
+import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
+import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
+import { useObservable } from '../../../components/hooks/observable';
+import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import styles from './index.module.less';
 
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
     const componentManager = useDependency(ComponentManager);
-    const position = useObservable(layer.position$);
+    const size$ = useMemo(() => layer.position$.pipe(
+        distinctUntilChanged(
+            (prev, curr) => prev.absolute.left === curr.absolute.left &&
+                prev.absolute.top === curr.absolute.top &&
+                prev.endX - prev.startX === curr.endX - curr.startX &&
+                prev.endY - prev.startY === curr.endY - curr.startY
+        )
+    ), [layer.position$]);
+
+    const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
+    const domRef = useRef<HTMLDivElement>(null);
+    const innerDomRef = useRef<HTMLDivElement>(null);
+    const transformRef = useRef<string>(`transform: rotate(${position?.rotate}deg) translate(${position?.startX}px, ${position?.startY}px)`);
+    const topRef = useRef<number>(position?.startY ?? 0);
+    const leftRef = useRef<number>(position?.startX ?? 0);
+    const innerStyle = useRef<React.CSSProperties>({
+
+    });
     const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
-    const layerProps: any = {
+    const layerProps: any = useMemo(() => ({
         data: layer.data,
         ...layer.props,
-    };
+    }), [layer.data, layer.props]);
 
-    return position
-        ? (
+    useEffect(() => {
+        const subscription = layer.position$.subscribe((position) => {
+            transformRef.current = `rotate(${position.rotate}deg)`;
+            topRef.current = position.startY;
+            leftRef.current = position.startX;
+            if (domRef.current) {
+                domRef.current.style.transform = transformRef.current;
+                domRef.current.style.top = `${topRef.current}px`;
+                domRef.current.style.left = `${leftRef.current}px`;
+            }
+        });
+
+        const sizeSubscription = size$.subscribe((size) => {
+            if (domRef.current) {
+                domRef.current.style.width = `${Math.max(size.endX - size.startX - 2, 0)}px`;
+                domRef.current.style.height = `${Math.max(size.endY - size.startY - 2, 0)}px`;
+            }
+
+            if (innerDomRef.current) {
+                const style = {
+                    width: `${size.width - 4}px`,
+                    height: `${size.height - 4}px`,
+                    left: `${size.absolute.left ? 0 : 'auto'}`,
+                    top: `${size.absolute.top ? 0 : 'auto'}`,
+                    right: `${size.absolute.left ? 'auto' : 0}`,
+                    bottom: `${size.absolute.top ? 'auto' : 0}`,
+                };
+
+                innerDomRef.current.style.width = style.width;
+                innerDomRef.current.style.height = style.height;
+                innerDomRef.current.style.left = style.left;
+                innerDomRef.current.style.top = style.top;
+                innerDomRef.current.style.right = style.right;
+                innerDomRef.current.style.bottom = style.bottom;
+
+                innerStyle.current = style;
+            }
+        });
+        return () => {
+            subscription.unsubscribe();
+            sizeSubscription.unsubscribe();
+        };
+    }, [layer.position$, size$]);
+
+    const component = useMemo(() => Component ? <Component {...layerProps} /> : null, [Component, layerProps]);
+
+    if (!position) {
+        return null;
+    }
+
+    return (
+        <div
+            ref={domRef}
+            className={styles.floatDomWrapper}
+            style={{
+                position: 'absolute',
+                top: topRef.current,
+                left: leftRef.current,
+                width: Math.max(position.endX - position.startX - 2, 0),
+                height: Math.max(position.endY - position.startY - 2, 0),
+                transform: transformRef.current,
+                overflow: 'hidden',
+                transformOrigin: 'center center',
+            }}
+            onPointerMove={(e) => {
+                layer.onPointerMove(e.nativeEvent);
+            }}
+            onPointerDown={(e) => {
+                layer.onPointerDown(e.nativeEvent);
+            }}
+            onPointerUp={(e) => {
+                layer.onPointerUp(e.nativeEvent);
+            }}
+            onWheel={(e) => {
+                layer.onWheel(e.nativeEvent);
+            }}
+        >
             <div
-                className={styles.floatDomWrapper}
-                style={{
-                    position: 'absolute',
-                    top: position.startY,
-                    left: position.startX,
-                    width: Math.max(position.endX - position.startX - 2, 0),
-                    height: Math.max(position.endY - position.startY - 2, 0),
-                    transform: `rotate(${position.rotate}deg)`,
-                    overflow: 'hidden',
-                }}
-                onPointerMove={(e) => {
-                    layer.onPointerMove(e.nativeEvent);
-                }}
-                onPointerDown={(e) => {
-                    layer.onPointerDown(e.nativeEvent);
-                }}
-                onPointerUp={(e) => {
-                    layer.onPointerUp(e.nativeEvent);
-                }}
-                onWheel={(e) => {
-                    layer.onWheel(e.nativeEvent);
-                }}
+                id={id}
+                ref={innerDomRef}
+                className={styles.floatDom}
+                style={{ position: 'absolute', ...innerStyle.current }}
             >
-                <div
-                    id={id}
-                    className={styles.floatDom}
-                    style={{
-                        width: position.width,
-                        height: position.height,
-                        position: 'absolute',
-                        ...(position.absolute.left) ? { left: 0 } : { right: 0 },
-                        ...(position.absolute.top) ? { top: 0 } : { bottom: 0 },
-                    }}
-                >
-                    {Component ? <Component {...layerProps} /> : null}
-                </div>
+                {component}
             </div>
-        )
-        : null;
+        </div>
+    );
 });
 
 export const FloatDom = ({ unitId }: { unitId?: string }) => {

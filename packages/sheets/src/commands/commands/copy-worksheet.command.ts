@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     ICommandService,
@@ -23,16 +29,10 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
-
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 
 export interface ICopySheetCommandParams {
     unitId?: string;
@@ -42,7 +42,7 @@ export interface ICopySheetCommandParams {
 export const CopySheetCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.copy-sheet',
-    handler: async (accessor: IAccessor, params?: ICopySheetCommandParams) => {
+    handler: (accessor: IAccessor, params?: ICopySheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

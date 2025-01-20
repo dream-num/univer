@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-
 import type { ReactNode } from 'react';
+import { Disposable, Inject, LocaleService } from '@univerjs/core';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingI18nController)
 export class ConditionalFormattingI18nController extends Disposable {
     constructor(@Inject(LocaleService) private _localeService: LocaleService) {
         super();

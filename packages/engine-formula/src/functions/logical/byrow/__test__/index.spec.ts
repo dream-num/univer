@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { Injector } from '@univerjs/core';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFunctionService } from '../../../../services/function.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
@@ -28,8 +31,6 @@ import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Lambda } from '../../lambda';
 import { Byrow } from '../index';
-import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 
 describe('Test byrow', () => {
     // const testFunction = new Byrow(FUNCTION_NAMES_LOGICAL.BYROW);
@@ -60,7 +61,7 @@ describe('Test byrow', () => {
         it('multiply', async () => {
             let lexerNode = lexer.treeBuilder('=BYROW({1;2;3},LAMBDA(x,x*2))');
             let astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            let result = await interpreter.executeAsync(astNode as BaseAstNode);
+            let result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual([
                 [2],
                 [4],
@@ -69,29 +70,29 @@ describe('Test byrow', () => {
 
             lexerNode = lexer.treeBuilder('=BYROW(1,LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(2);
 
             lexerNode = lexer.treeBuilder('=BYROW({1,2,3;4,5,6},LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(ErrorType.CALC);
         });
 
         it('value is error', async () => {
             let lexerNode = lexer.treeBuilder('=BYROW(#NAME?,LAMBDA(x,x*2))');
             let astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            let result = await interpreter.executeAsync(astNode as BaseAstNode);
+            let result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             lexerNode = lexer.treeBuilder('=BYROW({1;2;3},#NAME?)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             lexerNode = lexer.treeBuilder('=BYROW({1;2;3},1)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            result = await interpreter.executeAsync(generateExecuteAstNodeData(astNode as BaseAstNode));
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });

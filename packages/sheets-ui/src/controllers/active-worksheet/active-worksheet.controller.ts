@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import {
-    InsertSheetMutation,
-    RemoveSheetMutation,
-    SetSelectionsOperation,
-    SetWorksheetActiveOperation,
-    SetWorksheetHideMutation,
-} from '@univerjs/sheets';
 import type { IMutationInfo, IOperationInfo, Workbook } from '@univerjs/core';
 import type {
     IInsertSheetMutationParams,
@@ -30,13 +22,20 @@ import type {
     ISetWorksheetActiveOperationParams,
     ISetWorksheetHideMutationParams,
 } from '@univerjs/sheets';
+import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SetWorksheetHideMutation,
+} from '@univerjs/sheets';
 
 /**
  * This controller is responsible for changing the active worksheet when
  * worksheet tab related mutations executes. We cannot write this logic in
  * commands because it does not take collaborative editing into consideration.
  */
-@OnLifecycle(LifecycleStages.Ready, ActiveWorksheetController)
 export class ActiveWorksheetController extends Disposable {
     private _previousSheetIndex = -1;
 

@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
+import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+
+import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import {
     Disposable,
     ICommandService,
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
@@ -38,9 +37,7 @@ import {
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
-import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 
-@OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

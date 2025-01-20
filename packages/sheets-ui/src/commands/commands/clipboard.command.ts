@@ -16,7 +16,7 @@
 
 import type { IAccessor, ICommand, IMultiCommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
+import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand, SheetPasteShortKeyCommandName } from '@univerjs/ui';
 
 import { whenSheetFocused } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
@@ -85,7 +85,7 @@ export const SheetPasteCommand: IMultiCommand = {
 };
 
 export const SheetPasteShortKeyCommand: ICommand = {
-    id: 'sheet.command.paste-bu-short-key',
+    id: SheetPasteShortKeyCommandName,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
         const clipboardService = accessor.get(ISheetClipboardService);
@@ -135,5 +135,15 @@ export const SheetPasteBesidesBorderCommand: ICommand = {
         return commandService.executeCommand(SheetPasteCommand.id, {
             value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
         });
+    },
+};
+
+export const SheetOptionalPasteCommand: ICommand = {
+    id: 'sheet.command.optional-paste',
+    type: CommandType.COMMAND,
+    handler: async (accessor, { type }: { type: keyof typeof PREDEFINED_HOOK_NAME }) => {
+        const clipboardService = accessor.get(ISheetClipboardService);
+
+        return clipboardService.rePasteWithPasteType(type);
     },
 };

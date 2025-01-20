@@ -15,6 +15,7 @@
  */
 
 import type { DependencyIdentifier, Injector, Univer, Workbook } from '@univerjs/core';
+import type { ISelectionWithCoord } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
@@ -26,7 +27,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -39,14 +39,14 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
+import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
 import {
     ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
-import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
-import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -181,6 +181,10 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
         return null;
     }
 
+    addShapeWithNoFresh(): string | null {
+        return null;
+    }
+
     refreshShapes() { /* TODO document why this method 'refreshShapes' is empty */ }
 
     removeShape(id: string): void { /* TODO document why this method 'removeShape' is empty */ }
@@ -201,7 +205,7 @@ describe('Test format painter rules in controller', () => {
 
     beforeEach(() => {
         class SheetSelectionRenderService {
-            private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+            private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoord[]>([]);
             readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
         }
 
@@ -344,7 +348,7 @@ describe('Test format painter rules in controller', () => {
         });
 
         describe('format painter to single cell', () => {
-            it ('will copy whole original styles', async () => {
+            it('will copy whole original styles', async () => {
                 expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
@@ -380,7 +384,7 @@ describe('Test format painter rules in controller', () => {
             });
 
             describe('format painter from non-style cell to styled cell', () => {
-                it ('will clear styles', async () => {
+                it('will clear styles', async () => {
                     expect(await commandService.executeCommand(SetSelectionsOperation.id, {
                         unitId: 'workbook-01',
                         subUnitId: 'sheet-0011',

@@ -59,3 +59,55 @@ export function matchRefDrawToken(char: string) {
             char === ' '
     );
 }
+
+export const TOKEN_CANNOT_BE_AT_END_SET = new Set<string>([
+    operatorToken.PLUS,
+    operatorToken.MINUS,
+    operatorToken.MULTIPLY,
+    operatorToken.DIVIDED,
+    operatorToken.CONCATENATE,
+    operatorToken.POWER,
+    operatorToken.EQUALS,
+    operatorToken.NOT_EQUAL,
+    operatorToken.GREATER_THAN,
+    operatorToken.GREATER_THAN_OR_EQUAL,
+    operatorToken.LESS_THAN,
+    operatorToken.LESS_THAN_OR_EQUAL,
+    matchToken.OPEN_BRACKET,
+    matchToken.COMMA,
+    matchToken.COLON,
+    matchToken.OPEN_BRACES,
+    matchToken.OPEN_SQUARE_BRACKET,
+]);
+
+export function isTokenCannotBeAtEnd(token: string): boolean {
+    return TOKEN_CANNOT_BE_AT_END_SET.has(token);
+}
+
+export const TOKEN_CANNOT_PRECEDE_SUFFIX_TOKEN_SET = new Set<string>([
+    operatorToken.PLUS,
+    operatorToken.MINUS,
+    operatorToken.MULTIPLY,
+    operatorToken.DIVIDED,
+    operatorToken.CONCATENATE,
+    operatorToken.POWER,
+    operatorToken.EQUALS,
+    operatorToken.NOT_EQUAL,
+    operatorToken.GREATER_THAN,
+    operatorToken.GREATER_THAN_OR_EQUAL,
+    operatorToken.LESS_THAN,
+    operatorToken.LESS_THAN_OR_EQUAL,
+
+    matchToken.OPEN_BRACKET,
+    matchToken.COMMA,
+    matchToken.COLON,
+    matchToken.OPEN_BRACES,
+    matchToken.OPEN_SQUARE_BRACKET,
+
+    suffixToken.PERCENTAGE,
+    suffixToken.POUND,
+]);
+
+export function isTokenCannotPrecedeSuffixToken(token: string): boolean {
+    return TOKEN_CANNOT_PRECEDE_SUFFIX_TOKEN_SET.has(token);
+}

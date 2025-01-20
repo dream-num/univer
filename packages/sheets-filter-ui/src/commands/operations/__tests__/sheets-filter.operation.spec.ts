@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { Dependency, IOperation, IWorkbookData } from '@univerjs/core';
-import { CommandType, ICommandService, IContextService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import { CommandType, ICommandService, IContextService, Inject, Injector, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../sheets-filter.operation';
 import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
+import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../sheets-filter.operation';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
@@ -85,7 +85,7 @@ function createFilterOperationTestBed() {
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(SheetsFilterOperationTestPlugin);
 
-    univer.createUniverSheet(testWorkbookDataFactory());
+    univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, testWorkbookDataFactory());
 
     get(LocaleService).load({});
 

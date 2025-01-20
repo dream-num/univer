@@ -108,9 +108,13 @@ storybook-static
 # playwright
 /test-results/
 /playwright-report/
+/playwright-assets/
 /blob-report/
 /playwright/.cache/
 playwright-report.json
 
 *storybook.log
 typedoc.json
+
+# tsx
+**/tsx-0

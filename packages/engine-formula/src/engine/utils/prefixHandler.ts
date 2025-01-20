@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-import type { Injector, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { IFunctionService } from '../../services/function.service';
-import { PrefixNode } from '../ast-node/prefix-node';
+import type { IFormulaRuntimeService } from '../../services/runtime.service';
 import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { PrefixNode } from '../ast-node/prefix-node';
 
-export function prefixHandler(tokenTrim: string, functionService: IFunctionService, injector: Injector) {
+const minusRegExp = new RegExp(prefixToken.MINUS, 'g');
+const atRegExp = new RegExp(prefixToken.AT, 'g');
+
+export function prefixHandler(tokenTrimParam: string, functionService: IFunctionService, runtimeService: IFormulaRuntimeService) {
     let minusPrefixNode: Nullable<PrefixNode>;
     let atPrefixNode: Nullable<PrefixNode>;
+    let tokenTrim = tokenTrimParam;
     const prefix = tokenTrim.slice(0, 2);
     let sliceLength = 0;
-    if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {
+    if (prefix[0] === prefixToken.MINUS) {
         const functionExecutor = functionService.getExecutor(FUNCTION_NAMES_META.MINUS);
-        minusPrefixNode = new PrefixNode(injector, prefixToken.MINUS, functionExecutor);
+        minusPrefixNode = new PrefixNode(runtimeService, prefixToken.MINUS, functionExecutor);
         sliceLength++;
     }
 
-    if (new RegExp(prefixToken.AT, 'g').test(prefix)) {
-        atPrefixNode = new PrefixNode(injector, prefixToken.AT);
+    if (prefix[0] === prefixToken.AT) {
+        atPrefixNode = new PrefixNode(runtimeService, prefixToken.AT);
         if (minusPrefixNode) {
                 // minusPrefixNode.addChildren(atPrefixNode);
             atPrefixNode.setParent(minusPrefixNode);

@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     IBullet,
+    IDocumentStyle,
     INumberUnit,
     IObjectPositionH,
     IObjectPositionV,
@@ -30,7 +31,6 @@ import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -49,6 +49,7 @@ import {
     AlignTypeV,
     BooleanNumber,
     ColumnSeparatorType,
+    DocumentFlavor,
     GridType,
     HorizontalAlign,
     mergeWith,
@@ -64,7 +65,7 @@ import {
 } from '@univerjs/core';
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
-import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { getFontStyleString, isFunction, ptToPixel } from '../../../basics/tools';
 import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 import { getCustomDecorationStyle } from './style/custom-decoration';
 import { getCustomRangeStyle } from './style/custom-range';
@@ -802,6 +803,8 @@ function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewMod
     return lists[listType].nestingLevel[0].paragraphProperties?.textStyle;
 }
 
+const DEFAULT_TEXT_RUN = { ts: {}, st: 0, ed: 0 };
+
 export function getFontCreateConfig(
     index: number,
     viewModel: DocumentViewModel,
@@ -819,27 +822,28 @@ export function getFontCreateConfig(
         },
         marginRight = 0,
         marginLeft = 0,
-        localeService,
+        // localeService,
         renderConfig = {},
     } = sectionBreakConfig;
     const { paragraphStyle = {}, bullet } = paragraph;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
+    const originTextRun = viewModel.getTextRun(index + startIndex);
 
     const textRun = isRenderStyle === BooleanNumber.FALSE
-        ? { ts: {}, st: 0, ed: 0 }
-        : viewModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+        ? DEFAULT_TEXT_RUN
+        : originTextRun ?? DEFAULT_TEXT_RUN;
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !hasAddonStyle) {
+    if (cache && !hasAddonStyle && originTextRun) {
         return cache;
     }
 
@@ -854,7 +858,7 @@ export function getFontCreateConfig(
         ...bulletTextStyle,
     };
 
-    const fontStyle = getFontStyleString(textStyle, localeService);
+    const fontStyle = getFontStyleString(textStyle);
 
     const mixTextStyle: ITextStyle = {
         ...documentTextStyle,
@@ -872,8 +876,8 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!hasAddonStyle) {
-        // TODO: cache should more precisely, take custom-range, custom-decroation, paragraphStyle into considering.
+    if (!hasAddonStyle && originTextRun) {
+        // TODO: cache should more precisely, take custom-range, custom-decoration, paragraphStyle into considering.
         fontCreateConfigCache.setValue(st, ed, result);
     }
 
@@ -900,6 +904,22 @@ export function setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentS
     }
 }
 
+export enum FloatObjectType {
+    IMAGE = 'IMAGE',
+    TABLE = 'TABLE',
+}
+
+export interface IFloatObject {
+    id: string;
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    angle: number;
+    type: FloatObjectType;
+    positionV: IObjectPositionV;
+}
+
 // The context state of the layout process, which is used to store some cache and intermediate states in the typesetting process,
 // as well as identifying information such as the pointer of the layout.
 export interface ILayoutContext {
@@ -924,10 +944,10 @@ export interface ILayoutContext {
     // Used to store the resource of document and resource cache.
     skeletonResourceReference: ISkeletonResourceReference;
     // Positioned float objects cache.
-    drawingsCache: Map<string, {
+    floatObjectsCache: Map<string, {
         count: number;
         page: IDocumentSkeletonPage;
-        drawing: IDocumentSkeletonDrawing;
+        floatObject: IFloatObject;
     }>;
     paragraphConfigCache: Map<string, Map<number, IParagraphConfig>>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
@@ -947,11 +967,55 @@ const DEFAULT_SECTION_BREAK: ISectionBreak = {
 
 export const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
 
+const DEFAULT_MODERN_DOCUMENT_STYLE: IDocumentStyle = {
+    pageNumberStart: 1,
+    pageSize: {
+        width: ptToPixel(595),
+        height: Number.POSITIVE_INFINITY,
+    },
+    marginTop: ptToPixel(50),
+    marginBottom: ptToPixel(50),
+    marginRight: ptToPixel(50),
+    marginLeft: ptToPixel(50),
+    renderConfig: {
+        vertexAngle: 0,
+        centerAngle: 0,
+        background: {
+            rgb: '#FFFFFF',
+        },
+    },
+    defaultHeaderId: '',
+    defaultFooterId: '',
+    evenPageHeaderId: '',
+    evenPageFooterId: '',
+    firstPageHeaderId: '',
+    firstPageFooterId: '',
+    evenAndOddHeaders: BooleanNumber.FALSE,
+    useFirstPageHeaderFooter: BooleanNumber.FALSE,
+    marginHeader: 0,
+    marginFooter: 0,
+};
+
+const DEFAULT_MODERN_SECTION_BREAK: Partial<ISectionBreak> = {
+    columnProperties: [],
+    columnSeparatorType: ColumnSeparatorType.NONE,
+    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+};
+
 export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
     const { viewModel, dataModel, docsConfig } = ctx;
-    const sectionNode = viewModel.children[nodeIndex];
-    const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
-    const { documentStyle } = dataModel;
+    const sectionNode = viewModel.getChildren()[nodeIndex];
+    let { documentStyle } = dataModel;
+    const { documentFlavor } = documentStyle;
+    let sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+
+    // If the configuration is in modern mode, use the style configuration of modern mode to overwrite the original configuration.
+    // In modern mode, there are no pages, no sections, no columns. There are no headers and footers, and margins are all defaults.
+    if (documentFlavor === DocumentFlavor.MODERN) {
+        sectionBreak = Object.assign({}, sectionBreak, DEFAULT_MODERN_SECTION_BREAK);
+        documentStyle = Object.assign({}, documentStyle, DEFAULT_MODERN_DOCUMENT_STYLE);
+    }
+
     const {
         pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
         pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
@@ -1017,7 +1081,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         renderConfig = global_renderConfig,
     } = sectionBreak;
 
-    const sectionNodeNext = viewModel.children[nodeIndex + 1];
+    const sectionNodeNext = viewModel.getChildren()[nodeIndex + 1];
     const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
 
     const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };

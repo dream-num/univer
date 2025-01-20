@@ -15,13 +15,12 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { createDefaultUser } from './const';
 
 export interface IUser {
     userID: string; name: string; avatar?: string;
 };
-@OnLifecycle(LifecycleStages.Starting, UserManagerService)
+
 export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
@@ -32,6 +31,7 @@ export class UserManagerService {
      * @memberof UserManagerService
      */
     public currentUser$ = this._currentUser$.asObservable();
+
     getCurrentUser<T extends IUser>() {
         return this._currentUser$.getValue() as T;
     }

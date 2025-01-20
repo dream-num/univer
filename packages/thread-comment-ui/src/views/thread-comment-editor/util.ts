@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, type IDocumentBody } from '@univerjs/core';
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
+import { CustomRangeType, getBodySlice, type IDocumentBody } from '@univerjs/core';
 
 export type TextNode = {
     type: 'text';
@@ -25,67 +25,13 @@ export type TextNode = {
     content: IThreadCommentMention;
 };
 
-export const parseMentions = (text: string): TextNode[] => {
-    const regex = /@\[(.*?)\]\((.*?)\)|(\w+)/g;
-    let match;
-    let lastIndex = 0;
-    const result: TextNode[] = [];
-
-    while ((match = regex.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-            // Add the text between two user mentions or before the first user mention
-            result.push({
-                type: 'text',
-                content: text.substring(lastIndex, match.index),
-            });
-        }
-
-        if (match[1] && match[2]) {
-            // User mention found
-            result.push({
-                type: 'mention',
-                content: {
-                    label: match[1],
-                    id: match[2],
-                },
-            });
-        } else if (match[3]) {
-            // Text (numbers) found
-            result.push({
-                type: 'text',
-                content: match[3],
-            });
-        }
-        lastIndex = regex.lastIndex;
-    }
-
-    // Add any remaining text after the last mention (if any)
-    if (lastIndex < text.length) {
-        result.push({
-            type: 'text',
-            content: text.substring(lastIndex),
-        });
-    }
-
-    return result;
-};
-
-export const transformTextNode2Text = (nodes: TextNode[]) => {
-    return nodes.map((item) => {
-        switch (item.type) {
-            case 'mention':
-                return `@[${item.content.label}](${item.content.id})`;
-            default:
-                return item.content;
-        }
-    }).join('');
-};
-
-export const transformDocument2TextNodes = (doc: IDocumentBody) => {
+const transformDocument2TextNodesInParagraph = (doc: IDocumentBody) => {
     const { dataStream, customRanges } = doc;
-    const end = dataStream.length - 2;
+    const end = dataStream.endsWith('\r\n') ? dataStream.length - 2 : dataStream.length;
     const textNodes: TextNode[] = [];
+
     let lastIndex = 0;
+
     customRanges?.forEach((range) => {
         if (lastIndex < range.startIndex) {
             textNodes.push({
@@ -96,11 +42,11 @@ export const transformDocument2TextNodes = (doc: IDocumentBody) => {
         textNodes.push({
             type: 'mention',
             content: {
-                label: dataStream.slice(range.startIndex, range.endIndex).slice(1, -1),
+                label: dataStream.slice(range.startIndex, range.endIndex + 1),
                 id: range.rangeId,
             },
         });
-        lastIndex = range.endIndex;
+        lastIndex = range.endIndex + 1;
     });
 
     textNodes.push({
@@ -108,6 +54,17 @@ export const transformDocument2TextNodes = (doc: IDocumentBody) => {
         content: dataStream.slice(lastIndex, end),
     });
     return textNodes;
+};
+
+export const transformDocument2TextNodes = (doc: IDocumentBody) => {
+    const { paragraphs = [] } = doc;
+    let lastIndex = 0;
+
+    return paragraphs.map((paragraph) => {
+        const body = getBodySlice(doc, lastIndex, paragraph.startIndex);
+        lastIndex = paragraph.startIndex + 1;
+        return transformDocument2TextNodesInParagraph(body);
+    });
 };
 
 export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody => {
@@ -121,13 +78,14 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
                 break;
             case 'mention': {
                 const start = str.length;
-                str += `\x1F${node.content.label}\x1E`;
-                const end = str.length;
+                str += node.content.label;
+                const end = str.length - 1;
                 customRanges.push({
                     rangeId: node.content.id,
                     rangeType: CustomRangeType.MENTION,
                     startIndex: start,
                     endIndex: end,
+                    properties: {},
                 });
                 break;
             }
@@ -156,9 +114,3 @@ export const transformTextNodes2Document = (nodes: TextNode[]): IDocumentBody =>
         customRanges,
     };
 };
-
-export const transformMention = (mention: IThreadCommentMention) => ({
-    display: mention.label,
-    id: `${mention.id}`,
-    raw: mention,
-});

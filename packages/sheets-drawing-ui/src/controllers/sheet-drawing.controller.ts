@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 
 import { AddImageSingle } from '@univerjs/icons';
@@ -22,7 +22,7 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { InsertCellImageCommand, InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 
@@ -39,10 +39,8 @@ import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel'
 import { menuSchema } from './menu.schema';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -68,6 +66,7 @@ export class SheetDrawingUIController extends Disposable {
     private _initCommands() {
         [
             InsertFloatImageCommand,
+            InsertCellImageCommand,
             InsertSheetDrawingCommand,
             RemoveSheetDrawingCommand,
             SetSheetDrawingCommand,

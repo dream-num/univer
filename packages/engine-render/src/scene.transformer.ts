@@ -15,25 +15,25 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-
-import { Subject, type Subscription } from 'rxjs';
-import type { BaseObject } from './base-object';
-import { CURSOR_TYPE } from './basics/const';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+
+import type { ITransformerConfig } from './basics/transformer-config';
+import type { IPoint } from './basics/vector2';
+import type { Scene } from './scene';
+import type { IRectProps } from './shape/rect';
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import { Subject, type Subscription } from 'rxjs';
+import { type BaseObject, ObjectType } from './base-object';
+import { CURSOR_TYPE } from './basics/const';
+import { offsetRotationAxis } from './basics/offset-rotation-axis';
+
 import { getCurrentScrollXY } from './basics/scroll-xy';
+import { degToRad, precisionTo, radToDeg } from './basics/tools';
+import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
-import type { IRectProps } from './shape/rect';
 import { Rect } from './shape/rect';
-
-import { degToRad, precisionTo, radToDeg } from './basics/tools';
-import type { Scene } from './scene';
-import type { IPoint } from './basics/vector2';
-import { Vector2 } from './basics/vector2';
-import type { ITransformerConfig } from './basics/transformer-config';
 import { type IRegularPolygonProps, RegularPolygon } from './shape/regular-polygon';
-import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -95,6 +95,10 @@ const MINI_WIDTH_LIMIT = 20;
 const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
+
+const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
+    ObjectType.CHART,
+]);
 
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
@@ -202,6 +206,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
     ) {
         super();
         this._initialProps(config);
+    }
+
+    updateZeroPoint(left: number, top: number) {
+        this.zeroLeft = left;
+        this.zeroTop = top;
     }
 
     changeNotification() {
@@ -1032,7 +1041,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                     topScene.disableObjectsEvent();
 
-                    const viewportActualXY = topScene.getVpScrollXYInfoByPosToVp(Vector2.create(evtOffsetX, evtOffsetY));
+                    const viewportActualXY = topScene.getScrollXYInfoByViewport(Vector2.create(evtOffsetX, evtOffsetY));
 
                     this._viewportScrollX = viewportActualXY.x;
                     this._viewportScrollY = viewportActualXY.y;
@@ -1525,6 +1534,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._clearControl$.next(changeSelf);
     }
 
+    /**
+     * @description Clear the control of the object with the specified id
+     * @param {string[]} ids the id of the object to be cleared
+     */
+    public clearControlByIds(ids: string[]) {
+        for (const id of ids) {
+            this._selectedObjectMap.delete(id);
+        }
+        this.refreshControls();
+    }
+
     private _clearControlMap() {
         this._transformerControlMap.forEach((control) => {
             control.dispose();
@@ -1535,7 +1555,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
         const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
         const angle = applyObject.angle;
-        const { isCropper, resizeEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
+        const { isCropper, resizeEnabled, rotateEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
         }
@@ -1555,23 +1575,23 @@ export class Transformer extends Disposable implements ITransformerConfig {
             const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
                 TransformerManagerType.ROTATE_LINE, height, width, applyObject
             );
+            if (rotateEnabled) {
+                const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
+                    zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
+                    strokeWidth: borderStrokeWidth, stroke: borderStroke,
+                });
 
-            const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
-                zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
-                strokeWidth: borderStrokeWidth, stroke: borderStroke,
-            });
+                const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
-            const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
-
-            const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
-
-            const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
-                zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
-                radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
-            });
-            this._attachEventToRotate(rotate, applyObject);
-            this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
-            groupElements.push(rotateLine, rotate);
+                const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
+                const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
+                    zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
+                    radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
+                });
+                this._attachEventToRotate(rotate, applyObject);
+                this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
+                groupElements.push(rotateLine, rotate);
+            }
         }
         if (resizeEnabled) {
             for (let i = 0, len = enabledAnchors.length; i < len; i++) {
@@ -1586,7 +1606,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 } else {
                     anchor = this._createCopperResizeAnchor(type, applyObject, zIndex);
                 }
-
                 this._attachEventToAnchor(anchor, type, applyObject);
                 groupElements.push(anchor);
             }
@@ -1636,7 +1655,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        if (!evt.ctrlKey) {
+        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(applyObject.objectType)) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

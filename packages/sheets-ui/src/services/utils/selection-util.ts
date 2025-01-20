@@ -19,13 +19,12 @@ import type { ISelectionStyle } from '@univerjs/sheets';
 
 export function createCopyPasteSelectionStyle(
     themeService: ThemeService
-): ISelectionStyle {
+): Partial<ISelectionStyle> {
     return {
         strokeWidth: 1.5,
         stroke: themeService.getCurrentTheme().primaryColor,
         fill: 'rgba(178, 178, 178, 0.10)',
         widgets: {},
-        hasAutoFill: false,
         strokeDash: 8,
     };
 }

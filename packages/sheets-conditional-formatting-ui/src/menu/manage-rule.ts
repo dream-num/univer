@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { merge, Observable } from 'rxjs';
-import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor, Workbook } from '@univerjs/core';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { checkRangesEditablePermission, RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-
-import { debounceTime } from 'rxjs/operators';
+import type { IMenuSelectorItem } from '@univerjs/ui';
 import { ICommandService, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { checkRangesEditablePermission, RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
 
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { merge, Observable } from 'rxjs';
+
+import { debounceTime } from 'rxjs/operators';
 import { CF_MENU_OPERATION, OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
 
 const commandList = [
@@ -85,6 +85,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
 
     const clearRangeEnable$ = new Observable<boolean>((subscriber) => merge(
         selectionManagerService.selectionMoveEnd$,
+        selectionManagerService.selectionSet$,
         new Observable<null>((commandSubscribe) => {
             const disposable = commandService.onCommandExecuted((commandInfo) => {
                 const { id, params } = commandInfo;
@@ -164,4 +165,3 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     } as IMenuSelectorItem;
 };
-

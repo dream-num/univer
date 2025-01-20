@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
-import { ZenEditorController } from './controllers/zen-editor.controller';
-import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
-import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+import { IConfigService, Inject, Injector, merge, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import { ZenEditorController } from './controllers/zen-editor.controller';
+import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'SHEET_ZEN_EDITOR_PLUGIN';
@@ -35,11 +35,15 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_ZEN_EDITOR_PLUGIN_CONFIG_KEY, rest);
 
         this._initializeDependencies(this._injector);
     }
@@ -52,5 +56,13 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));
+    }
+
+    override onReady(): void {
+        this._injector.get(ZenEditorUIController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(ZenEditorController);
     }
 }

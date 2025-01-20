@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import { Skeleton } from '../../skeleton';
-import { Liquid } from '../liquid';
-import { DocumentEditArea } from '../view-model/document-view-model';
-import { dealWithSection } from './block/section';
-import { Hyphen } from './hyphenation/hyphen';
-import { LanguageDetector } from './hyphenation/language-detector';
-import { createSkeletonPage } from './model/page';
-import { createSkeletonSection } from './model/section';
-import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -37,6 +25,18 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
+import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import { Skeleton } from '../../skeleton';
+import { Liquid } from '../liquid';
+import { DocumentEditArea } from '../view-model/document-view-model';
+import { dealWithSection } from './block/section';
+import { Hyphen } from './hyphenation/hyphen';
+import { LanguageDetector } from './hyphenation/language-detector';
+import { createSkeletonPage } from './model/page';
+import { createSkeletonSection } from './model/section';
+import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -372,7 +372,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path, isBack } = position;
 
         let { glyph } = position;
 
@@ -511,10 +511,11 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
+        const pageLength = pages.length;
 
         this._findLiquid.reset();
         if (restrictions == null) {
-            for (let pi = 0, len = pages.length; pi < len; pi++) {
+            for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
                 const { headerId, footerId, pageWidth } = page;
 
@@ -532,7 +533,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -547,7 +549,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
                 } else {
@@ -560,7 +563,8 @@ export class DocumentSkeleton extends Skeleton {
                         pi,
                         cache,
                         x,
-                        y
+                        y,
+                        pageLength
                     );
                 }
 
@@ -575,7 +579,7 @@ export class DocumentSkeleton extends Skeleton {
             let exactMatch = null;
 
             if (strict === false) {
-                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
                     const { headerId, footerId, pageWidth } = page;
 
@@ -591,7 +595,8 @@ export class DocumentSkeleton extends Skeleton {
                                 pi,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
 
@@ -606,7 +611,8 @@ export class DocumentSkeleton extends Skeleton {
                                 pi,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
                     } else {
@@ -619,7 +625,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -630,7 +637,7 @@ export class DocumentSkeleton extends Skeleton {
                     this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 }
             } else {
-                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
 
                     if (segmentId) {
@@ -651,7 +658,8 @@ export class DocumentSkeleton extends Skeleton {
                                 segmentPage,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
                     } else {
@@ -664,7 +672,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -689,6 +698,7 @@ export class DocumentSkeleton extends Skeleton {
         cache: INearestCache,
         x: number,
         y: number,
+        pageLength: number,
         nestLevel: number = 0
         // eslint-disable-next-line ts/no-explicit-any
     ): any {
@@ -700,10 +710,29 @@ export class DocumentSkeleton extends Skeleton {
         const pageTop = this._findLiquid.y + (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0);
         const pageBottom = pageTop + segmentPage.pageHeight;
 
-        const pointInPage = x >= pageLeft
+        let pointInPage = x >= pageLeft
             && x <= pageRight
             && y >= pageTop
             && y <= pageBottom;
+
+        // Handle the outmost page.
+        if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
+            const isFirstPage = pi === 0;
+            const isLastPage = pi === pageLength - 1;
+            // TODO: Use page margin top as page gap now, need to consider the page gap in the future.
+            const halfMarginTop = page.originMarginTop / 2;
+
+            // It's the only page, point always in page.
+            if (isFirstPage && isLastPage) {
+                pointInPage = true;
+            } else if (isFirstPage) {
+                pointInPage = y <= pageBottom + halfMarginTop;
+            } else if (isLastPage) {
+                pointInPage = y >= pageTop - halfMarginTop;
+            } else {
+                pointInPage = y >= pageTop - halfMarginTop && y <= pageBottom + halfMarginTop;
+            }
+        }
 
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER: {
@@ -857,7 +886,12 @@ export class DocumentSkeleton extends Skeleton {
                 this._findLiquid?.translate(tableLeft, tableTop);
 
                 for (const row of rows) {
-                    const { top: rowTop, cells } = row;
+                    const { top: rowTop, cells, isRepeatRow } = row;
+
+                    // Cursor should not in repeat row.
+                    if (isRepeatRow) {
+                        continue;
+                    }
 
                     this._findLiquid?.translateSave();
                     this._findLiquid?.translate(0, rowTop);
@@ -877,6 +911,7 @@ export class DocumentSkeleton extends Skeleton {
                             cache,
                             x,
                             y,
+                            pageLength,
                             nestLevel + 1
                         );
 
@@ -971,7 +1006,7 @@ export class DocumentSkeleton extends Skeleton {
     private _prepareLayoutContext(): ILayoutContext {
         const viewModel = this.getViewModel();
         const dataModel = viewModel.getDataModel();
-        const { headerTreeMap, footerTreeMap } = viewModel;
+        const { headerTreeMap, footerTreeMap } = viewModel.getHeaderFooterTreeMap();
         const { documentStyle, drawings, lists: customLists = {} } = dataModel;
         const lists = {
             ...PRESET_LIST_TYPE,
@@ -989,7 +1024,7 @@ export class DocumentSkeleton extends Skeleton {
             lists,
             drawings,
 
-            localeService: this._localService,
+            localeService: this._localeService,
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,
@@ -1016,7 +1051,7 @@ export class DocumentSkeleton extends Skeleton {
                 '': null, // '' is the main document.
             },
             isDirty: false,
-            drawingsCache: new Map(),
+            floatObjectsCache: new Map(),
             paragraphConfigCache: new Map(),
             sectionBreakConfigCache: new Map(),
             paragraphsOpenNewPage: new Set(),
@@ -1059,8 +1094,6 @@ export class DocumentSkeleton extends Skeleton {
 
         const allSkeletonPages = skeleton.pages;
 
-        viewModel.resetCache();
-
         let startSectionIndex = 0;
 
         const layoutAnchor = ctx.layoutStartPointer[''];
@@ -1069,8 +1102,8 @@ export class DocumentSkeleton extends Skeleton {
         ctx.layoutStartPointer[''] = null;
 
         if (layoutAnchor != null) {
-            for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {
-                const sectionNode = viewModel.children[sectionIndex];
+            for (let sectionIndex = 0; sectionIndex < viewModel.getChildren().length; sectionIndex++) {
+                const sectionNode = viewModel.getChildren()[sectionIndex];
                 const { endIndex, startIndex } = sectionNode;
                 if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
                     startSectionIndex = sectionIndex;
@@ -1080,8 +1113,8 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         // Loop the sections with the start section index.
-        for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
-            const sectionNode = viewModel.children[i];
+        for (let i = startSectionIndex, len = viewModel.getChildren().length; i < len; i++) {
+            const sectionNode = viewModel.getChildren()[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
             const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
 

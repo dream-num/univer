@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type React from 'react';
+import type { defineComponent } from 'vue';
 import { toDisposable } from '@univerjs/core';
+
 import {
     AddDigitsSingle,
     AdjustHeight,
@@ -25,6 +29,7 @@ import {
     AllBorderSingle,
     AmplifySingle,
     AutoHeight,
+    AutoWidth,
     AutowrapSingle,
     AvgSingle,
     BackSlashSingle,
@@ -58,6 +63,7 @@ import {
     FreezeToSelectedSingle,
     FunctionSingle,
     GridSingle,
+    HeaderFooterSingle,
     Hide,
     HorizontalBorder,
     HorizontallySingle,
@@ -118,15 +124,11 @@ import {
     VerticalIntegrationSingle,
     VerticalTextSingle,
 } from '@univerjs/icons';
-import type { IDisposable } from '@univerjs/core';
-import type { defineComponent } from 'vue';
-
-import type React from 'react';
 import { cloneElement, createElement, useEffect, useRef } from 'react';
 
 type ComponentFramework = 'vue3' | 'react';
 
-interface IComponentOptions {
+export interface IComponentOptions {
     framework?: ComponentFramework;
 }
 
@@ -219,6 +221,7 @@ export class ComponentManager {
             Hide,
             HorizontalBorder,
             AutoHeight,
+            AutoWidth,
             AdjustHeight,
             AdjustWidth,
             AvgSingle,
@@ -230,6 +233,7 @@ export class ComponentManager {
             FreezeColumnSingle,
             FreezeRowSingle,
             GridSingle,
+            HeaderFooterSingle,
             FreezeToSelectedSingle,
             CodeSingle,
             FontSizeIncreaseSingle,

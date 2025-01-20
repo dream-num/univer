@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     Disposable,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     fromEventSubject,
     ICommandService,
     Inject,
@@ -30,9 +34,6 @@ import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { debounceTime, filter } from 'rxjs';
-import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {
@@ -112,7 +113,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
                         return;
                     }
 
-                    if (this._editorService.isEditor(unitId)) {
+                    // TODO: @JOCS, Do not use unitId to check if it's need to render images or isEditor. maybe need a config?
+                    if (this._editorService.isEditor(unitId) && unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
                         mainComponent?.makeDirty();
                         return;
                     }
@@ -195,9 +197,8 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             this._drawingManagerService.refreshTransform(nonMultiDrawings as unknown as IDrawingParam[]);
         }
 
-        if (multiDrawings.length > 0) {
-            this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
-        }
+        // if multiDrawings length is 0, also need to remove current multi drawings.
+        this._handleMultiDrawingsTransform(multiDrawings as unknown as IDrawingParam[]);
     }
 
     private _handleMultiDrawingsTransform(multiDrawings: IDrawingParam[]) {
@@ -224,7 +225,9 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
 
         this._drawingManagerService.removeNotification(allMultiDrawings);
         // Step 3: create new drawing shapes.
-        this._drawingManagerService.addNotification(multiDrawings);
+        if (multiDrawings.length > 0) {
+            this._drawingManagerService.addNotification(multiDrawings);
+        }
 
         // Step 4: reSelect previous shapes and focus previous drawings.
         for (const key of selectedObjectKeys) {
@@ -250,6 +253,7 @@ export class DocDrawingTransformUpdateController extends Disposable implements I
             marginTop,
             marginLeft,
         } as IDocumentSkeletonPage);
+
         skeDrawings.forEach((drawing) => {
             const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
             const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;

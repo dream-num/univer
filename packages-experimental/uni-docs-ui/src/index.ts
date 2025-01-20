@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+import './global.css';
+
 export { UniDocsUIController } from './controllers/uni-docs-ui.controller';

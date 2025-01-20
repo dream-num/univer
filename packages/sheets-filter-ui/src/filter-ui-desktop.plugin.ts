@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
     IConfigService,
     Inject,
     Injector,
+    merge,
     Optional,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { defaultPluginConfig, SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
-import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
-import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -52,11 +53,15 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         super();
 
         // Manage the plugin configuration.
-        const { menu, ...rest } = this._config;
+        const { menu, ...rest } = merge(
+            {},
+            defaultPluginConfig,
+            this._config
+        );
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+        this._configService.setConfig(SHEETS_FILTER_UI_PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

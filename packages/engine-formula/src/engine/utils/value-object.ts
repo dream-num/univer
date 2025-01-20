@@ -15,13 +15,16 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { CellValueType } from '@univerjs/core';
+import { ErrorType } from '../../basics/error-type';
+import { CellReferenceObject } from '../reference-object/cell-reference-object';
+import { ColumnReferenceObject } from '../reference-object/column-reference-object';
+import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
-import { ErrorType } from '../../basics/error-type';
 import { expandArrayValueObject } from './array-object';
 import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
@@ -196,11 +199,9 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
             // range must be an ArrayValueObject, criteria must be a BaseValueObject
             let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
 
-            const [, criteriaStringObject] = findCompareToken(`${criteriaValueObject.getValue()}`);
-
             // When comparing non-numbers and numbers, countifs does not take the result
             if (isNumberSensitive) {
-                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaValueObject);
             }
 
             if (booleanResults[rowIndex] === undefined) {
@@ -227,11 +228,34 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
  * @returns
  */
 export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
+    const [operator, criteriaObject] = findCompareToken(`${criteria.getValue()}`);
+
     return array.mapValue((valueObject, r, c) => {
         const rangeValueObject = range.get(r, c);
-        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
+
+        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteriaObject)) {
             return valueObject;
-        } else if (rangeValueObject?.isError() && criteria.isError() && rangeValueObject.getValue() === criteria.getValue()) {
+        } else if (rangeValueObject?.isNumber()) {
+            if (criteriaObject.isString()) {
+                const criteriaNumber = criteriaObject.convertToNumberObjectValue();
+
+                if (criteriaNumber.isNumber()) {
+                    return rangeValueObject.compare(criteriaNumber, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (criteriaObject.isNumber()) {
+            if (rangeValueObject?.isString()) {
+                const rangeNumber = rangeValueObject.convertToNumberObjectValue();
+
+                if (rangeNumber.isNumber()) {
+                    return rangeNumber.compare(criteriaObject, operator);
+                }
+            }
+
+            return BooleanValueObject.create(false);
+        } else if (rangeValueObject?.isError() && criteriaObject.isError() && rangeValueObject.getValue() === criteriaObject.getValue()) {
             return BooleanValueObject.create(true);
         } else {
             return BooleanValueObject.create(false);
@@ -267,4 +291,42 @@ export function isSameValueObjectType(left: BaseValueObject, right: BaseValueObj
     }
 
     return false;
+}
+
+export enum ReferenceObjectType {
+    CELL,
+    COLUMN,
+    ROW,
+}
+
+export function getReferenceObjectFromCache(trimToken: string, type: ReferenceObjectType) {
+    let referenceObject: BaseReferenceObject;
+    switch (type) {
+        case ReferenceObjectType.CELL:
+            referenceObject = new CellReferenceObject(trimToken);
+            break;
+        case ReferenceObjectType.COLUMN:
+            referenceObject = new ColumnReferenceObject(trimToken);
+            break;
+        case ReferenceObjectType.ROW:
+            referenceObject = new RowReferenceObject(trimToken);
+            break;
+        default:
+            throw new Error('Unknown reference object type');
+    }
+
+    return referenceObject;
+}
+
+export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, variant2: BaseReferenceObject) {
+    let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);
+    if (variant1.isCell() && variant2.isCell()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+    } else if (variant1.isRow() && variant2.isRow()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+    } else if (variant1.isColumn() && variant2.isColumn()) {
+        referenceObject = variant1.unionBy(variant2) as BaseReferenceObject;
+    }
+
+    return referenceObject;
 }

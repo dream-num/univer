@@ -1,0 +1,31 @@
+{
+    "name": "formula-integration-test",
+    "private": true,
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/mockdata": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-numfmt": "workspace:*",
+        "examples-node": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "typescript": "^5.7.2",
+        "vitest": "^2.1.8"
+    }
+}

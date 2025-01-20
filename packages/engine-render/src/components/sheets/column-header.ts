@@ -19,10 +19,10 @@
 import type { Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
-import { SheetColumnHeaderExtensionRegistry } from '../extension';
 import type { ColumnHeaderLayout, IColumnsHeaderCfgParam } from './extensions/column-header-layout';
-import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import { SheetColumnHeaderExtensionRegistry } from '../extension';
+import { SpreadsheetHeader } from './sheet-component';
 
 export class SpreadsheetColumnHeader extends SpreadsheetHeader {
     override getDocuments(): void {
@@ -54,7 +54,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         if (!spreadsheetSkeleton) return;
 
         const parentScale = this.getParentScale();
-        spreadsheetSkeleton.calculateSegment(bounds);
+        spreadsheetSkeleton.updateVisibleRange(bounds);
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
         if (!segment) return;
@@ -93,7 +93,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
     }
 
     /**
-     * Custimize column header, such as custom header text and background.
+     * Customize column header, such as custom header text and background.
      * @param cfg
      */
     setCustomHeader(cfg: IColumnsHeaderCfgParam): void {

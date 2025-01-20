@@ -16,19 +16,20 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Xlookup extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 6;
 
+    // eslint-disable-next-line
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
@@ -37,6 +38,21 @@ export class Xlookup extends BaseFunction {
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
+        let _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+        if (ifNotFound?.isNull()) {
+            _ifNotFound = ErrorValueObject.create(ErrorType.NA);
+        }
+
+        let _matchMode = matchMode ?? NumberValueObject.create(0);
+        if (matchMode?.isNull()) {
+            _matchMode = NumberValueObject.create(0);
+        }
+
+        let _searchMode = searchMode ?? NumberValueObject.create(1);
+        if (searchMode?.isNull()) {
+            _searchMode = NumberValueObject.create(1);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }
@@ -54,23 +70,29 @@ export class Xlookup extends BaseFunction {
         const rowCountReturn = returnArray.getRowCount();
         const columnCountReturn = returnArray.getColumnCount();
 
-        if ((rowCountLookup !== 1 && columnCountLookup !== 1) || (rowCountLookup !== rowCountReturn && columnCountLookup !== columnCountReturn)) {
+        if (
+            (rowCountLookup !== 1 && columnCountLookup !== 1) ||
+            (rowCountLookup === 1 && columnCountLookup > 1 && columnCountLookup !== columnCountReturn) ||
+            (columnCountLookup === 1 && rowCountLookup > 1 && rowCountLookup !== rowCountReturn)
+        ) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        if (ifNotFound?.isError() || matchMode?.isError() || searchMode?.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+        if (_matchMode.isError()) {
+            return _matchMode;
         }
 
-        const _ifNotFound = ifNotFound ?? ErrorValueObject.create(ErrorType.NA);
+        if (_searchMode.isError()) {
+            return _searchMode;
+        }
 
-        const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
+        const matchModeValue = this.getIndexNumValue(_matchMode);
 
         if (matchModeValue instanceof ErrorValueObject) {
             return matchModeValue;
         }
 
-        const searchModeValue = this.getIndexNumValue(searchMode || NumberValueObject.create(1));
+        const searchModeValue = this.getIndexNumValue(_searchMode);
 
         if (searchModeValue instanceof ErrorValueObject) {
             return searchModeValue;
@@ -102,7 +124,10 @@ export class Xlookup extends BaseFunction {
         rowCountReturn: number,
         columnCountReturn: number
     ) {
-        if (lookupValue.isArray()) {
+        const lookupValueRowCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getRowCount() : 1;
+        const lookupValueColumnCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getColumnCount() : 1;
+
+        if (lookupValueRowCount > 1 || lookupValueColumnCount > 1) {
             let resultArray: Nullable<ArrayValueObject>;
 
             if (rowCountLookup === 1) {
@@ -132,6 +157,8 @@ export class Xlookup extends BaseFunction {
             });
         }
 
+        const _lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).get(0, 0) as BaseValueObject : lookupValue;
+
         if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
             const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
 
@@ -139,7 +166,7 @@ export class Xlookup extends BaseFunction {
                 return checkErrorCombination;
             }
 
-            const result = this._handleSingleObject(lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
+            const result = this._handleSingleObject(_lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
 
             if (result.isError()) {
                 return ifNotFound!;
@@ -157,7 +184,7 @@ export class Xlookup extends BaseFunction {
             axis = 1;
         }
 
-        const resultArray = this._handleExpandObject(lookupValue, lookupArray, returnArray, matchModeValue, searchModeValue, axis);
+        const resultArray = this._handleExpandObject(_lookupValue, lookupArray, returnArray, matchModeValue, searchModeValue, axis);
 
         if (resultArray == null) {
             return ErrorValueObject.create(ErrorType.NA);

@@ -24,13 +24,14 @@ export { ColorKit, COLORS, type IRgbColor, RGB_PAREN, RGBA_PAREN } from './color
 export * from './command-enum';
 export * from './common';
 export * from './compare';
+export * from './dayjs';
 export * from './doc-tool';
 export * from './generate';
 export * from './hash-algorithm';
 export * from './lifecycle';
 export * from './locale';
 export { LRUHelper, LRUMap } from './lru/lru-map';
-export { numfmt } from './numfmt';
+export { type INumfmtLocalTag, numfmt } from './numfmt';
 export * from './object-matrix';
 export { queryObjectMatrix } from './object-matrix-query';
 export { moveRangeByOffset, splitIntoGrid } from './range';

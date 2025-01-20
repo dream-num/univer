@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
-import { BooleanNumber } from '../../../../types/enum/text-style';
+import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {
@@ -38,7 +38,7 @@ describe('test TextX methods and branches', () => {
                 ],
             };
 
-            textX.insert(5, body, '');
+            textX.insert(5, body);
 
             const actions = textX.serialize();
 
@@ -47,8 +47,6 @@ describe('test TextX methods and branches', () => {
                     t: TextXActionType.INSERT,
                     body,
                     len: 5,
-                    line: 0,
-                    segmentId: '',
                 },
             ]);
         });
@@ -56,7 +54,7 @@ describe('test TextX methods and branches', () => {
         it('test TextX delete method', () => {
             const textX = new TextX();
 
-            textX.delete(5, '');
+            textX.delete(5);
 
             const actions = textX.serialize();
 
@@ -64,8 +62,6 @@ describe('test TextX methods and branches', () => {
                 {
                     t: TextXActionType.DELETE,
                     len: 5,
-                    line: 0,
-                    segmentId: '',
                 },
             ]);
         });
@@ -85,7 +81,7 @@ describe('test TextX methods and branches', () => {
                 ],
             };
 
-            textX.retain(5, '', body, UpdateDocsAttributeType.COVER);
+            textX.retain(5, body, UpdateDocsAttributeType.COVER);
 
             const actions = textX.serialize();
 
@@ -95,7 +91,6 @@ describe('test TextX methods and branches', () => {
                     body,
                     len: 5,
                     coverType: UpdateDocsAttributeType.COVER,
-                    segmentId: '',
                 },
             ]);
         });
@@ -103,8 +98,8 @@ describe('test TextX methods and branches', () => {
         it('test TextX push method and merge two delete actions', () => {
             const textX = new TextX();
 
-            textX.delete(5, '');
-            textX.delete(5, '');
+            textX.delete(5);
+            textX.delete(5);
 
             const actions = textX.serialize();
 
@@ -112,8 +107,6 @@ describe('test TextX methods and branches', () => {
                 {
                     t: TextXActionType.DELETE,
                     len: 10, // 5 + 5
-                    line: 0,
-                    segmentId: '',
                 },
             ]);
         });
@@ -134,8 +127,8 @@ describe('test TextX methods and branches', () => {
                 ],
             };
 
-            textX.delete(5, '');
-            textX.insert(5, body, '');
+            textX.delete(5);
+            textX.insert(5, body);
 
             const actions = textX.serialize();
 
@@ -144,14 +137,10 @@ describe('test TextX methods and branches', () => {
                     t: TextXActionType.INSERT,
                     body,
                     len: 5,
-                    line: 0,
-                    segmentId: '',
                 },
                 {
                     t: TextXActionType.DELETE,
                     len: 5,
-                    line: 0,
-                    segmentId: '',
                 },
             ]);
         });
@@ -159,8 +148,8 @@ describe('test TextX methods and branches', () => {
         it('test TextX push method and merge two simple retain action', () => {
             const textX = new TextX();
 
-            textX.retain(4, '');
-            textX.retain(5, '');
+            textX.retain(4);
+            textX.retain(5);
 
             const actions = textX.serialize();
 
@@ -168,7 +157,6 @@ describe('test TextX methods and branches', () => {
                 {
                     t: TextXActionType.RETAIN,
                     len: 9,
-                    segmentId: '',
                 },
             ]);
         });
@@ -179,11 +167,9 @@ describe('test TextX methods and branches', () => {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: 4,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 5,
-                segmentId: '',
             });
 
             const actions = textX.serialize();
@@ -192,7 +178,6 @@ describe('test TextX methods and branches', () => {
                 {
                     t: TextXActionType.RETAIN,
                     len: 9,
-                    segmentId: '',
                 },
             ]);
         });
@@ -215,20 +200,15 @@ describe('test TextX methods and branches', () => {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: 4,
-                segmentId: '',
             }, {
                 t: TextXActionType.DELETE,
                 len: 5,
-                line: 0,
-                segmentId: '',
             });
 
             textX.push({
                 t: TextXActionType.INSERT,
                 len: 5,
                 body,
-                line: 0,
-                segmentId: '',
             });
 
             const actions = textX.serialize();
@@ -246,8 +226,8 @@ describe('test TextX methods and branches', () => {
 
             expect(TextX.isNoop(textX.serialize())).toBe(true);
 
-            textX.retain(4, '');
-            textX.delete(5, '');
+            textX.retain(4);
+            textX.delete(5);
 
             expect(TextX.isNoop(textX.serialize())).toBe(false);
         });

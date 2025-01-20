@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import type { MenuSchemaType } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
-import { DeleteLeftCommand } from '../commands/commands/delete.command';
+import { DeleteLeftCommand } from '../commands/commands/doc-delete.command';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
 
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
+import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
@@ -54,6 +55,7 @@ import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     CheckListMenuItemFactory,
+    DocSwitchModeMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     HeaderFooterMenuItemFactory,
@@ -157,6 +159,10 @@ export const menuSchema: MenuSchemaType = {
         [OpenHeaderFooterPanelCommand.id]: {
             order: 9,
             menuItemFactory: HeaderFooterMenuItemFactory,
+        },
+        [SwitchDocModeCommand.id]: {
+            order: 10,
+            menuItemFactory: DocSwitchModeMenuItemFactory,
         },
     },
     [ContextMenuPosition.MAIN_AREA]: {

@@ -21,8 +21,10 @@ import type {
     IDocDrawingBase,
     IDocumentRenderConfig,
     INestingLevel,
+    IParagraph,
     IParagraphProperties,
     ITable,
+    ITableRow,
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
@@ -37,11 +39,16 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     parent?: unknown;
 }
 
+export interface IParagraphList {
+    bullet: IDocumentSkeletonBullet;
+    paragraph: IParagraph;
+}
+
 export interface ISkeletonResourceReference {
     skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
     skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
-    skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
+    skeListLevel?: Map<string, IParagraphList[][]>; // 有序列表缓存，id：{ level: max(width)的bullet }
     drawingAnchor?: Map<string, Map<number, IDocumentSkeletonDrawingAnchor>>; // Anchor point to assist floating element positioning
 }
 
@@ -135,7 +142,9 @@ export interface IDocumentSkeletonRow {
     top: number; // top 相对于表格上沿
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
+    rowSource: ITableRow;
     parent?: IDocumentSkeletonTable;
+    isRepeatRow: boolean; // 是否是标题重复行
 }
 
 export interface IDocumentSkeletonColumn {

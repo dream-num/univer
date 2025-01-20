@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-import { type IDrawingParam, type IImageData, type IRotationSkewFlipTransform, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
-import type { Serializable } from '@univerjs/core';
+import type { IDrawingParam, IRotationSkewFlipTransform, Serializable } from '@univerjs/core';
+import type { ISheetOverGridPosition } from '@univerjs/sheets';
 import { createIdentifier } from '@univerjs/core';
-
-interface ICellPosition {
-    column: number; // column number
-    columnOffset: number; // column offset, unit is EMUs
-    row: number; // row number
-    rowOffset: number; // row offset, unit is EMUs
-}
+import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 
 export enum SheetDrawingAnchorType {
+    /**
+     * Only the position of the drawing follows the cell changes. When rows or columns are inserted or deleted, the position of the drawing changes, but the size remains the same.
+     */
     Position = '0',
+
+    /**
+     * The size and position of the drawing follow the cell changes. When rows or columns are inserted or deleted, the size and position of the drawing change accordingly.
+     */
     Both = '1',
+
+    /**
+     * The size and position of the drawing do not follow the cell changes. When rows or columns are inserted or deleted, the position and size of the drawing remain unchanged.
+     */
     None = '2',
 }
 
-export interface ISheetDrawingPosition extends IRotationSkewFlipTransform {
-    from: ICellPosition;
-    to: ICellPosition;
+export interface ISheetDrawingPosition extends IRotationSkewFlipTransform, ISheetOverGridPosition {
+
 }
 
 export interface ISheetDrawingBase {

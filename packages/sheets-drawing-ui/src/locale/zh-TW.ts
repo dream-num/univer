@@ -55,7 +55,7 @@ const locale: typeof zhCN = {
             'drawing-move-down': '下移繪圖',
             'drawing-move-up': '上移繪圖',
             'drawing-move-left': '左移繪圖',
-            'drawing-move-right': '下移繪圖',
+            'drawing-move-right': '右移繪圖',
             'drawing-delete': '刪除繪圖',
         },
     },

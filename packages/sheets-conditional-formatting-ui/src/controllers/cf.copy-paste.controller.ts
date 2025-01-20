@@ -15,14 +15,14 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IDiscreteRange, IPasteHookValueType } from '@univerjs/sheets-ui';
 import {
     Disposable,
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Range,
     Rectangle,
     Tools,
@@ -31,12 +31,9 @@ import {
 import {
     createTopMatrixFromMatrix, findAllRectangle,
 } from '@univerjs/sheets';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingCopyPasteController)
 export class ConditionalFormattingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         matrix: ObjectMatrix<string[]>;
@@ -85,10 +82,6 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                 cfMap,
             },
         };
-        const model = this._conditionalFormattingViewModel.getMatrix(unitId, subUnitId);
-        if (!model) {
-            return;
-        }
 
         const discreteRange = this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
@@ -100,12 +93,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         const cfIdSet: Set<string> = new Set();
         rows.forEach((row, rowIndex) => {
             cols.forEach((col, colIndex) => {
-                const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
+                const cellCfList = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, row, col);
                 if (!cellCfList) {
                     return;
                 }
-                cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
-                matrix.setValue(rowIndex, colIndex, cellCfList.cfList.map((item) => item.cfId));
+                cellCfList.forEach((item) => cfIdSet.add(item.cfId));
+                matrix.setValue(rowIndex, colIndex, cellCfList.map((item) => item.cfId));
             });
         });
         cfIdSet.forEach((cfId) => {
@@ -122,7 +115,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         copyInfo: {
             copyType: COPY_TYPE;
             copyRange?: IDiscreteRange;
-            pasteType: string;
+            pasteType: IPasteHookValueType;
         }
     ) {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -142,8 +135,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
+        const specialPastes: IPasteHookValueType[] = [
+            PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER,
+        ];
+
         if (
-            ![PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER].includes(
+            !specialPastes.includes(
                 copyInfo.pasteType
             )
         ) {
@@ -152,13 +149,12 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
 
         const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
         const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
-        const model = this._conditionalFormattingViewModel.getMatrix(unitId, subUnitId);
         const effectedConditionalFormattingRuleMatrix: Record<string, ObjectMatrix<1>> = {};
         Range.foreach(vPastedRange, (row, col) => {
             const { row: realRow, col: realCol } = mapFunc(row, col);
-            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, realRow, realCol, model!);
+            const cellCfList = this._conditionalFormattingViewModel.getCellCfs(unitId, subUnitId, realRow, realCol);
             if (cellCfList) {
-                cellCfList.cfList.forEach((item) => {
+                cellCfList.forEach((item) => {
                     if (!effectedConditionalFormattingRuleMatrix[item.cfId]) {
                         const ruleMatrix = new ObjectMatrix<1>();
                         effectedConditionalFormattingRuleMatrix[item.cfId] = ruleMatrix;
@@ -210,33 +206,33 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
 
         repeatRange.forEach((item) => {
             matrix &&
-            matrix.forValue((row, col, copyRangeCfIdList) => {
-                const range = Rectangle.getPositionRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    item.startRange
-                );
+                matrix.forValue((row, col, copyRangeCfIdList) => {
+                    const range = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            endRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                        },
+                        item.startRange
+                    );
 
-                const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
+                    const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
 
-                copyRangeCfIdList.forEach((cfId) => {
-                    if (!effectedConditionalFormattingRuleMatrix[cfId]) {
-                        const rule = getCurrentSheetCfRule(cfId);
-                        const ruleMatrix = new ObjectMatrix<1>();
-                        effectedConditionalFormattingRuleMatrix[cfId] = ruleMatrix;
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                ruleMatrix.setValue(row, col, 1);
+                    copyRangeCfIdList.forEach((cfId) => {
+                        if (!effectedConditionalFormattingRuleMatrix[cfId]) {
+                            const rule = getCurrentSheetCfRule(cfId);
+                            const ruleMatrix = new ObjectMatrix<1>();
+                            effectedConditionalFormattingRuleMatrix[cfId] = ruleMatrix;
+                            rule.ranges.forEach((range) => {
+                                Range.foreach(range, (row, col) => {
+                                    ruleMatrix.setValue(row, col, 1);
+                                });
                             });
-                        });
-                    }
-                    effectedConditionalFormattingRuleMatrix[cfId].setValue(_row, _col, 1);
+                        }
+                        effectedConditionalFormattingRuleMatrix[cfId].setValue(_row, _col, 1);
+                    });
                 });
-            });
         });
         const redos = [];
         const undos = [];

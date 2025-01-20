@@ -15,19 +15,22 @@
  */
 
 export { countryCurrencyMap } from './base/const/CURRENCY-SYMBOLS';
+export { CURRENCYFORMAT, DATEFMTLISG, NUMBERFORMAT } from './base/const/FORMATDETAIL';
 export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
 export { MenuCurrencyService } from './service/menu.currency.service';
-export { getPatternPreview, getPatternType } from './utils/pattern';
+export { getPatternPreview, getPatternPreviewIgnoreGeneral, getPatternType } from './utils/pattern';
+export { getDecimalFromPattern, getDecimalString, isPatternEqualWithoutDecimal, isPatternHasDecimal, setPatternDecimal } from './utils/decimal';
+export { getCurrencyType } from './utils/currency';
+export { currencySymbols } from './base/const/CURRENCY-SYMBOLS';
+export { SheetsNumfmtCellContentController } from './controllers/numfmt-cell-content.controller';
+export { getCurrencyFormatOptions, getCurrencyOptions, getDateFormatOptions, getNumberFormatOptions } from './utils/options';
 
 // #region - all commands
 
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';
 export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-
 export { SetPercentCommand } from './commands/commands/set-percent.command';
 export { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
-export { CloseNumfmtPanelOperator } from './commands/operations/close.numfmt.panel.operation';
-export { OpenNumfmtPanelOperator } from './commands/operations/open.numfmt.panel.operation';
 
 // #endregion

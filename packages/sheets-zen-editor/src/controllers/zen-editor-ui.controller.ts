@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 
-import { CancelZenEditCommand, ConfirmZenEditCommand } from '../commands/commands/zen-editor.command';
-import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
+import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
-import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 import { menuSchema } from './menu.schema';
+import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 
-@OnLifecycle(LifecycleStages.Rendered, ZenEditorUIController)
 export class ZenEditorUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
@@ -49,7 +46,7 @@ export class ZenEditorUIController extends Disposable {
     }
 
     private _initCommands(): void {
-        [OpenZenEditorOperation, CancelZenEditCommand, ConfirmZenEditCommand].forEach((c) => {
+        [OpenZenEditorCommand, CancelZenEditCommand, ConfirmZenEditCommand].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
     }

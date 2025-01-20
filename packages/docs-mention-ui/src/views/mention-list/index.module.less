@@ -16,6 +16,7 @@
     align-items: center;
     flex-direction: row;
     cursor: pointer;
+    border-radius: var(--border-radius-base);
 
     &-icon {
         width: 24px;
@@ -24,10 +25,11 @@
         margin-right: 6px;
         flex: 0 0 auto;
         border-radius: 6px;
+        pointer-events: none;
+    }
 
-        &-active {
-            background: rgb(var(--grey-50));
-        }
+    &-active {
+        background: rgb(var(--grey-50));
     }
 
     &-icon:hover {
@@ -39,5 +41,6 @@
         flex: 1 1 0;
         white-space: nowrap;
         text-overflow: ellipsis;
+        pointer-events: none;
     }
 }

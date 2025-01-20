@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import * as json1 from 'ot-json1';
 import { type Observable, Subject } from 'rxjs';
@@ -137,7 +137,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     getDrawingDataForUnit(unitId: string) {
-        return this.drawingManagerData[unitId];
+        return this.drawingManagerData[unitId] || {};
     }
 
     removeDrawingDataForUnit(unitId: string) {
@@ -470,7 +470,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void {
-        if (params == null) {
+        if (params == null || params.length === 0) {
             this._focusDrawings = [];
             this._focus$.next([]);
             return;

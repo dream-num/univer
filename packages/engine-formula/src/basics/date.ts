@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { isRealNum, numfmt } from '@univerjs/core';
 import type { BaseValueObject } from '../engine/value-object/base-value-object';
+import { isRealNum, numfmt } from '@univerjs/core';
 import { ErrorValueObject } from '../engine/value-object/base-value-object';
 import { ErrorType } from './error-type';
 
@@ -257,7 +257,7 @@ export function countWorkingDays(startDateSerialNumber: number, endDateSerialNum
         workingDays++;
     }
 
-    return end > start ? workingDays : -workingDays;
+    return end >= start ? workingDays : -workingDays;
 }
 
 export function getDateSerialNumberByWorkingDays(startDateSerialNumber: number, workingDays: number, weekend: number | string = 1, holidays?: number[]): (number | ErrorValueObject) {
@@ -515,6 +515,7 @@ export function isLeapYear1900(year: number): boolean {
 const daysInMonthL = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const daysInMonthR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
+// month is 0 based
 export function getDaysInMonth(year: number, month: number): number {
     return isLeapYear(year) ? daysInMonthL[month] : daysInMonthR[month];
 }

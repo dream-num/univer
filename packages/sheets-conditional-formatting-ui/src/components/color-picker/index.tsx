@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Dropdown, ColorPicker as OriginColorPicker } from '@univerjs/design';
 import { ColorKit, useDependency } from '@univerjs/core';
+import { DropdownLegacy, ColorPicker as OriginColorPicker } from '@univerjs/design';
+import { MoreDownSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
 import React, { useMemo } from 'react';
-import { MoreDownSingle } from '@univerjs/icons';
 
 import styles from './index.module.less';
 
@@ -40,19 +40,26 @@ export const ColorPicker = (props: IColorPickerProps) => {
 
     return Icon && (!disable
         ? (
-            <Dropdown
+            <DropdownLegacy
                 overlay={(
-                    <div className={`${styles.cfColorPicker} `}>
-                        <OriginColorPicker color={color} onChange={onChange} />
+                    <div className={`
+                      ${styles.cfColorPicker}
+                    `}
+                    >
+                        <OriginColorPicker value={color} onChange={onChange} />
                     </div>
                 )}
             >
-                <span className={`${styles.cfColorPickerIcon} ${className}`}>
+                <span className={`
+                  ${styles.cfColorPickerIcon}
+                  ${className}
+                `}
+                >
                     <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />
                     {isNeedDropdownIcon && <MoreDownSingle className={styles.iconDropdown} />}
                 </span>
 
-            </Dropdown>
+            </DropdownLegacy>
         )
         : <Icon className={className} extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />);
 };

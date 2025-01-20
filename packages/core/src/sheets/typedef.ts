@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
-import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -67,9 +66,19 @@ export interface IWorkbookData {
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 
     /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Workbook.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
+
+    /**
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
      */
     resources?: IResources;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 /**
@@ -117,6 +126,11 @@ export interface IWorksheetData {
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
 
+    /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Worksheet.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
+
     rowHeader: {
         width: number;
         hidden?: BooleanNumber;
@@ -128,8 +142,20 @@ export interface IWorksheetData {
     };
 
     showGridlines: BooleanNumber;
+    /**
+     * Color of the gridlines.
+     */
+    gridlinesColor?: string;
+
     rightToLeft: BooleanNumber;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
+
+export type CustomData = Nullable<Record<string, any>>;
 
 /**
  * Properties of row data
@@ -154,6 +180,16 @@ export interface IRowData {
      * hidden
      */
     hd?: BooleanNumber;
+
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 export interface IRowAutoHeightInfo {
@@ -174,6 +210,21 @@ export interface IColumnData {
      * hidden
      */
     hd?: BooleanNumber;
+
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
+}
+
+export interface IColAutoWidthInfo {
+    col: number;
+    width?: number;
 }
 
 /**
@@ -215,7 +266,7 @@ export interface ICellData {
     /**
      * User stored custom fields
      */
-    custom?: Nullable<Record<string, any>>;
+    custom?: CustomData;
 }
 
 export interface ICellMarksStyle {
@@ -231,27 +282,32 @@ export interface ICellMarks {
     isSkip?: boolean;
 }
 
+export interface IFontRenderExtension {
+    leftOffset?: number;
+    rightOffset?: number;
+    topOffset?: number;
+    downOffset?: number;
+    isSkip?: boolean;
+}
+
 // TODO@weird94: should be moved outside of the core package
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
-    dataValidation?: Nullable<ICellValidationData>;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;
+    interceptorAutoWidth?: () => number | undefined;
     /**
      * can cell be covered when sibling is overflow
      */
     coverable?: boolean;
     linkUrl?: string;
     linkId?: string;
-    fontRenderExtension?: {
-        leftOffset?: number;
-        rightOffset?: number;
-        topOffset?: number;
-        downOffset?: number;
-        isSkip?: boolean;
-    };
+    fontRenderExtension?: IFontRenderExtension;
+    // use for save the theme style, it  can not be composed directly
+    themeStyle?: Nullable<IStyleData>;
+
 }
 
 export function isICellData(value: any): value is ICellData {
@@ -287,7 +343,7 @@ export function isNullCell(cell: Nullable<ICellData>) {
         return true;
     }
 
-    const { v, f, si, p, s, custom } = cell;
+    const { v, f, si, p, custom } = cell;
 
     if (!(v == null || (typeof v === 'string' && v.length === 0))) {
         return false;
@@ -313,9 +369,22 @@ export function isCellV(cell: Nullable<ICellData | CellValue>) {
 }
 
 export interface IFreeze {
+    /**
+     * count of fixed cols
+     */
     xSplit: number;
+    /**
+     * count of fixed rows
+     */
     ySplit: number;
+    /**
+     * scrollable start row
+     */
     startRow: number;
+
+    /**
+     * scrollable start column
+     */
     startColumn: number;
 }
 
@@ -526,7 +595,7 @@ export interface IOptionData {
 /**
  * Option of copyTo function
  */
-export interface ICopyToOptionsData extends IOptionData {}
+export interface ICopyToOptionsData extends IOptionData { }
 
 export interface IRectLTRB {
     left: number;
@@ -554,13 +623,77 @@ export interface ISingleCell {
     isMergedMainCell: boolean;
 }
 
-export interface IRangeWithCoord extends IPosition, IRange {}
+export interface IRangeWithCoord extends IPosition, IRange { }
 
-export interface ISelectionCell extends IRange, ISingleCell {}
-
+/**
+ * @deprecated use ICellWithCoord instead.
+ */
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
+
+/**
+ * SingleCell & coordinate and mergeRange.
+ */
+// Original name: ISelectionCellWithMergeInfo
+export interface ICellWithCoord extends IPosition, ISingleCell {
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
+
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    startY: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endX: number;
+    /**
+     * Coordinate of the single cell(actual row and column).
+     */
+    endY: number;
+
+    // part of singleCell
+    /**
+     * The raw row index calculated by the offsetX (Without considering merged cells, this value is simply the row index.If there are merged cells, this value refers to the cell where the mouse was clicked.)
+     */
+    actualRow: number;
+
+    /**
+     * The raw col index calculated by the offsetX (Without considering merged cells)
+     */
+    actualColumn: number;
+    /**
+     * Whether the cell is merged. But main merged cell is false.
+     */
+    isMerged: boolean;
+    /**
+     * if Merged and is main merged cell.
+     */
+    isMergedMainCell: boolean;
+}
+
+/**
+ * Range & SingleCell & isMerged.
+ * startRow: number;
+ * startColumn: number;
+ * endRow: number;
+ * endColumn: number;
+ *
+ * actualRow: number;
+ * actualColumn: number;
+ * isMerged: boolean;
+ * isMergedMainCell: boolean;
+ */
+export interface ISelectionCell extends IRange, ISingleCell { }
+
+/**
+ * ICellInfo has the same properties as ISelectionCell, but the name ICellInfo might be more semantically appropriate in some contexts.
+ */
+export interface ICellInfo extends ISelectionCell { }
 
 export interface ISelection {
     /**
@@ -570,19 +703,11 @@ export interface ISelection {
 
     /**
      * The highlighted cell in the selection range. If there are several selections, only one selection would have a primary cell.
+     *
+     * This cell range should consider the merged cells.
      */
     primary: Nullable<ISelectionCell>;
 }
-
-/**
- * Selection range Info, contains selection range & primary range
- * primary range is the range of the highlighted cell.
- */
-export interface ISelectionWithCoord {
-    rangeWithCoord: IRangeWithCoord;
-    primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;
-}
-
 export interface ITextRangeStart {
     startOffset: number;
 }
@@ -673,4 +798,12 @@ export function getCellInfoInMergeData(row: number, column: number, mergeData?: 
         startRow: mergeRow,
         startColumn: mergeColumn,
     };
+}
+
+export type ICellDataWithSpanAndDisplay = ICellData & { rowSpan?: number; colSpan?: number; displayV?: string };
+
+export enum CellModeEnum {
+    Raw = 'raw',
+    Intercepted = 'intercepted',
+    Both = 'both',
 }

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 interface IAddCustomDecorationParam {
     unitId: string;
@@ -37,41 +37,13 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
             unitId,
             actions: [],
             textRanges: undefined,
+            // noHistory: true,
+            segmentId,
         },
     };
 
-    const textX = new TextX();
     const jsonX = JSONX.getInstance();
-    let cursor = 0;
-
-    for (let i = 0; i < ranges.length; i++) {
-        const range = ranges[i];
-        const { startOffset: start, endOffset: end } = range;
-        if (start > 0) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: start - cursor,
-                segmentId,
-            });
-        }
-
-        textX.push({
-            t: TextXActionType.RETAIN,
-            body: {
-                dataStream: '',
-                customDecorations: [{
-                    id,
-                    type,
-                    startIndex: 0,
-                    endIndex: end - start - 1,
-                }],
-            },
-            len: end - start,
-            segmentId,
-        });
-
-        cursor = end;
-    }
+    const textX = BuildTextUtils.customDecoration.add({ ranges, id, type });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
@@ -81,14 +53,17 @@ interface IAddCustomDecorationFactoryParam {
     segmentId?: string;
     id: string;
     type: CustomDecorationType;
+    unitId?: string;
 }
 
 export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param: IAddCustomDecorationFactoryParam) {
-    const { segmentId, id, type } = param;
+    const { segmentId, id, type, unitId: propUnitId } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const documentDataModel = propUnitId ?
+        univerInstanceService.getUnit<DocumentDataModel>(propUnitId, UniverInstanceType.UNIVER_DOC)
+        : univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }
@@ -127,27 +102,9 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-    const body = documentDataModel?.getBody();
-    if (!documentDataModel || !body) {
+    if (!documentDataModel) {
         return false;
     }
-
-    const decorations = documentDataModel.getBody()?.customDecorations?.filter((d) => d.id === id);
-    if (!decorations?.length) {
-        return false;
-    }
-
-    const oldBodySlices = decorations.map((i) => {
-        const bodySlice = getBodySlice(body, i.startIndex, i.endIndex + 1);
-        // bodySlice.customDecorations = bodySlice.customDecorations?.filter((decoration) => decoration.id !== id);
-        return bodySlice;
-    });
-
-    const bodySlices = oldBodySlices.map((bodySlice) => {
-        const copy = Tools.deepClone(bodySlice);
-        copy.customDecorations = copy.customDecorations?.filter((decoration) => decoration.id !== id);
-        return copy;
-    });
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
@@ -155,34 +112,16 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
             unitId,
             actions: [],
             textRanges: undefined,
+            // noHistory: true,
+            segmentId,
         },
     };
 
-    const textX = new TextX();
+    const textX = BuildTextUtils.customDecoration.delete({ id, segmentId, documentDataModel });
+    if (!textX) {
+        return false;
+    }
     const jsonX = JSONX.getInstance();
-
-    let cursor = 0;
-    decorations.forEach((decoration, i) => {
-        const bodySlice = bodySlices[i];
-        const oldBody = oldBodySlices[i];
-        if (decoration.startIndex !== cursor) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: decoration.startIndex - cursor,
-                segmentId,
-            });
-        }
-        cursor = (decoration.startIndex);
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: decoration.endIndex - decoration.startIndex + 1,
-            segmentId,
-            body: bodySlice,
-            oldBody,
-            coverType: UpdateDocsAttributeType.REPLACE,
-        });
-        cursor = cursor + (decoration.endIndex - decoration.startIndex + 1);
-    });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../basics';
+
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import {
     CommandType,
     ErrorService,
@@ -25,9 +30,8 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SelectionMoveType } from '../../services/selections/type';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     MoveColsMutation,
@@ -38,9 +42,6 @@ import {
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISelectionWithStyle } from '../../basics';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface IMoveRowsCommandParams {
     unitId?: string;
@@ -65,8 +66,9 @@ export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
 export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     id: MoveRowsCommandId,
     type: CommandType.COMMAND,
+
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
+    handler: (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
             fromRange: { startRow: fromRow },
@@ -161,13 +163,17 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             const setSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
-                selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
+                type: SelectionMoveType.MOVE_END,
+                selections: [{
+                    range: destSelection,
+                    primary: getPrimaryForRange(destSelection, worksheet),
+                    style: null,
+                }],
             };
             const undoSetSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
             };
 
@@ -206,8 +212,9 @@ export const MoveColsCommandId = 'sheet.command.move-cols' as const;
 export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     id: MoveColsCommandId,
     type: CommandType.COMMAND,
+
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
+    handler: (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const {
             fromRange: { startColumn: fromCol },
@@ -301,13 +308,13 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             const setSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
             };
             const undoSetSelectionsParam: ISetSelectionsOperationParams = {
                 unitId,
                 subUnitId,
-
+                type: SelectionMoveType.MOVE_END,
                 selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
             };
 

@@ -14,28 +14,46 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { IRange } from '@univerjs/core';
-
 import type { UnitObject } from '@univerjs/protocol';
+import { Tools } from '@univerjs/core';
+
+import { BehaviorSubject, Subject } from 'rxjs';
+
+export enum ViewStateEnum {
+    OthersCanView = 'othersCanView',
+    NoOneElseCanView = 'noOneElseCanView',
+}
+
+export enum EditStateEnum {
+    DesignedUserCanEdit = 'designedUserCanEdit',
+    OnlyMe = 'onlyMe',
+}
 
 export interface IRangeProtectionRule {
     ranges: IRange[];
     permissionId: string;
     id: string;
-    name: string;
     description?: string;
     unitType: UnitObject;
     unitId: string;
     subUnitId: string;
+    viewState: ViewStateEnum;
+    editState: EditStateEnum;
 }
 export type IObjectModel = Record<string, Record<string, IRangeProtectionRule[]>>;
 
 export type IModel = Map<string, Map<string, Map<string, IRangeProtectionRule>>>;
 
+export interface IRuleChange {
+    unitId: string;
+    subUnitId: string;
+    rule: IRangeProtectionRule;
+    oldRule?: IRangeProtectionRule;
+    type: IRuleChangeType;
+}
+
 type IRuleChangeType = 'add' | 'set' | 'delete';
-@OnLifecycle(LifecycleStages.Starting, RangeProtectionRuleModel)
 
 export class RangeProtectionRuleModel {
     /**
@@ -44,13 +62,7 @@ export class RangeProtectionRuleModel {
      */
     private _model: IModel = new Map();
 
-    private _ruleChange = new Subject<{
-        unitId: string;
-        subUnitId: string;
-        rule: IRangeProtectionRule;
-        oldRule?: IRangeProtectionRule;
-        type: IRuleChangeType;
-    }>();
+    private _ruleChange = new Subject<IRuleChange>();
 
     ruleChange$ = this._ruleChange.asObservable();
 

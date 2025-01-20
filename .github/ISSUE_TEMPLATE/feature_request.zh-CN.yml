@@ -1,6 +1,6 @@
 name: 🚀 新功能请求
 description: 尽管我们提供了中文 Feature request 的入口，但还是建议您使用英语描述需求，这可以让更多的人来帮助您。
-labels: feature
+type: Feature
 title: '[Feature] '
 
 body:

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
-import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
@@ -34,6 +34,10 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
     options?: { [key: string]: boolean };
+    // Whether this mutation is from a sync operation.
+    isSync?: boolean;
+    isEditing?: boolean;
+    syncer?: string;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -47,6 +51,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const {
             unitId,
@@ -59,6 +64,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             isCompositionEnd,
             noNeedSetTextRange,
             debounce,
+            isEditing = true,
+            isSync,
+            syncer,
         } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -93,9 +101,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         documentViewModel.reset(documentDataModel);
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
-        if (!noNeedSetTextRange && textRanges && trigger != null) {
+        if (!noNeedSetTextRange && textRanges && trigger != null && !isSync) {
             queueMicrotask(() => {
-                docSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
+                docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
             });
         }
 
@@ -116,6 +124,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 textRanges: prevTextRanges ?? docRanges,
             },
             isCompositionEnd,
+            isSync,
+            syncer,
         };
         docStateEmitService.emitStateChangeInfo(changeState);
 

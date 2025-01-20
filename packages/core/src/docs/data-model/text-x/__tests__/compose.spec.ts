@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { TextXAction } from '../action-types';
-import { TextXActionType } from '../action-types';
+import { describe, expect, it } from 'vitest';
+import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum/text-style';
+import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 describe('compose test cases', () => {
@@ -38,7 +39,6 @@ describe('compose test cases', () => {
                 customDecorations: [],
             },
             len: 5,
-            line: 0,
         }];
         const expect_actions = actions_b;
 
@@ -57,7 +57,6 @@ describe('compose test cases', () => {
                 customDecorations: [],
             },
             len: 5,
-            line: 0,
         }];
         const actions_b: TextXAction[] = [];
         const expect_actions = actions_a;
@@ -72,19 +71,16 @@ describe('compose test cases', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 8,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 10,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -94,19 +90,16 @@ describe('compose test cases', () => {
         const actions_a: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 8,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 10,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -116,7 +109,6 @@ describe('compose test cases', () => {
         const actions_a: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -127,7 +119,6 @@ describe('compose test cases', () => {
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -137,7 +128,6 @@ describe('compose test cases', () => {
         const actions_a: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -146,7 +136,6 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         // Always put insert before delete.
@@ -154,15 +143,11 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
-            line: 0,
         }, {
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -196,7 +181,6 @@ describe('compose test cases', () => {
             body: {
                 dataStream: 'h',
             },
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
@@ -204,10 +188,7 @@ describe('compose test cases', () => {
             len: 1,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -222,13 +203,11 @@ describe('compose test cases', () => {
         const actions_b: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -241,7 +220,6 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -253,11 +231,8 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'h',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -270,7 +245,6 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -279,7 +253,6 @@ describe('compose test cases', () => {
                 dataStream: 'b',
             },
             len: 1,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
@@ -288,7 +261,6 @@ describe('compose test cases', () => {
                 dataStream: 'bh',
             },
             len: 2,
-            line: 0,
         }];
 
         const composed = TextX.compose(actions_a, actions_b);
@@ -303,13 +275,11 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [];
@@ -350,6 +320,7 @@ describe('compose test cases', () => {
 
         const expect_actions: TextXAction[] = [{
             t: TextXActionType.RETAIN,
+            coverType: UpdateDocsAttributeType.COVER,
             body: {
                 dataStream: '',
                 textRuns: [{
@@ -374,7 +345,6 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -405,7 +375,6 @@ describe('compose test cases', () => {
                 }],
             },
             len: 1,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(expect_actions);
@@ -443,8 +412,6 @@ describe('compose test cases', () => {
                         it: BooleanNumber.TRUE,
                     },
                 }],
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
         }];
@@ -462,7 +429,6 @@ describe('compose test cases', () => {
                 dataStream: 'h',
             },
             len: 1,
-            line: 0,
         }];
 
         const actions_b: TextXAction[] = [{
@@ -474,11 +440,9 @@ describe('compose test cases', () => {
                 dataStream: 'ab',
             },
             len: 2,
-            line: 0,
         }, {
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
         }];
 
         const inner_actions: TextXAction[] = [{
@@ -488,11 +452,8 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'ab',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 2,
-            line: 0,
         }];
 
         expect(TextX.compose(actions_a, actions_b)).toEqual(inner_actions);
@@ -506,11 +467,9 @@ describe('compose test cases', () => {
                 dataStream: 'c',
             },
             len: 1,
-            line: 0,
         }, {
             t: TextXActionType.DELETE,
             len: 2,
-            line: 0,
         }];
 
         const expect_actions: TextXAction[] = [{
@@ -520,11 +479,8 @@ describe('compose test cases', () => {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: 'c',
-                customRanges: [],
-                customDecorations: [],
             },
             len: 1,
-            line: 0,
         }];
 
         expect(TextX.compose(inner_actions, actions_c)).toEqual(expect_actions);

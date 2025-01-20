@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
+import type { ISheetFloatDom } from '@univerjs/sheets-drawing';
+import { connectInjector, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService, SetDrawingSelectedOperation } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
-import type { BaseObject, Scene } from '@univerjs/engine-render';
 
+import { takeUntil } from 'rxjs';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { UploadLoading } from '../views/upload-loading/UploadLoading';
 
-@OnLifecycle(LifecycleStages.Steady, DrawingPopupMenuController)
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
@@ -39,7 +39,8 @@ export class DrawingPopupMenuController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService
+        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -120,21 +121,22 @@ export class DrawingPopupMenuController extends RxDisposable {
                     }
 
                     const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                    // drawingParam should be  ICanvasFloatDom, use for disable popup dialog
+                    const data = (drawingParam as ISheetFloatDom).data as Record<string, boolean>;
+                    if (data && data.disablePopup) {
+                        return;
+                    }
+
                     singletonPopupDisposer?.dispose();
+                    const menus = this._canvasPopManagerService.getFeatureMenu(unitId, subUnitId, drawingId, drawingType);
                     singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
                         direction: 'horizontal',
                         offset: [2, 0],
                         extraProps: {
-                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
+                            menuItems: menus || this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
                         },
                     }));
-
-                    this._drawingManagerService.focusDrawing([{
-                        unitId,
-                        subUnitId,
-                        drawingId,
-                    }]);
                 })
             )
         );
@@ -142,7 +144,14 @@ export class DrawingPopupMenuController extends RxDisposable {
             transformer.clearControl$.subscribe(() => {
                 singletonPopupDisposer?.dispose();
                 this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                this._drawingManagerService.focusDrawing(null);
+                this._commandService.syncExecuteCommand(SetDrawingSelectedOperation.id, []);
+            })
+        );
+        this.disposeWithMe(
+            this._contextService.contextChanged$.subscribe((event) => {
+                if (event[FOCUSING_COMMON_DRAWINGS] === false) {
+                    singletonPopupDisposer?.dispose();
+                }
             })
         );
         this.disposeWithMe(

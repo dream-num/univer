@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Dependency, ICommand, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
+import type { IInsertColMutationParams } from '../../../basics';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 
-import { RefRangeService } from '../ref-range.service';
-import { SheetsSelectionsService } from '../../selections/selection-manager.service';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InsertColMutation } from '../../../commands/mutations/insert-row-col.mutation';
-import type { IInsertColMutationParams } from '../../../basics';
+import { SheetsSelectionsService } from '../../selections/selection.service';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
+import { RefRangeService } from '../ref-range.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { binomialPDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class BinomDistRange extends BaseFunction {
     override minParams = 3;
@@ -63,6 +63,22 @@ export class BinomDistRange extends BaseFunction {
             const probabilitySObject = probabilitySArray.get(rowIndex, columnIndex) as BaseValueObject;
             const numberSObject = numberSArray.get(rowIndex, columnIndex) as BaseValueObject;
             const numberS2Object = numberS2Array.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (numberSObject.isError()) {
+                return numberSObject;
+            }
+
+            if (numberS2Object.isError()) {
+                return numberS2Object;
+            }
 
             return this._handleSignleObject(trialsObject, probabilitySObject, numberSObject, numberS2Object);
         });

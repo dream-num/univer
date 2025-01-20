@@ -56,5 +56,11 @@ export function ZenZone() {
         }
     }, [componentKey]);
 
-    return <section style={hidden ? { display: 'none' } : undefined} className={_className}>{Component && <Component />}</section>;
+    return (
+        <section style={hidden ? { opacity: 0, zIndex: -1 } : undefined} className={_className}>
+            <div className={styles.zenZoneEditorContainer}>
+                {Component && <Component />}
+            </div>
+        </section>
+    );
 }

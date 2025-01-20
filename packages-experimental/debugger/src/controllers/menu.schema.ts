@@ -20,10 +20,12 @@ import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverComman
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
+import { DarkModeOperation } from '../commands/operations/dark-mode.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
 import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
@@ -33,6 +35,7 @@ import {
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
     CreateFloatDOMMenuItemFactory,
+    DarkModeMenuItemFactory,
     DialogMenuItemFactory,
     DisposeCurrentUnitMenuItemFactory,
     DisposeUniverItemFactory,
@@ -49,6 +52,7 @@ import {
     ThemeMenuItemFactory,
     UNIT_ITEM_MENU_ID,
     UnitMenuItemFactory,
+    WatermarkMenuItemFactory,
 } from '../controllers/menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -56,6 +60,10 @@ export const menuSchema: MenuSchemaType = {
         [LocaleOperation.id]: {
             order: 0,
             menuItemFactory: LocaleMenuItemFactory,
+        },
+        [DarkModeOperation.id]: {
+            order: 0.9,
+            menuItemFactory: DarkModeMenuItemFactory,
         },
         [ThemeOperation.id]: {
             order: 1,
@@ -124,6 +132,10 @@ export const menuSchema: MenuSchemaType = {
         [ChangeUserCommand.id]: {
             order: 11,
             menuItemFactory: ChangeUserMenuItemFactory,
+        },
+        [OpenWatermarkPanelOperation.id]: {
+            order: 12,
+            menuItemFactory: WatermarkMenuItemFactory,
         },
     },
 };

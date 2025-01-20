@@ -26,6 +26,9 @@ import type {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     BooleanNumber,
     CommandType,
@@ -38,22 +41,18 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
     value: T | T[][];
 }
 
-interface ISetStyleCommonParams {
-    subUnitId?: string;
-    unitId?: string;
+interface ISetStyleCommonParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
 }
 
@@ -69,10 +68,10 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
-    handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
+    handler: <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
@@ -136,7 +135,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: unitId,
+                unitID: setRangeValuesMutationParams.unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });
@@ -155,7 +154,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 export const SetBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
@@ -173,7 +172,7 @@ export const SetBoldCommand: ICommand = {
             },
         };
 
-        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+        return accessor.get(ICommandService).syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -184,7 +183,7 @@ export const SetBoldCommand: ICommand = {
 export const SetItalicCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-italic',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
@@ -207,7 +206,7 @@ export const SetItalicCommand: ICommand = {
             },
         };
 
-        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+        return accessor.get(ICommandService).syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -217,7 +216,7 @@ export const SetItalicCommand: ICommand = {
 export const SetUnderlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-underline',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
@@ -230,7 +229,8 @@ export const SetUnderlineCommand: ICommand = {
         if (selection.primary) {
             currentlyUnderline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getUnderline().s;
+                .getUnderline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -242,7 +242,7 @@ export const SetUnderlineCommand: ICommand = {
             },
         };
 
-        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+        return accessor.get(ICommandService).syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -252,7 +252,7 @@ export const SetUnderlineCommand: ICommand = {
 export const SetStrikeThroughCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-stroke',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
@@ -265,7 +265,8 @@ export const SetStrikeThroughCommand: ICommand = {
         if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
                 .getRange(selection.primary.actualRow, selection.primary.actualColumn)
-                .getStrikeThrough().s;
+                .getStrikeThrough()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -275,7 +276,7 @@ export const SetStrikeThroughCommand: ICommand = {
             },
         };
 
-        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+        return accessor.get(ICommandService).syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -285,7 +286,7 @@ export const SetStrikeThroughCommand: ICommand = {
 export const SetOverlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-overline',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
@@ -297,7 +298,8 @@ export const SetOverlineCommand: ICommand = {
         if (selection.primary) {
             currentlyOverline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getOverline().s;
+                .getOverline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -309,7 +311,7 @@ export const SetOverlineCommand: ICommand = {
             },
         };
 
-        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+        return accessor.get(ICommandService).syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -320,7 +322,7 @@ export interface ISetFontFamilyCommandParams {
 export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-font-family',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -333,7 +335,7 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -344,7 +346,7 @@ export interface ISetFontSizeCommandParams {
 export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-font-size',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -357,19 +359,19 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
 export interface ISetColorCommandParams {
-    value: string;
+    value: string | null;
 }
 
 export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-color',
-    handler: async (accessor, params) => {
-        if (!params || !params.value) {
+    handler: (accessor, params) => {
+        if (!params) {
             return false;
         }
 
@@ -383,14 +385,14 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
 export const ResetTextColorCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.reset-text-color',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
@@ -401,14 +403,14 @@ export const ResetTextColorCommand: ICommand = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
 export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-background-color',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params || !params.value) {
             return false;
         }
@@ -423,14 +425,14 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
 export const ResetBackgroundColorCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.reset-background-color',
-    handler: async (accessor) => {
+    handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<IColorStyle> = {
             style: {
@@ -441,7 +443,7 @@ export const ResetBackgroundColorCommand: ICommand = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -452,7 +454,7 @@ export interface ISetVerticalTextAlignCommandParams extends ISetStyleCommonParam
 export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-vertical-text-align',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -468,7 +470,7 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -479,7 +481,7 @@ export interface ISetHorizontalTextAlignCommandParams extends ISetStyleCommonPar
 export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-horizontal-text-align',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -495,7 +497,7 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -506,7 +508,7 @@ export interface ISetTextWrapCommandParams extends ISetStyleCommonParams {
 export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-wrap',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -522,7 +524,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };
 
@@ -533,7 +535,7 @@ export interface ISetTextRotationCommandParams {
 export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-rotation',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
@@ -548,6 +550,6 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        return commandService.syncExecuteCommand(SetStyleCommand.id, setStyleParams);
     },
 };

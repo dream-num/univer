@@ -15,18 +15,17 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ISuperTableOptionParam } from '../services/super-table.service';
 
+import { Disposable, ICommandService } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
     type ISetSuperTableMutationParam,
     type ISetSuperTableMutationSearchParam,
     SetSuperTableOptionMutation,
 } from '../commands/mutations/set-super-table.mutation';
-import type { ISuperTableOptionParam } from '../services/super-table.service';
 import { ISuperTableService } from '../services/super-table.service';
 
-@OnLifecycle(LifecycleStages.Ready, SetSuperTableController)
 export class SetSuperTableController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

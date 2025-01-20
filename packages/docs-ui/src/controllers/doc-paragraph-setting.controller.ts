@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { ParagraphSettingIndex } from '../views/paragraph-setting/index';
 
 const paragraphSettingIndexKey = 'doc_ui_paragraph-setting-panel';
 
-@OnLifecycle(LifecycleStages.Rendered, DocParagraphSettingController)
 export class DocParagraphSettingController extends Disposable {
     private _id: 'DocParagraphSetting';
 

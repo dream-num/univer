@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
+
 import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
-
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { findFirstCursorOffset } from '../../basics/selection';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -76,11 +77,8 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 if (unitId !== this._context.unitId) {
                     return;
                 }
-
                 this._docSelectionRenderService.removeAllRanges();
-                if (docRanges.length) {
-                    this._docSelectionRenderService.addDocRanges(docRanges, isEditing, options);
-                }
+                this._docSelectionRenderService.addDocRanges(docRanges, isEditing, options);
             })
         );
     }
@@ -93,7 +91,10 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                         return;
                     }
 
-                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params);
+                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params, {
+                        unitId: this._context.unitId,
+                        subUnitId: this._context.unitId,
+                    });
                 })
         );
     }
@@ -220,18 +221,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     }
 
     private _setEditorFocus(unitId: string) {
-        // TODO@wzhudev: fix
-        /**
-         * The object for selecting data in the editor is set to the current sheet.
-         */
-        // const sheetInstances = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        // if (sheetInstances.length > 0) {
-        //     const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        //     this._editorService.setOperationSheetUnitId(workbook.getUnitId());
-        //     // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
-        // }
-
-        this._editorService.focusStyle(unitId);
+        this._editorService.focus(unitId);
     }
 
     private _commandExecutedListener() {
@@ -268,10 +258,14 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             if (!isInternalEditor) {
                 //TODO: @JOCS Only for docs. move to docs in the future.
                 this._docSelectionRenderService.focus();
+                const docDataModel = this._context.unit;
+                const snapshot = docDataModel.getSnapshot();
+                const offset = findFirstCursorOffset(snapshot);
+
                 this._docSelectionManagerService.replaceDocRanges([
                     {
-                        startOffset: 0,
-                        endOffset: 0,
+                        startOffset: offset,
+                        endOffset: offset,
                     },
                 ], {
                     unitId,

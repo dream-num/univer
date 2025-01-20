@@ -15,42 +15,47 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { LexerNode } from '../../engine/analysis/lexer-node';
 
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import { Iferror } from '../logical/iferror';
-import { Xlookup } from '../lookup/xlookup';
-import { Max } from '../statistical/max';
-import { Sumifs } from '../math/sumifs';
-import { Edate } from '../date/edate';
-import { Today } from '../date/today';
-import { Day } from '../date/day';
-import { Address } from '../lookup/address';
-import { Xmatch } from '../lookup/xmatch';
-import { Min } from '../statistical/min';
+import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { Plus } from '../meta/plus';
+import { Day } from '../date/day';
+import { Edate } from '../date/edate';
+import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { Today } from '../date/today';
+import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
+import { Iferror } from '../logical/iferror';
+import { Address } from '../lookup/address';
+import { Choose } from '../lookup/choose';
+import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { Xlookup } from '../lookup/xlookup';
+import { Xmatch } from '../lookup/xmatch';
+import { Fact } from '../math/fact';
+import { FUNCTION_NAMES_MATH } from '../math/function-names';
+import { Product } from '../math/product';
+import { Sum } from '../math/sum';
+import { Sumif } from '../math/sumif';
+import { Sumifs } from '../math/sumifs';
+import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
 import { Minus } from '../meta/minus';
-import { Concatenate } from '../text/concatenate';
-import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
-import { FUNCTION_NAMES_MATH } from '../math/function-names';
-import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { Plus } from '../meta/plus';
 import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
-import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { Max } from '../statistical/max';
+import { Min } from '../statistical/min';
+import { Concatenate } from '../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
-import { IFunctionService } from '../../services/function.service';
-import type { LexerNode } from '../../engine/analysis/lexer-node';
-import { Choose } from '../lookup/choose';
-import { Sum } from '../math/sum';
-import { ErrorType } from '../../basics/error-type';
 import { Len } from '../text/len';
-import { Divided } from '../meta/divided';
+import { Text } from '../text/text';
 import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
@@ -245,6 +250,72 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             t: 2,
                         },
                     },
+                    10: {
+                        0: {
+                            v: 1,
+                            t: 2,
+                        },
+                        1: {
+                            v: 2,
+                            t: 2,
+                        },
+                        2: {
+                            v: 3,
+                            t: 2,
+                        },
+                    },
+                    11: {
+                        0: {
+                            v: '2',
+                            t: 4,
+                        },
+                    },
+                    12: {
+                        0: {
+                            v: '10',
+                            t: 1,
+                            p: {
+                                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                                documentStyle: {
+                                    pageSize: {
+                                        width: 73,
+                                        height: undefined,
+                                    },
+                                    marginTop: 1,
+                                    marginBottom: 2,
+                                    marginRight: 2,
+                                    marginLeft: 2,
+                                    renderConfig: {
+                                        horizontalAlign: 0,
+                                        verticalAlign: 0,
+                                        centerAngle: 0,
+                                        vertexAngle: 0,
+                                        wrapStrategy: 0,
+                                    },
+                                },
+                                body: {
+                                    dataStream: '10\r\n',
+                                    textRuns: [
+                                        { ts: { ff: 'Arial', fs: 11 }, st: 0, ed: 1 },
+                                        { st: 1, ed: 2, ts: { ff: 'Arial', fs: 11, cl: { rgb: '#B20000' } } },
+                                    ],
+                                    paragraphs: [
+                                        { startIndex: 2, paragraphStyle: { horizontalAlign: 0 } },
+                                    ],
+                                    sectionBreaks: [
+                                        { startIndex: 3 },
+                                    ],
+                                    customRanges: [],
+                                    customDecorations: [],
+                                },
+                                drawings: {},
+                                drawingsOrder: [],
+                                settings: {
+                                    zoomRatio: 1,
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -279,6 +350,7 @@ describe('Test nested functions', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},
@@ -306,6 +378,7 @@ describe('Test nested functions', () => {
             new Iferror(FUNCTION_NAMES_LOGICAL.IFERROR),
             new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP),
             new Max(FUNCTION_NAMES_STATISTICAL.MAX),
+            new Sumif(FUNCTION_NAMES_MATH.SUMIF),
             new Sumifs(FUNCTION_NAMES_MATH.SUMIFS),
             new Edate(FUNCTION_NAMES_DATE.EDATE),
             new Today(FUNCTION_NAMES_DATE.TODAY),
@@ -319,8 +392,10 @@ describe('Test nested functions', () => {
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE),
             new Len(FUNCTION_NAMES_TEXT.LEN),
-            new Divided(FUNCTION_NAMES_META.DIVIDED)
-
+            new Divided(FUNCTION_NAMES_META.DIVIDED),
+            new Product(FUNCTION_NAMES_MATH.PRODUCT),
+            new Fact(FUNCTION_NAMES_MATH.FACT),
+            new Text(FUNCTION_NAMES_TEXT.TEXT)
         );
 
         calculate = (formula: string) => {
@@ -328,7 +403,7 @@ describe('Test nested functions', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             return getObjectValue(result);
         };
@@ -338,8 +413,19 @@ describe('Test nested functions', () => {
         it('Nested functions IFERROR,XLOOKUP,MAX,SUMIFS,EDATE,TODAY,DAY,PLUS,Minus,CONCATENATE', () => {
             const result = calculate('=IFERROR(XLOOKUP(MAX(SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1)), SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1), B2:B10, "No Data"), "No Data")');
 
-            expect(result).toStrictEqual([[101], [102], [103], [104], [105], [101], [102], [103], [104]]);
+            expect(result).toStrictEqual([
+                [101],
+                [102],
+                [103],
+                [104],
+                [105],
+                [101],
+                [102],
+                [103],
+                [104],
+            ]);
         });
+
         it('Nested functions ADDRESS,XMATCH,MIN,SUMIFS,EDATE,TODAY,DAY', () => {
             const result = calculate('=ADDRESS(XMATCH(MIN(SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1)), SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1), 0) + 1, 2)');
 
@@ -378,10 +464,66 @@ describe('Test nested functions', () => {
 
         it('Len gets length from formula result', () => {
             let result = calculate('=LEN(1/3)');
-            expect(result).toStrictEqual(17);
+            expect(result).toStrictEqual(14);
 
             result = calculate('=LEN(0.1+0.2)');
             expect(result).toStrictEqual(3);
+        });
+
+        it('Sumifs test, range is number, criteria is number string', () => {
+            let result = calculate('=SUMIFS(A11:C11,A11:C11,"2")');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,A12)');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,3)');
+            expect(result).toStrictEqual([
+                [0],
+            ]);
+
+            result = calculate('=SUMIFS(A11:C11,A11:C11,"2",A11:C11,2)');
+            expect(result).toStrictEqual([
+                [2],
+            ]);
+
+            result = calculate('=SUMIF(A11:C11,"1",A11:C11)');
+            expect(result).toBe(1);
+
+            result = calculate('=SUMIF(A11:C11,3,A11:C11)');
+            expect(result).toBe(3);
+
+            result = calculate('=SUMIF(A11:C11,A12,A11:C11)');
+            expect(result).toBe(2);
+        });
+
+        it('Product test, cell number string ignore, param number string can be calculated', () => {
+            let result = calculate('=PRODUCT(A12)');
+            expect(result).toBe(0);
+
+            result = calculate('=PRODUCT("2")');
+            expect(result).toBe(2);
+        });
+
+        it('value is rich text', () => {
+            let result = calculate('=SUM(A13)');
+            expect(result).toStrictEqual(0);
+
+            result = calculate('=FACT(A13)');
+            expect(result).toStrictEqual([
+                [3628800],
+            ]);
+        });
+
+        it('Text formula test', () => {
+            const result = calculate('=TEXT(1234, "000000")');
+            expect(result).toStrictEqual([
+                ['001234'],
+            ]);
         });
     });
 });

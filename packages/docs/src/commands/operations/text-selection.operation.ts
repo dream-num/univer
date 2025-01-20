@@ -15,8 +15,8 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
 import type { ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import { CommandType } from '@univerjs/core';
 
 export interface ISetTextSelectionsOperationParams {
     unitId: string;
@@ -33,7 +33,7 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
 
     type: CommandType.OPERATION,
 
-    handler: (_, __) => {
+    handler: () => {
         // for menu highlight use and share cursor.
         return true;
     },

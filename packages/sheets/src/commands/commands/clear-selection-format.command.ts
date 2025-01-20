@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+
 import {
     CommandType,
     ICommandService,
@@ -23,12 +25,16 @@ import {
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
-import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { generateNullCellStyle } from '../../basics/utils';
+import { SheetsSelectionsService } from '../../services/selections/selection.service';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+
+interface IClearSelectionFormatCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[];
+}
 
 /**
  * The command to clear content in current selected ranges.
@@ -38,7 +44,7 @@ export const ClearSelectionFormatCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor: IAccessor) => {
+    handler: (accessor: IAccessor, params: IClearSelectionFormatCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -48,13 +54,13 @@ export const ClearSelectionFormatCommand: ICommand = {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
-        const unitId = workbook.getUnitId();
+        const unitId = params?.unitId || workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
-        const subUnitId = worksheet.getSheetId();
-        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        if (!selections?.length) {
+        const subUnitId = params?.subUnitId || worksheet.getSheetId();
+        const ranges = params?.ranges || selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+        if (!ranges?.length) {
             return false;
         }
 
@@ -65,7 +71,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellStyle(selections),
+            cellValue: generateNullCellStyle(ranges),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -104,4 +110,3 @@ export const ClearSelectionFormatCommand: ICommand = {
         return false;
     },
 };
-

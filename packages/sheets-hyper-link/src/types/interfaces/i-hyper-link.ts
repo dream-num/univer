@@ -29,7 +29,7 @@ export interface ICellLinkContent {
     display?: string;
 }
 
-export interface ICellHyperLink extends ICellLinkContent {
+export interface ISheetHyperLink extends ICellLinkContent {
     /**
      * unique id
      */

@@ -252,7 +252,7 @@ export class SheetsSourceBindService extends Disposable {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
             priority: 102,
             handler: (cell, context, next) => {
-                const { row, col, unitId, subUnitId } = context;
+                const { row, col, unitId, subUnitId, workbook } = context;
                 let value = null;
                 if (this._bindingModel === BindModeEnum.Path) {
                     value = this._getPathModeCellValue(unitId, subUnitId, row, col);
@@ -260,7 +260,9 @@ export class SheetsSourceBindService extends Disposable {
                     value = this._getValueModeCellValue(unitId, subUnitId, row, col);
                 }
                 if (value !== null) {
-                    return next({ ...cell, ...value });
+                    const defaultStyle = (typeof cell?.s === 'string' ? workbook.getStyles().get(cell?.s) : cell?.s) || {};
+                    const newStyle = { ...defaultStyle };
+                    return next({ ...cell, ...value, s: newStyle });
                 }
 
                 return next(cell);

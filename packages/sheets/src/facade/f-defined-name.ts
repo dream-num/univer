@@ -48,6 +48,9 @@ function getDefinedNameFieldName(unitId: string, localeService: LocaleService, d
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FDefinedNameBuilder {
     private _definedNameParam: ISetDefinedNameMutationParam;
     constructor() {
@@ -199,6 +202,9 @@ export class FDefinedNameBuilder {
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FDefinedName extends FBase {
     constructor(
         protected _definedNameParam: ISetDefinedNameMutationParam,

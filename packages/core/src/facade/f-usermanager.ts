@@ -19,6 +19,9 @@ import { Inject, Injector } from '../common/di';
 import { UserManagerService } from '../services/user-manager/user-manager.service';
 import { FBase } from './f-base';
 
+/**
+ * @hideconstructor
+ */
 export class FUserManager extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

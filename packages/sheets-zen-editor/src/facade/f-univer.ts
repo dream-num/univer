@@ -159,6 +159,9 @@ export class FUniverSheetsZenEditorMixin extends FUniver implements IFUniverShee
         }));
     }
 
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         this._initSheetZenEditorEvent(injector);
     }

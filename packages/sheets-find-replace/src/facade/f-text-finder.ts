@@ -154,6 +154,7 @@ export interface IFTextFinder {
 
 /**
  * This interface class provides methods to find and replace text in the univer.
+ * @hideconstructor
  */
 export class FTextFinder extends Disposable implements IFTextFinder {
     private readonly _state = new FindReplaceState();

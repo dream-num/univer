@@ -21,6 +21,9 @@ import type { CFTimePeriodOperator, IAverageHighlightCell, IColorScale, IConditi
 import { BooleanNumber, ColorKit, Tools } from '@univerjs/core';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType, createCfId, EMPTY_ICON_TYPE, iconMap } from '@univerjs/sheets-conditional-formatting';
 
+/**
+ * @hideconstructor
+ */
 class ConditionalFormatRuleBaseBuilder {
     protected _rule: Partial<IConditionFormattingRule> = {};
 
@@ -155,6 +158,9 @@ class ConditionalFormatRuleBaseBuilder {
     }
 }
 
+/**
+ * @hideconstructor
+ */
 class ConditionalFormatHighlightRuleBuilder extends ConditionalFormatRuleBaseBuilder {
     constructor(initConfig: Partial<IConditionFormattingRule> = {}) {
         super(initConfig);
@@ -639,6 +645,9 @@ class ConditionalFormatIconSetRuleBuilder extends ConditionalFormatRuleBaseBuild
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FConditionalFormattingBuilder {
     constructor(private _initConfig: { ranges?: IRange[] } = {}) {
 

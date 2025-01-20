@@ -19,6 +19,9 @@ import type { Observable } from 'rxjs';
 import { FBase, generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, PermissionPointsDefinitions, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
+/**
+ * @hideconstructor
+ */
 export class FPermission extends FBase {
     public permissionPointsDefinition = PermissionPointsDefinitions;
     public rangeRuleChangedAfterAuth$: Observable<unknown>;

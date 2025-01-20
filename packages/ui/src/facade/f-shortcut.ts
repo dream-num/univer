@@ -19,6 +19,9 @@ import type { IShortcutItem } from '@univerjs/ui';
 import { FBase, Inject, Injector } from '@univerjs/core';
 import { IShortcutService } from '@univerjs/ui';
 
+/**
+ * @hideconstructor
+ */
 export class FShortcut extends FBase {
     private _forceEscapeDisposable: IDisposable | null = null;
 

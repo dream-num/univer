@@ -201,7 +201,7 @@ export class FFormulaSheetsMixin extends FFormula implements IFFormulaSheetsMixi
 
     /**
      * Initialize the FUniver instance.
-     * @private
+     * @ignore
      */
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {

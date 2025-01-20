@@ -16,6 +16,9 @@
 
 import { numfmt, Rectangle, Tools } from '../shared';
 
+/**
+ * @ignore
+ */
 export class FUtil {
     static _instance: FUtil | null;
     static get() {
@@ -28,6 +31,9 @@ export class FUtil {
         return instance;
     }
 
+    /**
+     * @ignore
+     */
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name !== 'constructor') {

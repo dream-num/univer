@@ -21,9 +21,12 @@ import { Disposable } from '../shared';
  * `FBase` is a base class for all facade classes.
  * It provides a way to extend classes with static and instance methods.
  * The `_initialize` as a special method that will be called after the constructor. You should never call it directly.
+ * @ignore
  */
-/** @ignore */
 export abstract class FBase extends Disposable {
+    /**
+     * @ignore
+     */
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name !== 'constructor') {
@@ -41,12 +44,20 @@ export abstract class FBase extends Disposable {
     }
 }
 
-/** @ignore */
+/**
+ * @ignore
+ */
 const InitializerSymbol = Symbol('initializers');
 
+/**
+ * @ignore
+ */
 type Initializers = Array<(injector: Injector) => void>;
 
-/** @ignore */
+/**
+ * @ignore
+ * @hideconstructor
+ */
 export class FBaseInitialable extends Disposable {
     declare private [InitializerSymbol]: Initializers | undefined;
 
@@ -66,8 +77,14 @@ export class FBaseInitialable extends Disposable {
         }
     }
 
+    /**
+     * @ignore
+     */
     _initialize(injector: Injector) { }
 
+    /**
+     * @ignore
+     */
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name === '_initialize') {

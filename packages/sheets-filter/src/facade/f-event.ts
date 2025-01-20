@@ -126,6 +126,9 @@ declare module '@univerjs/core' {
 }
 
 class FUniverSheetsFilterEventMixin extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

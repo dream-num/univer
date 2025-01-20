@@ -76,6 +76,7 @@ type FAllMenu = FMenu | FSubmenu;
  * This is a build for adding a menu to Univer. Please notice that until the `appendTo` method is called,
  * the menu item is not added to the UI. Please note that this menu cannot have submenus. If you want to
  * have submenus, please use `FSubmenu`.
+ * @hideconstructor
  */
 export class FMenu extends FBase {
     static RibbonStartGroup = RibbonStartGroup;
@@ -145,6 +146,9 @@ export class FMenu extends FBase {
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FSubmenu extends FBase {
     private _menuByGroups: FAllMenu[][] = [];
     private _submenus: FAllMenu[] = [];

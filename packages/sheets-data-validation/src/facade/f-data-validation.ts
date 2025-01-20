@@ -22,6 +22,9 @@ import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsComma
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidationBuilder } from './f-data-validation-builder';
 
+/**
+ * @hideconstructor
+ */
 export class FDataValidation {
     rule: IDataValidationRule;
     private _worksheet: Worksheet | undefined;

@@ -27,6 +27,9 @@ import { DOC_RANGE_TYPE, ICommandService,
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
+/**
+ * @hideconstructor
+ */
 export class FDocument {
     readonly id: string;
 

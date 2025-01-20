@@ -232,6 +232,9 @@ export class FUniverCommentMixin extends FUniver implements IFUniverCommentMixin
         }
     }
 
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
         this.disposeWithMe(

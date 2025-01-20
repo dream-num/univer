@@ -81,6 +81,9 @@ declare module '@univerjs/core' {
 }
 
 class FUniverSheetsSortEventMixin extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

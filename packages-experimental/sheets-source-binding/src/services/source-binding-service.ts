@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellBindingNodeParam, IListSourceInfo, ISourceBindingInfo } from '../types';
+import type { ICellBindingNodeParam, IListDataBindingNode, IListSourceInfo, ISourceBindingInfo } from '../types';
 import { Disposable, Inject, InterceptorEffectEnum, RTree } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
@@ -107,6 +107,7 @@ export class SheetsSourceBindService extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _registerSourceChange() {
         // Update the RTree collection when the source data updated
+        // eslint-disable-next-line complexity
         this.disposeWithMe(this._sheetsSourceManager.sourceDataUpdate$.subscribe((sourceInfo) => {
             const { sourceId, sourceType, unitId: sourceUnitId, changeType } = sourceInfo;
 
@@ -117,8 +118,10 @@ export class SheetsSourceBindService extends Disposable {
                     const recordCount = sourceInfo.recordCount;
                     for (const { unitId, subunitId, nodeId, row, column } of nodeInfo) {
                         const rTreeCollection = this._getRTeeCollection(sourceUnitId);
-                        if (rTreeCollection) {
-                            const range = { startRow: row, startColumn: column, endRow: row + recordCount, endColumn: column };
+                        const node = this._sheetsBindingManager.getBindingNodeById(unitId, subunitId, nodeId);
+                        if (rTreeCollection && node?.type === DataBindingNodeTypeEnum.List) {
+                            const offset = (node as IListDataBindingNode).containHeader ? 0 : 1;
+                            const range = { startRow: row, startColumn: column, endRow: row + recordCount - offset, endColumn: column };
                             rTreeCollection.remove({ unitId, sheetId: subunitId, id: nodeId, range });
                         }
                     }
@@ -129,9 +132,11 @@ export class SheetsSourceBindService extends Disposable {
                     const nodeInfo = this._sheetsBindingManager.getBindingModelBySourceId(sourceId);
                     for (const { unitId, subunitId, nodeId, row, column } of nodeInfo) {
                         const rTreeCollection = this._getRTeeCollection(sourceUnitId);
-                        if (rTreeCollection) {
-                            const oldRange = { startRow: row, startColumn: column, endRow: row + oldRecordCount, endColumn: column };
-                            const range = { startRow: row, startColumn: column, endRow: row + sourceInfo.recordCount, endColumn: column };
+                        const node = this._sheetsBindingManager.getBindingNodeById(unitId, subunitId, nodeId);
+                        if (rTreeCollection && node?.type === DataBindingNodeTypeEnum.List) {
+                            const offset = (node as IListDataBindingNode).containHeader ? 0 : 1;
+                            const oldRange = { startRow: row, startColumn: column, endRow: row + oldRecordCount - offset, endColumn: column };
+                            const range = { startRow: row, startColumn: column, endRow: row + sourceInfo.recordCount - offset, endColumn: column };
                             rTreeCollection.remove({ unitId, sheetId: subunitId, id: nodeId, range: oldRange });
                             rTreeCollection.insert({ unitId, sheetId: subunitId, id: nodeId, range });
                         }
@@ -148,8 +153,12 @@ export class SheetsSourceBindService extends Disposable {
 
                     for (const { unitId, subunitId, nodeId, row, column } of nodeInfo) {
                         const rTreeCollection = this._ensureRTreeCollection(unitId);
-                        const range = { startRow: row, startColumn: column, endRow: row + recordCount, endColumn: column };
-                        rTreeCollection.insert({ unitId, sheetId: subunitId, id: nodeId, range });
+                        const node = this._sheetsBindingManager.getBindingNodeById(unitId, subunitId, nodeId);
+                        if (rTreeCollection && node?.type === DataBindingNodeTypeEnum.List) {
+                            const offset = (node as IListDataBindingNode).containHeader ? 0 : 1;
+                            const range = { startRow: row, startColumn: column, endRow: row + recordCount - offset, endColumn: column };
+                            rTreeCollection.insert({ unitId, sheetId: subunitId, id: nodeId, range });
+                        }
                     }
                 }
             }
@@ -157,7 +166,7 @@ export class SheetsSourceBindService extends Disposable {
 
         // Update the RTree collection when the binding node updated
         this.disposeWithMe(this._sheetsBindingManager.cellBindInfoUpdate$.subscribe((nodeInfo) => {
-            const { unitId, subunitId, sourceId, nodeId, row, column, changeType } = nodeInfo;
+            const { unitId, subunitId, sourceId, nodeId, row, column, changeType, containHeader } = nodeInfo;
             const rTreeCollection = this._ensureRTreeCollection(unitId);
             const source = this._sheetsSourceManager.getSource(unitId, sourceId);
 
@@ -165,19 +174,21 @@ export class SheetsSourceBindService extends Disposable {
                 const sourceInfo = source.getSourceInfo() as IListSourceInfo;
                 if (sourceInfo.sourceType === DataBindingNodeTypeEnum.List) {
                     const recordCount = sourceInfo.recordCount;
-                    const range = { startRow: row, startColumn: column, endRow: row + recordCount, endColumn: column };
+                    const offset = containHeader ? 0 : 1;
+                    const range = { startRow: row, startColumn: column, endRow: row + recordCount - offset, endColumn: column };
                     if (changeType === BindingSourceChangeTypeEnum.Add) {
                         rTreeCollection.insert({ unitId, sheetId: subunitId, id: nodeId, range });
                     } else if (changeType === BindingSourceChangeTypeEnum.Remove) {
                         rTreeCollection.remove({ unitId, sheetId: subunitId, id: nodeId, range });
                     } else if (changeType === BindingSourceChangeTypeEnum.Update) {
                         const oldSourceId = nodeInfo.oldSourceId!;
+                        const offset = nodeInfo.oldNodeContainHeader ? 0 : 1;
                         // remove the old range
                         const oldSource = this._sheetsSourceManager.getSource(unitId, oldSourceId);
                         if (oldSource && oldSource.hasData()) {
                             const oldSourceInfo = oldSource.getSourceInfo() as IListSourceInfo;
                             const oldRecordCount = oldSourceInfo.recordCount;
-                            const oldRange = { startRow: row, startColumn: column, endRow: row + oldRecordCount, endColumn: column };
+                            const oldRange = { startRow: row, startColumn: column, endRow: row + oldRecordCount - offset, endColumn: column };
                             rTreeCollection.remove({ unitId, sheetId: subunitId, id: nodeId, range: oldRange });
                         }
                         rTreeCollection.insert({ unitId, sheetId: subunitId, id: nodeId, range });

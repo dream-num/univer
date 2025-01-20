@@ -15,13 +15,13 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import type { ICellBindingJSON, ICellBindingNode, ICellBindingNodeParam } from '../types';
+import type { ICellBindingJSON, ICellBindingNode, ICellBindingNodeParam, IListDataBindingNode } from '../types';
 import { Disposable, generateRandomId, Inject, IUniverInstanceService, Range } from '@univerjs/core';
 
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { SheetBindingModel } from '../model/binding-model';
-import { BindingSourceChangeTypeEnum } from '../types';
+import { BindingSourceChangeTypeEnum, DataBindingNodeTypeEnum } from '../types';
 
 interface IBindingNodeInfo {
     unitId: string;
@@ -35,7 +35,13 @@ interface IBindingNodeInfo {
 export class SheetsBindingManager extends Disposable {
     modelMap: Map<string, Map<string, SheetBindingModel>> = new Map();
 
-    private _cellBindInfoUpdate$ = new Subject<IBindingNodeInfo & { changeType: BindingSourceChangeTypeEnum; oldSourceId?: string }>();
+    private _cellBindInfoUpdate$ = new Subject<IBindingNodeInfo & {
+        changeType: BindingSourceChangeTypeEnum;
+        oldSourceId?: string;
+        containHeader?: boolean;
+        oldNodeContainHeader?: boolean;
+    }>();
+
     cellBindInfoUpdate$ = this._cellBindInfoUpdate$.asObservable();
 
     constructor(
@@ -125,6 +131,7 @@ export class SheetsBindingManager extends Disposable {
             throw new Error('row and column is required');
         }
         const oldNode = model.getBindingNode(row, column);
+        const containHeader = node.type === DataBindingNodeTypeEnum.List ? Boolean((node as IListDataBindingNode).containHeader) : false;
         model.setBindingNode(row, column, { ...node, row, column } as ICellBindingNode);
         this._cellBindInfoUpdate$.next({
             unitId,
@@ -133,8 +140,10 @@ export class SheetsBindingManager extends Disposable {
             nodeId: node.nodeId,
             row,
             column,
+            containHeader,
             changeType: oldNode ? BindingSourceChangeTypeEnum.Update : BindingSourceChangeTypeEnum.Add,
             oldSourceId: oldNode?.sourceId,
+            oldNodeContainHeader: oldNode?.type === DataBindingNodeTypeEnum.List ? Boolean((oldNode as IListDataBindingNode).containHeader) : false,
         });
     }
 
@@ -161,6 +170,14 @@ export class SheetsBindingManager extends Disposable {
         const model = this.getModel(unitId, subunitId);
         if (model) {
             return model.getBindingNode(row, column);
+        }
+        return undefined;
+    }
+
+    getBindingNodeById(unitId: string, subunitId: string, nodeId: string): ICellBindingNode | undefined {
+        const model = this.getModel(unitId, subunitId);
+        if (model) {
+            return model.getBindingNodeById(nodeId);
         }
         return undefined;
     }

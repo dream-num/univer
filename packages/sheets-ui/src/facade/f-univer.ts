@@ -812,31 +812,6 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
             skm.setColumnHeaderSize(subUnitId, render, cfg.headerStyle?.size);
-            // const skeleton = render?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)?.skeleton;
-            // if (skeleton) {
-            //     if (cfg.headerStyle?.size) {
-            //         const size = cfg.headerStyle?.size;
-            //         skeleton.columnHeaderHeight = cfg.headerStyle?.size;
-            //         render.scene.getViewports()[0].top = cfg.headerStyle?.size;
-            //         render.scene.getViewport('viewColumnRight')!.setViewportSize({
-            //             height: size,
-            //         });
-            //         render.scene.getViewport('viewColumnLeft')!.setViewportSize({
-            //             height: size,
-            //         });
-            //         render.scene.getViewport('viewRowBottom')!.setViewportSize({
-            //             top: size,
-            //         });
-            //         render.scene.getViewport('viewRowTop')!.setViewportSize({
-            //             top: size,
-            //         });
-
-            //         const selectionService = render?.with(SheetsSelectionsService);
-            //         const selectionRenderService = render?.with(ISheetSelectionRenderService);
-            //         const currSelections = selectionService.getCurrentSelections();
-            //         selectionRenderService.resetSelectionsByModelData(currSelections);
-            //     }
-            // }
             activeSheet?.refreshCanvas();
         }
 

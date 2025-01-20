@@ -371,6 +371,8 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the rich text value for the cell at the start of this range.
      * @returns {Nullable<RichTextValue>} The rich text value
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -379,7 +381,7 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValue()
      * ```
      */
-    getRichTextValue(): Nullable<RichTextValue> {
+    private getRichTextValue(): Nullable<RichTextValue> {
         const data = this.getCellData();
         if (data?.p) {
             return new RichTextValue(data.p);
@@ -391,6 +393,8 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the rich text value for the cells in the range.
      * @returns {Nullable<RichTextValue>[][]} A two-dimensional array of RichTextValue objects.
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -399,7 +403,7 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValues()
      * ```
      */
-    getRichTextValues(): Nullable<RichTextValue>[][] {
+    private getRichTextValues(): Nullable<RichTextValue>[][] {
         const dataGrid = this.getCellDataGrid();
         return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
     }
@@ -407,6 +411,8 @@ export class FRange extends FBaseInitialable {
     /**
      * Returns the value and rich text value for the cell at the start of this range.
      * @returns {Nullable<CellValue | RichTextValue>} The value and rich text value
+     * @internal
+     * @beta
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook()
@@ -415,7 +421,7 @@ export class FRange extends FBaseInitialable {
      *  .getValueAndRichTextValue()
      * ```
      */
-    getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
+    private getValueAndRichTextValue(): Nullable<CellValue | RichTextValue> {
         const cell = this.getCellData();
         return cell?.p ? new RichTextValue(cell.p) : cell?.v;
     }

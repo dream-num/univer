@@ -289,7 +289,10 @@ export class FRange extends FBaseInitialable {
      * @example
      * ```ts
      * // Get values with rich text if available
-     * const richTextValues = range.getValues(true);
+     * const richTextValues = univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getValues(true)
      * ```
      */
     getValues(includeRichText: true): (Nullable<RichTextValue | CellValue>)[][];
@@ -330,7 +333,7 @@ export class FRange extends FBaseInitialable {
     }
 
     /**
-     * Returns the cell data for the cells in the range.
+     * Alias for getCellDataGrid.
      * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
      * @example
      * ```ts
@@ -341,6 +344,21 @@ export class FRange extends FBaseInitialable {
      * ```
      */
     getCellDatas(): Nullable<ICellData>[][] {
+        return this.getCellDataGrid();
+    }
+
+    /**
+     * Returns the cell data for the cells in the range.
+     * @returns {Nullable<ICellData>[][]} A two-dimensional array of cell data.
+     * @example
+     * ```ts
+     * univerAPI.getActiveWorkbook()
+     *  .getActiveSheet()
+     *  .getActiveRange()
+     *  .getCellDataGrid()
+     * ```
+     */
+    getCellDataGrid(): Nullable<ICellData>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Nullable<ICellData>[][] = [];
 
@@ -354,14 +372,6 @@ export class FRange extends FBaseInitialable {
         return range;
     }
 
-    // eslint-disable-next-line jsdoc/require-returns
-    /**
-     * @deprecated use `getCellDatas` instead.
-     */
-    getCellDataGrid(): Nullable<ICellData>[][] {
-        return this.getCellDatas();
-    }
-
     /**
      * Returns the rich text value for the cell at the start of this range.
      * @returns {Nullable<RichTextValue>} The rich text value
@@ -373,14 +383,14 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValue()
      * ```
      */
-    // getRichTextValue(): Nullable<RichTextValue> {
-    //     const data = this.getCellData();
-    //     if (data?.p) {
-    //         return new RichTextValue(data.p);
-    //     }
+    getRichTextValue(): Nullable<RichTextValue> {
+        const data = this.getCellData();
+        if (data?.p) {
+            return new RichTextValue(data.p);
+        }
 
-    //     return null;
-    // }
+        return null;
+    }
 
     /**
      * Returns the rich text value for the cells in the range.
@@ -393,10 +403,10 @@ export class FRange extends FBaseInitialable {
      *  .getRichTextValues()
      * ```
      */
-    // getRichTextValues(): Nullable<RichTextValue>[][] {
-    //     const dataGrid = this.getCellDataGrid();
-    //     return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
-    // }
+    getRichTextValues(): Nullable<RichTextValue>[][] {
+        const dataGrid = this.getCellDataGrid();
+        return dataGrid.map((row) => row.map((data) => data?.p ? new RichTextValue(data.p) : null));
+    }
 
     /**
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.

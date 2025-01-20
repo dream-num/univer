@@ -264,11 +264,8 @@ export class FRange extends FBaseInitialable {
         if (includeRichText) {
             return this.getValueAndRichTextValue();
         }
-        const cell = this._worksheet.getCell(this._range.startRow, this._range.startColumn);
-        if (cell?.v !== undefined && cell?.v !== null) {
-            return cell.v;
-        }
-        return null;
+
+        return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
     }
 
     /**
@@ -302,14 +299,13 @@ export class FRange extends FBaseInitialable {
         }
 
         const { startRow, endRow, startColumn, endColumn } = this._range;
-        const range: Array<Array<Nullable<RichTextValue | CellValue>>> = [];
+        const range: Array<Array<Nullable<CellValue>>> = [];
 
         for (let r = startRow; r <= endRow; r++) {
-            const row: Array<Nullable<RichTextValue | CellValue>> = [];
+            const row: Array<Nullable<CellValue>> = [];
 
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = this._worksheet.getCell(r, c);
-                row.push(cell?.v ?? null);
+                row.push(this._worksheet.getCell(r, c)?.v ?? null);
             }
 
             range.push(row);

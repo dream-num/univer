@@ -19,9 +19,9 @@ import type { UnitAction } from '@univerjs/protocol';
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
 import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
 import { UnitObject, UniverType } from '@univerjs/protocol';
-import { RangeProtectionCache } from '../../../model/range-protection.cache';
-
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+
+import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { baseProtectionActions, getAllRangePermissionPoint } from './util';
 
 const PLUGIN_NAME = 'SHEET_RANGE_PROTECTION_PLUGIN';

@@ -102,7 +102,6 @@ export interface ISheetClipboardHook {
      * The priority of the hook. The higher the priority, the earlier the hook would be called.
      */
     priority?: number;
-
     /**
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.
@@ -110,8 +109,7 @@ export interface ISheetClipboardHook {
      * @param subUnitId
      * @param range
      */
-    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange): void;
-
+    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange, copyType: COPY_TYPE): void;
     /**
      * Properties that would be appended to the td element.
      *
@@ -233,6 +231,14 @@ export interface ISheetClipboardHook {
         text: string,
         payload: ICopyPastePayload
     ): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
+    onPasteFiles?(pasteTo: ISheetDiscreteRangeLocation, files: File[], payload: ICopyPastePayload): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
+    onPasteUnrecognized?(pasteTo: ISheetDiscreteRangeLocation): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };

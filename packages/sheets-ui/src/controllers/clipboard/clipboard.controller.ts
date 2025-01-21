@@ -61,16 +61,19 @@ import {
     isFormulaString,
     IUniverInstanceService,
     LocaleService,
+
     ObjectMatrix,
+
     RxDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
 import { MessageType } from '@univerjs/design';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
 
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -162,7 +165,9 @@ export class SheetClipboardController extends RxDisposable {
                 const clipboardEvent = config!.event as ClipboardEvent;
                 const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
                 const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
+                const files = this._resolveClipboardFiles(clipboardEvent.clipboardData);
+
+                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
             });
         };
 
@@ -183,6 +188,18 @@ export class SheetClipboardController extends RxDisposable {
                 }
             }
         });
+    }
+
+    private _resolveClipboardFiles(clipboardData: DataTransfer | null) {
+        if (!clipboardData) {
+            return;
+        }
+
+        const files = Array.from(clipboardData.items)
+            .map((item) => item.kind === 'file' ? item.getAsFile() : undefined)
+            .filter(Boolean) as File[];
+
+        return files.length > 0 ? files : undefined;
     }
 
     private _init(): void {

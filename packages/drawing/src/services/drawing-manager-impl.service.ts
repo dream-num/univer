@@ -237,7 +237,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
              * ops: [[unit, sheetUnit, order, 0, { r: true }], [unit, sheetUnit, order, 1, { r: true }]]
              * We expected them to composed as [unit, sheetUnit, order, [0, { r: true }], [1, { r: true }]]
              * But extremely confusing to get [unit, sheetUnit, order, 0, { r: true }, 2, { r: true }]
-             * And We apply this composed op to data, it's not a 2-index item for us to remove.
+             * And We apply this composed op to data, it's no item with index 2 can be removed.
              * So use unshift api instead of push here.
              */
             ops.unshift(op);

@@ -15,7 +15,8 @@
  */
 
 import type {
-    ICellData, ICellDataWithSpanAndDisplay, IDisposable,
+    ICellData,
+    ICellDataWithSpanAndDisplay, IDisposable,
     IMutationInfo,
     IRange,
     Nullable, Workbook, Worksheet,
@@ -51,22 +52,23 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     getPrimaryForRange,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
-    SheetsSelectionsService,
-} from '@univerjs/sheets';
-import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+
+    SheetsSelectionsService } from '@univerjs/sheets';
+import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
-import { CopyContentCache, extractId, genId } from './copy-content-cache';
 
+import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
 import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
@@ -83,6 +85,13 @@ export const PREDEFINED_HOOK_NAME = {
     SPECIAL_PASTE_COL_WIDTH: 'special-paste-col-width',
     SPECIAL_PASTE_BESIDES_BORDER: 'special-paste-besides-border',
     SPECIAL_PASTE_FORMULA: 'special-paste-formula',
+} as const;
+
+const IMAGE_MIME_TO_EXTENSION = {
+    [FILE_PNG_CLIPBOARD_MIME_TYPE]: 'png',
+    [FILE__JPEG_CLIPBOARD_MIME_TYPE]: 'jpg',
+    [FILE__WEBP_CLIPBOARD_MIME_TYPE]: 'webp',
+    [FILE__BMP_CLIPBOARD_MIME_TYPE]: 'bmp',
 } as const;
 
 interface ICopyContent {
@@ -111,7 +120,8 @@ export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
-    legacyPaste(html?: string, text?: string): Promise<boolean>; // paste a HTML string or plain text directly.
+    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean>; // paste a HTML string or plain text directly.
+
     rePasteWithPasteType(type: IPasteHookKeyType): boolean;
     disposePasteOptionsCache(): void;
 
@@ -182,10 +192,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent> {
-        const hooks = this._clipboardHooks;
-        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range));
-        const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks);
-        hooks.forEach((h) => h.onAfterCopy?.());
+        const copyContent = this._generateCopyContent(workbookId, worksheetId, range, this._clipboardHooks);
+
         return copyContent;
     }
 
@@ -200,8 +208,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
+        const hooks = this._clipboardHooks;
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
 
-        const copyContent = this.generateCopyContent(workbook.getUnitId(), worksheet.getSheetId(), selection.range);
+        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, selection.range, copyType));
+        const copyContent = this.generateCopyContent(workbookId, worksheetId, selection.range);
+        hooks.forEach((h) => h.onAfterCopy?.());
+
         if (!copyContent) {
             return false;
         }
@@ -245,6 +259,22 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
+        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
+
+        if (imageIndex !== -1) {
+            const imageMimeType = types[imageIndex]!;
+            const imageBlob = await item.getType(imageMimeType);
+
+            if (imageBlob) {
+                const file = new File(
+                    [imageBlob],
+                    `clipboard-image.${IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION]}`,
+                    { type: imageMimeType });
+
+                return this._pasteFiles([file], pasteType);
+            }
+        }
+
         if (html) {
             // Firstly see if the html content is from Excel
             if (this._platformService.isWindows && (await clipboardItemIsFromExcel(html))) {
@@ -269,8 +299,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return false;
     }
 
-    legacyPaste(html?: string, text?: string): Promise<boolean> {
-        if (html) {
+    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
+        if (files) {
+            return this._pasteFiles(files, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        } else if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (text) {
             // Converts text with tabs and newlines into an HTML table
@@ -279,9 +311,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             } else {
                 return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
             }
+        } else {
+            return this._pasteUnrecognized();
         }
 
-        return Promise.resolve(false);
+        // return Promise.resolve(false);
     }
 
     rePasteWithPasteType(type: IPasteHookKeyType): boolean {
@@ -419,7 +453,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._clipboardHooks$.next(this._clipboardHooks);
     }
 
-    private async _pastePlainText(text: string, pasteType: IPasteHookValueType): Promise<boolean> {
+    private async _executePaste(generateMutations: (hook: ISheetClipboardHook, payload: {
+        unitId: string;
+        subUnitId: string;
+        range: IDiscreteRange;
+    }) => undefined | ({
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    })): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;
@@ -447,17 +488,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         enabledHooks.forEach((h) => {
-            const contentReturn = h.onPastePlainText?.(
-                {
-                    unitId,
-                    subUnitId,
-                    range,
-                },
-                text,
-                {
-                    pasteType,
-                }
-            );
+            const contentReturn = generateMutations(h, {
+                unitId,
+                subUnitId,
+                range,
+            });
+
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);
@@ -474,6 +510,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         return result;
+    }
+
+    private async _pasteFiles(files: File[], pasteType: IPasteHookValueType): Promise<boolean> {
+        return this._executePaste((h, payload) => {
+            return h.onPasteFiles?.(payload, files, { pasteType });
+        });
+    }
+
+    private async _pastePlainText(text: string, pasteType: IPasteHookValueType): Promise<boolean> {
+        return this._executePaste((h, payload) => {
+            return h.onPastePlainText?.(payload, text, { pasteType });
+        });
+    }
+
+    private _pasteUnrecognized() {
+        return this._executePaste((h, payload) => {
+            return h.onPasteUnrecognized?.(payload);
+        });
     }
 
     private async _pasteHTML(html: string, pasteType: IPasteHookValueType): Promise<boolean> {

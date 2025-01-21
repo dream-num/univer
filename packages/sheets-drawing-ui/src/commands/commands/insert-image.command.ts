@@ -26,11 +26,23 @@ export interface IInsertImageCommandParams {
 export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
     id: 'sheet.command.insert-float-image',
     type: CommandType.COMMAND,
-    handler: (accessor) => {
+    handler: async (accessor, params) => {
         const renderManagerService = accessor.get(IRenderManagerService);
-        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
-            ?.with(SheetDrawingUpdateController)
-            .insertFloatImage() ?? false;
+        const sheetDrawingUpdateController = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+            ?.with(SheetDrawingUpdateController);
+
+        if (!sheetDrawingUpdateController) {
+            return false;
+        }
+        const files = params?.files;
+
+        if (files) {
+            const awaitFiles = files.map((file) => sheetDrawingUpdateController.insertFloatImageByFile(file));
+
+            return (await Promise.all(awaitFiles)).every((result) => result);
+        } else {
+            return sheetDrawingUpdateController.insertFloatImage() ?? false;
+        }
     },
 };
 

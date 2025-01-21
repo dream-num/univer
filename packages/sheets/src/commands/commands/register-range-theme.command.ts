@@ -50,7 +50,7 @@ export const RegisterWorksheetRangeThemeStyleCommand: ICommand<IRegisterWorkshee
             unitId,
             themeName: rangeThemeStyle.getName(),
         };
-        const result = commandService.syncExecuteCommand(RegisterWorksheetRangeThemeStyleMutation.id, params);
+        const result = commandService.syncExecuteCommand(RegisterWorksheetRangeThemeStyleMutation.id, redoParam);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

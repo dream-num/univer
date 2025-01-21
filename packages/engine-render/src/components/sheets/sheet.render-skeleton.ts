@@ -84,6 +84,7 @@ interface ICellDocumentModelOption {
     isDeepClone?: boolean;
     displayRawFormula?: boolean;
     ignoreTextRotation?: boolean;
+    cellDefaultStyle?: Nullable<IStyleData>;
 }
 
 const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
@@ -849,11 +850,12 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
      * @deprecated use same method in worksheet.
      * @param cell
      */
-    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
+    getCellDocumentModelWithFormula(cell: ICellData, cellDefaultStyle: Nullable<IStyleData>): Nullable<IDocumentLayoutObject> {
         return this._getCellDocumentModel(cell, {
             isDeepClone: true,
             displayRawFormula: true,
             ignoreTextRotation: true,
+            cellDefaultStyle,
         });
     }
 
@@ -876,7 +878,7 @@ export class SpreadsheetSkeleton extends SheetSkeleton {
             ...options,
         };
 
-        const style = this._styles.getStyleByCell(cell);
+        const style = { ...options.cellDefaultStyle, ...this._styles.getStyleByCell(cell) };
 
         if (!cell) return;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataBindingNodeTypeEnum, ISourceBindingInfo, SourceModelBase } from '@univerjs/sheets-source-binding';
+import type { DataBindingNodeTypeEnum, IBindingNodeInfo, ISourceBindingInfo, SourceModelBase } from '@univerjs/sheets-source-binding';
 import { SheetsSourceBindService, SheetsSourceManager } from '@univerjs/sheets-source-binding';
 import { FWorkbook } from '@univerjs/sheets/facade';
 
@@ -64,6 +64,8 @@ export interface IFWorkbookSourceBindingMixin {
     loadSourceBindingPathInfo(obj: ISourceBindingInfo): void;
 
     saveSourceBindingPathInfo(): ISourceBindingInfo;
+
+    getBindingModelBySourceId(): IBindingNodeInfo[];
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {
@@ -107,6 +109,12 @@ export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourc
         const injector = this._injector;
         const sheetsSourceBindService = injector.get(SheetsSourceBindService);
         return sheetsSourceBindService.getSourceBindingPathInfo(this.getId());
+    }
+
+    override getBindingModelBySourceId(sourceId: string): IBindingNodeInfo[] {
+        const injector = this._injector;
+        const sheetsSourceBindService = injector.get(SheetsSourceBindService);
+        return sheetsSourceBindService.getBindingModelBySourceId(sourceId);
     }
 }
 

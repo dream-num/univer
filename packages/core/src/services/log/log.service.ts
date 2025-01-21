@@ -74,7 +74,7 @@ export class DesktopLogService extends Disposable implements ILogService {
 
     deprecate(...args: ArgsType): void {
         if (this._logLevel >= LogLevel.WARN) {
-            this._logWithDeduplication(console.warn, ...args);
+            this._logWithDeduplication(console.error, ...args);
         }
     }
 

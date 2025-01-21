@@ -57,8 +57,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/drawing": "workspace:*",
-        "@univerjs/sheets": "workspace:*"
+        "@univerjs/drawing": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

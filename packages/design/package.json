@@ -70,7 +70,6 @@
     "dependencies": {
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.6",
-        "@types/react-mentions": "^4.4.0",
         "@univerjs/icons": "^0.2.12",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
@@ -93,7 +92,6 @@
     "devDependencies": {
         "@testing-library/react": "^16.1.0",
         "@types/react-grid-layout": "^1.3.5",
-        "@types/react-mentions": "^4.4.1",
         "@types/react-transition-group": "^4.4.11",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",

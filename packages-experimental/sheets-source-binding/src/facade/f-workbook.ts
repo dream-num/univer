@@ -65,7 +65,7 @@ export interface IFWorkbookSourceBindingMixin {
 
     saveSourceBindingPathInfo(): ISourceBindingInfo;
 
-    getBindingModelBySourceId(): IBindingNodeInfo[];
+    getBindingModelBySourceId(sourceId: string): IBindingNodeInfo[];
 }
 
 export class FWorkbookSourceBinding extends FWorkbook implements IFWorkbookSourceBindingMixin {

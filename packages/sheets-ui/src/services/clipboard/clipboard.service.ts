@@ -102,15 +102,6 @@ interface ICopyContent {
     discreteRange: IDiscreteRange;
 }
 
-enum PasteType {
-    Text = 1,
-    File,
-}
-
-interface IPasteContent {
-    [PasteType.Text]: string;
-    [PasteType.File]: File[];
-}
 /**
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */

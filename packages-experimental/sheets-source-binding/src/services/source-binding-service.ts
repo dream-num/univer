@@ -247,6 +247,10 @@ export class SheetsSourceBindService extends Disposable {
         }
     }
 
+    getBindingModelBySourceId(sourceId: string) {
+        return this._sheetsBindingManager.getBindingModelBySourceId(sourceId);
+    }
+
     private _registerInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,

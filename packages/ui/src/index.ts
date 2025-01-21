@@ -53,6 +53,7 @@ export {
     FILE_SVG_XML_CLIPBOARD_MIME_TYPE,
     HTML_CLIPBOARD_MIME_TYPE,
     IClipboardInterfaceService,
+    imageMimeTypeSet,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export { IConfirmService } from './services/confirm/confirm.service';

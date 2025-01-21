@@ -60,15 +60,15 @@ import {
     SetWorksheetActiveOperation,
 
     SheetsSelectionsService } from '@univerjs/sheets';
-import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { FILE__BMP_CLIPBOARD_MIME_TYPE, FILE__JPEG_CLIPBOARD_MIME_TYPE, FILE__WEBP_CLIPBOARD_MIME_TYPE, FILE_PNG_CLIPBOARD_MIME_TYPE, HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, imageMimeTypeSet, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
-import { CopyContentCache, extractId, genId } from './copy-content-cache';
 
+import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
 import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
@@ -85,6 +85,13 @@ export const PREDEFINED_HOOK_NAME = {
     SPECIAL_PASTE_COL_WIDTH: 'special-paste-col-width',
     SPECIAL_PASTE_BESIDES_BORDER: 'special-paste-besides-border',
     SPECIAL_PASTE_FORMULA: 'special-paste-formula',
+} as const;
+
+const IMAGE_MIME_TO_EXTENSION = {
+    [FILE_PNG_CLIPBOARD_MIME_TYPE]: 'png',
+    [FILE__JPEG_CLIPBOARD_MIME_TYPE]: 'jpg',
+    [FILE__WEBP_CLIPBOARD_MIME_TYPE]: 'webp',
+    [FILE__BMP_CLIPBOARD_MIME_TYPE]: 'bmp',
 } as const;
 
 interface ICopyContent {
@@ -260,6 +267,22 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             types.indexOf(HTML_CLIPBOARD_MIME_TYPE) !== -1
                 ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
+
+        const imageIndex = types.findIndex((type) => imageMimeTypeSet.has(type));
+
+        if (imageIndex !== -1) {
+            const imageMimeType = types[imageIndex]!;
+            const imageBlob = await item.getType(imageMimeType);
+
+            if (imageBlob) {
+                const file = new File(
+                    [imageBlob],
+                    `clipboard-image.${IMAGE_MIME_TO_EXTENSION[imageMimeType as keyof typeof IMAGE_MIME_TO_EXTENSION]}`,
+                    { type: imageMimeType });
+
+                return this._pasteFiles([file], pasteType);
+            }
+        }
 
         if (html) {
             // Firstly see if the html content is from Excel

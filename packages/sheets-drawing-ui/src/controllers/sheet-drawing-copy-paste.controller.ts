@@ -157,6 +157,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 if (!this._copyInfo) {
                     return { redos: [], undos: [] };
                 }
+
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;
                 const { range: copyRange } = pasteFrom || {};
                 const { range: pasteRange, unitId, subUnitId } = pasteTo;

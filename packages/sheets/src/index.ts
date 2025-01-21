@@ -56,6 +56,7 @@ export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { SheetRangeThemeService } from './services/range-theme-service';
+export type { IRangeThemeStyleJSON } from './model/range-theme-util';
 export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';

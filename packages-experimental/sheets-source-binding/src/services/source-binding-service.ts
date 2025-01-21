@@ -262,6 +262,9 @@ export class SheetsSourceBindService extends Disposable {
                 if (value !== null) {
                     const defaultStyle = (typeof cell?.s === 'string' ? workbook.getStyles().get(cell?.s) : cell?.s) || {};
                     const newStyle = { ...defaultStyle };
+                    if (value && value.s) {
+                        Object.assign(newStyle, value.s);
+                    }
                     return next({ ...cell, ...value, s: newStyle });
                 }
 

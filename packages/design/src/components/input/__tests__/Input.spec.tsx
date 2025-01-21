@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { afterEach, describe, expect, it } from 'vitest';
-import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Input } from '../Input';
 
 describe('Input', () => {
@@ -51,13 +50,13 @@ describe('Input', () => {
     it('renders the size', () => {
         const { container } = render(<Input size="large" />);
 
-        expect(container.innerHTML).contains('inputAffixWrapperLarge');
+        expect(container.innerHTML).contains('univer-h-12');
     });
 
     it('renders the clearable', () => {
-        const { container } = render(<Input allowClear />);
+        const { container } = render(<Input allowClear value="x" />);
 
-        expect(container.innerHTML).contains('input-clear-icon');
+        expect(container.innerHTML).contains('type="button"');
     });
 
     it('change the value', () => {

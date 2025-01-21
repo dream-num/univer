@@ -18,17 +18,20 @@ import { FEnum } from '@univerjs/core';
 import { CustomFilterOperator } from '@univerjs/sheets-filter';
 
 export interface IFSheetsFilterEnumMixin {
-    /** Please refer to {@link CustomFilterOperation}. */
-    CustomFilterOperator: CustomFilterOperator;
+    /** Please refer to {@link CustomFilterOperator}. */
+    CustomFilterOperator: typeof CustomFilterOperator;
 }
 
-export class FSheetsFilterEnumMixin extends FEnum {
-    get CustomFilterOperation(): typeof CustomFilterOperator { return CustomFilterOperator; };
+export class FSheetsFilterEnumMixin implements IFSheetsFilterEnumMixin {
+    get CustomFilterOperator(): typeof CustomFilterOperator {
+        return CustomFilterOperator;
+    };
 }
 
 FEnum.extend(FSheetsFilterEnumMixin);
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
-    interface FEnum extends IFSheetsFilterEnumMixin { }
+    interface FEnum extends IFSheetsFilterEnumMixin {
+    }
 }
 

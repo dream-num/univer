@@ -21,3 +21,4 @@ export { BindModeEnum, DataBindingNodeTypeEnum } from './types';
 export { SheetsSourceBindService } from './services/source-binding-service';
 export { SheetsSourceManager } from './controllers/source-manager';
 export type { ICellBindingNode, ICellBindingNodeParam, ISourceBindingInfo } from './types';
+export type { IBindingNodeInfo } from './controllers/binding-manager';

@@ -23,7 +23,7 @@ import { Subject } from 'rxjs';
 import { SheetBindingModel } from '../model/binding-model';
 import { BindingSourceChangeTypeEnum, DataBindingNodeTypeEnum } from '../types';
 
-interface IBindingNodeInfo {
+export interface IBindingNodeInfo {
     unitId: string;
     subunitId: string;
     sourceId: string;

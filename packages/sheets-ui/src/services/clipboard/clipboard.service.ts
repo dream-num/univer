@@ -298,7 +298,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
             }
         } else {
-            return this._pasteEmpty();
+            return this._pasteUnrecognized();
         }
 
         // return Promise.resolve(false);
@@ -510,9 +510,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
     }
 
-    private _pasteEmpty() {
+    private _pasteUnrecognized() {
         return this._executePaste((h, payload) => {
-            return h.onPasteEmpty?.(payload);
+            return h.onPasteUnrecognized?.(payload);
         });
     }
 

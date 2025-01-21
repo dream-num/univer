@@ -238,7 +238,7 @@ export interface ISheetClipboardHook {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
-    onPasteEmpty?(pasteTo: ISheetDiscreteRangeLocation): {
+    onPasteUnrecognized?(pasteTo: ISheetDiscreteRangeLocation): {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };

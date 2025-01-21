@@ -172,7 +172,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 return { undos: [], redos: [] };
             },
 
-            onPasteEmpty: (pasteTo: ISheetDiscreteRangeLocation) => {
+            onPasteUnrecognized: (pasteTo: ISheetDiscreteRangeLocation) => {
                 if (this._copyInfo) {
                     return this._generateSingleDrawingPasteMutations({ pasteTo, pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE }, COPY_TYPE.COPY);
                 } else {

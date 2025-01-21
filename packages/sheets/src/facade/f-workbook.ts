@@ -847,7 +847,7 @@ export class FWorkbook extends FBaseInitialable {
         });
     }
 
-    createRangeTheme(themeName: string, themeStyleJson?: Omit<IRangeThemeStyleJSON, 'name'>): RangeThemeStyle {
+    createRangeThemeStyle(themeName: string, themeStyleJson?: Omit<IRangeThemeStyleJSON, 'name'>): RangeThemeStyle {
         return new RangeThemeStyle(themeName, themeStyleJson);
     }
 

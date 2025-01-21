@@ -49,7 +49,7 @@ export function ComponentContainer(props: IComponentContainerProps) {
 export function useComponentsOfPart(part: string, injector?: Injector): Set<ComponentRenderer> {
     const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
     const uiVisibleChange$ = useMemo(() => uiPartsService.uiVisibleChange$.pipe(filter((ui) => ui.ui === part)), [part, uiPartsService]);
-    useObservable(uiVisibleChange$);
+    const changeInfo = useObservable(uiVisibleChange$);
 
     const updateCounterRef = useRef<number>(0);
     const componentPartUpdateCount = useObservable(
@@ -61,7 +61,7 @@ export function useComponentsOfPart(part: string, injector?: Injector): Set<Comp
         ),
         undefined,
         undefined,
-        [uiPartsService, part]
+        [uiPartsService, part, changeInfo]
     );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

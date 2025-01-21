@@ -24,13 +24,12 @@ export function getTextRunAtPosition(
     textRuns: ITextRun[],
     position: number,
     defaultStyle: ITextStyle,
-    cacheStyle: Nullable<ITextStyle>,
-    isCellEditor?: boolean
+    cacheStyle: Nullable<ITextStyle>
 ): ITextRun {
     const retTextRun: ITextRun = {
         st: 0,
         ed: 0,
-        ts: isCellEditor ? {} : defaultStyle,
+        ts: defaultStyle,
     };
 
     for (let i = textRuns.length - 1; i >= 0; i--) {

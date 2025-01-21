@@ -263,6 +263,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when a cell is clicked
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CellClicked, (params)=> {
@@ -273,6 +274,7 @@ export interface IFSheetsUIEventNameMixin {
     readonly CellClicked: 'CellClicked';
     /**
      * Event fired when a cell is pointer down
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CellPointerDown, (params)=> {
@@ -284,6 +286,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when a cell is pointer up
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CellPointerUp, (params)=> {
@@ -295,6 +298,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when a cell is hovered
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CellHover, (params)=> {
@@ -305,6 +309,7 @@ export interface IFSheetsUIEventNameMixin {
     readonly CellHover: 'CellHover';
     /**
      * Event fired when move on spreadsheet cells
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.CellPointerMove, (params)=> {
@@ -412,6 +417,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when drag over spreadsheet cells
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.DragOver, (params)=> {
@@ -423,6 +429,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when drop on spreadsheet cells
+     * @see {@link ICellEventParam}
      * @example
      * ```ts
      * univerAPI.getActiveWorkbook().addEvent(univerAPI.Event.Drop, (params)=> {
@@ -434,6 +441,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when scroll spreadsheet.
+     * @see {@link IScrollEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.Scroll, (params)=> {
@@ -445,6 +453,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when selection changed.
+     * @see {@link ISelectionEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionChanged, (p)=> {
@@ -456,6 +465,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when selection move start
+     * @see {@link ISelectionEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoveStart, (p)=> {
@@ -467,6 +477,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when selection move end
+     * @see {@link ISelectionEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoving, (p)=> {
@@ -478,6 +489,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when selection move end
+     * @see {@link ISelectionEventParam}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SelectionMoveEnd, (p)=> {
@@ -489,6 +501,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when zoom changed
+     * @see {@link ISheetZoomEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetZoomChanged, (p)=> {
@@ -500,6 +513,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired before zoom changed
+     * @see {@link ISheetZoomEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.BeforeSheetZoomChange, (p)=> {
@@ -511,6 +525,7 @@ export interface IFSheetsUIEventNameMixin {
 
     /**
      * Event fired when sheet skeleton changed
+     * @see {@link ISheetSkeletonChangedEvent}
      * @example
      * ```ts
      * univerAPI.addEvent(univerAPI.Event.SheetSkeletonChanged, (p)=> {

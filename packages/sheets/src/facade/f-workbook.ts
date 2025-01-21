@@ -26,6 +26,9 @@ import { FPermission } from './f-permission';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
+/**
+ * @hideconstructor
+ */
 export class FWorkbook extends FBaseInitialable {
     readonly id: string;
 

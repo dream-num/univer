@@ -21,6 +21,9 @@ import { CanceledError, FUniver, ICommandService } from '@univerjs/core';
 import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 
 export class FSheetLinkUniver extends FUniver {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

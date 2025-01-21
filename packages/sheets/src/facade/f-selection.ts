@@ -33,6 +33,7 @@ import { FWorksheet } from './f-worksheet';
  * const activeRange = fSelection.getActiveRange();
  * console.log(activeRange);
  * ```
+ * @hideconstructor
  */
 export class FSelection {
     constructor(

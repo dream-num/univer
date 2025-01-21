@@ -244,6 +244,9 @@ export class FTheadCommentBuilder extends FTheadCommentItem {
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FThreadComment {
     constructor(
         private readonly _thread: IThreadComment | IBaseComment,

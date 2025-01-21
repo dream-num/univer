@@ -83,6 +83,9 @@ export interface ICommandEvent extends IEventBase {
     type: CommandType;
 }
 
+/**
+ * @hideconstructor
+ */
 export class FEventName {
     static _instance: FEventName | null;
     static get() {
@@ -95,6 +98,9 @@ export class FEventName {
         return instance;
     }
 
+    /**
+     * @ignore
+     */
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name !== 'constructor') {

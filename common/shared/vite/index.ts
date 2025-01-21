@@ -37,10 +37,11 @@ interface IBuildExecuterOptions {
 }
 
 async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptions) {
-    const { entry } = options;
+    const { pkg, entry } = options;
 
     return Promise.all(Object.keys(entry).map((key) => {
         const basicConfig: InlineConfig = {
+            esbuild: {},
             build: {
                 emptyOutDir: false,
                 outDir: 'lib',
@@ -58,6 +59,13 @@ async function buildESM(sharedConfig: InlineConfig, options: IBuildExecuterOptio
                 },
             },
         };
+
+        if (pkg.name.startsWith('@univerjs/')) {
+            basicConfig.esbuild = {
+                minifyIdentifiers: false,
+                keepNames: true,
+            };
+        }
 
         const config: InlineConfig = mergeConfig(sharedConfig, basicConfig);
 

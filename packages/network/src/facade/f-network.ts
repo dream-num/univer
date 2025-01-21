@@ -19,6 +19,9 @@ import type { Observable } from 'rxjs';
 import { FBase, Inject, Injector } from '@univerjs/core';
 import { HTTPService } from '@univerjs/network';
 
+/**
+ * @hideconstructor
+ */
 export class FNetwork extends FBase {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

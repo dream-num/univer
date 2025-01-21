@@ -81,6 +81,9 @@ export interface IFWorkbookThreadCommentMixin {
 export class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
+    /**
+     * @ignore
+     */
     override _initialize(): void {
         Object.defineProperty(this, '_threadCommentModel', {
             get() {

@@ -37,7 +37,7 @@ export class FUniverSheetsFormulaMixin extends FUniver implements IFUniverSheets
 
     /**
      * Initialize the FUniver instance.
-     * @private
+     * @ignore
      */
     override _initialize(): void {
         this._debouncedFormulaCalculation = debounce(() => {

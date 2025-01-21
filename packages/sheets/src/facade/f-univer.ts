@@ -196,6 +196,9 @@ export class FUniverSheetsMixin extends FUniver implements IFUniverSheetsMixin {
         );
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);

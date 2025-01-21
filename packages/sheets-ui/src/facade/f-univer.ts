@@ -583,6 +583,9 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         });
     }
 
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         this._initSheetUIEvent(injector);
         const commandService = injector.get(ICommandService);

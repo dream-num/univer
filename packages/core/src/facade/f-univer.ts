@@ -40,6 +40,9 @@ import { FHooks } from './f-hooks';
 import { FUserManager } from './f-usermanager';
 import { FUtil } from './f-util';
 
+/**
+ * @hideconstructor
+ */
 export class FUniver extends FBaseInitialable {
     /**
      * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.

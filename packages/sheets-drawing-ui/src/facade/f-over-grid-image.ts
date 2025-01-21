@@ -97,6 +97,9 @@ function convertFOverGridImageToSheetImage(fOverGridImage: IFOverGridImage, sele
     };
 }
 
+/**
+ * @hideconstructor
+ */
 export class FOverGridImageBuilder {
     private _image: IFOverGridImage;
     constructor(
@@ -487,6 +490,9 @@ export class FOverGridImageBuilder {
     }
 }
 
+/**
+ * @hideconstructor
+ */
 export class FOverGridImage extends FBase {
     constructor(
         private _image: ISheetImage,

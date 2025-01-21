@@ -142,6 +142,9 @@ export interface IFUniverCrosshairHighlightMixin {
 }
 
 export class FUniverCrosshairHighlightMixin extends FUniver implements IFUniverCrosshairHighlightMixin {
+    /**
+     * @ignore
+     */
     override _initialize(injector: Injector): void {
         const commandService = injector.get(ICommandService);
 

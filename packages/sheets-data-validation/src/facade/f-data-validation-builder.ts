@@ -29,6 +29,7 @@ import { FDataValidation } from './f-data-validation';
  * const rule = FUniver.newDataValidation().requireValueInRange(range).build();
  * cell.setDataValidation(rule);
  * ```
+ * @hideconstructor
  */
 export class FDataValidationBuilder {
     private _rule: IDataValidationRule;

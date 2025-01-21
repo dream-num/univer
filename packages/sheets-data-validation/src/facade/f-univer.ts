@@ -45,6 +45,9 @@ export class FUnvierDataValidationMixin extends FUniver {
         return new FDataValidationBuilder();
     }
 
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line max-lines-per-function
     override _initialize(injector: Injector): void {
         if (!injector.has(SheetDataValidationModel)) return;

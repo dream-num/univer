@@ -27,6 +27,9 @@ export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
+/**
+ * @hideconstructor
+ */
 export class FRange extends FBaseInitialable {
     constructor(
         protected readonly _workbook: Workbook,

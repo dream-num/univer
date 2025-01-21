@@ -148,6 +148,7 @@ interface ICellDocumentModelOption {
     isDeepClone?: boolean;
     displayRawFormula?: boolean;
     ignoreTextRotation?: boolean;
+    cellDefaultStyle?: Nullable<IStyleData>;
 }
 
 const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
@@ -286,6 +287,10 @@ export class SpreadsheetSkeleton extends Skeleton {
     initConfig() {
         this._skipAutoHeightForMergedCells = !(this._configService.getConfig(AUTO_HEIGHT_FOR_MERGED_CELLS) ?? false);
         this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
+    }
+
+    get isRowStylePrecedeColumnStyle(): boolean {
+        return this._isRowStylePrecedeColumnStyle;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -1505,11 +1510,12 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @deprecated use same method in worksheet.
      * @param cell
      */
-    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
+    getCellDocumentModelWithFormula(cell: ICellData, cellDefaultStyle: Nullable<IStyleData>): Nullable<IDocumentLayoutObject> {
         return this._getCellDocumentModel(cell, {
             isDeepClone: true,
             displayRawFormula: true,
             ignoreTextRotation: true,
+            cellDefaultStyle,
         });
     }
 
@@ -1532,7 +1538,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             ...options,
         };
 
-        const style = this._styles.getStyleByCell(cell);
+        const style = { ...options.cellDefaultStyle, ...this._styles.getStyleByCell(cell) };
 
         if (!cell) return;
 

@@ -215,6 +215,24 @@ export class Worksheet {
     }
 
     /**
+     * Get the default style for cell.
+     * @param {number} row The row index.
+     * @param {number} col The column index.
+     * @param {boolean} [isRowStylePrecedeColumnStyle] The priority of row style and column style
+     * @returns {Nullable<IStyleData>} The default style for cell
+     */
+    getCellDefaultStyle(row: number, col: number, isRowStylePrecedeColumnStyle?: boolean): Nullable<IStyleData> {
+        const columnStyle = this.getColumnStyle(col) as Nullable<IStyleData>;
+        const rowStyle = this.getRowStyle(row) as Nullable<IStyleData>;
+        const defaultStyle = this.getDefaultCellStyleInternal();
+        if (isRowStylePrecedeColumnStyle) {
+            return composeStyles(defaultStyle, rowStyle, columnStyle);
+        } else {
+            return composeStyles(defaultStyle, columnStyle, rowStyle);
+        }
+    }
+
+    /**
      * Set Default Style, if the style has been set, all cells style will be base on this style.
      * @param {Nullable<IStyleData>} style The style to be set as default style
      */

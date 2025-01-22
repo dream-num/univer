@@ -10,9 +10,9 @@ Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before you join in the U
 
 If you encounter any issues while using Univer, you can seek help in the following communities:
 
--   [Discord community](https://discord.gg/z3NKNT6D2f)
--   [GitHub Discussions](https://github.com/dream-num/univer/discussions)
--   Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
+- [Discord community](https://discord.gg/z3NKNT6D2f)
+- [GitHub Discussions](https://github.com/dream-num/univer/discussions)
+- Join the Univer Chinese community (please scan the QR code [here](https://univer.ai/enterprises/#%E8%8E%B7%E5%8F%96%E5%95%86%E4%B8%9A%E7%89%88))
 
 ## Reporting Issues
 
@@ -20,9 +20,9 @@ If you encounter any issues or have any suggestions while using Univer, please f
 
 To better assist you, we recommend:
 
--   Before submitting an issue, please search to see if someone has already raised a similar question.
--   We provide an [issue template](https://github.com/dream-num/univer/issues/new/choose) and encourage you to fill it out with sufficient information, which helps us quickly identify the problem.
--   Please try to describe the issue in English, as it enables more people to participate in the discussion. We will also make an effort to reply in English to benefit a wider audience.
+- Before submitting an issue, please search to see if someone has already raised a similar question.
+- We provide an [issue template](https://github.com/dream-num/univer/issues/new/choose) and encourage you to fill it out with sufficient information, which helps us quickly identify the problem.
+- Please try to describe the issue in English, as it enables more people to participate in the discussion. We will also make an effort to reply in English to benefit a wider audience.
 
 > If you're new to submitting issues, we recommend to read [How To Ask Questions The Smart Way](http://www.catb.org/~esr/faqs/smart-questions.html) and [How to Report Bugs Effectively](https://www.chiark.greenend.org.uk/~sgtatham/bugs.html) before posting. Well-written bug reports help us and help you!
 
@@ -58,7 +58,7 @@ Please refer to [Architecture](https://univer.ai/guides/sheet/architecture/unive
 
 The structure of the repository is as follows:
 
-```
+```txt
 .
 ├── common/ shared configuration and utilities
 ├── docs/ documentation
@@ -72,7 +72,7 @@ The structure of the repository is as follows:
 
 The file structure of a plugin should be organized as follows:
 
-```
+```txt
 |- common/
 |- models/
 |- services/
@@ -90,10 +90,10 @@ The file structure of a plugin should be organized as follows:
 
 There are some limits on what paths could a file import from.
 
--   common cannot import file in other folders
--   models can only import files from common
--   services can only import files from models and common
--   commands can only import files from common, models and services
+- common cannot import file in other folders
+- models can only import files from common
+- services can only import files from models and common
+- commands can only import files from common, models and services
 
 During the refactoring process, it is recommended to remove legacy folders such as `Enum`, `Interface`, `Basics`, and `Shared`.
 
@@ -103,7 +103,7 @@ Avoid creating barrel imports (index.ts) unless it is the main root index.ts fil
 
 We added experimental support for mobile platforms since June 2024. After that, all UI plugins should split ui related code by their running platforms:
 
-```
+```txt
 |- controllers/
   |- render-controllers/
     |- common/
@@ -138,8 +138,8 @@ Please refer to [Univer Naming Convention](./docs/NAMING_CONVENTION.md).
 
 Before merging a pull request, please make sure the following requirements are met:
 
--   All tests are passed. ESLint and Prettier errors are fixed.
--   Test coverage is not decreased.
+- All tests are passed. ESLint and Prettier errors are fixed.
+- Test coverage is not decreased.
 
 We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
 
@@ -210,18 +210,17 @@ pnpm dev:libs
 
 Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by running this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) on your branch.
 
-
 ### Clean code
 
 > Programs are meant to be ready by humans and only incidentally for computers to execute. - Harold Abelson
 
--   Do not expose properties or methods those are not necessary to be exposed.
--   Group related methods or properties together. Do not always use blank lines to separate them.
--   Keep your concepts consistent by naming your variables consistently.
+- Do not expose properties or methods those are not necessary to be exposed.
+- Group related methods or properties together. Do not always use blank lines to separate them.
+- Keep your concepts consistent by naming your variables consistently.
 
 References:
 
-* [Make your code readable](https://www.notonlycode.org/make-your-code-readable/)
+- [Make your code readable](https://www.notonlycode.org/make-your-code-readable/)
 
 ### New Package
 
@@ -238,22 +237,12 @@ npm create @univerjs/cli init <project-name>
 
 ### How to Contribute to Facade API
 
-#### Synchronous API Priority
+Please refer to [How to Contribute to Facade API](./docs/CONTRIBUTING.md).
 
-* For asynchronous APIs, consider the following: Can a synchronous sub-API be extracted, separating logic such as secondary confirmation.
-* For APIs that must be asynchronous, indicate this in the method name, such as `addCommentAsync`.
+### Deprecate API
 
-#### Chaining Principle
+If you are going to deprecate an API, please follow the steps below:
 
-*. APIs must adhere to the chaining principle.
-*. APIs with `modify` semantics should return `this`.
-*. APIs with `create` semantics should return the created instance.
-*. APIs with `delete` semantics should return `true/false`.
-
-#### Easy to Get
-
-*. All APIs/constants/enums should be accessible from the `univerAPI` variable.
-
-## Links
-
-- [How to Contribute to Facade API](./packages/facade/docs/CONTRIBUTING.md)
+1. Mark the API as deprecated in the JSDoc.
+2. In the implementation, call `deprecate` of `ILogService` to log a deprecation message.
+3. Remove the API in the next minor version. If the API is considered heavily used, you can remove it in the next major version, e.g. 1.0.0.

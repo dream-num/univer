@@ -624,6 +624,11 @@ export class Scene extends Disposable {
         return objects;
     }
 
+    /**
+     * Get object in all layers by okey.
+     * @param oKey
+     * @returns
+     */
     getObject(oKey: string): Nullable<BaseObject> {
         for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();

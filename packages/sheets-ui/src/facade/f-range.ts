@@ -80,12 +80,21 @@ interface IFRangeSheetsUIMixin {
      * @returns The disposable object to detach the popup, if the popup is not attached, return `null`.
      * @example
     ```
+        univerAPI.getComponentManager().register(
+            'myPopup',
+            () => React.createElement('div', {
+                style: {
+                    color: 'red',
+                    fontSize: '14px'
+                }
+            }, 'Custom Popup')
+        );
+
         let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
         let range = sheet.getRange(2, 2, 3, 3);
         univerAPI.getActiveWorkbook().setActiveRange(range);
         let disposable = range.attachPopup({
-        componentKey: 'univer.sheet.cell-alert',
-        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+            componentKey: 'myPopup'
         });
     ```
      */
@@ -104,7 +113,7 @@ interface IFRangeSheetsUIMixin {
      */
     attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable;
     /**
-     * Attach a DOM popup to the start cell of current range.
+     * Attach a DOM popup to the current range.
      * @param alert The alert to attach
      * @returns The disposable object to detach the alert.
      * @example
@@ -112,9 +121,19 @@ interface IFRangeSheetsUIMixin {
         let sheet = univerAPI.getActiveWorkbook().getActiveSheet();
         let range = sheet.getRange(2, 2, 3, 3);
         univerAPI.getActiveWorkbook().setActiveRange(range);
+
+        univerAPI.getComponentManager().register(
+            'myPopup',
+            () => React.createElement('div', {
+                style: {
+                    background: 'red',
+                    fontSize: '14px'
+                }
+            }, 'Custom Popup')
+        );
         let disposable = range.attachRangePopup({
-        componentKey: 'univer.sheet.single-dom-popup',
-        extraProps: { alert: { type: 0, title: 'This is an Info', message: 'This is an info message' } },
+            componentKey: 'myPopup',
+            direction: 'top' // 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
         });
      * ```
      */
@@ -224,7 +243,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
         });
      */
     override attachRangePopup(popup: IFCanvasPopup): Nullable<IDisposable> {
-        popup.direction = popup.direction ?? 'horizontal';
+        popup.direction = popup.direction ?? 'top-center';
         popup.extraProps = popup.extraProps ?? {};
         popup.offset = popup.offset ?? [0, 0];
 
@@ -261,7 +280,7 @@ class FRangeSheetsUIMixin extends FRange implements IFRangeSheetsUIMixin {
 FRange.extend(FRangeSheetsUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeSheetsUIMixin {}
+    interface FRange extends IFRangeSheetsUIMixin { }
 }
 
 /**

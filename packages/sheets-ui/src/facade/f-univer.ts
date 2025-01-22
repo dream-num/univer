@@ -814,7 +814,7 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
         const render = renderManagerService.getRenderById(unitId);
         if (render && cfg.headerStyle?.size) {
             const skm = render.with(SheetSkeletonManagerService);
-            skm.setColumnHeaderSize(subUnitId, render, cfg.headerStyle?.size);
+            skm.setColumnHeaderSize(render, subUnitId, cfg.headerStyle?.size);
             activeSheet?.refreshCanvas();
         }
 

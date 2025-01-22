@@ -39,7 +39,7 @@ export interface IRectPopupProps {
      */
     anchorRect$: Observable<IAbsolutePosition>;
     excludeRects?: RefObject<Nullable<IAbsolutePosition[]>>;
-    direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
+    direction?: 'vertical' | 'horizontal' | 'top' | 'right' | 'left' | 'bottom' | 'bottom-center' | 'top-center';
 
     hidden?: boolean;
     // #region closing behavior

@@ -17,7 +17,7 @@
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, Injector } from '@univerjs/core';
-import { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
@@ -230,30 +230,33 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return spreadsheetSkeleton;
     }
 
-    setColumnHeaderSize(sheetId: string, render: IRender, size: number) {
+    setColumnHeaderSize(render: IRender, sheetId: string, size: number) {
         const skeleton = this.getWorksheetSkeleton(sheetId)?.skeleton;
         if (skeleton) {
             skeleton.columnHeaderHeight = size;
             render.scene.getViewports()[0].top = size;
-            render.scene.getViewport('viewColumnRight')!.setViewportSize({
+            render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT)!.setViewportSize({
                 height: size,
             });
-            render.scene.getViewport('viewColumnLeft')!.setViewportSize({
+            render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT)!.setViewportSize({
                 height: size,
             });
-            render.scene.getViewport('viewRowBottom')!.setViewportSize({
+            render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM)!.setViewportSize({
                 top: size,
             });
-            render.scene.getViewport('viewRowTop')!.setViewportSize({
+            render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP)!.setViewportSize({
                 top: size,
             });
-            render.scene.getViewport('viewLeftTop')!.setViewportSize({
+            render.scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP)!.setViewportSize({
                 height: size,
             });
             const selectionService = render?.with(SheetsSelectionsService);
             const selectionRenderService = render?.with(ISheetSelectionRenderService);
             const currSelections = selectionService.getCurrentSelections();
             selectionRenderService.resetSelectionsByModelData(currSelections);
+
+            const sheetSkeletonManagerParam = this.getUnitSkeleton(render.unitId, sheetId);
+            this._currentSkeleton$.next(sheetSkeletonManagerParam);
         }
     }
 }

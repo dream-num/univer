@@ -146,7 +146,7 @@ export interface IFUniverUIMixin {
      * @param component
      * @example
      * ```ts
-     * univerAPI.registerComponent(() => React.createElement('h1', null, 'Custom Header'));
+     * univerAPI.registerComponent('my-comp', () => React.createElement('h1', null, 'Custom Header'));
      * ```
      */
     registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;

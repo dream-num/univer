@@ -38,7 +38,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const commandService = useDependency(ICommandService);
     const markSelectionService = useDependency(IMarkSelectionService);
     const validator = validatorRegistry.getValidatorItem(rule.type);
-    const ids = useRef<(string | null)[]>();
+    const ids = useRef<(string | null)[]>(undefined);
     const [isHover, setIsHover] = useState(false);
     const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         commandService.executeCommand(RemoveSheetDataValidationCommand.id, {

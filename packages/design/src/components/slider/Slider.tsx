@@ -20,7 +20,9 @@ import React, { useContext, useMemo, useRef } from 'react';
 
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
-import { DropdownLegacy } from '../dropdown-legacy/DropdownLegacy';
+import { DropdownOverlay } from '../dropdown/DropdownOverlay';
+import { DropdownProvider } from '../dropdown/DropdownProvider';
+import { DropdownTrigger } from '../dropdown/DropdownTrigger';
 import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.less';
 
@@ -185,21 +187,46 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <DropdownLegacy
-                placement="topLeft"
-                overlay={(
-                    <div className={styles.sliderShortcuts}>
+            <DropdownProvider>
+                <DropdownTrigger>
+                    <a
+                        className={`
+                          univer-text-gray-800 univer-h-7 univer-text-sm univer-flex univer-items-center
+                          univer-cursor-pointer univer-rounded univer-transition-all univer-w-[55px]
+                          univer-justify-center
+                          hover:univer-bg-gray-100
+                        `}
+                    >
+                        {value}
+                        %
+                    </a>
+                </DropdownTrigger>
+                <DropdownOverlay offset={{ y: -20 }}>
+                    <div
+                        className={`
+                          univer-gap-1 univer-items-center univer-w-32 univer-p-2 univer-text-sm univer-text-gray-800
+                          univer-box-border univer-grid
+                        `}
+                    >
                         {shortcuts?.map((item) => (
                             <a
                                 key={item}
-                                className={clsx(
-                                    styles.sliderShortcut,
-                                    item === value ? styles.sliderShortcutActive : ''
-                                )}
+                                className={clsx(`
+                                  univer-cursor-pointer univer-rounded-md univer-transition-colors univer-duration-200
+                                  univer-px-2 univer-py-1 univer-relative univer-text-center
+                                  hover:univer-bg-gray-100
+                                `, {
+                                    'univer-bg-gray-100': item === value,
+                                })}
                                 onClick={() => onChange && onChange(item)}
                             >
                                 {item === value && (
-                                    <span className={styles.sliderShortcutIcon}>
+                                    <span
+                                        className={`
+                                          univer-text-green-500 univer-absolute univer-left-2 univer-top-0 univer-h-full
+                                          univer-items-center univer-flex
+                                        `}
+                                    >
                                         <CheckMarkSingle />
                                     </span>
                                 )}
@@ -210,13 +237,8 @@ export function Slider(props: ISliderProps) {
                             </a>
                         ))}
                     </div>
-                )}
-            >
-                <a className={styles.sliderValue}>
-                    {value}
-                    %
-                </a>
-            </DropdownLegacy>
+                </DropdownOverlay>
+            </DropdownProvider>
         </div>
     );
 }

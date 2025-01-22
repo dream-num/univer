@@ -59,7 +59,7 @@ export const useSheetSelectionChange = (
     }, [sequenceNodes]);
     oldFilterReferenceNodes.current = filterReferenceNodes;
 
-    const scalingOptionRef = useRef<{ result: string; offset: number }>();
+    const scalingOptionRef = useRef<{ result: string; offset: number }>(undefined);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {

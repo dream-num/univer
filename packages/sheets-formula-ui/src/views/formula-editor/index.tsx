@@ -117,7 +117,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const onFormulaSelectingChange = useEvent(propOnFormulaSelectingChange);
     const searchFunctionRef = useRef<HTMLElement>(null);
-    const editorRef = useRef<Editor>();
+    const editorRef = useRef<Editor>(undefined);
     const editor = editorRef.current;
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);

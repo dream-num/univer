@@ -19,9 +19,9 @@ import type { RenderUnit } from '@univerjs/engine-render';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { render as createRoot, unmount } from '@univerjs/design';
 
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import React from 'react';
 import { filter, take } from 'rxjs';
 import { ILayoutService } from '../../services/layout/layout.service';

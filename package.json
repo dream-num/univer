@@ -19,8 +19,8 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "engines": {
-        "node": ">=18.0.0",
-        "pnpm": ">=8.5.0 || >=9.0.0"
+        "node": ">=18 || <=22",
+        "pnpm": ">=9"
     },
     "scripts": {
         "prepare": "husky install",
@@ -53,8 +53,8 @@
         "@release-it/conventional-changelog": "^9.0.4",
         "@storybook/react": "8.4.7",
         "@types/node": "^22.10.2",
-        "@types/react": "^18.3.12",
-        "@types/react-dom": "^18.3.1",
+        "@types/react": "^19.0.2",
+        "@types/react-dom": "^19.0.2",
         "@univerjs-infra/shared": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@vitejs/plugin-react": "^4.3.4",
@@ -69,14 +69,20 @@
         "eslint-plugin-react-refresh": "^0.4.16",
         "husky": "^9.1.7",
         "lint-staged": "^15.3.0",
-        "react": "18.3.1",
-        "react-dom": "18.3.1",
+        "react": "19.0.0",
+        "react-dom": "19.0.0",
         "release-it": "^17.11.0",
         "serve": "^14.2.4",
         "tsx": "^4.19.2",
         "turbo": "^2.3.3",
         "typescript": "^5.7.2",
         "vitest": "^2.1.8"
+    },
+    "resolutions": {
+        "@types/react": "^19.0.2",
+        "@types/react-dom": "^19.0.2",
+        "react": "19.0.0",
+        "react-dom": "19.0.0"
     },
     "lint-staged": {
         "*": "eslint --fix"

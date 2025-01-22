@@ -73,12 +73,64 @@ export interface IFacadeSubmenuItem {
 type FAllMenu = FMenu | FSubmenu;
 
 /**
+ * @ignore
+ */
+abstract class FMenuBase extends FBase {
+    protected abstract readonly _menuManagerService: IMenuManagerService;
+    abstract __getSchema(): { [key: string]: MenuSchemaType };
+
+    /**
+     * Append the menu to any menu position on Univer UI.
+     * @param {string | string[]} path - Some predefined path to append the menu. The paths can be an array,
+     * or an array joined by `|` separator. Since lots of submenus reuse the same name,
+     * you may need to specify their parent menus as well.
+     *
+     * @example
+     * ```typescript
+     * // This menu item will appear on every `contextMenu.others` section.
+     * univerAPI.createMenu({
+     *   id: 'custom-menu-id-1',
+     *   title: 'Custom Menu 1',
+     *   action: () => {},
+     * }).appendTo('contextMenu.others');
+     *
+     * // This menu item will only appear on the `contextMenu.others` section on the main area.
+     * univerAPI.createMenu({
+     *   id: 'custom-menu-id-2',
+     *   title: 'Custom Menu 2',
+     *   action: () => { console.log(123); },
+     * }).appendTo(['contextMenu.mainArea', 'contextMenu.others']);
+     * ```
+     */
+    appendTo(path: string | string[]): void {
+        const paths = typeof path === 'string' ? path.split('|') : path;
+        const len = paths.length;
+
+        // eslint-disable-next-line ts/no-explicit-any
+        const menuConfig: Record<string, any> = {};
+        let obj = menuConfig;
+
+        const schema = this.__getSchema();
+        paths.forEach((p, index) => {
+            if (index === len - 1) {
+                obj[p] = schema;
+            } else {
+                obj[p] = {};
+            }
+            obj = obj[p];
+        });
+
+        this._menuManagerService.mergeMenu(menuConfig);
+    }
+}
+
+/**
  * This is a build for adding a menu to Univer. Please notice that until the `appendTo` method is called,
  * the menu item is not added to the UI. Please note that this menu cannot have submenus. If you want to
  * have submenus, please use `FSubmenu`.
  * @hideconstructor
  */
-export class FMenu extends FBase {
+export class FMenu extends FMenuBase {
     static RibbonStartGroup = RibbonStartGroup;
     static RibbonPosition = RibbonPosition;
     static MenuManagerPosition = MenuManagerPosition;
@@ -133,17 +185,6 @@ export class FMenu extends FBase {
 
         return { [this._item.id]: this._buildingSchema };
     }
-
-    /**
-     * Append the menu to any menu position on Univer UI.
-     * @param path Some predefined path to append the menu.
-     */
-    appendTo(path: string): void {
-        const schema = this.__getSchema();
-        this._menuManagerService.mergeMenu({
-            [path]: schema,
-        });
-    }
 }
 
 /**
@@ -183,8 +224,8 @@ export class FSubmenu extends FBase {
 
     /**
      * Add a menu to the submenu. It can be a {@link FMenu} or a {@link FSubmenu}.
-     * @param submenu Menu to add to the submenu.
-     * @returns The FSubmenu itself for chaining calls.
+     * @param {FMenu | FSubmenu} submenu - Menu to add to the submenu.
+     * @returns {FSubmenu} The FSubmenu itself for chaining calls.
      */
     addSubmenu(submenu: FMenu | FSubmenu): this {
         this._submenus.push(submenu);
@@ -193,23 +234,12 @@ export class FSubmenu extends FBase {
 
     /**
      * Add a separator to the submenu.
-     * @returns The FSubmenu itself for chaining calls.
+     * @returns {FSubmenu} The FSubmenu itself for chaining calls.
      */
     addSeparator(): this {
         this._menuByGroups.push(this._submenus);
         this._submenus = [];
         return this;
-    }
-
-    /**
-     * Append the menu to any menu position on Univer UI.
-     * @param path Some predefined path to append the menu.
-     */
-    appendTo(path: string): void {
-        const schema = this.__getSchema();
-        this._menuManagerService.mergeMenu({
-            [path]: schema,
-        });
     }
 
     /** @ignore */

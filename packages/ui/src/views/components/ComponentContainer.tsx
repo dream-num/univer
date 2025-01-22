@@ -29,7 +29,7 @@ export interface IComponentContainerProps {
     sharedProps?: Record<string, unknown>;
 }
 
-export function ComponentContainer(props: IComponentContainerProps) {
+export function ComponentContainer(props: IComponentContainerProps): React.ReactNode {
     const { components, fallback, sharedProps } = props;
     if (!components || components.size === 0) return fallback ?? null;
 

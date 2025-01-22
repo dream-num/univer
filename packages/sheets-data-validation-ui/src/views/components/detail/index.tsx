@@ -250,6 +250,7 @@ export function DataValidationDetail() {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     });
+    const shouldHideFormulaInput = operators.length && !localRule.operator;
 
     return (
         <div className={styles.dataValidationDetail}>
@@ -283,10 +284,16 @@ export function DataValidationDetail() {
                 ? (
                     <FormLayout label={localeService.t('dataValidation.panel.operator')}>
                         <Select
-                            options={operators.map((op, i) => ({
-                                value: `${op}`,
-                                label: operatorNames[i],
-                            }))}
+                            options={[
+                                {
+                                    value: '',
+                                    label: localeService.t('dataValidation.operators.legal'),
+                                },
+                                ...operators.map((op, i) => ({
+                                    value: `${op}`,
+                                    label: operatorNames[i],
+                                })),
+                            ]}
                             value={`${localRule.operator}`}
                             onChange={(operator) => {
                                 handleUpdateRuleSetting({
@@ -299,7 +306,7 @@ export function DataValidationDetail() {
                     </FormLayout>
                 )
                 : null}
-            {FormulaInput
+            {FormulaInput && !shouldHideFormulaInput
                 ? (
                     <FormulaInput
                         key={key + localRule.type}

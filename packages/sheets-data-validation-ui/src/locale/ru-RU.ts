@@ -65,6 +65,7 @@ const locale: typeof zhCN = {
             equal: 'равно',
             notEqual: 'не равно',
             notBetween: 'не между',
+            legal: 'является допустимым типом',
         },
         ruleName: {
             between: 'между {FORMULA1} и {FORMULA2}',

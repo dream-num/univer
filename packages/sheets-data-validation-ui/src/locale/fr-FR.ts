@@ -64,6 +64,7 @@ const locale: typeof enUS = {
             equal: 'égal à',
             notEqual: 'différent de',
             notBetween: 'pas entre',
+            legal: 'est de type légal',
         },
         ruleName: {
             between: 'est entre {FORMULA1} et {FORMULA2}',

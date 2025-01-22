@@ -61,9 +61,10 @@ const locale: typeof zhCN = {
             greaterThanOrEqual: 'بزرگتر از یا برابر با',
             lessThan: 'کوچکتر از',
             lessThanOrEqual: 'کوچکتر از یا برابر با',
-            equal: 'برابر است با',
-            notEqual: 'برابر نیست با',
-            notBetween: 'بین ... و ... نیست',
+            equal: 'برابر با',
+            notEqual: 'نابرابر با',
+            notBetween: 'بین نیست',
+            legal: 'نوع قانونی است',
         },
         ruleName: {
             between: 'بین {FORMULA1} و {FORMULA2} است',

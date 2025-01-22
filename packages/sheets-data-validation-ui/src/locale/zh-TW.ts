@@ -64,6 +64,7 @@ const locale: typeof zhCN = {
             equal: '等於',
             notEqual: '不等於',
             notBetween: '未介於',
+            legal: '是合法類型',
         },
         ruleName: {
             between: '介於 {FORMULA1} 和 {FORMULA2} 之間',

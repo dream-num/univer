@@ -62,6 +62,7 @@ const locale = {
             equal: '等于',
             notEqual: '不等于',
             notBetween: '未介于',
+            legal: '是合法类型',
         },
         ruleName: {
             between: '介于 {FORMULA1} 和 {FORMULA2} 之间',

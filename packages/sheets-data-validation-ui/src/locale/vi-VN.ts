@@ -64,6 +64,7 @@ const locale: typeof zhCN = {
             equal: 'Bằng',
             notEqual: 'Không bằng',
             notBetween: 'Không nằm giữa',
+            legal: 'là kiểu hợp lệ',
         },
         ruleName: {
             between: 'Giữa {FORMULA1} và {FORMULA2}',
@@ -185,7 +186,7 @@ const locale: typeof zhCN = {
             label: 'Hiển thị kiểu',
         },
         showTime: {
-            label: 'Hiển thị lựa chọn thời gian',
+            label: 'Hiển thị lựa chọn thởi gian',
         },
     },
 };

@@ -31,7 +31,7 @@ export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator, transformChe
 export { ListMultipleValidator } from './validators/list-multiple-validator';
 export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
 export { isLegalFormulaResult } from './utils/formula';
-
+export { getCellValueNumber } from './validators/decimal-validator';
 // #region - all commands
 
 export {

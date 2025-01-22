@@ -160,21 +160,7 @@ function createNewInstance() {
     });
 
     window.univer = univer;
-    const univerAPI = window.univerAPI = FUniver.newAPI(univer);
-
-    univerAPI.createMenu({
-        id: 'custom-aiComplete',
-        title: 'AIComplete',
-        // eslint-disable-next-line no-console
-        action: () => { console.log(123); },
-    }).appendTo(['contextMenu.mainArea', 'contextMenu.others']);
-
-    univerAPI.createMenu({
-        id: 'custom-sendEmail',
-        title: 'sendEmail',
-        // eslint-disable-next-line no-console
-        action: () => { console.log(123); },
-    }).appendTo(['contextMenu', 'contextMenu.mainArea', 'contextMenu.others']);
+    window.univerAPI = FUniver.newAPI(univer);
 }
 
 createNewInstance();

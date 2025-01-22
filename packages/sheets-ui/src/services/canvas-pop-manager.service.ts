@@ -558,7 +558,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         disposableCollection.add(positionObserverDisposable);
         disposableCollection.add(toDisposable(() => {
             this._globalPopupManagerService.removePopup(id);
-            // position$.complete();
             topLeftPos$.complete();
             rightBottomPos$.complete();
         }));

@@ -373,7 +373,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                     height: columnHeaderHeight,
                 });
             }
-
         }));
     }
 

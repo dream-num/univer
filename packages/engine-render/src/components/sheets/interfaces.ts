@@ -117,7 +117,7 @@ export interface IHeaderStyleCfg {
 }
 
 export type IAColumnCfgObj = IHeaderStyleCfg & { text: string };
-export type IAColumnCfg = undefined | null | string | Partial<IAColumnCfgObj>;
+export type IAColumnCfg = undefined | null | string | Partial<Omit<IAColumnCfgObj, 'size'>>;
 
 export interface IRowStyleCfg {
     fontFamily: string;

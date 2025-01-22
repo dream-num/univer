@@ -190,7 +190,7 @@ export class FMenu extends FMenuBase {
 /**
  * @hideconstructor
  */
-export class FSubmenu extends FBase {
+export class FSubmenu extends FMenuBase {
     private _menuByGroups: FAllMenu[][] = [];
     private _submenus: FAllMenu[] = [];
 

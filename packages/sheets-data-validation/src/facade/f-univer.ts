@@ -245,6 +245,9 @@ export class FUnvierDataValidationMixin extends FUniver {
 
 FUniver.extend(FUnvierDataValidationMixin);
 declare module '@univerjs/core' {
+    /**
+     * @ignore
+     */
     // eslint-disable-next-line ts/no-namespace
     namespace FUniver {
         function newDataValidation(): FDataValidationBuilder;

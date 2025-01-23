@@ -59,6 +59,17 @@ export class FShortcut extends FBase {
      * Dispatch a KeyboardEvent to the shortcut service and return the matched shortcut item.
      * @param {KeyboardEvent} e - The KeyboardEvent to dispatch.
      * @returns {IShortcutItem<object> | undefined} The matched shortcut item.
+     *
+     * @example
+     * ```typescript
+     * const fShortcut = univerAPI.getShortcut();
+     * const pseudoEvent = new KeyboardEvent('keydown', { key: 's', ctrlKey: true });
+     * const ifShortcutItem = fShortcut.dispatchShortcutEvent(pseudoEvent);
+     * if (ifShortcutItem) {
+     *   const commandId = ifShortcutItem.id;
+     *   // Do something with the commandId.
+     * }
+     * ```
      */
     dispatchShortcutEvent(e: KeyboardEvent): IShortcutItem<object> | undefined {
         return this._shortcutService.dispatch(e);

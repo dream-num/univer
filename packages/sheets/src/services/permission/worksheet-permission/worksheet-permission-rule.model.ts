@@ -34,7 +34,7 @@ export class WorksheetProtectionRuleModel {
         type: IRuleChangeType;
     }>();
 
-    private _ruleRefresh = new Subject();
+    private _ruleRefresh = new Subject<string>();
     private _resetOrder = new Subject();
 
     ruleChange$ = this._ruleChange.asObservable();

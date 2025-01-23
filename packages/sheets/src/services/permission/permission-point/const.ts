@@ -46,8 +46,6 @@ import { WorksheetInsertHyperlinkPermission } from './worksheet/insert-hyperlink
 import { WorksheetInsertRowPermission } from './worksheet/insert-row';
 import { WorksheetManageCollaboratorPermission } from './worksheet/manage-collaborator';
 import { WorksheetPivotTablePermission } from './worksheet/pivot-table';
-import { WorksheetSelectProtectedCellsPermission } from './worksheet/select-protected-cells';
-import { WorksheetSelectUnProtectedCellsPermission } from './worksheet/select-un-protected-cells';
 import { WorksheetSetCellStylePermission } from './worksheet/set-cell-style';
 import { WorksheetSetCellValuePermission } from './worksheet/set-cell-value';
 import { WorksheetSetColumnStylePermission } from './worksheet/set-column-style';
@@ -55,47 +53,197 @@ import { WorksheetSetRowStylePermission } from './worksheet/set-row-style';
 import { WorksheetSortPermission } from './worksheet/sort';
 import { WorksheetViewPermission } from './worksheet/view';
 
+/**
+ * @ignore
+ */
 export const PermissionPointsDefinitions = {
+    /**
+     * The permission point for adding or editing workbook comments
+     */
     WorkbookCommentPermission,
+
+    /**
+     * The permission point for copy in workbook
+     */
     WorkbookCopyPermission,
+
+    /**
+     * The permission point for creating protect in a workbook
+     */
     WorkbookCreateProtectPermission,
+
+    /**
+     * The permission point for creating new sheets in a workbook
+     */
     WorkbookCreateSheetPermission,
+
+    /**
+     * The permission point for deleting sheets in a workbook
+     */
     WorkbookDeleteSheetPermission,
+
+    /**
+     * The permission point for duplicating a sheet in a workbook
+     */
     WorkbookDuplicatePermission,
+
+    /**
+     * The permission point for editing workbook content
+     */
     WorkbookEditablePermission,
+
+    /**
+     * The permission point for exporting workbook data
+     */
     WorkbookExportPermission,
+
+    /**
+     * The permission point for hiding sheets in a workbook
+     */
     WorkbookHideSheetPermission,
+
+    /**
+     * The permission point for viewing and managing workbook history
+     */
     WorkbookHistoryPermission,
+
+    /**
+     * The permission point for managing collaborators in a workbook
+     */
     WorkbookManageCollaboratorPermission,
+
+    /**
+     * The permission point for moving sheets within a workbook
+     */
     WorkbookMoveSheetPermission,
+
+    /**
+     * The permission point for printing a workbook
+     */
     WorkbookPrintPermission,
+
+    /**
+     * The permission point for recovering a previous history state of a workbook
+     */
     WorkbookRecoverHistoryPermission,
+
+    /**
+     * The permission point for renaming sheets in a workbook
+     */
     WorkbookRenameSheetPermission,
+
+    /**
+     * The permission point for sharing a workbook with others
+     */
     WorkbookSharePermission,
+
+    /**
+     * The permission point for viewing the history of a workbook
+     */
     WorkbookViewHistoryPermission,
+
+    /**
+     * The permission point for viewing a workbook
+     */
     WorkbookViewPermission,
+
+    /**
+     * The permission point for copying contents from a worksheet
+     */
     WorksheetCopyPermission,
 
+    /**
+     * The permission point for deleting columns in a worksheet
+     */
     WorksheetDeleteColumnPermission,
+
+    /**
+     * The permission point for deleting worksheet protection rules
+     */
     WorksheetDeleteProtectionPermission,
+
+    /**
+     * The permission point for deleting rows in a worksheet
+     */
     WorksheetDeleteRowPermission,
+
+    /**
+     * The permission point for editing extra objects (e.g. shapes) in a worksheet
+     */
     WorksheetEditExtraObjectPermission,
+
+    /**
+     * The permission point for editing the content of a worksheet
+     */
     WorksheetEditPermission,
+
+    /**
+     * The permission point for applying filters in a worksheet
+     */
     WorksheetFilterPermission,
+
+    /**
+     * The permission point for inserting columns into a worksheet
+     */
     WorksheetInsertColumnPermission,
+
+    /**
+     * The permission point for inserting hyperlinks in a worksheet
+     */
     WorksheetInsertHyperlinkPermission,
+
+    /**
+     * The permission point for inserting rows into a worksheet
+     */
     WorksheetInsertRowPermission,
+
+    /**
+     * The permission point for managing collaborators of a worksheet
+     */
     WorksheetManageCollaboratorPermission,
+
+    /**
+     * The permission point for creating or modifying pivot tables in a worksheet
+     */
     WorksheetPivotTablePermission,
-    WorksheetSelectProtectedCellsPermission,
-    WorksheetSelectUnProtectedCellsPermission,
+
+    /**
+     * The permission point for setting the style of cells in a worksheet
+     */
     WorksheetSetCellStylePermission,
+
+    /**
+     * The permission point for setting the value of cells in a worksheet
+     */
     WorksheetSetCellValuePermission,
+
+    /**
+     * The permission point for setting the style of columns in a worksheet
+     */
     WorksheetSetColumnStylePermission,
+
+    /**
+     * The permission point for setting the style of rows in a worksheet
+     */
     WorksheetSetRowStylePermission,
+
+    /**
+     * The permission point for performing sort operations on a worksheet
+     */
     WorksheetSortPermission,
+
+    /**
+     * The permission point for viewing the content of a worksheet
+     */
     WorksheetViewPermission,
 
+    /**
+     * The permission point for editing the range protection settings
+     */
     RangeProtectionPermissionEditPoint,
+
+    /**
+     * The permission point for viewing the range protection settings
+     */
     RangeProtectionPermissionViewPoint,
 };

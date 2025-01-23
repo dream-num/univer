@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IRange, Workbook } from '@univerjs/core';
+import type { FUniver, IDocumentBody, IRange, Workbook } from '@univerjs/core';
 import type { IAddCommentCommandParams, IBaseComment, IDeleteCommentCommandParams, IResolveCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { generateRandomId, ICommandService, Inject, Injector, IUniverInstanceService, RichTextBuilder, RichTextValue, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -149,7 +149,7 @@ export class FTheadCommentItem {
 }
 
 /**
- * A builder for thread comment
+ * A builder for thread comment. use {@link FUniver} `univerAPI.newTheadComment()` to create a new builder.
  */
 export class FTheadCommentBuilder extends FTheadCommentItem {
     static override create(comment?: IThreadComment): FTheadCommentBuilder {

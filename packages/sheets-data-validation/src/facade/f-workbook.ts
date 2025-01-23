@@ -39,6 +39,9 @@ import {
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { filter } from 'rxjs';
 
+/**
+ * @ignore
+ */
 export interface IFWorkbookDataValidationMixin {
     /**
      * Get data validation validator status for current workbook.
@@ -112,6 +115,9 @@ export interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 

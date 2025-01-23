@@ -20,6 +20,9 @@ import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsD
 import { FRange } from '@univerjs/sheets/facade';
 import { FDataValidation } from './f-data-validation';
 
+/**
+ * @ignore
+ */
 export interface IFRangeDataValidationMixin {
     /**
      * Set a data validation rule to current range. if rule is null, clear data validation rule.
@@ -68,6 +71,9 @@ export interface IFRangeDataValidationMixin {
     getValidatorStatus(): Promise<DataValidationStatus[][]>;
 }
 
+/**
+ * @ignore
+ */
 export class FRangeDataValidationMixin extends FRange implements IFRangeDataValidationMixin {
     override setDataValidation(rule: Nullable<FDataValidation>): FRange {
         if (!rule) {

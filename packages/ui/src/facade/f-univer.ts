@@ -23,6 +23,9 @@ import { ComponentManager, CopyCommand, IDialogService, IMessageService, ISideba
 import { FMenu, FSubmenu } from './f-menu-builder';
 import { FShortcut } from './f-shortcut';
 
+/**
+ * @ignore
+ */
 export interface IFUniverUIMixin {
     /**
      * Return the URL of the current page.
@@ -152,6 +155,9 @@ export interface IFUniverUIMixin {
     registerComponent(name: string, component: ComponentType, options?: IComponentOptions): IDisposable;
 }
 
+/**
+ * @ignore
+ */
 export class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
     override getURL(): URL {
         return new URL(window.location.href);

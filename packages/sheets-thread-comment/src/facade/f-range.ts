@@ -21,6 +21,9 @@ import { FRange } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentTreeCommand, getDT } from '@univerjs/thread-comment';
 import { FTheadCommentBuilder, FThreadComment } from './f-thread-comment';
 
+/**
+ * @ignore
+ */
 export interface IFRangeCommentMixin {
     /**
      * Get the comment of the start cell in the current range.
@@ -98,6 +101,9 @@ export interface IFRangeCommentMixin {
     clearCommentsAsync(): Promise<boolean>;
 }
 
+/**
+ * @ignore
+ */
 export class FRangeCommentMixin extends FRange implements IFRangeCommentMixin {
     override getComment(): Nullable<FThreadComment> {
         const injector = this._injector;

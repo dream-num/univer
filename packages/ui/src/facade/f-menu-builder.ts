@@ -19,6 +19,9 @@ import type { IMenuButtonItem, IMenuItem, MenuSchemaType } from '@univerjs/ui';
 import { CommandType, FBase, ICommandService, Inject, Injector, Tools } from '@univerjs/core';
 import { IMenuManagerService, MenuItemType, MenuManagerPosition, RibbonPosition, RibbonStartGroup } from '@univerjs/ui';
 
+/**
+ * @ignore
+ */
 export interface IFacadeMenuItem {
     /**
      * The unique identifier of the menu item.
@@ -47,6 +50,9 @@ export interface IFacadeMenuItem {
     order?: number;
 }
 
+/**
+ * @ignore
+ */
 export interface IFacadeSubmenuItem {
     /**
      * The unique identifier of the menu item.

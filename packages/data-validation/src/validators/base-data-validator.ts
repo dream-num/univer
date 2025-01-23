@@ -21,9 +21,9 @@ import type { IBaseDataValidationWidget } from './base-widget';
 import { DataValidationOperator, Inject, Injector, LocaleService } from '@univerjs/core';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 
-const FORMULA1 = '{FORMULA1}';
-const FORMULA2 = '{FORMULA2}';
-const TYPE = '{TYPE}';
+export const FORMULA1 = '{FORMULA1}';
+export const FORMULA2 = '{FORMULA2}';
+export const TYPE = '{TYPE}';
 
 const operatorNameMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.BETWEEN]: 'dataValidation.operators.between',

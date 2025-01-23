@@ -35,7 +35,7 @@ export type { IFormulaResult, IValidatorCellInfo } from './validators/base-data-
 export type { IFormulaValidResult } from './validators/base-data-validator';
 
 export type { IBaseDataValidationWidget } from './validators/base-widget';
-
+export { FORMULA1, FORMULA2, TYPE } from './validators/base-data-validator';
 // #region - all commands
 export {
     AddDataValidationMutation,

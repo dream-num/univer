@@ -27,6 +27,7 @@ import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 
 /**
+ * Facade API object bounded to a workbook. It provides a set of methods to interact with the workbook.
  * @hideconstructor
  */
 export class FWorkbook extends FBaseInitialable {

@@ -20,6 +20,10 @@ import { FBase, Inject, Injector } from '@univerjs/core';
 import { HTTPService } from '@univerjs/network';
 
 /**
+ * This Facade provides a set of methods to make HTTP requests. You should not
+ * create an instance of this class directly, instead, use `getNetwork` of
+ * {@link FUniver} instead.
+ *
  * @hideconstructor
  */
 export class FNetwork extends FBase {
@@ -31,30 +35,30 @@ export class FNetwork extends FBase {
     }
 
     /**
-     * Send GET request to the server.
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns Network response
+     * Send a GET request to the server.
+     * @param {string} url - The requested URL.
+     * @param {IRequestParams} [params] - Query parameters.
+     * @returns {Promise<HTTPResponse>} Network response.
      */
     get<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.get(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
     /**
-     * Send POST request to the server.
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns Network response
+     * Send a POST request to the server.
+     * @param {string} url - The requested URL.
+     * @param {IPostRequestParams} [params] - Query parameters.
+     * @returns {Promise<HTTPResponse>} Network response.
      */
     post<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.post(url, params) as Promise<HTTPResponse<T>>; ;
     }
 
     /**
-     * Send PUT request to the server.
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns Network response
+     * Send a PUT request to the server.
+     * @param {string} url - The requested URL
+     * @param {IPostRequestParams} [params] - Query parameters
+     * @returns {Promise<HTTPResponse>} Network response
      */
     put<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.put(url, params) as Promise<HTTPResponse<T>>; ;
@@ -62,9 +66,9 @@ export class FNetwork extends FBase {
 
     /**
      * Send DELETE request to the server.
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns Network response
+     * @param {string} url - The requested URL
+     * @param {IRequestParams} [params] - Query parameters
+     * @returns {Promise<HTTPResponse>} Network response
      */
     delete<T>(url: string, params?: IRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.delete(url, params) as Promise<HTTPResponse<T>>; ;
@@ -72,9 +76,9 @@ export class FNetwork extends FBase {
 
     /**
      * Send PATCH request to the server.
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns Network response
+     * @param {string} url - The requested URL
+     * @param {IPostRequestParams} [params] - Query parameters
+     * @returns {Promise<HTTPResponse>} Network response
      */
     patch<T>(url: string, params?: IPostRequestParams): Promise<HTTPResponse<T>> {
         return this._httpService.patch(url, params) as Promise<HTTPResponse<T>>;
@@ -83,10 +87,10 @@ export class FNetwork extends FBase {
     /**
      * Request for a stream of server-sent events. Instead of a single response, the server sends a stream of responses,
      * Univer wraps the stream in an [`Observable`](https://rxjs.dev/guide/observable) which you can call `subscribe` on.
-     * @param method HTTP request method
-     * @param url The requested URL
-     * @param params Query parameters
-     * @returns An observable that emits the network response
+     * @param {HTTPRequestMethod} method - HTTP request method
+     * @param {string} url - The requested URL
+     * @param {IPostRequestParams} [params] - params Query parameters
+     * @returns {Observable<HTTPEvent>} An observable that emits the network response.
      */
     getSSE<T>(
         method: HTTPRequestMethod,

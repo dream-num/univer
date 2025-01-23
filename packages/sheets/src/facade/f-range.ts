@@ -28,6 +28,9 @@ export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
 /**
+ * Represents a range of cells in a sheet. You can call methods on this Facade API object
+ * to read contents or manipulate the range.
+ *
  * @hideconstructor
  */
 export class FRange extends FBaseInitialable {

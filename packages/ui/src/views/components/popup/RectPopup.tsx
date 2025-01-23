@@ -119,7 +119,7 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
     const excludeRectsRef = excludeRects;
-    const anchorRectRef = useRef<IAbsolutePosition>();
+    const anchorRectRef = useRef<IAbsolutePosition>(undefined);
 
     useEffect(() => {
         const anchorRectSub = anchorRect$.subscribe((anchorRect) => {

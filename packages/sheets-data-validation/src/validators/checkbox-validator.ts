@@ -153,4 +153,8 @@ export class CheckboxValidator extends BaseDataValidator {
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
         return this.localeService.t('dataValidation.checkbox.error');
     }
+
+    override generateRuleName(rule: IDataValidationRuleBase): string {
+        return this.titleStr;
+    }
 }

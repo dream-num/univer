@@ -109,6 +109,7 @@ export function DataValidationDetail() {
         if (!localRule.ranges.length || isRangeError) {
             return;
         }
+
         if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
             dataValidationPanelService.setActiveRule(null);
         } else {

@@ -75,6 +75,7 @@ const locale: typeof zhCN = {
             equal: 'Bằng {FORMULA1}',
             notEqual: 'Không bằng {FORMULA1}',
             notBetween: 'Không nằm giữa {FORMULA1} và {FORMULA2}',
+            legal: 'là một {TYPE} hợp lệ',
         },
         errorMsg: {
             between: 'Giá trị phải nằm giữa {FORMULA1} và {FORMULA2}',
@@ -85,6 +86,7 @@ const locale: typeof zhCN = {
             equal: 'Giá trị phải bằng {FORMULA1}',
             notEqual: 'Giá trị phải không bằng {FORMULA1}',
             notBetween: 'Giá trị phải không nằm giữa {FORMULA1} và {FORMULA2}',
+            legal: 'Giá trị phải là một {TYPE} hợp lệ',
         },
         any: {
             title: 'Bất kỳ giá trị',
@@ -101,6 +103,7 @@ const locale: typeof zhCN = {
                 equal: 'Bằng',
                 notEqual: 'Không bằng',
                 notBetween: 'Không nằm giữa',
+                legal: 'là ngày hợp lệ',
             },
             ruleName: {
                 between: 'Giữa {FORMULA1} và {FORMULA2}',
@@ -111,6 +114,7 @@ const locale: typeof zhCN = {
                 equal: 'Bằng {FORMULA1}',
                 notEqual: 'Không bằng {FORMULA1}',
                 notBetween: 'Không nằm giữa {FORMULA1} và {FORMULA2}',
+                legal: 'là một ngày hợp lệ',
             },
             errorMsg: {
                 between: 'Ngày phải nằm giữa {FORMULA1} và {FORMULA2}',
@@ -121,6 +125,7 @@ const locale: typeof zhCN = {
                 equal: 'Ngày phải bằng {FORMULA1}',
                 notEqual: 'Ngày phải không bằng {FORMULA1}',
                 notBetween: 'Ngày phải không nằm giữa {FORMULA1} và {FORMULA2}',
+                legal: 'Giá trị phải là một ngày hợp lệ',
             },
         },
         list: {

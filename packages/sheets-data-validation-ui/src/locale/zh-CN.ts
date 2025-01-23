@@ -73,6 +73,7 @@ const locale = {
             equal: '等于 {FORMULA1}',
             notEqual: '不等于 {FORMULA1}',
             notBetween: '在 {FORMULA1} 和 {FORMULA2} 范围之外',
+            legal: '是一个合法的 {TYPE}',
         },
         errorMsg: {
             between: '值必须介于 {FORMULA1} 和 {FORMULA2} 之间',
@@ -83,6 +84,7 @@ const locale = {
             equal: '值必须等于 {FORMULA1}',
             notEqual: '值必须不等于 {FORMULA1}',
             notBetween: '值必须在 {FORMULA1} 和 {FORMULA2} 范围之外',
+            legal: '值必须是一个合法的 {TYPE}',
         },
         any: {
             title: '任意值',
@@ -99,6 +101,7 @@ const locale = {
                 equal: '等于',
                 notEqual: '不等于',
                 notBetween: '未介于',
+                legal: '是合法日期',
             },
             ruleName: {
                 between: '介于 {FORMULA1} 和 {FORMULA2} 之间',
@@ -109,6 +112,7 @@ const locale = {
                 equal: '等于 {FORMULA1}',
                 notEqual: '不等于 {FORMULA1}',
                 notBetween: '在 {FORMULA1} 和 {FORMULA2} 范围之外',
+                legal: '是一个合法的日期',
             },
             errorMsg: {
                 between: '必须为有效日期且介于 {FORMULA1} 和 {FORMULA2} 之间',
@@ -119,6 +123,7 @@ const locale = {
                 equal: '必须为有效日期且等于 {FORMULA1}',
                 notEqual: '必须为有效日期且不等于 {FORMULA1}',
                 notBetween: '必须为有效日期且在 {FORMULA1} 和 {FORMULA2} 范围之外',
+                legal: '值必须是一个合法的日期',
             },
         },
         list: {

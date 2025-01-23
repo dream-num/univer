@@ -75,6 +75,7 @@ const locale: typeof zhCN = {
             equal: 'برابر است با {FORMULA1}',
             notEqual: 'برابر نیست با {FORMULA1}',
             notBetween: 'بین {FORMULA1} و {FORMULA2} نیست',
+            legal: 'یک {TYPE} قانونی است',
         },
         errorMsg: {
             between: 'مقدار باید بین {FORMULA1} و {FORMULA2} باشد',
@@ -85,6 +86,7 @@ const locale: typeof zhCN = {
             equal: 'مقدار باید برابر با {FORMULA1} باشد',
             notEqual: 'مقدار باید برابر نیست با {FORMULA1}',
             notBetween: 'مقدار باید بین {FORMULA1} و {FORMULA2} نباشد',
+            legal: 'مقدار باید یک {TYPE} قانونی باشد',
         },
         any: {
             title: 'هر مقدار',
@@ -101,6 +103,7 @@ const locale: typeof zhCN = {
                 equal: 'برابر است با',
                 notEqual: 'برابر نیست با',
                 notBetween: 'بین ... و ... نیست',
+                legal: 'یک تاریخ قانونی است',
             },
             ruleName: {
                 between: 'بین {FORMULA1} و {FORMULA2} است',
@@ -111,6 +114,7 @@ const locale: typeof zhCN = {
                 equal: 'برابر است با {FORMULA1}',
                 notEqual: 'برابر نیست با {FORMULA1}',
                 notBetween: 'بین {FORMULA1} و {FORMULA2} نیست',
+                legal: 'یک تاریخ قانونی است',
             },
             errorMsg: {
                 between: 'مقدار باید یک تاریخ معتبر و بین {FORMULA1} و {FORMULA2} باشد',
@@ -121,6 +125,7 @@ const locale: typeof zhCN = {
                 equal: 'مقدار باید یک تاریخ معتبر و {FORMULA1} باشد',
                 notEqual: 'مقدار باید یک تاریخ معتبر و نه {FORMULA1} باشد',
                 notBetween: 'مقدار باید یک تاریخ معتبر و بین {FORMULA1} و {FORMULA2} نباشد',
+                legal: 'مقدار باید یک تاریخ قانونی باشد',
             },
         },
         list: {
@@ -186,7 +191,7 @@ const locale: typeof zhCN = {
             label: 'سبک نمایش',
         },
         showTime: {
-            label: 'نمایش انتخاب‌گر زمان',
+            label: 'نمایش انتخاب زمان',
         },
     },
 };

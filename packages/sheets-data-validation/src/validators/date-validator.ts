@@ -99,7 +99,7 @@ export class DateValidator extends BaseDataValidator {
         const operator = rule.operator;
         if (!operator) {
             return {
-                success: false,
+                success: true,
             };
         }
 
@@ -162,7 +162,7 @@ export class DateValidator extends BaseDataValidator {
 
     override generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.titleStr;
+            return this.localeService.t(DateOperatorTitleMap.NONE);
         }
 
         const ruleName = this.localeService.t(DateOperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
